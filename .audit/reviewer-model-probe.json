@@ -1,0 +1,11 @@
+{
+  "scope": "Availability probe only, not candidate review or artifact-verification evidence.",
+  "sessionFile": "2026-10-14T14-48-53-661Z_565638c9-37a7-43a0-b2d3-20a7731e0b0f.jsonl",
+  "models": [
+    "opencode-go/deepseek-v4.1-flash"
+  ],
+  "efforts": [
+    "max"
+  ],
+  "limit": "Runtime effort metadata does not prove provider reasoning semantics. Probe self-reported a worker line count inconsistent with the committed file; do not treat its artifact claims as verified."
+}

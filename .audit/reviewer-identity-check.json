@@ -1,0 +1,9 @@
+{
+  "snapshot": "b22850258d599ad09e68c021db16bb0a5b59ac634fae2550b53c1b7bc3b09b19",
+  "ownedCopyAccepted": true,
+  "modifiedPayloadRejected": true,
+  "modifiedPath": ".agents/roles/references/review.md",
+  "exitAfterModification": 1,
+  "scope": "Disposable copy only; original frozen package unchanged. Demonstrates stored-byte mismatch detection, not adversarial authenticity or immutability.",
+  "cleanup": "Temporary copy removed in finally."
+}
