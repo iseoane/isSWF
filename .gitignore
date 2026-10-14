@@ -8,4 +8,5 @@ __pycache__/
 .isswf/
 .env
 .env.*
+.codegraph/
 .audit/*.stderr

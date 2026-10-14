@@ -1,0 +1,79 @@
+{
+  "command_under_test": "engram compatibility --data-dir <dir> --json",
+  "binary": "/home/linuxbrew/.linuxbrew/bin/engram (reports 3.4.0)",
+  "source": {
+    "tag": "v3.4.0",
+    "commit": "5c4171845958f046968c14d7d57a325eb4a83b7e",
+    "files": [
+      "cmd/engram/compatibility.go",
+      "internal/store/compatibility.go",
+      "internal/store/compatibility_test.go",
+      "README.md#read-only-compatibility-observations"
+    ]
+  },
+  "real_dir": {
+    "path": "/home/iseoane/.engram",
+    "touched": "read-only (cp -a only)",
+    "entries_before": {
+      "engram.db": 43085824,
+      "engram.db-wal": 27896552,
+      "engram.db-shm": 32768,
+      ".instance-id": 33,
+      ".instance-id.lock": 0,
+      ".migrate.lock": 0,
+      "sync.log": 43560
+    },
+    "entries_after": "identical sizes and mtimes",
+    "live_process": "engram serve, up ~1d13h, writes sync.log (last write 08:38:04)",
+    "sqlite_header": {
+      "magic": "SQLite format 3\\x00",
+      "page_size": 4096,
+      "format_write_version": 2,
+      "format_read_version": 2,
+      "schema_version": 1,
+      "size_mod_page_size": 0
+    }
+  },
+  "differential_in_private_copies": [
+    {
+      "variant": "verbatim copy (cp -a) including -wal and -shm",
+      "exit_code": 2,
+      "stdout_bytes": 0,
+      "stderr": "compatibility: unsafe or invalid fixture metadata"
+    },
+    {
+      "variant": "same copy, engram.db-wal and engram.db-shm moved out of the COPY dir only",
+      "exit_code": 0,
+      "stdout": {
+        "revision": 1,
+        "source": "offline",
+        "status": "unknown_shape",
+        "offline_automatic_opening_authorized": false,
+        "active_reuse_authorized": false,
+        "instance_id": "64ebcd423faa27c46bdb255fef443975"
+      }
+    },
+    {
+      "variant": "copy without sidecars plus an unrelated empty file named decoy-wal",
+      "exit_code": 2,
+      "stderr": "compatibility: unsafe or invalid fixture metadata"
+    },
+    {
+      "variant": "copy without sidecars, tight writer appending only to sync.log",
+      "probes": 50,
+      "exit_0": 0,
+      "exit_2": 50,
+      "sample_stderr": "compatibility: unsafe or invalid fixture metadata",
+      "idle_baseline_exit_code": 0
+    }
+  ],
+  "conclusion": "Confirmed condition: internal/store/compatibility.go line 60 rejects any directory entry ending in -wal/-shm/-journal. Isolated by differential: removing only the two sidecars from the copy turns exit 2 into exit 0 with instance_id matching the real store. The metadata-stability check (line 116) is a second, likely condition while engram serve is live; it was reproduced independently with a synthetic writer in a copy. No evidence for any other condition.",
+  "reads_on_verbatim_copy": {
+    "projects list": {"exit_code": 0, "projects": 44},
+    "stats --all": {"exit_code": 0, "sessions": 3614, "observations": 2797, "prompts": 4015},
+    "context --project omarchy --scope project": {"exit_code": 1, "stderr": "engram: unknown project: omarchy", "note": "sync.log mentions project 'omarchy'; it is not a stored project"}
+  },
+  "readability": "The store opens and reads through a normal Engram process pointed at the copy, with its WAL present. No memory contents were recorded; only counts.",
+  "limits": "The copy was taken while the store was open, without an atomic snapshot. Successful reads show SQLite could read the copied WAL set; they do not certify the integrity of the original. No repair/apply/init/setup/save/mcp/sync was run. Sidecars must not be deleted or renamed to make the probe pass: the 27.9 MB WAL holds committed transactions not yet checkpointed into the main file.",
+  "cleanup": "All private copies under /var/tmp removed; nothing in ~/.engram was modified."
+}

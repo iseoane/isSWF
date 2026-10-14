@@ -1,0 +1,22 @@
+{
+  "scope": "Parent independently reproduced the Engram preflight diagnosis on private copies. No real store was opened, written, repaired or migrated; read-only cp -a plus a directory listing.",
+  "binary": "/home/linuxbrew/.linuxbrew/bin/engram 3.4.0",
+  "commands": [
+    {
+      "case": "copy-with-sidecars",
+      "command": "env -i ... engram compatibility --data-dir <copy> --json",
+      "exit_code": 2,
+      "stderr": "compatibility: unsafe or invalid fixture metadata"
+    },
+    {
+      "case": "same-copy-sidecars-removed-in-copy-only",
+      "command": "env -i ... engram compatibility --data-dir <copy> --json",
+      "exit_code": 0,
+      "stdout": "{\"revision\":1,\"source\":\"offline\",\"status\":\"unknown_shape\",\"offline_automatic_opening_authorized\":false,\"active_reuse_authorized\":false,\"instance_id\":\"64ebcd423faa27c46bdb255fef443975\"}"
+    }
+  ],
+  "conclusion": "The rejection is the preflight's own rule at internal/store/compatibility.go L60 (any -wal/-shm/-journal entry), not store damage. The identical instance_id in the successful probe is the real store's identity, so the copy was faithful.",
+  "counter_evidence_preserved": "The same error also appears on a freshly created temporary store with sidecars, and a live writer changing directory metadata can trigger it without sidecars; the message never names the failing condition.",
+  "real_store_effect": "engram.db, engram.db-wal, engram.db-shm, .instance-id and locks kept identical sizes and mtimes. sync.log kept growing because the pre-existing engram serve process writes it, not this check.",
+  "limits": "cp -a taken while engram serve held the store open, so it is not an atomic snapshot and proves nothing about original-store integrity. No memory contents were dumped. This is a preflight-diagnosis verification, not an Engram integration test."
+}
