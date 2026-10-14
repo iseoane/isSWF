@@ -1,0 +1,20 @@
+diff --git c/.agents/skills/isswf-coordinator/SKILL.md w/.agents/skills/isswf-coordinator/SKILL.md
+index ba52cf14dae148013c6d96c91d025b183dce3c93..d94e3b23fd32a2c1c152732180c4cea2e38283f6 100644
+--- c/.agents/skills/isswf-coordinator/SKILL.md
++++ w/.agents/skills/isswf-coordinator/SKILL.md
+@@ -58,6 +58,15 @@ Antes de despachar implementación o diagnóstico, confirma que el runtime admit
+ 
+ Para despachar, pasa la ruta del perfil elegido y un brief con actor responsable, contexto necesario, unidad autorizada, checkout exclusivo, alcance y exclusiones, permisos de escritura, referencias de grounding y comprobaciones. No presupongas que se transfiere el historial completo de conversación. Incluye el modelo y esfuerzo efectivos. Mantén al coordinador como responsable del plan y de resolver decisiones. Evita escritores simultáneos. La falta de capacidad bloquea el despacho, no la preparación del brief. Informa el estado solo con evidencia de la herramienta.
+ 
++Antes de reintentar, reanudar o reemplazar un worker, reconcilia con las herramientas y registros existentes su ID de tarea y actor, ownership, estado real y autorización vigente. Distingue el número de workers activos del límite total autorizado de workers distintos. La asignación de un checkout aislado evita compartir archivos, pero no autoriza otro worker. Esta reconciliación no detiene trabajo independiente ya autorizado si cada unidad mantiene ownership y checkout propios y cabe en el límite total vigente.
++
++- Si la ejecución sigue activa, continúa con el mismo actor y conserva su ownership. No despaches un reemplazo.
++- Si figura completada, inspecciona su resultado y los efectos de su trabajo antes de decidir el siguiente paso. `completed` por sí solo no autoriza otro worker.
++- Si el estado o la identidad son `unknown` o hay un error al consultarlos, no infieras que la ejecución no existe ni la dupliques. Resuelve la incertidumbre con evidencia de las herramientas disponibles; si no puedes, deja el despacho bloqueado.
++- Si la herramienta confirma que la ejecución terminó con fallo, inspecciona el trabajo parcial antes de cualquier reemplazo. Reemplaza solo si la salida está confirmada y queda autorización dentro del límite total vigente. Un límite total de un worker no permite un segundo worker solo porque el primero ya no esté activo; hace falta autorización disponible explícita.
++
++Estas instrucciones guían el uso de las herramientas, pero no imponen límites ni aíslan ejecuciones en el runtime.
++
+ Despacha una revisión independiente solo cuando el brief la autorice. Usa el [perfil reviewer](../../roles/reviewer.md) y entrega el brief aceptado, normas del proyecto, SHA exacto de la base, identidad del candidato, alcance, evidencias y comprobaciones seguras. Identifica un candidato con commit por su SHA. Antes del commit, identifica el candidato por un digest reproducible de un paquete que incluya el diff binario contra la base, las rutas y el contenido exacto de los archivos sin seguimiento. No exijas ni inventes un commit de candidato.
+ 
+ El revisor trabaja en un contexto distinto al implementador; el worker nunca se revisa a sí mismo. Antes de preparar el paquete, confirma que el worker dejó de escribir. Retén el paquete exacto y entrégalo al revisor o crea un checkout separado desde ese paquete; no compartas un worktree mutable ni permitas escritores concurrentes. El revisor verifica que el digest corresponde al paquete recibido y juzga solo ese snapshot. Si no puedes retener o transferir el snapshot exacto, la revisión queda inconclusa. El carácter read-only del perfil es una instrucción, no una garantía de sandbox runtime.
