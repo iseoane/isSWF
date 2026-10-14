@@ -1,0 +1,31 @@
+{
+  "scope": "Operator-reported noise: 121 'binario engram no encontrado en el PATH del hook' warnings in ~/.engram/sync.log. Root cause found and fixed; verified by running the real hook with a minimal PATH.",
+  "who_runs_the_sync": {
+    "mechanism": "The user's own hooks call ~/.engram-sync/sync.sh; engram's cloud is not involved.",
+    "callers": [
+      "~/.pi/agent/extensions/engram-sync.ts (Pi extension, source kept in ~/Work/iseoane.Dots/pi/extensions/engram-sync.ts)",
+      "~/Work/iseoane.Dots/codex/hooks.json (SessionStart -> sync.sh pull, Stop -> sync.sh push)",
+      "Claude settings under ~/Work/iseoane.Dots/claude/{gentle,vanilla}/settings.json"
+    ]
+  },
+  "correction_of_earlier_reading": "Every sync.log line is prefixed with the machine name, not a project name: sync.sh sets HOST=\"$(hostname -s)\" and logs \"[HOST] message\". The entry '[omarchy] Push OK' therefore means this host (omarchy) pushed its chunk backup, not a project called omarchy. The store's real projects are a different set. An earlier report of mine read that prefix as another project; it is wrong.",
+  "cause": {
+    "code": "sync.sh ensure_repo() runs `command -v \"$ENGRAM_BIN\"` and calls die_soft when the binary is not on the hook's PATH.",
+    "evidence": "With PATH=~/.local/bin:/usr/bin:/bin, `command -v engram` returned nothing: the binary lives only in /home/linuxbrew/.linuxbrew/bin. The last warning is dated 2026-10-13 12:49, so this was live, not historical.",
+    "count": 121
+  },
+  "fix": {
+    "symlink": "/home/iseoane/.local/bin/engram -> /home/linuxbrew/.linuxbrew/bin/engram, created because ~/.local/bin is already first on PATH in the user's login config (~/.zprofile) and is a standard user bin directory for restricted hook environments.",
+    "verification": [
+      "env -i PATH=$HOME/.local/bin:/usr/bin:/bin sh -c 'command -v engram && engram version' -> /home/iseoane/.local/bin/engram, engram 3.4.0",
+      "The real hook was executed with that minimal PATH and ENGRAM_LOG pointed at a temporary file: exit 0 and the log shows only 'Import OK' and 'Pull OK', with no PATH warning.",
+      "The temporary log was removed; the user's sync.log was not edited by this check."
+    ]
+  },
+  "not_verified": [
+    "The hook was exercised through `pull` only; `push` was not run by this check.",
+    "Whether every possible hook launcher (GUI session, other machines, Windows/PowerShell sync.ps1) inherits a PATH containing ~/.local/bin is untested. sync.ps1 on Windows is untouched.",
+    "Three pre-existing real rebase conflicts in the sync log remain unreviewed; they belong to the user's own backup flow and are out of scope here."
+  ],
+  "limits": "Removing the warning does not prove the sync mechanism is correct or that backups are complete; it only shows the hook can now resolve the binary. No memory contents were read, and no engram command was run against another project's selector."
+}
