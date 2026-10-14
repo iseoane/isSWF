@@ -1,0 +1,28 @@
+{
+  "scope": "Parent evidence about the running Engram process and about what a graceful stop does to WAL sidecars. The checkpoint test ran on a private cp -a copy of ~/.engram, never on the real directory.",
+  "running_process": {
+    "command": "engram serve",
+    "pid": 3769726,
+    "uptime_at_check": "1d13h06m, started Mon 2026-10-12 19:41:40 CEST",
+    "supervision": "not a systemd unit; lives in transient scope app-Hyprland-xdg\\x2dterminal\\x2dexec-6edb38c6.scope created by xdg-terminal-exec, so it was launched from a terminal session",
+    "cwd": "/home/iseoane/Work/agent-depot",
+    "environment_of_interest": ["ENGRAM_CLOUD_AUTOSYNC=1"],
+    "implication": "The HTTP API on port 7437 serves the shared store to whatever other tooling uses it; nothing about this process is specific to isSWF."
+  },
+  "copy_checkpoint_test": {
+    "before": {"compatibility": "exit 2, unsafe or invalid fixture metadata", "entries": ["engram.db", "engram.db-wal", "engram.db-shm", ".instance-id", "locks", "sync.log"]},
+    "actions_on_copy_only": ["sqlite3 pragma integrity_check", "sqlite3 pragma wal_checkpoint(TRUNCATE)", "close connection"],
+    "integrity_check": "ok",
+    "tables": 28,
+    "after": {"entries": ["engram.db", "sync.log"], "compatibility": "exit 0, status unknown_shape, instance_id 64ebcd423faa27c46bdb255fef443975"}
+  },
+  "conclusions": [
+    "The store is healthy: integrity_check ok and 28 tables on a faithful copy.",
+    "The 27 MB WAL folds into engram.db when the last connection closes cleanly, and SQLite then removes -wal and -shm.",
+    "The preflight rejection is a side effect of the store being open, not a defect in the data.",
+    "Stopping Engram gracefully should therefore make `compatibility` succeed against the real path; the rejection returns as soon as any process reopens the store."
+  ],
+  "push_versus_sidecars": "These are unrelated mechanisms and the earlier report mixed them. -wal/-shm exist because a process has the store open in WAL mode. The push is the separate autosync feature configured on that process.",
+  "real_store_effect": "None. Only a read-only copy was opened; ~/.engram kept identical sizes and mtimes for db, sidecars, identity and locks.",
+  "limits": "The copy was taken while the store was open, so it is not an atomic snapshot and says nothing about writes that had not reached the WAL. A passing preflight after stop is a point-in-time observation, not a guarantee about concurrent writers. No memory contents were inspected."
+}
