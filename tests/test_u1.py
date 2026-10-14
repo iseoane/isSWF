@@ -657,6 +657,23 @@ class U1Test(unittest.TestCase):
         }))
         self.assertEqual(second_answer["answers"][-1]["question"]["id"], "updated-at-meaning-follow-up")
 
+    def test_ready_for_agent_rejects_pending_questions_in_proposal_and_snapshot(self):
+        proposal = json.loads(json.dumps(self.proposal))
+        proposal["questions"] = [{
+            "id": "ready-question", "kind": "product", "question": "¿Qué comportamiento se espera?",
+            "owner": "operator", "exit_condition": "La aceptación define el comportamiento.",
+        }]
+        with self.assertRaisesRegex(IntakeError, "ready-for-agent requiere preguntas vacías"):
+            prepare(self.state, self.write(proposal))
+        self.assertEqual(show(self.state), [])
+
+        snapshot = prepare(self.state, self.write(self.proposal))
+        invalid_snapshot = json.loads(json.dumps(snapshot))
+        invalid_snapshot["questions"] = proposal["questions"]
+        from isswf.contracts import ContractError, parse_snapshot
+        with self.assertRaisesRegex(ContractError, "ready-for-agent requiere preguntas vacías"):
+            parse_snapshot(invalid_snapshot)
+
     def test_resolution_cannot_coexist_with_pending_questions(self):
         proposal = self.pending_proposal()
         proposal["preparation"] = "needs-triage"

@@ -106,9 +106,11 @@ def _questions(value: Any) -> list[dict[str, str]]:
     return result
 
 
-def _validate_questions_resolution(
-    questions: list[dict[str, str]], resolution: dict[str, Any] | None,
+def _validate_preparation_questions_resolution(
+    preparation: str, questions: list[dict[str, str]], resolution: dict[str, Any] | None,
 ) -> None:
+    if preparation == "ready-for-agent" and (questions or resolution is not None):
+        raise ContractError("ready-for-agent requiere preguntas vacías y resolution null")
     if resolution is not None and questions:
         raise ContractError("resolution no puede coexistir con preguntas pendientes")
 
@@ -172,7 +174,7 @@ def parse_proposal(raw: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any],
     preparation = raw["preparation"]
     if preparation == "ready-for-agent" and not brief["acceptance"]:
         raise ContractError("ready-for-agent requiere acceptance no vacía")
-    _validate_questions_resolution(questions, resolution)
+    _validate_preparation_questions_resolution(preparation, questions, resolution)
     if preparation in {"needs-info", "ready-for-human"} and not questions:
         raise ContractError(f"{preparation} requiere preguntas concretas para el operador")
     if preparation == "needs-triage" and not (resolution or refs):
@@ -260,7 +262,7 @@ def parse_snapshot(value: Any) -> dict[str, Any]:
             raise ContractError("decision_refs debe referir respuestas del trabajo y fuente actuales")
     if value["preparation"] == "ready-for-agent" and not brief["acceptance"]:
         raise ContractError("snapshot ready-for-agent requiere acceptance no vacía")
-    _validate_questions_resolution(questions, resolution)
+    _validate_preparation_questions_resolution(value["preparation"], questions, resolution)
     if value["preparation"] in {"needs-info", "ready-for-human"} and not questions:
         raise ContractError("snapshot needs-info/ready-for-human requiere preguntas")
     if value["preparation"] == "needs-triage" and not (resolution or refs):
