@@ -328,6 +328,7 @@ class U1Test(unittest.TestCase):
         answered = decide(self.state, self.write(decision))
         self.assertEqual(answered["id"], first["id"])
         self.assertEqual(answered["revision"], 2)
+        self.assertEqual(answered["observed_at"], first["observed_at"])
         self.assertEqual(answered["preparation"], "needs-triage")
         self.assertEqual(answered["questions"], [])
         answer = answered["answers"][0]
@@ -349,6 +350,27 @@ class U1Test(unittest.TestCase):
         db = sqlite3.connect(self.state / "isswf.sqlite3")
         self.assertEqual(db.execute("SELECT revision FROM history ORDER BY revision").fetchall(), [(1,), (2,), (3,)])
         db.close()
+
+    def test_unverified_duplicate_suspicion_is_ready_for_grounding_via_cli(self):
+        with tempfile.TemporaryDirectory() as state:
+            command = [sys.executable, "-m", "isswf", "--state", state]
+            grant = json.loads(subprocess.run(
+                command + ["authorize", str(ROOT / "examples/u1/authorization.json")],
+                cwd=ROOT, text=True, capture_output=True, check=True,
+            ).stdout)
+            proposal = json.loads((ROOT / "examples/u2/grounding-proposal.json").read_text())
+            proposal["authorization_id"] = grant["id"]
+            proposal_path = Path(state) / "grounding-proposal.json"
+            proposal_path.write_text(json.dumps(proposal), encoding="utf-8")
+            snapshot = json.loads(subprocess.run(
+                command + ["prepare", str(proposal_path)],
+                cwd=ROOT, text=True, capture_output=True, check=True,
+            ).stdout)
+            self.assertEqual(snapshot["preparation"], "ready-for-agent")
+            self.assertIn("evidencia citada", snapshot["brief"]["acceptance"][0])
+            self.assertEqual(snapshot["resolution"], None)
+            self.assertEqual(snapshot["questions"], [])
+            self.assertIn("no autoriza cambios", snapshot["next_step"])
 
     def test_decide_is_operator_cli_and_panel_shows_trusted_answer(self):
         with tempfile.TemporaryDirectory() as state:
@@ -533,6 +555,77 @@ class U1Test(unittest.TestCase):
         persisted = json.loads(db.execute("SELECT snapshot FROM work WHERE id=?", (snapshot["id"],)).fetchone()[0])
         db.close()
         self.assertEqual(set(persisted), set(legacy))
+
+    def test_prepare_cannot_drop_a_registered_answer_reference(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        answered = decide(self.state, self.write({
+            "work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning",
+            "answer": "Solo cambios de estado.", "actor": "op",
+        }))
+        proposal = json.loads(json.dumps(self.proposal))
+        proposal["expected_revision"] = answered["revision"]
+        with self.assertRaisesRegex(IntakeError, "decision_refs"):
+            prepare(self.state, self.write(proposal))
+        self.assertEqual(show(self.state, first["id"]), answered)
+        import sqlite3
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        self.assertEqual(db.execute("SELECT revision FROM history ORDER BY revision").fetchall(), [(1,), (2,)])
+        db.close()
+
+    def test_prepare_rejects_new_grant_when_answers_exist_without_publishing(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        answered = decide(self.state, self.write({
+            "work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning",
+            "answer": "Solo cambios de estado.", "actor": "op",
+        }))
+        changed_auth = json.loads(json.dumps(self.auth))
+        changed_auth["decision"] = "Otra decisión del operador"
+        new_grant = authorize(self.state, self.write(changed_auth))
+        proposal = json.loads(json.dumps(self.proposal))
+        proposal["authorization_id"] = new_grant["id"]
+        proposal["expected_revision"] = answered["revision"]
+        with self.assertRaisesRegex(IntakeError, "autorización.*respuesta|respuestas.*autorización"):
+            prepare(self.state, self.write(proposal))
+        self.assertEqual(show(self.state, first["id"]), answered)
+        import sqlite3
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        self.assertEqual(db.execute("SELECT revision FROM history ORDER BY revision").fetchall(), [(1,), (2,)])
+        db.close()
+
+    def test_decide_keeps_human_wait_state_while_questions_remain(self):
+        proposal = self.pending_proposal()
+        proposal["questions"].append({
+            "id": "scope-choice", "kind": "product", "question": "¿Qué repositorios se muestran?",
+            "owner": "operator", "exit_condition": "La aceptación enumera los repositorios incluidos.",
+        })
+        first = prepare(self.state, self.write(proposal))
+        decision = {
+            "work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning",
+            "answer": "Solo cambios de estado.", "actor": "op",
+        }
+        answered = decide(self.state, self.write(decision))
+        self.assertEqual(answered["preparation"], "needs-info")
+        self.assertEqual([q["id"] for q in answered["questions"]], ["scope-choice"])
+        self.assertIn("pregunta", answered["motive"].lower())
+        self.assertIn("pendiente", answered["next_step"].lower())
+        self.assertEqual(show(self.state, first["id"]), answered)
+
+        human_state = Path(self.temp.name) / "ready-for-human-state"
+        human_grant = authorize(human_state, self.write(self.auth))
+        human_proposal = self.pending_proposal()
+        human_proposal["authorization_id"] = human_grant["id"]
+        human_proposal["preparation"] = "ready-for-human"
+        human_proposal["questions"].append({
+            "id": "scope-choice", "kind": "product", "question": "¿Qué repositorios se muestran?",
+            "owner": "operator", "exit_condition": "La aceptación enumera los repositorios incluidos.",
+        })
+        human_first = prepare(human_state, self.write(human_proposal))
+        human_answered = decide(human_state, self.write({
+            "work_id": human_first["id"], "expected_revision": human_first["revision"],
+            "question_id": "updated-at-meaning", "answer": "Solo cambios de estado.", "actor": "op",
+        }))
+        self.assertEqual(human_answered["preparation"], "ready-for-human")
+        self.assertEqual([q["id"] for q in human_answered["questions"]], ["scope-choice"])
 
     def test_read_failure_is_not_stale_success(self):
         prepare(self.state, self.write(self.proposal))

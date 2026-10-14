@@ -152,6 +152,7 @@ def authorize(state: str | Path, filename: str | Path) -> dict[str, str]:
 
 
 def _publish(db: sqlite3.Connection, snapshot: dict[str, Any], current_revision: int) -> dict[str, Any]:
+    parse_snapshot(snapshot)
     encoded = json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
     try:
         if current_revision == 0:
@@ -199,6 +200,8 @@ def prepare(state: str | Path, filename: str | Path) -> dict[str, Any]:
         if row:
             current = parse_snapshot(json.loads(row["snapshot"]))
             current_revision = current["revision"]
+            if current["answers"] and current["authorization_id"] != grant["id"]:
+                raise IntakeError("No se puede cambiar la autorización de un trabajo con respuestas registradas")
             material["answers"] = current["answers"]
             answers = {answer["id"]: answer for answer in current["answers"]}
             if current["source"]["fingerprint"] != fingerprint and current["answers"]:
@@ -216,6 +219,12 @@ def prepare(state: str | Path, filename: str | Path) -> dict[str, Any]:
                     )
                     if not matched:
                         raise IntakeError("No se puede quitar una pregunta pendiente sin una respuesta registrada")
+            expected_refs = {
+                answer["id"] for answer in current["answers"]
+                if answer["authorization_id"] == grant["id"] and answer["source_fingerprint"] == fingerprint
+            }
+            if set(decision_refs) != expected_refs:
+                raise IntakeError("decision_refs debe conservar todas las respuestas de esta autorización y fuente")
             for answer_id in decision_refs:
                 answer = answers.get(answer_id)
                 if not answer or answer["authorization_id"] != grant["id"] or answer["source_fingerprint"] != fingerprint:
@@ -269,12 +278,22 @@ def decide(state: str | Path, filename: str | Path) -> dict[str, Any]:
             "text": decision["answer"],
             "recorded_at": utc_now(),
         }
+        remaining_questions = [item for item in current["questions"] if item["id"] != question["id"]]
+        preparation = current["preparation"] if current["preparation"] in {"needs-info", "ready-for-human"} else "needs-info"
+        motive = (
+            "La respuesta está registrada; quedan preguntas del operador pendientes."
+            if remaining_questions else "La respuesta del operador está registrada y requiere reconciliar el brief."
+        )
+        next_step = (
+            "Esperar las respuestas pendientes antes de reconciliar el brief."
+            if remaining_questions else "Reconciliar el brief con la respuesta y preparar una nueva propuesta."
+        )
         snapshot = {
             **current,
-            "preparation": "needs-triage",
-            "motive": "La respuesta del operador está registrada y requiere reconciliar el brief.",
-            "next_step": "Reconciliar el brief con la respuesta y preparar una nueva propuesta.",
-            "questions": [item for item in current["questions"] if item["id"] != question["id"]],
+            "preparation": preparation if remaining_questions else "needs-triage",
+            "motive": motive,
+            "next_step": next_step,
+            "questions": remaining_questions,
             "decision_refs": [*current["decision_refs"], answer_id],
             "answers": [*current["answers"], answer],
             "revision": current["revision"] + 1,

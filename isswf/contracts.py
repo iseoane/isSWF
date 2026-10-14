@@ -233,11 +233,16 @@ def parse_snapshot(value: Any) -> dict[str, Any]:
         fingerprint = answer["source_fingerprint"]
         if not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
             raise ContractError("answer.source_fingerprint inválido")
+        if fingerprint != source["fingerprint"]:
+            raise ContractError("No se pueden conservar respuestas de una fuente anterior en U2")
         _number(answer["source_revision"], "answer.source_revision")
         _text(answer["actor"], "answer.actor")
         _text(answer["text"], "answer.text")
         _timestamp(answer["recorded_at"], "answer.recorded_at")
         answer_by_id[answer_id] = {**answer, "question": question}
+    expected_refs = set(answer_by_id)
+    if set(refs) != expected_refs:
+        raise ContractError("decision_refs debe conservar todas las respuestas del trabajo y fuente actuales")
     for answer_id in refs:
         answer = answer_by_id.get(answer_id)
         if not answer or answer["source_fingerprint"] != source["fingerprint"]:

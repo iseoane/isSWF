@@ -12,7 +12,7 @@ python -m isswf --state /ruta/privada prepare /ruta/ambiguous-proposal.json
 
 Una pregunta contiene `id`, `kind`, `question`, `owner` y `exit_condition`. Usa `kind: product` para una decisión de producto y `kind: missing-information` para información que solo conoce el operador. El dueño debe ser `operator`. Una duda técnica que se puede investigar pertenece al grounding, no a la lista de preguntas.
 
-`needs-info` y `ready-for-human` requieren al menos una pregunta concreta. Su aceptación puede estar vacía si el operador aún debe decidir el criterio. `ready-for-agent` requiere aceptación no vacía, ninguna pregunta pendiente y `resolution: null`. La preparación autoriza solo el siguiente paso descrito, no la ejecución de código.
+`needs-info` y `ready-for-human` requieren al menos una pregunta concreta. Su aceptación puede estar vacía si el operador aún debe decidir el criterio. `ready-for-agent` requiere aceptación no vacía, ninguna pregunta pendiente y `resolution: null`. Significa que el siguiente paso acotado está listo para realizarse, por ejemplo grounding técnico, no que ese grounding ya se completó, que se autorizó ejecutar cambios o que haya entrega o integración. Si el criterio ya está definido, un hecho técnico investigable no exige una espera humana perpetua. `next_step` propone el paso dentro del grant; no concede permisos ni promete ejecución, integración o entrega.
 
 ## Registrar la respuesta del operador
 
@@ -36,7 +36,15 @@ U2 bloquea el uso de respuestas si cambia el fingerprint de la fuente. Requiere 
 
 ## Registrar una disposición no accionable
 
-Usa `preparation: needs-triage` y una `resolution` de tipo `duplicate` o `already-present` solo con destino, referencias de evidencia que incluyan observación y explicación. `examples/u2/already-present-proposal.json` muestra la forma. Sin evidencia, el parser rechaza la disposición. La evidencia se conserva en la misma ficha y el panel la muestra. El parser comprueba su forma, no su veracidad. Una disposición no acredita una entrega integrada.
+Usa `preparation: needs-triage` y una `resolution` de tipo `duplicate` o `already-present` solo con destino, referencias de evidencia que incluyan observación y explicación. `examples/u2/already-present-proposal.json` muestra la forma. Sin evidencia, el parser rechaza la disposición: no inventes referencias ni una resolución concluyente. Para una sospecha técnica sin evidencia, conserva `resolution: null` y prepara grounding con un criterio observable de investigación, como en `examples/u2/grounding-proposal.json`. El ejemplo se puede comprobar con el CLI:
+
+```sh
+python -m isswf --state /ruta/privada authorize examples/u1/authorization.json
+# Sustituye authorization_id en una copia de grounding-proposal.json con el id devuelto.
+python -m isswf --state /ruta/privada prepare /ruta/grounding-proposal.json
+```
+
+La evidencia de una resolución se conserva en la misma ficha y el panel la muestra. El parser comprueba su forma, no su veracidad. Una disposición no acredita una entrega integrada.
 
 ## Snapshots y límites
 
