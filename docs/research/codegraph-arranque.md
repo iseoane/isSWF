@@ -23,4 +23,6 @@ El índice pertenece a Codegraph. SQLite de isSWF conserva el estado operativo; 
 
 ## Prueba pendiente
 
+Actualización: el usuario ejecutó `codegraph init` en isSWF y el padre volvió a consultar el servidor en la sesión siguiente. El índice contiene 18 archivos, 498 nodos y 1408 aristas; `codegraph_explore` devolvió fuente real con líneas y blast radius para `prepare`, `decide`, `_publish` y `parse_proposal`. El [registro de la comprobación](../../.audit/codegraph-index-verify.json) separa lo verificado de lo que sigue sin comprobar. Sigue pendiente el grounding completo de un encargo real con mapa de lectura y consumidores, y las pruebas de cambio concurrente y proyecto equivocado.
+
 Después de indexación decidida por el usuario y en una sesión que pueda volver a consultar el proyecto: recuperar un flujo real `prepare → _publish`, obtener archivos/rangos de líneas, contrastar el snapshot actual y demostrar que un archivo cambiado se identifica sin usar un mapa obsoleto. Una prueba negativa debe rechazar consultas al proyecto equivocado sin leer datos de otro cliente. No se sustituye este recorrido por leer la documentación del servidor.
