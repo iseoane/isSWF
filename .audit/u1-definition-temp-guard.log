@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/iseoane/Work/isSWF/.audit/test-definition-checker.py", line 26, in <module>
+    assert not root.resolve().is_relative_to(ROOT), 'Temporary fixture must be outside project'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Temporary fixture must be outside project

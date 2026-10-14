@@ -1,0 +1,18 @@
+test_cli_authorize_prepare_show_and_persist (test_u1.U1Test.test_cli_authorize_prepare_show_and_persist) ... ok
+test_concurrent_identical_publication_is_one_revision (test_u1.U1Test.test_concurrent_identical_publication_is_one_revision) ... ok
+test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel (test_u1.U1Test.test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel) ... ok
+test_empty_acceptance_invalid_json_and_unknown_preparation_rejected (test_u1.U1Test.test_empty_acceptance_invalid_json_and_unknown_preparation_rejected) ... ok
+test_hostile_instruction_and_authority_fields_rejected (test_u1.U1Test.test_hostile_instruction_and_authority_fields_rejected) ... ok
+test_idempotency_revision_conflict_and_history (test_u1.U1Test.test_idempotency_revision_conflict_and_history) ... ok
+test_malformed_origin_is_rejected_before_reading_state (test_u1.U1Test.test_malformed_origin_is_rejected_before_reading_state) ... ok
+test_missing_or_mismatched_grant_has_no_work (test_u1.U1Test.test_missing_or_mismatched_grant_has_no_work) ... ok
+test_panel_displays_brief_fields_escaped_without_private_inputs (test_u1.U1Test.test_panel_displays_brief_fields_escaped_without_private_inputs) ... ok
+test_private_storage_permissions (test_u1.U1Test.test_private_storage_permissions) ... ok
+test_read_failure_is_not_stale_success (test_u1.U1Test.test_read_failure_is_not_stale_success) ... ok
+test_real_panel_snapshot_and_security (test_u1.U1Test.test_real_panel_snapshot_and_security) ... ok
+test_show_missing_state_is_read_only_and_reports_missing_state (test_u1.U1Test.test_show_missing_state_is_read_only_and_reports_missing_state) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 2.916s
+
+OK

@@ -1,0 +1,114 @@
+test_cli_authorize_prepare_show_and_persist (test_u1.U1Test.test_cli_authorize_prepare_show_and_persist) ... ok
+test_concurrent_identical_publication_is_one_revision (test_u1.U1Test.test_concurrent_identical_publication_is_one_revision) ... ok
+test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel (test_u1.U1Test.test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel) ... FAIL
+test_empty_acceptance_invalid_json_and_unknown_preparation_rejected (test_u1.U1Test.test_empty_acceptance_invalid_json_and_unknown_preparation_rejected) ... ok
+test_hostile_instruction_and_authority_fields_rejected (test_u1.U1Test.test_hostile_instruction_and_authority_fields_rejected) ... ok
+test_idempotency_revision_conflict_and_history (test_u1.U1Test.test_idempotency_revision_conflict_and_history) ... ok
+test_malformed_origin_is_rejected_before_reading_state (test_u1.U1Test.test_malformed_origin_is_rejected_before_reading_state) ... ----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 49036)
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/http/server.py", line 500, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/http/server.py", line 488, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/tmp/isswf-u1-red-3q8vt4jt/isswf/panel.py", line 63, in do_GET
+    parsed_origin = urlsplit(origin)
+  File "/usr/lib/python3.14/urllib/parse.py", line 497, in urlsplit
+    scheme, netloc, url, query, fragment = _urlsplit(url, scheme, allow_fragments)
+                                           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/parse.py", line 525, in _urlsplit
+    raise ValueError("Invalid IPv6 URL")
+ValueError: Invalid IPv6 URL
+----------------------------------------
+ERROR
+test_missing_or_mismatched_grant_has_no_work (test_u1.U1Test.test_missing_or_mismatched_grant_has_no_work) ... ok
+test_panel_displays_brief_fields_escaped_without_private_inputs (test_u1.U1Test.test_panel_displays_brief_fields_escaped_without_private_inputs) ... FAIL
+test_private_storage_permissions (test_u1.U1Test.test_private_storage_permissions) ... ok
+test_read_failure_is_not_stale_success (test_u1.U1Test.test_read_failure_is_not_stale_success) ... ok
+test_real_panel_snapshot_and_security (test_u1.U1Test.test_real_panel_snapshot_and_security) ... FAIL
+test_show_missing_state_is_read_only_and_reports_missing_state (test_u1.U1Test.test_show_missing_state_is_read_only_and_reports_missing_state) ... FAIL
+
+======================================================================
+ERROR: test_malformed_origin_is_rejected_before_reading_state (test_u1.U1Test.test_malformed_origin_is_rejected_before_reading_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/isswf-u1-red-3q8vt4jt/tests/test_u1.py", line 237, in test_malformed_origin_is_rejected_before_reading_state
+    urllib.request.urlopen(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 487, in open
+    response = self._open(req, data)
+  File "/usr/lib/python3.14/urllib/request.py", line 504, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+                              '_open', req)
+  File "/usr/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/usr/lib/python3.14/urllib/request.py", line 1349, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 1324, in do_open
+    r = h.getresponse()
+  File "/usr/lib/python3.14/http/client.py", line 1478, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/http/client.py", line 343, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/http/client.py", line 312, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+======================================================================
+FAIL: test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel (test_u1.U1Test.test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/isswf-u1-red-3q8vt4jt/tests/test_u1.py", line 204, in test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel
+    with self.assertRaisesRegex(IntakeError, "snapshot|Campos no admitidos"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: IntakeError not raised
+
+======================================================================
+FAIL: test_panel_displays_brief_fields_escaped_without_private_inputs (test_u1.U1Test.test_panel_displays_brief_fields_escaped_without_private_inputs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/isswf-u1-red-3q8vt4jt/tests/test_u1.py", line 269, in test_panel_displays_brief_fields_escaped_without_private_inputs
+    self.assertIn(value, page)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^
+AssertionError: 'factory/isswf-demo' not found in "<!doctype html><html lang='es'><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>isSWF · trabajos</title><h1>Trabajos preparados</h1><article><h2><a href='/work/work-11cb00361313f665e66780ae'>Mostrar la última actualización de la issue</a></h2><p>feature · ready-for-agent</p><p>Objetivo: Mostrar cuándo cambió el estado de una issue.</p><ul><li>La ficha muestra la fecha de lectura observada en UTC.</li><li>La ficha diferencia la lectura de la actualización local.</li></ul><p>Issue leída: 2025-01-15T12:00:00Z (hace 636 d) · Ficha actualizada: 2026-10-14T04:14:59Z (hace 0 s)</p><p>Ejecución: no disponible en S01</p></article></html>"
+
+======================================================================
+FAIL: test_real_panel_snapshot_and_security (test_u1.U1Test.test_real_panel_snapshot_and_security)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/isswf-u1-red-3q8vt4jt/tests/test_u1.py", line 149, in test_real_panel_snapshot_and_security
+    self.assertIn("style-src 'self'", response.headers["Content-Security-Policy"])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "style-src 'self'" not found in "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+
+======================================================================
+FAIL: test_show_missing_state_is_read_only_and_reports_missing_state (test_u1.U1Test.test_show_missing_state_is_read_only_and_reports_missing_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/isswf-u1-red-3q8vt4jt/tests/test_u1.py", line 185, in test_show_missing_state_is_read_only_and_reports_missing_state
+    with self.assertRaisesRegex(IntakeError, "estado.*no disponible|no existe"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: IntakeError not raised
+
+----------------------------------------------------------------------
+Ran 13 tests in 2.385s
+
+FAILED (failures=4, errors=1)

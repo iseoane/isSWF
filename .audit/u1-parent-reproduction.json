@@ -1,0 +1,21 @@
+[
+  {
+    "case": "read-without-state",
+    "result": [],
+    "state_created": true,
+    "database_created": true
+  },
+  {
+    "case": "panel-visible-fields",
+    "revision_visible": false,
+    "next_step_visible": false,
+    "risk_visible": false
+  },
+  {
+    "case": "malformed-snapshot",
+    "show_returned": {
+      "id": "work-11cb00361313f665e66780ae"
+    },
+    "render_error": "KeyError"
+  }
+]

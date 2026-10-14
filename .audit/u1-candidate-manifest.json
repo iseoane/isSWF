@@ -1,0 +1,12 @@
+{
+  ".agents/skills/isswf-triage/SKILL.md": "f638714287c48d86686baf58f737b14099d6c78e10b07de25ad4e79d8dc79ced",
+  ".gitignore": "18d5da8d78bf61acd71a4177be83da7fdcfed39498cff399494704e2d83e3e43",
+  "docs/u1-usage.md": "fd52512f293d9539be0c23336795ea402112409c89e41d81a00e9370274383b3",
+  "examples/u1/authorization.json": "e1ef0d6ad9ab15ed83afc6303ed63cbf56387b9d65d9600f297704ca6d2a5b47",
+  "examples/u1/proposal.json": "94012f3558614380dab801d2a126bad0bfef11fe4dccabdb62d661e6fba897f6",
+  "isswf/__init__.py": "6c302b924dd55b9a8e3119aa8a9bd2e25e4d47128012796a38e5e6a13245e59c",
+  "isswf/__main__.py": "912cacb527b5daf26dbd9462ac905d6c07b60228e51480c6850a4c74e821dbfc",
+  "isswf/intake.py": "79992215b3b681a4332b11a57750eb4f4cce1de1ec694542f94a280f855f3f46",
+  "isswf/panel.py": "69a3ab0519099bcd69765fa3002c15686797f476cb351e9865299347d49e99b0",
+  "tests/test_u1.py": "f86f822f1f5b44dff7311717ca1a29bc0b9d19f05def812f5073a6996cfe4f7f"
+}
