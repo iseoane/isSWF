@@ -49,6 +49,8 @@ def _page(items: list[dict]) -> str:
             ("Alcance", _e(brief["scope"])),
             ("Exclusiones", _list(brief["exclusions"])),
             ("Aceptación", _list(brief["acceptance"])),
+            ("Decisiones pendientes", _question_list(item["questions"])),
+            ("Resolución", _resolution(item["resolution"])),
             ("Riesgos", _list(brief["risks"])),
             ("Dependencias", _list(brief["dependencies"])),
             ("Contexto", _list(brief["context"])),
@@ -71,6 +73,17 @@ def _page(items: list[dict]) -> str:
 
 def _list(values: list[str]) -> str:
     return "<ul>" + "".join(f"<li>{_e(value)}</li>" for value in values) + "</ul>" if values else "<span>Sin datos</span>"
+
+
+def _question_list(questions: list[dict]) -> str:
+    return _list([f"{item['id']}: {item['question']} Responsable: {item['owner']}. Salida: {item['exit_condition']}" for item in questions])
+
+
+def _resolution(value: dict | None) -> str:
+    if value is None:
+        return "<span>Sin resolución</span>"
+    evidence = _list([f"{item['ref']}: {item['observation']}" for item in value["evidence"]])
+    return f"<p>{_e(value['kind'])}. {_e(value['explanation'])} Destino: {_e(value['destination'])}</p>{evidence}"
 
 
 def make_server(state: str, port: int = 8765) -> ThreadingHTTPServer:

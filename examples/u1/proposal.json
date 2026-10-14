@@ -13,6 +13,9 @@
   },
   "category": "feature",
   "preparation": "ready-for-agent",
+  "questions": [],
+  "decision_refs": [],
+  "resolution": null,
   "motive": "La petición tiene resultado observable y alcance acotado para preparación.",
   "next_step": "Grounding de cómo se obtiene y presenta la fecha de actualización.",
   "brief": {

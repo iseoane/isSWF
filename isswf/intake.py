@@ -12,17 +12,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-CATEGORIES = {"feature", "bug", "maintenance", "research"}
-REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-PROPOSAL_KEYS = {"authorization_id", "expected_revision", "source", "category", "preparation", "motive", "next_step", "brief"}
-SOURCE_KEYS = {"repo", "number", "title", "body", "labels", "observed_at"}
-BRIEF_KEYS = {"objective", "scope", "exclusions", "acceptance", "risks", "dependencies", "context", "checks", "reviews", "base", "configuration", "limits", "checkpoints"}
-SNAPSHOT_KEYS = {"id", "repo", "issue", "source", "authorization_id", "category", "preparation", "motive", "next_step", "brief", "execution", "revision", "observed_at", "updated_at"}
-SNAPSHOT_SOURCE_KEYS = {"repo", "number", "title", "labels", "observed_at", "fingerprint"}
-FORBIDDEN_KEYS = {"command", "commands", "shell", "script", "executable", "execution", "permissions", "authorization", "auth", "token", "secret", "model", "provider", "config", "environment", "env"}
-
-class IntakeError(ValueError):
-    """Invalid or unauthorized intake data."""
+from .contracts import ContractError as IntakeError, FORBIDDEN_KEYS, REPO_RE, parse_proposal, parse_snapshot
 
 
 def utc_now() -> str:
@@ -101,41 +91,7 @@ def _contains_forbidden(value: Any) -> str | None:
 
 
 def _validate_snapshot(value: Any) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise IntakeError("snapshot inválido: debe ser un objeto")
-    _exact_keys(value, SNAPSHOT_KEYS, "snapshot")
-    source, brief = value["source"], value["brief"]
-    if not isinstance(source, dict) or not isinstance(brief, dict):
-        raise IntakeError("snapshot inválido: source y brief deben ser objetos")
-    _exact_keys(source, SNAPSHOT_SOURCE_KEYS, "snapshot.source")
-    _exact_keys(brief, BRIEF_KEYS, "snapshot.brief")
-    repo = _repo(value["repo"])
-    issue = _number(value["issue"], "snapshot.issue")
-    if _repo(source["repo"]) != repo or _number(source["number"], "snapshot.source.number") != issue:
-        raise IntakeError("snapshot inválido: source no coincide con repo/issue")
-    _text(value["id"], "snapshot.id")
-    _text(value["authorization_id"], "snapshot.authorization_id")
-    if not isinstance(value["category"], str) or value["category"] not in CATEGORIES or value["preparation"] != "ready-for-agent":
-        raise IntakeError("snapshot inválido: category o preparation no admitidos")
-    for key in ("motive", "next_step", "execution"):
-        _text(value[key], f"snapshot.{key}")
-    revision = _number(value["revision"], "snapshot.revision")
-    _text(source["title"], "snapshot.source.title")
-    _strings(source["labels"], "snapshot.source.labels")
-    _timestamp(source["observed_at"], "snapshot.source.observed_at")
-    if not isinstance(source["fingerprint"], str) or not re.fullmatch(r"[0-9a-f]{64}", source["fingerprint"]):
-        raise IntakeError("snapshot inválido: source.fingerprint")
-    _timestamp(value["observed_at"], "snapshot.observed_at")
-    _timestamp(value["updated_at"], "snapshot.updated_at")
-    _text(brief["objective"], "snapshot.brief.objective")
-    _text(brief["scope"], "snapshot.brief.scope")
-    for key in ("exclusions", "acceptance", "risks", "dependencies", "context", "checks", "reviews"):
-        _strings(brief[key], f"snapshot.brief.{key}", nonempty=(key == "acceptance"))
-    for key in ("base", "configuration", "limits", "checkpoints"):
-        _text(brief[key], f"snapshot.brief.{key}")
-    if source["observed_at"] != value["observed_at"] or revision < 1:
-        raise IntakeError("snapshot inválido: fechas o revisión incoherentes")
-    return value
+    return parse_snapshot(value)
 
 
 def _database(state: str | Path) -> Path:
@@ -195,46 +151,13 @@ def authorize(state: str | Path, filename: str | Path) -> dict[str, str]:
     return {"id": grant["id"], "repo": repo, "issue": str(issue), "created_at": grant["created_at"]}
 
 
-def _validate_proposal(raw: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
-    _exact_keys(raw, PROPOSAL_KEYS, "propuesta")
-    forbidden = _contains_forbidden(raw)
-    if forbidden:
-        raise IntakeError(f"Campo de autoridad o configuración no permitido: {forbidden}")
-    source, brief = raw["source"], raw["brief"]
-    if not isinstance(source, dict):
-        raise IntakeError("source debe ser un objeto")
-    if not isinstance(brief, dict):
-        raise IntakeError("brief debe ser un objeto")
-    _exact_keys(source, SOURCE_KEYS, "source")
-    _exact_keys(brief, BRIEF_KEYS, "brief")
-    source = dict(source)
-    source["repo"] = _repo(source["repo"])
-    source["number"] = _number(source["number"], "source.number")
-    source["title"] = _text(source["title"], "source.title")
-    _text(source["body"], "source.body")
-    source["labels"] = _strings(source["labels"], "source.labels")
-    source["observed_at"] = _timestamp(source["observed_at"], "source.observed_at")
-    brief = dict(brief)
-    brief["objective"] = _text(brief["objective"], "brief.objective")
-    brief["scope"] = _text(brief["scope"], "brief.scope")
-    for key in ("exclusions", "risks", "dependencies", "context", "checks", "reviews"):
-        brief[key] = _strings(brief[key], f"brief.{key}", nonempty=(key == "acceptance"))
-    brief["acceptance"] = _strings(brief["acceptance"], "brief.acceptance", nonempty=True)
-    for key in ("base", "configuration", "limits", "checkpoints"):
-        brief[key] = _text(brief[key], f"brief.{key}")
-    if not isinstance(raw["category"], str) or raw["category"] not in CATEGORIES:
-        raise IntakeError("category debe ser feature, bug, maintenance o research")
-    if raw["preparation"] != "ready-for-agent":
-        raise IntakeError("U1 solo admite preparation=ready-for-agent para issues claras")
-    expected = raw["expected_revision"]
-    if isinstance(expected, bool) or not isinstance(expected, int) or expected < 0:
-        raise IntakeError("expected_revision debe ser un entero no negativo")
-    return source, brief
+def _validate_proposal(raw: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, str]], list[str], dict[str, Any] | None]:
+    return parse_proposal(raw)
 
 
 def prepare(state: str | Path, filename: str | Path) -> dict[str, Any]:
     raw = _json_file(filename)
-    source, brief = _validate_proposal(raw)
+    source, brief, questions, decision_refs, resolution = _validate_proposal(raw)
     auth_id = _text(raw["authorization_id"], "authorization_id")
     with closing(_connect(state)) as db:
         db.execute("BEGIN IMMEDIATE")
@@ -251,9 +174,10 @@ def prepare(state: str | Path, filename: str | Path) -> dict[str, Any]:
         work_id = "work-" + hashlib.sha256(f'{grant["repo"]}#{grant["issue"]}'.encode()).hexdigest()[:24]
         material = {"id": work_id, "repo": grant["repo"], "issue": grant["issue"],
             "source": {**source, "fingerprint": fingerprint}, "authorization_id": grant["id"],
-            "category": raw["category"], "preparation": "ready-for-agent",
+            "category": raw["category"], "preparation": raw["preparation"],
             "motive": _text(raw["motive"], "motive"), "next_step": _text(raw["next_step"], "next_step"),
-            "brief": brief, "execution": "no disponible en S01"}
+            "brief": brief, "questions": questions, "decision_refs": decision_refs,
+            "answers": [], "resolution": resolution, "execution": "no disponible en S01"}
         row = db.execute("SELECT * FROM work WHERE id=?", (work_id,)).fetchone()
         if row:
             current = json.loads(row["snapshot"])

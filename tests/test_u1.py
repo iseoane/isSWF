@@ -82,7 +82,7 @@ class U1Test(unittest.TestCase):
             prepare(self.state, self.write(value))
         value = json.loads(json.dumps(self.proposal))
         value["preparation"] = "needs-info"
-        with self.assertRaisesRegex(IntakeError, "solo admite"):
+        with self.assertRaisesRegex(IntakeError, "requiere preguntas"):
             prepare(self.state, self.write(value))
         bad = Path(self.temp.name) / "broken.json"
         bad.write_text("{")
@@ -280,6 +280,69 @@ class U1Test(unittest.TestCase):
             server.shutdown()
             thread.join(timeout=2)
             server.server_close()
+
+    def test_pending_product_question_is_saved_and_rendered(self):
+        value = json.loads(json.dumps(self.proposal))
+        value["preparation"] = "needs-info"
+        value["brief"]["acceptance"] = []
+        value["questions"] = [{
+            "id": "updated-at-meaning",
+            "kind": "product",
+            "question": "¿Qué cambios cuentan como actualización?",
+            "owner": "operator",
+            "exit_condition": "La aceptación define los cambios que se muestran.",
+        }]
+        value["motive"] = "Falta una decisión de producto."
+        snapshot = prepare(self.state, self.write(value))
+        self.assertEqual(snapshot["preparation"], "needs-info")
+        self.assertEqual(snapshot["brief"]["acceptance"], [])
+        self.assertEqual(snapshot["questions"][0]["owner"], "operator")
+        self.assertEqual(snapshot["revision"], 1)
+        server = make_server(str(self.state), 0)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}/work/{snapshot['id']}") as response:
+                page = response.read().decode()
+            self.assertIn("¿Qué cambios cuentan como actualización?", page)
+            self.assertIn("La aceptación define los cambios que se muestran.", page)
+            self.assertIn("Responsable: operator", page)
+        finally:
+            server.shutdown()
+            thread.join(timeout=2)
+            server.server_close()
+
+    def test_technical_question_is_not_an_operator_question(self):
+        value = json.loads(json.dumps(self.proposal))
+        value["preparation"] = "needs-info"
+        value["questions"] = [{
+            "id": "technical-fact",
+            "kind": "technical",
+            "question": "¿Qué función calcula la fecha?",
+            "owner": "operator",
+            "exit_condition": "Leer el código.",
+        }]
+        with self.assertRaisesRegex(IntakeError, "grounding"):
+            prepare(self.state, self.write(value))
+        self.assertEqual(show(self.state), [])
+
+    def test_legacy_u1_snapshot_is_read_without_rewriting_storage(self):
+        snapshot = prepare(self.state, self.write(self.proposal))
+        import sqlite3
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        legacy = dict(snapshot)
+        for key in ("questions", "decision_refs", "answers", "resolution"):
+            legacy.pop(key)
+        db.execute("UPDATE work SET snapshot=? WHERE id=?", (json.dumps(legacy), snapshot["id"]))
+        db.commit()
+        db.close()
+        displayed = show(self.state, snapshot["id"])
+        self.assertEqual(displayed["questions"], [])
+        self.assertEqual(displayed["answers"], [])
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        persisted = json.loads(db.execute("SELECT snapshot FROM work WHERE id=?", (snapshot["id"],)).fetchone()[0])
+        db.close()
+        self.assertEqual(set(persisted), set(legacy))
 
     def test_read_failure_is_not_stale_success(self):
         prepare(self.state, self.write(self.proposal))

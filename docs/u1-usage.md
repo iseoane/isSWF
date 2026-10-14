@@ -18,7 +18,9 @@ python -m isswf --state /ruta/privada show
 python -m isswf --state /ruta/privada show work-<id>
 ```
 
-La propuesta requiere los campos del fixture. `source.body` solo se usa para calcular un fingerprint y no se guarda. El panel y snapshot exponen título, etiquetas, fecha de lectura y fingerprint, no la autorización privada. `objective` y `scope` deben coincidir exactamente con el grant. La aceptación debe contener al menos un criterio observable. Para U1, `preparation` solo puede ser `ready-for-agent`, que prepara el siguiente paso y no significa que se haya completado grounding o ejecución.
+La propuesta requiere los campos del fixture y `questions`, `decision_refs` y `resolution`. Una propuesta ordinaria usa `questions: []`, `decision_refs: []` y `resolution: null`. `source.body` solo se usa para calcular un fingerprint y no se guarda. El panel y snapshot exponen título, etiquetas, fecha de lectura y fingerprint, no la autorización privada. `objective` y `scope` deben coincidir exactamente con el grant.
+
+`ready-for-agent` requiere aceptación no vacía, ninguna pregunta pendiente y `resolution: null`. `needs-info` y `ready-for-human` requieren preguntas concretas con `id`, `kind`, `question`, `owner` y `exit_condition`. `owner` debe ser `operator`. `kind` puede ser `product` o `missing-information`; las dudas técnicas pertenecen al grounding, no al cuestionario. La aceptación puede estar vacía mientras el trabajo espera una respuesta. Los snapshots U1 guardados antes de este cambio siguen disponibles en lectura. La vista añade valores vacíos en memoria y no modifica SQLite.
 
 Las revisiones comienzan en 1. Una modificación requiere el `expected_revision` actual. Una relectura idéntica y no obsoleta devuelve el snapshot sin crear una nueva revisión. Conflictos y alcance distinto se rechazan. Las revisiones previas se conservan. SQLite publica el snapshot actual y la fila de historia en una transacción; el estado no promete serializar procesos que eviten esa transacción.
 
