@@ -1,0 +1,48 @@
+{
+  "authorization_id": "REEMPLAZAR_CON_ID_DEVUELTO_POR_AUTHORIZE",
+  "expected_revision": 0,
+  "source": {
+    "repo": "factory/isswf-demo",
+    "number": 17,
+    "title": "Mostrar la última actualización de la issue",
+    "body": "Como operador, quiero ver cuándo se leyó la issue y su fecha de actualización para interpretar la vigencia del brief.",
+    "labels": [
+      "enhancement"
+    ],
+    "observed_at": "2025-01-15T12:00:00Z"
+  },
+  "category": "feature",
+  "preparation": "ready-for-agent",
+  "motive": "La petición tiene resultado observable y alcance acotado para preparación.",
+  "next_step": "Grounding de cómo se obtiene y presenta la fecha de actualización.",
+  "brief": {
+    "objective": "Mostrar cuándo cambió el estado de una issue.",
+    "scope": "Preparar una ficha para observar la fecha de última actualización de la issue.",
+    "exclusions": [
+      "No consultar GitHub ni publicar cambios."
+    ],
+    "acceptance": [
+      "La ficha muestra la fecha de lectura observada en UTC.",
+      "La ficha diferencia la lectura de la actualización local."
+    ],
+    "risks": [
+      "Una fecha de lectura antigua puede no reflejar el estado actual de GitHub."
+    ],
+    "dependencies": [
+      "Ninguna para preparar la ficha."
+    ],
+    "context": [
+      "La ejecución de trabajos no está disponible en S01."
+    ],
+    "checks": [
+      "Verificar que el mismo snapshot se consulta desde CLI y panel."
+    ],
+    "reviews": [
+      "Revisión independiente pendiente."
+    ],
+    "base": "Desconocida; no se consultó un checkout del proyecto destino.",
+    "configuration": "Pendiente; U1 no ejecuta código.",
+    "limits": "Sin workers, llamadas de red ni publicación.",
+    "checkpoints": "Pendientes de definir antes de una ejecución posterior."
+  }
+}
