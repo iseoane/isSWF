@@ -70,7 +70,7 @@ Engram es memoria externa para decisiones y aprendizajes. Su identidad de proyec
 
 La [investigación Engram](research/engram-arranque.md) distingue la sonda offline de `doctor`, que abre el store y puede crear archivos. La [prueba aislada](../.audit/engram-scope.json) verifica guardar y recuperar en procesos nuevos con dos proyectos ficticios, sin usar memorias reales. No acredita la integración en isSWF ni separación contra un proceso malicioso del mismo usuario.
 
-La [sonda sobre el directorio real](../.audit/engram-compatibility.json) fue rechazada antes de operaciones de memoria. No prueba corrupción: el mismo mensaje se observó con sidecars en un store temporal. No se borran sidecars, migra ni fuerza una apertura para conseguir un PASS. La apertura segura del store real sigue pendiente. Si Engram no está disponible, se informa y se trabaja con fuentes actuales suficientes; nunca se inventa una decisión necesaria ni se crea otra memoria propia.
+La [sonda sobre el directorio real](../.audit/engram-compatibility.json) fue rechazada antes de operaciones de memoria. No prueba corrupción: el mismo mensaje se observó con sidecars en un store temporal, y `integrity_check` devolvió `ok` sobre una copia fiel con 28 tablas. La sonda rechaza cualquier directorio que contenga ficheros `-wal`, `-shm` o `-journal`, y una parada limpia de `engram serve` no los retira: se comprobó sobre el store real, que sigue rechazando la sonda con el servidor parado. Por eso **`compatibility` no puede ser la comprobación previa de este store** y no se usará como tal. La integración abrirá el store por su vía normal, con identidad explícita, y tratará la ausencia de Engram como degradación explícita. Nunca se borran sidecars, se migra ni se repara para conseguir un PASS. El [registro](../.audit/engram-checkpoint-verify.json) conserva la secuencia y su corrección.
 
 ## Codegraph
 
@@ -89,7 +89,7 @@ Para cerrar el arranque operativo falta:
 - Distribución real fijada por revisión, convivencia de versiones y protección de la instalación estable. La prueba actual comparte una copia de un commit, no un directorio protegido contra escrituras.
 - Trust persistido/interactivo y activación sobre settings existentes. El catálogo RPC con `--approve`/`--no-approve` ya se comprobó, no todos los modos de trust.
 - Arranque cómodo del CLI sin un `PYTHONPATH` manual y conservación de instrucciones/settings preexistentes. El import desde otro checkout y estados separados ya se comprobaron; el fixture no tenía archivos previos.
-- Apertura segura de Engram real, selección de proyecto y degradación sin cambiar estado operativo ni inventar memoria.
+- Engram con identidad de proyecto explícita y degradación sin cambiar estado operativo ni inventar memoria. Abrir por la vía normal ya no es un bloqueo abierto: el store se verificó sano sobre copia y la sonda se descartó como comprobación previa.
 - Grounding Codegraph real tras indexación elegida por el usuario; checkout equivocado y mapa obsoleto no se usan como evidencia vigente.
 - Actualización y rollback que respetan versiones de proyectos y ejecuciones activas. No se simulan workers inexistentes para acreditar este escenario.
 

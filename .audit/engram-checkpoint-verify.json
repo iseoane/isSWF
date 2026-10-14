@@ -19,10 +19,18 @@
   "conclusions": [
     "The store is healthy: integrity_check ok and 28 tables on a faithful copy.",
     "The 27 MB WAL folds into engram.db when the last connection closes cleanly, and SQLite then removes -wal and -shm.",
-    "The preflight rejection is a side effect of the store being open, not a defect in the data.",
-    "Stopping Engram gracefully should therefore make `compatibility` succeed against the real path; the rejection returns as soon as any process reopens the store."
+    "The preflight rejection is a side effect of sidecar files existing on disk, not a defect in the data.",
+    "Observed on the real store: a graceful stop of engram serve leaves the sidecars in place, so the rejection is not limited to a live store."
   ],
-  "push_versus_sidecars": "These are unrelated mechanisms and the earlier report mixed them. -wal/-shm exist because a process has the store open in WAL mode. The push is the separate autosync feature configured on that process.",
+  "stop_restart_on_real_store": {
+    "action": "kill -TERM 3769726 (graceful), bounded wait, then relaunch",
+    "stop": {"result": "process exited promptly", "sidecars_after_stop": "engram.db-wal (27896552 B, mtime unchanged) and engram.db-shm (32768 B, mtime updated) still present", "engram.db_mtime": "updated to stop time, size unchanged", "compatibility_after_stop": "exit 2, same message"},
+    "restart": {"command": "cd /home/iseoane/Work/agent-depot && ENGRAM_CLOUD_AUTOSYNC=1 setsid nohup engram serve", "result": "PID 268731, HTTP 127.0.0.1:7437 answering"},
+    "autosync_on_restart": "[autosync] ERROR: cloud token is not configured ... autosync disabled; GET /sync/status reports enabled=false, reason blocked_unenrolled",
+    "correction": "The copy-based prediction that a graceful stop clears the sidecars did NOT hold on the real store. internal/store/compatibility.go L60 therefore keeps rejecting this directory whether or not the store is open, so `compatibility` cannot serve as its preflight. The same file name rule also means the rejection is permanent for any store Engram has opened in WAL mode and left with sidecars."
+  },
+  "push_versus_sidecars": "These are unrelated mechanisms and the earlier report mixed them. -wal/-shm exist because a process has the store open in WAL mode, and engram's own shutdown does not remove them. sync.log records the user's git chunk export/import hooks per project (Import OK, Pull OK, Push OK, Chunks nuevos commiteados), not cloud traffic; cloud has no server URL or token and autosync disables itself. Its 121 'binario engram no encontrado en el PATH del hook' warnings and 3 real rebase conflicts are that mechanism's own backlog, unrelated to isSWF.",
+  "relevance_to_isSWF": "None of the observed projects or the push concern isSWF. Two consequences for integration: pass an explicit --project (the running serve process has cwd ~/Work/agent-depot, so cwd detection would attribute calls to it), and treat the shared store as hosting other projects whose content must never be read into our context.",
   "real_store_effect": "None. Only a read-only copy was opened; ~/.engram kept identical sizes and mtimes for db, sidecars, identity and locks.",
-  "limits": "The copy was taken while the store was open, so it is not an atomic snapshot and says nothing about writes that had not reached the WAL. A passing preflight after stop is a point-in-time observation, not a guarantee about concurrent writers. No memory contents were inspected."
+  "limits": "The copy was taken while the store was open, so it is not an atomic snapshot and says nothing about writes that had not reached the WAL. No memory contents were inspected. The stop/restart was performed with operator awareness; the relaunched process runs detached from a shell instead of its original terminal scope."
 }

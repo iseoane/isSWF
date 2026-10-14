@@ -111,6 +111,14 @@ Límite: la copia se tomó con el store abierto, sin instantánea atómica. El �
 
 - `compatibility` **no sirve como preflight del store vivo**: mientras `engram serve` mantiene el WAL, la condición 6 garantiza exit 2 con independencia del estado real del store. Tampoco sirve como detector de corrupción.
 - Sirve sólo como observación offline de un directorio quiescente: copia sin sidecars y sin escritores concurrentes. Su valor es clasificar cabecera e identidad, nunca autorizar la apertura.
+
+### Parada real de `engram serve` (14 de octubre)
+
+El usuario propuso parar y rearrancar el servidor. Se envió `SIGTERM` al proceso, esperó su salida y se observó el directorio real: el proceso terminó pronto, pero `engram.db-wal` (27 896 552 B, mtime sin cambios) y `engram.db-shm` siguieron presentes, y la sonda volvió a devolver exit 2 con el mismo mensaje. Es decir, **la predicción basada en la copia no se cumplió**: retirar los sidecars en una copia hacía pasar la sonda, pero la parada de Engram no los retira.
+
+Consecuencia práctica: la condición 6 depende de que existan esos ficheros, no de que el store esté abierto en ese momento. Un store que Engram haya abierto en modo WAL y dejado con sidecars seguirá rechazando la sonda de forma estable. `compatibility` no puede ser la comprobación previa de este store. El [registro](../../.audit/engram-checkpoint-verify.json) conserva la secuencia completa, incluida la corrección.
+
+El servidor se relanzó desde `~/Work/agent-depot` con `ENGRAM_CLOUD_AUTOSYNC=1` y volvió a escuchar en `127.0.0.1:7437`. Su propio log informó `[autosync] ERROR: cloud token is not configured ... autosync disabled`, y `GET /sync/status` respondió `enabled=false` con `reason_code: blocked_unenrolled`. El cloud no está configurado; las líneas de `sync.log` corresponden a los hooks de exportación/importación de chunks en Git, no a tráfico de nube.
 - Para el camino vivo, el canal autoritativo es el propio store en marcha: `GET /compatibility` del servidor devuelve `source: active`, `status: ready` y `capability: startup-verified-store-v1` (README L250-258).
 - Alternativa sin sonda: abrir con el camino normal y tratar los errores de esquema en el llamante, con fallo cerrado (continuar sin contexto). `Store.New` ejecuta DDL y reparaciones.
 - No borrar ni renombrar sidecars para que la sonda pase: los sidecars están rechazados a propósito y aquí el WAL contiene 27,9 MB de transacciones confirmadas que un checkpoint no ha trasladado al fichero principal. Suprimirlo es pérdida silenciosa de datos.
