@@ -1,0 +1,109 @@
+{
+  "scope": "Own-session actors only; effort is Pi metadata, not provider semantics.",
+  "actors": [
+    {
+      "role": "coordinator-failed",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T18-50-36-810Z_0480a7e6-924a-43be-88e4-61870e09a15c.jsonl"
+    },
+    {
+      "role": "coordinator-success",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T18-54-53-013Z_1c2ade5f-9e24-4de4-b1be-e8ac8e89d3e8.jsonl"
+    },
+    {
+      "role": "review-luna-v1",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T18-59-34-695Z_1a9a5468-aec2-4369-85ec-30ab9686c229.jsonl"
+    },
+    {
+      "role": "review-deepseek-v1",
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "max",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T18-59-34-688Z_646d89b4-1b1b-4f35-aafd-b2419d3d06d5.jsonl"
+    },
+    {
+      "role": "worker-before",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-00-13-836Z_f72f276c-0d69-43f4-9ae5-cea7cac51f38.jsonl"
+    },
+    {
+      "role": "worker-after",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-00-13-794Z_2495cb63-cbd7-4582-ad6a-8db49ec14f98.jsonl"
+    },
+    {
+      "role": "correction-writer",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-07-58-977Z_6ba18a30-3b26-4888-b62c-7e494422547e.jsonl"
+    },
+    {
+      "role": "citation-writer",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-12-53-097Z_a8a80fdc-9753-45cd-aaf7-989253004573.jsonl"
+    },
+    {
+      "role": "reviewer-before",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-08-39-615Z_2f5550d0-a585-4889-910c-c4e241b632cc.jsonl"
+    },
+    {
+      "role": "reviewer-after",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-08-39-595Z_d8d4e691-b636-403b-962b-cbcfcd57351f.jsonl"
+    },
+    {
+      "role": "review-luna-v2",
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "evidence": "Own session metadata (not provider semantics)",
+      "log": "2026-10-14T19-17-13-211Z_bf40eada-3be6-4e55-83d9-0e1a62340b92.jsonl"
+    },
+    {
+      "role": "source-worker",
+      "id": "a594c037af2cdd59a",
+      "model": "openai-codex/gpt-6-luna",
+      "effort": "high",
+      "base": "c083c861fe736c37ce0dc16b16b6899d01abfa51",
+      "evidence": "Own coordinator runtime agent lifecycle metadata"
+    },
+    {
+      "role": "review-deepseek-v2",
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "max",
+      "log": "2026-10-14T19-17-13-252Z_3fbdda84-a09d-48b2-9e53-f598c4bc521d.jsonl",
+      "evidence": "Own session metadata"
+    }
+  ]
+}

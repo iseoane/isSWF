@@ -1,0 +1,129 @@
+[
+  {
+    "type": "toolCall",
+    "id": "call_133d6faf41ab4867956415299c58c535|fc_04784cd57d6d49ec016acfd343c4bc819187450ac68364a079",
+    "name": "read",
+    "arguments": {
+      "path": ".agents/roles/references/review.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_1b229768b91b46f5a644cb6ab233d910|fc_04784cd57d6d49ec016acfd34433d88191bba7ffdb955b907c",
+    "name": "bash",
+    "arguments": {
+      "command": "git status --short",
+      "timeout": 10
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_c50581701c1c47e1bdce07bafbc3bca5|fc_04784cd57d6d49ec016acfd3477c1c81919e2344b4a6773426",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/spec-failure/manifest.json",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_2753da6983b1475096e96d46851189ba|fc_04784cd57d6d49ec016acfd3479bac8191ba6d510e64024fb4",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/spec-failure/candidate.diff",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_c8b024121be94c4e8bbf7d503cd9e62e|fc_04784cd57d6d49ec016acfd3479bac81918d1847c72fde4974",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/spec-failure/payload/sum.sh",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_77b7a3437a3042a08f0a99d7126bd281|fc_04784cd57d6d49ec016acfd3479bac8191ac670340e4fc9553",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/style-only/manifest.json",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_4106ce3eb6ba4375866039c4f566ca7f|fc_04784cd57d6d49ec016acfd3479bac8191b197af269b8bc7f3",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/style-only/candidate.diff",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_b03ff8f715ac4947b0248f29a4dca93e|fc_04784cd57d6d49ec016acfd3479bac81918c969789bcdb3465",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/style-only/payload/sum.sh",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_a5a8cffdeb6a49b2bb4927564604af0e|fc_04784cd57d6d49ec016acfd3479bac81918f209887838d0731",
+    "name": "read",
+    "arguments": {
+      "path": ".agents/roles/references/code-quality.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_5fc8bdebf8b54d799f5fc403402c9033|fc_04784cd57d6d49ec016acfd3479bac8191aad7d066eeecb6de",
+    "name": "read",
+    "arguments": {
+      "path": ".agents/roles/references/comments.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_a1e6737c7f2846378e2ef6c1312b626a|fc_04784cd57d6d49ec016acfd3479bac8191a8a9b4cc62dfff08",
+    "name": "read",
+    "arguments": {
+      "path": ".agents/roles/references/verification-principles.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_2823c099334040bc9725ab62c76ab9cd|fc_04784cd57d6d49ec016acfd34e16388191a6de7d72b5b94053",
+    "name": "bash",
+    "arguments": {
+      "command": "for fixture in spec-failure style-only; do\n  script=\".audit/reviewer-fixtures/$fixture/payload/sum.sh\"\n  printf '\\n== %s ==\\n' \"$fixture\"\n  for args in '7 3' '0 0' '-4 2'; do\n    printf '$ bash %s %s -> ' \"$script\" \"$args\"\n    bash \"$script\" $args\n  done\ndone",
+      "timeout": 10
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_9a4e8dd502c74f1b9db5bb194d0e4340|fc_04784cd57d6d49ec016acfd3561b348191a1b93c13cf2d3faf",
+    "name": "bash",
+    "arguments": {
+      "command": "printf 'baseline commit: '; git rev-parse --verify 'atc083^{commit}'\nprintf 'review guidance at atc083 vs worktree: '\ngit diff --quiet atc083 -- .agents/roles/references/review.md; printf 'exit=%s\\n' \"$?\"\nprintf 'baseline guidance:\\n'\ngit show atc083:.agents/roles/references/review.md",
+      "timeout": 10
+    }
+  }
+]

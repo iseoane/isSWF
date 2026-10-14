@@ -1,0 +1,23 @@
+{
+  "base": "c083c861fe736c37ce0dc16b16b6899d01abfa51",
+  "diffSha256": "0a25f71401e2dbfde2abe784f9b9fe784de6ea681bfd3f5b438f7a103965f588",
+  "files": [
+    {
+      "path": ".agents/roles/references/code-quality.md",
+      "mode": "100644",
+      "sha256": "9bd6f7672c787a7313d0a7b8ed5dbddf0f390b1105beaf30e579f8acd24cc06f"
+    },
+    {
+      "path": ".agents/roles/references/review.md",
+      "mode": "100644",
+      "sha256": "048aa91e338bafdbaa0465fa87f11ea9384f2fe0ba63f416c87b74ad5bf02e96"
+    },
+    {
+      "path": ".audit/quality-54-unit1-brief.md",
+      "mode": "100644",
+      "sha256": "a4b779e6691dfc6bdc300cbbcae3fc32f454499bbeedb4b084fb587d20d1a2c9"
+    }
+  ],
+  "snapshot": "ee27e08da53496a2b68267f268b2553545685f3abe3678007c53e77a09b47042",
+  "algorithm": "SHA-256 of UTF-8 NUL-terminated base SHA, diff SHA-256, then each byte-sorted path, Git regular-file mode and content SHA-256. Full binary diff retained; payload contains tracked changed and untracked new file bytes."
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "type": "toolCall",
+    "id": "call_23ddf14f93a64356b9144819f997c449|fc_0b696b955fb1274e016acfd3467de8819193a1f57b00f7d53b",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/quality-54-unit1-snapshot/payload/.agents/roles/references/review.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_d658da6737eb4ba28613095687e91e9b|fc_0b696b955fb1274e016acfd3467de8819197d133f77ceb011a",
+    "name": "bash",
+    "arguments": {
+      "command": "git status --short && printf '\\n--- fixture files ---\\n' && ls -l .audit/reviewer-fixtures/spec-failure/payload/sum.sh .audit/reviewer-fixtures/style-only/payload/sum.sh",
+      "timeout": 10
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_545afb688cfd4717b366a64cd7f03b5a|fc_0b696b955fb1274e016acfd34abe348191941294c29fe94cad",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/quality-54-behavior.json",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_0882130df7aa4da5923a78f11e349814|fc_0b696b955fb1274e016acfd34abe34819186b1b036b393e087",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/quality-54-fixture-context.json",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_a6514f2bd22d4bafb5f1b25ba528a765|fc_0b696b955fb1274e016acfd34abe348191b2ab95c510b71146",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/quality-54-dispatch-failure.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_ab8ba4a2ce754a9f94351dab08c2a1b8|fc_0b696b955fb1274e016acfd34abe348191b4ce967116c9bbaf",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/spec-failure/payload/sum.sh",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_51a6603a9c1b488bbf5943d48bec695f|fc_0b696b955fb1274e016acfd34abe348191978a34dd4559a02b",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-fixtures/style-only/payload/sum.sh",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_7bd834af961d4ec398fcae07835a52eb|fc_0b696b955fb1274e016acfd3508dd08191a82fecd2e4e0f4ad",
+    "name": "read",
+    "arguments": {
+      "path": ".agents/roles/reviewer.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_877528c54d3e42669326eaa67d6c8ddb|fc_0b696b955fb1274e016acfd350f0d88191b773d92a5c8b934e",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-brief.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_989bfaabc82c42d59c51cf8eca21a3a2|fc_0b696b955fb1274e016acfd350f0d88191a8c75b2f97b6a74f",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-luna-v1.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_4a6a55cf3bac412987b199447d12913b|fc_0b696b955fb1274e016acfd350f0d88191abe553e92aafb116",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-luna-v2.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_1bf454ee590e4ab4ac2be431f7607c77|fc_0b696b955fb1274e016acfd350f0d88191981c1d27cc2e684d",
+    "name": "read",
+    "arguments": {
+      "path": ".audit/reviewer-snapshot-v2/payload/.agents/roles/references/review.md",
+      "offset": 1,
+      "limit": null
+    }
+  },
+  {
+    "type": "toolCall",
+    "id": "call_96bd1b122e9646bb8cf90be6ee294a86|fc_0b696b955fb1274e016acfd356e2508191ae0b3345a7a18459",
+    "name": "bash",
+    "arguments": {
+      "command": "for fixture in spec-failure style-only; do\n  script=\".audit/reviewer-fixtures/$fixture/payload/sum.sh\"\n  printf '\\n--- %s ---\\n' \"$fixture\"\n  for args in '7 3' '0 0' '0 -4' '2 2'; do\n    printf 'bash %s %s => ' \"$script\" \"$args\"\n    bash \"$script\" $args\n  done\ndone",
+      "timeout": 10
+    }
+  }
+]
