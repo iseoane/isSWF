@@ -32,6 +32,10 @@ La implementación de funcionalidades se organiza en slices verticales que entre
 
 Engram es el candidato propuesto por el usuario para la memoria externa. isSWF no necesita construir un sistema de memoria propio. Todavía no se ha configurado ni probado esta integración.
 
+Antes de continuar con U3, el usuario confirma que se definirá y probará el arranque de la factory en proyectos. La propuesta aceptada como dirección es una instalación versionada compartida, con activación explícita por proyecto, configuración local de modelos, esfuerzo y fallbacks y datos operativos separados. No se copia toda la factory en cada proyecto ni se sobrescribe `AGENTS.md`. El [diseño de arranque por proyecto](arranque-por-proyecto.md) concreta esa dirección y sus pruebas pendientes; no hay instalador operativo ni cambios de configuración global por este acuerdo.
+
+Engram conservará decisiones y aprendizajes por proyecto; Codegraph apoyará el grounding con símbolos, relaciones y referencias precisas al código. Ambos son integraciones externas, no sistemas que isSWF reconstruya. Se distinguirá disponibilidad de integración y de prueba real: Engram está instalado pero todavía no se usa como memoria de este desarrollo; Codegraph está disponible, pero isSWF no tiene índice y no se ha demostrado aquí navegación mediante él. La ausencia de estas herramientas no autoriza a inventar memoria o hallazgos.
+
 Pstack interesa por su modelo de workers y elección de skills según la casuística, no únicamente por su tratamiento de TDD. La experiencia de Gentle AI es una referencia, pero el usuario quiere menos consultas innecesarias y más criterio dentro de lo autorizado.
 
 Las PRs deben explicar visualmente qué cambia y cómo funciona, los problemas relevantes encontrados y cómo se resolvieron. Deben destacar el riesgo de integrar el cambio. La publicación automática dentro del repositorio y encargo aprobados está confirmada; el formato concreto y los criterios de cierre siguen pendientes.
