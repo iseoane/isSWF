@@ -1,6 +1,6 @@
 # Adaptación de prácticas y candidatos de agentes
 
-Este mapa distingue prácticas de referencia, propuestas para isSWF y perfiles que existen hoy. Las fuentes locales son [referencias](referencias.md) y [análisis de Pstack](pstack-agentes.md). Salvo esos análisis documentales fijados que allí se describen y la skill code-review de Matt citada abajo, las ideas de proyectos externos se presentan como evidencia secundaria e indirecta; sus fuentes originales no se releyeron durante esta corrección. Versiones, licencias y vigencia upstream siguen pendientes de revisión antes de copiar contenido.
+Este mapa distingue prácticas de referencia, propuestas para isSWF y perfiles que existen hoy. Las fuentes locales son [referencias](referencias.md) y [análisis de Pstack](pstack-agentes.md). Salvo esos análisis documentales fijados que allí se describen, las ideas de proyectos externos se presentan como evidencia secundaria e indirecta; sus fuentes originales no se releyeron durante esta corrección. Versiones, licencias y vigencia upstream siguen pendientes de revisión antes de copiar contenido.
 
 ## Candidatos de perfiles y prácticas
 
@@ -9,7 +9,8 @@ Este mapa distingue prácticas de referencia, propuestas para isSWF y perfiles q
 | P0 Coordinator | Coordinar cualquier encargo | Fijar autorización, grounding, brief y siguiente paso; conservar decisión y estado | Perfil existente: [isswf-coordinator](../../.agents/skills/isswf-coordinator/SKILL.md). Basado en [referencias](referencias.md) y [Pstack](pstack-agentes.md). |
 | P0 Worker | Cambio autorizado, incluido bug simple reproducible | Recibir perfil por ruta, brief, checkout exclusivo, permisos, contexto necesario y comprobaciones | Perfil existente: [worker](../../.agents/roles/worker.md). Pstack, [agentes y skills](pstack-agentes.md). |
 | P0 Diagnostician | Causa desconocida, bug intermitente, transversal o de alto impacto | Reunir evidencia causal y recomendar el siguiente paso; no implementar por defecto | Perfil existente: [diagnostician](../../.agents/roles/diagnostician.md). Adaptación de diagnóstico de Pstack, [análisis](pstack-agentes.md). |
-| P1 Reviewer | Cambio con aceptación que requiere revisión independiente | Un perfil evalúa por separado Standards y Spec, contrasta el candidato exacto con criterios de aceptación y estándares, y declara hallazgos con evidencia | Perfil existente: [reviewer](../../.agents/roles/reviewer.md) y su [guía de revisión](../../.agents/roles/references/review.md). Adaptación de [Matt, code-review](https://github.com/mattpocock/skills/blob/main/skills/engineering/code-review/SKILL.md), leída en esta entrega: conserva ambos ejes sin exigir fan-out. |
+| P1 Reviewer de especificación | Cambio con aceptación que requiere veredicto independiente | Comparar candidato exacto con objetivo y aceptación; separar hallazgos de producto | Propuesta futura. Matt, revisión de código en [referencias](referencias.md); límites en [Pstack](pstack-agentes.md). |
+| P1 Reviewer de estándares | Cambio con riesgo de regresión técnica | Revisar corrección, legibilidad, seguridad y convenciones; severidad explícita | Propuesta futura. Matt y Addy, [referencias](referencias.md). |
 | P1 Planner de tickets | Solicitud amplia que necesita unidades verificables | Proponer slices verticales, dependencias y bloqueos; no convertirlas en autorización | Propuesta futura. Matt, `to-tickets` e `implement-spec`, [referencias](referencias.md). |
 | P2 Architect | Requisito nuevo con varias formas viables | Comparar interfaces y tipos desde consumidores antes de implementar | Diferir hasta que el trabajo lo justifique. Pstack, [análisis de architect y arena](pstack-agentes.md). |
 | P2 Verifier de entrega | Candidato con evidencia funcional requerida | Vincular verificaciones al candidato exacto y declarar límites | Práctica candidata, no perfil implementado. Gentle AI, RDD, [referencias](referencias.md). |
@@ -18,7 +19,7 @@ Este mapa distingue prácticas de referencia, propuestas para isSWF y perfiles q
 | P3 Retrospector | Cierre solicitado o incidente que deja aprendizaje | Proponer mejoras con evidencia y separar aceptadas, rechazadas y pendientes | Propuesta futura. Matt `retro` y Pstack `reflect`, [referencias](referencias.md) y [análisis](pstack-agentes.md). |
 | P3 Curador de estado | Varios trabajos activos que necesitan visibilidad | Mantener vista de estados, bloqueos y evidencias; no imponer etapas fijas | Adaptar como práctica de interfaz, no como agente autónomo. Zazencodes, [referencias](referencias.md). |
 
-Hoy existen únicamente los perfiles de coordinator, worker, diagnostician y reviewer con sus referencias base, más pruebas pequeñas del dispatcher. Reviewer es un perfil Markdown que se pasa por ruta, no un rol nativo de Pi. Un mismo contexto puede evaluar ambos ejes. Planner, architect, verifier, seguridad, memoria como agente y retro siguen siendo propuestas, no implementación actual. Los niveles indican orden de evaluación, no un plan aprobado.
+Hoy existen únicamente los perfiles de coordinator, worker y diagnostician con sus referencias base, más pruebas pequeñas del dispatcher. Reviewer, planner, architect, verifier, seguridad, memoria como agente y retro son propuestas, no implementación actual. Los niveles indican orden de evaluación, no un plan aprobado.
 
 ## Adaptaciones de principios
 
