@@ -1,0 +1,23 @@
+{
+  "base": "3b2a52f8a1fbfbc74830ae489d4111b13cc8272f",
+  "files": [
+    {
+      "path": "docs/research/adaptacion-matt.md",
+      "sha256": "8404a738161c8aa87a78038db4c0b4ed86273954a195e25ca4c568f197236d7d"
+    },
+    {
+      "path": "docs/research/adaptacion-pstack-addy.md",
+      "sha256": "375d860c762a00761f5910eb3811911a6474bd827383766ad77cdaab744c273c"
+    },
+    {
+      "path": "docs/research/adaptacion-experiencia.md",
+      "sha256": "1bae5a0a61eef3ad301d0508d7ef5568a3e4df2ab683bb6185afe1123cd66bca"
+    },
+    {
+      "path": "docs/research/adaptaciones-agentes.md",
+      "sha256": "18e41c0ba4144f827f74bd25bdfeb7524db804ee8d5a2eca66b42bf6c02910c0"
+    }
+  ],
+  "localLinksChecked": 47,
+  "scope": "Local targets, whitespace, URL revision shape; no HTTP fact check or agent behavior."
+}
