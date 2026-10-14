@@ -2,9 +2,11 @@
 
 Definición de una software factory personal: un coordinador conversacional, agentes en background y procedimientos adaptativos expresados principalmente en skills y perfiles Markdown.
 
-**Estado:** U1 de S01 implementada y verificada localmente con una issue ficticia. Hay skill de triage, registro SQLite y panel de lectura; no workers ni integración GitHub real. S01 completa y el primer hito siguen pendientes. No hay repositorio GitHub autorizado.
+**Estado:** U1 y U2 de S01 implementadas y verificadas localmente con issues ficticias. Hay skill de triage, preguntas pendientes, respuestas del operador, registro SQLite y panel de lectura; no workers ni integración GitHub real. S01 completa y el primer hito siguen pendientes. No hay repositorio GitHub autorizado.
 
 Para probarla, sigue [U1: preparar y observar una issue](docs/u1-usage.md). La [captura del panel real](.audit/u1-panel.png) corresponde al fixture, no a un proyecto cliente. La [revisión independiente](.audit/u1-final-review.md), las [13 pruebas](.audit/u1-tests.log) y la [verificación CLI/HTTP/browser](.audit/u1-live.json) conservan el alcance comprobado.
+
+Para resolver una entrada ambigua, sigue [U2: decisiones y retriage](docs/u2-usage.md). La [captura U2](.audit/u2-panel.png), la [prueba CLI/HTTP/browser](.audit/u2-live.json) y el [censo de variantes](.audit/u2-variants-final.json) muestran el alcance comprobado. El censo contrasta 96 combinaciones estructurales, no la verdad de cualquier respuesta o evidencia. Engram y Codegraph todavía no están integrados; el siguiente paso es definir y probar la instalación y activación por proyecto antes de U3.
 
 El proyecto se versiona con Git local en la rama `main`, sin remoto configurado. El código de U1 y la definición/investigación se conservan en commits separados. No se publica en GitHub.
 
@@ -13,7 +15,7 @@ El proyecto se versiona con Git local en la rama `main`, sin remoto configurado.
 - [Visión](docs/vision.md): acuerdos y prioridades del usuario.
 - [Especificación v1](docs/spec-v1.md): delegación, grounding, entrega, revisión, estado, seguridad, modelos y memoria.
 - [Plan funcional](docs/plan-v1.md): ocho slices y transferencia progresiva de trabajo a la propia factory.
-- [S01 concretada](docs/s01-intake.md): recorrido de issue a ficha visible; U1 local comprobada y tres unidades posteriores pendientes.
+- [S01 concretada](docs/s01-intake.md): recorrido de issue a ficha visible; U1 y U2 locales comprobadas; U3 y U4 pendientes.
 - [Glosario](GLOSSARY.md): términos compartidos.
 - [Arquitectura candidata](docs/arquitectura-candidata.md): comparación de ejecutor local, Pi RPC/SDK y A2A; propuesta pendiente de pruebas integradas.
 

@@ -1,0 +1,37 @@
+test_cli_authorize_prepare_show_and_persist (test_u1.U1Test.test_cli_authorize_prepare_show_and_persist) ... ok
+test_concurrent_identical_publication_is_one_revision (test_u1.U1Test.test_concurrent_identical_publication_is_one_revision) ... ok
+test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel (test_u1.U1Test.test_corrupt_valid_json_snapshot_is_rejected_by_show_and_panel) ... ok
+test_decide_is_operator_cli_and_panel_shows_trusted_answer (test_u1.U1Test.test_decide_is_operator_cli_and_panel_shows_trusted_answer) ... ok
+test_decide_keeps_human_wait_state_while_questions_remain (test_u1.U1Test.test_decide_keeps_human_wait_state_while_questions_remain) ... ok
+test_decide_reconcile_preserves_answer_and_publishes_history (test_u1.U1Test.test_decide_reconcile_preserves_answer_and_publishes_history) ... ok
+test_decide_rejects_wrong_reference_scope_and_duplicate_without_write (test_u1.U1Test.test_decide_rejects_wrong_reference_scope_and_duplicate_without_write) ... ok
+test_empty_acceptance_invalid_json_and_unknown_preparation_rejected (test_u1.U1Test.test_empty_acceptance_invalid_json_and_unknown_preparation_rejected) ... ok
+test_failed_publication_rolls_back_snapshot_and_history (test_u1.U1Test.test_failed_publication_rolls_back_snapshot_and_history) ... ok
+test_hostile_instruction_and_authority_fields_rejected (test_u1.U1Test.test_hostile_instruction_and_authority_fields_rejected) ... ok
+test_idempotency_revision_conflict_and_history (test_u1.U1Test.test_idempotency_revision_conflict_and_history) ... ok
+test_legacy_u1_snapshot_is_read_without_rewriting_storage (test_u1.U1Test.test_legacy_u1_snapshot_is_read_without_rewriting_storage) ... ok
+test_malformed_origin_is_rejected_before_reading_state (test_u1.U1Test.test_malformed_origin_is_rejected_before_reading_state) ... ok
+test_missing_or_mismatched_grant_has_no_work (test_u1.U1Test.test_missing_or_mismatched_grant_has_no_work) ... ok
+test_panel_displays_brief_fields_escaped_without_private_inputs (test_u1.U1Test.test_panel_displays_brief_fields_escaped_without_private_inputs) ... ok
+test_pending_product_question_is_saved_and_rendered (test_u1.U1Test.test_pending_product_question_is_saved_and_rendered) ... ok
+test_prepare_cannot_drop_a_registered_answer_reference (test_u1.U1Test.test_prepare_cannot_drop_a_registered_answer_reference) ... ok
+test_prepare_cannot_drop_unanswered_question_in_two_steps (test_u1.U1Test.test_prepare_cannot_drop_unanswered_question_in_two_steps) ... ok
+test_prepare_cannot_reintroduce_a_question_that_has_an_answer (test_u1.U1Test.test_prepare_cannot_reintroduce_a_question_that_has_an_answer) ... ok
+test_prepare_rejects_answers_spoofed_refs_and_changed_source (test_u1.U1Test.test_prepare_rejects_answers_spoofed_refs_and_changed_source) ... ok
+test_prepare_rejects_new_grant_when_answers_exist_without_publishing (test_u1.U1Test.test_prepare_rejects_new_grant_when_answers_exist_without_publishing) ... ok
+test_private_storage_permissions (test_u1.U1Test.test_private_storage_permissions) ... ok
+test_read_failure_is_not_stale_success (test_u1.U1Test.test_read_failure_is_not_stale_success) ... ok
+test_ready_for_agent_rejects_pending_questions_in_proposal_and_snapshot (test_u1.U1Test.test_ready_for_agent_rejects_pending_questions_in_proposal_and_snapshot) ... ok
+test_real_panel_snapshot_and_security (test_u1.U1Test.test_real_panel_snapshot_and_security) ... ok
+test_reconciliation_cannot_expand_granted_scope (test_u1.U1Test.test_reconciliation_cannot_expand_granted_scope) ... ok
+test_resolution_cannot_coexist_with_pending_questions (test_u1.U1Test.test_resolution_cannot_coexist_with_pending_questions) ... ok
+test_resolution_requires_evidence_and_is_non_actionable (test_u1.U1Test.test_resolution_requires_evidence_and_is_non_actionable) ... ok
+test_show_missing_state_is_read_only_and_reports_missing_state (test_u1.U1Test.test_show_missing_state_is_read_only_and_reports_missing_state) ... ok
+test_technical_question_is_not_an_operator_question (test_u1.U1Test.test_technical_question_is_not_an_operator_question) ... ok
+test_unverified_duplicate_suspicion_is_ready_for_grounding_via_cli (test_u1.U1Test.test_unverified_duplicate_suspicion_is_ready_for_grounding_via_cli) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 5.496s
+
+OK
+PASS: 9 live checks; generated triage proposal persisted; CLI/HTTP same revision; screenshot captured; panel stopped

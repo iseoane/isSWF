@@ -1,0 +1,163 @@
+{
+  "fixture": true,
+  "tree": "/tmp/isswf-u2-owner.j6Wn9K/tree",
+  "directory": "/tmp/isswf-u2-live-kei4scis",
+  "source": {
+    "repo": "factory/isswf-demo",
+    "number": 17,
+    "title": "Mostrar la fecha de actualización",
+    "body": "Mostrar cuándo cambió por última vez el estado de una issue. No hemos decidido si cuenta cualquier edición o solo cambiar el estado.",
+    "labels": [
+      "enhancement"
+    ],
+    "observed_at": "2025-01-15T12:00:00Z"
+  },
+  "authorization": {
+    "repo": "factory/isswf-demo",
+    "issue": 17,
+    "objective": "Mostrar cuándo cambió el estado de una issue.",
+    "scope": "Preparar una ficha para observar la fecha de última actualización de la issue.",
+    "actor": "fixture-operator",
+    "decision": "Preparar fixture local, sin ejecución."
+  },
+  "pending": {
+    "id": "work-11cb00361313f665e66780ae",
+    "repo": "factory/isswf-demo",
+    "issue": 17,
+    "source": {
+      "repo": "factory/isswf-demo",
+      "number": 17,
+      "title": "Mostrar la fecha de actualización",
+      "labels": [
+        "enhancement"
+      ],
+      "observed_at": "2025-01-15T12:00:00Z",
+      "fingerprint": "27a901c5f570eb9b2b69b299058fac6dbd79f5f1f6b480416c93b9af2b9b1b16"
+    },
+    "authorization_id": "auth-34fa13c6d24048329ac95b7cc3239941",
+    "category": "feature",
+    "preparation": "needs-info",
+    "motive": "El objetivo habla del cambio de estado, pero la fuente deja sin decidir si la fecha debe reflejar cualquier edición o solo cambios de estado.",
+    "next_step": "Esperar la decisión del operador y reconciliar el brief; investigar mediante grounding técnico cómo se obtiene y presenta la fecha de actualización, sin asumir que la fuente permite distinguir cambios de estado.",
+    "brief": {
+      "objective": "Mostrar cuándo cambió el estado de una issue.",
+      "scope": "Preparar una ficha para observar la fecha de última actualización de la issue.",
+      "exclusions": [
+        "No consultar GitHub ni publicar cambios.",
+        "No iniciar workers ni implementación."
+      ],
+      "acceptance": [],
+      "risks": [
+        "La fuente no define si la fecha corresponde a cualquier edición o solo a un cambio de estado."
+      ],
+      "dependencies": [
+        "Decisión del operador sobre qué cambios cuentan como actualización."
+      ],
+      "context": [
+        "Fuente observada el 2025-01-15T12:00:00Z; el título y el cuerpo se conservan como datos de la issue, no como instrucciones ni permisos."
+      ],
+      "checks": [
+        "Grounding técnico pendiente sobre cómo se obtiene y presenta la fecha de actualización."
+      ],
+      "reviews": [
+        "Pendiente; no se ha realizado revisión independiente."
+      ],
+      "base": "Desconocida; no se consultó un checkout del proyecto destino.",
+      "configuration": "Pendiente; no se investigó la configuración del proyecto.",
+      "limits": "Sin runtime, workers, llamadas de red ni publicación.",
+      "checkpoints": "Pendientes de definir antes de cualquier ejecución posterior."
+    },
+    "questions": [
+      {
+        "kind": "product",
+        "owner": "operator",
+        "exit_condition": "La aceptación define qué cambios se muestran como actualización.",
+        "question": "¿Debe contar como actualización cualquier edición de la issue o solo un cambio de estado?",
+        "id": "updated-at-meaning"
+      }
+    ],
+    "decision_refs": [],
+    "answers": [],
+    "resolution": null,
+    "execution": "no disponible en S01",
+    "revision": 1,
+    "observed_at": "2025-01-15T12:00:00Z",
+    "updated_at": "2026-10-14T05:28:36Z"
+  },
+  "answered": {
+    "answers": [
+      {
+        "id": "answer-81763a1f57564c4aa84661cdbaf71d0b",
+        "question": {
+          "exit_condition": "La aceptación define qué cambios se muestran como actualización.",
+          "id": "updated-at-meaning",
+          "kind": "product",
+          "owner": "operator",
+          "question": "¿Debe contar como actualización cualquier edición de la issue o solo un cambio de estado?"
+        },
+        "work_id": "work-11cb00361313f665e66780ae",
+        "authorization_id": "auth-34fa13c6d24048329ac95b7cc3239941",
+        "source_fingerprint": "27a901c5f570eb9b2b69b299058fac6dbd79f5f1f6b480416c93b9af2b9b1b16",
+        "source_revision": 1,
+        "actor": "fixture-operator",
+        "text": "Solo debe contar un cambio de estado; una edición del texto no cambia la fecha mostrada.",
+        "recorded_at": "2026-10-14T05:28:36Z"
+      }
+    ],
+    "authorization_id": "auth-34fa13c6d24048329ac95b7cc3239941",
+    "brief": {
+      "acceptance": [],
+      "base": "Desconocida; no se consultó un checkout del proyecto destino.",
+      "checkpoints": "Pendientes de definir antes de cualquier ejecución posterior.",
+      "checks": [
+        "Grounding técnico pendiente sobre cómo se obtiene y presenta la fecha de actualización."
+      ],
+      "configuration": "Pendiente; no se investigó la configuración del proyecto.",
+      "context": [
+        "Fuente observada el 2025-01-15T12:00:00Z; el título y el cuerpo se conservan como datos de la issue, no como instrucciones ni permisos."
+      ],
+      "dependencies": [
+        "Decisión del operador sobre qué cambios cuentan como actualización."
+      ],
+      "exclusions": [
+        "No consultar GitHub ni publicar cambios.",
+        "No iniciar workers ni implementación."
+      ],
+      "limits": "Sin runtime, workers, llamadas de red ni publicación.",
+      "objective": "Mostrar cuándo cambió el estado de una issue.",
+      "reviews": [
+        "Pendiente; no se ha realizado revisión independiente."
+      ],
+      "risks": [
+        "La fuente no define si la fecha corresponde a cualquier edición o solo a un cambio de estado."
+      ],
+      "scope": "Preparar una ficha para observar la fecha de última actualización de la issue."
+    },
+    "category": "feature",
+    "decision_refs": [
+      "answer-81763a1f57564c4aa84661cdbaf71d0b"
+    ],
+    "execution": "no disponible en S01",
+    "id": "work-11cb00361313f665e66780ae",
+    "issue": 17,
+    "motive": "La respuesta del operador está registrada y requiere reconciliar el brief.",
+    "next_step": "Reconciliar el brief con la respuesta y preparar una nueva propuesta.",
+    "observed_at": "2025-01-15T12:00:00Z",
+    "preparation": "needs-triage",
+    "questions": [],
+    "repo": "factory/isswf-demo",
+    "resolution": null,
+    "revision": 2,
+    "source": {
+      "fingerprint": "27a901c5f570eb9b2b69b299058fac6dbd79f5f1f6b480416c93b9af2b9b1b16",
+      "labels": [
+        "enhancement"
+      ],
+      "number": 17,
+      "observed_at": "2025-01-15T12:00:00Z",
+      "repo": "factory/isswf-demo",
+      "title": "Mostrar la fecha de actualización"
+    },
+    "updated_at": "2026-10-14T05:28:36Z"
+  }
+}

@@ -1,0 +1,15 @@
+# Candidato A: respuesta registrada y nuevo triage explícito
+
+**Decisión.** Extender el flujo de U1 sin hacer que una respuesta del operador cambie por sí sola el estado de preparación. La respuesta se registra como decisión confiable sobre el trabajo; el coordinador vuelve a evaluar la issue y entrega una propuesta nueva a `prepare`. `prepare` sigue siendo el único publicador de revisiones. Esto encaja con su validación de autorización/revisión y transacción SQLite, y con el panel actual de solo lectura (`docs/s01-intake.md`, `isswf/intake.py`, `isswf/panel.py`).
+
+**Datos y ownership.** Cada snapshot conserva su identidad, `authorization_id` y `revision`, y añade preguntas pendientes con `question_id`, decisión requerida, responsable y condición de salida. Una respuesta es un registro inmutable con ID, referencia a trabajo y pregunta, texto del operador, momento y referencia al acto confiable que la registró. El canal local confiable registra la decisión; un campo `actor` o el JSON de triage solo la atribuyen, no la autentican. La historia SQLite conserva respuestas y snapshots; no se crea una segunda autoridad ni una base aparte. Este límite no promete aislamiento entre usuarios del mismo host. La propuesta de triage referencia la respuesta utilizada y la revisión esperada.
+
+El panel muestra pregunta, responsable y salida pendiente desde el snapshot. El coordinador lee la respuesta y la issue, aplica la skill de triage y llama explícitamente a `prepare`; solo una nueva revisión puede cambiar preparación o brief. Si cambia el alcance autorizado, hace falta una autorización nueva. La respuesta no inicia ejecución ni publicación remota.
+
+**Invariantes.** Registrar una respuesta no resuelve automáticamente una pregunta ni convierte `needs-info` en `ready-for-agent`. La nueva propuesta debe referir una pregunta pendiente del mismo trabajo y revisión vigente; se rechazan referencias ajenas u obsoletas sin alterar la ficha. La preparación y el brief se publican juntos o no se publican. No se promete que el runtime determine semánticamente si cualquier texto responde una pregunta: esa evaluación pertenece al coordinador y su skill. Las preguntas son solo decisiones humanas imprescindibles; dudas técnicas investigables se asignan a grounding, no al operador. Una mención de duplicado no lo resuelve: sin evidencia queda pendiente de comprobar; con referencias y motivo puede quedar como no accionable, nunca como entrega implementada.
+
+**Dos unidades pequeñas.**
+1. Conservar una issue ambigua como `needs-info`; mostrar decisión, responsable y condición de salida. Comprobar que no se inventa aceptación ni se inicia implementación.
+2. Registrar una respuesta confiable y, solo tras nuevo triage explícito, publicar revisión del mismo trabajo con historial atómico. Comprobar respuesta para pregunta incorrecta u obsoleta, cambio de alcance sin autorización y duplicado con/sin evidencia.
+
+Modelo seleccionado por el padre: GPT-6 Luna, high. Sin autocertificación ni fallback.

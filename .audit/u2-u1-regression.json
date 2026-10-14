@@ -1,0 +1,131 @@
+{
+  "scope": "Fictitious issue, real CLI/HTTP/browser; no GitHub, worker or client code. Original model proposal rebound by operator test to a fresh equivalent fictitious preparation grant for repeatability.",
+  "snapshot": {
+    "id": "work-11cb00361313f665e66780ae",
+    "repo": "factory/isswf-demo",
+    "issue": 17,
+    "source": {
+      "repo": "factory/isswf-demo",
+      "number": 17,
+      "title": "Mostrar la última actualización de la issue",
+      "labels": [
+        "enhancement"
+      ],
+      "observed_at": "2026-10-14T04:10:18Z",
+      "fingerprint": "9ca94d318dc1d22cef663ad801223601608fbe3d5976dccf0ea6fd26fb6c62ee"
+    },
+    "authorization_id": "auth-8b5dd274b3874bf593931df4821e7d78",
+    "category": "feature",
+    "preparation": "ready-for-agent",
+    "motive": "La petición define un resultado observable: mostrar cuándo se leyó la issue y su fecha de actualización para interpretar la vigencia del brief.",
+    "next_step": "Grounding: determinar si la fuente disponible aporta la fecha de actualización de la issue y cómo presentarla junto a la fecha de lectura, sin confundirlas.",
+    "brief": {
+      "objective": "Mostrar cuándo cambió el estado de una issue.",
+      "scope": "Preparar una ficha para observar la fecha de última actualización de la issue.",
+      "exclusions": [
+        "No consultar GitHub ni publicar cambios.",
+        "No ampliar el trabajo más allá de mostrar la fecha de última actualización de la issue y distinguirla de la fecha de lectura."
+      ],
+      "acceptance": [
+        "La ficha muestra la fecha de lectura observada en UTC.",
+        "La ficha muestra la fecha de última actualización de la issue cuando esté disponible.",
+        "La ficha diferencia claramente la fecha de lectura de la fecha de actualización de la issue."
+      ],
+      "risks": [
+        "La fuente puede no proporcionar una fecha de actualización; disponibilidad y tratamiento quedan pendientes de grounding.",
+        "Una fecha de lectura antigua puede no reflejar el estado actual de la issue."
+      ],
+      "dependencies": [
+        "Pendiente de grounding: confirmar qué fuente proporciona la fecha de actualización y su semántica."
+      ],
+      "context": [
+        "La issue solicita ambas fechas para interpretar la vigencia del brief.",
+        "La fuente fixture no incluye una fecha de actualización; no se ha investigado código ni una fuente externa.",
+        "La ejecución de trabajos no está disponible en S01."
+      ],
+      "checks": [
+        "Comprobar que la ficha presenta por separado la fecha de lectura observada y la fecha de última actualización.",
+        "Comprobar cómo se representa una fecha de actualización ausente, según lo que determine el grounding."
+      ],
+      "reviews": [
+        "Revisión independiente pendiente."
+      ],
+      "base": "Desconocida; no se consultó un checkout del proyecto destino.",
+      "configuration": "Pendiente; U1 no ejecuta código.",
+      "limits": "Sin workers, llamadas de red ni publicación; ready-for-agent prepara grounding y no significa que este se haya completado.",
+      "checkpoints": "Pendientes de definir antes de una ejecución posterior."
+    },
+    "questions": [],
+    "decision_refs": [],
+    "answers": [],
+    "resolution": null,
+    "execution": "no disponible en S01",
+    "revision": 1,
+    "observed_at": "2026-10-14T04:10:18Z",
+    "updated_at": "2026-10-14T05:47:25Z"
+  },
+  "checks": [
+    {
+      "case": "CLI-and-HTTP-same-snapshot",
+      "passed": true,
+      "id": "work-11cb00361313f665e66780ae",
+      "revision": 1
+    },
+    {
+      "case": "HTTP-rejection",
+      "path": "/isswf.sqlite3",
+      "headers": {},
+      "status": 404,
+      "passed": true
+    },
+    {
+      "case": "HTTP-rejection",
+      "path": "/",
+      "headers": {
+        "Host": "evil.example"
+      },
+      "status": 400,
+      "passed": true
+    },
+    {
+      "case": "HTTP-rejection",
+      "path": "/",
+      "headers": {
+        "Origin": "http://evil.example"
+      },
+      "status": 403,
+      "passed": true
+    },
+    {
+      "case": "HTTP-rejection",
+      "path": "/",
+      "headers": {
+        "Origin": "http://["
+      },
+      "status": 403,
+      "passed": true
+    },
+    {
+      "case": "HTTP-rejection",
+      "path": "/",
+      "headers": {
+        "Sec-Fetch-Site": "cross-site"
+      },
+      "status": 403,
+      "passed": true
+    },
+    {
+      "case": "no-HTTP-write-method",
+      "passed": true
+    },
+    {
+      "case": "real-browser-screenshot",
+      "passed": true,
+      "artifact": ".audit/u1-panel.png"
+    },
+    {
+      "case": "panel-process-stopped",
+      "passed": true
+    }
+  ]
+}

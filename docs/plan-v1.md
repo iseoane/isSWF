@@ -31,7 +31,7 @@ Este orden recomendado prioriza seguridad antes de paralelismo y automatización
 
 ## S01. De una issue a un brief visible
 
-El [contrato de construcción de S01](s01-intake.md) concreta el recorrido, las responsabilidades, las revisiones del brief y cuatro unidades funcionales pequeñas. U1 tiene una implementación local comprobada con fixtures y [guía de uso](u1-usage.md). U2-U4 siguen pendientes; no se marcan los escenarios siguientes como superados ni S01 como completa.
+El [contrato de construcción de S01](s01-intake.md) concreta el recorrido, las responsabilidades, las revisiones del brief y cuatro unidades funcionales pequeñas. U1 y U2 tienen una implementación local comprobada con fixtures y guías de [entrada clara](u1-usage.md) y [decisiones pendientes](u2-usage.md). U3 y U4 siguen pendientes; no se marcan los escenarios siguientes como superados ni S01 como completa.
 
 El operador registra un repositorio autorizado y entrega una issue definida. La skill de triage contrasta información, clasifica, señala dudas y propone el tratamiento. El panel muestra la issue, brief, estado y decisiones pendientes.
 

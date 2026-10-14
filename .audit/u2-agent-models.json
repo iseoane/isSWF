@@ -1,0 +1,194 @@
+[
+  {
+    "log": "2026-10-14T05-02-08-799Z_a77786c3-1316-43e6-96b3-b55eb083e3c2.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-02-08-816Z_9c3f29fb-90e7-4958-8d6b-e8f27b71ebf1.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-06-43-647Z_081b63b7-29df-4e20-b194-005cc4b3a277.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-09-33-734Z_68216ba0-2e82-4770-a636-90e44786d382.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-26-49-864Z_d4e5eab4-68b0-4f2a-9c69-aef3d49cd712.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-27-17-137Z_a22cab5c-e878-4980-8810-cfe54548976f.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-28-45-398Z_24592d35-5790-4a2b-b421-0ad5d0262b04.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-28-58-676Z_e25919f2-1eed-4515-bc86-a11bedbd3bcc.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-30-49-131Z_a13c9ac5-faa7-4666-bc40-1d05f5d374bd.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-36-30-678Z_e6ac306b-d043-48ec-b6c1-1189b7574ae4.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-36-51-024Z_237efe3b-175a-4723-a315-7d731b69be99.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-39-03-595Z_e471d027-f673-4bbd-a11e-5b734b7786bf.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-44-07-014Z_3ad8012a-3a4c-4d0e-9c5c-3e8cc11797af.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-44-50-894Z_b93fe0a4-5ce8-44d1-98fb-96a1494bead5.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-47-19-935Z_06718370-29bc-4ae9-966a-9a7058aee2e2.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  },
+  {
+    "log": "2026-10-14T05-50-23-934Z_b9f0e14a-6c06-41de-aab0-84dbb1a6fe85.jsonl",
+    "levels": [
+      "high"
+    ],
+    "assistant_models": [
+      [
+        "openai-codex",
+        "gpt-6-luna"
+      ]
+    ]
+  }
+]

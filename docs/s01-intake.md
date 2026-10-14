@@ -1,6 +1,6 @@
 # S01. Preparar una issue y verla en el panel
 
-Estado: U1 implementada y revisada localmente con fixtures; U2-U4 y S01 completa pendientes. Hay skill candidata, persistencia SQLite y panel de lectura comprobados. No hay integración GitHub real ni workers. Este documento desarrolla [S01 del plan](plan-v1.md), sin modificar el alcance de la [spec](spec-v1.md).
+Estado: U1 y U2 implementadas y verificadas localmente con fixtures; U3, U4 y S01 completa pendientes. Hay skill candidata, persistencia SQLite y panel de lectura comprobados. No hay integración GitHub real ni workers. Este documento desarrolla [S01 del plan](plan-v1.md), sin modificar el alcance de la [spec](spec-v1.md).
 
 ## Experiencia del operador
 
@@ -24,7 +24,7 @@ La consulta de GitHub reutiliza `gh` cuando exista autorización y acceso config
 
 ## Skill de triage
 
-La [skill candidata de U1](../.agents/skills/isswf-triage/SKILL.md) produce propuestas de issues claras; se probó con carga explícita en un agente fresco. No ofrece todavía reconciliación completa ni almacenamiento de `needs-info`. Los procedimientos siguientes describen el contrato de S01 completa, no capacidades ya implementadas. No se modificaron settings globales de Pi.
+La [skill de triage](../.agents/skills/isswf-triage/SKILL.md) produce propuestas claras o pendientes de decisión y reconcilia respuestas registradas por el operador. Se probó con carga explícita en agentes frescos y registro real mediante CLI. U2 conserva `needs-info` y respuestas; bloquea reutilizarlas si cambia la fuente o la autorización. Esa reconciliación más amplia pertenece a U3. Los procedimientos siguientes también incluyen capacidades de S01 completa todavía pendientes. No se modificaron settings globales de Pi.
 
 El trigger es preparar o reconciliar una entrada autorizada. Recibe referencia de trabajo, fuente externa y revisión observada, autorización y decisiones previas pertinentes. Su salida propone categoría, preparación con motivo, brief, evidencias, incertidumbres y siguiente paso. La configuración no se repite como una bolsa de parámetros en cada llamada.
 
@@ -109,4 +109,4 @@ No se entrega aquí fallback, workers independientes del chat, ejecución de có
 
 Se compararon [documento autoritativo](../.audit/s01-candidate-a.md) y [registro con brief versionado](../.audit/s01-candidate-b.md). La [comparación independiente](../.audit/s01-design-comparison.md) recomienda B como base. Se conserva de A la lectura conjunta y el rechazo de datos inválidos. El brief se incluye en la misma revisión para evitar publicación coordinada de dos artefactos. En U1 sus campos son estructurados en JSON, no un cuerpo Markdown separado. Se rechaza usar Git como única historia en un workspace sin repositorio y un supervisor completo para esta slice.
 
-La [revisión independiente del contrato](../.audit/s01-design-review.md) no encontró bloqueantes de diseño. U1 usa Python estándar y SQLite, sin framework ni dependencias nuevas. La [revisión del candidato implementado](../.audit/u1-final-review.md) no encontró bloqueantes para esa unidad. Se comprobaron 13 pruebas y el recorrido de una propuesta producida por la skill hasta CLI, HTTP y navegador real. La [guía de U1](u1-usage.md) permite probarlo; U2 es el siguiente resultado funcional pendiente. Los criterios y casillas de S01 no se marcan completos por este primer corte.
+La [revisión independiente del contrato](../.audit/s01-design-review.md) no encontró bloqueantes de diseño. U1 usa Python estándar y SQLite, sin framework ni dependencias nuevas. La [revisión del candidato implementado](../.audit/u1-final-review.md) no encontró bloqueantes para esa unidad. Se comprobaron 13 pruebas y el recorrido de una propuesta producida por la skill hasta CLI, HTTP y navegador real. Las guías de [U1](u1-usage.md) y [U2](u2-usage.md) permiten probarlo. U2 añade decisiones pendientes, respuestas confiables y retriage sin auto-ready. Se comprobaron [31 tests](../.audit/u2-final-archive.log), [96 variantes estructurales](../.audit/u2-variants-final.json) y un recorrido real CLI/HTTP/browser con propuestas de agentes frescos. La [evidencia U2](../.audit/u2-live.json) no acredita workers, acceso real a GitHub ni veracidad universal de evidencias. Antes de U3 se definirá y probará el arranque por proyecto, incluyendo Engram y Codegraph. Los criterios y casillas de S01 no se marcan completos por este primer corte.
