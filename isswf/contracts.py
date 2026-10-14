@@ -106,6 +106,13 @@ def _questions(value: Any) -> list[dict[str, str]]:
     return result
 
 
+def _validate_questions_resolution(
+    questions: list[dict[str, str]], resolution: dict[str, Any] | None,
+) -> None:
+    if resolution is not None and questions:
+        raise ContractError("resolution no puede coexistir con preguntas pendientes")
+
+
 def _resolution(value: Any) -> dict[str, Any] | None:
     if value is None:
         return None
@@ -163,8 +170,9 @@ def parse_proposal(raw: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any],
         raise ContractError("decision_refs no puede repetir referencias")
     resolution = _resolution(raw["resolution"])
     preparation = raw["preparation"]
-    if preparation == "ready-for-agent" and (not brief["acceptance"] or questions or resolution is not None):
-        raise ContractError("ready-for-agent requiere acceptance no vacía, sin preguntas y resolution=null")
+    if preparation == "ready-for-agent" and not brief["acceptance"]:
+        raise ContractError("ready-for-agent requiere acceptance no vacía")
+    _validate_questions_resolution(questions, resolution)
     if preparation in {"needs-info", "ready-for-human"} and not questions:
         raise ContractError(f"{preparation} requiere preguntas concretas para el operador")
     if preparation == "needs-triage" and not (resolution or refs):
@@ -240,6 +248,9 @@ def parse_snapshot(value: Any) -> dict[str, Any]:
         _text(answer["text"], "answer.text")
         _timestamp(answer["recorded_at"], "answer.recorded_at")
         answer_by_id[answer_id] = {**answer, "question": question}
+    answered_question_ids = {answer["question"]["id"] for answer in answer_by_id.values()}
+    if answered_question_ids.intersection(question["id"] for question in questions):
+        raise ContractError("Una pregunta con respuesta registrada no puede volver a la lista pendiente")
     expected_refs = set(answer_by_id)
     if set(refs) != expected_refs:
         raise ContractError("decision_refs debe conservar todas las respuestas del trabajo y fuente actuales")
@@ -247,8 +258,9 @@ def parse_snapshot(value: Any) -> dict[str, Any]:
         answer = answer_by_id.get(answer_id)
         if not answer or answer["source_fingerprint"] != source["fingerprint"]:
             raise ContractError("decision_refs debe referir respuestas del trabajo y fuente actuales")
-    if value["preparation"] == "ready-for-agent" and (not brief["acceptance"] or questions or resolution is not None):
-        raise ContractError("snapshot ready-for-agent inválido")
+    if value["preparation"] == "ready-for-agent" and not brief["acceptance"]:
+        raise ContractError("snapshot ready-for-agent requiere acceptance no vacía")
+    _validate_questions_resolution(questions, resolution)
     if value["preparation"] in {"needs-info", "ready-for-human"} and not questions:
         raise ContractError("snapshot needs-info/ready-for-human requiere preguntas")
     if value["preparation"] == "needs-triage" and not (resolution or refs):

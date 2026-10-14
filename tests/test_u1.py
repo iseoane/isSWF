@@ -627,6 +627,60 @@ class U1Test(unittest.TestCase):
         self.assertEqual(human_answered["preparation"], "ready-for-human")
         self.assertEqual([q["id"] for q in human_answered["questions"]], ["scope-choice"])
 
+    def test_prepare_cannot_reintroduce_a_question_that_has_an_answer(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        answered = decide(self.state, self.write({
+            "work_id": first["id"], "expected_revision": first["revision"],
+            "question_id": "updated-at-meaning", "answer": "Solo cambios de estado.", "actor": "op",
+        }))
+        proposal = json.loads(json.dumps(self.pending_proposal()))
+        proposal["expected_revision"] = answered["revision"]
+        proposal["decision_refs"] = [answer["id"] for answer in answered["answers"]]
+        with self.assertRaisesRegex(IntakeError, "respuesta registrada"):
+            prepare(self.state, self.write(proposal))
+        self.assertEqual(show(self.state, first["id"]), answered)
+        import sqlite3
+        with sqlite3.connect(self.state / "isswf.sqlite3") as db:
+            self.assertEqual(db.execute("SELECT revision FROM history ORDER BY revision").fetchall(), [(1,), (2,)])
+
+        follow_up = json.loads(json.dumps(proposal))
+        follow_up["questions"] = [{
+            **proposal["questions"][0], "id": "updated-at-meaning-follow-up",
+            "question": "¿Qué información se muestra junto a cada actualización?",
+        }]
+        follow_up["expected_revision"] = answered["revision"]
+        reconciled = prepare(self.state, self.write(follow_up))
+        self.assertEqual([question["id"] for question in reconciled["questions"]], ["updated-at-meaning-follow-up"])
+        second_answer = decide(self.state, self.write({
+            "work_id": reconciled["id"], "expected_revision": reconciled["revision"],
+            "question_id": "updated-at-meaning-follow-up", "answer": "Mostrar fecha y estado.", "actor": "op",
+        }))
+        self.assertEqual(second_answer["answers"][-1]["question"]["id"], "updated-at-meaning-follow-up")
+
+    def test_resolution_cannot_coexist_with_pending_questions(self):
+        proposal = self.pending_proposal()
+        proposal["preparation"] = "needs-triage"
+        proposal["resolution"] = {
+            "kind": "already-present", "destination": "src/status.py",
+            "evidence": [{"ref": "src/status.py", "observation": "Existe."}],
+            "explanation": "La capacidad ya existe.",
+        }
+        with self.assertRaisesRegex(IntakeError, "resolution.*preguntas|preguntas.*resolution"):
+            prepare(self.state, self.write(proposal))
+        self.assertEqual(show(self.state), [])
+        import sqlite3
+        with sqlite3.connect(self.state / "isswf.sqlite3") as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM history").fetchone(), (0,))
+
+        valid = prepare(self.state, self.write(self.pending_proposal()))
+        invalid_snapshot = json.loads(json.dumps(valid))
+        invalid_snapshot["preparation"] = "needs-triage"
+        invalid_snapshot["resolution"] = proposal["resolution"]
+        with self.assertRaisesRegex(IntakeError, "resolution.*preguntas|preguntas.*resolution"):
+            from isswf.contracts import parse_snapshot
+            parse_snapshot(invalid_snapshot)
+        self.assertEqual(show(self.state, valid["id"]), valid)
+
     def test_read_failure_is_not_stale_success(self):
         prepare(self.state, self.write(self.proposal))
         (self.state / "isswf.sqlite3").write_bytes(b"not a sqlite database")

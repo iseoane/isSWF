@@ -44,12 +44,6 @@ def _text(value: Any, where: str) -> str:
     return value.strip()
 
 
-def _strings(value: Any, where: str, *, nonempty: bool = False) -> list[str]:
-    if not isinstance(value, list) or (nonempty and not value):
-        raise IntakeError(f"{where} debe ser una lista" + (" no vacía" if nonempty else ""))
-    return [_text(item, where) for item in value]
-
-
 def _repo(value: Any) -> str:
     repo = _text(value, "repo")
     if not REPO_RE.fullmatch(repo) or repo.startswith(".") or repo.endswith("."):
@@ -61,17 +55,6 @@ def _number(value: Any, where: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 1:
         raise IntakeError(f"{where} debe ser un entero positivo")
     return value
-
-
-def _timestamp(value: Any, where: str) -> str:
-    text = _text(value, where)
-    try:
-        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
-            raise ValueError
-    except ValueError as exc:
-        raise IntakeError(f"{where} debe incluir una fecha ISO con zona horaria") from exc
-    return text
 
 
 def _contains_forbidden(value: Any) -> str | None:
