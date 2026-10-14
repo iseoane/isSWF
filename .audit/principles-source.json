@@ -1,0 +1,102 @@
+{
+  "scope": "Content hashes of 24 locally installed Pstack principle documents. These identify the source material, not upstream freshness, license approval, or proof of behavior.",
+  "source": "michael-denyer/pstack-claude",
+  "principles": [
+    {
+      "name": "principle-attack-the-premise",
+      "sha256": "c8ce0f2bdc9006d17b0b9347f2e7505170dff398857af62abd0ead6bab877daa"
+    },
+    {
+      "name": "principle-boundary-discipline",
+      "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f"
+    },
+    {
+      "name": "principle-build-the-lever",
+      "sha256": "d142676018f4918119f5a8095b933b17749b1173c8a74dbc679d6f19d3f88032"
+    },
+    {
+      "name": "principle-encode-lessons-in-structure",
+      "sha256": "1568ece8b96017b6e244530f96d937317d0ac602a58f25415d9f90073b378d6c"
+    },
+    {
+      "name": "principle-exhaust-the-design-space",
+      "sha256": "4abd4aaca2527af82dba58d908c7d91c33a0fe0f2145aa46a19bcf7fb5525db9"
+    },
+    {
+      "name": "principle-experience-first",
+      "sha256": "688917387e19da6a343fe657c726eb65998937da69ed7d29f1dfaadb53516a10"
+    },
+    {
+      "name": "principle-explain-the-number",
+      "sha256": "f376dfbb8086c76e313036d303628bf454e94aec9c2a5ccfcc7fafef1aabd72f"
+    },
+    {
+      "name": "principle-fix-root-causes",
+      "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9"
+    },
+    {
+      "name": "principle-foundational-thinking",
+      "sha256": "a3d9bf77ebb9ed5c5eb9ef6ae719f6eeecf5fda6122a134a89ce6856b14577ab"
+    },
+    {
+      "name": "principle-guard-the-context-window",
+      "sha256": "6db84b7d5e67fb4e2e6a260605f2c2e34fbeaa1bc0e49645eef6f00a17543778"
+    },
+    {
+      "name": "principle-laziness-protocol",
+      "sha256": "4c1514611a4d85f58a8d31403d6541aacbd1254bd981667adf6111b08295c539"
+    },
+    {
+      "name": "principle-make-operations-idempotent",
+      "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4"
+    },
+    {
+      "name": "principle-migrate-callers-then-delete-legacy-apis",
+      "sha256": "8014f4eb04fe50474f7e3f9286bce2de276116b8b669cd2fe7b2100972efb68a"
+    },
+    {
+      "name": "principle-minimize-reader-load",
+      "sha256": "d10f8f6f185a61df8db1b5037bcf638f815d49f3cfe1fb3613f9a858896e6de5"
+    },
+    {
+      "name": "principle-model-the-domain",
+      "sha256": "3d14c29b3aca902ed7bf11716df971d4561f8e9624d70e2a9650feb918a22619"
+    },
+    {
+      "name": "principle-never-block-on-the-human",
+      "sha256": "060b88f06b57486102bd7ac1c6fc73b84092f956a836d9c8947cc768a8eef4c2"
+    },
+    {
+      "name": "principle-outcome-oriented-execution",
+      "sha256": "55f1baeb9951f8584399bf82042e78f623e1f1dd560cb9b6413302bde43fd439"
+    },
+    {
+      "name": "principle-prove-it-works",
+      "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce"
+    },
+    {
+      "name": "principle-redesign-from-first-principles",
+      "sha256": "e54d6d205206261850eb5eb28026f0820773e01001485c97b4b423bab18b2c05"
+    },
+    {
+      "name": "principle-separate-before-serializing-shared-state",
+      "sha256": "dd432081bc5664ce1a9513a6b58207d8e4685e0d0cb894278204bd08a637f601"
+    },
+    {
+      "name": "principle-sequence-verifiable-units",
+      "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7"
+    },
+    {
+      "name": "principle-subtract-before-you-add",
+      "sha256": "af2dfa66022e7a27e05fddf17ad8d8e450ebd4150ca3d037ccf25a8191ac0882"
+    },
+    {
+      "name": "principle-test-behavior-not-implementation",
+      "sha256": "c1da1aa8a5550e692ad474ac8157ede82f7ba204c41f7e7ca3423bee7c0c3898"
+    },
+    {
+      "name": "principle-type-system-discipline",
+      "sha256": "388d8966513f19f8357b4250044f7f6d6c236874224fdcf8411667b548052e9a"
+    }
+  ]
+}

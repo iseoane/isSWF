@@ -1,0 +1,90 @@
+{
+  "candidate": "/home/iseoane/Work/isSWF",
+  "files": [
+    ".agents/roles/diagnostician.md",
+    ".agents/roles/references/bug-diagnosis.md",
+    ".agents/roles/references/code-quality.md",
+    ".agents/roles/references/comments.md",
+    ".agents/roles/references/design-principles.md",
+    ".agents/roles/references/execution-principles.md",
+    ".agents/roles/references/tdd.md",
+    ".agents/roles/references/verification-principles.md",
+    ".agents/roles/worker.md",
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".agents/skills/isswf-triage/SKILL.md"
+  ],
+  "checkedLinks": [
+    {
+      "file": ".agents/roles/diagnostician.md",
+      "link": "references/bug-diagnosis.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/bug-diagnosis.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/tdd.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/design-principles.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/execution-principles.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/verification-principles.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/code-quality.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/comments.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../isswf-triage/SKILL.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/diagnostician.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/references/design-principles.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/references/execution-principles.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/references/verification-principles.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/worker.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/diagnostician.md"
+    }
+  ],
+  "catalogs": [
+    {
+      "approved": true,
+      "coordinatorCount": 1
+    },
+    {
+      "approved": false,
+      "coordinatorCount": 0
+    }
+  ],
+  "scope": "Native Pi skill discovery and Markdown links only; no LLM, dispatch, Python, host config, or operational store.",
+  "cleanup": "Temporary directory removed in finally."
+}
