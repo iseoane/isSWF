@@ -10,6 +10,16 @@ Identify a committed candidate by its commit SHA. A review may run before commit
 
 Assess whether the change fits the project's engineering standards and its local context. Read the relevant standards and sources rather than applying a generic checklist. Consider behavior, boundaries, reuse, complexity, ownership, and documentation where the change makes them relevant. Reuse [code quality guidance](code-quality.md), [comment guidance](comments.md), and [verification principles](verification-principles.md); do not restate their full rubrics.
 
+For code changes, use these technical dimensions within Standards when they apply to the diff and its risks:
+
+- **Correctness:** check that the behavior matches its contract, including relevant edge cases and failure paths.
+- **Readability:** check whether names, control flow, and local structure make the changed behavior clear.
+- **Architecture:** check ownership, module boundaries, reuse, and complexity. When you find a concrete structural problem, name a proportionate alternative that preserves the contract. Do not prescribe a larger redesign without evidence.
+- **Security:** inspect trust boundaries, permissions, sensitive data, and external effects when the change touches them. Assess dependency security only when dependencies change.
+- **Performance:** investigate a plausible regression or stated performance goal with a relevant probe. Do not require measurement when the change has no performance risk or goal.
+
+These dimensions refine Standards; they do not replace Spec. Assess Spec separately against the accepted objective and each applicable acceptance criterion. Choose evidence and checks that can detect plausible defects in the changed behavior. For tests, look for sufficient assertions of observable results, not test presence alone. Neither axis requires a universal test suite or TDD. Do not certify the author's own change or conflate the implementer's close check with independent review. This mapping adapts the existing reviewer contract rather than adding a reviewer or parallel rubric. See `docs/research/adaptacion-pstack-addy.md` and `docs/research/adaptaciones-agentes.md`.
+
 ## Spec
 
 Assess whether the candidate meets the accepted product objective and each applicable acceptance criterion. Compare the delivered user-visible result with the brief. Passing tests or sound code alone does not establish product fit. Treat a new product choice as a question for the coordinator, not a reviewer decision.
