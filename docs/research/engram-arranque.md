@@ -129,7 +129,7 @@ Nada se escribió en `~/.engram`; sólo lecturas (`cp -a`) y ejecuciones de la s
 
 ## Proyecto, alcance y sincronización
 
-- La resolución documentada es proyecto explícito, luego `ENGRAM_PROJECT`, luego detección desde el directorio actual.
+- La resolución documentada es proyecto explícito, luego `ENGRAM_PROJECT`, luego detección desde el directorio actual. Con un directorio que contiene varios repositorios git, la detección no elige: el binario local responde `ambiguous project: multiple git repos found in cwd` y sale con código 1. Falla en cerrado, pero refuerza que la identidad debe pasarse explícita.
 - El binario ofrece `--project` en `save`, `search` y `context`; el test aislado confirmó que el `project` y `scope` explícitos aparecen en el resultado guardado y recuperado.
 - Usar un identificador canónico compartido entre worktrees de isSWF. El nombre de un worktree suele cambiar al renombrarlo o crear otro checkout y no es una identidad de proyecto estable.
 - No usar `--all` en la integración normal. La documentación reserva esa opción para lecturas globales intencionales.
