@@ -1,12 +1,14 @@
 # Visión de isSWF
 
+Estado revisado el 14 de octubre de 2026. Esta visión conserva los acuerdos de producto y distingue los resultados comprobados en el entorno local de las capacidades aún no implementadas en el runtime de isSWF o en instalaciones de clientes. Las evidencias actuales están en [cierre del núcleo Markdown](../.audit/markdown-core-closure.md), [cierre de calidad #54](../.audit/quality-54-closure.md), [cierre de adaptación #49](../.audit/adaptation-49-closure.md), [comprobación de integración Engram](../.audit/engram-integration.json) y [comprobación del índice Codegraph](../.audit/codegraph-index-verify.json).
+
 ## Acuerdos
 
 La factory empieza como herramienta personal para un proyecto. Podrá usarse con clientes cuando demuestre calidad. La apertura del código no es una prioridad ni un impedimento. La coordinación entre varios proyectos queda para una etapa posterior.
 
 Pi es el entorno inicial de ejecución de agentes. GitHub es el tracker inicial para issues y PRs. El etiquetado se inspira en el triage de Matt: distingue categorías como bug o mejora y estados de preparación para triage, agente o humano. Los nombres y significados exactos de las etiquetas se concretarán antes de implementarlas.
 
-Dentro de un repositorio y encargo aprobados, la factory puede hacer commits y crear o actualizar PRs draft sin consultar cada operación. La aceptación final, el merge y el despliegue siguen inicialmente en manos del usuario. Elegir GitHub no ha creado ni autorizado todavía un repositorio concreto.
+El modelo de autorización previsto permite commits y creación o actualización de PRs draft dentro de un repositorio y encargo aprobados. La aceptación final, el merge y el despliegue siguen inicialmente en manos del usuario. Elegir GitHub no ha creado ni autorizado todavía un repositorio concreto. En el estado actual, la autorización de esta sesión cubre únicamente cambios locales en este worktree; no hay operaciones remotas autorizadas ni ejecutadas.
 
 Un coordinador mantiene la conversación con el usuario mientras los agentes ejecutan trabajos en background. Puede resumir avances, pendientes y bloqueos, y preparar nuevas features sin detener los trabajos actuales.
 
@@ -30,15 +32,15 @@ Las entregas necesitan evidencias de comportamiento, revisión independiente y c
 
 La implementación de funcionalidades se organiza en slices verticales que entregan comportamiento funcional y verificable. No se organiza como una etapa de base de datos, seguida por API y luego interfaz. El paralelismo debe respetar las dependencias y el aislamiento de cambios.
 
-Engram es el candidato propuesto por el usuario para la memoria externa. isSWF no necesita construir un sistema de memoria propio. Todavía no se ha configurado ni probado esta integración.
+Engram es el candidato propuesto por el usuario para la memoria externa. isSWF no necesita construir un sistema de memoria propio. Una comprobación posterior escribió o confirmó memorias en el store real del proyecto `isswf`, las recuperó y comprobó selectores de proyecto; también demostró que la aplicación actual no consume Engram. Esto valida el CLI y el alcance por proyecto, no una integración de runtime ni una degradación de isSWF ante fallos. Véase el [registro de integración](../.audit/engram-integration.json).
 
 Antes de continuar con U3, el usuario confirma que se definirá y probará el arranque de la factory en proyectos. La propuesta aceptada como dirección es una instalación versionada compartida, con activación explícita por proyecto, configuración local de modelos, esfuerzo y fallbacks y datos operativos separados. No se copia toda la factory en cada proyecto ni se sobrescribe `AGENTS.md`. El [diseño de arranque por proyecto](arranque-por-proyecto.md) concreta esa dirección y sus pruebas pendientes; no hay instalador operativo ni cambios de configuración global por este acuerdo.
 
-Engram conservará decisiones y aprendizajes por proyecto; Codegraph apoyará el grounding con símbolos, relaciones y referencias precisas al código. Ambos son integraciones externas, no sistemas que isSWF reconstruya. Se distinguirá disponibilidad de integración y de prueba real: Engram está instalado pero todavía no se usa como memoria de este desarrollo; Codegraph está disponible, pero isSWF no tiene índice y no se ha demostrado aquí navegación mediante él. La ausencia de estas herramientas no autoriza a inventar memoria o hallazgos.
+Engram conservará decisiones y aprendizajes por proyecto; Codegraph apoyará el grounding con símbolos, relaciones y referencias precisas al código. Ambos son integraciones externas, no sistemas que isSWF reconstruya. El 14 de octubre de 2026 se verificó que Codegraph indexa isSWF y devuelve código fuente y relaciones para consultas exploratorias. No se ha demostrado todavía un mapa de grounding completo para un encargo real, ni la actualización concurrente o el rechazo de un índice de otro proyecto. Véase la [comprobación del índice](../.audit/codegraph-index-verify.json). La disponibilidad de una herramienta no sustituye la lectura del checkout ni autoriza a inventar hallazgos.
 
-Pstack interesa por su modelo de workers y elección de skills según la casuística, no únicamente por su tratamiento de TDD. La experiencia de Gentle AI es una referencia, pero el usuario quiere menos consultas innecesarias y más criterio dentro de lo autorizado.
+Pstack interesa por su modelo de workers y elección de skills según la casuística, no únicamente por su tratamiento de TDD. Los perfiles Markdown actuales de worker, diagnostician, reviewer y coordinator se cargan manualmente por ruta; no son roles nativos ni proporcionan autonomía completa o ejecución independiente del chat. Las pruebas del núcleo confirmaron despacho real de un worker en un fixture local y un flujo del coordinador ejecutado manualmente, no una delegación nativa autónoma. La experiencia de Gentle AI es una referencia, pero el usuario quiere menos consultas innecesarias y más criterio dentro de lo autorizado.
 
-Las PRs deben explicar visualmente qué cambia y cómo funciona, los problemas relevantes encontrados y cómo se resolvieron. Deben destacar el riesgo de integrar el cambio. La publicación automática dentro del repositorio y encargo aprobados está confirmada; el formato concreto y los criterios de cierre siguen pendientes.
+Las PRs deben explicar visualmente qué cambia y cómo funciona, los problemas relevantes encontrados y cómo se resolvieron. Deben destacar el riesgo de integrar el cambio. Está acordado que el runtime futuro pueda crear o actualizar PRs draft dentro del repositorio y encargo aprobados; no se ha probado publicación remota y no hay autorización remota vigente en esta sesión. El formato concreto y los criterios de cierre siguen pendientes.
 
 Hay una retrospectiva al terminar una feature o bug completo y una revisión conjunta cuando el usuario cierra explícitamente una sesión de trabajo. Cerrar el chat no cierra el trabajo. La retrospectiva analiza posibles mejoras a `AGENTS.md`, a las skills del proyecto y al proceso de la factory. Puede generar issues pendientes de triage. Los cambios de instrucciones o skills se revisan y proponen mediante PR, no se aplican directamente a las reglas vigentes.
 
@@ -84,6 +86,8 @@ La autoridad acordada para commits y PRs se limita al repositorio y encargo apro
 
 ## Skills, agentes Markdown y delegación
 
+Los perfiles existentes son instrucciones Markdown que se cargan manualmente. La adaptación #49 propone selección contextual de skills y la calidad #54 añade revisiones proporcionales; ninguna exige cargar todas las skills ni usar TDD siempre. La investigación de solo lectura debe tener un perfil investigador autónomo y separado, con alcance de research explícito. Se aprobó desarrollar ese perfil con destino `opencode-go/glm-5.3-flash` y esfuerzo `high`; el destino alternativo aprobado es `openai-codex/gpt-6-luna` con esfuerzo `medium`. El desarrollo del perfil puede empezar antes de configurar esos destinos. Para un probe real hay que validar disponibilidad y compatibilidad, y declarar el destino elegido en el brief; no hay fallback silencioso ni runtime automático probado.
+
 El usuario exige que la mayor parte de la factory se exprese en skills y agentes Markdown. No quiere una colección creciente de herramientas con muchos parámetros. La metodología, los perfiles, los briefs, las rúbricas y la selección adaptativa de procedimientos deben poder entenderse y cambiarse en esos archivos.
 
 La propuesta es que el coordinador delegue mediante un brief referenciado y un perfil de agente. El brief aporta alcance, aceptación y contexto, incluido el mapa de lectura del research. El agente lee las instrucciones de su perfil y las skills pertinentes, y devuelve artefactos, evidencias, dudas y bloqueos. No recibe por defecto todo el historial de conversación ni asume el contexto de otros agentes.
@@ -116,11 +120,22 @@ Los niveles de esfuerzo dependen del modelo y del proveedor. Antes de ejecutar, 
 
 Un test fallido o una solución incorrecta no son motivos por sí solos para cambiar de proveedor. Si todos los destinos se agotan, el trabajo queda bloqueado y se comunica. Para retomar un trabajo parcial con otro destino, debe confirmar que el escritor anterior ya no actúa, recuperar los artefactos y comprobar las operaciones ya realizadas antes de repetirlas. Las credenciales permanecen fuera de la configuración versionada del proyecto. Se han acordado límites configurables de reintentos y bloqueo visible al agotarlos, y la prohibición de activar costes adicionales sin autorización. Los valores concretos y los tiempos de espera se fijarán en la especificación.
 
+## Secuencia de trabajo acordada
+
+1. Reconciliar el estado actual y las decisiones pendientes.
+2. Completar #55 con artefactos durables para spec, plan y jobs, ownership explícito, snapshot por intento y checkpoints Git. No implica backup completo ni un proceso runtime.
+3. Tras #55, construir en paralelo los perfiles de planificador e investigador. Las ejecuciones de planificación y research requieren materiales reconciliados y un brief explícito; no se inician automáticamente a la vez sobre materiales sin reconciliar.
+4. Construir en paralelo los formatos y procedimientos de entrega visual y retrospectiva. No se prepara una PR draft real sin evidencia de entrega.
+5. Diseñar e implementar configuración centralizada.
+6. Completar una demostración local integral. Después se retoma la instalación runtime de #44, que permanece pausada. Esta demostración no prueba OPS-03 a OPS-06, independencia del chat, recuperación tras reinicio ni H1 completo.
+
+Esta secuencia no modifica la especificación v1. `.factory/` es una ubicación propuesta para artefactos de spec, plan y jobs, no una instalación runtime ni la instalación de #44. No está implementada ni aceptada como decisión final; #55 debe formalizar y probar la ubicación.
+
 ## Uso progresivo para construir la propia factory
 
 El usuario quiere usar isSWF durante su propia implementación conforme disponga de capacidades funcionales. Las primeras entregas se construyen con Pi, Pstack y las skills de Matt disponibles. Después se transfieren encargos a isSWF según lo que ya pueda hacer y verificar, no según funciones prometidas.
 
-El primer hito mínimo está definido arriba. El orden detallado de slices y la transferencia de responsabilidades se concretarán en la especificación v1. Como propuesta de seguridad, la versión que ejecuta trabajos permanece estable mientras se construye y verifica una versión candidata. Una propuesta de mejora de las reglas no se aplica retroactivamente a workers en curso. Un fallo del prototipo no debe impedir volver al flujo de apoyo existente.
+El primer hito mínimo está definido arriba. S01 conserva unidades históricas U1 y U2 implementadas en Python; ese CLI no es requisito para el núcleo Markdown. U3 y U4 siguen pendientes. S01 y S02 no están completas, y H1 no se ha demostrado: no hay PR real ni se ha probado independencia del chat en el runtime de producto. El orden detallado de slices y la transferencia de responsabilidades se concretarán en la especificación v1. Como propuesta de seguridad, la versión que ejecuta trabajos permanece estable mientras se construye y verifica una versión candidata. Una propuesta de mejora de las reglas no se aplica retroactivamente a workers en curso. Un fallo del prototipo no debe impedir volver al flujo de apoyo existente.
 
 ## Método de investigación
 

@@ -1,6 +1,6 @@
 # Plan funcional de construcción de isSWF v1
 
-Estado: propuesta para revisar junto a la [especificación](spec-v1.md). No es una orden de ejecución ni un plan técnico con módulos y comandos ya decididos.
+Estado revisado el 14 de octubre de 2026. Sigue siendo una propuesta para revisar junto a la [especificación](spec-v1.md), no una orden de ejecución ni un plan técnico con módulos y comandos ya decididos. La asignación documental de criterios y los cierres locales no demuestran que S01, S02, H1 ni los 61 criterios estén completos. Véanse [cierre del núcleo Markdown](../.audit/markdown-core-closure.md), [cierre de calidad #54](../.audit/quality-54-closure.md), [cierre de adaptación #49](../.audit/adaptation-49-closure.md), [comprobación de integración Engram](../.audit/engram-integration.json) y [comprobación del índice Codegraph](../.audit/codegraph-index-verify.json).
 
 ## Lectura del plan
 
@@ -8,9 +8,24 @@ Cada slice termina en un resultado observable, con evidencias y revisión indepe
 
 Las primeras slices se construyen con Pi, Pstack y las skills de Matt disponibles. La factory asume responsabilidades conforme las demuestra. El soporte externo sigue disponible si una capacidad aún no existe o falla.
 
-El primer hito usable, H1, comprende S01 y S02. Incluye una issue real y definida, grounding, implementación, revisión, correcciones y PR visual. Las slices posteriores completan v1; no se presentan como disponibles en H1.
+El primer hito previsto, H1, comprende S01 y S02. Incluye una issue real y definida, grounding, implementación, revisión, correcciones y PR visual. H1 aún no se ha demostrado: falta una PR real y no se ha probado independencia del chat en el runtime de producto. Las slices posteriores completan v1; no se presentan como disponibles en H1.
 
 No se obliga a usar TDD, diez revisores o benchmarks en cada slice. Se eligen comprobaciones según riesgo. Todos los cambios de código necesitan verificación de comportamiento y revisión independiente.
+
+## Estado y secuencia acordada
+
+U1 y U2 son unidades históricas locales de S01, implementadas con el CLI Python. No se exige ese CLI para el núcleo Markdown. U3 y U4 siguen pendientes; por tanto, S01 sigue abierta. S02 tampoco está completa. Las pruebas Markdown acreditan el uso manual de perfiles y un worker en un fixture local, no la ejecución autónoma del coordinador ni la independencia del chat. Codegraph tiene un índice local verificado y devolvió código fuente en una consulta; aún no existe un mapa de grounding completo para un encargo real.
+
+La secuencia de trabajo acordada es:
+
+1. Reconciliar el estado y las decisiones pendientes.
+2. Completar #55 con artefactos durables para spec, plan y jobs, ownership, snapshot por intento y checkpoints Git. No incluye backup completo ni un proceso runtime.
+3. Tras #55, construir en paralelo los perfiles de planificador e investigador. Las ejecuciones de planificación y research requieren materiales reconciliados y un brief explícito; no se inician automáticamente a la vez sobre materiales sin reconciliar.
+4. Construir en paralelo los formatos y procedimientos de entrega visual y retrospectiva. No se prepara una PR draft real sin evidencia de entrega.
+5. Centralizar la configuración.
+6. Completar una demostración local integral y después retomar la instalación runtime #44, ahora pausada. Esta demostración no prueba OPS-03 a OPS-06, independencia del chat, recuperación tras reinicio ni H1 completo.
+
+La ubicación `.factory/` es una propuesta para guardar artefactos de spec, plan y jobs, no una instalación runtime ni la instalación de #44. No está implementada ni aceptada como decisión final; #55 debe formalizar y probar la ubicación. Esta secuencia no cambia la [especificación v1](spec-v1.md).
 
 ## Dependencias y trazabilidad
 
@@ -31,7 +46,7 @@ Este orden recomendado prioriza seguridad antes de paralelismo y automatización
 
 ## S01. De una issue a un brief visible
 
-El [contrato de construcción de S01](s01-intake.md) concreta el recorrido, las responsabilidades, las revisiones del brief y cuatro unidades funcionales pequeñas. U1 y U2 tienen una implementación local comprobada con fixtures y guías de [entrada clara](u1-usage.md) y [decisiones pendientes](u2-usage.md). U3 y U4 siguen pendientes; no se marcan los escenarios siguientes como superados ni S01 como completa.
+El [contrato de construcción de S01](s01-intake.md) concreta el recorrido, las responsabilidades, las revisiones del brief y cuatro unidades funcionales pequeñas. U1 y U2 tienen una implementación local histórica en Python, comprobada con fixtures y guías de [entrada clara](u1-usage.md) y [decisiones pendientes](u2-usage.md). Esa CLI no es requisito del núcleo Markdown. U3 y U4 siguen pendientes; no se marcan los escenarios siguientes como superados ni S01 como completa.
 
 El operador registra un repositorio autorizado y entrega una issue definida. La skill de triage contrasta información, clasifica, señala dudas y propone el tratamiento. El panel muestra la issue, brief, estado y decisiones pendientes.
 
@@ -48,7 +63,7 @@ Con S01 funcionando, se usa su intake para preparar issues de las siguientes sli
 
 ## S02. De una issue clara a una PR revisada
 
-Un perfil Markdown y un brief permiten ejecutar un trabajo de código. El research entrega análisis y mapa de lectura cuando se delega, o el worker hace grounding acotado. La revisión usa otro contexto. Las correcciones vuelven a comprobarse antes de declarar cierre técnico.
+Un perfil Markdown y un brief permiten preparar y ejecutar un trabajo de código con el soporte disponible. Los perfiles actuales de worker, diagnostician, reviewer y coordinator se cargan manualmente por ruta; no son roles nativos ni acreditan autonomía completa o independencia del chat. El research entrega análisis y mapa de lectura cuando se delega, o el worker hace grounding acotado. Se aprobó desarrollar un perfil investigador autónomo separado para research de solo lectura, con destino `opencode-go/glm-5.3-flash` y esfuerzo `high`; el destino alternativo aprobado es `openai-codex/gpt-6-luna` con esfuerzo `medium`. El desarrollo del perfil no depende de que la configuración esté lista. Esta ruta aún no está configurada: antes de un probe real se validan disponibilidad y compatibilidad, y el brief debe declarar explícitamente el destino elegido. No hay fallback silencioso ni runtime automático probado. La revisión usa otro contexto. Las correcciones vuelven a comprobarse antes de declarar cierre técnico.
 
 La ruta inicial de modelo y effort es explícita. En esta slice una cuota agotada puede bloquear el trabajo; el fallback automático pertenece a S03. Esto se comunica como límite de H1, no como incumplimiento oculto de una v1 terminada.
 
@@ -125,7 +140,7 @@ Una skill de retrospectiva analiza un trabajo completo o el cierre explícito de
 
 ## S08. Retomar contexto mediante Engram
 
-Se prueba la integración propuesta de Engram antes de darla por adoptada. Una nueva conversación recupera decisiones y aprendizajes del proyecto; el coordinador contrasta su vigencia contra briefs, código y estado operativo actuales. Si falla la separación entre proyectos o la recuperación, se revisa la propuesta con el operador, no se anuncia completada esta slice.
+La comprobación del 14 de octubre de 2026 verificó búsquedas y contexto por proyecto en el store real, pero también confirmó que isSWF no consume Engram en runtime. Esto no completa S08 ni demuestra una ruta de degradación ante fallos. La integración propuesta aún debe probarse dentro de isSWF. Una nueva conversación debe recuperar decisiones y aprendizajes del proyecto; el coordinador contrasta su vigencia contra briefs, código y estado operativo actuales. Si falla la separación entre proyectos o la recuperación, se revisa la propuesta con el operador, no se anuncia completada esta slice. Véase el [registro de integración Engram](../.audit/engram-integration.json).
 
 - [ ] Una decisión guardada se recupera en una conversación nueva sin volver a preguntarla.
 - [ ] Un recuerdo antiguo no sobreescribe una decisión posterior ni marca un trabajo terminado.
