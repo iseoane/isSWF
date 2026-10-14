@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/iseoane/Work/isSWF/.audit/verify-engram-scope.py", line 34, in <module>
+    assert other not in absent and 'No memories found' in absent, (project, absent)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('isswf-fixture-a', 'No memories found for: "vxbetamemorytwo"\n')

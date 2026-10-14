@@ -1,0 +1,8 @@
+{
+  "command": "engram compatibility --data-dir /home/iseoane/.engram --json",
+  "version": "3.4.0",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "compatibility: unsafe or invalid fixture metadata\n",
+  "scope": "Read-only preflight refused before any memory operation. Does not establish that the real store is incompatible or corrupt; fixture-specific command contract needs investigation. No memory contents read or saved."
+}
