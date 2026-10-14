@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from isswf.intake import IntakeError, authorize, prepare, show
+from isswf.intake import IntakeError, authorize, decide, prepare, show
 from isswf.panel import make_server
 
 class U1Test(unittest.TestCase):
@@ -31,6 +31,20 @@ class U1Test(unittest.TestCase):
         path = Path(self.temp.name) / f"input-{threading.get_ident()}.json"
         path.write_text(json.dumps(value), encoding="utf-8")
         return path
+
+    def pending_proposal(self):
+        value = json.loads(json.dumps(self.proposal))
+        value["preparation"] = "needs-info"
+        value["brief"]["acceptance"] = []
+        value["motive"] = "Falta una decisión de producto."
+        value["questions"] = [{
+            "id": "updated-at-meaning",
+            "kind": "product",
+            "question": "¿Qué cambios cuentan como actualización?",
+            "owner": "operator",
+            "exit_condition": "La aceptación define los cambios que se muestran.",
+        }]
+        return value
 
     def test_cli_authorize_prepare_show_and_persist(self):
         with tempfile.TemporaryDirectory() as state:
@@ -282,17 +296,7 @@ class U1Test(unittest.TestCase):
             server.server_close()
 
     def test_pending_product_question_is_saved_and_rendered(self):
-        value = json.loads(json.dumps(self.proposal))
-        value["preparation"] = "needs-info"
-        value["brief"]["acceptance"] = []
-        value["questions"] = [{
-            "id": "updated-at-meaning",
-            "kind": "product",
-            "question": "¿Qué cambios cuentan como actualización?",
-            "owner": "operator",
-            "exit_condition": "La aceptación define los cambios que se muestran.",
-        }]
-        value["motive"] = "Falta una decisión de producto."
+        value = self.pending_proposal()
         snapshot = prepare(self.state, self.write(value))
         self.assertEqual(snapshot["preparation"], "needs-info")
         self.assertEqual(snapshot["brief"]["acceptance"], [])
@@ -307,6 +311,192 @@ class U1Test(unittest.TestCase):
             self.assertIn("¿Qué cambios cuentan como actualización?", page)
             self.assertIn("La aceptación define los cambios que se muestran.", page)
             self.assertIn("Responsable: operator", page)
+        finally:
+            server.shutdown()
+            thread.join(timeout=2)
+            server.server_close()
+
+    def test_decide_reconcile_preserves_answer_and_publishes_history(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        decision = {
+            "work_id": first["id"],
+            "expected_revision": first["revision"],
+            "question_id": "updated-at-meaning",
+            "answer": "Solo un cambio de estado cuenta como actualización.",
+            "actor": "operador-local",
+        }
+        answered = decide(self.state, self.write(decision))
+        self.assertEqual(answered["id"], first["id"])
+        self.assertEqual(answered["revision"], 2)
+        self.assertEqual(answered["preparation"], "needs-triage")
+        self.assertEqual(answered["questions"], [])
+        answer = answered["answers"][0]
+        self.assertEqual(answer["question"], first["questions"][0])
+        self.assertEqual(answer["source_revision"], 1)
+        self.assertEqual(answer["actor"], "operador-local")
+        self.assertEqual(answer["text"], decision["answer"])
+        replay = json.loads(json.dumps(self.proposal))
+        replay["expected_revision"] = answered["revision"]
+        replay["decision_refs"] = [answer["id"]]
+        replayed = prepare(self.state, self.write(replay))
+        self.assertEqual(replayed["id"], first["id"])
+        self.assertEqual(replayed["revision"], 3)
+        self.assertEqual(replayed["preparation"], "ready-for-agent")
+        self.assertEqual(replayed["answers"], answered["answers"])
+        reopened = show(self.state, first["id"])
+        self.assertEqual(reopened, replayed)
+        import sqlite3
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        self.assertEqual(db.execute("SELECT revision FROM history ORDER BY revision").fetchall(), [(1,), (2,), (3,)])
+        db.close()
+
+    def test_decide_is_operator_cli_and_panel_shows_trusted_answer(self):
+        with tempfile.TemporaryDirectory() as state:
+            command = [sys.executable, "-m", "isswf", "--state", state]
+            grant = json.loads(subprocess.run(command + ["authorize", str(ROOT / "examples/u1/authorization.json")], cwd=ROOT, text=True, capture_output=True, check=True).stdout)
+            proposal = json.loads((ROOT / "examples/u2/ambiguous-proposal.json").read_text())
+            proposal["authorization_id"] = grant["id"]
+            proposal_path = Path(state) / "proposal.json"
+            proposal_path.write_text(json.dumps(proposal), encoding="utf-8")
+            first = json.loads(subprocess.run(command + ["prepare", str(proposal_path)], cwd=ROOT, text=True, capture_output=True, check=True).stdout)
+            decision = json.loads((ROOT / "examples/u2/decision.json").read_text())
+            decision.update({"work_id": first["id"], "expected_revision": first["revision"]})
+            decision_path = Path(state) / "decision.json"
+            decision_path.write_text(json.dumps(decision), encoding="utf-8")
+            answered = json.loads(subprocess.run(command + ["decide", str(decision_path)], cwd=ROOT, text=True, capture_output=True, check=True).stdout)
+            self.assertEqual(answered["preparation"], "needs-triage")
+            reconciled = json.loads((ROOT / "examples/u2/reconciled-proposal.json").read_text())
+            reconciled.update({"authorization_id": grant["id"], "expected_revision": answered["revision"], "decision_refs": [answered["answers"][0]["id"]]})
+            reconciled_path = Path(state) / "reconciled.json"
+            reconciled_path.write_text(json.dumps(reconciled), encoding="utf-8")
+            ready = json.loads(subprocess.run(command + ["prepare", str(reconciled_path)], cwd=ROOT, text=True, capture_output=True, check=True).stdout)
+            self.assertEqual(ready["preparation"], "ready-for-agent")
+            self.assertEqual(ready["revision"], 3)
+            server = make_server(state, 0)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}/work/{first['id']}") as response:
+                    page = response.read().decode()
+                self.assertIn("Respuestas registradas", page)
+                self.assertIn("Solo un cambio de estado cuenta como actualización.", page)
+                self.assertIn("operador-local", page)
+                self.assertIn("revisión 1", page)
+            finally:
+                server.shutdown()
+                thread.join(timeout=2)
+                server.server_close()
+
+    def test_decide_rejects_wrong_reference_scope_and_duplicate_without_write(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        invalid = [
+            {"work_id": "work-not-this-one", "expected_revision": 1, "question_id": "updated-at-meaning", "answer": "ok", "actor": "op"},
+            {"work_id": first["id"], "expected_revision": 9, "question_id": "updated-at-meaning", "answer": "ok", "actor": "op"},
+            {"work_id": first["id"], "expected_revision": 1, "question_id": "missing", "answer": "ok", "actor": "op"},
+            {"work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning", "answer": "ok", "actor": "op", "permissions": ["publish"]},
+        ]
+        for value in invalid:
+            with self.assertRaises(IntakeError):
+                decide(self.state, self.write(value))
+            self.assertEqual(show(self.state, first["id"]), first)
+        decision = {"work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning", "answer": "ok", "actor": "op"}
+        answered = decide(self.state, self.write(decision))
+        with self.assertRaisesRegex(IntakeError, "conflicto"):
+            decide(self.state, self.write(decision))
+        self.assertEqual(show(self.state, first["id"]), answered)
+
+    def test_prepare_cannot_drop_unanswered_question_in_two_steps(self):
+        pending = self.pending_proposal()
+        first = prepare(self.state, self.write(pending))
+        renamed = json.loads(json.dumps(pending))
+        renamed["expected_revision"] = 1
+        renamed["questions"][0]["question"] = "Otra pregunta bajo el mismo identificador."
+        with self.assertRaisesRegex(IntakeError, "pregunta pendiente"):
+            prepare(self.state, self.write(renamed))
+        self.assertEqual(show(self.state, first["id"]), first)
+        bypass = json.loads(json.dumps(self.proposal))
+        bypass["expected_revision"] = 1
+        bypass["preparation"] = "needs-triage"
+        bypass["brief"]["acceptance"] = []
+        bypass["questions"] = []
+        bypass["resolution"] = {
+            "kind": "already-present", "destination": "src/status.py", "evidence": [{"ref": "src/status.py", "observation": "Existe."}], "explanation": "Ya existe."
+        }
+        with self.assertRaisesRegex(IntakeError, "pregunta pendiente"):
+            prepare(self.state, self.write(bypass))
+        bypass["preparation"] = "ready-for-agent"
+        bypass["resolution"] = None
+        bypass["brief"]["acceptance"] = ["La ficha muestra el resultado."]
+        with self.assertRaisesRegex(IntakeError, "pregunta pendiente"):
+            prepare(self.state, self.write(bypass))
+        self.assertEqual(show(self.state, first["id"]), first)
+
+    def test_reconciliation_cannot_expand_granted_scope(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        expanded = json.loads(json.dumps(self.proposal))
+        expanded["expected_revision"] = first["revision"]
+        expanded["brief"]["scope"] += " También cambiar alertas."
+        with self.assertRaisesRegex(IntakeError, "coincidir exactamente"):
+            prepare(self.state, self.write(expanded))
+        self.assertEqual(show(self.state, first["id"]), first)
+
+    def test_prepare_rejects_answers_spoofed_refs_and_changed_source(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        forged = json.loads(json.dumps(self.proposal))
+        forged["answers"] = []
+        with self.assertRaisesRegex(IntakeError, "answers"):
+            prepare(self.state, self.write(forged))
+        forged = json.loads(json.dumps(self.proposal))
+        forged["decision_refs"] = ["answer-inventada"]
+        with self.assertRaises(IntakeError):
+            prepare(self.state, self.write(forged))
+        answered = decide(self.state, self.write({
+            "work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning", "answer": "Solo cambios de estado.", "actor": "op"
+        }))
+        changed = json.loads(json.dumps(self.proposal))
+        changed["expected_revision"] = answered["revision"]
+        changed["decision_refs"] = [answered["answers"][0]["id"]]
+        changed["source"]["body"] = "La fuente cambió después de la respuesta."
+        with self.assertRaisesRegex(IntakeError, "fuente alterada"):
+            prepare(self.state, self.write(changed))
+        self.assertEqual(show(self.state, first["id"]), answered)
+
+    def test_failed_publication_rolls_back_snapshot_and_history(self):
+        first = prepare(self.state, self.write(self.pending_proposal()))
+        import sqlite3
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        db.execute("CREATE TRIGGER reject_history BEFORE INSERT ON history BEGIN SELECT RAISE(ABORT, 'test failure'); END")
+        db.commit()
+        db.close()
+        decision = {"work_id": first["id"], "expected_revision": 1, "question_id": "updated-at-meaning", "answer": "Respuesta", "actor": "op"}
+        with self.assertRaises(sqlite3.IntegrityError):
+            decide(self.state, self.write(decision))
+        self.assertEqual(show(self.state, first["id"]), first)
+        db = sqlite3.connect(self.state / "isswf.sqlite3")
+        self.assertEqual(db.execute("SELECT revision FROM history ORDER BY revision").fetchall(), [(1,)])
+        db.close()
+
+    def test_resolution_requires_evidence_and_is_non_actionable(self):
+        proposal = json.loads(json.dumps(self.proposal))
+        proposal["preparation"] = "needs-triage"
+        proposal["brief"]["acceptance"] = []
+        proposal["resolution"] = {"kind": "duplicate", "destination": "issue #12", "evidence": [], "explanation": "Same request."}
+        with self.assertRaisesRegex(IntakeError, "evidencia"):
+            prepare(self.state, self.write(proposal))
+        proposal["resolution"]["evidence"] = [{"ref": "issue #12", "observation": "Same accepted behavior."}]
+        snapshot = prepare(self.state, self.write(proposal))
+        self.assertEqual(snapshot["preparation"], "needs-triage")
+        self.assertEqual(snapshot["brief"]["acceptance"], [])
+        self.assertEqual(snapshot["resolution"]["kind"], "duplicate")
+        self.assertNotIn("implementation", snapshot["next_step"].lower())
+        server = make_server(str(self.state), 0)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}/work/{snapshot['id']}") as response:
+                page = response.read().decode()
+            self.assertIn("Same accepted behavior.", page)
+            self.assertIn("issue #12", page)
         finally:
             server.shutdown()
             thread.join(timeout=2)

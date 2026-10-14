@@ -1,0 +1,45 @@
+# U2. Registrar una decisión y reconciliar una issue
+
+U2 conserva las decisiones humanas en el mismo snapshot SQLite que la propuesta. `prepare` propone y reconcilia. Solo el operador usa `decide` para registrar una respuesta. Ninguno de los dos comandos inicia ejecución.
+
+## Preparar una ficha pendiente
+
+Copia `examples/u2/ambiguous-proposal.json`, sustituye la referencia de autorización y prepara la ficha:
+
+```sh
+python -m isswf --state /ruta/privada prepare /ruta/ambiguous-proposal.json
+```
+
+Una pregunta contiene `id`, `kind`, `question`, `owner` y `exit_condition`. Usa `kind: product` para una decisión de producto y `kind: missing-information` para información que solo conoce el operador. El dueño debe ser `operator`. Una duda técnica que se puede investigar pertenece al grounding, no a la lista de preguntas.
+
+`needs-info` y `ready-for-human` requieren al menos una pregunta concreta. Su aceptación puede estar vacía si el operador aún debe decidir el criterio. `ready-for-agent` requiere aceptación no vacía, ninguna pregunta pendiente y `resolution: null`. La preparación autoriza solo el siguiente paso descrito, no la ejecución de código.
+
+## Registrar la respuesta del operador
+
+Copia `examples/u2/decision.json` y sustituye el identificador devuelto por `prepare`, la revisión actual y la respuesta:
+
+```sh
+python -m isswf --state /ruta/privada decide /ruta/decision.json
+```
+
+El documento acepta solo `work_id`, `expected_revision`, `question_id`, `answer` y `actor`. El comando comprueba la revisión, el trabajo, la autorización y la pregunta pendiente. `actor` registra atribución; no autentica al usuario. El comando publica una revisión del mismo trabajo, conserva la pregunta original en `answers`, elimina esa pregunta de la lista pendiente y fija `preparation` en `needs-triage`. No cambia el resultado a `ready-for-agent`.
+
+No repitas `decide` para la misma pregunta. Una respuesta a un trabajo, pregunta o revisión distintos se rechaza sin cambiar la ficha ni la historia. El texto de una respuesta no concede permisos. La skill contrasta semánticamente que la respuesta se mantenga dentro del objetivo y alcance del grant.
+
+## Reconciliar el brief
+
+Después de `decide`, la skill lee la respuesta del snapshot y produce una propuesta nueva. Usa `decision_refs` con el identificador de respuesta devuelto por `decide`, conserva el mismo trabajo y autorización y aumenta `expected_revision` a la revisión actual. El nuevo brief debe respetar exactamente el objetivo y alcance autorizados.
+
+Usa `examples/u2/reconciled-proposal.json` como formato. Para pasar a `ready-for-agent`, define aceptación observable, deja `questions` vacío y conserva `resolution: null`. El comando de preparación valida que cada pregunta anterior que desaparece tenga una respuesta registrada que se refiera a la misma pregunta y fuente. No permite cambiar el texto de una pregunta respondida bajo el mismo ID. También rechaza retirar una pregunta sin respuesta en cualquier transición, incluso a `needs-triage`.
+
+U2 bloquea el uso de respuestas si cambia el fingerprint de la fuente. Requiere reconciliación fuera de esta unidad. No borres preguntas pendientes ni añadas nuevas y cambies de revisión para saltarte una decisión.
+
+## Registrar una disposición no accionable
+
+Usa `preparation: needs-triage` y una `resolution` de tipo `duplicate` o `already-present` solo con destino, referencias de evidencia que incluyan observación y explicación. `examples/u2/already-present-proposal.json` muestra la forma. Sin evidencia, el parser rechaza la disposición. La evidencia se conserva en la misma ficha y el panel la muestra. El parser comprueba su forma, no su veracidad. Una disposición no acredita una entrega integrada.
+
+## Snapshots y límites
+
+`questions`, `decision_refs`, `answers` y `resolution` forman un solo contrato. Una propuesta no puede escribir `answers`; solo `decide` puede añadir una respuesta confiable. `show` y el panel leen el snapshot SQLite. El publicador actualiza la ficha y su historia en una transacción. Una falla de escritura conserva la revisión anterior.
+
+Las fichas U1 antiguas siguen disponibles en lectura. La lectura añade valores vacíos solo en memoria, sin reescribir el snapshot ni la historia. El panel sigue siendo de solo lectura. En S01, U2 no implementa workers, ejecución, consulta real a GitHub ni publicación remota.

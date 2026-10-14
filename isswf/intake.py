@@ -12,7 +12,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from .contracts import ContractError as IntakeError, FORBIDDEN_KEYS, REPO_RE, parse_proposal, parse_snapshot
+from .contracts import ContractError as IntakeError, FORBIDDEN_KEYS, REPO_RE, parse_decision, parse_proposal, parse_snapshot
 
 
 def utc_now() -> str:
@@ -151,13 +151,29 @@ def authorize(state: str | Path, filename: str | Path) -> dict[str, str]:
     return {"id": grant["id"], "repo": repo, "issue": str(issue), "created_at": grant["created_at"]}
 
 
-def _validate_proposal(raw: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, str]], list[str], dict[str, Any] | None]:
-    return parse_proposal(raw)
+def _publish(db: sqlite3.Connection, snapshot: dict[str, Any], current_revision: int) -> dict[str, Any]:
+    encoded = json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
+    try:
+        if current_revision == 0:
+            db.execute("INSERT INTO work VALUES (?, ?, ?, ?, ?, ?)", (
+                snapshot["id"], snapshot["repo"], snapshot["issue"], snapshot["revision"], encoded, snapshot["updated_at"]))
+        else:
+            result = db.execute(
+                "UPDATE work SET revision=?, snapshot=?, updated_at=? WHERE id=? AND revision=?",
+                (snapshot["revision"], encoded, snapshot["updated_at"], snapshot["id"], current_revision))
+            if result.rowcount != 1:
+                raise IntakeError("conflicto: la revisión cambió durante la publicación")
+        db.execute("INSERT INTO history VALUES (?, ?, ?)", (snapshot["id"], snapshot["revision"], encoded))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return snapshot
 
 
 def prepare(state: str | Path, filename: str | Path) -> dict[str, Any]:
     raw = _json_file(filename)
-    source, brief, questions, decision_refs, resolution = _validate_proposal(raw)
+    source, brief, questions, decision_refs, resolution = parse_proposal(raw)
     auth_id = _text(raw["authorization_id"], "authorization_id")
     with closing(_connect(state)) as db:
         db.execute("BEGIN IMMEDIATE")
@@ -179,27 +195,92 @@ def prepare(state: str | Path, filename: str | Path) -> dict[str, Any]:
             "brief": brief, "questions": questions, "decision_refs": decision_refs,
             "answers": [], "resolution": resolution, "execution": "no disponible en S01"}
         row = db.execute("SELECT * FROM work WHERE id=?", (work_id,)).fetchone()
+        current_revision = 0
         if row:
-            current = json.loads(row["snapshot"])
-            if current["source"]["fingerprint"] == fingerprint and {k: current[k] for k in material if k not in {"id"}} == {k: material[k] for k in material if k != "id"}:
-                if raw["expected_revision"] not in (current["revision"], current["revision"] - 1):
+            current = parse_snapshot(json.loads(row["snapshot"]))
+            current_revision = current["revision"]
+            material["answers"] = current["answers"]
+            answers = {answer["id"]: answer for answer in current["answers"]}
+            if current["source"]["fingerprint"] != fingerprint and current["answers"]:
+                raise IntakeError("Una fuente alterada con respuestas requiere reconciliación fuera de U2")
+            for question in questions:
+                previous = next((answer["question"] for answer in current["answers"] if answer["question"]["id"] == question["id"]), None)
+                if previous is not None and previous != question:
+                    raise IntakeError("No se puede cambiar una pregunta respondida bajo el mismo id")
+            for old_question in current["questions"]:
+                if old_question not in questions:
+                    matched = any(
+                        answer_id in decision_refs and answers[answer_id]["question"] == old_question
+                        and answers[answer_id]["source_fingerprint"] == current["source"]["fingerprint"]
+                        for answer_id in answers
+                    )
+                    if not matched:
+                        raise IntakeError("No se puede quitar una pregunta pendiente sin una respuesta registrada")
+            for answer_id in decision_refs:
+                answer = answers.get(answer_id)
+                if not answer or answer["authorization_id"] != grant["id"] or answer["source_fingerprint"] != fingerprint:
+                    raise IntakeError("decision_refs no pertenece a esta autorización y fuente")
+            if current["source"]["fingerprint"] == fingerprint and {k: current[k] for k in material if k != "id"} == {k: material[k] for k in material if k != "id"}:
+                if raw["expected_revision"] not in (current_revision, current_revision - 1):
                     raise IntakeError("expected_revision obsoleto")
                 db.commit()
                 return current
-            if raw["expected_revision"] != row["revision"]:
-                raise IntakeError(f"conflicto: revisión actual {row['revision']}")
-            revision = row["revision"] + 1
+            if raw["expected_revision"] != current_revision:
+                raise IntakeError(f"conflicto: revisión actual {current_revision}")
+            revision = current_revision + 1
         else:
+            if decision_refs:
+                raise IntakeError("decision_refs requiere respuestas registradas en este trabajo")
             if raw["expected_revision"] != 0:
                 raise IntakeError("trabajo nuevo requiere expected_revision=0")
             revision = 1
         now = utc_now()
         snapshot = {**material, "revision": revision, "observed_at": source["observed_at"], "updated_at": now}
-        encoded = json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
-        db.execute("INSERT INTO work VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision, snapshot=excluded.snapshot, updated_at=excluded.updated_at", (work_id, grant["repo"], grant["issue"], revision, encoded, now))
-        db.execute("INSERT INTO history VALUES (?, ?, ?)", (work_id, revision, encoded))
-        db.commit()
-        return snapshot
+        return _publish(db, snapshot, current_revision)
+
+
+def decide(state: str | Path, filename: str | Path) -> dict[str, Any]:
+    decision = parse_decision(_json_file(filename))
+    with closing(_connect(state)) as db:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute("SELECT * FROM work WHERE id=?", (decision["work_id"],)).fetchone()
+        if not row:
+            raise IntakeError("No existe ese trabajo")
+        current = parse_snapshot(json.loads(row["snapshot"]))
+        if decision["expected_revision"] != current["revision"]:
+            raise IntakeError(f"conflicto: revisión actual {current['revision']}")
+        grant_row = db.execute("SELECT * FROM grants WHERE id=?", (current["authorization_id"],)).fetchone()
+        if not grant_row or (grant_row["repo"], grant_row["issue"]) != (current["repo"], current["issue"]):
+            raise IntakeError("La autorización del trabajo no coincide con su origen")
+        question = next((item for item in current["questions"] if item["id"] == decision["question_id"]), None)
+        if question is None:
+            raise IntakeError("No existe esa pregunta pendiente en la revisión actual")
+        if any(answer["question"]["id"] == question["id"] and answer["source_fingerprint"] == current["source"]["fingerprint"] for answer in current["answers"]):
+            raise IntakeError("La pregunta ya tiene una respuesta registrada")
+        answer_id = "answer-" + uuid.uuid4().hex
+        answer = {
+            "id": answer_id,
+            "question": question,
+            "work_id": current["id"],
+            "authorization_id": current["authorization_id"],
+            "source_fingerprint": current["source"]["fingerprint"],
+            "source_revision": current["revision"],
+            "actor": decision["actor"],
+            "text": decision["answer"],
+            "recorded_at": utc_now(),
+        }
+        snapshot = {
+            **current,
+            "preparation": "needs-triage",
+            "motive": "La respuesta del operador está registrada y requiere reconciliar el brief.",
+            "next_step": "Reconciliar el brief con la respuesta y preparar una nueva propuesta.",
+            "questions": [item for item in current["questions"] if item["id"] != question["id"]],
+            "decision_refs": [*current["decision_refs"], answer_id],
+            "answers": [*current["answers"], answer],
+            "revision": current["revision"] + 1,
+            "updated_at": utc_now(),
+        }
+        return _publish(db, snapshot, current["revision"])
 
 
 def _read_connect(state: str | Path) -> sqlite3.Connection:

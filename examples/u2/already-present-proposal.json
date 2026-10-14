@@ -1,0 +1,44 @@
+{
+  "authorization_id": "REEMPLAZAR_CON_ID_DEVUELTO_POR_AUTHORIZE",
+  "expected_revision": 0,
+  "source": {
+    "repo": "factory/isswf-demo",
+    "number": 17,
+    "title": "Mostrar la fecha de actualización",
+    "body": "Mostrar cuándo cambió por última vez el estado de una issue.",
+    "labels": ["enhancement"],
+    "observed_at": "2025-01-15T12:00:00Z"
+  },
+  "category": "feature",
+  "preparation": "needs-triage",
+  "motive": "La misma capacidad ya existe en una ubicación citada.",
+  "next_step": "No proponer implementación; conservar el resultado respaldado.",
+  "brief": {
+    "objective": "Mostrar cuándo cambió el estado de una issue.",
+    "scope": "Preparar una ficha para observar la fecha de última actualización de la issue.",
+    "exclusions": [],
+    "acceptance": [],
+    "risks": [],
+    "dependencies": [],
+    "context": [],
+    "checks": [],
+    "reviews": [],
+    "base": "Desconocida.",
+    "configuration": "Pendiente.",
+    "limits": "Sin ejecución.",
+    "checkpoints": "No aplica mientras el trabajo no es accionable."
+  },
+  "questions": [],
+  "decision_refs": [],
+  "resolution": {
+    "kind": "already-present",
+    "destination": "src/status.py::last_updated_at",
+    "evidence": [
+      {
+        "ref": "src/status.py:42",
+        "observation": "La función devuelve la fecha del último cambio de estado."
+      }
+    ],
+    "explanation": "El comportamiento solicitado ya está presente en la ubicación citada."
+  }
+}

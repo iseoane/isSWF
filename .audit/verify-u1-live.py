@@ -15,7 +15,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 AUDIT = ROOT / '.audit'
 context = json.loads((AUDIT / 'u1-triage-context.json').read_text())
-proposal = json.loads((AUDIT / 'u1-triage-proposal.json').read_text())
+historical_proposal = json.loads((AUDIT / 'u1-triage-proposal.json').read_text())
+proposal = json.loads((ROOT / 'examples/u1/proposal.json').read_text())
+proposal.update(historical_proposal)
+assert set(proposal) == set(json.loads((ROOT / 'examples/u1/proposal.json').read_text()))
 assert context['fixture'] is True
 assert proposal['authorization_id'] == context['authorization_id']
 temporary_state = tempfile.mkdtemp(prefix='isswf-u1-repeat-')

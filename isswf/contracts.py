@@ -16,6 +16,8 @@ SNAPSHOT_SOURCE_KEYS = {"repo", "number", "title", "labels", "observed_at", "fin
 QUESTION_KEYS = {"id", "kind", "question", "owner", "exit_condition"}
 RESOLUTION_KEYS = {"kind", "destination", "evidence", "explanation"}
 EVIDENCE_KEYS = {"ref", "observation"}
+ANSWER_KEYS = {"id", "question", "work_id", "authorization_id", "source_fingerprint", "source_revision", "actor", "text", "recorded_at"}
+DECISION_KEYS = {"work_id", "expected_revision", "question_id", "answer", "actor"}
 FORBIDDEN_KEYS = {"command", "commands", "shell", "script", "executable", "execution", "permissions", "authorization", "auth", "token", "secret", "model", "provider", "config", "environment", "env", "answers"}
 
 
@@ -157,14 +159,16 @@ def parse_proposal(raw: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any],
         raise ContractError("expected_revision debe ser un entero no negativo")
     questions = _questions(raw["questions"])
     refs = _strings(raw["decision_refs"], "decision_refs")
+    if len(refs) != len(set(refs)):
+        raise ContractError("decision_refs no puede repetir referencias")
     resolution = _resolution(raw["resolution"])
     preparation = raw["preparation"]
     if preparation == "ready-for-agent" and (not brief["acceptance"] or questions or resolution is not None):
         raise ContractError("ready-for-agent requiere acceptance no vacía, sin preguntas y resolution=null")
     if preparation in {"needs-info", "ready-for-human"} and not questions:
         raise ContractError(f"{preparation} requiere preguntas concretas para el operador")
-    if preparation == "needs-triage" and not resolution:
-        raise ContractError("needs-triage requiere una resolución no accionable")
+    if preparation == "needs-triage" and not (resolution or refs):
+        raise ContractError("needs-triage requiere una respuesta pendiente de reconciliar o una resolución no accionable")
     if resolution is not None and (preparation != "needs-triage" or not resolution["evidence"]):
         raise ContractError("resolution concluyente requiere needs-triage y evidencia")
     return source, brief, questions, refs, resolution
@@ -187,7 +191,7 @@ def parse_snapshot(value: Any) -> dict[str, Any]:
         raise ContractError("snapshot inválido: source no coincide con repo/issue")
     _text(value["id"], "snapshot.id")
     _text(value["authorization_id"], "snapshot.authorization_id")
-    if value["category"] not in CATEGORIES or value["preparation"] not in {"ready-for-agent", "needs-info", "ready-for-human", "needs-triage"}:
+    if not isinstance(value["category"], str) or value["category"] not in CATEGORIES or not isinstance(value["preparation"], str) or value["preparation"] not in {"ready-for-agent", "needs-info", "ready-for-human", "needs-triage"}:
         raise ContractError("snapshot inválido: category o preparation no admitidos")
     for key in ("motive", "next_step", "execution"):
         _text(value[key], f"snapshot.{key}")
@@ -207,15 +211,58 @@ def parse_snapshot(value: Any) -> dict[str, Any]:
         _text(brief[key], f"snapshot.brief.{key}")
     questions = _questions(value["questions"])
     refs = _strings(value["decision_refs"], "decision_refs")
+    if len(refs) != len(set(refs)):
+        raise ContractError("snapshot decision_refs repetidas")
     resolution = _resolution(value["resolution"])
-    if not isinstance(value["answers"], list):
+    answers = value["answers"]
+    if not isinstance(answers, list):
         raise ContractError("snapshot.answers debe ser una lista")
+    answer_by_id = {}
+    for answer in answers:
+        if not isinstance(answer, dict):
+            raise ContractError("Cada answer debe ser un objeto")
+        _exact(answer, ANSWER_KEYS, "answer")
+        if not isinstance(answer["question"], dict):
+            raise ContractError("answer.question debe ser un objeto")
+        question = _questions([answer["question"]])[0]
+        answer_id = _text(answer["id"], "answer.id")
+        if answer_id in answer_by_id:
+            raise ContractError("answer.id debe ser único")
+        if answer["work_id"] != value["id"] or answer["authorization_id"] != value["authorization_id"]:
+            raise ContractError("answer no coincide con work_id/authorization_id")
+        fingerprint = answer["source_fingerprint"]
+        if not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            raise ContractError("answer.source_fingerprint inválido")
+        _number(answer["source_revision"], "answer.source_revision")
+        _text(answer["actor"], "answer.actor")
+        _text(answer["text"], "answer.text")
+        _timestamp(answer["recorded_at"], "answer.recorded_at")
+        answer_by_id[answer_id] = {**answer, "question": question}
+    for answer_id in refs:
+        answer = answer_by_id.get(answer_id)
+        if not answer or answer["source_fingerprint"] != source["fingerprint"]:
+            raise ContractError("decision_refs debe referir respuestas del trabajo y fuente actuales")
     if value["preparation"] == "ready-for-agent" and (not brief["acceptance"] or questions or resolution is not None):
         raise ContractError("snapshot ready-for-agent inválido")
     if value["preparation"] in {"needs-info", "ready-for-human"} and not questions:
         raise ContractError("snapshot needs-info/ready-for-human requiere preguntas")
+    if value["preparation"] == "needs-triage" and not (resolution or refs):
+        raise ContractError("snapshot needs-triage requiere decisión pendiente")
     if resolution is not None and (value["preparation"] != "needs-triage" or not resolution["evidence"]):
         raise ContractError("snapshot resolution inválida")
     if source["observed_at"] != value["observed_at"] or revision < 1:
         raise ContractError("snapshot inválido: fechas o revisión incoherentes")
     return value
+
+
+def parse_decision(raw: dict[str, Any]) -> dict[str, Any]:
+    _exact(raw, DECISION_KEYS, "decisión")
+    if _forbidden(raw):
+        raise ContractError("La decisión no admite permisos ni configuración")
+    return {
+        "work_id": _text(raw["work_id"], "work_id"),
+        "expected_revision": _number(raw["expected_revision"], "expected_revision"),
+        "question_id": _text(raw["question_id"], "question_id"),
+        "answer": _text(raw["answer"], "answer"),
+        "actor": _text(raw["actor"], "actor"),
+    }

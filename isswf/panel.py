@@ -50,6 +50,7 @@ def _page(items: list[dict]) -> str:
             ("Exclusiones", _list(brief["exclusions"])),
             ("Aceptación", _list(brief["acceptance"])),
             ("Decisiones pendientes", _question_list(item["questions"])),
+            ("Respuestas registradas", _answer_list(item["answers"])),
             ("Resolución", _resolution(item["resolution"])),
             ("Riesgos", _list(brief["risks"])),
             ("Dependencias", _list(brief["dependencies"])),
@@ -77,6 +78,10 @@ def _list(values: list[str]) -> str:
 
 def _question_list(questions: list[dict]) -> str:
     return _list([f"{item['id']}: {item['question']} Responsable: {item['owner']}. Salida: {item['exit_condition']}" for item in questions])
+
+
+def _answer_list(answers: list[dict]) -> str:
+    return _list([f"{item['question']['id']} · revisión {item['source_revision']} · {item['actor']}: {item['text']}" for item in answers])
 
 
 def _resolution(value: dict | None) -> str:

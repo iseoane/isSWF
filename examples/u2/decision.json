@@ -1,0 +1,7 @@
+{
+  "work_id": "WORK_ID_DEVUELTO_POR_PREPARE",
+  "expected_revision": 1,
+  "question_id": "updated-at-meaning",
+  "answer": "Solo un cambio de estado cuenta como actualización.",
+  "actor": "operador-local"
+}

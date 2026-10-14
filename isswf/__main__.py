@@ -3,7 +3,7 @@ import argparse
 import json
 import sys
 
-from .intake import IntakeError, authorize, prepare, show
+from .intake import IntakeError, authorize, decide, prepare, show
 from .panel import serve
 
 
@@ -15,6 +15,8 @@ def main(argv: list[str] | None = None) -> int:
     auth.add_argument("file")
     prep = commands.add_parser("prepare")
     prep.add_argument("file")
+    decision = commands.add_parser("decide")
+    decision.add_argument("file")
     display = commands.add_parser("show")
     display.add_argument("id", nargs="?")
     panel = commands.add_parser("serve")
@@ -25,6 +27,8 @@ def main(argv: list[str] | None = None) -> int:
             result = authorize(args.state, args.file)
         elif args.command == "prepare":
             result = prepare(args.state, args.file)
+        elif args.command == "decide":
+            result = decide(args.state, args.file)
         elif args.command == "show":
             result = show(args.state, args.id)
         else:
