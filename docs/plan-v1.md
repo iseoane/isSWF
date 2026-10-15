@@ -27,6 +27,12 @@ La secuencia de trabajo acordada es:
 
 La ubicación `.factory/` es una propuesta para guardar artefactos de spec, plan y jobs, no una instalación runtime ni la instalación de #44. No está implementada ni aceptada como decisión final; #55 debe formalizar y probar la ubicación. Esta secuencia no cambia la [especificación v1](spec-v1.md).
 
+## Mantenimiento futuro: idioma de las instrucciones
+
+- [ ] Traducir al inglés las skills, perfiles de agentes y referencias operativas existentes que todavía estén en español. Conservar permisos, triggers, contratos y enlaces, y verificar que la traducción no cambia su comportamiento. No incluye traducir la documentación de producto ni la conversación con el operador.
+
+Desde ahora, las instrucciones operativas nuevas de la factory se escriben en inglés. La traducción de las existentes queda pendiente y no amplía el alcance de #55.
+
 ## Dependencias y trazabilidad
 
 La numeración propone un orden de entrega, no una cadena obligatoria. Las dependencias de la tabla esperan aceptación e integración humana de los contratos indicados. S01 aporta intake; S02, ejecución y entrega; S03, intentos y cambio de destino; S04, recuperación para operar en paralelo. Producto, retrospectiva y memoria no necesitan esperar a todas las capacidades anteriores. El grafo no divide el trabajo por frontend, backend o almacenamiento.
