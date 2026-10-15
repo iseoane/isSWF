@@ -1,0 +1,22 @@
+{
+  "fixture": "/tmp/isswf-boundary65-8522ceda-9960-4a3a-941a-09e6fec937bc-hqDzpd/fixture",
+  "files": [
+    {
+      "path": "boundary-check.mjs",
+      "sha256": "92961be03e4724669050381cc9ad540d55aa1223d25270ce575e7d85199e43a2"
+    },
+    {
+      "path": "check.mjs",
+      "sha256": "8d093c97e3c6592be0677bbbd95ee50a90b53d2adb40d5d1ba643d3ffecc50d6"
+    },
+    {
+      "path": "parent-canary-42ba5406-c227-46f9-a069-e0cb174d666a.mjs",
+      "sha256": "92961be03e4724669050381cc9ad540d55aa1223d25270ce575e7d85199e43a2"
+    },
+    {
+      "path": "sum.mjs",
+      "sha256": "d5889be441f078a42bbc3cc5f1e7e556fae06b5011c7c52969bfb32b5b72ef79"
+    }
+  ],
+  "scope": "Actual synthetic post-model fixture; symlink not copied; generated hostpaths historical. No transcript/credentials."
+}

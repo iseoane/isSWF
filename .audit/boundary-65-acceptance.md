@@ -17,4 +17,10 @@ After real model execution verify:
 - Host canary/source/test hashes intact, no auth/home mount. Tool-output limits and timeouts observed by controlled self-tests, not claimed as exhaustive resource isolation.
 - Provider failure remains failed/blocked; no retry with a different model to hide test failure. No PASS if model never executed.
 
+## Newly authorized follow-up after v4 partial
+
+The user approved a new bounded proof after the partial milestone, not repetition of unchanged instrumentation. Before this call, offline tests must distinguish a model-requested, host-selected execution of the immutable canary from ordinary shell output that merely echoes matching JSON. Successful parsing alone is not proof of execution. Trusted execution metadata must be correlated to the actual tool call; malformed, failed and spoofed ordinary results must not satisfy attribution. Compound shell commands must not silently become privileged canary operations.
+
+The same single callable tool and fixed sandbox policy remain required. Parent reads the actual delta, freezes a new candidate, runs offline tests and obtains independent pre-call approval. Only then may one fresh real Luna-high task run. Preserve all v4 partial evidence. No automatic repeat after another partial result.
+
 Security limits remain explicit. Supervisor/provider runtime is trusted host code and has network/auth authority; only tool subprocesses are sandboxed. Authorized synthetic fixture/tool output enters provider context. No complete output confidentiality, hostile-kernel protection, production/client readiness, MCP broker, lifecycle/recovery or multiwriter exclusion is demonstrated.

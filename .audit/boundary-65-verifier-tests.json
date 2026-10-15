@@ -1,0 +1,8 @@
+{
+  "fixture": "/tmp/isswf-boundary65-359f1047-fba0-4f06-a253-b4635f9b89e9-iyGovq/fixture",
+  "beforeExit": 0,
+  "unchangedBugRejected": true,
+  "correctFixExit": 0,
+  "modifiedOriginalCheckRejected": true,
+  "scope": "Parent verifier controls on separate owned disposable fixture; no model/provider call."
+}

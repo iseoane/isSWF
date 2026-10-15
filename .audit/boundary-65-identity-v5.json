@@ -1,0 +1,9 @@
+{
+  "snapshot": "703f95bf3a15c44e9ddfce862d0337cbe0d689c6528e628a9ca7cf089bc48f63",
+  "base": "556e50aedb508509dc7c946e0b5cc68644931677",
+  "files": [
+    ".audit/boundary-65-build-brief.md",
+    ".audit/boundary-65.mjs"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}
