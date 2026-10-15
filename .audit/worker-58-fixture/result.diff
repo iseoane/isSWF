@@ -1,0 +1,7 @@
+diff --git i/sum.mjs w/sum.mjs
+index 7419f3a2bfc59cf7b6310ae363072aa277940e9e..0de6d4960767ef813dd5c23bd7c97780c10553fd 100644
+--- i/sum.mjs
++++ w/sum.mjs
+@@ -1 +1 @@
+-export function sum(a,b) { return a - b; }
++export function sum(a,b) { return a + b; }

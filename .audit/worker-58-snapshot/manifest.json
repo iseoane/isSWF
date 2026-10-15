@@ -1,0 +1,17 @@
+{
+  "base": "7fd328f43505aaf27757d9fe33f7eee53939042d",
+  "diffSha256": "afb2c9ac0cb543878e7b6b52048ee906baa16524bca4cea92204553bfe18a132",
+  "files": [
+    {
+      "path": ".agents/roles/worker.md",
+      "mode": "100644",
+      "sha256": "e9b8b4ccec8528af9195495ac2e72244854383bc11c8edc000289625b094a3c3"
+    },
+    {
+      "path": ".audit/worker-58-build-brief.md",
+      "mode": "100644",
+      "sha256": "f0e76fa9f41d035e26a962d04b8082bf72d279f806cd3123ccbe647fb8818274"
+    }
+  ],
+  "snapshot": "d4f2d5af93410dc00d83c75ae16b8934e9fc3b0227482e17b12f58a13d122c13"
+}

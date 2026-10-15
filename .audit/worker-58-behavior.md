@@ -1,0 +1,9 @@
+# #58 factory-owned instruction exercise
+
+Parent reproduced the red baseline before dispatch: the first sum assertion expected 10 but received 4 (exit 1). After the behavior actor completed, parent replayed `node check.mjs`: `3 cases pass`. Git diff shows only `return a - b` to `return a + b` in `sum.mjs`; the three-case test file is unchanged and no new fixture file exists.
+
+Actual own-actor tool calls, retained in `worker-58-calls.json`, read the frozen candidate worker and exactly four factory-owned methodology references: bug-diagnosis, tdd, code-quality and comments. Calls read the two fixture files, reproduced the failing check, edited one operator, reran green and inspected diff/status. No external Pstack/Matt/Addy methodology file was loaded in these observed calls. Runtime metadata records `openai-codex/gpt-6-luna` with `high` effort. An Engram memory call is internal mandatory bookkeeping, not another target-file write.
+
+The effort wrapper used for transport contains only a task instruction and effort selection, not implementation principles. Nevertheless the Pstack transport and skill registry remained installed/visible: this is an observed instruction-dependency exercise, NOT a hermetic environment, independent installer or proof that the entire factory runs without Pstack. The writer of the worker paragraph used external development scaffolding; its output alone is not this behavioral evidence.
+
+The existing core verifier passed on the candidate `.agents` tree; this verifies links/catalog, not behavior. Frozen snapshot identity and candidate bytes are retained separately. The independent artifact review passed Standards/Spec with behavior initially pending. No benchmark, improvement over another worker, broad bug coverage, native role execution, permission enforcement or restart recovery is claimed.
