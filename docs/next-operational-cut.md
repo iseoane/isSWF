@@ -1,6 +1,8 @@
 # Siguiente corte operativo: activación fijada y aislamiento mínimo
 
-**Estado: propuesta de diseño; no es autorización de implementación.** Corte candidato posterior a #62. La activación por proyecto y el runtime de workers son capacidades distintas: descubrir/cargar una factory no prueba que pueda ejecutar workers seguros.
+**Estado de este documento: propuesta histórica de diseño, no evidencia actual ni autorización de implementación.** Se redactó antes de los probes #64/#65 y de la prueba real del source #44. La unidad de instalación compartida/activación local se verificó después; véanse la [guía de activación](activacion-por-proyecto.md), el [cierre de #44](../.audit/activation-44-closure.md), el [proof del source comprometido](../.audit/activation-44-committed-proof.json) y el [cierre final de #65](../.audit/boundary-65-final-closure.md). Los resultados posteriores no convierten estas opciones históricas en decisiones implementadas ni cierran el runtime, aislamiento exhaustivo o readiness de cliente.
+
+Corte candidato posterior a #62. La activación por proyecto y el runtime de workers son capacidades distintas: descubrir/cargar una factory no prueba que pueda ejecutar workers seguros.
 
 ## Resultado propuesto
 
@@ -40,6 +42,6 @@ Incluye diseño; un probe de aislamiento de fixture solo podría ejecutarse con 
 
 Excluye independencia del chat, fallback/recuperación, PR real, coordinación multiproyecto, producción, sandbox universal, nuevas dependencias/frameworks, autoimplementación de #44, resucitar el candidato Python o completar H1.
 
-#44 sigue pausada. Este corte no la reactiva ni amplía el alcance de implementación/lifecycle: antes de cualquier implementación, el coordinador debe reconciliar explícitamente #44 con esta propuesta, delimitar qué reutiliza y obtener un grant nuevo y separado. El push anterior autorizado no concede autorización para PR, merge, despliegue, instalación ni nuevo push; este documento tampoco las autoriza.
+Al redactarse esta propuesta, #44 seguía pausada. La verificación posterior completó solo el subalcance de instalación/activación documentado en el [cierre de #44](../.audit/activation-44-closure.md); no valida el resto del alcance ni reactiva trabajo de implementación/lifecycle. Cualquier trabajo adicional requiere reconciliación explícita y grant separado. El push anterior autorizado no concede autorización para PR, merge, despliegue, instalación adicional ni nuevo push; este documento tampoco las autoriza.
 
 **Preguntas abiertas para decisión tras el probe:** ¿qué plataformas/entornos de cliente se pretenden soportar primero? ¿Qué integración de modelo, red y credenciales puede quedar fuera del worker sin concederle autoridad? ¿Qué versión de factory se designa como estable y cuál como candidata para el ensayo? Una respuesta desconocida bloquea la afirmación de soporte, no se rellena por inferencia.

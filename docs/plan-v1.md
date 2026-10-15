@@ -18,19 +18,20 @@ U1 y U2 son unidades históricas locales de S01, implementadas con el CLI Python
 
 ## Estado reconciliado y siguiente secuencia
 
-#55–62 están cerrados dentro de sus límites documentados: contratos durables de jobs, perfiles, ejercicios manuales de worker/workflow/model routing, demo supervisada #61 con candidato técnicamente verificado y revisión independiente acotada PASS, y skill de setup #62. La aceptación de producto de #61 sigue pendiente. Estos cierres no equivalen a instalación runtime, independencia del chat, recuperación, fallback automático ni H1. Véanse los cierres exactos enlazados en la [visión](vision.md) y los límites de comportamiento en `.audit/`.
+#55–62 están cerrados dentro de sus límites documentados: contratos durables de jobs, perfiles, ejercicios manuales de worker/workflow/model routing, demo supervisada #61 con candidato técnicamente verificado y revisión independiente acotada PASS, y skill de setup #62. La aceptación de producto de #61 sigue pendiente. Estos cierres no equivalen a independencia del chat, recuperación, fallback automático ni H1. Véanse los cierres exactos enlazados en la [visión](vision.md) y los límites de comportamiento en `.audit/`.
+
+El subalcance de #44 de publicación de recursos compartidos y activación de proyecto está implementado desde `737fc7b` y su prueba del source comprometido pasó: veinte recursos verificados, dos skills y descubrimiento Pi offline condicionado a aprobación. Consulta la [guía de activación](activacion-por-proyecto.md), el [cierre y límites de #44](../.audit/activation-44-closure.md) y el [registro de prueba comprometida](../.audit/activation-44-committed-proof.json). #64 completó 20 casos con estado `PROBE_COMPLETE_WITH_UNPROVEN_REQUIREMENTS`, no con PASS de todos los requisitos ([cierre de #64](../.audit/probe-64-closure.md)); #65 sí obtuvo PASS para su experimento acotado ([cierre final de #65](../.audit/boundary-65-final-closure.md)). Ninguno demuestra integración runtime de Engram/Codegraph, broker MCP/autoridad, lifecycle/recuperación, multiwriter, seguridad exhaustiva, readiness para clientes ni H1. #44 no está completamente terminada y el resto de trabajo no queda autorizado por estos resultados.
 
 La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec y plan, artefactos bajo `.factory/jobs/`, ownership y entradas fijadas. No crea un nuevo store ni garantiza liveness, recuperación o backup. Las rutas configuradas viven en [`.factory/models.json`](../.factory/models.json); [la guía de modelos](model-routing.md) define interpretación y preflight manuales, no un resolver runtime.
 
 Siguiente secuencia propuesta, sin ampliar autorización:
 
-1. Reconciliar esta documentación y las decisiones aún abiertas.
-2. Preparar la activación mínima por proyecto y diseñar la **aislación técnica** antes de implementar #44. La aislación es requisito duro para uso con clientes, no una propiedad demostrada por Markdown.
-3. Diseñar y probar por separado el ciclo de vida independiente del chat.
-4. Seleccionar una issue real y obtener el grant necesario antes de ejecutar el trabajo que podría demostrar H1/PR. H1 no se considera logrado por #61.
-5. Abordar después fallback y recuperación, concurrencia e integraciones; traducción operativa y pasadas de verificación más profundas siguen pendientes.
+1. Resolver decisiones abiertas de ciclo de vida, recuperación, autoridad e integración que correspondan a un encargo futuro.
+2. Diseñar/probar por separado ciclo de vida independiente del chat, MCP/autoridad y exclusión multiwriter; los probes #64/#65 no cubren esos límites.
+3. Seleccionar una issue real y obtener el grant necesario antes de ejecutar el trabajo que podría demostrar H1/PR. H1 no se considera logrado por #61.
+4. Abordar fallback, recuperación, concurrencia e integraciones conforme a autorización; traducción operativa y pasadas de verificación más profundas siguen pendientes.
 
-El [siguiente corte operativo](next-operational-cut.md) concreta la propuesta de activación fijada y el diseño de aislamiento mínimo. #44 sigue pausada. Esta secuencia no cambia la [especificación v1](spec-v1.md), no autoriza una nueva acción remota y no declara S01, S02 ni los 61 criterios completos.
+El [siguiente corte operativo](next-operational-cut.md) conserva la propuesta anterior al probe; sus opciones no son evidencia actual ni decisiones de implementación. Esta secuencia no cambia la [especificación v1](spec-v1.md), no autoriza acciones remotas y no declara S01, S02, H1 ni los 61 criterios completos.
 
 Antes de usar la factory con clientes, debe demostrarse aislamiento técnico de archivos, herramientas y efectos autorizados. El demo #61 no lo hizo.
 
