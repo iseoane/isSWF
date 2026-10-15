@@ -1,0 +1,21 @@
+{
+  "agent": "a53cadda3e3f61812",
+  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-15T16-12-19-104Z_ff50451a-60a6-41a9-a29d-041fa5b874dd.jsonl",
+  "metadata": [
+    {
+      "type": "model_change",
+      "id": "b554edee",
+      "parentId": null,
+      "timestamp": "2026-10-15T16:12:19.702Z",
+      "provider": "opencode-go",
+      "modelId": "deepseek-v4.1-flash"
+    },
+    {
+      "type": "thinking_level_change",
+      "id": "8371963a",
+      "parentId": "b554edee",
+      "timestamp": "2026-10-15T16:12:19.702Z",
+      "thinkingLevel": "max"
+    }
+  ]
+}

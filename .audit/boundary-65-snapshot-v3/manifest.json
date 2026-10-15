@@ -1,0 +1,17 @@
+{
+  "base": "cb58f811b3c5c5127d437d60d5f2994125ec0ab1",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".audit/boundary-65-build-brief.md",
+      "mode": "100644",
+      "sha256": "c1d62784e898b1ee8d0547492962261569e7021b69b844687029f363a88a9979"
+    },
+    {
+      "path": ".audit/boundary-65.mjs",
+      "mode": "100644",
+      "sha256": "f2323123c72c3b02c4631f6be399f1c85bdeac1f370bb9b4222d7802688a85aa"
+    }
+  ],
+  "snapshot": "efc9ac927489424dbc03428190a6a691076b30d944a9cc8e67b21c8c45097b4b"
+}

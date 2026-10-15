@@ -1,0 +1,21 @@
+{
+  "agent": "a76cfa2db5ac60031",
+  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-15T16-03-31-350Z_382c2ada-6dff-44a2-baaa-6dc40b02e75a.jsonl",
+  "metadata": [
+    {
+      "type": "model_change",
+      "id": "c4b8c876",
+      "parentId": null,
+      "timestamp": "2026-10-15T16:03:31.926Z",
+      "provider": "openai-codex",
+      "modelId": "gpt-6-luna"
+    },
+    {
+      "type": "thinking_level_change",
+      "id": "37508bfd",
+      "parentId": "c4b8c876",
+      "timestamp": "2026-10-15T16:03:31.926Z",
+      "thinkingLevel": "high"
+    }
+  ]
+}

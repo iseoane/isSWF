@@ -1,0 +1,22 @@
+{
+  "fixture": "/tmp/isswf-boundary65-3b68df04-9a7b-4b81-8035-89d900aa9463-UdEI40/fixture",
+  "files": [
+    {
+      "path": "boundary-check.mjs",
+      "sha256": "c5a27c26c291049a964382367ec9df43159e1b7bb736a5d920f2ce8daa1d90d9"
+    },
+    {
+      "path": "check.mjs",
+      "sha256": "8d093c97e3c6592be0677bbbd95ee50a90b53d2adb40d5d1ba643d3ffecc50d6"
+    },
+    {
+      "path": "parent-canary-47c2217d-a00f-4eae-a045-2e41879a0eb5.mjs",
+      "sha256": "c5a27c26c291049a964382367ec9df43159e1b7bb736a5d920f2ce8daa1d90d9"
+    },
+    {
+      "path": "sum.mjs",
+      "sha256": "d5889be441f078a42bbc3cc5f1e7e556fae06b5011c7c52969bfb32b5b72ef79"
+    }
+  ],
+  "scope": "Synthetic actual post-model fixture; no transcript or credentials. Symlink intentionally not copied; outside path captured as host canary in generated scripts is historical."
+}
