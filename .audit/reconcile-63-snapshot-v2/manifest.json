@@ -1,0 +1,37 @@
+{
+  "base": "5c85a3834ddcaf670ee5dc07d286b7c8f360f88e",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".audit/nextcut-63-build-brief.md",
+      "mode": "100644",
+      "sha256": "690626cc995561c4036ca5dc78f11c9fe145641c73f89032db819a7767f69d2a"
+    },
+    {
+      "path": ".audit/reconcile-63-build-brief.md",
+      "mode": "100644",
+      "sha256": "eb57d02f21c525961ff2e0998919f277a580264e4498f2cdbc81a28ad0ca3f9f"
+    },
+    {
+      "path": "docs/arranque-por-proyecto.md",
+      "mode": "100644",
+      "sha256": "8b26a68bc033f9fa17985475f0869f7ea8b367cd5ed96174af8f77e7b5e790d1"
+    },
+    {
+      "path": "docs/next-operational-cut.md",
+      "mode": "100644",
+      "sha256": "aac54932eb454b08a8e4b32bfe729223fa22e7ac1e3840856dfad4a5fed8bdb5"
+    },
+    {
+      "path": "docs/plan-v1.md",
+      "mode": "100644",
+      "sha256": "9d8a97cc72e6a714b96de5323ae47b0f1481975a50b97548a0a6601c566cef89"
+    },
+    {
+      "path": "docs/vision.md",
+      "mode": "100644",
+      "sha256": "b9afa0ba76a39b6a3cd9a77d48df24282acc3772a299778bdbd7cfff05407241"
+    }
+  ],
+  "snapshot": "e80cdd17637077e3cfc35e7a316d72d56cc49be74ba8234ffaf2862346d4b7ca"
+}

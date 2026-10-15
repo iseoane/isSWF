@@ -1,0 +1,216 @@
+{
+  "root": "/tmp/isswf-reconcile63-v2-Icdh7T",
+  "base": "5c85a3834ddcaf670ee5dc07d286b7c8f360f88e",
+  "files": [
+    {
+      "path": "docs/vision.md",
+      "sha256": "b9afa0ba76a39b6a3cd9a77d48df24282acc3772a299778bdbd7cfff05407241"
+    },
+    {
+      "path": "docs/plan-v1.md",
+      "sha256": "9d8a97cc72e6a714b96de5323ae47b0f1481975a50b97548a0a6601c566cef89"
+    },
+    {
+      "path": "docs/arranque-por-proyecto.md",
+      "sha256": "8b26a68bc033f9fa17985475f0869f7ea8b367cd5ed96174af8f77e7b5e790d1"
+    },
+    {
+      "path": "docs/next-operational-cut.md",
+      "sha256": "aac54932eb454b08a8e4b32bfe729223fa22e7ac1e3840856dfad4a5fed8bdb5"
+    },
+    {
+      "path": ".audit/reconcile-63-build-brief.md",
+      "sha256": "eb57d02f21c525961ff2e0998919f277a580264e4498f2cdbc81a28ad0ca3f9f"
+    },
+    {
+      "path": ".audit/nextcut-63-build-brief.md",
+      "sha256": "690626cc995561c4036ca5dc78f11c9fe145641c73f89032db819a7767f69d2a"
+    }
+  ],
+  "links": [
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/markdown-core-closure.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/quality-54-closure.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/adaptation-49-closure.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/arranque-por-proyecto.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/plan-v1.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/u1-usage.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/u1-usage.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/next-operational-cut.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/research/referencias.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/markdown-core-closure.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/quality-54-closure.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/adaptation-49-closure.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/vision.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/durable-work.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".factory/models.json"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/model-routing.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/next-operational-cut.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/s01-intake.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/u1-usage.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/u2-usage.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": "docs/durable-work.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".factory/models.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": "docs/model-routing.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/durable-55-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/profiles-57-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/worker-58-behavior.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/workflow-59-behavior-limits.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/models-60-behavior-limits.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/e2e-61-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/setup-62-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": "docs/next-operational-cut.md"
+    }
+  ]
+}

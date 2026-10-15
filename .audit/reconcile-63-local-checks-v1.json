@@ -1,0 +1,195 @@
+{
+  "files": [
+    {
+      "path": "docs/vision.md",
+      "sha256": "97ef3ea529a95b2a8be48ae6a9cd0f0f3e56dd0f7609b68f2622ad43e644b207"
+    },
+    {
+      "path": "docs/plan-v1.md",
+      "sha256": "921e346f74975de81a1f037ff8e988a2993ab31a2852d81a709d1b933a2b11fc"
+    },
+    {
+      "path": "docs/arranque-por-proyecto.md",
+      "sha256": "64177f8e8063444c7e116eb83d783072b81065221865fd627e255b5a09e03661"
+    },
+    {
+      "path": "docs/next-operational-cut.md",
+      "sha256": "2d59d1e2f7828866f6e78b5ceec5e3efe7fdd5cb341d06f3bf7b1b0de7f32460"
+    }
+  ],
+  "links": [
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/markdown-core-closure.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/quality-54-closure.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/adaptation-49-closure.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/arranque-por-proyecto.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/plan-v1.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/u1-usage.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/u1-usage.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/research/referencias.md"
+    },
+    {
+      "file": "docs/vision.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/markdown-core-closure.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/quality-54-closure.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/adaptation-49-closure.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/codegraph-index-verify.json"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/vision.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/durable-work.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".factory/models.json"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/model-routing.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/spec-v1.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/s01-intake.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/u1-usage.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": "docs/u2-usage.md"
+    },
+    {
+      "file": "docs/plan-v1.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": "docs/durable-work.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".factory/models.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": "docs/model-routing.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/durable-55-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/profiles-57-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/worker-58-behavior.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/workflow-59-behavior-limits.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/models-60-behavior-limits.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/e2e-61-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/setup-62-closure.md"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/engram-integration.json"
+    },
+    {
+      "file": "docs/arranque-por-proyecto.md",
+      "target": ".audit/codegraph-index-verify.json"
+    }
+  ],
+  "scope": "File-link existence over combined candidate plus unchanged repository dependencies; no runtime proof."
+}
