@@ -1,0 +1,37 @@
+{
+  "base": "9cd0eebfea8ecf79043a42b4cfcf560bf299936f",
+  "diffSha256": "483d2cbfe32257437f080bc16402f8076d9875cb1e386f0b6901586136a78e76",
+  "files": [
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "mode": "100644",
+      "sha256": "6bd762b8bc349d42c6809654dba1fc1fc6bd47dec6579bc6f6f0480bf7bcc24f"
+    },
+    {
+      "path": ".audit/durable-55-build-brief.md",
+      "mode": "100644",
+      "sha256": "1975c1641a5a839871cf0575db8831386160fb137e9f0a4846785d5e715556d7"
+    },
+    {
+      "path": "docs/durable-work.md",
+      "mode": "100644",
+      "sha256": "5566805154a27f80e2de28a493f331d6cf03cf112c6bb074af33de05003a99f8"
+    },
+    {
+      "path": "docs/templates/attempt.md",
+      "mode": "100644",
+      "sha256": "c6af768d64176cd65b2053cf6f4538658d8525afce2353d41d3587eba8d2a54e"
+    },
+    {
+      "path": "docs/templates/job-brief.md",
+      "mode": "100644",
+      "sha256": "4ed6bdc5a270e234004a1902550806b975f4bdc1ac39599c1dce90a2ac560a9a"
+    },
+    {
+      "path": "docs/templates/review.md",
+      "mode": "100644",
+      "sha256": "02f9c45756dae21d91727975e586205a1cd37c3c82c43e0c970b952bfb36f4b7"
+    }
+  ],
+  "snapshot": "f92c54e1a2f7b95e2c1a47ed6efc4dc38acb4dce27df908ff0d6e5ac45766994"
+}

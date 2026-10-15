@@ -1,0 +1,3 @@
+# #55 correction command scope incident
+
+Correction actor a1485c3316d7d7e9a reported using Python for a readonly relative-link check despite the explicit no-Python/no-runtime instruction. Its completed report is retained in the parent-owned actor session. This is a command-scope violation; no claim is made that this attempt complied fully. No installation or Python dependency was added to the factory artifacts. The parent inspected the four-file delta and will independently repeat link checks with Node; the Python check is not accepted as gate evidence. This does not establish runtime enforcement of the Markdown prohibition.

@@ -1,0 +1,12 @@
+{
+  "root": "/tmp/isswf-durable55-z4SI0V",
+  "r1": "0a8a8e6242b9d4494b42dd1b7eb6c504ce1439d3",
+  "r2": "4b44a807679658a4ebc9490b43a9b8f897014094",
+  "checks": {
+    "pinnedOldSpec": true,
+    "changedCurrentSpec": true,
+    "missingPathExit": 128,
+    "missingRevisionExit": 128
+  },
+  "limits": "Git reads and explicit recorded dependency only. No process recovery, concurrency enforcement, authorization enforcement or agent behavior proven."
+}

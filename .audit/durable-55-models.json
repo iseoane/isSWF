@@ -1,0 +1,95 @@
+{
+  "scope": "Own assigned actor logs; runtime recorded effort, not provider-internal semantics.",
+  "records": [
+    {
+      "log": "2026-10-15T05-30-41-947Z_d583656e-00be-4553-a22b-d448ef58f7e3.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "effortChanges": [
+        "high"
+      ],
+      "lastTimestamp": "2026-10-15T05:31:37.933Z"
+    },
+    {
+      "log": "2026-10-15T05-30-41-949Z_946e76dd-c6e1-4728-af55-30819b022e0b.jsonl",
+      "models": [
+        "opencode-go/deepseek-v4.1-flash"
+      ],
+      "effortChanges": [
+        "max"
+      ],
+      "lastTimestamp": "2026-10-15T05:33:05.822Z"
+    },
+    {
+      "log": "2026-10-15T05-34-27-700Z_160d4eec-5c32-4dc6-a072-255580971212.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "effortChanges": [
+        "high"
+      ],
+      "lastTimestamp": "2026-10-15T05:35:07.337Z"
+    },
+    {
+      "log": "2026-10-15T05-37-54-997Z_b53f22b2-72a1-424a-b33b-4e0c672b11a5.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "effortChanges": [
+        "high"
+      ],
+      "lastTimestamp": "2026-10-15T05:39:26.448Z"
+    },
+    {
+      "log": "2026-10-15T05-41-54-838Z_acf9014f-9aff-402e-bbfd-40672af2e26e.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "effortChanges": [
+        "high"
+      ],
+      "lastTimestamp": "2026-10-15T05:42:37.506Z"
+    },
+    {
+      "log": "2026-10-15T05-41-54-847Z_b5a8d336-1c0f-4cfb-9bc6-43106a0f9e2e.jsonl",
+      "models": [
+        "opencode-go/deepseek-v4.1-flash"
+      ],
+      "effortChanges": [
+        "max"
+      ],
+      "lastTimestamp": "2026-10-15T05:44:59.672Z"
+    },
+    {
+      "log": "2026-10-15T05-45-16-035Z_1eb6e2b4-68ce-495f-80bb-965521ad3ff5.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "effortChanges": [
+        "high"
+      ],
+      "lastTimestamp": "2026-10-15T05:46:48.771Z"
+    },
+    {
+      "log": "2026-10-15T05-49-14-575Z_43dfdfe6-43d4-4e67-abbb-e0e4d9b01cf3.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "effortChanges": [
+        "high"
+      ],
+      "lastTimestamp": "2026-10-15T05:49:47.194Z"
+    },
+    {
+      "log": "2026-10-15T05-49-14-582Z_f5c050b7-5bbc-4088-8dcc-0f5caf46cdc3.jsonl",
+      "models": [
+        "opencode-go/deepseek-v4.1-flash"
+      ],
+      "effortChanges": [
+        "max"
+      ],
+      "lastTimestamp": "2026-10-15T05:51:35.987Z"
+    }
+  ]
+}

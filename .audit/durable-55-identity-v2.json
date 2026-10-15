@@ -1,0 +1,13 @@
+{
+  "snapshot": "f92c54e1a2f7b95e2c1a47ed6efc4dc38acb4dce27df908ff0d6e5ac45766994",
+  "base": "9cd0eebfea8ecf79043a42b4cfcf560bf299936f",
+  "files": [
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".audit/durable-55-build-brief.md",
+    "docs/durable-work.md",
+    "docs/templates/attempt.md",
+    "docs/templates/job-brief.md",
+    "docs/templates/review.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

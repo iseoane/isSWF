@@ -1,0 +1,10 @@
+{
+  "links": [
+    "spec-v1.md",
+    "plan-v1.md",
+    "templates/job-brief.md",
+    "templates/attempt.md",
+    "templates/review.md"
+  ],
+  "passed": true
+}
