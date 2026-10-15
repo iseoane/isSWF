@@ -1,0 +1,130 @@
+{
+  "probe": 64,
+  "status": "BLOCKED_OR_FAILED",
+  "root": "/tmp/isswf-probe64-tXFzsA",
+  "repository": "/home/iseoane/Work/isSWF/.claude/worktrees/agent-a4024e2e5f5799b57",
+  "sourceId": "5c9a516fa967a9f7b6fcbaf774a315b59a6cff94",
+  "targetId": {
+    "fixture": "/tmp/isswf-probe64-tXFzsA/project",
+    "markerHashesBefore": {
+      "/tmp/isswf-probe64-tXFzsA/project/AGENTS.md": "077a3c99a4193c62a193f99449f3e50584663ffb9393ef787a473b3e423f69f0",
+      "/tmp/isswf-probe64-tXFzsA/project/.pi/settings.json": "4577606235cd43284b4120307a3f87a1364328feb5f3bca68d6104696003ab85",
+      "/tmp/isswf-probe64-tXFzsA/project/.factory/models.json": "f232de5483f9bcde2443904fa6b5734211997ffd8302b2dc44d67b3d8925fb6a"
+    }
+  },
+  "cases": [
+    {
+      "name": "preflight-bwrap-namespaces",
+      "status": "PROVEN",
+      "expected": "required namespaces and minimal runtime start",
+      "actual": {
+        "bwrapVersion": "bubblewrap 0.12.0",
+        "exitCode": 0
+      },
+      "note": ""
+    },
+    {
+      "name": "systemd-run-user-preflight",
+      "status": "OBSERVED_AVAILABLE",
+      "expected": "bounded ephemeral user unit only; not isolation evidence",
+      "actual": {
+        "exitCode": 0,
+        "stderr": ""
+      },
+      "note": "not used as a sandbox"
+    },
+    {
+      "name": "fixture-ownership",
+      "status": "PRECONDITION",
+      "expected": "unique mkdtemp root; one probe writer",
+      "actual": {
+        "root": "/tmp/isswf-probe64-tXFzsA",
+        "project": "/tmp/isswf-probe64-tXFzsA/project",
+        "exclusiveOwnerAssumed": true
+      },
+      "note": "not proof against a second writer"
+    },
+    {
+      "name": "outside-controls-live",
+      "status": "PROVEN",
+      "expected": "canary exists/readable and TCP listener accepts on host loopback",
+      "actual": {
+        "fileHash": "6301728d4c67c5f1610e2667ab2f0cabf1063b7d78317633613c3be7e1050e5c",
+        "fileBytes": "TASK64-FAKE-OUTSIDE-CANARY",
+        "listenerPort": 34425
+      },
+      "note": ""
+    },
+    {
+      "name": "pi-rpc-noapprove-setup-absent",
+      "status": "PROVEN",
+      "expected": "no skill loaded",
+      "actual": [],
+      "note": ""
+    },
+    {
+      "name": "pi-rpc-approved-setup-discovery",
+      "status": "PROVEN",
+      "expected": "one skill from /tmp/isswf-probe64-tXFzsA/factory/.agents/skills/isswf-setup/SKILL.md",
+      "actual": [
+        {
+          "name": "skill:isswf-setup",
+          "description": "Set up or reconcile an authorized project's setup decisions, permissions, checks, and delivery boundary.",
+          "source": "skill",
+          "sourceInfo": {
+            "path": "/factory/.agents/skills/isswf-setup/SKILL.md",
+            "source": "/factory",
+            "scope": "project",
+            "origin": "package",
+            "baseDir": "/factory"
+          }
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "worker-positive-write",
+      "status": "PROVEN",
+      "expected": "worker writes only under /work",
+      "actual": {
+        "output": "{\"outsideRead\":\"ENOENT\",\"outsideWrite\":\"ENOENT\",\"symlinkRead\":\"ENOENT\",\"symlinkWrite\":\"ENOENT\",\"sourceWrite\":\"EROFS\",\"subprocess\":{\"status\":1,\"error\":null,\"stderr\":\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\n\"},\"network\":\"ECONNREFUSED\"}\nwrite-ok\n",
+        "exitCode": 0,
+        "cancelled": false,
+        "truncated": false
+      },
+      "note": ""
+    },
+    {
+      "name": "outside-canary-read",
+      "status": "FAIL",
+      "expected": "ENOENT; pre-existing canary readable on host",
+      "note": ""
+    },
+    {
+      "name": "probe-aborted",
+      "status": "BLOCKED_OR_FAILED",
+      "expected": "failed preflight/case retained; no inferred PASS",
+      "actual": {
+        "name": "Error",
+        "message": "Pi RPC probe failed outside-canary-read: {\"data\":{\"output\":\"{\\\"outsideRead\\\":\\\"ENOENT\\\",\\\"outsideWrite\\\":\\\"ENOENT\\\",\\\"symlinkRead\\\":\\\"ENOENT\\\",\\\"symlinkWrite\\\":\\\"ENOENT\\\",\\\"sourceWrite\\\":\\\"EROFS\\\",\\\"subprocess\\\":{\\\"status\\\":1,\\\"error\\\":null,\\\"stderr\\\":\\\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\\\n\\\"},\\\"network\\\":\\\"ECONNREFUSED\\\"}\\nwrite-ok\\n\",\"exitCode\":0,\"cancelled\":false,\"truncated\":false},\"report\":{\"parseError\":true,\"output\":\"{\\\"outsideRead\\\":\\\"ENOENT\\\",\\\"outsideWrite\\\":\\\"ENOENT\\\",\\\"symlinkRead\\\":\\\"ENOENT\\\",\\\"symlinkWrite\\\":\\\"ENOENT\\\",\\\"sourceWrite\\\":\\\"EROFS\\\",\\\"subprocess\\\":{\\\"status\\\":1,\\\"error\\\":null,\\\"stderr\\\":\\\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\\\n\\\"},\\\"network\\\":\\\"ECONNREFUSED\\\"}\\nwrite-ok\\n\",\"exitCode\":0}}",
+        "stack": [
+          "Error: Pi RPC probe failed outside-canary-read: {\"data\":{\"output\":\"{\\\"outsideRead\\\":\\\"ENOENT\\\",\\\"outsideWrite\\\":\\\"ENOENT\\\",\\\"symlinkRead\\\":\\\"ENOENT\\\",\\\"symlinkWrite\\\":\\\"ENOENT\\\",\\\"sourceWrite\\\":\\\"EROFS\\\",\\\"subprocess\\\":{\\\"status\\\":1,\\\"error\\\":null,\\\"stderr\\\":\\\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\\\n\\\"},\\\"network\\\":\\\"ECONNREFUSED\\\"}\\nwrite-ok\\n\",\"exitCode\":0,\"cancelled\":false,\"truncated\":false},\"report\":{\"parseError\":true,\"output\":\"{\\\"outsideRead\\\":\\\"ENOENT\\\",\\\"outsideWrite\\\":\\\"ENOENT\\\",\\\"symlinkRead\\\":\\\"ENOENT\\\",\\\"symlinkWrite\\\":\\\"ENOENT\\\",\\\"sourceWrite\\\":\\\"EROFS\\\",\\\"subprocess\\\":{\\\"status\\\":1,\\\"error\\\":null,\\\"stderr\\\":\\\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\\\n\\\"},\\\"network\\\":\\\"ECONNREFUSED\\\"}\\nwrite-ok\\n\",\"exitCode\":0}}",
+          "    at file:///home/iseoane/Work/isSWF/.claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64.mjs:184:24"
+        ]
+      },
+      "note": ""
+    }
+  ],
+  "limits": [
+    "disposable single-writer fixture only",
+    "no lifecycle/recovery or multiwriter proof",
+    "no real model/auth/provider integration",
+    "MCP disabled; no authority broker claimed",
+    "no deliberate inherited-file-descriptor test",
+    "no general resource limits or production security claim"
+  ],
+  "error": {
+    "name": "Error",
+    "message": "Pi RPC probe failed outside-canary-read: {\"data\":{\"output\":\"{\\\"outsideRead\\\":\\\"ENOENT\\\",\\\"outsideWrite\\\":\\\"ENOENT\\\",\\\"symlinkRead\\\":\\\"ENOENT\\\",\\\"symlinkWrite\\\":\\\"ENOENT\\\",\\\"sourceWrite\\\":\\\"EROFS\\\",\\\"subprocess\\\":{\\\"status\\\":1,\\\"error\\\":null,\\\"stderr\\\":\\\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\\\n\\\"},\\\"network\\\":\\\"ECONNREFUSED\\\"}\\nwrite-ok\\n\",\"exitCode\":0,\"cancelled\":false,\"truncated\":false},\"report\":{\"parseError\":true,\"output\":\"{\\\"outsideRead\\\":\\\"ENOENT\\\",\\\"outsideWrite\\\":\\\"ENOENT\\\",\\\"symlinkRead\\\":\\\"ENOENT\\\",\\\"symlinkWrite\\\":\\\"ENOENT\\\",\\\"sourceWrite\\\":\\\"EROFS\\\",\\\"subprocess\\\":{\\\"status\\\":1,\\\"error\\\":null,\\\"stderr\\\":\\\"cat: /tmp/isswf-probe64-tXFzsA/outside-canary.txt: No such file or directory\\\\n\\\"},\\\"network\\\":\\\"ECONNREFUSED\\\"}\\nwrite-ok\\n\",\"exitCode\":0}}"
+  }
+}

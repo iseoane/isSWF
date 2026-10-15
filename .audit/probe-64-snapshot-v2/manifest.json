@@ -1,0 +1,17 @@
+{
+  "base": "5c9a516fa967a9f7b6fcbaf774a315b59a6cff94",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".audit/probe-64-build-brief.md",
+      "mode": "100644",
+      "sha256": "4c5c9e09a6edfbb246165f2a1bbc8fe7102f5e576745eaec4ac7a178dcc344a1"
+    },
+    {
+      "path": ".audit/probe-64.mjs",
+      "mode": "100644",
+      "sha256": "7a06c04a828f08a27e8aa1935f6e9feb4f6e445635438ccffbffa1ea437cfced"
+    }
+  ],
+  "snapshot": "7da7450df25a22b41b5a85504142c879f54c1513df90fa042279415905c1de6d"
+}

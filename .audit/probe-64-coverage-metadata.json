@@ -1,0 +1,17 @@
+[
+  {
+    "type": "model_change",
+    "id": "2ecef72a",
+    "parentId": null,
+    "timestamp": "2026-10-15T14:59:12.261Z",
+    "provider": "opencode-go",
+    "modelId": "deepseek-v4.1-flash"
+  },
+  {
+    "type": "thinking_level_change",
+    "id": "3b3a65e3",
+    "parentId": "2ecef72a",
+    "timestamp": "2026-10-15T14:59:12.261Z",
+    "thinkingLevel": "max"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "instrument": {
+    "path": "/home/iseoane/Work/isSWF/.claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64.mjs",
+    "sha256": "7a06c04a828f08a27e8aa1935f6e9feb4f6e445635438ccffbffa1ea437cfced"
+  },
+  "source": "5c9a516fa967a9f7b6fcbaf774a315b59a6cff94",
+  "settingsUnchangedAfterActivationObserved": true,
+  "hostTcpPositiveControl": true,
+  "actualFileReadback": true,
+  "status": "PROBE_COMPLETE_WITH_UNPROVEN_REQUIREMENTS",
+  "scope": "Parent assertions on this result; does not repair missing instrument regression assertion or prove arbitrary executions."
+}

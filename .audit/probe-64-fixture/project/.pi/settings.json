@@ -1,0 +1,13 @@
+{
+  "customFixtureField": {
+    "keep": true
+  },
+  "packages": [
+    {
+      "source": "/work/existing-local-source"
+    },
+    {
+      "source": "/factory"
+    }
+  ]
+}

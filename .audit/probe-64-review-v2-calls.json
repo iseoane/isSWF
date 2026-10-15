@@ -1,0 +1,164 @@
+{
+  "metadata": [
+    {
+      "type": "model_change",
+      "id": "cbfffbc2",
+      "parentId": null,
+      "timestamp": "2026-10-15T15:14:29.433Z",
+      "provider": "opencode-go",
+      "modelId": "deepseek-v4.1-flash"
+    },
+    {
+      "type": "thinking_level_change",
+      "id": "77715500",
+      "parentId": "cbfffbc2",
+      "timestamp": "2026-10-15T15:14:29.433Z",
+      "thinkingLevel": "max"
+    }
+  ],
+  "calls": [
+    {
+      "type": "toolCall",
+      "id": "call_00_aefdu2KSX58jCTZiI8tz9021",
+      "name": "bash",
+      "arguments": {
+        "command": "pwd; ls -la; echo ---; ls -la .audit 2>/dev/null | head -50",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_01_7uKKmKOuOiKM0d1hZ4Bo5064",
+      "name": "bash",
+      "arguments": {
+        "command": "find . -path ./node_modules -prune -o -name '*probe-64*' -print 2>/dev/null | head -50",
+        "timeout": 60
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_SileM26sKH5cSwEojOC02976",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; wc -l -c .audit/probe-64-review-v1.md .claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64.mjs .claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64-build-brief.md .audit/probe-64-parent-v2.json .audit/probe-64-builder-v2.json .audit/probe-64-snapshot-v2/payload/.audit/probe-64.mjs 2>/dev/null; echo ---; sha256sum .claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64.mjs .audit/probe-64-snapshot-v2/payload/.audit/probe-64.mjs .audit/probe-64-candidate-v1/.audit/probe-64.mjs .claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64-build-brief.md .audit/probe-64-candidate-v1/.audit/probe-64-build-brief.md .audit/probe-64-snapshot-v2/payload/.audit/probe-64-build-brief.md 2>/dev/null",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_gu3xn2lePFmqCTsOeboO0374",
+      "name": "read",
+      "arguments": {
+        "path": "/home/iseoane/Work/isSWF/.audit/probe-64-review-v1.md",
+        "offset": 1,
+        "limit": 100
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_01_lOCowxPTQj3GjwcQNjPq9262",
+      "name": "read",
+      "arguments": {
+        "path": "/home/iseoane/Work/isSWF/.claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64-build-brief.md",
+        "offset": 1,
+        "limit": 100
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_ZDIXsgtPMzTBhg90xF5w6453",
+      "name": "read",
+      "arguments": {
+        "limit": 291,
+        "offset": 1,
+        "path": "/home/iseoane/Work/isSWF/.claude/worktrees/agent-a4024e2e5f5799b57/.audit/probe-64.mjs"
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_kqsuX5kASgc0ULSI3kJ15624",
+      "name": "read",
+      "arguments": {
+        "limit": 360,
+        "offset": 1,
+        "path": "/home/iseoane/Work/isSWF/.audit/probe-64-parent-v2.json"
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_dDVXfEx8WokL4UMOs6Vq7720",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; ls -la .audit/probe-64-parent-v2-assertions.json .audit/probe-64-identity-v2.json 2>&1; echo ---; cat .audit/probe-64-identity-v2.json 2>/dev/null; echo ---; wc -c .audit/probe-64-parent-v2-assertions.json 2>/dev/null",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_01_9AvutqvWK0gtyZ6FSG8d5877",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; tail -30 .audit/probe-64-parent-v2.log 2>/dev/null; echo \"=== head ===\"; head -5 .audit/probe-64-parent-v2.log 2>/dev/null",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_D1fYQZUKn8IUPSwXQzuo6815",
+      "name": "read",
+      "arguments": {
+        "limit": 60,
+        "offset": 1,
+        "path": "/home/iseoane/Work/isSWF/.audit/probe-64-parent-v2-assertions.json"
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_01_2idTMvq26XLqBNIhMIAl8070",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; python3 - <<'EOF' 2>/dev/null || true\nimport hashlib, os, itertools\nroot='.claude/worktrees/agent-a4024e2e5f5799b57'\nfiles=['.audit/probe-64-build-brief.md','.audit/probe-64.mjs']\nhs=[hashlib.sha256(open(os.path.join(root,f),'rb').read()).hexdigest() for f in files]\ntarget='7da7450df25a22b41b5a85504142c879f54c1513df90fa042279415905c1de6d'\ncands={}\ncands['concat-hash-only']=(hs[0]+hs[1])\ncands['lines-path-hash']=''.join(f'{root}/{f}  {h}\\n' for f,h in zip(files,hs))\ncands['lines-hash-path']=''.join(f'{h}  {root}/{f}\\n' for f,h in zip(files,hs))\ncands['lines-hash-path-noroot']=''.join(f'{h}  {f}\\n' for f,h in zip(files,hs))\nfor k,v in cands.items():\n    print(k, hashlib.sha256(v.encode()).hexdigest()==target)\nEOF",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_XFAW4eVl56xQbenavrV47986",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; sha256sum .audit/probe-64-parent-v2.json .audit/probe-64-builder-v2.json .audit/probe-64-parent-v2-assertions.json .audit/probe-64-identity-v2.json",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_XW3WAFjBlNiIyUHDB3OX9271",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; diff <(head -c 2000 .audit/probe-64-parent-v2.json) <(head -c 2000 .audit/probe-64-builder-v2.json) | head -40; echo \"=== builder head ===\"; head -c 700 .audit/probe-64-builder-v2.json",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_Ahzu0sxlgelZI5jEOK3V3044",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /home/iseoane/Work/isSWF; sed -e 's/isswf-probe64-eCwk9G/ROOT/g' -e \"$(printf 's#/tmp/isswf-probe64-[A-Za-z0-9]*#TMPROOT#g')\" .audit/probe-64-parent-v2.json > /dev/null 2>&1; diff <(sed -e 's/isswf-probe64-[A-Za-z0-9]*/TMPROOT/g' .audit/probe-64-parent-v2.json) <(sed -e 's/isswf-probe64-[A-Za-z0-9]*/TMPROOT/g' .audit/probe-64-builder-v2.json) | head -60",
+        "timeout": 30
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_00_LtmH5NAFytRDhhz3WXfV4915",
+      "name": "mem_save",
+      "arguments": {
+        "title": "Probe-64 v2 review: builder and parent runs identical; all prior findings closed",
+        "content": "**What**: Reviewed isSWF probe-64 v2 candidate `.audit/probe-64.mjs` (sha256 7a06c04a828f08a27e8aa1935f6e9feb4f6e445635438ccffbffa1ea437cfced) plus brief, parent-v2 and builder-v2 results; verdict Standards/Spec/Evidence PASS, no blocking changes.\n**Why**: Operator asked for a fresh <=300-word review after v1 review findings.\n**Where**: `.audit/probe-64.mjs`, `.audit/probe-64-build-brief.md`, `.audit/probe-64-parent-v2.json`, `.audit/probe-64-builder-v2.json`, `.audit/probe-64-parent-v2-assertions.json`, `.audit/probe-64-snapshot-v2/payload/.audit/`.\n**Learned**: builder-v2.json is the builder's own independent run (root /tmp/isswf-probe64-q41BOj); its case outcomes are byte-identical to the parent replay (root /tmp/isswf-probe64-eCwk9G) except the ephemeral listenerPort (42157 vs 34559). v1 findings closed: cat-file/archive instead of HEAD equality; bounded waitForClose with exit precheck + SIGKILL; host TCP connect/receive 'canary'; host readback of worker-positive.txt = 'write-ok'; explicit activation appending {source:'/factory'} preserving customFixtureField, existing local source, AGENTS.md/models hashes. Residual scoped limitation: instrument records but does not assert post-activation settings hash equals final hash; parent assertions establish it for this run only (894d6fbb...). Status intentionally PROBE_COMPLETE_WITH_UNPROVEN_REQUIREMENTS, not a full gate.",
+        "type": "discovery",
+        "scope": "project",
+        "topic_key": "isswf/probe-64/v2-review"
+      }
+    }
+  ]
+}
