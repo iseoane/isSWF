@@ -39,4 +39,4 @@ Report the exact checkout and baseline, changed paths, outcome against each acce
 
 ## Dispatch configuration
 
-Use Pi's pstack `agent` tool with this profile path in the prompt, `subagent_type: pstack:poteto-agent-high`, and `model: openai-codex/gpt-6-luna`. High effort is required. Do not substitute a fallback model; if that destination is unavailable, report the block to the coordinator.
+Consult the canonical route values in `docs/model-routing.md` and `.factory/models.json`. The effective brief must identify this assignment's domain role, complete resolved route, selected destination, and actual requested/effective model and effort metadata when observed. The coordinator verifies current runtime availability and effort support before dispatch; do not silently substitute a model. The current Pstack transport adapter remains available, but this profile does not guarantee future transport compatibility.

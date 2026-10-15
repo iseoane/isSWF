@@ -13,11 +13,16 @@
 - Target codebase base (full Git SHA):
 - Trusted authorization reference (operator conversation or record ID, or external path; if tracked in Git, full Git SHA):
 - Exclusive checkout or worktree:
+- Model configuration path and input Git SHA (full SHA):
+- Resolved ordered route and selected destination:
 
 ## Execution
 
 - Requested model and effort:
-- Effective model and effort, as observed:
+- Observed actual model and effort metadata:
+- Availability and effort-support evidence:
+- Route transitions and reason for each transition:
+- Account or subscription alias, only if supplied by the operator:
 - Start and end timestamps, if known:
 - Status evidence and source:
 - Reported status is not proof of process state or liveness.

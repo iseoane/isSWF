@@ -39,6 +39,6 @@ Git checkpoints make committed files referable and reviewable. They are not a fu
 
 A worker returns its attempt artifact, changed paths, observed checks, candidate or checkpoint references, risks, and blockers. A reviewer returns its artifact against that exact candidate. A new candidate needs a new review. The coordinator reconciles the evidence and updates plan references; a report of `complete` alone does not satisfy a dependency or establish technical closure.
 
-## Future routing agreement
+## Model routing
 
-For future researcher work only, the agreed route is `opencode-go/glm-5.3-flash` with high effort. The agreed alternate is `openai-codex/gpt-6-luna` with medium effort, subject to future validation. This agreement does not validate, configure, or run either route.
+Use [`.factory/models.json`](../.factory/models.json) as the canonical source for configured role routes and [`model-routing.md`](model-routing.md) for manual preflight, precedence, availability, and transition rules. Neither document grants work or guarantees runtime support; pin the configuration path and full input Git SHA in each attempt.
