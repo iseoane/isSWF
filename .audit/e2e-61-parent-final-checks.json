@@ -1,0 +1,39 @@
+{
+  "head": "eda3fa20cef401658f3ed9860240e5aafbf84e4b",
+  "candidate": "aa88e9d29ee341fc4e48a0a7e7cfee0c90755a80",
+  "status": "",
+  "codeDiff": "",
+  "checks": "2 sum assertions and 4 CLI checks pass",
+  "cli": [
+    {
+      "args": [
+        "7",
+        "3"
+      ],
+      "output": "10"
+    },
+    {
+      "args": [
+        "-2",
+        "3"
+      ],
+      "output": "1"
+    },
+    {
+      "args": [
+        "--multiply",
+        "7",
+        "3"
+      ],
+      "output": "21"
+    },
+    {
+      "args": [
+        "--multiply",
+        "-2",
+        "3"
+      ],
+      "output": "-6"
+    }
+  ]
+}

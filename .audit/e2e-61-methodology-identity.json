@@ -1,0 +1,13 @@
+{
+  "factoryCheckpoint": "d5986363551e96710c0aa015a3f3b7969a8cd55e",
+  "verified": [
+    {
+      "path": ".agents/roles/researcher.md",
+      "sha256": "bd55b162e6c67b5adf30c3c0d990eadfae323d55f4d0d8786c6464b6ae478d8d"
+    },
+    {
+      "path": ".agents/roles/references/research.md",
+      "sha256": "e26faae21f47fb7da7be0922c13d94c6753de3041a78c4699ad56e1c5782f133"
+    }
+  ]
+}

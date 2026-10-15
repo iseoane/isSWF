@@ -1,0 +1,12 @@
+{
+  "root": "/tmp/isswf-e2e61-u76tcs",
+  "inputCheckpoint": "501a726dcd0925be8be7f669418c7430474cb900",
+  "targetBase": "501a726dcd0925be8be7f669418c7430474cb900",
+  "factoryCheckpoint": "d5986363551e96710c0aa015a3f3b7969a8cd55e",
+  "researchBrief": ".factory/jobs/J301/brief-r1.md",
+  "limits": "Supervised manual factory profiles. No remote effects, native autonomous orchestration, installation or process/chat independence.",
+  "plannerCheckpoint": "74f5cd35a22594102f3fd5eb1815740146219a20",
+  "implementationCheckpoint": "897ba1653a2a423fd7bc3ba0695efcd22c7eff81",
+  "candidate": "aa88e9d29ee341fc4e48a0a7e7cfee0c90755a80",
+  "reviewCheckpoint": "f6970eaa9454a0035b98bb9badfa8ae9173fee6e"
+}
