@@ -23,9 +23,12 @@ La secuencia de trabajo acordada es:
 3. Tras #55, construir en paralelo los perfiles de planificador e investigador. Las ejecuciones de planificación y research requieren materiales reconciliados y un brief explícito; no se inician automáticamente a la vez sobre materiales sin reconciliar.
 4. Construir en paralelo los formatos y procedimientos de entrega visual y retrospectiva. No se prepara una PR draft real sin evidencia de entrega.
 5. Centralizar la configuración.
-6. Completar una demostración local integral y después retomar la instalación runtime #44, ahora pausada. Esta demostración no prueba OPS-03 a OPS-06, independencia del chat, recuperación tras reinicio ni H1 completo.
+6. Completar la demostración local supervisada #61. Esta demostración no prueba OPS-03 a OPS-06, independencia del chat, recuperación tras reinicio ni H1 completo.
+7. Crear la skill propia de setup #62 después de la demo: detectar proyecto y configuración existente, preguntar solo decisiones no deducibles, proponer permisos, verificaciones, entrega y rutas modelo/effort/fallback autorizadas, mostrar el diff y dejar un checkpoint. Debe poder repetirse sin sobrescribir decisiones ni alterar intentos activos. No guarda credenciales ni realiza cambios globales implícitos. Configurar un proyecto no instala ni conecta el runtime; #44 sigue pausada.
 
-La ubicación `.factory/` es una propuesta para guardar artefactos de spec, plan y jobs, no una instalación runtime ni la instalación de #44. No está implementada ni aceptada como decisión final; #55 debe formalizar y probar la ubicación. Esta secuencia no cambia la [especificación v1](spec-v1.md).
+El contrato documental de `.factory/jobs/` se formalizó y probó de forma acotada en #55; véase la [guía de trabajo durable](durable-work.md). La configuración manual de rutas está en `.factory/models.json`, con sus límites en la [guía de modelos](model-routing.md). Esto no entrega una instalación runtime ni demuestra recuperación de procesos. Esta secuencia no cambia la [especificación v1](spec-v1.md).
+
+Antes de usar la factory con clientes, verificar aislamiento técnico de archivos, herramientas y efectos autorizados. Las instrucciones de alcance y la elección de un modelo no son una frontera de seguridad; las pruebas supervisadas actuales no satisfacen ese requisito. Su implementación no se añade implícitamente a #61 ni reactiva #44.
 
 ## Mantenimiento futuro: idioma de las instrucciones
 
