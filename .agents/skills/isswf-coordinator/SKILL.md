@@ -28,6 +28,8 @@ El código actual determina el comportamiento existente. El brief y la aceptaci�
 
 ## 3. Haz grounding con referencias comprobables
 
+When you receive a job path and its input checkpoint, consult `docs/durable-work.md` if it is available. The checkpoint must be a full Git SHA. If the job path or an input is missing, block that job; do not invent references or resolve to the latest version.
+
 Lee los archivos y contratos relevantes en la base actual. Carga [principios de diseño](../../roles/references/design-principles.md) si entran en alcance formas de datos, contratos o límites de módulos; [principios de ejecución](../../roles/references/execution-principles.md) para ownership paralelo, reintentos, migraciones u operaciones repetidas; [principios de verificación](../../roles/references/verification-principles.md) al elegir diagnóstico o evidencias. Son referencias contextuales, no obligatorias para todo brief. Usa Codegraph si está disponible para encontrar símbolos y relaciones; si no, busca y lee el código directamente. No inventes resultados de búsqueda. Anota por cada hallazgo la ruta, símbolo si existe, rango de líneas actual y motivo para leerlo. Incluye los helpers o contratos a reutilizar, consumidores afectados y pruebas pertinentes.
 
 Verifica rutas y líneas contra la base que se implementaría. Antes de editar, quien implemente vuelve a abrir esos puntos y confirma que siguen vigentes. Si cambió la base o el código, vuelve a localizar las referencias afectadas. Distingue hechos observados, inferencias y preguntas pendientes.
