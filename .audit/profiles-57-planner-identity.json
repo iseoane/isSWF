@@ -1,0 +1,10 @@
+{
+  "snapshot": "32b047aa8c4aff0e001455beadc2e870a2670f89a6a8b0f6213263401d568d1b",
+  "base": "da1ab009a455fca754aabd5f07e340d252d8563a",
+  "files": [
+    ".agents/roles/planner.md",
+    ".agents/roles/references/planning.md",
+    ".audit/planner-57-build-brief.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

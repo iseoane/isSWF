@@ -1,0 +1,9 @@
+{
+  "tree": "/tmp/isswf-profiles57-tree-vz03jR",
+  "base": "da1ab009a455fca754aabd5f07e340d252d8563a",
+  "packets": [
+    "planner",
+    "researcher"
+  ],
+  "priorFailure": "Full archive hit execFileSync default buffer; scoped archive with explicit buffer rerun."
+}

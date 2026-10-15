@@ -1,0 +1,10 @@
+{
+  "snapshot": "e5f473d4dd2288b9cd973610a9a9d97c44fb1464245b0a0e01f717c0b0828f8f",
+  "base": "da1ab009a455fca754aabd5f07e340d252d8563a",
+  "files": [
+    ".agents/roles/references/research.md",
+    ".agents/roles/researcher.md",
+    ".audit/researcher-57-build-brief.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

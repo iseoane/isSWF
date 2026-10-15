@@ -1,0 +1,40 @@
+{
+  "integrated": [
+    {
+      "path": ".agents/roles/planner.md",
+      "mode": "100644",
+      "sha256": "6e3b99d50df2c61c228432eba304dd1bc7a7fa4b5de6751e32722e7a59631ff9",
+      "snapshot": "8f334e789ff4800caa55a3ffc8c984c4c8ae0725c032d27e2989995f7eef2edd"
+    },
+    {
+      "path": ".agents/roles/references/planning.md",
+      "mode": "100644",
+      "sha256": "dccf2692a0c4e0b7f2d7eab4c347e1abdf0c924d7bd9d9a59912630a43a62cf8",
+      "snapshot": "8f334e789ff4800caa55a3ffc8c984c4c8ae0725c032d27e2989995f7eef2edd"
+    },
+    {
+      "path": ".audit/planner-57-build-brief.md",
+      "mode": "100644",
+      "sha256": "d794913e12f722f0633c0dfa8dcefcc61206280fae7e107521555dd6ce85c42a",
+      "snapshot": "8f334e789ff4800caa55a3ffc8c984c4c8ae0725c032d27e2989995f7eef2edd"
+    },
+    {
+      "path": ".agents/roles/references/research.md",
+      "mode": "100644",
+      "sha256": "e26faae21f47fb7da7be0922c13d94c6753de3041a78c4699ad56e1c5782f133",
+      "snapshot": "e5f473d4dd2288b9cd973610a9a9d97c44fb1464245b0a0e01f717c0b0828f8f"
+    },
+    {
+      "path": ".agents/roles/researcher.md",
+      "mode": "100644",
+      "sha256": "bd55b162e6c67b5adf30c3c0d990eadfae323d55f4d0d8786c6464b6ae478d8d",
+      "snapshot": "e5f473d4dd2288b9cd973610a9a9d97c44fb1464245b0a0e01f717c0b0828f8f"
+    },
+    {
+      "path": ".audit/researcher-57-build-brief.md",
+      "mode": "100644",
+      "sha256": "f99bb9d6404216fd8d37b86b6f9671dc58d8ee51263617ab1068dd2dbfa9bad1",
+      "snapshot": "e5f473d4dd2288b9cd973610a9a9d97c44fb1464245b0a0e01f717c0b0828f8f"
+    }
+  ]
+}

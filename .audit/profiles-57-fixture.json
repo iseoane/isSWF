@@ -1,0 +1,8 @@
+{
+  "root": "/tmp/isswf-profiles57-WRTbOy",
+  "checkpoint": "6cfbb7c100ff05b425ffa9792fe56ea4c53ebcdb",
+  "targetBase": "6cfbb7c100ff05b425ffa9792fe56ea4c53ebcdb",
+  "plannerBrief": ".factory/jobs/J101/brief-r1.md",
+  "researchBrief": ".factory/jobs/J102/brief-r1.md",
+  "scope": "Disposable local fixture, not product process evidence."
+}

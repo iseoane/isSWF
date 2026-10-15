@@ -1,0 +1,22 @@
+{
+  "base": "da1ab009a455fca754aabd5f07e340d252d8563a",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".agents/roles/planner.md",
+      "mode": "100644",
+      "sha256": "6e3b99d50df2c61c228432eba304dd1bc7a7fa4b5de6751e32722e7a59631ff9"
+    },
+    {
+      "path": ".agents/roles/references/planning.md",
+      "mode": "100644",
+      "sha256": "dccf2692a0c4e0b7f2d7eab4c347e1abdf0c924d7bd9d9a59912630a43a62cf8"
+    },
+    {
+      "path": ".audit/planner-57-build-brief.md",
+      "mode": "100644",
+      "sha256": "1e1c2c0b52db0f1d148563007258a1da914a1e0e57c9c7e8ae7ce04f106187c1"
+    }
+  ],
+  "snapshot": "32b047aa8c4aff0e001455beadc2e870a2670f89a6a8b0f6213263401d568d1b"
+}

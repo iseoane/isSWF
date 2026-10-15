@@ -1,0 +1,15 @@
+**Verdict: fail** — Standards fail, Spec fail. Base `da1ab009a455fca754aabd5f07e340d252d8563a` verified as candidate HEAD; exactly 3 untracked paths, no tracked diff, no ignored extras.
+
+**Hashes (sha256):** researcher.md `2a1b9a3a4c29…c4e88`; research.md `09453f2c4735…39e6ce`; brief `e2da13d17e99…08acf06`. Pre-commit snapshot ID `51606d0f223cfd0da7a425710aff4a997a62fd1c8e1c6cb2e67c8590a6910d36` (main `references/review.md` format: base + empty-diff hash + sorted path/mode/content hash). No retained package existed before this review.
+
+**Blockers**
+
+1. **False provenance (Spec/Standards).** Brief: “authored directly in the parent session, not dispatched”; “Subagents: none”. Trusted dispatch: isolated child writer `agent-a7d0511d2535f7355`. Artifact agrees: candidate is branch `worktree-agent-a7d0511d2535f7355`, files written 07:54:41–07:55:32 inside it. Correct provenance: dispatched child writer, agent id should appear in the grant reference. “Effective/Actual model and effort … observed” is dispatch-declared, not observed; “No GLM model executed” is unverifiable. Remedy: record dispatch/child id; label model/effort declared-by-dispatch, unknown-not-observed.
+
+2. **Role contract contradicts itself (Spec/Standards).** researcher.md requires, before start, “permission to write that path”; research.md requires an “assigned output path before starting”. Step 5, Boundaries, Return and reference Limits instead define a findings-only mode: “If permission to write … absent, return the research result … leave the filesystem unchanged”, yet Return still mandates “assigned artifact path”. A findings-only dispatch the brief itself permits is unforcible under the start gate. Remedy: “artifact path with explicit write permission, or explicit findings-only return”; make Return conditional.
+
+3. **Pinned-brief resolution unsatisfiable (Spec).** Both files order resolving “the brief … at the input checkpoint (`git show <sha>:<path>`)”, but this brief is untracked at `da1ab00` (no commit authorized). A researcher following the text either blocks a valid job or reads the live brief unpinned. Remedy: checkpoint pins referenced documents; read the brief from its durable dispatch path, verify at checkpoint only when tracked.
+
+**Minor:** grounding anchors all verified, none fabricated — GND-01/03/06/07 at 70–76, worker 3–7/21–26/30–34, durable-work 24–32/36–44, vision 21–23/39/89–93, plan S02 70–76, adaptaciones 3/21; only boundary slop (heading 34 cited from 36; spec 15–48 vs section to 49; 50–76 vs 77). Link claim reproduces (one relative link resolves; no others) but script/output not retained. Route wording matches durable-work:44 and vision:89 (agreed, not configured, no availability claim) — pass. No implementation/tool/runtime/new-command added — pass. Behavior untested; brief correctly disclaims runtime — pass.
+
+**Limits:** no pre-review snapshot package, so drift before this review is undetectable; audited only the worktree, not parent-session or dispatch records; no history probing, so adaptaciones’ “older base” claim unverified; Markdown only — no runtime behavior tested, no closure claimed.
