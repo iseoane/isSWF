@@ -1,0 +1,11 @@
+{
+  "name": "isswf-pi-resources",
+  "version": "1.0.0",
+  "description": "A fixed-version Pi resource package for isSWF project workflows.",
+  "pi": {
+    "skills": [
+      "./.agents/skills/isswf-coordinator",
+      "./.agents/skills/isswf-setup"
+    ]
+  }
+}

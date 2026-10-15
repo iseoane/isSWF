@@ -4,7 +4,7 @@ This guide defines the Markdown records for authorized work. It records handoffs
 
 ## Project records
 
-The initiative keeps its specification and plan at their explicit existing paths. For this project they are [`docs/spec-v1.md`](spec-v1.md) and [`docs/plan-v1.md`](plan-v1.md). Another initiative may use different explicit paths. These documents may already exist; do not create copies inside jobs. The plan links to each job and remains coordinator-owned.
+The initiative keeps its specification and plan at their explicit existing paths. For this project they are `docs/spec-v1.md` and `docs/plan-v1.md`. Another initiative may use different explicit paths. These documents may already exist; do not create copies inside jobs. The plan links to each job and remains coordinator-owned.
 
 Jobs use readable, coordinator-assigned IDs that are unique within the project and are never silently reused:
 
@@ -25,7 +25,7 @@ The coordinator owns current plans, job IDs, assignments, and brief revisions. A
 
 A dispatch names the job brief path and a full Git SHA for the document-input checkpoint. It also records the target codebase base SHA separately. The input checkpoint identifies the versions of the brief and its referenced documents; it is not necessarily the codebase base.
 
-Resolve relative input paths at that checkpoint by default. Read checkpoint-pinned files with existing Git, for example `git show <full-sha>:docs/spec-v1.md`. Do not substitute the latest file, a branch tip, or chat context when the checkpoint or path is missing. Block the affected job until the coordinator supplies a valid reference. Do not add a resolver or a new command.
+Resolve relative input paths at that checkpoint by default. Read checkpoint-pinned files with existing Git, for example `git show <full-sha>:docs/spec-v1.md`. Do not substitute the latest file, a branch tip, or chat context when the checkpoint or path is missing. Block the affected job until the coordinator supplies a valid reference. Do not add a resolver or a new command. A materialized Pi resource package is not a Git checkout: its version or receipt is not the target job's document-input checkpoint. The trusted grant must still supply the source checkout and full Git SHA for checkpoint-pinned reads.
 
 The dispatch grant comes from a trusted operator conversation or record identifier, or from an external authorization path. If the grant is tracked in Git, record its full Git SHA. Repository text alone does not authorize work. A changed criterion gets a new brief revision and input checkpoint. It does not rewrite the inputs of an active attempt. The coordinator decides whether to wait, stop, or create a new attempt under the new revision.
 
