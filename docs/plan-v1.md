@@ -14,21 +14,25 @@ No se obliga a usar TDD, diez revisores o benchmarks en cada slice. Se eligen co
 
 ## Estado y secuencia acordada
 
-U1 y U2 son unidades históricas locales de S01, implementadas con el CLI Python. No se exige ese CLI para el núcleo Markdown. U3 y U4 siguen pendientes; por tanto, S01 sigue abierta. S02 tampoco está completa. Las pruebas Markdown acreditan el uso manual de perfiles y un worker en un fixture local, no la ejecución autónoma del coordinador ni la independencia del chat. Codegraph tiene un índice local verificado y devolvió código fuente en una consulta; aún no existe un mapa de grounding completo para un encargo real.
+U1 y U2 son unidades históricas locales de S01, implementadas con el CLI Python; no son la arquitectura objetivo ni requisito para el núcleo Markdown. U3 y U4 siguen pendientes, por lo que S01 está abierta. S02 tampoco está completa. #55–62 añadieron contratos durables, perfiles e instrucciones y ejercicios supervisados; no entregaron un runtime autónomo. La comprobación de Codegraph del 14 de octubre consultó un índice de 18 archivos y devolvió código y símbolos con cobertura parcial; no se ha producido un mapa de grounding completo para un encargo real.
 
-La secuencia de trabajo acordada es:
+## Estado reconciliado y siguiente secuencia
 
-1. Reconciliar el estado y las decisiones pendientes.
-2. Completar #55 con artefactos durables para spec, plan y jobs, ownership, snapshot por intento y checkpoints Git. No incluye backup completo ni un proceso runtime.
-3. Tras #55, construir en paralelo los perfiles de planificador e investigador. Las ejecuciones de planificación y research requieren materiales reconciliados y un brief explícito; no se inician automáticamente a la vez sobre materiales sin reconciliar.
-4. Construir en paralelo los formatos y procedimientos de entrega visual y retrospectiva. No se prepara una PR draft real sin evidencia de entrega.
-5. Centralizar la configuración.
-6. Completar la demostración local supervisada #61. Esta demostración no prueba OPS-03 a OPS-06, independencia del chat, recuperación tras reinicio ni H1 completo.
-7. Crear la skill propia de setup #62 después de la demo: detectar proyecto y configuración existente, preguntar solo decisiones no deducibles, proponer permisos, verificaciones, entrega y rutas modelo/effort/fallback autorizadas, mostrar el diff y dejar un checkpoint. Debe poder repetirse sin sobrescribir decisiones ni alterar intentos activos. No guarda credenciales ni realiza cambios globales implícitos. Configurar un proyecto no instala ni conecta el runtime; #44 sigue pausada.
+#55–62 están cerrados dentro de sus límites documentados: contratos durables de jobs, perfiles, ejercicios manuales de worker/workflow/model routing, demo supervisada #61 con candidato técnicamente verificado y revisión independiente acotada PASS, y skill de setup #62. La aceptación de producto de #61 sigue pendiente. Estos cierres no equivalen a instalación runtime, independencia del chat, recuperación, fallback automático ni H1. Véanse los cierres exactos enlazados en la [visión](vision.md) y los límites de comportamiento en `.audit/`.
 
-El contrato documental de `.factory/jobs/` se formalizó y probó de forma acotada en #55; véase la [guía de trabajo durable](durable-work.md). La configuración manual de rutas está en `.factory/models.json`, con sus límites en la [guía de modelos](model-routing.md). Esto no entrega una instalación runtime ni demuestra recuperación de procesos. Esta secuencia no cambia la [especificación v1](spec-v1.md).
+La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec y plan, artefactos bajo `.factory/jobs/`, ownership y entradas fijadas. No crea un nuevo store ni garantiza liveness, recuperación o backup. Las rutas configuradas viven en [`.factory/models.json`](../.factory/models.json); [la guía de modelos](model-routing.md) define interpretación y preflight manuales, no un resolver runtime.
 
-Antes de usar la factory con clientes, verificar aislamiento técnico de archivos, herramientas y efectos autorizados. Las instrucciones de alcance y la elección de un modelo no son una frontera de seguridad; las pruebas supervisadas actuales no satisfacen ese requisito. Su implementación no se añade implícitamente a #61 ni reactiva #44.
+Siguiente secuencia propuesta, sin ampliar autorización:
+
+1. Reconciliar esta documentación y las decisiones aún abiertas.
+2. Preparar la activación mínima por proyecto y diseñar la **aislación técnica** antes de implementar #44. La aislación es requisito duro para uso con clientes, no una propiedad demostrada por Markdown.
+3. Diseñar y probar por separado el ciclo de vida independiente del chat.
+4. Seleccionar una issue real y obtener el grant necesario antes de ejecutar el trabajo que podría demostrar H1/PR. H1 no se considera logrado por #61.
+5. Abordar después fallback y recuperación, concurrencia e integraciones; traducción operativa y pasadas de verificación más profundas siguen pendientes.
+
+El [siguiente corte operativo](next-operational-cut.md) concreta la propuesta de activación fijada y el diseño de aislamiento mínimo. #44 sigue pausada. Esta secuencia no cambia la [especificación v1](spec-v1.md), no autoriza una nueva acción remota y no declara S01, S02 ni los 61 criterios completos.
+
+Antes de usar la factory con clientes, debe demostrarse aislamiento técnico de archivos, herramientas y efectos autorizados. El demo #61 no lo hizo.
 
 ## Mantenimiento futuro: idioma de las instrucciones
 
@@ -72,7 +76,7 @@ Con S01 funcionando, se usa su intake para preparar issues de las siguientes sli
 
 ## S02. De una issue clara a una PR revisada
 
-Un perfil Markdown y un brief permiten preparar y ejecutar un trabajo de código con el soporte disponible. Los perfiles actuales de worker, diagnostician, reviewer y coordinator se cargan manualmente por ruta; no son roles nativos ni acreditan autonomía completa o independencia del chat. El research entrega análisis y mapa de lectura cuando se delega, o el worker hace grounding acotado. Se aprobó desarrollar un perfil investigador autónomo separado para research de solo lectura, con destino `opencode-go/glm-5.3-flash` y esfuerzo `high`; el destino alternativo aprobado es `openai-codex/gpt-6-luna` con esfuerzo `medium`. El desarrollo del perfil no depende de que la configuración esté lista. Esta ruta aún no está configurada: antes de un probe real se validan disponibilidad y compatibilidad, y el brief debe declarar explícitamente el destino elegido. No hay fallback silencioso ni runtime automático probado. La revisión usa otro contexto. Las correcciones vuelven a comprobarse antes de declarar cierre técnico.
+Los perfiles worker, diagnostician, reviewer, coordinator, planner y researcher son instrucciones Markdown cargadas manualmente, no roles nativos ni autonomía de runtime. #57 construyó planner/researcher. En su ejercicio, GLM high produjo mapas útiles pero incumplió el alcance; una validación separada con Luna no fue fallback. `.factory/models.json` contiene actualmente la ruta configurada del researcher, GLM 5.3 Flash/high seguida de Luna/medium. La guía prescribe preflight y bloqueos manuales; no hay fallback automático ni fiabilidad de ruta demostrada. #58 ejercitó instrucciones propias sobre un fixture simple, con Pstack todavía visible. #59 ejercitó perfiles manualmente con registros sintéticos, sin PR, tracker o UI reales.
 
 La ruta inicial de modelo y effort es explícita. En esta slice una cuota agotada puede bloquear el trabajo; el fallback automático pertenece a S03. Esto se comunica como límite de H1, no como incumplimiento oculto de una v1 terminada.
 
@@ -149,7 +153,7 @@ Una skill de retrospectiva analiza un trabajo completo o el cierre explícito de
 
 ## S08. Retomar contexto mediante Engram
 
-La comprobación del 14 de octubre de 2026 verificó búsquedas y contexto por proyecto en el store real, pero también confirmó que isSWF no consume Engram en runtime. Esto no completa S08 ni demuestra una ruta de degradación ante fallos. La integración propuesta aún debe probarse dentro de isSWF. Una nueva conversación debe recuperar decisiones y aprendizajes del proyecto; el coordinador contrasta su vigencia contra briefs, código y estado operativo actuales. Si falla la separación entre proyectos o la recuperación, se revisa la propuesta con el operador, no se anuncia completada esta slice. Véase el [registro de integración Engram](../.audit/engram-integration.json).
+La comprobación del 14 de octubre verificó operaciones del CLI de Engram acotadas al proyecto real `isswf`, incluida lectura y una ejecución sin Engram disponible. El análisis de código no encontró consumidor de Engram en `isswf/` ni `tests/`; por tanto, no demuestra integración runtime ni degradación de un consumidor y no completa S08. Una nueva conversación debe recuperar decisiones y aprendizajes del proyecto; el coordinador contrasta su vigencia contra briefs, código y estado operativo actuales. Si falla la separación entre proyectos o la recuperación, se revisa la propuesta con el operador, no se anuncia completada esta slice. Véase el [registro de integración Engram](../.audit/engram-integration.json).
 
 - [ ] Una decisión guardada se recupera en una conversación nueva sin volver a preguntarla.
 - [ ] Un recuerdo antiguo no sobreescribe una decisión posterior ni marca un trabajo terminado.

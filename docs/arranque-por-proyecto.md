@@ -1,102 +1,35 @@
 # Arranque de isSWF por proyecto
 
-Estado: propuesta de distribución y activación, no instalador implementado. U1 y U2 funcionan localmente; antes de U3 se comprobará cómo usarlas desde otro proyecto. Engram y Codegraph todavía no están integrados en el funcionamiento normal de isSWF. Este documento concreta el nuevo acuerdo de la [visión](vision.md), sin dar por resuelto el ejecutor de S02.
+Estado reconciliado con #55–62. Este documento registra qué se ha demostrado y qué falta para preparar la activación por proyecto. No es un diseño aprobado de instalador ni una autorización para instalar, copiar o ejecutar la factory.
 
-## Decisión propuesta
+## Estado comprobado
 
-Instalar los recursos de la factory una vez por versión y activarlos explícitamente en cada proyecto. Compartir los archivos no significa cargar automáticamente sus instrucciones en todos los proyectos ni compartir sus datos.
+- #55 fijó contratos documentales durables: las rutas de spec y plan son explícitas; los jobs usan `.factory/jobs/` con IDs, ownership y referencias de entrada fijadas. Esto no es un store de ejecución ni garantiza liveness, backup o recuperación. Véase [`durable-work.md`](durable-work.md).
+- #57 creó perfiles Markdown de planner y researcher. Se cargan manualmente. El ejercicio del researcher con GLM high tuvo una brecha de alcance; la validación separada con Luna no fue fallback ni prueba de ruta runtime.
+- #58 ejercitó el worker y metodología propios en un fixture simple. El transporte y registro de Pstack seguían visibles; no fue un entorno hermético ni un instalador independiente.
+- #59 ejercitó manualmente delivery y retrospective con registros sintéticos. No hubo PR, tracker, UI ni control de proceso reales.
+- #60 consolidó rutas por rol en [`.factory/models.json`](../.factory/models.json), interpretadas por [`model-routing.md`](model-routing.md). Es política configurada que requiere preflight manual, no un resolver ni fallback de runtime.
+- #61 fue una demo local supervisada. No demostró H1, aceptación de producto, aislación técnica de cliente, ciclo de vida independiente del chat, recuperación ni publicación remota.
+- #62 añadió `.agents/skills/isswf-setup/SKILL.md`, invocada explícitamente. Puede reconciliar decisiones y, con autorización expresa, editar rutas en un `.factory/models.json` existente en el proyecto objetivo. Si falta el archivo, deja la configuración pendiente. No instala ni copia archivos de factory, no crea una configuración faltante, runtime, credenciales ni configuración global.
 
-| Alternativa | Ventaja | Coste o riesgo | Decisión |
-| --- | --- | --- | --- |
-| Paquete compartido con revisión fijada y activación de proyecto | Una fuente de skills y perfiles; cada proyecto elige versión. | Hay que probar resolución de recursos, trust, actualizaciones y convivencia de versiones. | Dirección acordada con el usuario. |
-| Copias completas en cada proyecto | Checkout autocontenido. | Duplica metodología y runtime; propaga arreglos mediante copias y facilita divergencias. | No es el camino normal. |
+Los informes con resultados y límites exactos son [#55](../.audit/durable-55-closure.md), [#57](../.audit/profiles-57-closure.md), [#58](../.audit/worker-58-behavior.md), [#59](../.audit/workflow-59-behavior-limits.md), [#60](../.audit/models-60-behavior-limits.md), [#61](../.audit/e2e-61-closure.md) y [#62](../.audit/setup-62-closure.md). No se declara completo H1, S01/S02 ni el conjunto de 61 criterios.
 
-La [investigación Pi](research/instalacion-pi.md) recomienda copias para su primer bootstrap. Conservamos sus hechos y prueba de descubrimiento, pero no esa recomendación: el usuario ya eligió evitar copiar la factory. Una instalación compartida puede usar el caché de paquetes de Pi y declaraciones de proyecto, sin cambiar el catálogo personal. No se necesita una extensión por skill.
+## Límites de las rutas de modelos
 
-## Qué se comparte y qué no
+La fuente canónica de rutas de la factory es `.factory/models.json`; `docs/model-routing.md` define cómo interpretarla. La ruta configurada para researcher contiene GLM 5.3 Flash/high y después Luna/medium. No es una selección efectiva, permiso, comprobación de disponibilidad o fallback automático. El GLM high produjo hallazgos útiles en el ejercicio de #57, pero incumplió el alcance; el resultado separado de Luna fue validación, no reemplazo automático.
 
-Propuesta de distribución, no árbol ya creado:
+La skill #62 solo puede modificar una configuración **existente y propiedad del proyecto objetivo** cuando un grant cubra esa acción. No debe copiar la configuración central ni inventar valores o esquema duplicado. Si el archivo del proyecto no existe, la decisión se presenta y queda pendiente. No se ha aprobado un `isswf.config.json`, una base SQLite nueva ni un almacén operativo por proyecto.
 
-```text
-factory/<revision-inmutable>/
-  .agents/skills/                 procedimientos Markdown
-  agents/                        perfiles Markdown futuros
-  isswf/                         soporte Python pequeño
-  docs/                          contratos y referencias de las skills
-  examples/                      formatos ficticios citados por las skills
-  package.json                   manifiesto Pi futuro
+## Engram y Codegraph
 
-proyecto/
-  AGENTS.md                      instrucciones existentes, intactas
-  .pi/settings.json              activación explícita; preservar contenido previo
-  isswf.config.json              identidad, versión y configuración local propuestas
-  .agents/skills/                procedimientos propios del proyecto, si existen
+La integración real de Engram comprobó el CLI con selector explícito de proyecto: confirmó/recuperó dos memorias aprobadas en `isswf`, comprobó aislamiento de consultas y ejercitó isSWF con Engram no disponible. El código actual no contiene un consumidor Engram en `isswf/` o `tests/`; por tanto, la prueba demuestra comportamiento del CLI y ausencia de dependencia en el flujo probado, no integración runtime ni degradación de un consumidor.
 
-estado-del-usuario/isswf/<project-id>/
-  isswf.sqlite3                  estado operativo separado, no versionado
-```
+La comprobación de Codegraph del 14 de octubre consultó un índice de 18 archivos y devolvió fuente y símbolos en una consulta exploratoria; la respuesta fue parcial. No están probados frescura bajo escrituras concurrentes, rechazo de un índice de otro proyecto ni un mapa de grounding completo para un encargo real. Ambos registros describen límites: [Engram](../.audit/engram-integration.json) y [Codegraph](../.audit/codegraph-index-verify.json).
 
-La versión de la factory y la del proyecto son distintas. No se apunta a un checkout de desarrollo mutable como instalación estable. Actualizar un proyecto no cambia la versión de otro ni las instrucciones de un worker ya activo. Un rollback selecciona una versión comprobada; no borra trabajos ni memorias.
+## Dirección y trabajo pendiente
 
-Todos los worktrees de un mismo proyecto usan una identidad estable y el mismo dueño de estado operativo. El nombre del directorio o del worktree no identifica el proyecto. Proyectos diferentes tienen datos separados. Esta resolución automática de identidad/rutas aún no está implementada: el CLI actual recibe `--state` explícitamente.
+La dirección de producto acordada es una instalación compartida de una versión fija, con activación explícita por proyecto. No significa copiar toda la factory dentro de cada proyecto ni sobrescribir su `AGENTS.md`. La dirección no aprueba un instalador ni un mecanismo concreto: el árbol, caché, `isswf.config.json`, Python o SQLite de propuestas históricas no son requisitos. U1/U2 en Python son unidades locales históricas, no una arquitectura objetivo. El contrato vigente para artefactos durables es el de `docs/durable-work.md`; la ruta central de modelos está en `.factory/models.json`. La prueba de setup #62 no instaló la factory ni conectó un runtime.
 
-Los agentes Markdown serán datos del runtime de isSWF. Pi 1.2.0 carga skills y contexto, pero no despacha perfiles Markdown ni asigna modelos por rol de forma nativa. Empaquetar esos perfiles no equivale a ejecutar workers.
+Siguiente secuencia: reconciliar el estado y las decisiones; preparar la activación mínima y diseñar la **aislación técnica** antes de cualquier implementación de #44; diseñar y probar aparte el ciclo de vida independiente del chat; y solo después preparar un encargo real/H1 con el grant pertinente. Fallback, recuperación, concurrencia e integraciones quedan para pasos posteriores. La aislación técnica es un prerequisito duro para uso con clientes y no está demostrada. #44 sigue pausada.
 
-## Configuración por proyecto
-
-Se propone un único `isswf.config.json` versionado para:
-
-- identidad estable del proyecto y revisión de factory;
-- defaults y overrides por rol: modelo/esfuerzo inicial y cadena ordenada de fallbacks aprobados;
-- integración de memoria y navegación, y límites operativos pertinentes.
-
-El esquema concreto se probará antes de implementarlo. No contiene credenciales ni copia settings privados de Pi. La configuración de modelos por rol pertenece a isSWF, no a las skills ni al default de sesión de Pi. El runtime deberá comprobar combinaciones disponibles y conservar la configuración efectiva de cada intento. Actualmente no existe ese resolver ni fallback automático.
-
-Las rutas de instalación personales se resuelven al activar el proyecto, no se convierten en una dependencia portátil ficticia. Cuando exista un origen de distribución autorizado se podrá declarar una ref Git inmutable o una versión exacta de paquete. Ahora sólo hay Git local; no se inventa un repositorio remoto ni se publica una release.
-
-## Recorrido de activación
-
-1. El operador elige una versión revisada de la factory y el proyecto objetivo.
-2. Se comprueban dependencias y se presenta qué archivos o entradas se añadirán. Se preservan `AGENTS.md`, settings y skills existentes; no se sobrescriben ni se mezclan memorias por nombre parecido.
-3. Se declara el paquete en el ámbito del proyecto. Pi exige trust para recursos de proyecto; esa decisión no es un sandbox ni autorización de ejecutar encargos.
-4. Se fija identidad, configuración y ubicación del estado. Instalar o confiar instrucciones no autoriza una issue ni efectos GitHub.
-5. Se comprueban catálogo de skills, CLI y panel desde el proyecto objetivo. Una prueba fallida deja la integración incompleta, no una factory lista por tener archivos copiados.
-
-La implementación deberá hacer esta operación idempotente y reversible. No se propone un comando por agente, skill o proveedor. Los comandos actuales de intake siguen siendo operaciones del operador; no acreditan un arranque automático del coordinador.
-
-## Engram
-
-Engram es memoria externa para decisiones y aprendizajes. Su identidad de proyecto se fija explícitamente y se comparte entre worktrees; no se usan lecturas globales `--all` en el flujo normal. No guarda secretos, transcript completo ni una copia autoritativa del estado. Un recuerdo se contrasta con brief y código actuales.
-
-La [investigación Engram](research/engram-arranque.md) distingue la sonda offline de `doctor`, que abre el store y puede crear archivos. La [prueba aislada](../.audit/engram-scope.json) verifica guardar y recuperar en procesos nuevos con dos proyectos ficticios, sin usar memorias reales. No acredita la integración en isSWF ni separación contra un proceso malicioso del mismo usuario.
-
-La [prueba de integración real](../.audit/engram-integration.json) — repetible con `python .audit/verify-engram-integration.py` — escribió dos memorias aprobadas por el operador en el store real bajo el proyecto `isswf` (observaciones 2799 y 2800) y las recuperó por `search`, `context` y `export`. Cuatro ejecuciones consecutivas dejan exactamente dos observaciones: el script busca el título antes de guardar, de modo que repetirlo no duplica. La lectura acotada a otro proyecto no devuelve el marcador, y ninguna comprobación usa `--all`.
-
-El caso de directorio neutro merece atención: sin `--project`, el CLI puede responder `ambiguous project: multiple git repos found in cwd` y salir con código 1 en lugar de adivinar. Falla en cerrado, pero confirma que la identidad debe ser explícita. El [registro de la comprobación de Codegraph](../.audit/codegraph-index-verify.json) es independiente de esto.
-
-El fallo cerrado se comprobó con `PATH=/usr/bin:/bin` sin `engram` y con `ENGRAM_DATA_DIR` apuntando a un fichero: la suite de 31 tests pasa igual que el control, los comandos `authorize`, `prepare` y `show` devuelven 0 y el contenido lógico del SQLite coincide salvo marcas de tiempo y el identificador de autorización. Esto acredita **ausencia de acoplamiento**, no consumo real: ningún archivo de `isswf/` ni de `tests/` menciona Engram todavía, así que aún no existe una degradación explícita que probar. Tampoco están probados MCP, cloud ni procesos hostiles del mismo usuario.
-
-La [sonda sobre el directorio real](../.audit/engram-compatibility.json) fue rechazada antes de operaciones de memoria. No prueba corrupción: el mismo mensaje se observó con sidecars en un store temporal, y `integrity_check` devolvió `ok` sobre una copia fiel con 28 tablas. La sonda rechaza cualquier directorio que contenga ficheros `-wal`, `-shm` o `-journal`, y una parada limpia de `engram serve` no los retira: se comprobó sobre el store real, que sigue rechazando la sonda con el servidor parado. Por eso **`compatibility` no puede ser la comprobación previa de este store** y no se usará como tal. La integración abrirá el store por su vía normal, con identidad explícita, y tratará la ausencia de Engram como degradación explícita. Nunca se borran sidecars, se migra ni se repara para conseguir un PASS. El [registro](../.audit/engram-checkpoint-verify.json) conserva la secuencia y su corrección.
-
-## Codegraph
-
-Codegraph aporta navegación para el grounding: símbolos, relaciones, consumidores y referencias precisas al código. No valida comportamiento ni sustituye al checkout y sus pruebas. La skill deberá usar los avisos de actualidad del índice y entregar un mapa de lectura vinculado al proyecto y revisión correctos.
-
-La [comprobación real](research/codegraph-arranque.md) confirmó que isSWF no tiene índice. La indexación es decisión del usuario, mediante `codegraph init` en el proyecto. Hasta disponer de índice se declara esa limitación y se usa lectura/búsqueda local; no se presenta un mapa de Codegraph inventado. No se ha cerrado la prueba de grounding mediante esa herramienta.
-
-## Pruebas realizadas y pendientes
-
-La [prueba de paquete compartido](../.audit/project-package-proof.md), repetida por el padre, usa un `git archive` de U2 y un manifiesto temporal, no un paquete publicado. El [resultado](../.audit/project-package-proof.json) confirma mediante RPC real de Pi 1.2.0 que dos proyectos cargan la misma skill con `--approve` y la omiten con `--no-approve`. El CLI Python se importa desde esa copia fijada y conserva grants distintos en estados temporales separados. No hubo prompts a modelos ni configuración global modificada. Esto demuestra primitivas de activación, no el instalador ni los perfiles de ejecución.
-
-Los ocho checks de [Engram aislado](../.audit/engram-scope.json) contrastan dos selectores de proyecto con memoria ficticia en procesos nuevos. No abren el store real ni integran MCP. La consulta Codegraph sigue bloqueada por ausencia de índice.
-
-Para cerrar el arranque operativo falta:
-
-- Distribución real fijada por revisión, convivencia de versiones y protección de la instalación estable. La prueba actual comparte una copia de un commit, no un directorio protegido contra escrituras.
-- Trust persistido/interactivo y activación sobre settings existentes. El catálogo RPC con `--approve`/`--no-approve` ya se comprobó, no todos los modos de trust.
-- Arranque cómodo del CLI sin un `PYTHONPATH` manual y conservación de instrucciones/settings preexistentes. El import desde otro checkout y estados separados ya se comprobaron; el fixture no tenía archivos previos.
-- Engram con identidad de proyecto explícita y degradación sin cambiar estado operativo ni inventar memoria. Abrir por la vía normal ya no es un bloqueo abierto: el store se verificó sano sobre copia y la sonda se descartó como comprobación previa.
-- Grounding Codegraph real tras indexación elegida por el usuario; checkout equivocado y mapa obsoleto no se usan como evidencia vigente.
-- Actualización y rollback que respetan versiones de proyectos y ejecuciones activas. No se simulan workers inexistentes para acreditar este escenario.
-
-La verificación documental de los 61 criterios originales comprueba enlaces y asignaciones, no estas nuevas pruebas de arranque. Se conservarán sus resultados por separado antes de declarar la instalación operativa o continuar con U3.
+El [siguiente corte operativo](next-operational-cut.md) concreta la propuesta de activación fijada y el diseño de aislamiento mínimo. El usuario autorizó y completó anteriormente el push de `origin/main` de `0d81c5f` a `5c85a38`; esa autorización no se extiende a PR, merge, despliegue o instalación. Esta tarea documental no autoriza otro push ni cambios de configuración global.
