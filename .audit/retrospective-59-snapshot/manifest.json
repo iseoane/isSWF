@@ -1,0 +1,27 @@
+{
+  "base": "f6608f197d2acb8a66d6013c74b4fae1c5a2ee66",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".agents/roles/references/retrospective.md",
+      "mode": "100644",
+      "sha256": "a249d090cd159280818dab8d942c53533ce49e4f0c9eac9f3d459fff4df0f197"
+    },
+    {
+      "path": ".agents/roles/retrospective.md",
+      "mode": "100644",
+      "sha256": "c7e0b3241e0f53566dc34157ca360b43e170d7bd72f43f1b7420beb5484cb387"
+    },
+    {
+      "path": ".audit/retrospective-59-build-brief.md",
+      "mode": "100644",
+      "sha256": "afcc437a552833e72df01d26b090f80084c1c7afa1592a4e7eca4ffbd69c0866"
+    },
+    {
+      "path": "docs/templates/retrospective.md",
+      "mode": "100644",
+      "sha256": "fb27c50036d6b7dd956e71bec168cc695ff993450251ab78c253e7ecb9bbbe44"
+    }
+  ],
+  "snapshot": "36335d8aad9b430ab2ce892f4ab0b08429c889f6aa1e35f5050a5c331d7adc58"
+}

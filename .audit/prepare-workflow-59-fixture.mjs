@@ -1,0 +1,15 @@
+// Audit-only local record fixture. No real workers, tracker or PR operations.
+import{mkdtempSync,mkdirSync,writeFileSync}from'node:fs';import{tmpdir}from'node:os';import{join,dirname}from'node:path';import{execFileSync}from'node:child_process';
+const root=mkdtempSync(join(tmpdir(),'isswf-workflow59-'));const put=(p,t)=>{mkdirSync(dirname(join(root,p)),{recursive:true});writeFileSync(join(root,p),t)};const git=(...a)=>execFileSync('git',['-C',root,...a],{encoding:'utf8'}).trim();git('init','-q');git('config','user.name','Workflow audit');git('config','user.email','audit@example.invalid');
+put('sum.mjs','export const sum = (a,b) => a+b;\n');git('add','.');git('commit','-qm','Prior reviewed code');const reviewed=git('rev-parse','HEAD');
+put('sum.mjs','export const sum = (a,b) => Number(a)+Number(b);\n');git('add','.');git('commit','-qm','Changed candidate not yet independently reviewed');const candidate=git('rev-parse','HEAD');
+put('AGENTS.md','# Project rules\nPreserve numeric sum behavior. Verify before technical closure.\n');
+put('spec.md','# Objective\nDeliver sum behavior with honest verification and risk reporting. No UI.\n');
+put('plan.md','# Job records\nJ201 partial: numeric conversion changed; operator acceptance pending.\nJ202 last reported running at 2026-10-14T12:00:00Z, no live process check.\nOperator explicitly closes the review session; jobs are not lifecycle commands.\n');
+put('checks.md','# Synthetic supplied check record\nJ201: node check.mjs PASS 3 arithmetic cases; malformed input FAIL NaN policy undefined. No UI capture. These are supplied records, not commands run by this role.\n');
+put('review.md',`# Supplied independent review\nStandards PASS, Spec PASS for candidate ${reviewed}. Does not review later candidates.\n`);
+put('known-proposals.md','# Known local DRAFT P01\nProblem: malformed input acceptance undefined. Destination: clarify spec acceptance before implementation. Status: pending triage; not authorized.\n');
+put('retrospective-history.md','# Previous retrospective\nReviewed until 2026-10-14T10:00:00Z. No incident required for next session review.\n');
+put('.factory/jobs/J201/brief-r1.md',`# Delivery job\nInput spec.md plan.md checks.md review.md. Candidate ${candidate}, code base ${reviewed}. Prepare local draft only. Include stale-review/malformed-input risks. No remote publication or product acceptance.\n`);
+put('.factory/jobs/J203/brief-r1.md','# Session retrospective job\nExplicit session close reviews work after previous retrospective through this checkpoint. Read plan.md checks.md review.md known-proposals.md retrospective-history.md AGENTS.md. Findings only; active job J202 untouched. Proposal dedupe before new draft. No policy edits, tracker activity or process control.\n');
+git('add','.');git('commit','-qm','Checkpoint workflow records');const checkpoint=git('rev-parse','HEAD');const data={root,reviewed,candidate,checkpoint,limits:'Synthetic records; no real worker liveness or actual test executions inferred.'};writeFileSync('.audit/workflow-59-fixture.json',JSON.stringify(data,null,2)+'\n');console.log(JSON.stringify(data,null,2));

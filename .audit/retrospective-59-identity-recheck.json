@@ -1,0 +1,11 @@
+{
+  "snapshot": "36335d8aad9b430ab2ce892f4ab0b08429c889f6aa1e35f5050a5c331d7adc58",
+  "base": "f6608f197d2acb8a66d6013c74b4fae1c5a2ee66",
+  "files": [
+    ".agents/roles/references/retrospective.md",
+    ".agents/roles/retrospective.md",
+    ".audit/retrospective-59-build-brief.md",
+    "docs/templates/retrospective.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}
