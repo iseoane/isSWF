@@ -1,0 +1,26 @@
+{
+  "format": 1,
+  "revision": "737fc7b86a78b61fa0aa9fafb859c75748cab836",
+  "files": {
+    ".agents/skills/isswf-coordinator/SKILL.md": "0c8178cfdcdf2d5c20810e70d4e556143a989c31837111f6a6b4a3a78b398fd6",
+    ".agents/skills/isswf-setup/SKILL.md": "586e1b3c91511f52fed14193d298a13db332aada1ae34bc97050ae45a43dc911",
+    ".agents/roles/worker.md": "645ac895b558b293717051aa818ba7d586b4d128cd6119579141bf44e84afbed",
+    ".agents/roles/diagnostician.md": "b0d7001cb9aff800b3a9a61cbeb11dc96c8b756aa13b89ea3420c8c4cf4b0a18",
+    ".agents/roles/reviewer.md": "ab18460d871e836aee16c90b797a258d64c809fb028560b3e34c52f7684383ab",
+    ".agents/roles/references/bug-diagnosis.md": "a3eec8dd8355d2bd8d04767fa205c08099e6013524b600bddd084d2f364e4a2a",
+    ".agents/roles/references/design-principles.md": "61ce975c0490a2568403905a832fca01298070397413010b2a5b827449b95eb7",
+    ".agents/roles/references/execution-principles.md": "10d1246544f8f3640ecde991632947343543bbb23de1148f3c410fbb8a1b43c7",
+    ".agents/roles/references/verification-principles.md": "4358822a736feba43b384d472202260f9a85811fec1a84961e97444ee1778036",
+    ".agents/roles/references/tdd.md": "04d091e6af46d07cefc39bba1a1b8197ff8a63d12643a03ad6fee41696d02874",
+    ".agents/roles/references/code-quality.md": "d1d74637c71d74c8f0c00987fe727a904debf05f8ba67d013ae884c36446fc75",
+    ".agents/roles/references/comments.md": "31c3f085cfe0f9db78ee8cdaf1de928b5417230d71e7823bde0e35efd1b96166",
+    ".agents/roles/references/review.md": "41fb8c48d559d5e0bdaa720c667e79ba15fcce0c59edbfa42cd431e286409b43",
+    "docs/durable-work.md": "15f99a891e2ab431b134aee391192cabeecf393e8531dbbb9b7301cd9d5565d3",
+    "docs/model-routing.md": "b70b9a654f45bccf056f9b1a323f4c0b419e83be29bcf8cd9b9160cc1c8dbae4",
+    "docs/templates/job-brief.md": "23ed362f3df96be7344039e7891d9def7337a57a4aa5ec431f3720c2910b6757",
+    "docs/templates/attempt.md": "a8d6caec0eca5593a0edc9c15a4ca6e3e96bcb1ff6ed2c1d26eb612a114fd1c2",
+    "docs/templates/review.md": "02f9c45756dae21d91727975e586205a1cd37c3c82c43e0c970b952bfb36f4b7",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1",
+    "package.json": "6558e1b6b1fd713900fa666912952d0eb9019c27fd6cb5cd42b833a22477306b"
+  }
+}

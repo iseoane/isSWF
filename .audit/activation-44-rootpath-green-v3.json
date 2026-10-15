@@ -1,0 +1,26 @@
+{
+  "result": "PASS",
+  "source": ".claude/worktrees/agent-a79874a42b1bb0ec7/tools/factory-package.mjs",
+  "sha256": "e7c656c3c9708b7c2500540cebb26e1aa1534aa6ea785da6598912aeff236511",
+  "cases": [
+    {
+      "supplied": "/fresh-store",
+      "expected": "/fresh-store",
+      "actual": "/fresh-store",
+      "matches": true
+    },
+    {
+      "supplied": "/fresh/store",
+      "expected": "/fresh/store",
+      "actual": "/fresh/store",
+      "matches": true
+    },
+    {
+      "supplied": "/a/b/c",
+      "expected": "/a/b/c",
+      "actual": "/a/b/c",
+      "matches": true
+    }
+  ],
+  "scope": "Exact frozen/source helper unit with synthetic filesystem where only root exists. No actual filesystem canonicalization, root write, isolation or full CLI proof."
+}

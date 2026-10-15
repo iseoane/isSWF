@@ -1,0 +1,12 @@
+{
+  "theme": "existing-theme",
+  "packages": [
+    "/tmp/isswf-activation44-FOlbid/shared/737fc7b86a78b61fa0aa9fafb859c75748cab836"
+  ],
+  "retry": {
+    "enabled": false
+  },
+  "customProjectChoice": {
+    "retain": true
+  }
+}

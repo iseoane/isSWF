@@ -1,0 +1,11 @@
+{
+  "snapshot": "5996b4cd4f193380ec34059ff4f50e95f19f3a63f54a128e4f9f3b70ece818b3",
+  "base": "737fc7b86a78b61fa0aa9fafb859c75748cab836",
+  "files": [
+    ".audit/activation-44-docs-brief.md",
+    "docs/arranque-por-proyecto.md",
+    "docs/next-operational-cut.md",
+    "docs/plan-v1.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

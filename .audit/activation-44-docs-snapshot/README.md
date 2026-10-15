@@ -1,0 +1,1 @@
+Identity: tracked binary patch plus ALL four payload files. Untracked audit brief is represented by payload, not tracked diff. Links checked against candidate or parent audit intended for integration.

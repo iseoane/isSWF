@@ -1,0 +1,51 @@
+{
+  "result": "PASS",
+  "base": "fc598ae8543711241c4ba5de16188dffce9257cd",
+  "syntheticResourceCommit": "cc0d24626d22d34fca313b382770952513bf642e",
+  "candidateIdentity": "Separate from this synthetic resource commit; the retained frozen seven-payload v1 snapshot is the pre-correction baseline and must not be presented as the identity of these corrections.",
+  "fixtureSource": "/tmp/isswf-activation44-314430-1792084899383/source-repo",
+  "sharedStore": "/tmp/isswf-activation44-314430-1792084899383/shared-store",
+  "materializedPackage": "/tmp/isswf-activation44-314430-1792084899383/shared-store/cc0d24626d22d34fca313b382770952513bf642e",
+  "targetProject": "/tmp/isswf-activation44-314430-1792084899383/target-project",
+  "exportedFiles": [
+    ".agents/roles/diagnostician.md",
+    ".agents/roles/references/bug-diagnosis.md",
+    ".agents/roles/references/code-quality.md",
+    ".agents/roles/references/comments.md",
+    ".agents/roles/references/design-principles.md",
+    ".agents/roles/references/execution-principles.md",
+    ".agents/roles/references/review.md",
+    ".agents/roles/references/tdd.md",
+    ".agents/roles/references/verification-principles.md",
+    ".agents/roles/reviewer.md",
+    ".agents/roles/worker.md",
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".agents/skills/isswf-setup/SKILL.md",
+    ".factory/models.json",
+    ".isswf-package-receipt.json",
+    "docs/durable-work.md",
+    "docs/model-routing.md",
+    "docs/templates/attempt.md",
+    "docs/templates/job-brief.md",
+    "docs/templates/review.md",
+    "package.json"
+  ],
+  "checks": [
+    "exact committed-blob export and excluded audit/Python paths",
+    "repeat materialization verifies without rewriting",
+    "conflicting destination refusal with expected diagnostic and no mutation",
+    "activation preserves unrelated settings, AGENTS.md, models, and attempt bytes",
+    "repeat activation is byte-identical and does not rewrite, including through a project alias",
+    "a second SHA of the same factory refuses for the expected reason with unchanged settings",
+    "aliased and missing stores beneath a source alias refuse before publication",
+    "package/project alias overlap refuses before changing settings",
+    "dirty, malformed, conflicting, and tampered inputs refuse for expected reasons with unchanged bytes; tampering uses a clean project",
+    "Pi 1.2.0 RPC get_commands discovers exactly the two skills with --approve and neither with --no-approve"
+  ],
+  "rpc": "offline, no-session, no-MCP, isolated HOME and PI_CODING_AGENT_DIR; no prompt or model call",
+  "limits": [
+    "synthetic local Git commit identifies only the exported resource blobs; it is not the correction candidate or the frozen seven-payload candidate identity",
+    "discovery is not role execution, sandboxing, lifecycle, recovery, or client readiness",
+    "fixtures are retained at the reported paths for independent inspection"
+  ]
+}

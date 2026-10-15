@@ -1,0 +1,44 @@
+[
+  {
+    "agent": "a966b9a61b7e20f6c",
+    "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-15T17-21-57-182Z_f985c490-69ac-49c7-a779-59c90ec7f015.jsonl",
+    "metadata": [
+      {
+        "type": "model_change",
+        "id": "072f1f53",
+        "parentId": null,
+        "timestamp": "2026-10-15T17:21:57.883Z",
+        "provider": "opencode-go",
+        "modelId": "deepseek-v4.1-flash"
+      },
+      {
+        "type": "thinking_level_change",
+        "id": "5148451f",
+        "parentId": "072f1f53",
+        "timestamp": "2026-10-15T17:21:57.883Z",
+        "thinkingLevel": "max"
+      }
+    ]
+  },
+  {
+    "agent": "af8267695b66a4a32",
+    "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-15T17-21-57-191Z_ddd2bd85-6f98-4cd8-9d3d-b60eaf12a634.jsonl",
+    "metadata": [
+      {
+        "type": "model_change",
+        "id": "7d122c45",
+        "parentId": null,
+        "timestamp": "2026-10-15T17:21:57.879Z",
+        "provider": "openai-codex",
+        "modelId": "gpt-6-luna"
+      },
+      {
+        "type": "thinking_level_change",
+        "id": "06c863c1",
+        "parentId": "7d122c45",
+        "timestamp": "2026-10-15T17:21:57.879Z",
+        "thinkingLevel": "high"
+      }
+    ]
+  }
+]

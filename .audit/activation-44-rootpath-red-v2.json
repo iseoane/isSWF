@@ -1,0 +1,26 @@
+{
+  "result": "FAIL",
+  "source": ".audit/activation-44-snapshot-v2/payload/tools/factory-package.mjs",
+  "sha256": "b96281d24d53ca08dbe14341edbd2755a3cd484774c323be4414339931122b38",
+  "cases": [
+    {
+      "supplied": "/fresh-store",
+      "expected": "/fresh-store",
+      "actual": "/resh-store",
+      "matches": false
+    },
+    {
+      "supplied": "/fresh/store",
+      "expected": "/fresh/store",
+      "actual": "/resh/store",
+      "matches": false
+    },
+    {
+      "supplied": "/a/b/c",
+      "expected": "/a/b/c",
+      "actual": "/b/c",
+      "matches": false
+    }
+  ],
+  "scope": "Exact frozen/source helper unit with synthetic filesystem where only root exists. No actual filesystem canonicalization, root write, isolation or full CLI proof."
+}

@@ -1,0 +1,42 @@
+{
+  "result": "PASS",
+  "cli": "/home/iseoane/Work/isSWF/.claude/worktrees/agent-a79874a42b1bb0ec7/tools/factory-package.mjs",
+  "cliSha256": "e7c656c3c9708b7c2500540cebb26e1aa1534aa6ea785da6598912aeff236511",
+  "sourceFixtureCommit": "4aadf095e5e06e73a922162e89cbbdf9c6f1b1a1",
+  "sourceFixtureNewerCommit": "fbe0b77bdbcb343c3b444fe168087b75aa560eac",
+  "fixture": {
+    "root": "/tmp/isswf-activation44-PRm4l9",
+    "project": "/tmp/isswf-activation44-PRm4l9/project",
+    "store": "/tmp/isswf-activation44-PRm4l9/shared",
+    "sourceCommit": "fc598ae8543711241c4ba5de16188dffce9257cd",
+    "targetCommit": "4f7212a18f3af891cf57925aef657ecf03862089",
+    "baseline": {
+      "AGENTS.md": "c41b2c3791b412660ab97682adca8b8b083fb5bd8d36c7477edb99887a0b4d88",
+      ".pi/settings.json": "6a6265a8482d1f15557ac49244a49ec031abd7697c249594911084d77e44db2b",
+      ".factory/models.json": "24dc575af8fb7db507f98a7b1b21d4896dbb96e86c126cf41221672e7bfc3ac0",
+      ".factory/jobs/J501/A001.md": "68a721db3e1a956068ffa389af94565bfecee4e38f47ca76c7ad93b400b269b4"
+    },
+    "scope": "Owned disposable preservation fixture only. Local seed checkpoint; no installation, activation, process state or provider call performed."
+  },
+  "checks": [
+    {
+      "name": "ordinary activation and exact repeat preserve independent seed",
+      "passed": true
+    },
+    {
+      "name": "second factory revision refused on clean settings",
+      "exit": 1,
+      "unchanged": true,
+      "expectedReasonObserved": true,
+      "passed": true
+    },
+    {
+      "name": "store alias into source refused before publication",
+      "exit": 1,
+      "sourceUnchanged": true,
+      "expectedReasonObserved": true,
+      "passed": true
+    }
+  ],
+  "scope": "Independent parent regression fixture, exact executable hash and observed outcomes. Synthetic resource commits are not full implementation identity. No provider, trust-catalog, runtime, hostile-filesystem or concurrency proof."
+}

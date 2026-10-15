@@ -1,0 +1,27 @@
+{
+  "base": "737fc7b86a78b61fa0aa9fafb859c75748cab836",
+  "diffSha256": "8cbfaea3c209ec64498ae7364f2a2edc7faf546a5c3818345af05ae75141cdbf",
+  "files": [
+    {
+      "path": ".audit/activation-44-docs-brief.md",
+      "mode": "100644",
+      "sha256": "4ead8874453ce673119aaa9edd656ac1bd870d9526fe211b687852a1056494ee"
+    },
+    {
+      "path": "docs/arranque-por-proyecto.md",
+      "mode": "100644",
+      "sha256": "733bf6fb0ffa6ffc88b8fb0eb2772d53b96880c9e140e994a6733c047bb78dda"
+    },
+    {
+      "path": "docs/next-operational-cut.md",
+      "mode": "100644",
+      "sha256": "7530f0dceb8918bff46490a3ce6c6e3787ff12c8718ed2aba289f76acb0aa1e8"
+    },
+    {
+      "path": "docs/plan-v1.md",
+      "mode": "100644",
+      "sha256": "7aa85c53b6ad8df03cab2f077005ec1459f23cbfe89f945594b8690b558194a5"
+    }
+  ],
+  "snapshot": "5996b4cd4f193380ec34059ff4f50e95f19f3a63f54a128e4f9f3b70ece818b3"
+}

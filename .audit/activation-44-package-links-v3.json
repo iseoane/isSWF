@@ -1,0 +1,105 @@
+{
+  "result": "PASS",
+  "package": "/tmp/isswf-activation44-317444-1792085483914/shared-store/99fe8ad1b22a293390926341bde882e733038565",
+  "resourceCommit": "99fe8ad1b22a293390926341bde882e733038565",
+  "checkedMarkdownFiles": 18,
+  "links": [
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/diagnostician.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/references/design-principles.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/references/execution-principles.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/references/verification-principles.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/worker.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/diagnostician.md"
+    },
+    {
+      "file": ".agents/skills/isswf-coordinator/SKILL.md",
+      "link": "../../roles/reviewer.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/bug-diagnosis.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/tdd.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/design-principles.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/execution-principles.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/verification-principles.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/code-quality.md"
+    },
+    {
+      "file": ".agents/roles/worker.md",
+      "link": "references/comments.md"
+    },
+    {
+      "file": ".agents/roles/diagnostician.md",
+      "link": "references/bug-diagnosis.md"
+    },
+    {
+      "file": ".agents/roles/reviewer.md",
+      "link": "references/review.md"
+    },
+    {
+      "file": ".agents/roles/references/review.md",
+      "link": "code-quality.md"
+    },
+    {
+      "file": ".agents/roles/references/review.md",
+      "link": "comments.md"
+    },
+    {
+      "file": ".agents/roles/references/review.md",
+      "link": "verification-principles.md"
+    },
+    {
+      "file": "docs/durable-work.md",
+      "link": "templates/job-brief.md"
+    },
+    {
+      "file": "docs/durable-work.md",
+      "link": "templates/attempt.md"
+    },
+    {
+      "file": "docs/durable-work.md",
+      "link": "templates/review.md"
+    },
+    {
+      "file": "docs/durable-work.md",
+      "link": "../.factory/models.json"
+    },
+    {
+      "file": "docs/durable-work.md",
+      "link": "model-routing.md"
+    }
+  ],
+  "scope": "Actual installed package local Markdown links and whitespace only, not dynamic/code-span dependency completeness."
+}

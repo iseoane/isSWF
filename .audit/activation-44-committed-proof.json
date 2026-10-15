@@ -1,0 +1,48 @@
+{
+  "result": "PASS",
+  "source": "/home/iseoane/Work/isSWF",
+  "revision": "737fc7b86a78b61fa0aa9fafb859c75748cab836",
+  "cliSha256": "e7c656c3c9708b7c2500540cebb26e1aa1534aa6ea785da6598912aeff236511",
+  "fixture": {
+    "root": "/tmp/isswf-activation44-FOlbid",
+    "project": "/tmp/isswf-activation44-FOlbid/project",
+    "store": "/tmp/isswf-activation44-FOlbid/shared",
+    "sourceCommit": "737fc7b86a78b61fa0aa9fafb859c75748cab836",
+    "targetCommit": "7464d7676d9c47d38cc4a9e40e2b8bb4bc71044e",
+    "baseline": {
+      "AGENTS.md": "c41b2c3791b412660ab97682adca8b8b083fb5bd8d36c7477edb99887a0b4d88",
+      ".pi/settings.json": "6a6265a8482d1f15557ac49244a49ec031abd7697c249594911084d77e44db2b",
+      ".factory/models.json": "24dc575af8fb7db507f98a7b1b21d4896dbb96e86c126cf41221672e7bfc3ac0",
+      ".factory/jobs/J501/A001.md": "68a721db3e1a956068ffa389af94565bfecee4e38f47ca76c7ad93b400b269b4"
+    },
+    "scope": "Owned disposable preservation fixture only. Local seed checkpoint; no installation, activation, process state or provider call performed."
+  },
+  "packageRoot": "/tmp/isswf-activation44-FOlbid/shared/737fc7b86a78b61fa0aa9fafb859c75748cab836",
+  "payloadVerifiedAgainstActualCommit": 20,
+  "settingsRepeatBytesUnchanged": true,
+  "protectedFilesUnchanged": [
+    "AGENTS.md",
+    ".factory/models.json",
+    ".factory/jobs/J501/A001.md"
+  ],
+  "catalogs": [
+    {
+      "approved": true,
+      "skills": [
+        {
+          "name": "skill:isswf-coordinator",
+          "path": "/tmp/isswf-activation44-FOlbid/shared/737fc7b86a78b61fa0aa9fafb859c75748cab836/.agents/skills/isswf-coordinator/SKILL.md"
+        },
+        {
+          "name": "skill:isswf-setup",
+          "path": "/tmp/isswf-activation44-FOlbid/shared/737fc7b86a78b61fa0aa9fafb859c75748cab836/.agents/skills/isswf-setup/SKILL.md"
+        }
+      ]
+    },
+    {
+      "approved": false,
+      "skills": []
+    }
+  ],
+  "scope": "Actual committed source installation and isolated offline Pi discovery only; no provider, runtime role execution or client readiness."
+}

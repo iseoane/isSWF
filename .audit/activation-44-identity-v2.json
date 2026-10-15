@@ -1,0 +1,14 @@
+{
+  "snapshot": "01ded393074e2772642b4da98100ad49ecad5bf19d0e6171ad391f13bcf50fef",
+  "base": "fc598ae8543711241c4ba5de16188dffce9257cd",
+  "files": [
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".audit/activation-44-build-brief.md",
+    ".audit/verify-activation-44.mjs",
+    "docs/activacion-por-proyecto.md",
+    "docs/durable-work.md",
+    "package.json",
+    "tools/factory-package.mjs"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}
