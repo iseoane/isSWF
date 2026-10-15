@@ -1,0 +1,296 @@
+{
+  "log": "2026-10-15T13-06-09-138Z_8b2d258f-80b3-444c-8270-919177f78596.jsonl",
+  "metadata": [
+    {
+      "type": "model_change",
+      "id": "7b7a1802",
+      "parentId": null,
+      "timestamp": "2026-10-15T13:06:09.747Z",
+      "provider": "openai-codex",
+      "modelId": "gpt-6-luna"
+    },
+    {
+      "type": "thinking_level_change",
+      "id": "b83d9eb0",
+      "parentId": "7b7a1802",
+      "timestamp": "2026-10-15T13:06:09.747Z",
+      "thinkingLevel": "high"
+    }
+  ],
+  "calls": [
+    {
+      "type": "toolCall",
+      "id": "call_0836030003494c22bdc66f323458edfb|fc_0f84b84b15caa01f016ad0cfc8e2ec81919df799872eb27ae8",
+      "name": "todo",
+      "arguments": {
+        "action": "create",
+        "subject": "Apply approved route override",
+        "description": "Follow the frozen isswf-setup skill, inspect only the authorized source files with exact git show calls, run the three local checks, present the proposed diff, then apply and verify the target-exclusive route update and project record without dispatch or commit.",
+        "activeForm": "applying approved route override"
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_776a4e3a145a4105947fbdada42ddb00|fc_0f84b84b15caa01f016ad0cfca8af48191a2514a06c45ab87a",
+      "name": "todo",
+      "arguments": {
+        "action": "update",
+        "id": 1,
+        "status": "in_progress",
+        "activeForm": "reading frozen setup instructions"
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_6dcfcc93081349bcb05a0ee82b9aa318|fc_0f84b84b15caa01f016ad0cfcbe530819192c0f054af61c523",
+      "name": "read",
+      "arguments": {
+        "path": "/home/iseoane/Work/isSWF/.audit/setup-62-snapshot-v2/payload/.agents/skills/isswf-setup/SKILL.md",
+        "offset": 1,
+        "limit": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_f2d8d566b2174c778a0d7bcd01a3022d|fc_0f84b84b15caa01f016ad0cfcdb89c8191b81cc53aa3b26089",
+      "name": "bash",
+      "arguments": {
+        "command": "git status --short --branch",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_84da058c8bbd4befbc0ce2534977fc6c|fc_0f84b84b15caa01f016ad0cfcdb89c8191a44ed45595873957",
+      "name": "bash",
+      "arguments": {
+        "command": "git show 9dc64bb34411f18f7ac01ee6fdb3443eced3b002:docs/model-routing.md",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_5d8ce5ae04374085a146df276afc8afc|fc_0f84b84b15caa01f016ad0cfcdb89c81918cb24e83f5e615d3",
+      "name": "bash",
+      "arguments": {
+        "command": "git show 9dc64bb34411f18f7ac01ee6fdb3443eced3b002:.factory/models.json",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_caa66eb3859348f7a9fb6528ccf3049e|fc_0f84b84b15caa01f016ad0cfcdb89c81919ffca1dc91f07702",
+      "name": "bash",
+      "arguments": {
+        "command": "git show 9dc64bb34411f18f7ac01ee6fdb3443eced3b002:docs/durable-work.md",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_165f84ef61134d0b92c41f53cc006c5e|fc_0f84b84b15caa01f016ad0cfcdb89c8191a1326e217b808082",
+      "name": "bash",
+      "arguments": {
+        "command": "node check.mjs localapproved",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_1ec70bf8cd104f969a01d964c0d55b18|fc_0f84b84b15caa01f016ad0cfd6872081919caea8789b40b813",
+      "name": "bash",
+      "arguments": {
+        "command": "git status --short --branch && git rev-parse HEAD && git diff -- .factory/models.json .factory/project-setup.md",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_cf64e06f41a544f49faa56564230c897|fc_0f84b84b15caa01f016ad0cfd69bc48191b7832e499d38d3b1",
+      "name": "bash",
+      "arguments": {
+        "command": "node check.mjs localapproved",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_9e16c113dd2943618e13501e93e27389|fc_0f84b84b15caa01f016ad0cfd69bc48191912f967abefa79e8",
+      "name": "bash",
+      "arguments": {
+        "command": "node check.mjs scopefixtureowner",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_7bbc770cf4514936aa7cbcf8c371a0d9|fc_0f84b84b15caa01f016ad0cfd69bc48191a5f85db5b6589815",
+      "name": "bash",
+      "arguments": {
+        "command": "node check.mjs localdraftonly",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_4b543f8ae0314c378d3c7d755be53c25|fc_0f84b84b15caa01f016ad0cfd69bc48191bcabbad154bd5db4",
+      "name": "bash",
+      "arguments": {
+        "command": "node check.mjs isolationunverifiedclientblocked",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_8a5c6beb00494bb0b65d8ff8eb23fa8a|fc_0f84b84b15caa01f016ad0cfd69bc48191a6a6de48087fe83b",
+      "name": "ls",
+      "arguments": {
+        "path": "/tmp/isswf-setup62-kyQXJd/approved-route-update",
+        "limit": 100
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_78c14037525043839ea2eeaafed97b61|fc_0f84b84b15caa01f016ad0cfdb90ac819193ddaf44cf3ad601",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && git status --short --branch && git rev-parse HEAD && git diff -- .factory/models.json .factory/project-setup.md",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_277f5b8cbf34493ab74c98be786ddc17|fc_0f84b84b15caa01f016ad0cfdbc4748191b8c5ff7604f30443",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs localapproved",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_3905f5efce8e472a957175da8152c7a6|fc_0f84b84b15caa01f016ad0cfdbc4748191a4b7252458d78798",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs scopefixtureowner",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_c5d76e94625044d39761bfff092c9f14|fc_0f84b84b15caa01f016ad0cfdbc4748191ab2237778b08c75c",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs localdraftonly",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_7a7030b72c4d4c608a47191d1fde8478|fc_0f84b84b15caa01f016ad0cfdbc474819191f29bd52140e778",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs isolationunverifiedclientblocked",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_9bc9febfdfcc457a81c6493078138a31|fc_0f84b84b15caa01f016ad0cfdbc4748191a50b999767dd67f0",
+      "name": "read",
+      "arguments": {
+        "path": "/tmp/isswf-setup62-kyQXJd/approved-route-update/.factory/models.json",
+        "offset": 1,
+        "limit": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_cbb56525511a4ad7a8ac8332956d3f3d|fc_0f84b84b15caa01f016ad0cfdbc4748191a1cdf2a9bf5d4a6e",
+      "name": "read",
+      "arguments": {
+        "path": "/tmp/isswf-setup62-kyQXJd/approved-route-update/.factory/project-setup.md",
+        "offset": 1,
+        "limit": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_3a4e2654b4254448afd72769763f6a72|fc_0f84b84b15caa01f016ad0cfeb91c8819197028a746128db26",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node -e 'const fs=require(\"node:fs\"); const p=\".factory/models.json\"; let j=fs.readFileSync(p,\"utf8\"); const old=\"    \\\"researcher\\\": [\\n      { \\\"model\\\": \\\"opencode-go/glm-5.3-flash\\\", \\\"effort\\\": \\\"high\\\" },\\n      { \\\"model\\\": \\\"openai-codex/gpt-6-luna\\\", \\\"effort\\\": \\\"medium\\\" }\\n    ],\"; const next=\"    \\\"researcher\\\": [\\n      { \\\"model\\\": \\\"openai-codex/gpt-6-luna\\\", \\\"effort\\\": \\\"medium\\\" }\\n    ],\"; if(j.split(old).length!==2) throw Error(\"expected unique existing researcher route\"); JSON.parse(j); fs.writeFileSync(p,j.replace(old,next)); const q=\".factory/project-setup.md\"; let r=fs.readFileSync(q,\"utf8\"); const oldRecord=\"Model configuration: .factory/models.json, inherited approved routes, no override.\\n\"; const newRecord=`Model configuration: .factory/models.json; researcher uses the explicitly granted\\nwhole-route override recorded there for future attempts only; no fallback.\\n`; if(r.split(oldRecord).length!==2) throw Error(\"expected unique project-record decision\"); r=r.replace(oldRecord,newRecord); r+=`\\n## Setup evidence\\nTarget: /tmp/isswf-setup62-kyQXJd/approved-route-update\\nTarget base: 8aeb5260907573d1d9215f6f6d6134d83e3b06e7\\nSource checkout: /home/iseoane/Work/isSWF\\nSource checkpoint: 9dc64bb34411f18f7ac01ee6fdb3443eced3b002\\nGrant: operator-approved whole-route researcher override, no fallback,\\nfuture attempts only. Route values are in .factory/models.json.\\nChecks: node check.mjs localapproved, scopefixtureowner, localdraftonly,\\nisolationunverifiedclientblocked (all passed).\\nDelivery: local draft only; no commit authorized. Checkpoint pending.\\nIsolation: unverified; client execution blocked. Runtime/effort availability\\nwas not tested. Existing attempts were not changed.\\n`; fs.writeFileSync(q,r);' && git diff --check && git diff -- .factory/models.json .factory/project-setup.md",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_3f3a2e62d05a43538f1821576f05a36b|fc_0f84b84b15caa01f016ad0cff355a481918410737ceea20d7e",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node -e 'const fs=require(\"node:fs\"); const c=JSON.parse(fs.readFileSync(\".factory/models.json\",\"utf8\")); const expected={worker:[{model:\"openai-codex/gpt-6-luna\",effort:\"high\"}],researcher:[{model:\"openai-codex/gpt-6-luna\",effort:\"medium\"}],reviewer:[{model:\"openai-codex/gpt-6-luna\",effort:\"high\"}],\"additional-review\":[{model:\"opencode-go/deepseek-v4.1-flash\",effort:\"max\"}]}; if(JSON.stringify(c.roles)!==JSON.stringify(expected)) throw Error(\"route/other-role verification failed\"); const p=fs.readFileSync(\".factory/project-setup.md\",\"utf8\"); if(!p.includes(\"Route values are in .factory/models.json\")||/gpt-6-luna|glm-5\\.3|deepseek-v4\\.1/.test(p)) throw Error(\"project record duplicates route values or lacks reference\"); if(!p.includes(\"future attempts only\")||!p.includes(\"client execution blocked\")) throw Error(\"scope/gate record missing\"); console.log(\"route and other roles verified; project record references config without route values\");' && git diff --check && git status --short --branch && git diff -- .factory/models.json .factory/project-setup.md",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_25e9df2dcb7f4864981173f227bbc944|fc_0f84b84b15caa01f016ad0cff518ec8191a5e67f3cf1f08aaf",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs localapproved",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_0575da1ed6d04a00943444334853fe06|fc_0f84b84b15caa01f016ad0cff518ec81918a8001d47bf71274",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs scopefixtureowner",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_0163ef30802e4401bc54e462a699f13e|fc_0f84b84b15caa01f016ad0cff518ec819195e75d6d45d2cecc",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs localdraftonly",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_677bc0f9829d4ab6af90acb8af9dbe88|fc_0f84b84b15caa01f016ad0cff518ec8191993fdae1a362cebe",
+      "name": "bash",
+      "arguments": {
+        "command": "cd /tmp/isswf-setup62-kyQXJd/approved-route-update && node check.mjs isolationunverifiedclientblocked",
+        "timeout": null
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_09e81135377d40a9be6f7fe8385ef682|fc_0f84b84b15caa01f016ad0cff83f608191bd834d244733ec32",
+      "name": "todo",
+      "arguments": {
+        "action": "update",
+        "id": 1,
+        "status": "completed"
+      }
+    },
+    {
+      "type": "toolCall",
+      "id": "call_3040f9c25b85455598842300c844e9e0|fc_0f84b84b15caa01f016ad0cff8c14c81919c5301b0e813e490",
+      "name": "mem_save",
+      "arguments": {
+        "title": "Apply setup 62 researcher override",
+        "type": "config",
+        "scope": "project",
+        "topic_key": "isswf.setup62.researcher-route",
+        "project": "isSWF",
+        "cwd": "/home/iseoane/Work/isSWF",
+        "content": "What: Applied the explicitly granted whole-route researcher override in the target fixture's existing .factory/models.json and documented setup evidence. Why: Task 62 required future attempts to use the approved route without fallback while preserving other role choices. Where: /tmp/isswf-setup62-kyQXJd/approved-route-update/.factory/models.json and project-setup.md. Learned: Keep route tuples solely in the canonical JSON, preserve other roles, and report unverified isolation/client blocking separately from route configuration; runtime availability was not tested."
+      }
+    }
+  ]
+}

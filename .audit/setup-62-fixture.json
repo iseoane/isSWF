@@ -1,0 +1,21 @@
+{
+  "root": "/tmp/isswf-setup62-kyQXJd",
+  "cases": {
+    "new-project": {
+      "root": "/tmp/isswf-setup62-kyQXJd/new-project",
+      "checkpoint": "297ef38ee509fbbac74d43829006b03549fdf28e",
+      "status": ""
+    },
+    "configured-repeat": {
+      "root": "/tmp/isswf-setup62-kyQXJd/configured-repeat",
+      "checkpoint": "8aeb5260907573d1d9215f6f6d6134d83e3b06e7",
+      "status": ""
+    },
+    "dirty-active": {
+      "root": "/tmp/isswf-setup62-kyQXJd/dirty-active",
+      "checkpoint": "8aeb5260907573d1d9215f6f6d6134d83e3b06e7",
+      "status": "M .factory/project-setup.md\n?? .factory/jobs/J401/A001.md"
+    }
+  },
+  "limits": "Disposable local records; saved running status is not real actor liveness. No sandbox/runtime proof."
+}

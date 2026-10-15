@@ -1,0 +1,9 @@
+{
+  "snapshot": "b4c44f6c391e28914bdfd58cbaf44ab77bbbbaf980ea333cb6e6c33f11791960",
+  "base": "9dc64bb34411f18f7ac01ee6fdb3443eced3b002",
+  "files": [
+    ".agents/skills/isswf-setup/SKILL.md",
+    ".audit/setup-62-build-brief.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

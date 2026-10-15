@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "roles": {
+    "worker": [
+      { "model": "openai-codex/gpt-6-luna", "effort": "high" }
+    ],
+    "researcher": [
+      { "model": "openai-codex/gpt-6-luna", "effort": "medium" }
+    ],
+    "reviewer": [
+      { "model": "openai-codex/gpt-6-luna", "effort": "high" }
+    ],
+    "additional-review": [
+      { "model": "opencode-go/deepseek-v4.1-flash", "effort": "max" }
+    ]
+  }
+}

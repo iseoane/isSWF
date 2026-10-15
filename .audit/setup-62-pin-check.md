@@ -1,0 +1,3 @@
+**Narrow check:** A001 records a saved status of “running,” not current liveness, and pins input `brief-r1.md` plus config at checkpoint `8aeb5260907573d1d9215f6f6d6134d83e3b06e7`. Both files exist and match that checkpoint. The brief says to preserve the pinned job; it does not identify an actor or grant dispatch/replacement. The route config is not permission.
+
+The existing setup draft is already dirty and says to preserve the operator’s delivery-preference change. I left it and all other files unchanged. No grant was established from the inspected artifacts; no dispatch, replacement, route change, or publication is authorized.

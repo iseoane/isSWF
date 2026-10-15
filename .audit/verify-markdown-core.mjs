@@ -30,7 +30,7 @@ try {
     const text = await readFile(file, 'utf8');
     assert.equal(/[\t ]+$/mu.test(text), false, `trailing whitespace: ${file}`);
     if (basename(file) === 'SKILL.md') {
-      assert.match(text, /^---\nname: [a-z0-9-]+\ndescription: .+\n---\n/u, file);
+      assert.match(text, /^---\nname: [a-z0-9-]+\ndescription: .+\n(?:disable-model-invocation: (?:true|false)\n)?---\n/u, file);
       assert.equal(text.match(/^name: (.+)$/mu)?.[1], basename(dirname(file)));
     }
     for (const match of text.matchAll(/\[[^\]]*\]\(([^)]+)\)/gu)) {
