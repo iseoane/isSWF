@@ -1,0 +1,42 @@
+{
+  "base": "f78792878909530b730956c439b3172a90e25c51",
+  "diffSha256": "e42249a2dbab4a71d6e5024fb55085abcb602f10c6bf445695ac4b9ae73ea06b",
+  "files": [
+    {
+      "path": ".agents/roles/worker.md",
+      "mode": "100644",
+      "sha256": "57ea7f9af00afa930db5aafde2e8dab4d41d41a12fa38279fd5d299214dde286"
+    },
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "mode": "100644",
+      "sha256": "9acb58ff7f5ae6103f5c3719b91eb3faa1820c2b8a59196e265ff787a7372313"
+    },
+    {
+      "path": ".audit/models-60-build-brief.md",
+      "mode": "100644",
+      "sha256": "5d4c0531ed9538b4c540e8e6151548ec2dc8a5ec2a91c35bf9bc93a6e01fcd54"
+    },
+    {
+      "path": ".factory/models.json",
+      "mode": "100644",
+      "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+    },
+    {
+      "path": "docs/durable-work.md",
+      "mode": "100644",
+      "sha256": "b895577b8ff8c5d67ce4600398711443466fa8573ebc8697bf8402603b1fa379"
+    },
+    {
+      "path": "docs/model-routing.md",
+      "mode": "100644",
+      "sha256": "9145e255c3726e9e71e1c794caa9bf6d7ac27962a03c366a27f034535afcde97"
+    },
+    {
+      "path": "docs/templates/attempt.md",
+      "mode": "100644",
+      "sha256": "a8d6caec0eca5593a0edc9c15a4ca6e3e96bcb1ff6ed2c1d26eb612a114fd1c2"
+    }
+  ],
+  "snapshot": "ed97e54545f00f38433494845ce94c987ae397a6b608fc0b378c786fc59e1b4f"
+}

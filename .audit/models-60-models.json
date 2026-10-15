@@ -1,0 +1,104 @@
+{
+  "records": [
+    {
+      "file": "2026-10-15T08-07-54-694Z_e35ff3e5-bd55-4c41-9788-9150c349cf46.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-07-54-695Z_c7e5560e-c0e3-445b-986a-33d5bdbc66fa.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-11-49-210Z_098782ee-6686-4386-ab17-86206d1e18b4.jsonl",
+      "models": [
+        "opencode-go/deepseek-v4.1-flash"
+      ],
+      "efforts": [
+        "max"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-15-59-765Z_38567a32-7089-4967-8456-4ddac74b3187.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-20-13-559Z_599b10c1-9d13-413d-935d-5f96c7e1876d.jsonl",
+      "models": [
+        "opencode-go/deepseek-v4.1-flash"
+      ],
+      "efforts": [
+        "max"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-20-13-584Z_de575205-185f-4e42-8733-c68eba8fea8b.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-23-48-673Z_85099a55-a60e-4803-ae49-22dc0cee94de.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-28-35-778Z_c0ff1dc3-f61b-4aaf-a929-b3fe78612f03.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-28-35-829Z_796bfda7-384d-4f5b-8061-c8127d4801ae.jsonl",
+      "models": [
+        "opencode-go/deepseek-v4.1-flash"
+      ],
+      "efforts": [
+        "max"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-28-35-864Z_173b3895-adf7-4b6c-b6f6-ce80809dc1a9.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    },
+    {
+      "file": "2026-10-15T08-28-35-959Z_044b427a-205b-4c4b-9bfe-a397ae217d40.jsonl",
+      "models": [
+        "openai-codex/gpt-6-luna"
+      ],
+      "efforts": [
+        "high"
+      ]
+    }
+  ],
+  "scope": "Own assigned runtime metadata, not provider-internal semantics or remaining quota."
+}

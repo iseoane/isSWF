@@ -1,0 +1,14 @@
+{
+  "snapshot": "ed97e54545f00f38433494845ce94c987ae397a6b608fc0b378c786fc59e1b4f",
+  "base": "f78792878909530b730956c439b3172a90e25c51",
+  "files": [
+    ".agents/roles/worker.md",
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".audit/models-60-build-brief.md",
+    ".factory/models.json",
+    "docs/durable-work.md",
+    "docs/model-routing.md",
+    "docs/templates/attempt.md"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}
