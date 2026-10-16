@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-native-7SVluL",
+  "runtimeSha": "bfe83ade2b555f521b152f97dfcee372bfd1f761",
+  "input": "fb4a84d0f35dd1ec62bdbca917051ad84710621a",
+  "providerPromptStarted": false,
+  "nativeStopped": "stopped-review-required",
+  "receiptSha256": "c383efefc82832732f93ad5d36d731dab0a3ee58ad0ab70fa50a4cadb11522f4",
+  "fingerprint": "c418898ab5ea6fbedc439e354f63f20646f19c18d7dd4f349149a582c934055c",
+  "results": [
+    "inspect-check-read-reconcile-readonly-no-receipt",
+    "approval-relative-project-runtime-store-workspace-oversized-malformed-refused",
+    "missing-or-mismatched-trusted-review-and-check-authority-refused",
+    "actual-original-check-failure-output-overflow-and-timeout-no-receipt",
+    "matching-submitted-unknown-PR-blocks-without-query",
+    "actual-readonly-protected-check-valid-write-once-receipt-idempotent-and-readonly-observation",
+    "conflicting-approval-stale-bytes-nonexec-file-directory-root-modes-path-and-corrupt-receipt-block",
+    "valid-review-never-releases-admission-or-authorizes-successor"
+  ],
+  "limits": [
+    "approval provenance and review quality remain trusted caller preconditions",
+    "local fake PR phase facts only, no GitHub queries",
+    "receipt is exact observed candidate, not a successor lease",
+    "provider charge and whole recovery not reconciled"
+  ]
+}

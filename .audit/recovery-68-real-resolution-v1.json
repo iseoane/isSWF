@@ -1,0 +1,21 @@
+{
+  "accepted": [
+    {
+      "finding": "Audit omission of real invocation file",
+      "fix": "Conditional evidence collection includes pi-model-invocation; readonly check-preservation action and actual tamper test",
+      "evidence": "preservation-control-v3 PASS; omission mutant EXPECTED_RED missing invocation digest"
+    },
+    {
+      "finding": "committed-runtime not yet exercised",
+      "fix": "Actual committed-runtime preparation and entire offline chain tested against exact candidate runtime committed in disposable Git source",
+      "evidence": "committed-rehearsal-prepared/interruption/successor-v2 PASS, source7a29574aede1862bc04d8c426e956ff2f7e684cf"
+    }
+  ],
+  "limits": [
+    "Disposable committed rehearsal does not replace actual main-source replay after integration",
+    "Real provider gate stays closed until actual main committed fixture and independent fresh precall",
+    "No recovery authority change: record digest already in native records, direct audit preservation strengthened only"
+  ],
+  "sourceIntegrationGate": "Production Standards/Maint already PASS both; fresh delta asks source integration only, not approval to invoke real model",
+  "actualRuntimeProviderPrompts": 0
+}

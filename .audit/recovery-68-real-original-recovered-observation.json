@@ -1,0 +1,125 @@
+{
+  "status": "RECOVERED_FOR_REVIEW",
+  "originalDriverExit": 1,
+  "originalOutcome": "PARTIAL_INSTRUMENT_FAILURE",
+  "originalTaskSlotsConsumed": 1,
+  "remainingRealSuccessorSlots": 1,
+  "noOriginalRetry": true,
+  "stopped": {
+    "attemptId": "R68-real-A001",
+    "state": "unknown",
+    "reason": "owner identity absent or mismatched",
+    "executionChild": {
+      "state": "not-live",
+      "identity": {
+        "pid": 934246,
+        "startTicks": "22107376",
+        "pgid": 934246,
+        "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+        "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+        "spawnedAt": "2026-10-16T21:23:15.678Z"
+      },
+      "descendants": "unproven"
+    },
+    "job": {
+      "version": 1,
+      "logicalJobRef": "R68-real-model-recovery",
+      "attemptId": "R68-real-A001",
+      "repo": "/tmp/isswf-recovery68-real-WFigP2/project",
+      "grantRef": "operator-68-two-LunaHigh-tasks",
+      "packageRoot": "/tmp/isswf-recovery68-real-WFigP2/packages/f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+      "runtimeSha": "f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "86d51f3b10cd5ccdb8dd255123e5e4a7802c2551",
+      "targetBase": "acca7b8982da699281cd8fdec94f65796f6b1dca",
+      "jobPath": ".factory/jobs/R68-real/job.json",
+      "jobSha256": "45b476a96ca51d4e57b28e475646d94f6eb6cf33865dc00556daa9ff463cadf4",
+      "models": {
+        "sha": "acca7b8982da699281cd8fdec94f65796f6b1dca",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "real",
+      "taskSha256": "b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d",
+      "briefPath": ".factory/jobs/R68-real/brief.md",
+      "briefSha256": "dd017c43b473ccf78cec0f6b93f63880de43b8d532cb446f8274950d978c0f0e",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true,
+    "recovery": {
+      "status": "stopped-review-required",
+      "reviewRequired": true,
+      "retry": "never",
+      "taskSha256": "b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d",
+      "targetBase": "acca7b8982da699281cd8fdec94f65796f6b1dca",
+      "changedPaths": [
+        "src/counter.mjs"
+      ],
+      "candidateHashes": {
+        "src/counter.mjs": "3cf33d38bac183a2373d815e7a5338d6975fcc814f400705ba8e39c716ac15d8"
+      },
+      "namespacesCeased": 2,
+      "protectedHashesPreserved": true,
+      "remoteEffects": "not-reconciled"
+    }
+  },
+  "modelInvocation": {
+    "version": 1,
+    "attemptId": "R68-real-A001",
+    "taskSha256": "b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d",
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "callableTools": [
+      "sandbox_shell"
+    ],
+    "providerPromptStarted": true
+  },
+  "SDKToolCallCount": 2,
+  "taskIdentityMatchesDurableDispatchBindingAndBytes": true,
+  "lastTool": {
+    "version": 1,
+    "attemptId": "R68-real-A001",
+    "taskSha256": "b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d",
+    "seq": 2,
+    "modelCall": {
+      "sdkCallSha256": "19975bbe153592ac1307030ffba98d6647eb0f048167e6ea0c8a595c6a355389",
+      "operation": "shell",
+      "invocationSha256": "17b253be3b0b07bb4198602558a3f698943e29cfc75a86fdd7578a42f89fad1c"
+    },
+    "init": {
+      "pid": 935170,
+      "startTicks": "22107898",
+      "state": "R",
+      "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+      "exe": "/usr/bin/bwrap",
+      "namespace": "pid:[4026532441]"
+    }
+  },
+  "limits": [
+    "No recorded intermediate host-dead/task-live observation for this run",
+    "baseline evidence preservation must begin after this interruption, not reconstructed as pre-kill",
+    "provider charge unknown and consumed; actual successor not yet granted by independent partial gate"
+  ],
+  "mode": "real",
+  "root": "/tmp/isswf-recovery68-real-WFigP2",
+  "predecessorFiles": {
+    "dispatch.json": "eded2c767e82c9e564fd69882a9ea027182dad7031f1edfb18d960513b59acd8",
+    "owner.json": "006489c094b2bbc01a27718cd4db4be2f5d43c91827fbb4ba976dfd95bc96462",
+    "execution-child.json": "ca108657bfc2e3eb66b99d63ec161dacfb312dd4aa9ed7b12833fea6194d3abc",
+    "task.mjs": "b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d",
+    "native-recovery.json": "ac8121db6f524605ec811780b6f4541a15ff67b514ca4db960b4e3be36734351",
+    "pi-model-invocation.json": "17b253be3b0b07bb4198602558a3f698943e29cfc75a86fdd7578a42f89fad1c",
+    "native-tools/000001.intent.json": "c61b52fd595b061aae46814028b09a5d81d1cdb32af2f653e0c72ffc0ad27c3a",
+    "native-tools/000001.started.json": "3cb68c4d5d356e05325e3cc7946b67131c0431f4d624734c47d1ab134fd1db47",
+    "native-tools/000002.intent.json": "da08e9ffba8adc7025ac90acbd43a4f5adb3a94ecf37e2ecf4a1180000a02a09",
+    "native-tools/000002.started.json": "66ce93435b027c985501db6c58564bf59eaaf02d005654a6bb1c61f88816ed84",
+    "../R68-real-A001.job.json": "8ddd905ab37fc8e2f6cb6bb5694eb6638fc329c5052b78375e47caf7e7fec19c"
+  },
+  "preservationBaselineCapturedAfterInterruption": true,
+  "preKillPreservationNotClaimed": true,
+  "initialJobBindingPromptFlagIsPreparationOnly": true,
+  "originalFailureSha256": "ca4bc3032627001ecb1982d2fbe19dd86f90393ebd55fa1f997ff7505af5eddc"
+}

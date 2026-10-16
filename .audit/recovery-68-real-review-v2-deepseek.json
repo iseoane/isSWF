@@ -1,0 +1,13 @@
+{
+  "agent": "ad1bdaf29de201166",
+  "sourceLog": "2026-10-16T21-17-00-376Z_8ad3fa30-3c27-49f2-98f3-7b1b6d1b8abd.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-real-snapshot-v2/manifest.json",
+  "report": "**DELTA68 real-source v2 gate — READONLY.**\n\nIndependently verified:\n- Snapshot v1→v2: same base f70d759, same grant. Seven v1 entries; only `.audit/verify-recovery-68-real.mjs` changed; one new file `verify-recovery-68-invocation-preservation.mjs`. All eight payload hashes match the working tree. Production two tools + guide byte-unchanged v1→v2.\n- Delta confirmed in source: `evidenceFiles()` adds `pi-model-invocation.json` for mode real only; `check-preservation` is readonly, compares predecessor files, no gate/write. New test drives the actual harness — asserts collected invocation digest + `readonly:true`, then tampers bytes and requires exit 1.\n- Evidence: preservation-control-v3 PASS; omission mutant EXPECTED_RED (undefined digest); gate-controls-v3 PASS with consumed offline marker unchanged; committed rehearsal `--committed-runtime:true`, `runtimeSha===sourceCommit 7a29574`, offline interrupt→review→successor PASS, original evidence preserved. I compared all eight rehearsal runtime `.mjs` bytes to tree: exact match. Zero provider prompts.\n\n7a29574 is a disposable /tmp commit, not main; main candidate is uncommitted. That is the declared transient committed rehearsal, not actual main-source replay, and it does not block this review or require main commit first.\n\n**Standards: PASS. Spec delta: PASS.** No material blockers. Actual main committed fixture and fresh precall still pending; real-call gate stays closed.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

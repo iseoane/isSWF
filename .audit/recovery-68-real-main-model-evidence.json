@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-mock-sdk-kPDJ7w",
+  "cases": [
+    "real-mock",
+    "preclaimed-invocation",
+    "offline-mock"
+  ],
+  "mockedSDK": true,
+  "actualProviderPrompts": 0,
+  "realBranchExecutedWithMock": true,
+  "invocationBeforeMockPrompt": true,
+  "SDKCallHashesBoundToNativeRecords": true,
+  "hostCallsUnlabelled": true,
+  "preclaimBlocksBeforePrompt": true,
+  "offlineNoAttribution": true
+}

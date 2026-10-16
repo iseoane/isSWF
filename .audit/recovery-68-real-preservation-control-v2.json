@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-real-preserve-epriW0",
+  "actualHarnessRefusesInvocationDriftBeforeReviewOrSuccessor": true,
+  "mockedRecords": true,
+  "providerPrompts": 0
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "attemptId": "R68-real-A002",
+  "finishedAt": "2026-10-16T21:41:55.488Z",
+  "outcome": "success",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"version\":1,\"mode\":\"real\",\"briefPath\":\".factory/jobs/R68-successor/brief.md\",\"inputSha\":\"9d784ebee2835820e1bbe77589b3c99f9c4bc3d6\",\"briefSha256\":\"1f7f3ffaadebd205d08ef211cea74472735bf471e16c45cd11137d199ff4c537\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":true,\"sdkInitialized\":true,\"toolCalls\":5,\"acceptance\":true,\"protectedHashesPreserved\":true,\"boundaryCallAttributed\":true,\"hostTcpPositive\":true,\"checkExitCode\":0,\"mutablePaths\":[\"src/counter.mjs\"],\"status\":\"completed\"}\n",
+  "stderr": "",
+  "stdoutTruncated": false,
+  "stderrTruncated": false,
+  "captureIncomplete": false,
+  "descendants": "not-claimed",
+  "timedOut": false,
+  "workspace": "/tmp/isswf-recovery68-real-WFigP2/runs/R68-real-A002/workspace"
+}

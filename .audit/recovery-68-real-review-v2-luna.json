@@ -1,0 +1,13 @@
+{
+  "agent": "a93935c4b21cd2bfe",
+  "sourceLog": "2026-10-16T21-17-00-372Z_210cddc9-f4ed-4875-8c6f-99ae5e899ee2.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-real-snapshot-v2/manifest.json",
+  "report": "**Source-integration gate: PASS**\n\n- **Standards: PASS.** The production/doc baseline remains unchanged; the v1 Standards and Maint PASS results stand.\n- **Spec: PASS for this delta.** The v2 preservation check includes `pi-model-invocation.json`; the omission mutant is `EXPECTED_RED`. The committed-runtime offline rehearsal and gate controls report PASS.\n- **Maint: PASS.** The delta is limited to invocation-evidence collection/preservation and its check; no production recovery-authority change is indicated.\n\nThe v1 review’s FAIL metadata remains intact; this delta addresses its bounded findings, not a retroactive rewrite of that review.\n\n**Real-call gate remains closed.** Before any provider invocation, regenerate the actual-main committed fixture/replay and obtain a fresh, narrow, independent pre-call gate. No provider prompts were issued or authorized by this integration result.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

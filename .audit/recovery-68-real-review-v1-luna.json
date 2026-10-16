@@ -1,0 +1,13 @@
+{
+  "agent": "a137dc5ed76338dc7",
+  "sourceLog": "2026-10-16T21-09-29-586Z_3329bf6b-2a94-49a3-b894-a34d36cfcf43.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-real-snapshot-v1/manifest.json",
+  "report": "**Overall: FAIL — two bounded spec-evidence blockers.** No production recovery-authority change is indicated.\n\n- **Standards: PASS.** The frozen7 hashes match the manifest; no material standards blocker found.\n- **Spec: FAIL.** `.audit/verify-recovery-68-real.mjs` `evidenceFiles()` omits real-mode `pi-model-invocation.json`, so `preserve()` cannot catch its drift through partial review and successor launch. Native records bind its digest, but recovery does not validate the file against it.\n- **Spec evidence: FAIL.** The supplied offline fixture records `committedRuntime: false`; I found no PASS evidence for the required post-commit `--committed-runtime` path before a fresh actual pre-call gate.\n- **Maint: PASS.** No material maintainability blocker in the three production/docs files. The preservation gap is narrowly an audit-harness coverage issue.\n\nOther requested offline and mock-SDK PASS evidence, including the v1 filename-collision resolution, was present. No scripts were run; actual provider calls remain **zero**. No edits made.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

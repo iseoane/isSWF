@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "base": "f70d759513df7173a0df7953941810336feebd97",
+  "files": {
+    "tools/pi-worker-task.mjs": "a89dbf302af99147dd1a7b37ddd0c752e797a6bafccdd409f75738831a7b92a2",
+    "tools/native-recovery.mjs": "50e1565349999a78fe4755deb3a566013cbbc66474af040544f073a74ce3db71",
+    "docs/local-worker-lifecycle.md": "6818eb19bf0044275d574060b12392c8f5f0b7a1be9323ccc7be964b09eedf6e",
+    ".audit/prepare-recovery-68-real.mjs": "7f5f8f25871bda36c1c389b30b14b183336db30ef70195343fdf799be29af818",
+    ".audit/verify-recovery-68-real.mjs": "e67988ad01b111efbf102b4a72dc7a97467d811528d03418f933c2aec8f7c4af",
+    ".audit/verify-recovery-68-model-evidence.mjs": "f86e4bcdf2af9e791f87fbc7d32ae686ab1b3bf3e1ea240abffd431e401d452e",
+    ".audit/verify-recovery-68-real-gates.mjs": "269bc5c67e0dea04d05988e5c9e85073b7680189ac2d0f8b675e5f30f934c09e",
+    ".audit/verify-recovery-68-invocation-preservation.mjs": "588bc96d4a4c9292cb4e04b99a2b70e6dd19bc0174c7b2715564a6193e7b4bba"
+  },
+  "actualRuntimeProviderPrompts": 0,
+  "userGrant": {
+    "maximumTasks": 2,
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "perTaskMs": 120000,
+    "perTaskToolCalls": 12,
+    "retries": 0,
+    "fallback": false,
+    "githubEffects": false
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "status": "PASS",
+  "mode": "offline",
+  "root": "/tmp/isswf-recovery68-real-kyUpQ4",
+  "launched": {
+    "attemptId": "R68-real-A001",
+    "attemptDir": "/tmp/isswf-recovery68-real-kyUpQ4/runs/R68-real-A001",
+    "launchedPid": 937168,
+    "mode": "offline",
+    "bindingPath": "/tmp/isswf-recovery68-real-kyUpQ4/runs/R68-real-A001.job.json",
+    "reviewRequired": true
+  },
+  "taskIdentity": {
+    "source": "durable dispatch, binding and snapshot bytes",
+    "taskSha256": "a98e9e2314f6fed1c79dd4021ca0df8e362f40d25e519e6bd8f747f6e0e18d96"
+  },
+  "hostLossWhileTaskLive": {
+    "attemptId": "R68-real-A001",
+    "state": "unknown",
+    "reason": "owner identity absent or mismatched",
+    "executionChild": {
+      "state": "live",
+      "identity": {
+        "pid": 937186,
+        "startTicks": "22132857",
+        "pgid": 937186,
+        "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+        "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+        "spawnedAt": "2026-10-16T21:27:30.492Z"
+      },
+      "descendants": "unproven"
+    },
+    "job": {
+      "version": 1,
+      "logicalJobRef": "R68-real-model-recovery",
+      "attemptId": "R68-real-A001",
+      "repo": "/tmp/isswf-recovery68-real-kyUpQ4/project",
+      "grantRef": "operator-68-two-LunaHigh-tasks",
+      "packageRoot": "/tmp/isswf-recovery68-real-kyUpQ4/packages/f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+      "runtimeSha": "f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "e5a429424f369a117760a9cbfca04a0208032833",
+      "targetBase": "a746f3d5586d043f973dc112c8624d1352b267da",
+      "jobPath": ".factory/jobs/R68-real/job.json",
+      "jobSha256": "c6f1f193a488af1b21c82dddea9258157ea03bbc861a521b5d17c2764e5f835e",
+      "models": {
+        "sha": "a746f3d5586d043f973dc112c8624d1352b267da",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "offline",
+      "taskSha256": "a98e9e2314f6fed1c79dd4021ca0df8e362f40d25e519e6bd8f747f6e0e18d96",
+      "briefPath": ".factory/jobs/R68-real/brief.md",
+      "briefSha256": "dd017c43b473ccf78cec0f6b93f63880de43b8d532cb446f8274950d978c0f0e",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true,
+    "recovery": {
+      "status": "blocked",
+      "reason": "execution task cessation not confirmed",
+      "reviewRequired": true,
+      "retry": "never"
+    }
+  },
+  "stopped": {
+    "attemptId": "R68-real-A001",
+    "state": "unknown",
+    "reason": "owner identity absent or mismatched",
+    "executionChild": {
+      "state": "not-live",
+      "identity": {
+        "pid": 937186,
+        "startTicks": "22132857",
+        "pgid": 937186,
+        "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+        "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+        "spawnedAt": "2026-10-16T21:27:30.492Z"
+      },
+      "descendants": "unproven"
+    },
+    "job": {
+      "version": 1,
+      "logicalJobRef": "R68-real-model-recovery",
+      "attemptId": "R68-real-A001",
+      "repo": "/tmp/isswf-recovery68-real-kyUpQ4/project",
+      "grantRef": "operator-68-two-LunaHigh-tasks",
+      "packageRoot": "/tmp/isswf-recovery68-real-kyUpQ4/packages/f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+      "runtimeSha": "f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "e5a429424f369a117760a9cbfca04a0208032833",
+      "targetBase": "a746f3d5586d043f973dc112c8624d1352b267da",
+      "jobPath": ".factory/jobs/R68-real/job.json",
+      "jobSha256": "c6f1f193a488af1b21c82dddea9258157ea03bbc861a521b5d17c2764e5f835e",
+      "models": {
+        "sha": "a746f3d5586d043f973dc112c8624d1352b267da",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "offline",
+      "taskSha256": "a98e9e2314f6fed1c79dd4021ca0df8e362f40d25e519e6bd8f747f6e0e18d96",
+      "briefPath": ".factory/jobs/R68-real/brief.md",
+      "briefSha256": "dd017c43b473ccf78cec0f6b93f63880de43b8d532cb446f8274950d978c0f0e",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true,
+    "recovery": {
+      "status": "stopped-review-required",
+      "reviewRequired": true,
+      "retry": "never",
+      "taskSha256": "a98e9e2314f6fed1c79dd4021ca0df8e362f40d25e519e6bd8f747f6e0e18d96",
+      "targetBase": "a746f3d5586d043f973dc112c8624d1352b267da",
+      "changedPaths": [
+        "src/counter.mjs"
+      ],
+      "candidateHashes": {
+        "src/counter.mjs": "3cf33d38bac183a2373d815e7a5338d6975fcc814f400705ba8e39c716ac15d8"
+      },
+      "namespacesCeased": 2,
+      "protectedHashesPreserved": true,
+      "remoteEffects": "not-reconciled"
+    }
+  },
+  "activeTool": {
+    "version": 1,
+    "attemptId": "R68-real-A001",
+    "taskSha256": "a98e9e2314f6fed1c79dd4021ca0df8e362f40d25e519e6bd8f747f6e0e18d96",
+    "seq": 2,
+    "init": {
+      "pid": 937536,
+      "startTicks": "22133051",
+      "state": "R",
+      "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+      "exe": "/usr/bin/bwrap",
+      "namespace": "pid:[4026532443]"
+    }
+  },
+  "predecessorFiles": {
+    "dispatch.json": "c75e5a3d1f24afce659986ce05febf96a21e3ca96b36cdde32f1c3a09c024a25",
+    "owner.json": "a32273f5e8ad5ffe41795774d8daabf920c3171964e1c84c044a43664c6d08fe",
+    "execution-child.json": "9683fcab3918d7aa17f2e0d3bcf7701165fe5b7cbddd5c640400431f85b7eba3",
+    "task.mjs": "a98e9e2314f6fed1c79dd4021ca0df8e362f40d25e519e6bd8f747f6e0e18d96",
+    "native-recovery.json": "1f370cbc7f2954c64cf6c434562a978e0780f06958a09025b427a32b108dddbe",
+    "native-tools/000001.intent.json": "b38623779a6fa7b76ff3cbc2845bb0c2b7fbd75e9f2142146e2aa967e4f4ba9f",
+    "native-tools/000001.started.json": "727d8b9cbe3a81b7d468873dd107695c11ffa273aeb686107c8d2a204ed266b0",
+    "native-tools/000002.intent.json": "5f26c789b56e17331be6ab62d660971cc37e4a94dab0a9454d0578e9a7e8e7f0",
+    "native-tools/000002.started.json": "78ee48f57a04a34a9c44c515f927e447bf738d173bd0cfe5a6e5c25c072be655",
+    "../R68-real-A001.job.json": "64e41dd8f4fe70fec2fd578d672a628f121f88c20f7bfe3b352efc5961fecfb2"
+  },
+  "providerCharge": "unknown-consumed",
+  "successorNotLaunched": true,
+  "limits": [
+    "sameboot original interruption, not provider billing reconciliation",
+    "model-call metadata comes from validated SDK tool execution, never project output"
+  ]
+}

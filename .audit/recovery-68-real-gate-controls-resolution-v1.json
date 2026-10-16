@@ -1,0 +1,7 @@
+{
+  "failure": "Test input named negative-gate-fixture.json collided with gate case fixture and overwrote its own input",
+  "scope": "test fixture producer bug, no runtime provider launch",
+  "fix": "Distinct gate-control-input.json filename",
+  "redSource": ".audit/recovery-68-real-gate-controls-failed-v1.mjs",
+  "green": ".audit/recovery-68-real-gate-controls-v2.json"
+}

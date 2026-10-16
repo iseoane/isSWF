@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "root": "/tmp/isswf-recovery68-real-QAxCig",
+  "project": "/tmp/isswf-recovery68-real-QAxCig/project",
+  "runtime": "/tmp/isswf-recovery68-real-QAxCig/runtime",
+  "cli": "/tmp/isswf-recovery68-real-QAxCig/runtime/tools/isswf-job.mjs",
+  "store": "/tmp/isswf-recovery68-real-QAxCig/runs",
+  "runtimeSha": "7a29574aede1862bc04d8c426e956ff2f7e684cf",
+  "sourceCommit": "7a29574aede1862bc04d8c426e956ff2f7e684cf",
+  "committedRuntime": true,
+  "packageRoot": "/tmp/isswf-recovery68-real-QAxCig/packages/7a29574aede1862bc04d8c426e956ff2f7e684cf",
+  "inputSha": "6070ffca62668ee2ebcd08705d38e63a869e46fb",
+  "targetBase": "cbce08dcfc55a50b2f0998520a7428b34b39a8c9",
+  "jobPath": ".factory/jobs/R68-real/job.json",
+  "jobSha256": "e9617b6d1ef10b5b65c2e1fc410b767e5c337cc9149dd9475d057f3dce68122b",
+  "originalAttemptId": "R68-real-A001",
+  "successorAttemptId": "R68-real-A002",
+  "grantRef": "operator-68-two-LunaHigh-tasks",
+  "operatorGrant": {
+    "owner": "operator",
+    "reference": "explicit-user-Si-after-two-task-budget",
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "maximumRuntimeTasks": 2,
+    "taskDeadlineMs": 120000,
+    "maxToolCalls": 12,
+    "retry": false,
+    "fallback": false,
+    "githubEffects": false,
+    "interruptedSlotConsumedEvenIfChargeUnknown": true,
+    "successorRequiresCessationAndIndependentPartialReview": true
+  },
+  "invocationMarkers": {
+    "original": "/tmp/isswf-recovery68-real-QAxCig/original-invocation.json",
+    "successor": "/tmp/isswf-recovery68-real-QAxCig/successor-invocation.json"
+  },
+  "limits": [
+    "disposable sameboot fixture only",
+    "prepare makes offline SDK controls only; no real model prompt",
+    "actual real original and successor require independent code/precall gates"
+  ]
+}

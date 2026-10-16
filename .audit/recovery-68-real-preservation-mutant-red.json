@@ -1,0 +1,8 @@
+{
+  "status": "EXPECTED_RED",
+  "root": "/tmp/isswf-recovery68-preservation-mutant-qUtqUF",
+  "mutation": "Restore v1 omission of real invocation file in collected evidence, keep read-only inspection action",
+  "disagreement": "collected invocation digest undefined instead of actual digest",
+  "actualCheckerExit": 1,
+  "providerPrompts": 0
+}

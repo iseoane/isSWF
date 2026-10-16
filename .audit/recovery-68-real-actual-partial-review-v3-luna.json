@@ -1,0 +1,13 @@
+{
+  "agent": "a0f10d870a4c0f4df",
+  "sourceLog": "2026-10-16T21-28-50-199Z_79210587-c462-404e-9181-e4c45c290827.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-real-snapshot-v3/manifest.json",
+  "report": "## Standards — PASS\nThe v2→v3 change is confined to `.audit/verify-recovery-68-real.mjs`; the production runtime and lifecycle docs retain their v2 hashes. The fix derives task identity from durable dispatch, binding, and task bytes instead of assuming the launch response contains `taskSha256`.\n\n## Spec — PASS\nThe preserved stderr and exit confirm the original failure: the observer compared the real task hash with `undefined`, then the harness’s catch path stopped the run. The original result remains an actual partial instrument failure; its one task is consumed, with no retry.\n\n## Maint — PASS\nThe reserved fixture’s recorded source hashes match the snapshot, and the inspected partial fingerprint matches the parent-check record. The protected check passed read-only. Offline shared-path interrupt and successor evidence supports the corrected common path, but does not retroactively pass the failed real driver.\n\n**Material gate:** `RECOVERED_FOR_REVIEW` is observation, not authority. This review did not create a CLI receipt, so successor preparation still requires a fresh independent fingerprint gate and receipt. A new pre-call gate is required before the remaining real task. No successor invocation is authorized here. No edits, probes, provider calls, or additional real calls were made.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

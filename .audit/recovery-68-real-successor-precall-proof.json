@@ -1,0 +1,37 @@
+{
+  "status": "READY_FOR_PRECALL",
+  "fixtureSha256": "60917f17636c1c10bb2b0799ba169b15f2acd59210b19b560642c0df8ce7b638",
+  "successorPreparedSha256": "79711bd54a0f3ee2916081913543c22229efdf554edb64c50cbe0a620307294f",
+  "files": {
+    "tools/isswf-job.mjs": "ad92b1dc6e7796e233c331c310aed948fd909da39bc255a692d90d0f7c511404",
+    "tools/factory-package.mjs": "17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7",
+    "tools/pi-worker-task.mjs": "a89dbf302af99147dd1a7b37ddd0c752e797a6bafccdd409f75738831a7b92a2",
+    "tools/worker-lifecycle.mjs": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a",
+    "tools/native-recovery.mjs": "50e1565349999a78fe4755deb3a566013cbbc66474af040544f073a74ce3db71",
+    "tools/external-effect-journal.mjs": "6dfcaef6077654d16e0cca45470633eb9e5d2466d92253f33d4348d5d2e1efbd",
+    "tools/recovery-review.mjs": "303c103bbdae05dce145466a53c5b5913227e27e5fbd26c5ba86b352ca3a52df",
+    "tools/job-successor.mjs": "ad8a159eb9a01bdfb51601c2288fac6b6aab21a5795339902e88bab60dfd9f7e",
+    ".audit/prepare-recovery-68-real.mjs": "7f5f8f25871bda36c1c389b30b14b183336db30ef70195343fdf799be29af818",
+    ".audit/verify-recovery-68-real.mjs": "7ace038a4481277d9b53920446dabd62f59b8262a37fa7b27c6a82ba658e05ce"
+  },
+  "sourceCommit": "f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+  "inputSha": "9d784ebee2835820e1bbe77589b3c99f9c4bc3d6",
+  "targetBase": "67e000a85399ab8319333a7b864c2d37e4a7365d",
+  "jobSha256": "9b65ec0d8ca6e321724435ca8c202148771ca685bbddff8b990e32ac9f750a93",
+  "receiptSha256": "774a67e2b6c9f2da60ef90a6f8c359dd46fe4815316e49e09af6d787009060ad",
+  "fingerprint": "35e1acc9ed2de35cb468972326ff115cf5e9ede009284709593aa812a148600a",
+  "baseEqualsExactReviewedPartialWithGitModes": true,
+  "receiptValid": true,
+  "predecessorEvidencePreservedFromPostInterruptionBaseline": true,
+  "originalDriverOutcome": "PARTIAL_INSTRUMENT_FAILURE",
+  "originalRealTasksConsumed": 1,
+  "remainingRealSuccessorTasks": 1,
+  "successorMarkerAbsent": true,
+  "successorEdgeAbsent": true,
+  "explicitNodeShellOnlyBrief": true,
+  "limits": [
+    "No successor prompt yet",
+    "no pre-kill preservation or intermediate host-dead/task-live snapshot claimed",
+    "provider charge remains unknown-consumed"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "R68-real-A001",
+  "createdAt": "2026-10-16T21:07:42.332Z",
+  "repo": "/tmp/isswf-recovery68-real-9MGJUT/project",
+  "inputSha": "99c0e594f40286e62ab61f93951c191ba788852e",
+  "targetBase": "af4ef0efbcdffe8d292e16d54c337b52ececec74",
+  "briefPath": ".factory/jobs/R68-real/brief.md",
+  "briefSha256": "dd017c43b473ccf78cec0f6b93f63880de43b8d532cb446f8274950d978c0f0e",
+  "grantRef": "operator-68-two-LunaHigh-tasks",
+  "taskSha256": "c667a2f03cbfa06d6732f61cc9527894a3f8ab4d4144aa41603602efc09ebc63",
+  "timeoutMs": 120000,
+  "outputBytes": 16000,
+  "workspace": "/tmp/isswf-recovery68-real-9MGJUT/runs/R68-real-A001/workspace",
+  "taskCopy": "/tmp/isswf-recovery68-real-9MGJUT/runs/R68-real-A001/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-recovery68-real-9MGJUT/runs/R68-real-A001/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a"
+}

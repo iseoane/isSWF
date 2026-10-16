@@ -1,0 +1,16 @@
+{
+  "status": "OFFLINE_FIX_PASS",
+  "failure": "Real-only observer assumed launch response exposed taskSha256; API exposes durable bindingPath instead",
+  "actualFirstDriverExit": 1,
+  "fix": "Common offline/real path validates dispatch+binding+snapshot task SHA before mode-specific observation, with owned identities available for safe abort",
+  "sharedOfflineAPIHasNoTaskHashField": true,
+  "taskIdentityValidatedAgainstDurableRecords": true,
+  "firstRealTaskOutcome": "PARTIAL_INSTRUMENT_FAILURE",
+  "recoveredObservation": "RECOVERED_FOR_REVIEW",
+  "noOriginalRetry": true,
+  "realSlotsConsumed": 1,
+  "remainingSuccessorSlots": 1,
+  "preKillPreservationNotClaimed": true,
+  "hostDeadTaskLiveIntermediateNotRecorded": true,
+  "next": "fresh independent actual partial/code-fix review before record receipt or successor preparation"
+}

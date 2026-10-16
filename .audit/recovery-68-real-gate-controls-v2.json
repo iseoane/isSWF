@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "cases": [
+    "missing",
+    "verdict",
+    "phase",
+    "fixture",
+    "source"
+  ],
+  "providerPrompts": 0,
+  "existingOfflineInvocationMarkerUnchanged": true,
+  "limits": "deliberately invalid gates on consumed offline fixture, no real fixture invocation"
+}

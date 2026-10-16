@@ -1,0 +1,114 @@
+{
+  "status": "PASS",
+  "mode": "offline",
+  "root": "/tmp/isswf-recovery68-real-9MGJUT",
+  "launched": {
+    "attemptId": "R68-real-A002",
+    "attemptDir": "/tmp/isswf-recovery68-real-9MGJUT/runs/R68-real-A002",
+    "launchedPid": 920911,
+    "mode": "offline",
+    "bindingPath": "/tmp/isswf-recovery68-real-9MGJUT/runs/R68-real-A002.job.json",
+    "reviewRequired": true
+  },
+  "final": {
+    "attemptId": "R68-real-A002",
+    "state": "terminal",
+    "terminal": {
+      "version": 1,
+      "attemptId": "R68-real-A002",
+      "finishedAt": "2026-10-16T21:07:50.587Z",
+      "outcome": "success",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "{\"version\":1,\"mode\":\"offline\",\"briefPath\":\".factory/jobs/R68-successor/brief.md\",\"inputSha\":\"41b7e7c42fea928ad1650468ca6933b99a949505\",\"briefSha256\":\"a3520d5d12ef75247cabc0f17d0ccdc719d0f7d4628507b8e52a8e7c3df4a510\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":false,\"sdkInitialized\":true,\"toolCalls\":0,\"acceptance\":false,\"protectedHashesPreserved\":true,\"callableTools\":[\"sandbox_shell\"],\"toolBridgeReady\":true,\"boundaryCheckPassed\":true,\"boundaryControls\":{\"fakeEnvAbsent\":true,\"outsideRead\":\"ENOENT\",\"outsideWrite\":\"ENOENT\",\"factoryWrite\":\"EROFS\",\"sdkWrite\":\"EROFS\",\"network\":\"ECONNREFUSED\"},\"hostTcpPositive\":true,\"outsideHashPreserved\":true,\"fixtureCheckExitCode\":0,\"offlineChecks\":[{\"name\":\"successor-final-check\",\"exitCode\":0}],\"status\":\"completed\"}\n",
+      "stderr": "",
+      "stdoutTruncated": false,
+      "stderrTruncated": false,
+      "captureIncomplete": false,
+      "descendants": "not-claimed",
+      "timedOut": false,
+      "workspace": "/tmp/isswf-recovery68-real-9MGJUT/runs/R68-real-A002/workspace"
+    },
+    "job": {
+      "version": 1,
+      "successor": {
+        "version": 1,
+        "key": "1ec10120c13e83ee3973fd1522d1132e85866bdc3f3468fd6730af3356058071",
+        "sha256": "3a6f612cc328b740f8e23f04348e25d89ef32b274abff5bf919b6ae407e71585",
+        "admissionKey": "68320dd335c461e30013d8732ac09f2dc46bc0cf27859c7012017fb4e97bc829",
+        "predecessorAttemptId": "R68-real-A001",
+        "cumulativeWorkerTotal": 2
+      },
+      "logicalJobRef": "R68-real-model-recovery",
+      "attemptId": "R68-real-A002",
+      "repo": "/tmp/isswf-recovery68-real-9MGJUT/project",
+      "grantRef": "operator-68-two-LunaHigh-tasks-successor",
+      "packageRoot": "/tmp/isswf-operational44-B1IYuH/packages/7a29574aede1862bc04d8c426e956ff2f7e684cf",
+      "runtimeSha": "7a29574aede1862bc04d8c426e956ff2f7e684cf",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "41b7e7c42fea928ad1650468ca6933b99a949505",
+      "targetBase": "177b3018ff2eb515c9b4dd9f3734e0cbaa3acee5",
+      "jobPath": ".factory/jobs/R68-successor/job.json",
+      "jobSha256": "546d0238e0b9ecf94c5565a31c30232122181a619f9af1f61c9b55c6dedfe314",
+      "models": {
+        "sha": "af4ef0efbcdffe8d292e16d54c337b52ececec74",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "offline",
+      "taskSha256": "df85bd2823442efa5551db57195f0c4c73d493891c80c844bf81f901367e8be9",
+      "briefPath": ".factory/jobs/R68-successor/brief.md",
+      "briefSha256": "a3520d5d12ef75247cabc0f17d0ccdc719d0f7d4628507b8e52a8e7c3df4a510",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true
+  },
+  "taskResult": {
+    "version": 1,
+    "mode": "offline",
+    "briefPath": ".factory/jobs/R68-successor/brief.md",
+    "inputSha": "41b7e7c42fea928ad1650468ca6933b99a949505",
+    "briefSha256": "a3520d5d12ef75247cabc0f17d0ccdc719d0f7d4628507b8e52a8e7c3df4a510",
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "providerPromptStarted": false,
+    "sdkInitialized": true,
+    "toolCalls": 0,
+    "acceptance": false,
+    "protectedHashesPreserved": true,
+    "callableTools": [
+      "sandbox_shell"
+    ],
+    "toolBridgeReady": true,
+    "boundaryCheckPassed": true,
+    "boundaryControls": {
+      "fakeEnvAbsent": true,
+      "outsideRead": "ENOENT",
+      "outsideWrite": "ENOENT",
+      "factoryWrite": "EROFS",
+      "sdkWrite": "EROFS",
+      "network": "ECONNREFUSED"
+    },
+    "hostTcpPositive": true,
+    "outsideHashPreserved": true,
+    "fixtureCheckExitCode": 0,
+    "offlineChecks": [
+      {
+        "name": "successor-final-check",
+        "exitCode": 0
+      }
+    ],
+    "status": "completed"
+  },
+  "originalEvidencePreserved": true,
+  "parentProtectedCheckExitCode": 0,
+  "workerSlotsConsumed": 2,
+  "limits": [
+    "two explicit original/successor slots, no retry or billing reconciliation",
+    "sameboot disposable project, no GitHub effects or machine reboot claim"
+  ]
+}

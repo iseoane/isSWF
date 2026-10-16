@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-real-WFigP2",
+  "sourceRuntime": "f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+  "observations": {
+    "R68-real-A001": {
+      "taskSha256": "b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d",
+      "validatedRoute": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high"
+      },
+      "SDKModelToolCalls": 2,
+      "nativeNamespacesCeased": 2,
+      "hostAndTaskCeased": true
+    },
+    "R68-real-A002": {
+      "taskSha256": "bb29a2ba6a60f5a136cdc26d13d22072980f50e237c1be24763b5c03d6dbecee",
+      "validatedRoute": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high"
+      },
+      "SDKModelToolCalls": 5,
+      "nativeNamespacesCeased": 6,
+      "hostAndTaskCeased": true
+    }
+  },
+  "originalDriverOutcome": "PARTIAL_INSTRUMENT_FAILURE",
+  "originalEvidencePreservedFromPostInterruptionBaseline": true,
+  "receiptStillValid": true,
+  "successorTerminal": "success",
+  "onlyChangedPath": "src/counter.mjs",
+  "parentReadonlyOriginalCheckExit": 0,
+  "exactWorkerSlotsConsumed": 2,
+  "successorEdges": 1,
+  "additionalRuntimeCallsMadeByVerifier": 0,
+  "limits": [
+    "sameboot native process and fresh model-task recovery",
+    "original real intermediate host-dead/task-live observation and pre-kill preservation not recorded",
+    "provider charges unknown-consumed, no exactly-once billing",
+    "no real GitHub transport, reboot or multiwriter claim"
+  ]
+}

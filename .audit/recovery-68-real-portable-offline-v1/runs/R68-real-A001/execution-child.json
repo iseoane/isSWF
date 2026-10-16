@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "attemptId": "R68-real-A001",
+  "taskSha256": "c667a2f03cbfa06d6732f61cc9527894a3f8ab4d4144aa41603602efc09ebc63",
+  "child": {
+    "pid": 919572,
+    "startTicks": "22014049",
+    "pgid": 919572,
+    "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+    "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+    "spawnedAt": "2026-10-16T21:07:42.413Z"
+  }
+}

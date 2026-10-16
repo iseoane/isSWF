@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "sevenFrozenHashes": true,
+  "actualRuntimeProviderPrompts": 0,
+  "mockSDKRealBranch": true,
+  "offlineOriginalInterruptedAndReviewed": true,
+  "offlineExplicitSuccessorTerminal": true,
+  "gateDenialsBeforeLaunch": true,
+  "regressions": [
+    "adapter",
+    "native",
+    "review",
+    "core"
+  ],
+  "limits": [
+    "committed-runtime preparation still pending source integration",
+    "no actual real-model recovery claim yet"
+  ]
+}

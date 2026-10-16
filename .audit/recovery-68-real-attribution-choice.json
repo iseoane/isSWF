@@ -1,0 +1,12 @@
+{
+  "agent": "aecd6ad631dc96f6e",
+  "sourceLog": "2026-10-16T20-58-23-694Z_3b37be9d-ee76-4b3d-a2d4-b0ff97bea427.jsonl",
+  "initialPromptMatched": true,
+  "report": "**Decision: adopt the graft; drop the parent's separate per-call writer.**\n\nSource+native alone cannot attribute: without SDK metadata they identify neither the model turn nor a durable route, and the same intent/started series also serves host `bounded()` calls (post-prompt protected check). Code hash-binding proves the task, not the route/call at kill time.\n\nGraft spec:\n1. `pi-model-invocation.json`, real only: caller runtimeSource immediately after route/tool validation, before `session.prompt`. Fields: version, attemptId, taskSha256, provider/model/effort/thinkingLevel, callableTools, providerPromptStarted:true. No auth, paths, commands, text. Same atomic pattern (wx temp, fsync, link, dir fsync), write-once; write failure aborts before prompt.\n2. Metadata, real only: in `tool.execute` after abort/limit/canary checks, immediately before `bounded`: `{sdkCallSha256: sha256(_id), operation, invocationSha256}` as optional fourth arg bounded→nativeRun, spread into the existing binding for both intent and started. `seq` remains the ordinal. Offline callers pass nothing, so offline bytes and verifications stay unchanged.\n3. Semantics: metadata persists before spawn/release, so no effect lacks it; host calls carry none and reviewers exclude them; claim kill only when `started` exists. `inspectNativeRecovery` ignores extra keys; the receipt hashes records, transitively binding invocationSha. No framework, no admission change; charge stays unreconciled.\n\nSufficient claim: validated route prompted; SDK call H executed as native seq N under task T.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

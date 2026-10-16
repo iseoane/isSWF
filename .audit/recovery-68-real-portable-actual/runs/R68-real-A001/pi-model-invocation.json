@@ -1,0 +1,1 @@
+{"version":1,"attemptId":"R68-real-A001","taskSha256":"b0a6e5eef6f1debfc5c41b2a7260b3b1d88f56e45c0e94981949d4ce59bb9a0d","provider":"openai-codex","model":"gpt-6-luna","effort":"high","callableTools":["sandbox_shell"],"providerPromptStarted":true}

@@ -1,0 +1,19 @@
+{
+  "verdict": "PASS",
+  "phase": "original",
+  "fixtureSha256": "60917f17636c1c10bb2b0799ba169b15f2acd59210b19b560642c0df8ce7b638",
+  "files": {
+    "tools/isswf-job.mjs": "ad92b1dc6e7796e233c331c310aed948fd909da39bc255a692d90d0f7c511404",
+    "tools/factory-package.mjs": "17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7",
+    "tools/pi-worker-task.mjs": "a89dbf302af99147dd1a7b37ddd0c752e797a6bafccdd409f75738831a7b92a2",
+    "tools/worker-lifecycle.mjs": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a",
+    "tools/native-recovery.mjs": "50e1565349999a78fe4755deb3a566013cbbc66474af040544f073a74ce3db71",
+    "tools/external-effect-journal.mjs": "6dfcaef6077654d16e0cca45470633eb9e5d2466d92253f33d4348d5d2e1efbd",
+    "tools/recovery-review.mjs": "303c103bbdae05dce145466a53c5b5913227e27e5fbd26c5ba86b352ca3a52df",
+    "tools/job-successor.mjs": "ad8a159eb9a01bdfb51601c2288fac6b6aab21a5795339902e88bab60dfd9f7e",
+    ".audit/prepare-recovery-68-real.mjs": "7f5f8f25871bda36c1c389b30b14b183336db30ef70195343fdf799be29af818",
+    ".audit/verify-recovery-68-real.mjs": "e67988ad01b111efbf102b4a72dc7a97467d811528d03418f933c2aec8f7c4af"
+  },
+  "reviewer": "aa54802e43ba50a31",
+  "reviewReportSha256": "6636164160105fd6bbba9d17365ba34f42b2e6bd80036b8eeeae6ccec2822617"
+}
