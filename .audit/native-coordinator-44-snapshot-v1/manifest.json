@@ -1,0 +1,22 @@
+{
+  "base": "bddec92d285eea957a83631b6d6a9c6c177c36aa",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".audit/native-coordinator-44-fixture.json",
+      "mode": "100644",
+      "sha256": "d633aeb3f6d6d6efe01936a4803a659d6c69803e29996a3b771a5c25c2d1486d"
+    },
+    {
+      "path": ".audit/prepare-native-coordinator-44.mjs",
+      "mode": "100644",
+      "sha256": "b26eda35991332415f97b5a3e2d13993d2feb50e893171719caed306179a07e9"
+    },
+    {
+      "path": ".audit/verify-native-coordinator-44.mjs",
+      "mode": "100644",
+      "sha256": "bd539713779b41ff2543875da100735c668c0bc8570e7ee7dd3091eda5c032fc"
+    }
+  ],
+  "snapshot": "b24d6c4ff61ecbe05bdf9efd4655371453d855d7950648c0d506c0bdeb3564ee"
+}

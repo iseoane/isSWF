@@ -1,0 +1,22 @@
+{
+  "workspace": "/tmp/isswf-native-coordinator44-8anAlE/real/runs/J704-native-A001/workspace",
+  "allowed": [
+    "src/math.mjs"
+  ],
+  "files": {
+    "check.mjs": {
+      "sha256": "9050df98a17a2c1114f7d4808b787f3d4c04d0d42ad1918a47203faa3f316a20",
+      "mode": 420
+    },
+    "src/math.mjs": {
+      "sha256": "3c3ee391032f2afa2e970623f719fea60949012c1c5732fe376fc4a88cd4e41f",
+      "mode": 420
+    }
+  },
+  "baseline": {
+    "exit": 1,
+    "expected": 21,
+    "actual": 11
+  },
+  "binding": "Exact target-base Git blobs, checked before launch; not an observation of a live worker workspace"
+}

@@ -1,0 +1,42 @@
+{
+  "files": [
+    {
+      "path": "dispatch.json",
+      "sha256": "08669e521db57d84c396ec0e2d18657420d2268d059f2171f23a0439d6c44670"
+    },
+    {
+      "path": "owner.json",
+      "sha256": "a82de5a1545f0e81a44175afe414d38e489c68224444fb6b7ac057e9dd8b01b9"
+    },
+    {
+      "path": "terminal.json",
+      "sha256": "346936bbb26e2237f19a59d9f79204ece5fafcdd0fd662774e33c4519d16a881"
+    },
+    {
+      "path": "pi-result.json",
+      "sha256": "180f16ea636272a6f4d0dd0435dab23803660455868ec6382686f21cae2074fd"
+    },
+    {
+      "path": "task.mjs",
+      "sha256": "fe96c8b9f25c2abcda6ac95cf4d08332e31518d2625f70308164a690a9495c0e"
+    },
+    {
+      "path": "workspace/src/math.mjs",
+      "sha256": "3dcebef6eea20cb2ff1b25f3a82535d22f3e0d8e51c500182598f81becf3727d"
+    },
+    {
+      "path": "workspace/check.mjs",
+      "sha256": "9050df98a17a2c1114f7d4808b787f3d4c04d0d42ad1918a47203faa3f316a20"
+    },
+    {
+      "path": "before.json",
+      "sha256": "fd4478ea16a6a717c35c02a8dd63feff2921d341b913c540b75d2dd75e264f6c"
+    },
+    {
+      "path": "worker-config.json",
+      "sha256": "ad22eda337b7dac0a1e7cfc3867d8c2326228a200fab098497a384af928dceaf"
+    }
+  ],
+  "scope": "Safe task/lifecycle/source evidence. Auth path is an opaque path only, never credential contents. No model text/tool-command transcript retained.",
+  "fixtureGitBundle": "../history.bundle"
+}

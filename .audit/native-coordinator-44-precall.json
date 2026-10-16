@@ -1,0 +1,10 @@
+{
+  "verdict": "PASS",
+  "scriptSha256": "bd539713779b41ff2543875da100735c668c0bc8570e7ee7dd3091eda5c032fc",
+  "fixtureSha256": "d633aeb3f6d6d6efe01936a4803a659d6c69803e29996a3b771a5c25c2d1486d",
+  "review": ".audit/native-coordinator-44-precall-v1-review.json",
+  "snapshot": "b24d6c4ff61ecbe05bdf9efd4655371453d855d7950648c0d506c0bdeb3564ee",
+  "authorizedCoordinator": 1,
+  "workerTotal": 1,
+  "automaticRetries": 0
+}

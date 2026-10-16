@@ -1,0 +1,70 @@
+{
+  "sourceCommit": "bddec92d285eea957a83631b6d6a9c6c177c36aa",
+  "reviewers": [
+    {
+      "evidence": ".audit/native-coordinator-44-advisory-luna.json",
+      "agentId": "ab0c6bb325249a195",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "thinking": [
+        "high"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T07-37-13-467Z_8d6273b3-b009-4f3f-ac22-c8dcd0d9d9cb.jsonl"
+    },
+    {
+      "evidence": ".audit/native-coordinator-44-advisory-deepseek.json",
+      "agentId": "a05326a0208f0e40b",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "thinking": [
+        "max"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T07-37-13-493Z_eb73e883-382c-4d22-aa4e-1371b72aa853.jsonl"
+    },
+    {
+      "evidence": ".audit/native-coordinator-44-precall-v1-review.json",
+      "agentId": "af8014ab1f5ed54a0",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "thinking": [
+        "max"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T07-45-40-221Z_3cc67844-55b2-4bd0-acf7-deb144bb7612.jsonl"
+    },
+    {
+      "evidence": ".audit/native-coordinator-44-final-review.json",
+      "agentId": "a97491293081f7eb4",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "thinking": [
+        "max"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T08-39-57-372Z_1d0cfa03-422d-4721-bd95-0d8f0a0e8193.jsonl"
+    }
+  ],
+  "coordinator": {
+    "route": {
+      "model": "openai-codex/gpt-6-luna",
+      "effort": "high",
+      "authority": "Operator authorized native coordinator E2E; trusted whole-role override, not a configured default"
+    },
+    "verification": "Runtime session provider/model/effort asserted by harness; tool calls attributed by SDK events. No raw provider response text retained.",
+    "result": ".audit/native-coordinator-44-real.json",
+    "toolCalls": 5
+  },
+  "worker": {
+    "route": [
+      {
+        "model": "openai-codex/gpt-6-luna",
+        "effort": "high"
+      }
+    ],
+    "verification": "Explicit runtime route assertion inside generated task; safe pi-result records selected provider/model/effort.",
+    "toolCalls": 3,
+    "result": ".audit/native-coordinator-44-portable/real/pi-result.json"
+  },
+  "automaticRetries": 0,
+  "implementationTransport": "Native Pi SDK, not Pstack. Read-only advisory/review actors use parent Pstack transport.",
+  "sourceUnchanged": true,
+  "finalIndependentGate": "StandardsPASS/SpecPASS"
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "root": "/tmp/isswf-native-coordinator44-8anAlE",
+  "repo": "/tmp/isswf-native-coordinator44-8anAlE/repo",
+  "source": "/home/iseoane/Work/isSWF",
+  "factorySha": "bddec92d285eea957a83631b6d6a9c6c177c36aa",
+  "coordinatorProfileSha": "bddec92d285eea957a83631b6d6a9c6c177c36aa",
+  "modelConfigPath": ".factory/models.json",
+  "modelConfigSha": "bddec92d285eea957a83631b6d6a9c6c177c36aa",
+  "workerMethodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+  "workerRoute": [
+    {
+      "model": "openai-codex/gpt-6-luna",
+      "effort": "high"
+    }
+  ],
+  "coordinatorOverride": {
+    "model": "openai-codex/gpt-6-luna",
+    "effort": "high",
+    "authority": "Operator authorized native coordinator E2E; trusted whole-role override, not a configured default"
+  },
+  "inputSha": "ca5a42ec721113e99ded0c24b8134c17978927ae",
+  "targetBase": "10adeb97146e0f302dabea2973e8e1eaa1b9d41a",
+  "briefPath": ".factory/jobs/J704/brief-r1.md",
+  "briefSha256": "74c8dbb5c8eeab0361fac1b1d3c0b4d4657cbbfe7be7f7941519ffc711bfd046",
+  "referencedInputs": [
+    "src/math.mjs",
+    "check.mjs"
+  ],
+  "writePaths": [
+    "src/math.mjs"
+  ],
+  "attemptId": "J704-native-A001",
+  "actorBudget": {
+    "coordinator": 1,
+    "workerTotal": 1,
+    "automaticRetries": 0
+  },
+  "providerPromptStarted": false,
+  "scope": "Disposable coordinator-to-native-worker proof; no source implementation or real client project"
+}
