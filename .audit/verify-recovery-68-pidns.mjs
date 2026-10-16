@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { setTimeout as delay } from 'node:timers/promises';
 
+const nested = process.argv.includes('--nested');
 const root = await mkdtemp(join(tmpdir(), 'isswf-recovery68-pidns-'));
 const nonce = 'recovery68-' + root.split('/').at(-1);
 const writer = join(root, 'writer.mjs');
@@ -18,7 +19,7 @@ while(Date.now()<end){writeFileSync('${root}/heartbeat',String(Date.now()));Atom
 `);
 await writeFile(task, `import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
-const child=spawn(process.execPath,['${writer}','${nonce}'],{detached:true,stdio:'ignore'});
+const child=spawn(${nested ? "'/usr/bin/unshare'" : 'process.execPath'},${JSON.stringify(nested ? ['--user','--map-root-user','--pid','--fork','--mount-proc',process.execPath,writer,nonce] : [writer,nonce])},{detached:true,stdio:'ignore'});
 child.unref();
 writeFileSync('${root}/task-ready',JSON.stringify({pid:process.pid,child:child.pid}));
 setTimeout(()=>{},10000);
@@ -53,6 +54,7 @@ for (const pid of readdirSync('/proc').filter(x=>/^\d+$/.test(x))) {
   } catch {}
 }
 assert.ok(matching.length>=2, 'task and setsid writer must both be live');
+if (nested) assert.ok(matching.some(record=>record.namespace!=='pid:['+started['pid-namespace']+']'), 'writer must actually occupy a nested PID namespace');
 const distinctNamespace = readFileSync(`/proc/${owner.pid}/status`,'utf8');
 assert.ok(distinctNamespace.includes('Pid:'));
 for(const record of matching) assert.notEqual(record.namespace,readlinkSync(`/proc/${owner.pid}/ns/pid`));
@@ -62,4 +64,4 @@ await wait(async()=>matching.every(record=>{try {const now=proc(record.pid);retu
 const stoppedHeartbeat = await readFile(join(root,'heartbeat'),'utf8');
 await delay(300);
 assert.equal(await readFile(join(root,'heartbeat'),'utf8'),stoppedHeartbeat);
-console.log(JSON.stringify({scope:'technical feasibility only; not production recovery authorization',root,ownerIdentity,status,matching,ownerSignal:'SIGKILL',namespaceDescendantsNoLongerLive:true,heartbeatStable:true,credentialsMounted:false,providerPromptStarted:false},null,2));
+console.log(JSON.stringify({scope:'technical feasibility only; not production recovery authorization',nested,root,ownerIdentity,status,matching,ownerSignal:'SIGKILL',namespaceDescendantsNoLongerLive:true,heartbeatStable:true,credentialsMounted:false,providerPromptStarted:false},null,2));

@@ -6,10 +6,11 @@ import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:pat
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
+import { inspectNativeRecovery } from './native-recovery.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const methodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs'];
+const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md'];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
@@ -24,6 +25,19 @@ function blob(repo, revision, path) {
   const entry = invoke('git', ['-C', repo, 'ls-tree', '-z', revision, '--', path]).toString().split('\0').find(value => value.slice(value.indexOf('\t') + 1) === path);
   if (!entry || !/^100(?:644|755) blob [0-9a-f]{40}\t/.test(entry)) throw new Error(`committed regular file required: ${path}`);
   return invoke('git', ['-C', repo, 'cat-file', 'blob', entry.slice(0, entry.indexOf('\t')).split(' ')[2]]);
+}
+function baselineTree(repo, revision) {
+  const tree = Object.create(null);
+  const entries = invoke('git', ['-C', repo, 'ls-tree', '-rz', '--full-tree', revision]).toString().split('\0').filter(Boolean);
+  for (const entry of entries) {
+    const tab = entry.indexOf('\t'), [mode, type, object] = entry.slice(0, tab).split(' '), path = entry.slice(tab+1);
+    if (type !== 'blob' || !['100644','100755'].includes(mode)) continue;
+    if (!safeRelative(path)) throw Error('unsafe committed baseline path');
+    tree[path] = {kind:'file',sha256:digest(invoke('git', ['-C', repo, 'cat-file', 'blob', object])),executable:mode === '100755'};
+    const parts = path.split('/');
+    for (let index=1;index<parts.length;index++) tree[parts.slice(0,index).join('/')] = {kind:'directory'};
+  }
+  return tree;
 }
 function options(values) {
   const result = {};
@@ -152,15 +166,26 @@ An independent review remains required for every worker result.`);
   if (command === 'run') return run(args);
   if (!['read', 'reconcile'].includes(command) || Object.keys(args).some(key => !['runs-store', 'attempt-id'].includes(key))) throw new Error('usage: isswf-job.mjs run|read|reconcile [explicit options]');
   const result = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), command, '--runs-store', args['runs-store'] || '', '--attempt-id', args['attempt-id'] || '']));
-  let binding;
+  let binding, dispatch;
   try {
     binding = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'] + '.job.json'), 'utf8'));
-    const dispatch = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'], 'dispatch.json'), 'utf8'));
+    dispatch = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'], 'dispatch.json'), 'utf8'));
     if (binding.version !== 1 || !fullSha(binding.runtimeSha) || binding.methodologySha !== methodologySha || !/^[0-9a-f]{64}$/.test(binding.jobSha256) || !fullSha(binding.models?.sha) || !/^[0-9a-f]{64}$/.test(binding.models?.sha256) || !['real', 'offline'].includes(binding.mode) || binding.reviewRequired !== true || dispatch.timeoutMs !== 120000 || dispatch.outputBytes !== 16000 || ['attemptId', 'repo', 'grantRef', 'inputSha', 'targetBase', 'briefPath', 'briefSha256', 'taskSha256'].some(key => typeof binding[key] !== 'string' || binding[key] !== dispatch[key]) || binding.attemptId !== args['attempt-id']) throw new Error('binding mismatch');
   } catch {
     console.log(JSON.stringify({ attemptId: args['attempt-id'], state: 'unknown', reason: 'missing, corrupt or mismatched job/dispatch binding', reviewRequired: true }));
     return;
   }
-  console.log(JSON.stringify({ ...result, job: binding, reviewRequired: true }));
+  let recovery;
+  if (command === 'reconcile' && result.state === 'unknown') {
+    try {
+      const jobBytes=blob(binding.repo,binding.inputSha,binding.jobPath), job=JSON.parse(jobBytes);
+      if (digest(jobBytes)!==binding.jobSha256 || job.version!==1 || job.targetBase!==binding.targetBase || job.runtimeSha!==binding.runtimeSha || job.methodologySha!==binding.methodologySha || job.briefPath!==binding.briefPath || JSON.stringify(job.models)!==JSON.stringify(binding.models) || digest(blob(binding.repo,binding.inputSha,binding.briefPath))!==binding.briefSha256 || digest(blob(binding.repo,binding.models.sha,binding.models.path))!==binding.models.sha256) throw Error('committed recovery inputs changed');
+      for (const path of runtimeFiles) if (digest(await readFile(join(root,path)))!==digest(blob(root,binding.runtimeSha,path))) throw Error('recovery runtime identity changed');
+      await verifyPackage(binding.packageRoot,binding.runtimeSha);
+      for (const path of job.referencedInputs || []) if (digest(blob(binding.repo,binding.inputSha,path))!==digest(blob(binding.repo,binding.targetBase,path))) throw Error('recovery input/base mismatch');
+      recovery=await inspectNativeRecovery({attemptDir:join(args['runs-store'],args['attempt-id']),dispatch,observation:result,job,baseline:baselineTree(binding.repo,binding.targetBase)});
+    } catch { recovery={status:'blocked',reason:'committed recovery pins or runtime could not be revalidated',reviewRequired:true,retry:'never'}; }
+  }
+  console.log(JSON.stringify({ ...result, job: binding, reviewRequired: true, ...(recovery ? {recovery} : {}) }));
 }
 try { await main(); } catch (error) { console.error(error.message); process.exitCode = 1; }

@@ -4,6 +4,7 @@ import { readFile, writeFile, link, unlink, open, mkdir, mkdtemp, rm, realpath, 
 import { spawnSync } from 'node:child_process';
 import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { nativeRecorderSource } from './native-recovery.mjs';
 
 const BASELINE = '37a56ebc902e94f21fc10666f33fceac44946af7';
 const sha = value => createHash('sha256').update(value).digest('hex');
@@ -85,12 +86,12 @@ function runtimeSource() {
   return String.raw`
 import { createRequire } from 'node:module';
 import { createHash as hashFn } from 'node:crypto';
-import { readFile as read, writeFile as write, mkdir as makeDir, mkdtemp as tempDir, rm as remove, readdir, readlink } from 'node:fs/promises';
-import { spawn as spawnChild } from 'node:child_process';
+import { readFile as read, writeFile as write, mkdir as makeDir, mkdtemp as tempDir, rm as remove } from 'node:fs/promises';
 import { join as pathJoin, dirname as pathDirname, resolve as pathResolve } from 'node:path';
 import net from 'node:net';
 const hash = value => hashFn('sha256').update(value).digest('hex');
 ${matchesBoundaryControls.toString()}
+${nativeRecorderSource()}
 const processStartedAt = Date.now();
 const remainingBudget = () => Math.max(0, 110000 - (Date.now() - processStartedAt));
 const work = process.argv[2];
@@ -103,19 +104,14 @@ const finish = async (ok, extra = {}) => {
   process.stdout.write(JSON.stringify(result) + '\n');
   if (!ok) process.exitCode = 2;
 };
-const bounded = async (command, timeout = 10000) => new Promise(resolveRun => {
+let nativeRun;
+const bounded = async (command, timeout = 10000) => {
   const args = ['--unshare-user','--unshare-pid','--unshare-net','--unshare-ipc','--unshare-uts','--new-session','--die-with-parent','--cap-drop','ALL','--clearenv','--ro-bind','/usr','/usr','--symlink','usr/bin','/bin','--symlink','usr/lib','/lib','--symlink','usr/lib','/lib64','--proc','/proc','--dev','/dev','--tmpfs','/tmp','--dir','/tmp/home','--ro-bind',CONFIG.nodeBinary,'/runtime/node','--ro-bind',CONFIG.sdkPath,'/runtime/sdk','--bind',work,'/work'];
   args.push('--dir','/factory','--ro-bind',factoryRoot,'/factory');
-  args.push('--chdir','/work','--remount-ro','/','--setenv','PATH','/runtime:/usr/bin:/bin','--setenv','HOME','/tmp/home','--setenv','LANG','C.UTF-8','--','/bin/sh','-lc',command);
-  const child = spawnChild('/usr/bin/bwrap', args, { cwd: '/', env: { PATH: '/usr/bin:/bin', PI_WORKER_ENV_CANARY: 'fake-offline-only' }, detached: true, stdio: ['ignore','pipe','pipe'] });
-  let out = Buffer.alloc(0), err = Buffer.alloc(0), used = 0, truncated = false;
-  const add = (prev, chunk) => { const n = Math.min(chunk.length, Math.max(0, 8000-used)); used += n; truncated ||= n < chunk.length; return n ? Buffer.concat([prev,chunk.subarray(0,n)]) : prev; };
-  const timer = setTimeout(() => { try { process.kill(-child.pid,'SIGKILL'); } catch {} }, timeout);
-  child.stdout.on('data', chunk => { out = add(out,chunk); }); child.stderr.on('data', chunk => { err = add(err,chunk); });
-  child.once('error', () => { clearTimeout(timer); resolveRun({ code: 1, output: '', truncated: false }); });
-  child.once('close', code => { clearTimeout(timer); resolveRun({ code: code ?? 1, output: (out.toString()+err.toString()).slice(-8000), truncated }); });
-});
-const tree = async dir => { const out={}; const walk=async p=>{ for(const e of await readdir(p,{withFileTypes:true})){const f=pathJoin(p,e.name),name=f.slice(dir.length+1); if(e.isDirectory()){out['dir:'+name]='directory';await walk(f);} else if(e.isFile()) out[name]=hash(await read(f)); else if(e.isSymbolicLink()) out[name]='link:'+await readlink(f); else throw Error('unsupported workspace entry');} }; await walk(dir); return out; };
+  args.push('--chdir','/work','--remount-ro','/','--setenv','PATH','/runtime:/usr/bin:/bin','--setenv','HOME','/tmp/home','--setenv','LANG','C.UTF-8');
+  return nativeRun(args, command, timeout);
+};
+const tree = workspaceTree;
 let session, runtime, listener, runtimeRoot, trustedRoot, tools=0, failure='setup', boundaryAttributed=false;
 try {
   const requireSdk = createRequire(pathJoin(CONFIG.sdkPath,'package.json'));
@@ -139,6 +135,7 @@ try {
   const boundaryHash=hash(boundarySource), outsideHash=hash(await read(outside));
   const hostPositive=await new Promise((resolveHost,rejectHost)=>{const socket=net.connect(port,'127.0.0.1');let text='';socket.setEncoding('utf8');socket.on('data',part=>text+=part);socket.once('end',()=>resolveHost(text));socket.once('error',rejectHost);});
   if(hostPositive!=='host-positive') throw Error('host TCP positive control failed');
+  nativeRun=await createNativeToolRunner({work,factoryRoot});
   const tool = { name:'sandbox_shell', label:'Sandbox shell', description:'Run a bounded command in isolated /work or request the host-selected boundary checks.', parameters:schema, execute:async (_id,args,signal)=>{
     if(signal?.aborted) return {content:[{type:'text',text:'aborted'}],isError:true};
     if(tools>=12) { void session?.abort(); return {content:[{type:'text',text:'tool-call limit reached'}],isError:true}; }
@@ -155,7 +152,7 @@ try {
   const {session: created}=await sdk.createAgentSession({cwd:work,agentDir:runtimeRoot,modelRuntime:runtime,model,thinkingLevel:'high',settingsManager:settings,sessionManager:sdk.SessionManager.inMemory(work),resourceLoader:loader,noTools:'all',tools:['sandbox_shell'],excludeTools:['mcp__*'],customTools:[tool]});
   session=created;
   if(session.model?.provider!=='openai-codex'||session.model?.id!=='gpt-6-luna'||session.thinkingLevel!=='high'||JSON.stringify(session.getCallableToolNames())!==JSON.stringify(['sandbox_shell'])) throw Error('runtime route/tool validation failed');
-  if(CONFIG.mode==='offline') { const probe=await tool.execute('offline-boundary-call',{operation:'boundary_check'}); let controls={}; try{controls=JSON.parse(probe.content?.[0]?.text?.trim().split('\\n').at(-1)||'{}');}catch{} if(probe.isError||probe.details?.exitCode!==0||probe.details?.canaryHashPreserved!==true||!matchesBoundaryControls(controls)||hash(await read(outside))!==outsideHash) throw Error('offline boundary bridge failed'); const beforeOffline=await tree(work), checks=[]; for(const item of CONFIG.checks){const run=await bounded(item.command,10000);checks.push({name:item.name,exitCode:run.code});if(run.code!==item.expectedExitCode)throw Error('offline control mismatch');} const check=await bounded(CONFIG.protectedCheckCommand,10000),afterOffline=await tree(work),changed=Object.keys({...beforeOffline,...afterOffline}).filter(name=>beforeOffline[name]!==afterOffline[name]),mutable=changed.filter(name=>CONFIG.expectedMutablePaths.includes(name)); const protectedHashesPreserved=changed.every(name=>CONFIG.expectedMutablePaths.includes(name))&&Object.keys(beforeOffline).every(name=>afterOffline[name]!==undefined); if(check.code!==0||mutable.length===0||changed.length!==mutable.length||!mutable.every(name=>typeof afterOffline[name]==='string'&&/^[0-9a-f]{64}$/.test(afterOffline[name]))||!protectedHashesPreserved) throw Error('offline final-tree acceptance gate failed'); await finish(true,{sdkInitialized:true,providerPromptStarted:false,callableTools:['sandbox_shell'],toolBridgeReady:true,boundaryCheckPassed:true,boundaryControls:controls,hostTcpPositive:true,outsideHashPreserved:true,protectedHashesPreserved,fixtureCheckExitCode:check.code,offlineChecks:checks,mode:'offline'}); }
+  if(CONFIG.mode==='offline') { const probe=await tool.execute('offline-boundary-call',{operation:'boundary_check'}); let controls={}; try{controls=JSON.parse(probe.content?.[0]?.text?.trim().split('\\n').at(-1)||'{}');}catch{} if(probe.isError||probe.details?.exitCode!==0||probe.details?.canaryHashPreserved!==true||!matchesBoundaryControls(controls)||hash(await read(outside))!==outsideHash) throw Error('offline boundary bridge failed'); const beforeOffline=await tree(work), checks=[]; for(const item of CONFIG.checks){const run=await bounded(item.command,10000);checks.push({name:item.name,exitCode:run.code});if(run.code!==item.expectedExitCode)throw Error('offline control mismatch');} const check=await bounded(CONFIG.protectedCheckCommand,10000),afterOffline=await tree(work),changed=Object.keys({...beforeOffline,...afterOffline}).filter(name=>JSON.stringify(beforeOffline[name])!==JSON.stringify(afterOffline[name])),mutable=changed.filter(name=>CONFIG.expectedMutablePaths.includes(name)); const protectedHashesPreserved=changed.every(name=>CONFIG.expectedMutablePaths.includes(name))&&Object.keys(beforeOffline).every(name=>afterOffline[name]!==undefined); if(check.code!==0||mutable.length===0||changed.length!==mutable.length||!mutable.every(name=>afterOffline[name]?.kind==='file'&&/^[0-9a-f]{64}$/.test(afterOffline[name].sha256)&&(beforeOffline[name]?.kind!=='file'||beforeOffline[name].executable===afterOffline[name].executable))||!protectedHashesPreserved) throw Error('offline final-tree acceptance gate failed'); await finish(true,{sdkInitialized:true,providerPromptStarted:false,callableTools:['sandbox_shell'],toolBridgeReady:true,boundaryCheckPassed:true,boundaryControls:controls,hostTcpPositive:true,outsideHashPreserved:true,protectedHashesPreserved,fixtureCheckExitCode:check.code,offlineChecks:checks,mode:'offline'}); }
   else {
     failure='provider prompt';
     const before=await tree(work); let deadlineHit=false;
@@ -176,10 +173,10 @@ try {
     try { await session.prompt(CONFIG.briefText+'\nUse sandbox_shell to inspect, fix, and verify. Request boundary_check and rely only on its result.',{expandPromptTemplates:false,source:'extension'}); } finally { clearTimeout(timer); }
     failure='acceptance checks';
     const check=await bounded(CONFIG.protectedCheckCommand,10000), after=await tree(work);
-    const changed=Object.keys({...before,...after}).filter(name=>before[name]!==after[name]);
+    const changed=Object.keys({...before,...after}).filter(name=>JSON.stringify(before[name])!==JSON.stringify(after[name]));
     const mutable=changed.filter(name=>CONFIG.expectedMutablePaths.includes(name));
     const protectedHashesPreserved=changed.every(name=>CONFIG.expectedMutablePaths.includes(name))&&Object.keys(before).every(name=>after[name]!==undefined)&&hash(await read(outside))===outsideHash&&hash(await read(boundaryPath))===boundaryHash;
-    const accepted=!deadlineHit&&check.code===0&&mutable.length>0&&mutable.every(name=>typeof after[name]==='string'&&/^[0-9a-f]{64}$/.test(after[name]))&&changed.length===mutable.length&&protectedHashesPreserved&&boundaryAttributed;
+    const accepted=!deadlineHit&&check.code===0&&mutable.length>0&&mutable.every(name=>after[name]?.kind==='file'&&/^[0-9a-f]{64}$/.test(after[name].sha256)&&(before[name]?.kind!=='file'||before[name].executable===after[name].executable))&&changed.length===mutable.length&&protectedHashesPreserved&&boundaryAttributed;
     await finish(accepted,{providerPromptStarted:true,toolCalls:tools,acceptance:accepted,protectedHashesPreserved,boundaryCallAttributed:boundaryAttributed,hostTcpPositive:true,checkExitCode:check.code,mutablePaths:mutable});
   }
 } catch (error) {
