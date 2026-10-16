@@ -1,0 +1,33 @@
+{
+  "sourceProof": ".audit/recovery-68-native-parent-v7.json",
+  "runtimeSha": "e28fda6a638f963f49b6293a77b722f85cf36b5e",
+  "projectInputSha": "1e27dcb931a108f1a72728d4f2b22e68dd754bde",
+  "scope": "Actual offline native interruption; stopped review only, no fabricated terminal/provider prompt",
+  "bundlePrerequisite": {
+    "project-history.bundle": "none",
+    "runtime-incremental.bundle": "4237633"
+  },
+  "bundleVerification": "PASS",
+  "files": {
+    "dispatch.json": "b4ba35e6e7d15007459fa7349fe0d458d48ad5002a02c642bf3d43e2326e3001",
+    "execution-child.json": "8b595316204ef78fbc7acfc8d5a2db81db80a5dec8a4d8348efbcf8606b57851",
+    "job-binding.json": "c9be84cf37854a1a0ac5c5769b5ec431443045241600b4549c1f64a623e4db43",
+    "native-recovery.json": "04f7cceeddef916bd2f872d7ac162bc9d1162562c4751df3d53ec54a3dae8ff7",
+    "native-tools/000001.intent.json": "098817c60b73355c31fc70de560e6701e7ba653de11465fa54fb3468ab30460a",
+    "native-tools/000001.started.json": "65d63eda3a8eb84e913bdf64e9d76d3a70309b1bd7e66ea09b6e5c1b578b13a9",
+    "native-tools/000002.intent.json": "02a7ecd3fffa02c2db88d354d3d3aa45cfadbcf6525de1f144a3a049e9f6dced",
+    "native-tools/000002.started.json": "f1a3cf836aeb11183bbb2a5792f115daf031d8f96367a01735614f4e186d28ba",
+    "owner.json": "ef5d280246a756ee57034ccea0f1605c737e71e3155bacb2bb72c54b6d89f208",
+    "project-history.bundle": "02acab7fd892cdefdf30699c4de85ca872d90ec9c490047944c309d087ffd149",
+    "runtime-incremental.bundle": "8290948469528a6f48076291065aebc8cce979069e30a11969d3c615ea098b60",
+    "task.mjs": "66e49df747749190ad3fed9e701938f258bdfcc83fbc83412e21455a842dcfb5",
+    "workspace/.factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1",
+    "workspace/.pi/settings.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "workspace/AGENTS.md": "724ec95ad16388285742c1db857599356ed4d70d21d28934b59cddf20d4fbc11",
+    "workspace/check.mjs": "cd47830796315d9c8f3df8646aa52c6db67d937272d162142656cb0f7df80aa0",
+    "workspace/heartbeat.txt": "52a1d19aa8e5cd2591c115b018379d7dc626b8dabfba6a4b01a9f010c46d9cb8",
+    "workspace/src/counter.mjs": "3cf33d38bac183a2373d815e7a5338d6975fcc814f400705ba8e39c716ac15d8",
+    "workspace/tool-ready.json": "1d8135e3901ff009e815335d4960ce5542cc9d89166d1848eb9616ca91176b80",
+    "workspace/trusted-hold.mjs": "957d3d93e80933f5ce15d3c06ba590576d8385339e1dce5c9c07eba44db8c1ba"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "wrongActorPromptRejected": true,
+  "exitCode": 1,
+  "validPromptEvidence": ".audit/recovery-68-native-review-v2-luna.json",
+  "scope": "Own agent logs only; prompt/model verified before labeling result"
+}

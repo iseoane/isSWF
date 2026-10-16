@@ -1,0 +1,17 @@
+{
+  "failedRun": {
+    "stdoutBytes": 0,
+    "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: {\"args\":[\"/tmp/isswf-operational44-Rs35k9/source/tools/isswf-job.mjs\",\"run\",\"--project\",\"/tmp/isswf-recovery68-native-lJclVQ/project\",\"--input-sha\",\"c2ec4d859023bd5decf0b0243299840c2576030b\",\"--job\",\".factory/jobs/R68/job.json\",\"--runs-store\",\"/tmp/isswf-recovery68-native-lJclVQ/runs\",\"--attempt-id\",\"R68-host-task-loss\",\"--grant-ref\",\"explicit-offline-recovery-fixture\",\"--mode\",\"offline\"],\"status\":1,\"stderr\":\"runtime working bytes differ from activated revision: tools/isswf-job.mjs\\n\"}\n\n1 !== 0\n\n    at run (file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-native.mjs:14:10)\n    at launch (file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-native.mjs:49:29)\n    at file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-native.mjs:59:16 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 1,\n  expected: 0,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
+    "cause": "Test helper reused runtime checkout intentionally dirtied by prior operational negative test; new test now uses clean Git clone of exact synthetic runtime"
+  },
+  "actualParentRuns": [
+    ".audit/recovery-68-native-parent-v2.json",
+    ".audit/recovery-68-native-parent-v3.json"
+  ],
+  "providerPrompts": 0,
+  "limits": [
+    "Native pipeline tested offline with actual task/host SIGKILL; no actual provider recovery proof",
+    "stopped-review-required is review permission only",
+    "external effects not reconciled"
+  ]
+}

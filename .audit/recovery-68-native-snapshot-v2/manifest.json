@@ -1,0 +1,14 @@
+{
+  "base": "4237633",
+  "files": {
+    "tools/native-recovery.mjs": "88016bea813bd542b9a28e004c6141b06221c315cf20fcae33b2f478014895b5",
+    "tools/pi-worker-task.mjs": "9b65e8bd2254bcc5c13501a5ab4e0410e3fbd2c304763bafe8edd5d2a852ba47",
+    "tools/isswf-job.mjs": "b9eeff4865fbe43c116bad88c0fe5a73fccb1a4a63558e9f2514f48d84a30330",
+    "docs/local-worker-lifecycle.md": "2d363732b20dc8fb8404f103f3e5a50ece06e36f9b5cf6c305423076ee83f9a2",
+    ".audit/verify-operational-44.mjs": "9a6528ca8053ce8a72f412e047b95c5c0b6cce53db0862355495fcf9703604f0",
+    ".audit/verify-recovery-68-native.mjs": "3b65ae592b2d0579f842f3ce33e22e3a71f28ac1d20c33a3f6bb4c2889c061e4",
+    ".audit/verify-recovery-68-scope.mjs": "51dda75f05bbcbf808f8b2656fd6a1463480c89f1f31d75735e008e596d8fcc0",
+    ".audit/verify-recovery-68-pidns.mjs": "da3f2b14559e6f5221e77c8d532ff7a9b450c1a1ebfdc76602e4c293f7ac9e1e"
+  },
+  "status": "native recovery correction candidate; no provider calls"
+}

@@ -1,0 +1,35 @@
+{
+  "completedReviews": [
+    {
+      "agent": "a1980c382cb3869d9",
+      "sourceLog": "2026-10-16T11-28-39-894Z_ae188c37-fe26-4197-b1fa-c3b286633f40.jsonl",
+      "actualMetadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "stopReason": "stop"
+      }
+    },
+    {
+      "agent": "a8389bc06a80fbadf",
+      "sourceLog": "2026-10-16T11-28-39-931Z_ab32adc8-93b4-4846-af7b-4ac69a612b9f.jsonl",
+      "actualMetadata": {
+        "provider": "opencode-go",
+        "model": "deepseek-v4.1-flash",
+        "effort": "max",
+        "stopReason": "stop"
+      }
+    }
+  ],
+  "quotaIncident": {
+    "actualActor": "a1980c382cb3869d9",
+    "actualRoute": "openai-codex/gpt-6-luna high",
+    "errorRetained": ".audit/recovery-68-native-review-v1-deepseek.json",
+    "note": "Historical parent filename/ID label incorrect, actualmetadata always retained"
+  },
+  "attributionCorrection": ".audit/recovery-68-native-agent-attribution-correction.json",
+  "initiallyRejectedFindingsRetained": true,
+  "workerProviderPrompts": 0,
+  "isolationClaim": "Readonly reviewer tool policy is not technical sandbox isolation",
+  "closure": "Native offline code unit only; #68 remains in_progress"
+}

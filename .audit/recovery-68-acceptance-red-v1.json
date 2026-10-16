@@ -1,0 +1,52 @@
+{
+  "root": "/tmp/isswf-recovery68-acceptance-6aQbUy",
+  "providerPromptStarted": false,
+  "unauthorized": "unauthorized",
+  "result": {
+    "attemptId": "R68-acceptance",
+    "state": "terminal",
+    "terminal": {
+      "version": 1,
+      "attemptId": "R68-acceptance",
+      "finishedAt": "2026-10-16T14:34:44.875Z",
+      "outcome": "success",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "{\"version\":1,\"mode\":\"offline\",\"briefPath\":\".factory/jobs/R68/brief.md\",\"inputSha\":\"18ea57efc1f0d520708c663251f4dec69cfc8ecc\",\"briefSha256\":\"2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":false,\"sdkInitialized\":true,\"toolCalls\":0,\"acceptance\":false,\"protectedHashesPreserved\":true,\"callableTools\":[\"sandbox_shell\"],\"toolBridgeReady\":true,\"boundaryCheckPassed\":true,\"boundaryControls\":{\"fakeEnvAbsent\":true,\"outsideRead\":\"ENOENT\",\"outsideWrite\":\"ENOENT\",\"factoryWrite\":\"EROFS\",\"sdkWrite\":\"EROFS\",\"network\":\"ECONNREFUSED\"},\"hostTcpPositive\":true,\"outsideHashPreserved\":true,\"fixtureCheckExitCode\":0,\"offlineChecks\":[{\"name\":\"repair-plus-unauthorized-prototype-file\",\"exitCode\":0}],\"status\":\"completed\"}\n",
+      "stderr": "",
+      "stdoutTruncated": false,
+      "stderrTruncated": false,
+      "captureIncomplete": false,
+      "descendants": "not-claimed",
+      "timedOut": false,
+      "workspace": "/tmp/isswf-recovery68-acceptance-6aQbUy/runs/R68-acceptance/workspace"
+    },
+    "job": {
+      "version": 1,
+      "attemptId": "R68-acceptance",
+      "repo": "/tmp/isswf-recovery68-acceptance-6aQbUy/project",
+      "grantRef": "disposable-no-provider-negative",
+      "packageRoot": "/tmp/isswf-operational44-4esVpB/packages/e29608f9b80b28e7eda89ab8cbbaff6c347b9983",
+      "runtimeSha": "e29608f9b80b28e7eda89ab8cbbaff6c347b9983",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "18ea57efc1f0d520708c663251f4dec69cfc8ecc",
+      "targetBase": "8253e121a08c9ea7cdc9958e90019437ae054e92",
+      "jobPath": ".factory/jobs/R68/job.json",
+      "jobSha256": "9129266829ea1da670893ef2261f379f1c94bab76106ff0ea0796ecfb7f82b1e",
+      "models": {
+        "sha": "8253e121a08c9ea7cdc9958e90019437ae054e92",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "offline",
+      "taskSha256": "087716d346bdbc2f5b14b0630ffe5545b6e48746a73b9464f70bfbe7f737504a",
+      "briefPath": ".factory/jobs/R68/brief.md",
+      "briefSha256": "2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true
+  }
+}

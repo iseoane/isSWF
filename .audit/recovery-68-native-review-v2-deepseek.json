@@ -1,0 +1,12 @@
+{
+  "agent": "a847f41122c37c2b6",
+  "sourceLog": "2026-10-16T14-33-15-162Z_7a802c18-4aba-4ef5-9ccb-cf07252cd6a3.jsonl",
+  "initialPromptMatched": true,
+  "report": "**Route:** `opencode-go/deepseek-v4.1-flash`, `PI_REASONING_LEVEL=high` (max unavailable without changing model). No fallback observed. Read-only; no probes launched. Frozen v2 hashes match working tree.\n\n**Standards: PASS.** Style, fail-closed defaults, five-file runtime pin, docs, offline tests consistent.\n\n**Spec: FAIL — one remaining blocker.**\n\nConfirmed fixed: `inspectNativeRecovery` dropped the `mode:` filter; null-prototype typed entries; spread keeps `__proto__` as own key. `scope-green-v3` blocks `mode:payload`/`mode:link`/`dir:payload`/`__proto__` (red-v1 showed the `mode:*` bypass). v1 finding #2 correctly notReproduced: `recovery-68-nested-pidns-v1.json` — writer in nested ns 4026532632 ceased with task after init/owner SIGKILL (a descendant-namespace task retains PIDs in every ancestor ns, so ancestor-init death zaps it). Scope-limited to this kernel.\n\n**Blocker (companion adapter tree):** `tools/pi-worker-task.mjs` `runtimeSource()` `tree()` still uses plain `{}` with `dir:`/`link:` prefixed keys. `out['__proto__']=hash` invokes the `Object.prototype.__proto__` setter with a string and is silently dropped; `dir:`/`link:` also collide with real names. Both gates (offline `beforeOffline`/`afterOffline`, real `before`/`after`) therefore miss an unlisted `__proto__`: `changed.length===mutable.length` and `protectedHashesPreserved` remain true. `.audit/verify-recovery-68-acceptance.mjs` (parent red-v1, exit 1) proves terminal `outcome:success`, stdout `status:completed`, `acceptance` untouched, with unauthorized `/workspace/__proto__` present. The reconcile fix does not cover this: reconcile runs only when `state==='unknown'`, never on normal terminal success. Minimal fix: give `tree()` the same typed entries + null-prototype map (or reuse the native-recovery walk), then a fresh green v3.\n\nNote: `resolution-v1.json` routeIncident and both review filenames are mislabeled; `native-agent-attribution-correction.json` is correct (a838 Deepseek-max completed FAIL; a198 Luna quota-errored).\n\nNon-blockers: new-directory/exec-bit changes fail closed; `ceased` identity (bootId+PID+startTicks, zombie/gone) is sound; policy↔observation binding omits namespace but that is redundant given PID/startTicks/bootId/exe.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

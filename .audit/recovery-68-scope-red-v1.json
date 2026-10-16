@@ -1,0 +1,63 @@
+{
+  "root": "/tmp/isswf-recovery68-native-bPu95F",
+  "cases": [
+    {
+      "name": "mode:payload",
+      "kind": "file",
+      "recovery": {
+        "status": "stopped-review-required",
+        "reviewRequired": true,
+        "retry": "never",
+        "taskSha256": "d71decb6d3fd7c44a4ac80974ce94fa351539ec9ca63aa3e76f8e87d8c50f879",
+        "targetBase": "06e7a49813f407c7534b1f4109690c4c90862a4b",
+        "changedPaths": [
+          "heartbeat.txt",
+          "src/counter.mjs",
+          "tool-ready.json"
+        ],
+        "candidateHashes": {
+          "heartbeat.txt": "628562a7942019d14d93b2043fabbb830e313319f6a1efb9cb3dbc96add67832",
+          "src/counter.mjs": "3cf33d38bac183a2373d815e7a5338d6975fcc814f400705ba8e39c716ac15d8",
+          "tool-ready.json": "1d8135e3901ff009e815335d4960ce5542cc9d89166d1848eb9616ca91176b80"
+        },
+        "namespacesCeased": 2,
+        "protectedHashesPreserved": true,
+        "remoteEffects": "not-reconciled"
+      }
+    },
+    {
+      "name": "mode:link",
+      "kind": "symlink",
+      "recovery": {
+        "status": "stopped-review-required",
+        "reviewRequired": true,
+        "retry": "never",
+        "taskSha256": "d71decb6d3fd7c44a4ac80974ce94fa351539ec9ca63aa3e76f8e87d8c50f879",
+        "targetBase": "06e7a49813f407c7534b1f4109690c4c90862a4b",
+        "changedPaths": [
+          "heartbeat.txt",
+          "src/counter.mjs",
+          "tool-ready.json"
+        ],
+        "candidateHashes": {
+          "heartbeat.txt": "628562a7942019d14d93b2043fabbb830e313319f6a1efb9cb3dbc96add67832",
+          "src/counter.mjs": "3cf33d38bac183a2373d815e7a5338d6975fcc814f400705ba8e39c716ac15d8",
+          "tool-ready.json": "1d8135e3901ff009e815335d4960ce5542cc9d89166d1848eb9616ca91176b80"
+        },
+        "namespacesCeased": 2,
+        "protectedHashesPreserved": true,
+        "remoteEffects": "not-reconciled"
+      }
+    },
+    {
+      "name": "dir:payload",
+      "kind": "file",
+      "recovery": {
+        "status": "blocked",
+        "reason": "partial tree exceeds committed mutable scope",
+        "reviewRequired": true,
+        "retry": "never"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "root": "/tmp/isswf-recovery68-native-ZlfnLd",
+  "cases": [
+    {
+      "name": "mode:payload",
+      "kind": "file",
+      "recovery": {
+        "status": "blocked",
+        "reason": "partial tree exceeds committed mutable scope",
+        "reviewRequired": true,
+        "retry": "never"
+      }
+    },
+    {
+      "name": "mode:link",
+      "kind": "symlink",
+      "recovery": {
+        "status": "blocked",
+        "reason": "partial tree exceeds committed mutable scope",
+        "reviewRequired": true,
+        "retry": "never"
+      }
+    },
+    {
+      "name": "dir:payload",
+      "kind": "file",
+      "recovery": {
+        "status": "blocked",
+        "reason": "partial tree exceeds committed mutable scope",
+        "reviewRequired": true,
+        "retry": "never"
+      }
+    }
+  ]
+}

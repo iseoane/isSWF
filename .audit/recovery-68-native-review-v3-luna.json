@@ -1,0 +1,13 @@
+{
+  "agent": "a1980c382cb3869d9",
+  "sourceLog": "2026-10-16T11-28-39-894Z_ae188c37-fe26-4197-b1fa-c3b286633f40.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-native-snapshot-v3/manifest.json",
+  "report": "**Standards: PASS. Spec: PASS.** All nine v3 payload hashes match the working tree.\n\n`workspaceTree` now builds one null-prototype, typed inventory (file hash and executable bit; directory; symlink), shared by the generated task and recovery (`tools/native-recovery.mjs:100–128`). Both acceptance paths compare entry values, so `__proto__` is data rather than an object-prototype mutation; no `dir:`/`mode:` namespace remains.\n\nThe acceptance helper exercises the public CLI and asserts terminal failure when an offline check creates an unlisted `__proto__` file (`.audit/verify-recovery-68-acceptance.mjs`). The supplied green report records that failure with the unauthorized file present; scope-green-v4 and parent-v7 record the additional prefix, symlink, prototype-name, and chmod negatives. I did not run probes.\n\nNo new material blocker found in the shared inventory or test caller. These offline results do not establish provider recovery or external-effect reconciliation.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

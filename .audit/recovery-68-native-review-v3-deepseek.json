@@ -1,0 +1,13 @@
+{
+  "agent": "a8389bc06a80fbadf",
+  "sourceLog": "2026-10-16T11-28-39-931Z_ab32adc8-93b4-4846-af7b-4ac69a612b9f.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-native-snapshot-v3/manifest.json",
+  "report": "**Identity:** all nine v3 manifest files match live bytes (base 4237633).\n\n**Standards: PASS.** One shared typed `workspaceTree` in `tools/native-recovery.mjs`; exported through `nativeRecorderSource()` into the generated task (`const tree = workspaceTree;`) and reused by the recovery reader. `baselineTree` in `tools/isswf-job.mjs` is typed and null-prototype. No second walker, no `mode:`/`dir:` prefix-key maps remain; `__proto__`/`constructor` names are own data properties through walk, spread, comparison, and `Object.fromEntries`.\n\n**Spec: PASS.** The prior `mode:*`/`__proto__` scope bypass is closed: changed entries must be files with 64-hex sha256; deletions, non-file kinds, and exec-mode changes on existing files block; unlisted names block. Covered by `scope-green-v4.json` (`mode:payload`, `mode:link`, `dir:payload`, `__proto__`) and parent-v7 negatives plus the normal-adapter `__proto__` rejection (`acceptance-red-v1` → `acceptance-green-v3`, `normalAcceptanceScopeControl` failure). The nested-escape claim is withdrawn per `recovery-68-nested-pidns-v1.json` and `recovery-68-native-agent-attribution-correction.json`; no new material blocker found in the shared walker or its acceptance/recovery callers.\n\n**No new material blockers.**\n\nLimits preserved: offline/no-provider evidence only, no real provider recovery run; remote/external effects not reconciled; `stopped-review-required` authorizes review only, never replacement; coordinator SKILL prepare/launch integration is outside this nine-file candidate and is not claimed covered. No writes or probes performed.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

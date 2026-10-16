@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "R68-host-task-loss",
+  "createdAt": "2026-10-16T14:39:49.932Z",
+  "repo": "/tmp/isswf-recovery68-native-VHNiGs/project",
+  "inputSha": "1e27dcb931a108f1a72728d4f2b22e68dd754bde",
+  "targetBase": "c68c0de99f6ef4fd318633251aa58a22873412a0",
+  "briefPath": ".factory/jobs/R68/brief.md",
+  "briefSha256": "2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4",
+  "grantRef": "explicit-offline-recovery-fixture",
+  "taskSha256": "66e49df747749190ad3fed9e701938f258bdfcc83fbc83412e21455a842dcfb5",
+  "timeoutMs": 120000,
+  "outputBytes": 16000,
+  "workspace": "/tmp/isswf-recovery68-native-VHNiGs/runs/R68-host-task-loss/workspace",
+  "taskCopy": "/tmp/isswf-recovery68-native-VHNiGs/runs/R68-host-task-loss/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-recovery68-native-VHNiGs/runs/R68-host-task-loss/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a"
+}

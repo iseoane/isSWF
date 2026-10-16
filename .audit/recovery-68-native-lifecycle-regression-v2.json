@@ -1,0 +1,25 @@
+{
+  "result": "PASS",
+  "temp": "/tmp/isSWF-lifecycle44-fqXMv2",
+  "fixtureProject": "/tmp/isSWF-lifecycle44-fqXMv2/project",
+  "sourceFixture": "/tmp/isswf-lifecycle44-project-Xe19TZ",
+  "inputCheckpoint": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "targetBase": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "checks": [
+    "parent-pinned J601 arithmetic baseline reproduces the expected product mismatch (11 !== 21) in a private fixture copy",
+    "CLI rejects options outside the explicitly supported invocation",
+    "pinned J601 task completes after launch CLI exits; fresh read/reconcile sees actual product check output; terminal repeat is rejected",
+    "nonzero task publishes failure without requiring an A001 report",
+    "deadline kills only the live owner’s child process group and publishes timeout",
+    "same ID is blocked while live and after terminal",
+    "different attempt IDs materialize different attempt-derived workspaces",
+    "torn dispatch, corrupt terminal and process-identity mismatch remain unknown; readers do not repair or release claims",
+    "killed owner with a potentially-live child stays unknown, preserves partial work, and cannot be relaunched under the same ID",
+    "captured task output respects the explicit per-stream bound",
+    "duplicate normalized option is rejected before creating an attempt",
+    "UTF-8 tail and explicit truncation marker stay within encoded-byte bounds and remain readable",
+    "exact 64 KiB invalid UTF-8 on both streams publishes a valid terminal within the cap and marks render-time omission",
+    "leader exit cannot hold the deadline open; bounded close reports incomplete capture and uncertain descendants",
+    "empty nonce cannot make an unrelated live process appear to own an attempt"
+  ]
+}
