@@ -25,7 +25,12 @@ const git=(...args)=>run('git',['-C',project,...args]).trim();
 await writeFile(join(project,'.pi/settings.json'),'{}\n');
 await writeFile(join(project,'AGENTS.md'),'Preserve original project rules.\n');
 await writeFile(join(project,'src/counter.mjs'),'export const counter=()=>0;\n');
-await writeFile(join(project,'check.mjs'),"import assert from 'node:assert/strict';import {counter} from './src/counter.mjs';assert.equal(counter(),1);\n");
+await writeFile(join(project,'check.mjs'), process.argv.includes('--review-controls') ? `import assert from 'node:assert/strict';import {writeFileSync} from 'node:fs';import {counter} from './src/counter.mjs';
+assert.throws(()=>writeFileSync('/work/review-write-canary','forbidden'),{code:'EROFS'});
+if(counter()===4)process.stdout.write('x'.repeat(20000));
+else if(counter()===5)await new Promise(resolve=>setTimeout(resolve,15000));
+else {assert.equal(counter(),1);console.log('READONLY_REVIEW_CHECK');}
+` : "import assert from 'node:assert/strict';import {counter} from './src/counter.mjs';assert.equal(counter(),1);\n");
 const models=await readFile(join(source,'.factory/models.json'));
 await writeFile(join(project,'.factory/models.json'),models);
 await writeFile(join(project,'trusted-hold.mjs'),`import {spawn} from 'node:child_process';

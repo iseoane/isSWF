@@ -1,0 +1,13 @@
+{
+  "status": "RED",
+  "expected": "stale receipt after0644to0600",
+  "actualExit": 0,
+  "actual": {
+    "status": "valid",
+    "fingerprint": "dc0f570e2bd59ef82a353cb91a1905ac311af2037ba5419e1ea2e0f4ecd09b27",
+    "receiptSha256": "ab1058fa4828245466396f964bc56a54eed15a69272c85e14e7b88aa9c68caba",
+    "successorAuthorized": false,
+    "providerCharge": "not-reconciled"
+  },
+  "fixture": "/tmp/isswf-recovery68-native-Ax19Ly"
+}

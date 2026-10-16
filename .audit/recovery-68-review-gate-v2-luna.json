@@ -1,0 +1,13 @@
+{
+  "agent": "a062ffe444e07b1ff",
+  "sourceLog": "2026-10-16T16-23-33-849Z_d7038c47-2087-4a89-b29c-625138632967.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-review-snapshot-v2/manifest.json",
+  "report": "**Standards — PASS. Spec — PASS. Maintainability — PASS.**\n\nThe v1 failure remains valid for its candidate: the saved public-CLI RED showed `check` accepted the `0644 → 0600` change. The v2 manifest changes exactly three files: the review module, its verifier, and the existing lifecycle guide. The other five payload hashes match v1.\n\nThe review module now binds `permissionModesSha256` across the workspace root and all tree paths, including full `07777` mode bits. The verifier adds non-executable-file, directory, and root-mode stale-receipt controls. The guide documents that binding. The saved v4 result reports PASS for those controls and preserves readonly observation and no-successor behavior. Resolution confirms the shared Git walker and native acceptance semantics are unchanged.\n\nThis closes the identified mode-binding blocker for v2 only; it does not establish full recovery or successor authorization. No probes were run.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

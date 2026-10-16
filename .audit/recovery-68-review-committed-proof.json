@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "sourceSha": "d1a50e3b6ced1520eb77a188c0cb6565123352e6",
+  "runtimeSha": "e5673b357308faab933b194b48a1f53689e6d64f",
+  "sevenRuntimeGitBlobHashes": {
+    "tools/isswf-job.mjs": "a39ebf7afe134fd98418aef982f1066ea8fc219cc8cfe0b26b4b00811e840033",
+    "tools/factory-package.mjs": "17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7",
+    "tools/pi-worker-task.mjs": "39fa280d95a493ff19190ba83e717dce1a187165cb2968a6161415285b15f341",
+    "tools/worker-lifecycle.mjs": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a",
+    "tools/native-recovery.mjs": "68200ee86a884d8d8933fb2d4eec0a8f28f331fafc50edd24d9dbe08a044a03f",
+    "tools/external-effect-journal.mjs": "6dfcaef6077654d16e0cca45470633eb9e5d2466d92253f33d4348d5d2e1efbd",
+    "tools/recovery-review.mjs": "303c103bbdae05dce145466a53c5b5913227e27e5fbd26c5ba86b352ca3a52df"
+  },
+  "snapshotIdentity": true,
+  "actualChecks": [
+    "receipt publicCLI/nativeHostSIGKILL/full modes/originalcheck failures+timeout+overflow/no successor",
+    "effect fakegh22controls including store/workspacegrant refusal",
+    "admission9controls",
+    "core2catalogs"
+  ],
+  "providerPromptStarted": false,
+  "githubCalls": false,
+  "reviewers": {
+    "luna": {
+      "agent": "a062ffe444e07b1ff",
+      "sourceLog": "2026-10-16T16-23-33-849Z_d7038c47-2087-4a89-b29c-625138632967.jsonl",
+      "initialPromptMatched": true,
+      "afterSnapshot": ".audit/recovery-68-review-snapshot-v2/manifest.json",
+      "report": "**Standards — PASS. Spec — PASS. Maintainability — PASS.**\n\nThe v1 failure remains valid for its candidate: the saved public-CLI RED showed `check` accepted the `0644 → 0600` change. The v2 manifest changes exactly three files: the review module, its verifier, and the existing lifecycle guide. The other five payload hashes match v1.\n\nThe review module now binds `permissionModesSha256` across the workspace root and all tree paths, including full `07777` mode bits. The verifier adds non-executable-file, directory, and root-mode stale-receipt controls. The guide documents that binding. The saved v4 result reports PASS for those controls and preserves readonly observation and no-successor behavior. Resolution confirms the shared Git walker and native acceptance semantics are unchanged.\n\nThis closes the identified mode-binding blocker for v2 only; it does not establish full recovery or successor authorization. No probes were run.",
+      "metadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "stopReason": "stop"
+      }
+    },
+    "deepseek": {
+      "agent": "a72363f61227da04e",
+      "sourceLog": "2026-10-16T16-23-33-869Z_246f1708-9794-44bc-a25f-e58962e0f887.jsonl",
+      "initialPromptMatched": true,
+      "afterSnapshot": ".audit/recovery-68-review-snapshot-v2/manifest.json",
+      "report": "**FAIL retained for v1; v2 delta closes the sole blocker — remaining gate PASS.**\n\n- v1 blocker real: `recovery-68-review-permission-red.json` — 0644→0600, exit 0, `valid`, frozen-v1 CLI `/tmp/isswf-recovery68-native-Ax19Ly`.\n- Delta exactly 3 files (`resolution-v1.changed`): `tools/recovery-review.mjs`, `docs/local-worker-lifecycle.md`, `.audit/verify-recovery-68-review.mjs`. v2 manifest confirms the other 5 hashes identical to v1 (`isswf-job.mjs`, `native-recovery.mjs`, three verifiers) — shared Git typed walker and native acceptance unchanged. v2 payload hashes match actual working files.\n- Closure: `recovery-review.mjs:54` adds `permissionModesSha256` = `mode & 0o7777` for workspace root (`''`) plus every sorted tree path (files and directories); the field sits inside `candidate`, so `validateReceipt`'s full-candidate equality rejects mode-only changes at `check` and `record`. Controls `verify-recovery-68-review.mjs:75-77` cover nonexec file 0600, `src/` directory, and workspace root; result string matches. Guide sentence updated at line 114.\n- `parent-v4.json` PASS on the actual public CLI with original plus expanded controls; RED→GREEN is honest, no successor, provider, or read-only claim changed.",
+      "metadata": {
+        "provider": "opencode-go",
+        "model": "deepseek-v4.1-flash",
+        "effort": "max",
+        "stopReason": "stop"
+      }
+    }
+  },
+  "limits": "bounded exact-candidate local receipt only; no successor/provider charge/reboot/general recovery proof"
+}

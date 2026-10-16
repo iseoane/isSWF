@@ -1,0 +1,10 @@
+{
+  "status": "RED",
+  "oldCli": "/tmp/isswf-effects68-CsOxXm/runtime/tools/isswf-job.mjs",
+  "oldCliSha256": "7dcf175b5b1e04de19b1f56601846a94d66d484af8ae6c0ce523aa590c183fac",
+  "exitCode": 0,
+  "stdout": "{\"key\":\"3d3b9828b5973d3cca60997d33c2d0e0f4336e2cd1d5776cc64453740237584e\",\"state\":\"confirmed\",\"outcome\":{\"version\":1,\"key\":\"3d3b9828b5973d3cca60997d33c2d0e0f4336e2cd1d5776cc64453740237584e\",\"observedState\":\"open\",\"number\":1,\"url\":\"https://github.com/fixture/repository/pull/1\",\"candidateSha\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"baseSha\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"},\"retry\":\"never\"}\n",
+  "stderr": "",
+  "scope": "Old effect entry accepted an approval located in a worker-writable derived workspace; prepare only, no remote request",
+  "workspaceGrant": "/tmp/isswf-operational44-FFSKP8/runs/effects-A001/workspace/worker-grant.json"
+}

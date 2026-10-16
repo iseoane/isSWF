@@ -1,0 +1,13 @@
+{
+  "base": "b3d46256453d5f142ecf114dc4dca3a52e2d5c5f",
+  "files": {
+    "tools/isswf-job.mjs": "a39ebf7afe134fd98418aef982f1066ea8fc219cc8cfe0b26b4b00811e840033",
+    "tools/native-recovery.mjs": "68200ee86a884d8d8933fb2d4eec0a8f28f331fafc50edd24d9dbe08a044a03f",
+    "tools/recovery-review.mjs": "177527834c29b19bbce20b0f693f84159fa2e1e080b33f1e01a6cdc16d05df74",
+    "docs/local-worker-lifecycle.md": "e0ca032b775fe947b51cff9f7b61fa05992207ca33f8749a614fcbb86bd2fe97",
+    ".audit/verify-operational-44.mjs": "e4e9cf5d8bdd5dfa8513220d317cf83c6d6997f8cc5b83acf7d5d91a786be984",
+    ".audit/verify-recovery-68-native.mjs": "c066d76ea0ec161d86a470e775e4d7ebd1f45a78361a8c5b7f1ebf64af0d8ac0",
+    ".audit/verify-recovery-68-review.mjs": "1991eaf2f94f6527d231fa770a64d8d4b193e0e92426f3e4c5cc0127785d7641",
+    ".audit/verify-external-effects-68.mjs": "9e7b6786db24f9b7f4afab9dce6999bd5f5c808638fd27a6f73ddaa89516f78f"
+  }
+}

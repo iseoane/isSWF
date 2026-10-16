@@ -1,0 +1,13 @@
+{
+  "agent": "a062ffe444e07b1ff",
+  "sourceLog": "2026-10-16T16-23-33-849Z_d7038c47-2087-4a89-b29c-625138632967.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-review-snapshot-v1/manifest.json",
+  "report": "**Standards — FAIL.** The review module keeps receipt logic out of the CLI and reuses the native typed-tree walker. However, `tools/native-recovery.mjs` records only `executable: Boolean(entry.mode & 0o111)` for files. Permission changes such as `0644 → 0600` therefore leave the tree fingerprint unchanged, despite the requirement to bind modes. The supplied test covers an executable-bit change, not this case.\n\n**Spec — FAIL.** The receipt binds the candidate tree, pins, native evidence, approval digest, and protected-check result; record/check and ordinary readers are designed to fail closed and remain readonly. But the incomplete mode representation means the receipt can miss a changed candidate mode, violating the exact tree/mode binding.\n\n**Maintainability — PASS.** The bounded `recovery-review` module, existing lifecycle guide, and focused verifier fit the requested scope; no successor admission or broad recovery claim is introduced. No framework or narrative-doc proliferation observed.\n\n**Gate: FAIL** on the mode-binding blocker. The supplied machine evidence reports PASS for the listed scenarios, but does not cover non-executable permission changes. No probes or tests were run for this review.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

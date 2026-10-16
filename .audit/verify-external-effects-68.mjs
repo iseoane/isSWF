@@ -172,6 +172,8 @@ const invalidGrants = [
   { path: 'relative-grant.json', reason: /absolute operator-owned/ },
   { path: join(project, 'grant.json'), content: JSON.stringify(grant), reason: /outside untrusted project/ },
   { path: join(runtime, 'grant.json'), content: JSON.stringify(grant), reason: /outside untrusted project/ },
+  { path: join(store, 'grant.json'), content: JSON.stringify(grant), reason: /outside untrusted project/ },
+  { path: join(store, 'effects-A001/workspace/worker-grant.json'), content: JSON.stringify(grant), reason: /outside untrusted project/ },
   { path: join(root, 'large-grant.json'), content: ' '.repeat(16001), reason: /bounded regular/ },
   { path: join(root, 'malformed-grant.json'), content: '{', reason: /JSON/ }
 ];
@@ -186,7 +188,7 @@ await writeFile(join(store,'effects-A001/terminal.json'),'{');
 assert.match(run(process.execPath,[...args,'prepare','--grant-file',grantFile],1,cliRemote.env).stderr,/validated successful bound attempt/);
 await writeFile(join(store,'effects-A001/terminal.json'),originalTerminal);
 assert.equal(await cliRemote.postCount(),0);
-results.push('public-cli-relative-project-source-oversized-malformed-grants-and-unknown-corrupt-attempts-block');
+results.push('public-cli-relative-project-source-runs-store-worker-workspace-oversized-malformed-grants-and-unknown-corrupt-attempts-block');
 for(const action of ['prepare','publish','reconcile']) {
   const result=JSON.parse(run(process.execPath,[...args,action,'--grant-file',grantFile],0,cliRemote.env).stdout);
   assert.equal(result.state,action==='prepare'?'prepared':'confirmed');

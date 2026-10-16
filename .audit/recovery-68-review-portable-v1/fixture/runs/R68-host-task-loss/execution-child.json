@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "attemptId": "R68-host-task-loss",
+  "taskSha256": "cafb5b0f465ed67df780e4e8fda893e288cb01ea6bf8bb58ecce80a4e50b32b3",
+  "child": {
+    "pid": 627599,
+    "startTicks": "20302009",
+    "pgid": 627599,
+    "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+    "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+    "spawnedAt": "2026-10-16T16:22:22.006Z"
+  }
+}
