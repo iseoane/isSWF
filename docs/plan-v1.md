@@ -1,6 +1,6 @@
 # Plan funcional de construcción de isSWF v1
 
-Estado revisado el 14 de octubre de 2026. Sigue siendo una propuesta para revisar junto a la [especificación](spec-v1.md), no una orden de ejecución ni un plan técnico con módulos y comandos ya decididos. La asignación documental de criterios y los cierres locales no demuestran que S01, S02, H1 ni los 61 criterios estén completos. Véanse [cierre del núcleo Markdown](../.audit/markdown-core-closure.md), [cierre de calidad #54](../.audit/quality-54-closure.md), [cierre de adaptación #49](../.audit/adaptation-49-closure.md), [comprobación de integración Engram](../.audit/engram-integration.json) y [comprobación del índice Codegraph](../.audit/codegraph-index-verify.json).
+Estado revisado el 16 de octubre de 2026. Sigue siendo una propuesta para revisar junto a la [especificación](spec-v1.md), no una orden de ejecución ni un plan técnico con módulos y comandos ya decididos. La asignación documental de criterios y los cierres locales no demuestran que S01, S02, H1 ni los 61 criterios estén completos. Véanse [cierre del núcleo Markdown](../.audit/markdown-core-closure.md), [cierre de calidad #54](../.audit/quality-54-closure.md), [cierre de adaptación #49](../.audit/adaptation-49-closure.md), [comprobación de integración Engram](../.audit/engram-integration.json) y [comprobación del índice Codegraph](../.audit/codegraph-index-verify.json).
 
 ## Lectura del plan
 
@@ -20,18 +20,19 @@ U1 y U2 son unidades históricas locales de S01, implementadas con el CLI Python
 
 #55–62 están cerrados dentro de sus límites documentados: contratos durables de jobs, perfiles, ejercicios manuales de worker/workflow/model routing, demo supervisada #61 con candidato técnicamente verificado y revisión independiente acotada PASS, y skill de setup #62. La aceptación de producto de #61 sigue pendiente. Estos cierres no equivalen a independencia del chat, recuperación, fallback automático ni H1. Véanse los cierres exactos enlazados en la [visión](vision.md) y los límites de comportamiento en `.audit/`.
 
-El subalcance de #44 de publicación de recursos compartidos y activación de proyecto está implementado desde `737fc7b` y su prueba del source comprometido pasó: veinte recursos verificados, dos skills y descubrimiento Pi offline condicionado a aprobación. Consulta la [guía de activación](activacion-por-proyecto.md), el [cierre y límites de #44](../.audit/activation-44-closure.md) y el [registro de prueba comprometida](../.audit/activation-44-committed-proof.json). #64 completó 20 casos con estado `PROBE_COMPLETE_WITH_UNPROVEN_REQUIREMENTS`, no con PASS de todos los requisitos ([cierre de #64](../.audit/probe-64-closure.md)); #65 sí obtuvo PASS para su experimento acotado ([cierre final de #65](../.audit/boundary-65-final-closure.md)). Ninguno demuestra integración runtime de Engram/Codegraph, broker MCP/autoridad, lifecycle/recuperación, multiwriter, seguridad exhaustiva, readiness para clientes ni H1. #44 no está completamente terminada y el resto de trabajo no queda autorizado por estos resultados.
+El cierre acordado de #44 se limita al arranque local operativo de un job: versión compartida fija, activación explícita, entrada nativa normal, resultado consultable y revisión independiente de un cambio útil de la propia factory. La [guía de activación](activacion-por-proyecto.md) conecta los veinte recursos y dos skills con la [entrada normal](local-worker-lifecycle.md#run-a-job-from-an-activated-project), implementada en `7560d2c`. J802 usó esa entrada para añadir ayuda al CLI real: un worker Luna/high, tres checks originales verdes y solo un archivo cambiado ([replay parental](../.audit/operational-44-own-parent-checks.json)). La [prueba del coordinador terminado](../.audit/coordinator-exit-44-parent-checks.json) cubre SIGKILL/ESRCH de ese proceso aislado antes de liberar su worker y consulta posterior desde un CLI nuevo; no demuestra cierre del chat principal ni recuperación general. #64/#65 conservan sus [límites](../.audit/probe-64-closure.md) [originales](../.audit/boundary-65-final-closure.md). Este cierre finito no acredita H1, cliente listo, seguridad exhaustiva, MCP/autoridad, multiwriter ni integración runtime de Engram/Codegraph.
 
 La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec y plan, artefactos bajo `.factory/jobs/`, ownership y entradas fijadas. No crea un nuevo store ni garantiza liveness, recuperación o backup. Las rutas configuradas viven en [`.factory/models.json`](../.factory/models.json); [la guía de modelos](model-routing.md) define interpretación y preflight manuales, no un resolver runtime.
 
 Siguiente secuencia propuesta, sin ampliar autorización:
 
-1. Resolver decisiones abiertas de ciclo de vida, recuperación, autoridad e integración que correspondan a un encargo futuro.
-2. Diseñar/probar por separado ciclo de vida independiente del chat, MCP/autoridad y exclusión multiwriter; los probes #64/#65 no cubren esos límites.
-3. Seleccionar una issue real y obtener el grant necesario antes de ejecutar el trabajo que podría demostrar H1/PR. H1 no se considera logrado por #61.
-4. Abordar fallback, recuperación, concurrencia e integraciones conforme a autorización; traducción operativa y pasadas de verificación más profundas siguen pendientes.
+1. #66: fallback entre rutas aprobadas, sin usar fallos de tests como motivo de cambio.
+2. #67: concurrencia y exclusión multiwriter; un ID de intento distinto no prueba ownership exclusivo del job.
+3. #68: recuperación general, incluido reinicio de coordinador/modelo/entorno, sin repetir efectos inciertos.
+4. #69: consumidores runtime de Engram y Codegraph. Estas tareas quedan separadas de #44 y requieren su alcance y gates propios; no se activan por cerrar el arranque local.
+5. Seleccionar una issue y obtener el grant para el recorrido completo que podría demostrar H1/PR. H1 no se considera logrado por #61 ni por J802; traducción operativa y verificación más profunda siguen pendientes.
 
-El [siguiente corte operativo](next-operational-cut.md) conserva la propuesta anterior al probe; sus opciones no son evidencia actual ni decisiones de implementación. Esta secuencia no cambia la [especificación v1](spec-v1.md), no autoriza acciones remotas y no declara S01, S02, H1 ni los 61 criterios completos.
+El [siguiente corte operativo](next-operational-cut.md) conserva la propuesta anterior al probe; sus opciones no son evidencia actual ni decisiones de implementación. Esta secuencia no cambia la [especificación v1](spec-v1.md) ni declara S01, S02, H1 o los 61 criterios completos. El operador autorizó pushes normales periódicos de checkpoints revisados a `origin/main`; no es permiso para PR, merge, despliegue o force-push.
 
 Antes de usar la factory con clientes, debe demostrarse aislamiento técnico de archivos, herramientas y efectos autorizados. El demo #61 no lo hizo.
 
@@ -171,4 +172,4 @@ La comprobación del 14 de octubre verificó operaciones del CLI de Engram acota
 - [ ] Definir las verificaciones y comandos reales de la primera slice; no copiar rutas de código inexistentes.
 - [ ] Autorizar la implementación de la primera slice con su alcance concreto.
 
-Las decisiones de almacenamiento, interfaz local, composición de prompts, sandbox y comandos exactos siguen abiertas. La elección usa pruebas acotadas donde puedan resolverla; no exige al operador elegir detalles técnicos por intuición.
+Las decisiones de las etapas pendientes siguen abiertas; los comandos y límites del arranque local probado son los de la guía vigente. La elección usa pruebas acotadas donde puedan resolverla; no exige al operador elegir detalles técnicos por intuición.
