@@ -1,0 +1,12 @@
+{
+  "base": "95ea690267b2041391b67dd1f4e87b69b9762f87",
+  "createdAt": "2026-10-16T15:52:10.841Z",
+  "files": {
+    "tools/isswf-job.mjs": "7dcf175b5b1e04de19b1f56601846a94d66d484af8ae6c0ce523aa590c183fac",
+    "docs/local-worker-lifecycle.md": "f8c0b219e569d57aec3cc0de5a36ced9c6846e2649bae0f51c3b50039432b216",
+    ".audit/verify-operational-44.mjs": "b4fd8ea90fdd6ba6890a1297ae7a782523ec6280d8054438f8db824749a62eb7",
+    ".audit/verify-recovery-68-native.mjs": "2d813a3de9df020b400312ce6b05d0fc9ee57ae81600c9cffb000a2a576061ff",
+    ".audit/verify-recovery-68-admission.mjs": "6797a218bafd22f553255a680e5ffd1f1b3eda50e2c41a665e2a51fc9cb30304"
+  },
+  "allPayloadIncludesUntracked": true
+}

@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "sourceCommit": "5d1097667c67029d39f4fe16205fafd6ae9eb517",
+  "source": {
+    "tools/isswf-job.mjs": "7dcf175b5b1e04de19b1f56601846a94d66d484af8ae6c0ce523aa590c183fac",
+    "docs/local-worker-lifecycle.md": "f8c0b219e569d57aec3cc0de5a36ced9c6846e2649bae0f51c3b50039432b216"
+  },
+  "checks": {
+    "parent": {
+      "status": "PASS",
+      "sha256": "81a1fe02547024a6bbfa7883f67ccb942843c271c0135266800096351b0ec28d"
+    },
+    "native": {
+      "status": "PASS",
+      "sha256": "679f1ad76034a269a9c3134efde6fa6fe357b16331b0442d48288e42c0ac17ea"
+    },
+    "effects": {
+      "status": "PASS",
+      "sha256": "6f3794b95a683a5e910ce71b5ac49a871dd722c71ddc706e5ab93520bf3e311d"
+    },
+    "core": {
+      "exitCode": 0,
+      "catalogs": [
+        {
+          "approved": true,
+          "coordinatorCount": 1
+        },
+        {
+          "approved": false,
+          "coordinatorCount": 0
+        }
+      ]
+    }
+  },
+  "models": {
+    "deepseek": {
+      "agent": "a2b0c60aada9c9a1f",
+      "metadata": {
+        "provider": "opencode-go",
+        "model": "deepseek-v4.1-flash",
+        "effort": "max",
+        "stopReason": "stop"
+      },
+      "reportSha256": "6d7085160b83abc675184a91b981573e108e365dafe587597c9ae5e482b6f8e5"
+    },
+    "luna": {
+      "agent": "a5eb5edd024bcf4d9",
+      "metadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "stopReason": "stop"
+      },
+      "reportSha256": "ff2d4f0792048c0de7e3f30f7f51ce50d00209ba82f58cac6607c4c1a0b4592a"
+    }
+  },
+  "portableRun": "parent-v3 before integration, exact frozen source bytes; postcommit tests independently replayed",
+  "limits": [
+    "serial one-worker admission in one fixed store",
+    "no successor release or structural review receipt yet",
+    "no cross-store/global/mixed-old-runtime ownership exclusion",
+    "no provider/GitHub/reboot recovery proof; #68 remains in progress"
+  ]
+}

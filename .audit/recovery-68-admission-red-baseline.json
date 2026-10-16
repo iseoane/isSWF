@@ -1,0 +1,9 @@
+{
+  "baseline": "95ea690267b2041391b67dd1f4e87b69b9762f87",
+  "fixture": "/tmp/isswf-admission68-red-5tqxId",
+  "exitCode": 1,
+  "signal": null,
+  "stdout": "",
+  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: {\"attemptId\":\"terminal-repeat\",\"attemptDir\":\"/tmp/isswf-operational44-NL18Zz/runs/terminal-repeat\",\"launchedPid\":595342,\"mode\":\"offline\",\"bindingPath\":\"/tmp/isswf-operational44-NL18Zz/runs/terminal-repeat.job.json\",\"reviewRequired\":true}\n\n\n0 !== 1\n\n    at reject (file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-admission.mjs:41:10)\n    at async file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-admission.mjs:48:1 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
+  "expected": "baseline permits terminal same-logical distinct ID, new guard refuses; failing assertion retained, not a host-loss-before-fix proof"
+}

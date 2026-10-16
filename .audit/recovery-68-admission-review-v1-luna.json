@@ -1,0 +1,13 @@
+{
+  "agent": "a5eb5edd024bcf4d9",
+  "sourceLog": "2026-10-16T15-52-28-201Z_9681c24f-6f70-4fc8-8fb3-2335cee5f6ef.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-admission-snapshot-v1/manifest.json",
+  "report": "**Standards: PASS** — No material standards blocker found. The run boundary claims before task preparation; reads and reconciliation validate without writing. The guide preserves the fixed-store and low-level-runner limits.\n\n**Spec: PASS** — The admission snapshot reports a passing normal-CLI control for terminal repeats, host-loss/unknown and recovered states, independent logical jobs, corrupt/legacy bindings, missing identity, and competing claims. The RED baseline is specifically a terminal-repeat failure, not host-loss evidence. No successor release or review receipt is claimed; #68 remains open.\n\n**Maintainability: PASS** — The change is localized to the normal entry point, its disposable producer fixtures, and lifecycle guidance. No material structural blocker found.\n\nRead-only review; no probes or tests run.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

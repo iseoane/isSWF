@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "files": 55,
+  "archivePatchContextOnly": [
+    ".audit/recovery-68-admission-snapshot-v1/tracked.patch:66: trailing whitespace.",
+    ".audit/recovery-68-admission-snapshot-v1/tracked.patch:69: trailing whitespace.",
+    ".audit/recovery-68-admission-snapshot-v1/tracked.patch:71: trailing whitespace.",
+    ".audit/recovery-68-admission-snapshot-v1/tracked.patch:75: trailing whitespace."
+  ],
+  "productionSourceHasNoExceptions": true
+}

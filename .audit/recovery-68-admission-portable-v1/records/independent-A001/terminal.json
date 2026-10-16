@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "attemptId": "independent-A001",
+  "finishedAt": "2026-10-16T15:51:37.496Z",
+  "outcome": "success",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"version\":1,\"mode\":\"offline\",\"briefPath\":\".factory/jobs/J801/brief.md\",\"inputSha\":\"d6c8fd85646eb5b38e1c865c4a4abfec0450f23c\",\"briefSha256\":\"920432c7923847d3fa4cc8661e53a6d866c4a2ae53ea7862237da6a66a5d980e\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":false,\"sdkInitialized\":true,\"toolCalls\":0,\"acceptance\":false,\"protectedHashesPreserved\":true,\"callableTools\":[\"sandbox_shell\"],\"toolBridgeReady\":true,\"boundaryCheckPassed\":true,\"boundaryControls\":{\"fakeEnvAbsent\":true,\"outsideRead\":\"ENOENT\",\"outsideWrite\":\"ENOENT\",\"factoryWrite\":\"EROFS\",\"sdkWrite\":\"EROFS\",\"network\":\"ECONNREFUSED\"},\"hostTcpPositive\":true,\"outsideHashPreserved\":true,\"fixtureCheckExitCode\":0,\"offlineChecks\":[{\"name\":\"disposable-admission-control\",\"exitCode\":0}],\"status\":\"completed\"}\n",
+  "stderr": "",
+  "stdoutTruncated": false,
+  "stderrTruncated": false,
+  "captureIncomplete": false,
+  "descendants": "not-claimed",
+  "timedOut": false,
+  "workspace": "/tmp/isswf-operational44-ceHPtz/runs/independent-A001/workspace"
+}
