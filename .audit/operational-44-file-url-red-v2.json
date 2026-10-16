@@ -1,0 +1,7 @@
+{
+  "exit": 1,
+  "expected": "v2 accepts a second file URL package; new negative expected exit1 but got0",
+  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: {\"exe\":\"/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node\",\"args\":[\"/tmp/isswf-operational44-Mj9htf/source/tools/isswf-job.mjs\",\"run\",\"--project\",\"/tmp/isswf-operational44-Mj9htf/project\",\"--input-sha\",\"8692b529ce6724f6f4674e6c3f6e9729494208a6\",\"--job\",\".factory/jobs/J801/job.json\",\"--runs-store\",\"/tmp/isswf-operational44-Mj9htf/runs\",\"--attempt-id\",\"relative-package\",\"--grant-ref\",\"offline-verifier-exclusive-one\",\"--mode\",\"offline\"],\"status\":0,\"stderr\":\"\"}\n\n0 !== 1\n\n    at run (file:///home/iseoane/Work/isSWF/.audit/verify-operational-44.mjs:16:10)\n    at file:///home/iseoane/Work/isSWF/.audit/verify-operational-44.mjs:88:14 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
+  "stdout": "",
+  "providerPromptStarted": false
+}

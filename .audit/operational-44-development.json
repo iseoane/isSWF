@@ -1,0 +1,25 @@
+{
+  "versions": [
+    {
+      "version": 1,
+      "stdout": "",
+      "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: The input did not match the regular expression /invalid or repeated job option/. Input:\n\n'runtime working bytes differ from activated revision: tools/isswf-job.mjs\\n'\n\n    at file:///home/iseoane/Work/isSWF/.audit/verify-operational-44.mjs:89:8 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'runtime working bytes differ from activated revision: tools/isswf-job.mjs\\n',\n  expected: /invalid or repeated job option/,\n  operator: 'match',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n"
+    },
+    {
+      "version": 2,
+      "stdout": "{\n  \"status\": \"PASS\",\n  \"root\": \"/tmp/isswf-operational44-vHlxfE\",\n  \"runtimeSha\": \"3e7e844829df68db490fa1063840376c8522e696\",\n  \"inputSha\": \"6d21c3eff571a7be2abe6d0dd9bac02beb34fc09\",\n  \"targetBase\": \"0901f5de879e285501ed913ce723cec92a46ff21\",\n  \"offlineProviderPromptStarted\": false,\n  \"terminal\": \"success\",\n  \"reviewRequired\": true,\n  \"negatives\": [\n    \"wrong-runtime\",\n    \"wrong-method\",\n    \"missing-grant\",\n    \"bad-model-digest\",\n    \"unsafe-brief\",\n    \"runtime-byte-mismatch\"\n  ],\n  \"preserved\": {\n    \"AGENTS.md\": \"5e8da67b3275a763f2db416a65007a43e27dc3ac9a7508d0993ad306e13a68b7\",\n    \".pi/settings.json\": \"d713218e2d501c18c0cd0952b1f11dc3f841960bb7dcb92fe0ccd76b4240102f\",\n    \".factory/models.json\": \"5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1\"\n  },\n  \"productionHashes\": {\n    \"tools/isswf-job.mjs\": \"a0954e902a1e73c7ecd6bb1d157636c299e4cfd22854ebc485252bcf1b450f35\",\n    \"tools/factory-package.mjs\": \"17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7\",\n    \"tools/pi-worker-task.mjs\": \"83e8af2a87c7b14cc0c070d9f2d6a7a7c50e219211232eab19b088da4a719ed9\",\n    \"tools/worker-lifecycle.mjs\": \"405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "version": 3,
+      "stdout": "{\n  \"status\": \"PASS\",\n  \"root\": \"/tmp/isswf-operational44-EaW1Aw\",\n  \"runtimeSha\": \"b03f25bfa20d61f9752cfbd72a6e964207c0c313\",\n  \"inputSha\": \"7d3b456215064c8e0040413371b9712e64ff4a3f\",\n  \"targetBase\": \"5e0e0cfe8d8c9ba5d0253a25e122c5f75890a81d\",\n  \"offlineProviderPromptStarted\": false,\n  \"terminal\": \"success\",\n  \"reviewRequired\": true,\n  \"negatives\": [\n    \"unknown-attempt-blocks\",\n    \"overlap-no-write\",\n    \"wrong-runtime\",\n    \"wrong-method\",\n    \"missing-grant\",\n    \"bad-model-digest\",\n    \"unsafe-brief\",\n    \"runtime-byte-mismatch\"\n  ],\n  \"preserved\": {\n    \"AGENTS.md\": \"5e8da67b3275a763f2db416a65007a43e27dc3ac9a7508d0993ad306e13a68b7\",\n    \".pi/settings.json\": \"85dc91999ae46d7ce23289b0d353aa3c88dcfaf2c82cfe6e2635bb899424eeda\",\n    \".factory/models.json\": \"5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1\"\n  },\n  \"productionHashes\": {\n    \"tools/isswf-job.mjs\": \"a0954e902a1e73c7ecd6bb1d157636c299e4cfd22854ebc485252bcf1b450f35\",\n    \"tools/factory-package.mjs\": \"17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7\",\n    \"tools/pi-worker-task.mjs\": \"83e8af2a87c7b14cc0c070d9f2d6a7a7c50e219211232eab19b088da4a719ed9\",\n    \"tools/worker-lifecycle.mjs\": \"405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36\"\n  }\n}\n",
+      "stderr": ""
+    }
+  ],
+  "corrections": [
+    "Initial test exposed duplicate option detection using the wrong key shape; fixed before first review snapshot.",
+    "Canonical store ancestry is validated before creating its directory; reused package helper.",
+    "Verifier allows an empty synthetic source commit so it remains rerunnable after integration."
+  ],
+  "providerPromptStarted": false
+}

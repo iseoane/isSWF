@@ -1,0 +1,23 @@
+{
+  "agentId": "a889907cc13ae76d9",
+  "log": "2026-10-16T09-51-37-993Z_f4416714-2b09-4ca3-92e4-b5c590b4f519.jsonl",
+  "text": "**Verdict: evidence PASS, bounded acceptance confirmed; one material pre-integration defect.**\n\nRe-derived read-only: HEAD=7560d2c; precall binding hashes match worktree and 7560d2c blobs. Workspace vs c12f: 1120 files, 1119 byte-identical, only `tools/isswf-job.mjs` differs (34a0407b), 0 extras; `check.mjs` still d30762d7 (pinned original). One launch, one attempt J802-A001; task sha dadd319d matches dispatch; sibling binding and project `job.json` present. pi-result: openai-codex/gpt-6-luna/high, toolCalls 7, boundaryCallAttributed, reviewRequired; in-memory session, no transcript → no raw provider messages. One `.prepare` artifact; the X5dqtD prepare-control is a separate fixture (providerPromptStarted false) — no retry. v2-Luna/v3-Deepseek PASS are delta-scoped and truthful.\n\nDefect: `docs/local-worker-lifecycle.md`, added in 7560d2c, tells users to run `node .audit/verify-operational-44.mjs`. That file was in the reviewed 5-file payload/identity (ca44462d, snapshot 813a4d92) but is untracked — never committed on any ref; `operational-44-committed-identity.json` lists only the other 4 hashes while citing that snapshot. A clean checkout of the pinned SHA cannot run the documented command. Fix: commit the suite and re-pin, or delete the sentence.\n\nKeep stated limits: no upstream model-identity proof; 7 calls and the 3-check pass are harness-reported; candidate 34a0407b still needs independent review. No claim beyond #44's own-factory normal path; 66–69 separate.",
+  "provider": "opencode-go",
+  "model": "deepseek-v4.1-flash",
+  "thinkingLevel": "max",
+  "usage": {
+    "input": 3124,
+    "output": 409,
+    "cacheRead": 72704,
+    "cacheWrite": 0,
+    "reasoning": 0,
+    "totalTokens": 76237,
+    "cost": {
+      "input": 0.00046859999999999995,
+      "output": 0.0002454,
+      "cacheRead": 0.000218112,
+      "cacheWrite": 0,
+      "total": 0.000932112
+    }
+  }
+}

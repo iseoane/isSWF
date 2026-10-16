@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "J802-A001",
+  "createdAt": "2026-10-16T09:49:45.677Z",
+  "repo": "/tmp/isswf-own-factory44-Y1sYOL/factory-project",
+  "inputSha": "d5872c4a174ae312503c7a3d017a9d992a3c73a2",
+  "targetBase": "c12f3299cef54b07ab1b3832968f1cd777566744",
+  "briefPath": ".factory/jobs/J802/brief.md",
+  "briefSha256": "3f3f815963a649c2873e716a6455f39632ac681354f0055b87d285f4ff7b2ce5",
+  "grantRef": "operator-approved-44-normal-entry-one-native-worker",
+  "taskSha256": "dadd319d24d92e7a0f8045eac7df4bc9a71b11d55521843967a442cb7c09f34c",
+  "timeoutMs": 120000,
+  "outputBytes": 16000,
+  "workspace": "/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/workspace",
+  "taskCopy": "/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+}

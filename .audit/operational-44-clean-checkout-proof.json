@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "sourceCommit": "43ba87f7446627f49fc8e833dee499f56a8b6f60",
+  "root": "/tmp/isswf-release44-nGxJgf",
+  "cleanCheckout": true,
+  "documentedSuiteTracked": true,
+  "suiteSha256": "ca44462d66ee404199994468bc1a1e3450f4f0465b1eb13b0c9baa51688e0914",
+  "offlineSuite": "PASS",
+  "providerPromptStarted": false,
+  "actualMaterializedRevision": "43ba87f7446627f49fc8e833dee499f56a8b6f60",
+  "resourceFiles": 20,
+  "deliveredCandidateSha256": "34a0407b131865c24e73f149a6a5452700c2fd0b17f5e142f4458134d4e6b6fb",
+  "helpWorksWithoutJobConfig": true,
+  "originalRealWorkerRuntime": "7560d2ce12f6dd1e861e41896ccb4801a140498b",
+  "note": "Clean checkout of integrated source replayed offline only; historical real-provider run is not repeated or reattributed"
+}

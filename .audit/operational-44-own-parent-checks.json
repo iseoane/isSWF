@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "runtimeSha": "7560d2ce12f6dd1e861e41896ccb4801a140498b",
+  "inputSha": "d5872c4a174ae312503c7a3d017a9d992a3c73a2",
+  "targetBase": "c12f3299cef54b07ab1b3832968f1cd777566744",
+  "workspace": "/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/workspace",
+  "toolCalls": 7,
+  "route": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high"
+  },
+  "trustedBoundaryAttributed": true,
+  "changed": [
+    "tools/isswf-job.mjs"
+  ],
+  "candidateSha256": "34a0407b131865c24e73f149a6a5452700c2fd0b17f5e142f4458134d4e6b6fb",
+  "originalCheckSha256": "d30762d75dff65760f88cf505e97d97ed4042e7a8fe3a5c76c273b888058f6f1",
+  "originalChecks": 3,
+  "parentSandboxCheckExit": 0,
+  "jobBindingCorrelated": true,
+  "reviewRequired": true,
+  "preservedFiles": 1119
+}

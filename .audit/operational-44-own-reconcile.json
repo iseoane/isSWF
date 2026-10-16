@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "state": "terminal",
+  "outcome": "success",
+  "jobBindingCorrelated": true,
+  "terminalAndBindingHashesPreserved": true,
+  "attempts": [
+    "J802-A001"
+  ],
+  "reviewRequired": true
+}

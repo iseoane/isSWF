@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "sourceCommit": "7560d2ce12f6dd1e861e41896ccb4801a140498b",
+  "reviewSnapshot": "813a4d92f3701e7a70b22035dcb53431053f794da927b43b59482ba02dcce45a",
+  "hashes": {
+    "docs/activacion-por-proyecto.md": "0f9c0786092d4d503284d597b3b7b2bc80400d42ff996ed10d8d450f1eb4906b",
+    "docs/local-worker-lifecycle.md": "2359924549477c357ddb11f2cd45a462131cbc93198fd6bb1235720390bfa20c",
+    "tools/factory-package.mjs": "17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7",
+    "tools/isswf-job.mjs": "12011ccc87bfeda558b014cfb1844e657527060af866e2296e55d07212ecb5e4"
+  },
+  "providerPromptStarted": false
+}

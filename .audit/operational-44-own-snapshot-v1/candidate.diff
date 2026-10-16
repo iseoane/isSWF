@@ -1,0 +1,38 @@
+diff --git 1/tools/isswf-job.mjs 2/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/workspace/tools/isswf-job.mjs
+index 6166b4b..8c07402 100644
+--- 1/tools/isswf-job.mjs
++++ 2/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/workspace/tools/isswf-job.mjs
+@@ -123,7 +123,32 @@ async function run(args) {
+   console.log(JSON.stringify({ ...launched, mode, bindingPath, reviewRequired: true }));
+ }
+ async function main() {
+-  const command = process.argv[2], args = options(process.argv.slice(3));
++  const command = process.argv[2];
++  if (command === '--help' || command === 'help') {
++    console.log(`Usage: isswf-job.mjs <run|read|reconcile> [options]
++
++Commands:
++  run         Execute a pinned factory job
++  read        Read an existing attempt
++  reconcile   Reconcile an existing attempt
++
++Required for run:
++  --project ABSOLUTE_PATH  Project checkout
++  --input-sha FULL_SHA     Committed input revision
++  --job PATH               Committed job JSON path
++  --attempt-id ID          Unique attempt identifier
++  --grant-ref REF          Trusted authorization reference
++  --runs-store ABS_PATH    Operator-owned run storage
++
++Required for read/reconcile:
++  --runs-store ABS_PATH    Operator-owned run storage
++  --attempt-id ID          Attempt identifier
++
++Optional for run: --mode real|offline
++An independent review remains required for every worker result.`);
++    return;
++  }
++  const args = options(process.argv.slice(3));
+   if (command === 'run') return run(args);
+   if (!['read', 'reconcile'].includes(command) || Object.keys(args).some(key => !['runs-store', 'attempt-id'].includes(key))) throw new Error('usage: isswf-job.mjs run|read|reconcile [explicit options]');
+   const result = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), command, '--runs-store', args['runs-store'] || '', '--attempt-id', args['attempt-id'] || '']));

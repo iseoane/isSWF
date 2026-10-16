@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-operational44-7qk6RZ",
+  "runtimeSha": "faa13ecabea72d925e571a7be67cf78b324f1d84",
+  "inputSha": "f97f73aeef1f4aa17085905bc8238a5d419dbddf",
+  "targetBase": "fab378e4af8d0c2b1b4794706eade85e20d4d609",
+  "offlineProviderPromptStarted": false,
+  "terminal": "success",
+  "reviewRequired": true,
+  "negatives": [
+    "binding-dispatch-mismatch",
+    "relative-second-package",
+    "crash-after-binding-before-dispatch",
+    "unknown-attempt-blocks",
+    "overlap-no-write-including-dot-prefixed-child",
+    "wrong-runtime",
+    "wrong-method",
+    "missing-grant",
+    "bad-model-digest",
+    "unsafe-brief",
+    "runtime-byte-mismatch"
+  ],
+  "preserved": {
+    "AGENTS.md": "5e8da67b3275a763f2db416a65007a43e27dc3ac9a7508d0993ad306e13a68b7",
+    ".pi/settings.json": "09e0c5b787c81af707affe04c8bf7acdd2d543709612dfb8109017c34f19a95d",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "productionHashes": {
+    "tools/isswf-job.mjs": "b69e5568ec66c7de2b1341a6a9358be7687c17d99e637a5297480b4feb5a7163",
+    "tools/factory-package.mjs": "17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7",
+    "tools/pi-worker-task.mjs": "83e8af2a87c7b14cc0c070d9f2d6a7a7c50e219211232eab19b088da4a719ed9",
+    "tools/worker-lifecycle.mjs": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+  }
+}

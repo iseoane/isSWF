@@ -1,0 +1,23 @@
+{
+  "agentId": "a0c20933d3943c304",
+  "log": "2026-10-16T09-59-37-311Z_78535127-8bc1-4f00-b9ad-7fd959ba8d81.jsonl",
+  "text": "Verified read-only, no workers invoked.\n\n- **Tracked-suite/clean-checkout gap resolved:** `.audit/verify-operational-44.mjs` blob = `ca44462d…` at `6284d86` (parent), `43ba87f` (HEAD) and worktree. `operational-44-clean-checkout-proof.json`: clean clone of `43ba87f`, offline suite PASS, `providerPromptStarted:false`, 20 resources, help works without job config.\n- **Candidate frozen identity:** `own-snapshot-v1` manifest snapshot `985bb655…d79ed1fe9` lists `tools/isswf-job.mjs` = `34a0407b…`, byte-identical to `43ba` tree and worktree; `check.mjs` stays pinned `d30762d7…`. Luna's PASS reviewed exactly that snapshot.\n- **Historical worker:** remains runtime `7560d2c`; clean-checkout note and `final-review-resolution.json` state no repetition/re-attribution (`noAdditionalProviderCall:true`).\n- **Findings preserved:** original suite finding accepted (6284d86) plus temporary status-doc FAIL; `status-snapshot-v1` (docs `2927b8c3`/`9808faf1`) states finite #44 closure after integration, doc gate separate. Issues 66–69 excluded.",
+  "provider": "opencode-go",
+  "model": "deepseek-v4.1-flash",
+  "thinkingLevel": "max",
+  "usage": {
+    "input": 3118,
+    "output": 1316,
+    "cacheRead": 35456,
+    "cacheWrite": 0,
+    "reasoning": 1016,
+    "totalTokens": 39890,
+    "cost": {
+      "input": 0.0004677,
+      "output": 0.0007896,
+      "cacheRead": 0.000106368,
+      "cacheWrite": 0,
+      "total": 0.001363668
+    }
+  }
+}

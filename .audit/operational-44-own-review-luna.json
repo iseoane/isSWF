@@ -1,0 +1,23 @@
+{
+  "agentId": "ae403b2002a45aba4",
+  "log": "2026-10-16T09-51-37-968Z_483137b0-9a09-4662-80cc-f915afec9bdb.jsonl",
+  "text": "**Standards: PASS.** Reviewed frozen snapshot `985bb655…d79ed1fe9`; candidate and original check hashes match the manifest. The change is isolated to `tools/isswf-job.mjs`: `help` and `--help` print usage and return before parsing options or entering run/read/reconcile logic. The retained check covers both spellings, required help topics, and that `run` without arguments still fails.\n\n**Spec: PASS.** The usage text describes the existing commands and options, and preserves the independent-review reminder. Parent-check evidence records the original three checks passing in a read-only sandbox and 1,119 files preserved. I did not execute the candidate.\n\nNo material findings. This review is limited to the frozen candidate and finite normal-entry/useful-factory-job scope; it does not claim integration or process-scope proof.",
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "thinkingLevel": "high",
+  "usage": {
+    "input": 582,
+    "output": 180,
+    "cacheRead": 32256,
+    "cacheWrite": 0,
+    "reasoning": 0,
+    "totalTokens": 33018,
+    "cost": {
+      "input": 0.000058200000000000005,
+      "output": 0.00008999999999999999,
+      "cacheRead": 0.00032256,
+      "cacheWrite": 0,
+      "total": 0.00047075999999999997
+    }
+  }
+}

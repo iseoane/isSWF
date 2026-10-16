@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "attemptId": "J802-A001",
+  "finishedAt": "2026-10-16T09:50:35.797Z",
+  "outcome": "success",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"version\":1,\"mode\":\"real\",\"briefPath\":\".factory/jobs/J802/brief.md\",\"inputSha\":\"d5872c4a174ae312503c7a3d017a9d992a3c73a2\",\"briefSha256\":\"3f3f815963a649c2873e716a6455f39632ac681354f0055b87d285f4ff7b2ce5\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":true,\"sdkInitialized\":true,\"toolCalls\":7,\"acceptance\":true,\"protectedHashesPreserved\":true,\"boundaryCallAttributed\":true,\"hostTcpPositive\":true,\"checkExitCode\":0,\"mutablePaths\":[\"tools/isswf-job.mjs\"],\"status\":\"completed\"}\n",
+  "stderr": "",
+  "stdoutTruncated": false,
+  "stderrTruncated": false,
+  "captureIncomplete": false,
+  "descendants": "not-claimed",
+  "timedOut": false,
+  "workspace": "/tmp/isswf-own-factory44-Y1sYOL/runs/J802-A001/workspace"
+}

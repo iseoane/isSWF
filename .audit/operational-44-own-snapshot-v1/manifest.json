@@ -1,0 +1,17 @@
+{
+  "base": "7560d2ce12f6dd1e861e41896ccb4801a140498b",
+  "diffSha256": "32c25a900582e52540ea9019b3df076830c5039558879cc11e68fea9d2e14c6b",
+  "files": [
+    {
+      "path": ".factory/jobs/J802/check.mjs",
+      "mode": "100644",
+      "sha256": "d30762d75dff65760f88cf505e97d97ed4042e7a8fe3a5c76c273b888058f6f1"
+    },
+    {
+      "path": "tools/isswf-job.mjs",
+      "mode": "100644",
+      "sha256": "34a0407b131865c24e73f149a6a5452700c2fd0b17f5e142f4458134d4e6b6fb"
+    }
+  ],
+  "snapshot": "985bb6558486c965f475f406affdedeb8827cf1b76e184f5ec6aca2d79ed1fe9"
+}

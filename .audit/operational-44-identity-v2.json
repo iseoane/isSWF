@@ -1,0 +1,12 @@
+{
+  "snapshot": "1790753499459ffa40c5e95232ac06aa17bcf0fc1d7d947c09e96210c4646a8b",
+  "base": "cd841160fdc64fff07f99fe4140e6a9eb3737450",
+  "files": [
+    ".audit/verify-operational-44.mjs",
+    "docs/activacion-por-proyecto.md",
+    "docs/local-worker-lifecycle.md",
+    "tools/factory-package.mjs",
+    "tools/isswf-job.mjs"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

@@ -1,0 +1,47 @@
+{
+  "log": "2026-10-16T09-21-03-540Z_263cd516-1543-4e39-a62f-0698f9610c5f.jsonl",
+  "finals": [
+    {
+      "text": "## Grounding\n\nAt `cd84116`, activation publishes **20 receipt-verified Markdown resources and two instruction skills—not runtime tools or native roles**. The guide explicitly says activation does not install a runtime or run jobs. Pi’s CLI can load skills for a process; that does not invoke a coordinator or provide a worker runtime.\n\nThe existing worker path is real but not normal-run ready: `worker-lifecycle.mjs` needs explicit repository, input/base SHAs, task script, attempt ID and runs store; `pi-worker-task.mjs` requires trusted config pinning the SDK, Node, opaque host-auth path, profile and brief. The coordinator skill documents those handoffs, but remains instructions—not a CLI.\n\nGrounded in `docs/activacion-por-proyecto.md`, `.audit/activation-44-closure.md`, `tools/factory-package.mjs`, `tools/worker-lifecycle.mjs`, `tools/pi-worker-task.mjs`, `.agents/skills/isswf-coordinator/SKILL.md`, `docs/durable-work.md`, `package.json`, and Pi 1.2.0 `docs/cli.md`.\n\n## Recommendation: A — explicit source connection, checked against the receipt\n\nKeep runtime code in the fixed source Git checkout. A small `isswf-job` entry point should require the activated project and package, verify that the named source commit matches the package receipt, then use the existing Git-object reads, task preparation and lifecycle runner. Refuse dirty/unverifiable runtime identity; never resolve “latest.” This reuses existing contracts and avoids expanding the package export.\n\nIllustrative command:\n\n```sh\nnode \"$SOURCE/tools/isswf-job.mjs\" run \\\n  --project \"$PROJECT\" --package \"$PACKAGE\" \\\n  --input-sha \"$INPUT_SHA\" --target-base \"$BASE_SHA\" \\\n  --method-sha \"$METHOD_SHA\" \\\n  --models-config \"$MODELS_CONFIG\" --models-sha \"$MODELS_SHA\" \\\n  --attempt-id \"$ATTEMPT_ID\" --runs-store \"$RUNS_STORE\" \\\n  --grant-ref \"$GRANT_REF\"\n```\n\nRequire explicit, distinct full-SHA pins for runtime/source, brief inputs, target base, methodology and model config. Validate activation and package receipt before launch. Use only an already-available Pi SDK/Node/auth path; treat auth as opaque. Don’t install anything, log credentials, overwrite project settings, or mistake coordinator instructions for a model session.\n\nB—bundle runtime files and a receipt-backed profile—is more self-contained, but expands the resource package and its export, verification and compatibility surface. It is not the smallest connection.\n\n## Execution shape\n\n1. Add the narrow run entry point and regression coverage, reusing current runner and adapter; no daemon, queue, resolver or new store.\n2. Run one explicitly authorized factory job with one owner/attempt. `unknown` blocks; terminal success remains pending independent review. Preserve bounded, redacted results; no automatic acceptance or replacement.\n3. Independently review the exact candidate snapshot; make its result consultable. No PR is needed.\n\nA suitable real factory task is to make the CLI’s result/status presentation unambiguously distinguish **blocked/unknown**, **worker terminal**, and **pending independent review**, with regression tests. It is consequential to operator decisions, not a toy task. No files, providers or workers were used in this grounding.",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "usage": {
+        "input": 584,
+        "output": 1171,
+        "cacheRead": 62464,
+        "cacheWrite": 0,
+        "reasoning": 472,
+        "totalTokens": 64219,
+        "cost": {
+          "input": 0.0000584,
+          "output": 0.0005855,
+          "cacheRead": 0.00062464,
+          "cacheWrite": 0,
+          "total": 0.0012685399999999999
+        }
+      },
+      "timestamp": "2026-10-16T09:23:29.659Z"
+    },
+    {
+      "text": "That finding supports the bounded **A** recommendation: keep the runtime in the fixed source checkout and connect it to the activated package by verifying the source revision against the package receipt. For SDK setup, the entry point should either:\n\n- explicitly discover and validate the existing managed Pi install using the observed launcher behavior (`PI_MANAGED_INSTALL_ROOT`, `current-version`, and the matching release), or\n- accept a persisted operator-selected SDK path and validate it.\n\nDo not treat an undocumented environment variable as a general Pi API, guess paths, or install anything. Keep the auth path opaque. All job, method, model-config and runtime pins remain explicit; unknown worker state blocks, and successful execution still awaits independent review.\n\nNo source changes were made.",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "usage": {
+        "input": 1110,
+        "output": 152,
+        "cacheRead": 64128,
+        "cacheWrite": 0,
+        "reasoning": 0,
+        "totalTokens": 65390,
+        "cost": {
+          "input": 0.00011100000000000001,
+          "output": 0.00007599999999999999,
+          "cacheRead": 0.00064128,
+          "cacheWrite": 0,
+          "total": 0.00082828
+        }
+      },
+      "timestamp": "2026-10-16T09:24:10.265Z"
+    }
+  ]
+}

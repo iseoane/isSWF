@@ -1,0 +1,23 @@
+{
+  "agentId": "a7282b2311e9b8354",
+  "log": "2026-10-16T09-48-05-026Z_9f2d2e86-02ab-460d-9d22-6f75fbac946e.jsonl",
+  "text": "**PASS — pre-call gate only.** The fixture’s input and target pins match the J802 job; LunaHigh is the sole configured route, with `exclusiveAttempt: true` and `workerTotal: 1`. All five recorded protected-file hashes match. The runs store and `J802-A001` attempt are absent. The normal CLI defaults to `real`, prepares the task itself, enforces the one-attempt binding, and launches with a 120-second timeout. Baseline confirms the requested help behavior is missing.\n\nThe proposed invocation is consistent with those pins. I did **not** run it: the invocation creates files and starts a provider, both explicitly prohibited here. This gate does not certify a worker outcome or the broader 44-job review.",
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "thinkingLevel": "high",
+  "usage": {
+    "input": 2846,
+    "output": 220,
+    "cacheRead": 33536,
+    "cacheWrite": 0,
+    "reasoning": 60,
+    "totalTokens": 36602,
+    "cost": {
+      "input": 0.00028460000000000003,
+      "output": 0.00010999999999999999,
+      "cacheRead": 0.00033536,
+      "cacheWrite": 0,
+      "total": 0.00072996
+    }
+  }
+}
