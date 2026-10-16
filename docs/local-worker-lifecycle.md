@@ -28,7 +28,7 @@ Commit a trusted job JSON and a brief in the target project. Review every comman
 }
 ```
 
-The model configuration must select exactly `openai-codex/gpt-6-luna` at `high` for the worker, with no fallback. The input checkpoint, target base, runtime/package revision, model-config checkpoint, and methodology revision have different meanings. Referenced inputs must have identical committed bytes at the input checkpoint and target base. The brief is read at the input checkpoint, not from the working tree. The five runtime files (`isswf-job.mjs`, `factory-package.mjs`, `pi-worker-task.mjs`, `worker-lifecycle.mjs`, and `native-recovery.mjs` under `tools/`) must match their Git blobs at `runtimeSha`; unrelated later commits do not change that identity. Exactly one local isSWF package declaration must exist, and it must be an absolute, string-form declaration matching that revision; its complete receipt/payload is verified. Relative local declarations are resolved from `.pi/settings.json`; home-relative paths and `file://` URLs are also normalized and counted, rather than silently bypassing this check. Nonlocal declarations explicitly naming this factory are refused as ambiguous; unrelated remote packages are not fetched or inspected.
+The model configuration must select exactly `openai-codex/gpt-6-luna` at `high` for the worker, with no fallback. The input checkpoint, target base, runtime/package revision, model-config checkpoint, and methodology revision have different meanings. Referenced inputs must have identical committed bytes at the input checkpoint and target base. The brief is read at the input checkpoint, not from the working tree. The six runtime files (`isswf-job.mjs`, `factory-package.mjs`, `pi-worker-task.mjs`, `worker-lifecycle.mjs`, `native-recovery.mjs`, and `external-effect-journal.mjs` under `tools/`) must match their Git blobs at `runtimeSha`; unrelated later commits do not change that identity. Exactly one local isSWF package declaration must exist, and it must be an absolute, string-form declaration matching that revision; its complete receipt/payload is verified. Relative local declarations are resolved from `.pi/settings.json`; home-relative paths and `file://` URLs are also normalized and counted, rather than silently bypassing this check. Nonlocal declarations explicitly naming this factory are refused as ambiguous; unrelated remote packages are not fetched or inspected.
 
 The entry uses the Node executable that invoked it. It locates an existing SDK through `PI_MANAGED_INSTALL_ROOT` only when supplied by the actual managed Pi launcher, reads its validated `current-version`, and verifies the release package identity. This is a managed-install convention, not a general Pi environment API. Other installations must provide an absolute `sdkPath` in the trusted job JSON. The opaque host auth path defaults to `auth.json` under Pi's `PI_CODING_AGENT_DIR`, or `~/.pi/agent`; an explicit absolute `authPath` overrides it. No credentials are copied into the sandbox or printed. No dependencies or global settings are installed or changed.
 
@@ -95,6 +95,47 @@ New task snapshots record `native-tools-pidns-v1` evidence outside the writable 
 If the lifecycle host is lost, run the normal `isswf-job.mjs reconcile` command. While the task or a recorded namespace may still act, recovery stays `blocked`. Only after the exact task and every recorded namespace-init process are confirmed absent or matching zombies on the same boot can reconciliation return `recovery.status: "stopped-review-required"`. PID reuse, reboot, unreadable evidence, missing records, changed task/runtime/package/config/brief pins, or partial changes outside the committed mutable scope block that result. The check compares workspace bytes, file executable modes, and entries against the committed target base; it does not execute project checks. Review the reported candidate hashes and run the original protected checks in the sandbox before any delivery.
 
 The overall attempt remains `unknown`: this is recovery of reviewable partial work, not a fabricated terminal result, automatic retry, or authorization to replace a writer. Records and partial files are never repaired or copied automatically. Existing generic tasks and older snapshots without the policy stay uncovered. External effects are reported `not-reconciled`; a stopped local process does not settle a provider charge, remote Git operation, or lost external response. This cut does not supply general restart, exactly-once effects, concurrency exclusion, or client readiness. Run `node .audit/verify-recovery-68-native.mjs` for actual disposable offline host/task-loss, descendant-cessation, partial-scope, and pre-release publication controls; it makes no provider prompt.
+
+## Reconcile an uncertain PR response
+
+The separate `isswf-job.mjs effect` command supplies a write-once PR journal. It is not part of ordinary `run`, `read`, or `reconcile`. Ordinary observation remains local and read-only. The coordinator host owns this journal; sandbox workers receive no GitHub authority. The delivery profile remains local-draft-only unless the operator grants a specific external action separately.
+
+The committed job must add `logicalJobRef` and `externalEffect`:
+
+```json
+{
+  "logicalJobRef": "J900",
+  "externalEffect": {
+    "operation": "pr-open",
+    "repository": "owner/repository",
+    "head": "jobs/J900",
+    "base": "main",
+    "candidateSha": "<full reviewed commit already on the remote head>",
+    "baseSha": "<full reviewed remote base commit>",
+    "title": "Reviewed change",
+    "body": "Reviewed PR description",
+    "draft": true
+  }
+}
+```
+
+Only a validated, successful bound attempt with complete capture is supported by this entry. Live, failed, unknown, or merely recovered partial attempts block. Terminal success does not prove independent review or descendant cessation. The trusted caller must establish review, prior-writer cessation, and exclusive effect ownership separately. This cut does not implement a multiwriter job lock.
+
+Run `effect --action inspect --runs-store ABS --attempt-id ID` first. This read-only action returns the immutable intent, its `key`, and `intentSha256` when unprepared. The key derives from the canonical GitHub repository, stable logical job reference, and `pr-open`, never the attempt ID or candidate. Keep that logical identity across replacement attempts. Changed input, base, candidate, description, or grant under an existing key blocks without overwriting records or creating another PR identity.
+
+Provide an absolute operator-owned grant JSON outside the project and runtime source. It must contain `version: 1`, a concrete `grantRef`, `host: "github.com"`, the exact `key` and `intentSha256`, `maxInvocations: 1`, an explicit integer `maxQueries` from 1 to 20, `exclusiveEffectOwner: true`, `priorWritersCeased: true`, a concrete `reviewRef`, and an `actions` array explicitly allowing the required `prepare`, `publish`, or `reconcile` actions. There are no budget defaults. These fields are trusted caller attestations, not an authentication service; a model response or a project file is not operator approval. Query slots count individual GET requests, including pagination and the two remote-ref checks, and are consumed durably before requests. Crashes consume slots too.
+
+```sh
+node /absolute/fixed-isSWF/tools/isswf-job.mjs effect \
+  --runs-store /absolute/private-runs-store --attempt-id J900-A001 \
+  --action prepare --grant-file /absolute/operator-grants/J900.json
+```
+
+Use the same options with `--action publish` only under a concrete publication grant. This action uses the existing host `gh` executable and opaque normal GitHub authentication, pinned to `github.com`. It neither installs tools nor creates or pushes branches. It queries existing PRs and verifies remote head/base pins, then durably claims `submitted.json` **before** requesting PR creation. That exclusive claim consumes the entire supported `maxInvocations: 1` budget. No caller can remove or reuse it. The journal lives under `<runs-store>/effects/<key>` across attempt IDs. Concurrent invocation claims cannot submit twice, but this is not general job ownership enforcement or exactly-once delivery.
+
+If the response is lost, use the explicitly authorized `effect --action reconcile`, not `publish` again. Only one exact, completely queried, open and unmerged match of repository, head, base, marker, title, draft status, and candidate/base SHAs can publish an outcome fact. Missing state, closed, or merged PR evidence blocks. A preexisting PR without a local submission claim also blocks for an operator decision; lost or relocated journals are not automatically adopted. Zero, multiple, incomplete, conflicting, failed, or over-budget queries block without retry. A crash after the submission claim but before network transmission deliberately remains uncertain. Confirmed facts record that an open PR was observed at confirmation time, not its current live state. They return idempotently without another network call. Ordinary `read`, ordinary `reconcile`, and effect `inspect` never query GitHub or modify effect facts.
+
+Run `node .audit/verify-external-effects-68.mjs` for disposable fake-`gh` controls, actual initiating-process SIGKILL before submission and after a persistent fake PR but before local response, competing invocation claims, immutable conflicts, numeric grants, and normal CLI integration. These controls make no real GitHub calls or provider prompts. They prove journal/process logic, not real GitHub semantics, race-free remote ref updates, reboot/power-loss recovery, local Git branch/commit/push reconciliation, issue creation, or all S04 criteria. Actual GitHub use needs its own named operator grant and pre-call gates.
 
 ## Pi task snapshot
 

@@ -7,10 +7,11 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
 import { inspectNativeRecovery } from './native-recovery.mjs';
+import { effectIntent, externalEffect } from './external-effect-journal.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const methodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs'];
+const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md'];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
@@ -43,12 +44,12 @@ function options(values) {
   const result = {};
   for (let i = 0; i < values.length; i += 2) {
     const key = values[i];
-    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
+    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
     result[key.slice(2)] = values[i + 1];
   }
   return result;
 }
-async function canonicalStore(path, project) {
+async function canonicalStore(path, project, create = true) {
   if (!isAbsolute(path || '')) throw new Error('--runs-store must be an absolute operator-owned path');
   const store = await canonicalPath(path);
   for (const tree of [project, root]) {
@@ -56,7 +57,7 @@ async function canonicalStore(path, project) {
     const inside = path => path === '' || (path !== '..' && !path.startsWith('../') && !isAbsolute(path));
     if (inside(child) || inside(parent)) throw new Error('runs store must be outside project and source trees');
   }
-  await mkdir(store, { recursive: true });
+  if (create) await mkdir(store, { recursive: true });
   if (await realpath(store) !== store) throw new Error('runs store changed during validation');
   return store;
 }
@@ -100,6 +101,7 @@ async function activePackage(project, revision) {
   return matches[0].path;
 }
 async function run(args) {
+  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode'].includes(key))) throw Error('unsupported run option');
   if (!isAbsolute(args.project || '') || !fullSha(args['input-sha']) || !safeRelative(args.job)) throw new Error('run requires --project absolute --input-sha fullSHA --job committed/relative.json');
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(args['attempt-id'] || '') || ['.', '..'].includes(args['attempt-id']) || !args['grant-ref']?.trim()) throw new Error('explicit attempt ID and trusted grant reference required');
   const mode = args.mode || 'real';
@@ -136,15 +138,42 @@ async function run(args) {
   const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000']));
   console.log(JSON.stringify({ ...launched, mode, bindingPath, reviewRequired: true }));
 }
+async function effect(args) {
+  if (Object.keys(args).some(key => !['runs-store', 'attempt-id', 'action', 'grant-file'].includes(key)) || !['prepare', 'inspect', 'publish', 'reconcile'].includes(args.action)) throw Error('effect requires explicit --action prepare|inspect|publish|reconcile');
+  const observed = JSON.parse(invoke(process.execPath, [join(root, 'tools/isswf-job.mjs'), 'read', '--runs-store', args['runs-store'] || '', '--attempt-id', args['attempt-id'] || '']));
+  const binding = observed.job;
+  if (!binding || observed.state !== 'terminal' || observed.terminal.outcome !== 'success' || observed.terminal.captureIncomplete) throw Error('effect requires a validated successful bound attempt; unknown/live/failed writers block');
+  const project = await realpath(binding.repo);
+  const store = await canonicalStore(args['runs-store'], project, false);
+  const bytes = blob(project, binding.inputSha, binding.jobPath), job = JSON.parse(bytes);
+  if (digest(bytes) !== binding.jobSha256 || job.version !== 1 || job.runtimeSha !== binding.runtimeSha || job.targetBase !== binding.targetBase || job.methodologySha !== binding.methodologySha) throw Error('effect committed binding mismatch');
+  for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(blob(root, binding.runtimeSha, path))) throw Error('effect runtime identity changed');
+  await verifyPackage(binding.packageRoot, binding.runtimeSha);
+  const intent = effectIntent(binding, job);
+  let grant;
+  if (args.action !== 'inspect') {
+    if (!isAbsolute(args['grant-file'] || '')) throw Error('absolute operator-owned --grant-file required');
+    const path = await realpath(args['grant-file']);
+    for (const tree of [project, root]) {
+      const child = relative(tree, path);
+      if (child === '' || (child !== '..' && !child.startsWith('../') && !isAbsolute(child))) throw Error('effect grant must be outside untrusted project and runtime source');
+    }
+    const stat = await lstat(path);
+    if (!stat.isFile() || stat.size > 16000) throw Error('bounded regular effect grant required');
+    grant = JSON.parse(await readFile(path, 'utf8'));
+  }
+  console.log(JSON.stringify(await externalEffect({ action: args.action, store, intent, grant })));
+}
 async function main() {
   const command = process.argv[2];
   if (command === '--help' || command === 'help') {
-    console.log(`Usage: isswf-job.mjs <run|read|reconcile> [options]
+    console.log(`Usage: isswf-job.mjs <run|read|reconcile|effect> [options]
 
 Commands:
   run         Execute a pinned factory job
   read        Read an existing attempt
-  reconcile   Reconcile an existing attempt
+  reconcile   Reconcile an existing attempt locally (read-only)
+  effect      Explicit PR journal action, separate from ordinary observation
 
 Required for run:
   --project ABSOLUTE_PATH  Project checkout
@@ -158,12 +187,17 @@ Required for read/reconcile:
   --runs-store ABS_PATH    Operator-owned run storage
   --attempt-id ID          Attempt identifier
 
+Required for effect: --runs-store ABS_PATH --attempt-id ID
+  --action prepare|inspect|publish|reconcile
+  --grant-file ABS_PATH (except read-only inspect)
+Effect publish/reconcile contact github.com only under a concrete operator grant.
 Optional for run: --mode real|offline
 An independent review remains required for every worker result.`);
     return;
   }
   const args = options(process.argv.slice(3));
   if (command === 'run') return run(args);
+  if (command === 'effect') return effect(args);
   if (!['read', 'reconcile'].includes(command) || Object.keys(args).some(key => !['runs-store', 'attempt-id'].includes(key))) throw new Error('usage: isswf-job.mjs run|read|reconcile [explicit options]');
   const result = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), command, '--runs-store', args['runs-store'] || '', '--attempt-id', args['attempt-id'] || '']));
   let binding, dispatch;
