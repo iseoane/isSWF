@@ -1,0 +1,7 @@
+{
+  "actor": "a58b6c8fd3ce08315",
+  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-15T18-03-37-917Z_d3dfb6b7-2267-4be5-bf1b-6b93ea67a9cc.jsonl",
+  "provider": "opencode-go",
+  "model": "deepseek-v4.1-flash",
+  "thinkingLevel": "max"
+}

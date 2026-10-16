@@ -1,0 +1,1 @@
+Identity is tracked binary patch plus ALL four exact payloads. All current additions are untracked, so empty tracked patch is expected; payload digests define the changes. Source is frozen and writers stopped.

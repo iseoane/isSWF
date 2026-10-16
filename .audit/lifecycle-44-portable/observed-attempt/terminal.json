@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "attemptId": "J601-pi-exit",
+  "finishedAt": "2026-10-16T03:42:46.246Z",
+  "outcome": "success",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "PASS two sum and three product assertions\n",
+  "stderr": "",
+  "stdoutTruncated": false,
+  "stderrTruncated": false,
+  "captureIncomplete": false,
+  "descendants": "not-claimed",
+  "timedOut": false,
+  "workspace": "/tmp/isswf-lifecycle44-candidate-pi-UDRYES/runs/J601-pi-exit/workspace"
+}

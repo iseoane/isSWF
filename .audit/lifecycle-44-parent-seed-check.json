@@ -1,0 +1,12 @@
+{
+  "root": "/tmp/isswf-lifecycle44-project-Xe19TZ",
+  "head": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "clean": true,
+  "checksUnchanged": true,
+  "expectedRed": {
+    "exit": 1,
+    "actual": 11,
+    "expected": 21
+  },
+  "scope": "Reserved original seed only; implementation writer owns separate fixtures and this is not candidate lifecycle evidence."
+}

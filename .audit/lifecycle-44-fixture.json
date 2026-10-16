@@ -1,0 +1,18 @@
+{
+  "root": "/tmp/isswf-lifecycle44-project-Xe19TZ",
+  "factorySource": "f1316072c5447e857fe16caa4804990ac8e6d741",
+  "inputCheckpoint": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "targetBase": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "briefPath": ".factory/jobs/J601/brief-r1.md",
+  "writePaths": [
+    "src/math.mjs",
+    ".factory/jobs/J601/A001.md"
+  ],
+  "checksSha256": "bcca7761416083af37100b40bee6bf998e394fd97e1e90969227b33f3ba5ce61",
+  "baseline": {
+    "exit": 1,
+    "stdout": "",
+    "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n11 !== 21\n\n    at file:///tmp/isswf-lifecycle44-project-Xe19TZ/check.mjs:5:8\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 11,\n  expected: 21,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n"
+  },
+  "scope": "Committed disposable project and observed expected arithmetic failure only. No worker execution, lifecycle or model proof."
+}

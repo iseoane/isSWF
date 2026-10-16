@@ -1,0 +1,11 @@
+{
+  "root": "/tmp/isswf-lifecycle44-binary-control-wkvCt7",
+  "cli": "/home/iseoane/Work/isSWF/.audit/lifecycle-44-snapshot-v3/payload/tools/worker-lifecycle.mjs",
+  "passed": true,
+  "terminalPublished": true,
+  "observationState": "terminal",
+  "outputBytes": 65535,
+  "omissionMarked": true,
+  "fixtureHostTerminated": false,
+  "scope": "Actual frozen CLI with supported binary stdout/cap. Parent-owned host terminated only on failed publication guard after matching launched PID, boot, start ticks, executable and exact nonce. Pure task has no descendants. Not production reader signaling, native model, performance benchmark or recovery proof."
+}

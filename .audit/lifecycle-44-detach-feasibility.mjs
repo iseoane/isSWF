@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { setTimeout } from 'node:timers/promises';
+
+const root = await mkdtemp(join(tmpdir(), 'isswf-lifecycle44-detach-'));
+const worker = join(root, 'worker.mjs');
+const launcher = join(root, 'launcher.mjs');
+await writeFile(worker, `import {writeFile,readFile} from 'node:fs/promises';
+const root=process.argv[2];
+await writeFile(root+'/started.json',JSON.stringify({pid:process.pid,ppid:process.ppid,procStat:await readFile('/proc/self/stat','utf8')}));
+setTimeout(async()=>{await writeFile(root+'/result.json',JSON.stringify({value:21,ppid:process.ppid}));},1200);
+`);
+await writeFile(launcher, `import{spawn}from'node:child_process';
+const c=spawn(process.execPath,[process.argv[2],process.argv[3]],{detached:true,stdio:'ignore'});c.unref();console.log(JSON.stringify({workerPid:c.pid,launcherPid:process.pid}));
+`);
+const launch = spawnSync(process.execPath, [launcher, worker, root], { encoding: 'utf8', timeout: 3000 });
+assert.equal(launch.status, 0, launch.stderr);
+const ids = JSON.parse(launch.stdout);
+let launcherAlive;
+try { process.kill(ids.launcherPid, 0); launcherAlive = true; } catch (error) { assert.equal(error.code, 'ESRCH'); launcherAlive = false; }
+assert.equal(launcherAlive, false);
+await setTimeout(2200);
+const started = JSON.parse(await readFile(join(root, 'started.json'), 'utf8'));
+const result = JSON.parse(await readFile(join(root, 'result.json'), 'utf8'));
+assert.equal(started.pid, ids.workerPid);
+assert.equal(result.value, 21);
+console.log(JSON.stringify({ root, launcherExitedBeforeRead: true, workerPid: started.pid, value: result.value, passed: true, scope: 'One local Node launcher exits before its detached deterministic worker publishes a result. Not chat teardown, supervisor recovery, durable identity authentication, model integration or exactly-once proof.' }, null, 2));

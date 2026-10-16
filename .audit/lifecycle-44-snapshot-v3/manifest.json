@@ -1,0 +1,27 @@
+{
+  "base": "f1316072c5447e857fe16caa4804990ac8e6d741",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": [
+    {
+      "path": ".audit/lifecycle-44-build-brief.md",
+      "mode": "100644",
+      "sha256": "7adbd68f7923408bcd414b2355c14cc89b0815a543c70ac24ef658be9bfdeffc"
+    },
+    {
+      "path": ".audit/verify-lifecycle-44.mjs",
+      "mode": "100644",
+      "sha256": "2b4e26c1bf0d188ea983a5b6fcdfca66ae3c1f4f37302dfc4dd2167fce36a7d7"
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "mode": "100644",
+      "sha256": "07a7061d654f91180b9ecab76e05a05adc3177af7be9bc97475ce696626472be"
+    },
+    {
+      "path": "tools/worker-lifecycle.mjs",
+      "mode": "100644",
+      "sha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+    }
+  ],
+  "snapshot": "d830db92db77b6e7c6b68dafd13d34a3dd2892ed2f0d0e152a0ef099b48d0f9c"
+}

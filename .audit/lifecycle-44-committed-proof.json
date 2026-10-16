@@ -1,0 +1,129 @@
+{
+  "result": "PASS",
+  "revision": "c2eeca2ca61b16bd9969d0c892d2d174b6aa9f34",
+  "executableSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36",
+  "frozenSnapshot": "d830db92db77b6e7c6b68dafd13d34a3dd2892ed2f0d0e152a0ef099b48d0f9c",
+  "verifier": {
+    "result": "PASS",
+    "temp": "/tmp/isSWF-lifecycle44-Izfh5f",
+    "fixtureProject": "/tmp/isSWF-lifecycle44-Izfh5f/project",
+    "sourceFixture": "/tmp/isswf-lifecycle44-project-Xe19TZ",
+    "inputCheckpoint": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+    "targetBase": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+    "checks": [
+      "parent-pinned J601 arithmetic baseline reproduces the expected product mismatch (11 !== 21) in a private fixture copy",
+      "CLI rejects options outside the explicitly supported invocation",
+      "pinned J601 task completes after launch CLI exits; fresh read/reconcile sees actual product check output; terminal repeat is rejected",
+      "nonzero task publishes failure without requiring an A001 report",
+      "deadline kills only the live owner’s child process group and publishes timeout",
+      "same ID is blocked while live and after terminal",
+      "different attempt IDs materialize different attempt-derived workspaces",
+      "torn dispatch, corrupt terminal and process-identity mismatch remain unknown; readers do not repair or release claims",
+      "killed owner with a potentially-live child stays unknown, preserves partial work, and cannot be relaunched under the same ID",
+      "captured task output respects the explicit per-stream bound",
+      "duplicate normalized option is rejected before creating an attempt",
+      "UTF-8 tail and explicit truncation marker stay within encoded-byte bounds and remain readable",
+      "exact 64 KiB invalid UTF-8 on both streams publishes a valid terminal within the cap and marks render-time omission",
+      "leader exit cannot hold the deadline open; bounded close reports incomplete capture and uncertain descendants",
+      "empty nonce cannot make an unrelated live process appear to own an attempt"
+    ]
+  },
+  "regressions": {
+    "root": "/tmp/isswf-lifecycle44-parent-regression-qtT6FB",
+    "cli": "/home/iseoane/Work/isSWF/tools/worker-lifecycle.mjs",
+    "checks": [
+      {
+        "name": "duplicate option refused",
+        "pass": true,
+        "actual": {
+          "exit": 1,
+          "stderr": "invalid or repeated option: --attempt-id\n",
+          "stdout": ""
+        },
+        "expected": "nonzero invalid/repeated option, no launch"
+      },
+      {
+        "name": "UTF-8 output remains a valid terminal within encoded-byte bound",
+        "pass": true,
+        "actual": {
+          "read": {
+            "attemptId": "unicode",
+            "state": "terminal",
+            "terminal": {
+              "version": 1,
+              "attemptId": "unicode",
+              "finishedAt": "2026-10-16T03:47:27.468Z",
+              "outcome": "success",
+              "exitCode": 0,
+              "signal": null,
+              "error": null,
+              "stdout": "[...truncated...]\n😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+              "stderr": "",
+              "stdoutTruncated": true,
+              "stderrTruncated": false,
+              "captureIncomplete": false,
+              "descendants": "not-claimed",
+              "timedOut": false,
+              "workspace": "/tmp/isswf-lifecycle44-parent-regression-qtT6FB/runs/unicode/workspace"
+            }
+          },
+          "terminalOutputBytes": 254
+        },
+        "expected": "terminal; stdout <=257 encoded bytes"
+      },
+      {
+        "name": "deadline bounds inherited pipes after leader exits",
+        "pass": true,
+        "actual": {
+          "elapsedMs": 618,
+          "outcome": "timeout",
+          "exitCode": 0
+        },
+        "expected": "bounded completion well before self-exiting descendant2200ms; 1500ms generous fixture guard, not performance claim"
+      },
+      {
+        "name": "empty nonce cannot identify an unrelated live process",
+        "pass": true,
+        "actual": {
+          "attemptId": "empty-nonce",
+          "state": "unknown",
+          "reason": "owner identity absent or mismatched"
+        },
+        "expected": "unknown with invalid owner identity"
+      }
+    ],
+    "allPassed": true,
+    "scope": "Parent-owned independent frozen-candidate regression controls, trusted deterministic Node tasks only. No provider, native model, client isolation or exactly-once proof. Descendant self-terminates at2200ms even if tested deadline fails."
+  },
+  "binary": {
+    "root": "/tmp/isswf-lifecycle44-binary-control-YghUIK",
+    "cli": "/home/iseoane/Work/isSWF/tools/worker-lifecycle.mjs",
+    "passed": true,
+    "terminalPublished": true,
+    "observationState": "terminal",
+    "outputBytes": 65535,
+    "omissionMarked": true,
+    "fixtureHostTerminated": false,
+    "scope": "Actual frozen CLI with supported binary stdout/cap. Parent-owned host terminated only on failed publication guard after matching launched PID, boot, start ticks, executable and exact nonce. Pure task has no descendants. Not production reader signaling, native model, performance benchmark or recovery proof."
+  },
+  "pi": {
+    "result": "PASS",
+    "root": "/tmp/isswf-lifecycle44-candidate-pi-0RSANS",
+    "cli": "/home/iseoane/Work/isSWF/tools/worker-lifecycle.mjs",
+    "executableSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36",
+    "piExitedBeforeRelease": true,
+    "before": {
+      "state": "running"
+    },
+    "after": {
+      "state": "terminal",
+      "outcome": "success",
+      "exitCode": 0
+    },
+    "checkExit": 0,
+    "checksUnchanged": true,
+    "providerPromptStarted": false,
+    "scope": "Actual candidate launch via isolated offline Pi RPC bash, Pi exits before task release, fresh CLI observes completion and parent independently runs protected arithmetic checks. Not native model integration, interactive main chat shutdown, hostile-task isolation, crash recovery or exactly-once proof."
+  },
+  "scope": "Actual committed source and frozen four-file packet binding with parent-run deterministic process checks and isolated offline Pi RPC teardown. No provider prompt, native model adapter, hostile-task isolation, recovery of arbitrary effects, broad44 completion or client readiness."
+}

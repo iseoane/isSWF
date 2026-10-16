@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "J601-owner-kill",
+  "createdAt": "2026-10-16T03:42:50.484Z",
+  "repo": "/tmp/isSWF-lifecycle44-iC4V7X/project",
+  "inputSha": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "targetBase": "98d1bce6baa7e4aca53fba3311d16d68f706574c",
+  "briefPath": ".factory/jobs/J601/brief-r1.md",
+  "briefSha256": "499d3bfb2bcb4458359c918d9e2383bcdc086930a2c49ef1893809c04cf7d2ad",
+  "grantRef": "local-verifier-only",
+  "taskSha256": "3b115ee52d177cc8a3d33d8f48fe48ffaa4b0fca72856f628d4b51b08b75d8bd",
+  "timeoutMs": 5000,
+  "outputBytes": 4096,
+  "workspace": "/tmp/isSWF-lifecycle44-iC4V7X/runs/J601-owner-kill/workspace",
+  "taskCopy": "/tmp/isSWF-lifecycle44-iC4V7X/runs/J601-owner-kill/task.mjs",
+  "lifecycleCopy": "/tmp/isSWF-lifecycle44-iC4V7X/runs/J601-owner-kill/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+}

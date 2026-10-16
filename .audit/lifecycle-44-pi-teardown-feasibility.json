@@ -1,0 +1,13 @@
+{
+  "root": "/tmp/isswf-lifecycle44-pi-exit-1scSBa",
+  "passed": true,
+  "piExitedBeforeRelease": true,
+  "resultBeforeRelease": false,
+  "workerPid": 327968,
+  "result": {
+    "value": 21,
+    "pid": 327968
+  },
+  "providerPromptStarted": false,
+  "scope": "Actual isolated offline Pi RPC bash request launches a detached deterministic Node child; Pi shuts down before parent releases child completion. Not the production lifecycle candidate, model integration, supervisor crash recovery, interactive main-chat termination or exactly-once proof."
+}

@@ -1,0 +1,11 @@
+{
+  "cli": "/home/iseoane/Work/isSWF/.audit/lifecycle-44-snapshot-v2/payload/tools/worker-lifecycle.mjs",
+  "passed": false,
+  "status": null,
+  "signal": "SIGTERM",
+  "errorCode": "ETIMEDOUT",
+  "result": null,
+  "inputBytes": 65536,
+  "outerSafetyBoundMs": 2500,
+  "scope": "Exact frozen output-helper unit with valid binary task output and supported cap. Outer timeout is a safety/control failure, not a speed benchmark or full lifecycle execution. The owned pure helper subprocess has no descendants."
+}
