@@ -124,6 +124,8 @@ async function workspaceTree(directory) {
   return entries;
 }
 
+export { workspaceTree };
+
 export function nativeRecorderSource() {
   return [processEvidence,createNativeToolRunner,workspaceTree].map(fn=>fn.toString()).join('\n');
 }
