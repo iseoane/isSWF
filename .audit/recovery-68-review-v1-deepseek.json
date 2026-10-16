@@ -1,0 +1,10 @@
+{
+  "agent": "ac6943af84aa95796",
+  "report": "Snapshot identity verified: manifest hashes == worktree == tested CLI (`2a29796a…`), doc (`02a46f24…`), verifier (`461d305e…`); base `d352b58`; diff = the two files named.\n\n**Sound:** identity captured synchronously inside `spawn` (no async gap), write-once + fsync'd, `await childRecord` placed before the terminal write; `error` resolves that promise, so no host hang; `read`/`reconcile` stay read-only; `executionChild` is additive, never alters top-level state, and is omitted on `terminal` (backward compatible); same-ID relaunch still fails, so nested `live`/`not-live` never authorizes a successor, and descendants stay `unproven`.\n\n**Spec: FAIL** — `tools/worker-lifecycle.mjs:270-278`. The catch maps `ENOENT`/`ESRCH` from *any* step to `not-live`, but `linuxProcess` resolves `realpathSync('/proc/<pid>/exe')` and re-reads `boot_id` inside that same try. A **live** direct child whose executable was deleted or replaced (readlink → `…(deleted)`; ENOENT) is therefore published as `not-live`, contradicting the sentence this diff adds: \"`not-live` means only the direct child is absent or a zombie.\" The passing host-loss evidence traverses this same catch, so it cannot distinguish the wrong case; `not-live` is inferred from unreadable evidence, not observed absence.\n\nMinimal fix: derive `not-live` only from `/proc/<pid>/stat` — `ENOENT`/`ESRCH` on that read, or `fields[0] === 'Z'` evaluated *before* exe resolution; map every other failure (exe, boot_id) on a present, non-zombie PID to `{ state: 'unknown' }`.\n\n**Standards: PASS** — notes only: `/proc/stat` parsing is now duplicated in `linuxProcess` and `linuxIdentity`, and the blanket catch is what hides the distinction above.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

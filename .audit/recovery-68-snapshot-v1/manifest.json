@@ -1,0 +1,9 @@
+{
+  "base": "d352b582b752025f51c8b4b3ffcd8dd37bb7540d",
+  "files": {
+    "tools/worker-lifecycle.mjs": "2a29796a591772234300fd258c352bfa6968c90266b45978bc7ab6aa33fcf421",
+    "docs/local-worker-lifecycle.md": "02a46f24257ee73dd6f338ffe083807e5f7c02a7b0ce5ca0d5b7ae1a98cb79b5",
+    ".audit/verify-recovery-68-host-loss.mjs": "461d305ee9f496170d24ea0cd3e5861dd803940747e8c743c054b660f91f0eb8"
+  },
+  "scope": "partial68 child identity, no replacement authorization"
+}

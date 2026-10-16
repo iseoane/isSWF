@@ -1,0 +1,10 @@
+{
+  "agent": "af1d4c091bd346fc6",
+  "report": "## Standards — PASS\nThe source stays within the existing lifecycle runner and uses its write-once metadata pattern. The guide adds a focused explanation; no unnecessary command or framework was introduced. I found no material maintainability blocker.\n\n## Spec — PASS\nThe parent and baseline show the intended gap: host loss left the attempt `unknown` without identifying its direct child. The change adds a durable child identity and nested read-only observation while keeping the attempt `unknown` when the host is absent. The verifier asserts live and exited child observations, same-ID relaunch refusal, preserved records/work, and malformed-identity failures. Descendant cessation and recovery authorization remain explicitly unclaimed.\n\nStatic review only; I did not run the verifier or processes.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}
