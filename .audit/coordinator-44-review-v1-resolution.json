@@ -1,0 +1,12 @@
+{
+  "finding": "Luna v1 claimed missing briefText declaration",
+  "disposition": "dismissed; independent Luna retracted its sole blocker after reading frozen line69; original report and correction retained",
+  "declaration": {
+    "line": 69,
+    "text": "  const briefText = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(briefBytes);"
+  },
+  "allCandidateHashesStillMatch": true,
+  "offlineProof": ".audit/coordinator-44-parent-offline.json",
+  "sourceChanged": false,
+  "independentReview": "Deepseek StandardsPASS/SpecPASS plus Luna original manualcase decisions and withdrawn soleblocker"
+}

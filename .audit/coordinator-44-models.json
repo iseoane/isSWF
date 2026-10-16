@@ -1,0 +1,64 @@
+{
+  "scope": "Read-only review metadata from own actor logs; implementation A001/A002 PiSDK exact runtime fields retained separately. Parent source corrections after explicit operator approval.",
+  "reviewers": [
+    {
+      "evidence": ".audit/coordinator-44-precall.json",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "observedThinkingLevels": [
+        "max"
+      ],
+      "agentId": "a894c69e6ef9292f0",
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T06-06-03-712Z_55d26ee3-901b-457c-90e7-10eb215b020c.jsonl"
+    },
+    {
+      "evidence": ".audit/coordinator-44-instrumented-precall.json",
+      "agentId": "a46ca7f91616e6588",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "observedThinkingLevels": [
+        "max"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T06-47-16-470Z_de54e2d2-1f53-4403-8a24-1a4c4ed7cdf7.jsonl"
+    },
+    {
+      "evidence": ".audit/coordinator-44-review-v1-deepseek.json",
+      "agentId": "a122ebb8f278d5b10",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "observedThinkingLevels": [
+        "max"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T07-14-57-525Z_b6f900f6-a8ac-4633-8188-4464c0e12c08.jsonl"
+    },
+    {
+      "evidence": ".audit/coordinator-44-review-v1-luna.json",
+      "agentId": "a15e51c2ce12f70c4",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "observedThinkingLevels": [
+        "high"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T07-14-57-528Z_0fa9b772-12ed-4cd3-8c11-1cdb79ba3d41.jsonl"
+    },
+    {
+      "evidence": ".audit/coordinator-44-review-v1-luna-corrected.json",
+      "agentId": "a15e51c2ce12f70c4",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "observedThinkingLevels": [
+        "high"
+      ],
+      "sourceLog": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T07-14-57-528Z_0fa9b772-12ed-4cd3-8c11-1cdb79ba3d41.jsonl"
+    }
+  ],
+  "implementationResults": [
+    ".audit/coordinator-44-native-result.json",
+    ".audit/coordinator-44-instrumented-result.json"
+  ],
+  "automaticProviderRetryOrFallback": false,
+  "archivalWhitespaceException": {
+    "path": ".audit/coordinator-44-snapshot-v1/candidate.diff",
+    "reason": "Immutable unified diff context blank lines contain a context-marker space; reviewed production source and payload have no trailing whitespace."
+  }
+}

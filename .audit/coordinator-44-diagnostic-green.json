@@ -1,0 +1,1 @@
+{"status":"PASS","scope":"Actual generated SDK event-consumer code with synthetic message_end events, no provider. Error indicators are message-derived booleans, not independently confirmed account or provider state.","cases":["error-with-quota-indicator","normal-prose-not-error","unknown-stop-redacted","non-assistant-ignored"]}

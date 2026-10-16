@@ -1,0 +1,79 @@
+{
+  "status": "PARTIAL_NOT_ACCEPTED",
+  "attemptId": "J703-native-A002",
+  "originalA001Cause": "unknown",
+  "a002StopReason": "error",
+  "errorIndicators": {
+    "quotaOrRate": false,
+    "auth": false,
+    "modelUnsupported": false,
+    "transport": false
+  },
+  "toolCalls": 12,
+  "toolLimit": 12,
+  "cause": "not established from retained metadata",
+  "findings": [
+    {
+      "kind": "protected-static-check",
+      "missingCliName": "pi-worker-task.mjs"
+    },
+    {
+      "kind": "protected-static-check",
+      "missingCliName": "worker-lifecycle.mjs"
+    },
+    {
+      "kind": "source-control-bytes",
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "escapeCount": 6
+    }
+  ],
+  "files": [
+    {
+      "path": "tools/pi-worker-task.mjs",
+      "changed": true,
+      "sha256": "81f421131d64d71f2d7c58d8e71f606336603c494f42b776f308b2f998f97d98"
+    },
+    {
+      "path": ".audit/verify-pi-worker-44.mjs",
+      "changed": true,
+      "sha256": "3c18f728227c75fe2ba5b9d8beeadabace7da4d769ec61c059a1e510bf7109e0"
+    },
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "changed": true,
+      "sha256": "7424c873d0cfa5ceef245a98cee567d1a3d5cbbd5846f6c16b4a1742aa316d36"
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "changed": true,
+      "sha256": "cd65a8e709318ccb890dc77974f72d1cd3dfcc1c5273278272ecaf3beba08af3"
+    },
+    {
+      "path": "tools/worker-lifecycle.mjs",
+      "changed": false,
+      "sha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+    },
+    {
+      "path": "docs/durable-work.md",
+      "changed": false,
+      "sha256": "15f99a891e2ab431b134aee391192cabeecf393e8531dbbb9b7301cd9d5565d3"
+    },
+    {
+      "path": "docs/model-routing.md",
+      "changed": false,
+      "sha256": "b70b9a654f45bccf056f9b1a323f4c0b419e83be29bcf8cd9b9160cc1c8dbae4"
+    },
+    {
+      "path": "docs/templates/job-brief.md",
+      "changed": false,
+      "sha256": "23ed362f3df96be7344039e7891d9def7337a57a4aa5ec431f3720c2910b6757"
+    },
+    {
+      "path": ".factory/models.json",
+      "changed": false,
+      "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+    }
+  ],
+  "mainSourceUnchanged": true,
+  "additionalAttemptAuthorized": false
+}

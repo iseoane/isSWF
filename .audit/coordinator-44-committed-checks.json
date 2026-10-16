@@ -1,0 +1,46 @@
+{
+  "sourceCommit": "0897ba236268b52515660d0d680c0dd5f8a86563",
+  "reviewSnapshot": "be5ffc3a07700a81734c6535c67eadfa4383589ea7261bee4d74fcb09a35dd2b",
+  "files": [
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "mode": "100644",
+      "sha256": "5ffc8fd6309cf1d342145f9bd223f146cd83d5a6db23d5330a717d2e8ac06148",
+      "committed": true
+    },
+    {
+      "path": ".audit/verify-pi-worker-44.mjs",
+      "mode": "100644",
+      "sha256": "6041501703c06e3e11bfdf39b82c5a628c3d18fe42f6ae411e1cd636c4ec94c3",
+      "committed": false
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "mode": "100644",
+      "sha256": "514bf7b60d271d0cda2670a2f467d27f9ec43ae96075f46ace228270c0cb5848",
+      "committed": true
+    },
+    {
+      "path": "tools/pi-worker-task.mjs",
+      "mode": "100644",
+      "sha256": "83e8af2a87c7b14cc0c070d9f2d6a7a7c50e219211232eab19b088da4a719ed9",
+      "committed": true
+    }
+  ],
+  "postCommitOffline": "PASS",
+  "mainCore": "PASS",
+  "providerCallsAfterA002": 0,
+  "unitStatus": "Source/API and manual decision review verified; not autonomous coordinator execution",
+  "nativeImplementationAttempts": {
+    "A001": "partial no tools; original cause unknown",
+    "A002": "partial 12tools; parent subsequently corrected/reviewed sources"
+  },
+  "limitations": [
+    "No new real model proof of changed Git-brief API",
+    "Manual coordinator decision-case review, not model-driven coordinator dispatch",
+    "No main interactive-chat teardown proof",
+    "No full factory/runtime/recovery/MCP/client-readiness claim",
+    "Broad task44 remains in progress"
+  ],
+  "rawLunaMisreadingRetained": true
+}

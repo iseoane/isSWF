@@ -1,0 +1,181 @@
+diff --git c/.agents/skills/isswf-coordinator/SKILL.md w/.agents/skills/isswf-coordinator/SKILL.md
+index 93b9602..7f171da 100644
+--- c/.agents/skills/isswf-coordinator/SKILL.md
++++ w/.agents/skills/isswf-coordinator/SKILL.md
+@@ -54,10 +54,18 @@ Marca el brief como `listo para ejecutar` solo si el objetivo, alcance, autoriza
+ 
+ ## 5. Decide si puedes despachar
+ 
+-Un perfil Markdown describe instrucciones, no un rol nativo de Pi ni una capacidad runtime. Comprueba que Pi ofrece la herramienta `agent`, que la extensión pstack está activa y que existen los perfiles [worker](../../roles/worker.md) y [diagnostician](../../roles/diagnostician.md). El diagnostician reúne evidencia causal para defectos complejos; el worker implementa una unidad autorizada y resuelve bugs simples con causa reproducible. Si falta una capacidad, informa el bloqueo de despacho y sigue preparando el brief.
++A Markdown profile supplies instructions, not a native Pi role or runtime capability. Verify the selected [worker](../../roles/worker.md) or [diagnostician](../../roles/diagnostician.md) profile is available. The worker implements an authorized unit; the diagnostician gathers causal evidence for complex defects. Select only an explicitly authorized transport. The Pstack path requires its active extension and `agent` tool; the native worker path requires the prerequisites below and does not require Pstack. Missing capability blocks that dispatch, not brief preparation.
+ 
+ Before dispatching implementation or diagnosis, consult the canonical route values in `docs/model-routing.md` and `.factory/models.json`. Put the selected role's complete resolved route and selected destination in the effective brief, then verify current runtime availability and effort support before dispatch; block rather than silently substituting a model. The current Pstack transport adapter remains available, but this is not a guarantee of future transport compatibility. Route configuration does not grant work or authorize another actor.
+ 
++For an authorized native implementation worker, require an approved source checkout with `tools/pi-worker-task.mjs`, `tools/worker-lifecycle.mjs`, the configured SDK, and working nested `bwrap`. An installed Markdown resource package alone does not supply these capabilities; block rather than install missing tools. Verify the selected worker route is exactly `openai-codex/gpt-6-luna` at `high`, the adapter's supported route. This adapter does not dispatch other roles.
++
++- Pin the canonical model-config path and full commit SHA, complete resolved worker route and selected destination, job input SHA, target-base SHA, and methodology SHA separately in the effective attempt record. Configuration is not permission. The adapter currently requires methodology `37a56ebc902e94f21fc10666f33fceac44946af7`; do not substitute the installed resource version or job checkpoint.
++- Read the brief and job inputs from their Git objects. The brief must be self-contained, or every referenced input must exist in the target base with the identical blob OID at the input checkpoint. The worker workspace has no Git history; otherwise block this narrow path instead of substituting latest inputs.
++- Build the trusted config and run `node tools/pi-worker-task.mjs prepare --config <absolute-config> --output <absolute-new-task>`. Set `brief` to `{repo, inputSha, path}`. Match emitted `briefPath`, `inputSha`, and `briefSha256` against the committed brief and subsequent lifecycle dispatch; preserve the generated task hash.
++- Verify the new attempt directory is explicitly absent, then run `node tools/worker-lifecycle.mjs launch` with the verified repository, input SHA, brief path, target base, new attempt ID, private runs store, grant reference, generated task, and bounded timeout. The runner's atomic claim remains authoritative. `read` returning `unknown` is not freshness.
++- Observe with the existing `read` or `reconcile` commands. Apply the reconciliation and TOTAL actor-budget rules below before any replacement, including after failure. A saved report is not liveness; process success is not coordinator or product acceptance. Keep Pstack optional only on explicit grant, never as a silent fallback.
++
+ Para despachar, pasa la ruta del perfil elegido y un brief con actor responsable, contexto necesario, unidad autorizada, checkout exclusivo, alcance y exclusiones, permisos de escritura, referencias de grounding y comprobaciones. No presupongas que se transfiere el historial completo de conversación. Incluye el modelo y esfuerzo efectivos. Mantén al coordinador como responsable del plan y de resolver decisiones. Evita escritores simultáneos. La falta de capacidad bloquea el despacho, no la preparación del brief. Informa el estado solo con evidencia de la herramienta.
+ 
+ Antes de reintentar, reanudar o reemplazar un worker, reconcilia con las herramientas y registros existentes su ID de tarea y actor, ownership, estado real y autorización vigente. Distingue el número de workers activos del límite total autorizado de workers distintos. La asignación de un checkout aislado evita compartir archivos, pero no autoriza otro worker. Esta reconciliación no detiene trabajo independiente ya autorizado si cada unidad mantiene ownership y checkout propios y cabe en el límite total vigente.
+diff --git c/.audit/verify-pi-worker-44.mjs w/.audit/verify-pi-worker-44.mjs
+index 8765353..2d16486 100644
+--- c/.audit/verify-pi-worker-44.mjs
++++ w/.audit/verify-pi-worker-44.mjs
+@@ -1,7 +1,8 @@
+ #!/usr/bin/env node
+ import assert from 'node:assert/strict';
++import { createHash } from 'node:crypto';
+ import { spawnSync } from 'node:child_process';
+-import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
++import { mkdtemp, mkdir, writeFile, readFile, lstat, symlink } from 'node:fs/promises';
+ import { tmpdir } from 'node:os';
+ import { join, resolve } from 'node:path';
+ import { fileURLToPath } from 'node:url';
+@@ -34,7 +35,12 @@ await mkdir(join(repo, 'src'), { recursive: true });
+ await mkdir(join(repo, '.factory/jobs/J44'), { recursive: true });
+ await writeFile(join(repo, 'src/math.mjs'), 'export const add = (a, b) => a - b;\n');
+ await writeFile(join(repo, 'check.mjs'), "import assert from 'node:assert/strict'; import { add } from './src/math.mjs'; assert.equal(add(7, 3), 10); assert.equal(add(-2, 3), 1); console.log('arithmetic checks pass');\n");
+-await writeFile(join(repo, '.factory/jobs/J44/brief.md'), 'Correct src/math.mjs so check.mjs passes. Do not modify other files.\n');
++const originalBrief = '\ufeffCorrect src/math.mjs so check.mjs passes. Do not modify other files.\n';
++await writeFile(join(repo, '.factory/jobs/J44/brief.md'), originalBrief);
++await writeFile(join(repo, '.factory/jobs/J44/empty.md'), '');
++await writeFile(join(repo, '.factory/jobs/J44/oversized.md'), 'x'.repeat(32001));
++await writeFile(join(repo, '.factory/jobs/J44/invalid-utf8.md'), Buffer.from([0xff]));
++await symlink('brief.md', join(repo, '.factory/jobs/J44/link.md'));
+ git(repo, 'add', '.'); git(repo, 'commit', '-qm', 'disposable red arithmetic fixture');
+ const fixtureSha = git(repo, 'rev-parse', 'HEAD');
+ const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md'];
+@@ -43,7 +49,7 @@ const config = {
+   version: 1, mode: 'offline', sdkPath: SDK, nodeBinary: NODE,
+   authPath: '/home/iseoane/.pi/agent/auth.json',
+   profile: { repo: ROOT, sha: BASELINE, files: profileFiles },
+-  briefText: 'Offline preflight: initialize the pinned Pi runtime, exercise the fixed sandbox bridge and verify deterministic fixture controls. Never start a provider prompt.',
++  brief: { repo, inputSha: fixtureSha, path: '.factory/jobs/J44/brief.md' },
+   expectedMutablePaths: ['src/math.mjs'], protectedCheckCommand: 'node check.mjs',
+   checks: [
+     { name: 'bug-is-red', command: 'node check.mjs', expectedExitCode: 1 },
+@@ -52,17 +58,44 @@ const config = {
+   ],
+ };
+ await writeFile(configPath, JSON.stringify(config), { mode: 0o600, flag: 'wx' });
+-const expectPrepareFailure = async (name, variant) => {
++const rejected = [];
++const expectPrepareFailure = async (name, variant, reason) => {
+   const input = join(fixtureRoot, `${name}.json`), output = join(fixtureRoot, `${name}.mjs`);
+   await writeFile(input, JSON.stringify(variant), { mode: 0o600, flag: 'wx' });
+   const attempt = spawnSync(NODE, [PI_PREPARER, 'prepare', '--config', input, '--output', output], { cwd: ROOT, encoding: 'utf8', env: process.env, timeout: 15000, maxBuffer: 1024 * 1024 });
+   assert.notEqual(attempt.status, 0, `${name} must be refused during preparation`);
+   assert.equal(attempt.error, undefined, `${name} rejection must complete without timeout`);
++  assert.match(attempt.stderr, reason, `${name} must fail for the intended reason`);
++  assert.equal(await lstat(output).then(() => true, error => { assert.equal(error.code, 'ENOENT'); return false; }), false, 'rejected preparation must not publish a task');
++  rejected.push(name);
+ };
+-await expectPrepareFailure('missing-node', { ...config, nodeBinary: join(fixtureRoot, 'missing-node') });
+-await expectPrepareFailure('missing-real-auth', { ...config, mode: 'real', authPath: join(fixtureRoot, 'missing-auth') });
++await expectPrepareFailure('missing-node', { ...config, nodeBinary: join(fixtureRoot, 'missing-node') }, /ENOENT/);
++await expectPrepareFailure('missing-real-auth', { ...config, mode: 'real', authPath: join(fixtureRoot, 'missing-auth') }, /real mode authPath must name a host auth file/);
++await expectPrepareFailure('legacy-brief', { ...config, brief: undefined, briefText: 'untrusted replacement' }, /legacy briefText is not accepted/);
++await expectPrepareFailure('ambiguous-brief', { ...config, briefText: 'untrusted replacement' }, /legacy briefText is not accepted/);
++await expectPrepareFailure('missing-brief', { ...config, brief: undefined }, /brief must contain exactly/);
++await expectPrepareFailure('wrong-brief-sha', { ...config, brief: { ...config.brief, inputSha: 'A'.repeat(40) } }, /full lowercase commit SHA/);
++await expectPrepareFailure('unknown-brief-sha', { ...config, brief: { ...config.brief, inputSha: '0'.repeat(40) } }, /pinned Git read failed/);
++await expectPrepareFailure('unsafe-brief-path', { ...config, brief: { ...config.brief, path: '../brief.md' } }, /safe relative path/);
++for (const [name, reason] of [['missing', /committed regular-file blob/], ['link', /committed regular-file blob/], ['empty', /non-empty/], ['oversized', /<=32KB/], ['invalid-utf8', /encoded data was not valid/]]) {
++  await expectPrepareFailure(`${name}-brief-blob`, { ...config, brief: { ...config.brief, path: `.factory/jobs/J44/${name}.md` } }, reason);
++}
++await writeFile(join(repo, config.brief.path), 'Changed working-tree brief must not replace the pinned input.\n');
+ const prepared = JSON.parse(run(NODE, [PI_PREPARER, 'prepare', '--config', configPath, '--output', taskPath], ROOT));
+ assert.equal(prepared.prepared, true); assert.equal(prepared.mode, 'offline'); assert.match(prepared.taskSha256, /^[0-9a-f]{64}$/);
++const briefBytes = Buffer.from(originalBrief);
++const briefSha256 = createHash('sha256').update(briefBytes).digest('hex');
++const generatedConfig = JSON.parse((await readFile(taskPath, 'utf8')).split('\n')[1].slice('const CONFIG='.length, -1));
++assert.equal(generatedConfig.briefText, originalBrief, 'task embeds the committed brief exactly, including BOM and trailing newline');
++assert.notEqual(await readFile(join(repo, config.brief.path), 'utf8'), generatedConfig.briefText, 'working-tree edits cannot change pinned inputs');
++git(repo, 'add', config.brief.path); git(repo, 'commit', '-qm', 'new brief default after old pin');
++const newInputSha = git(repo, 'rev-parse', 'HEAD');
++const newConfigPath = join(fixtureRoot, 'new-input.json'), newTaskPath = join(fixtureRoot, 'new-input.mjs');
++await writeFile(newConfigPath, JSON.stringify({ ...config, brief: { ...config.brief, inputSha: newInputSha } }), { flag: 'wx', mode: 0o600 });
++const newPrepared = JSON.parse(run(NODE, [PI_PREPARER, 'prepare', '--config', newConfigPath, '--output', newTaskPath], ROOT));
++assert.notEqual(newPrepared.briefSha256, briefSha256, 'new checkpoint selects new bytes');
++assert.equal(createHash('sha256').update(await readFile(taskPath)).digest('hex'), prepared.taskSha256, 'old task stays pinned after a new checkpoint');
++assert.deepEqual({ briefPath: prepared.briefPath, inputSha: prepared.inputSha, briefSha256: prepared.briefSha256 }, { briefPath: config.brief.path, inputSha: fixtureSha, briefSha256 });
+ const launched = JSON.parse(run(NODE, [LIFECYCLE, 'launch', '--repo', repo, '--input-sha', fixtureSha, '--brief', '.factory/jobs/J44/brief.md', '--target-base', fixtureSha, '--attempt-id', 'pi44-offline-a1', '--runs-store', runStore, '--grant-ref', 'offline-verifier', '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16384'], ROOT));
+ let observation;
+ for (let attempt = 0; attempt < 160; attempt += 1) {
+@@ -78,6 +111,7 @@ assert.match(await readFile(join(workspace, 'check.mjs'), 'utf8'), /assert\.equa
+ const taskResult = JSON.parse(await readFile(join(launched.attemptDir, 'pi-result.json'), 'utf8'));
+ assert.equal(taskResult.status, 'completed');
+ assert.equal(taskResult.mode, 'offline');
++assert.deepEqual({ briefPath: taskResult.briefPath, inputSha: taskResult.inputSha, briefSha256: taskResult.briefSha256 }, { briefPath: config.brief.path, inputSha: fixtureSha, briefSha256 });
+ assert.equal(taskResult.providerPromptStarted, false);
+ assert.equal(taskResult.sdkInitialized, true);
+ assert.equal(taskResult.toolBridgeReady, true);
+@@ -89,4 +123,4 @@ assert.equal(taskResult.protectedHashesPreserved, true);
+ assert.equal(taskResult.fixtureCheckExitCode, 0);
+ assert.equal(taskResult.acceptance, false, 'offline success is setup/control proof, not model acceptance');
+ assert.deepEqual(taskResult.offlineChecks.map(check => check.name), ['bug-is-red', 'deterministic-fix', 'bug-is-green']);
+-process.stdout.write(`${JSON.stringify({ mode: 'verify-pi-worker-44', status: 'PASS', baseline: BASELINE, fixtureSha, preparedTaskSha256: prepared.taskSha256, attemptId: launched.attemptId, lifecycleOutcome: observation.terminal.outcome, providerPromptStarted: taskResult.providerPromptStarted, sdkInitialized: taskResult.sdkInitialized, boundaryCheckPassed: taskResult.boundaryCheckPassed, controls: taskResult.boundaryControls, offlineChecks: taskResult.offlineChecks, fixtureRoot })}\n`);
++process.stdout.write(`${JSON.stringify({ mode: 'verify-pi-worker-44', status: 'PASS', baseline: BASELINE, fixtureSha, preparedTaskSha256: prepared.taskSha256, attemptId: launched.attemptId, lifecycleOutcome: observation.terminal.outcome, providerPromptStarted: taskResult.providerPromptStarted, sdkInitialized: taskResult.sdkInitialized, boundaryCheckPassed: taskResult.boundaryCheckPassed, controls: taskResult.boundaryControls, offlineChecks: taskResult.offlineChecks, fixtureRoot, rejectedBriefCases: rejected, pinnedBriefSha256: briefSha256, newInputSha })}\n`);
+diff --git c/docs/local-worker-lifecycle.md w/docs/local-worker-lifecycle.md
+index 2a5b898..97a6fb7 100644
+--- c/docs/local-worker-lifecycle.md
++++ w/docs/local-worker-lifecycle.md
+@@ -41,4 +41,4 @@ A failed or unknown attempt is never resumed or re-executed under the same ID. I
+ 
+ ## Pi task snapshot
+ 
+-`tools/pi-worker-task.mjs prepare --config /absolute/trusted.json --output /absolute/nonexistent-task.mjs` creates a self-contained task snapshot for the existing runner. The trusted config pins the Pi SDK and Node paths, opaque host auth-file path, baseline Git profile/reference map, brief text, mode (`offline` or explicitly authorized `real`), protected check command, and expected mutable paths. Preparation reads methodology bytes from the pinned local Git objects and embeds all inputs in the generated script; subsequent task execution does not reread that config or checkout. Pass the generated script to `worker-lifecycle.mjs launch` as `--task-script`, with the usual 120000 ms outer timeout. Offline mode validates SDK/session/tool setup without a provider prompt. Real mode requests only `openai-codex/gpt-6-luna` at `high`, with a 12-tool-call cap and 110-second inner deadline; process completion is not product acceptance. This narrow integration is not a general sandbox, authorization service, coordinator, recovery mechanism, or client-readiness guarantee; its real-run verification confirms teardown of the isolated initiating Pi RPC, not of the main interactive chat or native coordinator (see `.audit/verify-pi-worker-44.mjs` for the trusted config example).
++`tools/pi-worker-task.mjs prepare --config /absolute/trusted.json --output /absolute/nonexistent-task.mjs` creates a self-contained task snapshot for the existing runner. The trusted config pins the Pi SDK and Node paths, opaque host auth-file path, baseline Git profile/reference map, a brief object `{ "repo": "/absolute/local/repository", "inputSha": "<full-lowercase-commit-sha>", "path": ".factory/jobs/J601/brief.md" }`, mode (`offline` or explicitly authorized `real`), protected check command, and expected mutable paths. Preparation reads methodology and exact brief bytes from the pinned local Git objects, requires a committed regular-file brief of 1–32,000 bytes, and emits `briefPath`, `inputSha`, and `briefSha256` in preparation metadata and the safe task result; subsequent task execution does not reread that config or checkout. Pass the generated script to `worker-lifecycle.mjs launch` as `--task-script`, with the usual 120000 ms outer timeout. Offline mode validates SDK/session/tool setup without a provider prompt. Real mode requests only `openai-codex/gpt-6-luna` at `high`, with a 12-tool-call cap and 110-second inner deadline; process completion is not product acceptance. The coordinator's [dispatch instructions](../.agents/skills/isswf-coordinator/SKILL.md#5-decide-si-puedes-despachar) define transport authorization, separate revision pins, input availability, and actor-budget reconciliation. The adapter prepares only the pinned worker route, not other roles. The caller must match its emitted brief identity to the lifecycle dispatch; neither CLI authorizes work or validates the caller's grant. Legacy free-form `briefText` is rejected. This narrow integration is not a general sandbox, authorization service, coordinator, recovery mechanism, or client-readiness guarantee; its real-run verification confirms teardown of the isolated initiating Pi RPC, not of the main interactive chat or native coordinator (see `.audit/verify-pi-worker-44.mjs` for the trusted config example).
+diff --git c/tools/pi-worker-task.mjs w/tools/pi-worker-task.mjs
+index ba43b70..1413b18 100644
+--- c/tools/pi-worker-task.mjs
++++ w/tools/pi-worker-task.mjs
+@@ -55,18 +55,31 @@ async function prepare(args) {
+     const object = entry.slice(0, entry.indexOf('\t')).split(' ')[2];
+     files[path] = git(repo, ['cat-file', 'blob', object]).toString('utf8');
+   }
+-  if (typeof config.briefText !== 'string' || !config.briefText.trim() || Buffer.byteLength(config.briefText) > 32000) throw new Error('briefText must be non-empty and <=32KB');
++  if (Object.hasOwn(config, 'briefText')) throw new Error('legacy briefText is not accepted');
++  const brief = config.brief;
++  if (!brief || typeof brief !== 'object' || Array.isArray(brief) || Object.keys(brief).sort().join(',') !== 'inputSha,path,repo') throw new Error('brief must contain exactly repo, inputSha, and path');
++  if (typeof brief.inputSha !== 'string' || !/^[0-9a-f]{40}$/.test(brief.inputSha)) throw new Error('brief.inputSha must be a full lowercase commit SHA');
++  if (typeof brief.path !== 'string' || brief.path.startsWith('/') || brief.path.includes('\\') || brief.path.includes('\0') || brief.path.split('/').some(part => !part || part === '.' || part === '..')) throw new Error('brief.path must be a safe relative path');
++  const briefRepo = await realpath(safePath(brief.repo, 'brief.repo'));
++  git(briefRepo, ['cat-file', '-e', `${brief.inputSha}^{commit}`]);
++  const briefEntry = git(briefRepo, ['ls-tree', '-z', brief.inputSha, '--', brief.path]).toString().split('\0').find(entry => entry.slice(entry.indexOf('\t') + 1) === brief.path);
++  if (!briefEntry || !/^100(?:644|755) blob [0-9a-f]{40}\t/.test(briefEntry)) throw new Error('brief.path must name a committed regular-file blob');
++  const briefOid = briefEntry.slice(0, briefEntry.indexOf('\t')).split(' ')[2];
++  const briefBytes = git(briefRepo, ['cat-file', 'blob', briefOid]);
++  const briefText = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(briefBytes);
++  if (!briefBytes.length || briefBytes.length > 32000 || !briefText.trim()) throw new Error('brief must be non-empty and <=32KB');
++  const briefSha256 = sha(briefBytes);
+   if (!Array.isArray(config.expectedMutablePaths) || !config.expectedMutablePaths.length || config.expectedMutablePaths.some(path => typeof path !== 'string' || path.startsWith('/') || path.split('/').some(part => !part || part === '..' || part === '.'))) throw new Error('expectedMutablePaths invalid');
+   if (typeof config.protectedCheckCommand !== 'string' || !config.protectedCheckCommand || config.protectedCheckCommand.length > 1000) throw new Error('protectedCheckCommand invalid');
+   const checks = config.checks ?? [];
+   if (!Array.isArray(checks) || checks.length > 10 || checks.some(check => !check || typeof check.name !== 'string' || !check.name || typeof check.command !== 'string' || !check.command || check.command.length > 8000 || !Number.isInteger(check.expectedExitCode) || check.expectedExitCode < 0 || check.expectedExitCode > 255)) throw new Error('checks invalid');
+-  const body = { version: 1, mode: config.mode, sdkPath, nodeBinary, authPath, files, briefText: config.briefText, expectedMutablePaths: config.expectedMutablePaths, protectedCheckCommand: config.protectedCheckCommand, checks };
++  const body = { version: 1, mode: config.mode, sdkPath, nodeBinary, authPath, files, briefText, briefPath: brief.path, inputSha: brief.inputSha, briefSha256, expectedMutablePaths: config.expectedMutablePaths, protectedCheckCommand: config.protectedCheckCommand, checks };
+   const generated = `#!/usr/bin/env node\nconst CONFIG=${JSON.stringify(body)};\n${runtimeSource()}`;
+   const temp = `${output}.${process.pid}.tmp`;
+   const handle = await open(temp, 'wx', 0o600);
+   try { await handle.writeFile(generated); await handle.sync(); } finally { await handle.close(); }
+   try { await link(temp, output); await unlink(temp); } catch (error) { await rm(temp, { force: true }); throw error; }
+-  process.stdout.write(`${JSON.stringify({ prepared: true, mode: config.mode, taskSha256: sha(generated), providerPromptStarted: false })}\n`);
++  process.stdout.write(`${JSON.stringify({ prepared: true, mode: config.mode, taskSha256: sha(generated), briefPath: brief.path, inputSha: brief.inputSha, briefSha256, providerPromptStarted: false })}\n`);
+ }
+ function runtimeSource() {
+   return String.raw`
+@@ -83,7 +96,7 @@ const remainingBudget = () => Math.max(0, 110000 - (Date.now() - processStartedA
+ const work = process.argv[2];
+ const resultPath = pathJoin(pathDirname(pathResolve(work)), 'pi-result.json');
+ let factoryRoot = '';
+-const safeResult = { version: 1, mode: CONFIG.mode, provider: 'openai-codex', model: 'gpt-6-luna', effort: 'high', providerPromptStarted: false, sdkInitialized: false, toolCalls: 0, acceptance: false, protectedHashesPreserved: false };
++const safeResult = { version: 1, mode: CONFIG.mode, briefPath: CONFIG.briefPath, inputSha: CONFIG.inputSha, briefSha256: CONFIG.briefSha256, provider: 'openai-codex', model: 'gpt-6-luna', effort: 'high', providerPromptStarted: false, sdkInitialized: false, toolCalls: 0, acceptance: false, protectedHashesPreserved: false };
+ const finish = async (ok, extra = {}) => {
+   const result = { ...safeResult, ...extra, status: ok ? 'completed' : 'partial' };
+   if (resultPath) { const temp = resultPath + '.' + process.pid + '.tmp'; await write(temp, JSON.stringify(result) + '\n', { mode: 0o600, flag: 'wx' }); await (await import('node:fs/promises')).rename(temp, resultPath); }

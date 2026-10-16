@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "J703-native-A002",
+  "createdAt": "2026-10-16T06:52:07.904Z",
+  "repo": "/tmp/isswf-coordinator44-phSyGa/repo",
+  "inputSha": "914e2b30d29a653b8ee0d77a4971519d26a39d6f",
+  "targetBase": "a547fa92f059f3ad31808e492124a7fb2358e6f7",
+  "briefPath": ".factory/jobs/J703/brief-r2.md",
+  "briefSha256": "f47516dc65f0c90569bf9d2fdea028b18bfd5b88ba17b6ef51065c4b4691e2d9",
+  "grantRef": "operator-Su-approved-one-instrumented-native-replacement",
+  "taskSha256": "7a594660a8b6346fa443311c04f5244eb3e24a8f75003fa5632d294237538724",
+  "timeoutMs": 120000,
+  "outputBytes": 16384,
+  "workspace": "/tmp/isswf-coordinator44-phSyGa/runs/J703-native-A002/workspace",
+  "taskCopy": "/tmp/isswf-coordinator44-phSyGa/runs/J703-native-A002/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-coordinator44-phSyGa/runs/J703-native-A002/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+}

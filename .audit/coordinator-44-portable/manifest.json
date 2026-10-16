@@ -1,0 +1,36 @@
+{
+  "scope": "Two terminal partial native attempts, not accepted implementation. Local Git bundle plus safe lifecycle/task records; no raw assistant/tool text or credential values.",
+  "fixtureCheckpoint": "914e2b30d29a653b8ee0d77a4971519d26a39d6f",
+  "targetBase": "a547fa92f059f3ad31808e492124a7fb2358e6f7",
+  "files": [
+    {
+      "path": "J703-native-A001-dispatch.json",
+      "sha256": "1d008351ec656f9bc4862a99b563a99f301c7576c7e763512042bf0d0d9f07c8"
+    },
+    {
+      "path": "J703-native-A001-terminal.json",
+      "sha256": "a4af1d1e8ee829eb45b52bb89b8066f4a8d6bfd255b0ccbc4fbcf86a70d6e124"
+    },
+    {
+      "path": "J703-native-A001-pi-result.json",
+      "sha256": "00381bc464788f7e358b43315e5d8ecc251adcd3d90ff15aa8edaf2a3f34767f"
+    },
+    {
+      "path": "J703-native-A002-dispatch.json",
+      "sha256": "13dae11d444431a429eb7560612b84498e29e7b02c7bce1c61976948fcf4c864"
+    },
+    {
+      "path": "J703-native-A002-terminal.json",
+      "sha256": "f2ad6d91a999da5d6a90bdee02a2b52d7716e6cd90fab941a659d0d68a0ac1c7"
+    },
+    {
+      "path": "J703-native-A002-pi-result.json",
+      "sha256": "bbb96fe35f93b511fb93037849f2141d6fa296e0763599233bb1698f30641a25"
+    },
+    {
+      "path": "history.bundle",
+      "sha256": "1431e2824d5fd10084995dd44be551cce8dc9a9c69d4d12600db71b2d96f3afc"
+    }
+  ],
+  "bundleVerified": true
+}

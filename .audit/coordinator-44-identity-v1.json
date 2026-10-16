@@ -1,0 +1,11 @@
+{
+  "snapshot": "be5ffc3a07700a81734c6535c67eadfa4383589ea7261bee4d74fcb09a35dd2b",
+  "base": "42444e2364b3c98a7aaa7726fccbbe1a978b0e03",
+  "files": [
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".audit/verify-pi-worker-44.mjs",
+    "docs/local-worker-lifecycle.md",
+    "tools/pi-worker-task.mjs"
+  ],
+  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
+}

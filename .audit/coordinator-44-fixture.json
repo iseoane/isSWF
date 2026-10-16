@@ -1,0 +1,63 @@
+{
+  "root": "/tmp/isswf-coordinator44-phSyGa",
+  "repo": "/tmp/isswf-coordinator44-phSyGa/repo",
+  "baseline": "42444e2364b3c98a7aaa7726fccbbe1a978b0e03",
+  "inputCheckpoint": "a547fa92f059f3ad31808e492124a7fb2358e6f7",
+  "targetBase": "a547fa92f059f3ad31808e492124a7fb2358e6f7",
+  "briefPath": ".factory/jobs/J703/brief-r1.md",
+  "checkerPath": ".factory/verify-candidate.mjs",
+  "writePaths": [
+    "tools/pi-worker-task.mjs",
+    ".audit/verify-pi-worker-44.mjs",
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    "docs/local-worker-lifecycle.md"
+  ],
+  "sourceFiles": [
+    {
+      "path": "tools/pi-worker-task.mjs",
+      "sha256": "49dfc09d8088be6802f89194990caf19f4c7e85c1c4083227c6f0cb7f6de61e5"
+    },
+    {
+      "path": ".audit/verify-pi-worker-44.mjs",
+      "sha256": "e410cee9bb483e2ab1c7144e8fef0c9ef42abdc7b5976408c22971633fdcc0a0"
+    },
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "sha256": "0c8178cfdcdf2d5c20810e70d4e556143a989c31837111f6a6b4a3a78b398fd6"
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "sha256": "51d034e5950c92b50a6afe46bdc9eb6cd267d8d066514e6614b04420d410b77f"
+    },
+    {
+      "path": "tools/worker-lifecycle.mjs",
+      "sha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+    },
+    {
+      "path": "docs/durable-work.md",
+      "sha256": "15f99a891e2ab431b134aee391192cabeecf393e8531dbbb9b7301cd9d5565d3"
+    },
+    {
+      "path": "docs/model-routing.md",
+      "sha256": "b70b9a654f45bccf056f9b1a323f4c0b419e83be29bcf8cd9b9160cc1c8dbae4"
+    },
+    {
+      "path": "docs/templates/job-brief.md",
+      "sha256": "23ed362f3df96be7344039e7891d9def7337a57a4aa5ec431f3720c2910b6757"
+    },
+    {
+      "path": ".factory/models.json",
+      "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+    }
+  ],
+  "taskPath": "/tmp/isswf-coordinator44-phSyGa/trusted-task.mjs",
+  "prepared": {
+    "prepared": true,
+    "mode": "real",
+    "taskSha256": "21ef132bdfa1f268fda8217a4bfb3de98c64ed2f3fb6a27fc79552dd75fb05d3",
+    "providerPromptStarted": false
+  },
+  "exactBriefHash": "7bf759e7f8804745935dc91c2e4077a6a94975b54f99434d615018b2aac65d56",
+  "legacyConfigUsedOnlyByTrustedParent": true,
+  "scope": "One native implementation worker planned in disposable reconstructed source. No provider prompt yet; baseline failure is static free-form-brief guard, not full adapter API proof."
+}
