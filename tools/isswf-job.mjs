@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat } from 'node:fs/promises';
+import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat, readdir, open, link, unlink } from 'node:fs/promises';
 import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -100,6 +100,34 @@ async function activePackage(project, revision) {
   await verifyPackage(matches[0].path, revision);
   return matches[0].path;
 }
+function admission(binding) {
+  const key = digest(JSON.stringify(['job-admission-v1', binding.repo, binding.logicalJobRef]));
+  return { version: 1, key, repo: binding.repo, logicalJobRef: binding.logicalJobRef, attemptId: binding.attemptId, inputSha: binding.inputSha, jobSha256: binding.jobSha256, grantRef: binding.grantRef, workerTotal: 1 };
+}
+async function claimAdmission(store, record) {
+  for (const name of await readdir(store)) {
+    if (!name.endsWith('.job.json')) continue;
+    let prior;
+    try { prior = JSON.parse(await readFile(join(store, name), 'utf8')); }
+    catch { throw Error('ambiguous prior job binding blocks admission'); }
+    if (typeof prior.repo !== 'string' || typeof prior.jobPath !== 'string') throw Error('ambiguous prior job binding blocks admission');
+    if (await realpath(prior.repo) === record.repo && (typeof prior.logicalJobRef !== 'string' || !prior.logicalJobRef.trim() || prior.logicalJobRef === record.logicalJobRef)) throw Error('prior logical job binding blocks admission; no automatic replacement');
+  }
+  const directory = join(store, 'admissions');
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  const stat = await lstat(directory);
+  if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('admission directory must be a real private directory');
+  const sync = async path => { const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } };
+  await sync(store);
+  const pending = join(directory, '.pending-' + randomUUID());
+  const file = await open(pending, 'wx', 0o600);
+  try { await file.writeFile(JSON.stringify(record) + '\n'); await file.sync(); } finally { await file.close(); }
+  try {
+    try { await link(pending, join(directory, record.key + '.json')); }
+    catch (error) { if (error.code === 'EEXIST') throw Error('logical job admission already claimed; no automatic replacement'); throw error; }
+    await sync(directory);
+  } finally { await unlink(pending); }
+}
 async function run(args) {
   if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode'].includes(key))) throw Error('unsupported run option');
   if (!isAbsolute(args.project || '') || !fullSha(args['input-sha']) || !safeRelative(args.job)) throw new Error('run requires --project absolute --input-sha fullSHA --job committed/relative.json');
@@ -111,6 +139,7 @@ async function run(args) {
   const job = JSON.parse(jobBytes);
   if (job.version !== 1 || !fullSha(job.runtimeSha) || !fullSha(job.targetBase) || job.methodologySha !== methodologySha) throw new Error('job version/runtime/base/methodology pins invalid');
   if (job.exclusiveAttempt !== true || job.workerTotal !== 1) throw new Error('trusted exclusive-attempt grant and workerTotal=1 required');
+  if (typeof job.logicalJobRef !== 'string' || !job.logicalJobRef.trim() || job.logicalJobRef.length > 200 || /[\x00-\x1f\x7f]/.test(job.logicalJobRef)) throw Error('committed logicalJobRef required for serial job admission');
   const packageRoot = await activePackage(project, job.runtimeSha);
   for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(blob(root, job.runtimeSha, path))) throw new Error(`runtime working bytes differ from activated revision: ${path}`);
   if (!job.models || !fullSha(job.models.sha) || !safeRelative(job.models.path)) throw new Error('committed model config pin required');
@@ -127,13 +156,15 @@ async function run(args) {
   for (const path of [join(store, args['attempt-id']), bindingPath]) {
     try { await lstat(path); throw new Error('attempt already exists; read/reconcile before any operator-authorized replacement'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
+  const admitted = admission({ repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], inputSha: args['input-sha'], jobSha256: digest(jobBytes), grantRef: args['grant-ref'] });
+  await claimAdmission(store, admitted);
   const prepared = await mkdtemp(join(store, '.prepare-'));
   const configPath = join(prepared, 'config.json'), taskPath = join(prepared, 'task.mjs');
   const config = { version: 1, mode, ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };
   await writeFile(configPath, JSON.stringify(config) + '\n', { mode: 0o600, flag: 'wx' });
   const preparedResult = JSON.parse(invoke(process.execPath, [join(root, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', taskPath]));
   if (preparedResult.inputSha !== args['input-sha'] || preparedResult.briefPath !== job.briefPath || preparedResult.briefSha256 !== digest(briefBytes) || preparedResult.taskSha256 !== digest(await readFile(taskPath))) throw new Error('prepared task/brief identity mismatch');
-  const binding = { version: 1, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
+  const binding = { version: 1, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
   await writeFile(bindingPath, JSON.stringify(binding) + '\n', { mode: 0o600, flag: 'wx' });
   const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000']));
   console.log(JSON.stringify({ ...launched, mode, bindingPath, reviewRequired: true }));
@@ -203,6 +234,10 @@ An independent review remains required for every worker result.`);
   let binding, dispatch;
   try {
     binding = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'] + '.job.json'), 'utf8'));
+    if (typeof binding.logicalJobRef !== 'string' || !binding.logicalJobRef.trim() || await realpath(binding.repo) !== binding.repo) throw Error('missing canonical admission identity');
+    const admitted = admission(binding);
+    const actual = JSON.parse(await readFile(join(args['runs-store'], 'admissions', admitted.key + '.json'), 'utf8'));
+    if (JSON.stringify(actual) !== JSON.stringify(admitted)) throw Error('logical admission mismatch');
     dispatch = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'], 'dispatch.json'), 'utf8'));
     if (binding.version !== 1 || !fullSha(binding.runtimeSha) || binding.methodologySha !== methodologySha || !/^[0-9a-f]{64}$/.test(binding.jobSha256) || !fullSha(binding.models?.sha) || !/^[0-9a-f]{64}$/.test(binding.models?.sha256) || !['real', 'offline'].includes(binding.mode) || binding.reviewRequired !== true || dispatch.timeoutMs !== 120000 || dispatch.outputBytes !== 16000 || ['attemptId', 'repo', 'grantRef', 'inputSha', 'targetBase', 'briefPath', 'briefSha256', 'taskSha256'].some(key => typeof binding[key] !== 'string' || binding[key] !== dispatch[key]) || binding.attemptId !== args['attempt-id']) throw new Error('binding mismatch');
   } catch {
