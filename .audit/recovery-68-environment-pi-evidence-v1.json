@@ -1,0 +1,18 @@
+{
+  "root": "/tmp/isswf-recovery68-env-2rKisd",
+  "initiatingPi": {
+    "pid": 827920,
+    "startTicks": "21787447",
+    "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8"
+  },
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "esrchBeforeFreshReader": true,
+  "freshReaderState": "running",
+  "isolatedHome": true,
+  "coordinatorProviderPromptStarted": false,
+  "workerMode": "offline",
+  "limits": "isolated Pi/runtime-process restart on same boot, not main-chat or machine reboot; SDK host auth remains opaque"
+}

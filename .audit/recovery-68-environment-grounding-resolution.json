@@ -1,0 +1,7 @@
+{
+  "disputedClaim": "Readonly design said offline leg needs neither explicit SDK nor auth path",
+  "actualSource": "tools/pi-worker-task.mjs initializes ModelRuntime and requires hasConfiguredAuth before offline/real branch",
+  "resolution": "Carry seed SDK/auth absolute opaque path strings in committed offline job; reject absent/relative fields before serialization",
+  "authValuesRead": false,
+  "noProviderPromptGrant": true
+}

@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-path-controls-QZtTlI",
+  "cases": [
+    {
+      "field": "sdkPath",
+      "malformed": "missing",
+      "rejectedBeforeJobCommit": true
+    },
+    {
+      "field": "authPath",
+      "malformed": "relative",
+      "rejectedBeforeJobCommit": true
+    }
+  ],
+  "providerPromptStarted": false,
+  "method": "actual native verifier with process-local readFile injection on seed config only; files unchanged"
+}

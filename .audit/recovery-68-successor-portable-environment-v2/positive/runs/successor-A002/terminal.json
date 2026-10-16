@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "attemptId": "successor-A002",
+  "finishedAt": "2026-10-16T20:38:42.195Z",
+  "outcome": "success",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"version\":1,\"mode\":\"offline\",\"briefPath\":\".factory/jobs/R68-successor/brief.md\",\"inputSha\":\"dde0d7f2c8ae07f366ba4a192991fb6cc073a791\",\"briefSha256\":\"f4e6985df5b9b3f5a46ec7e50631e6ff53320e078d43bcee9841ccca82320fbe\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":false,\"sdkInitialized\":true,\"toolCalls\":0,\"acceptance\":false,\"protectedHashesPreserved\":true,\"callableTools\":[\"sandbox_shell\"],\"toolBridgeReady\":true,\"boundaryCheckPassed\":true,\"boundaryControls\":{\"fakeEnvAbsent\":true,\"outsideRead\":\"ENOENT\",\"outsideWrite\":\"ENOENT\",\"factoryWrite\":\"EROFS\",\"sdkWrite\":\"EROFS\",\"network\":\"ECONNREFUSED\"},\"hostTcpPositive\":true,\"outsideHashPreserved\":true,\"fixtureCheckExitCode\":0,\"offlineChecks\":[{\"name\":\"explicit-successor-offline-check\",\"exitCode\":0}],\"status\":\"completed\"}\n",
+  "stderr": "",
+  "stdoutTruncated": false,
+  "stderrTruncated": false,
+  "captureIncomplete": false,
+  "descendants": "not-claimed",
+  "timedOut": false,
+  "workspace": "/tmp/isswf-recovery68-native-s3WqSb/runs/successor-A002/workspace"
+}

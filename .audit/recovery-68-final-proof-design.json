@@ -1,0 +1,12 @@
+{
+  "agent": "af37cc646addca372",
+  "sourceLog": "2026-10-16T20-19-34-411Z_8ee1c0b8-0f72-4e56-87da-53f31f99bc74.jsonl",
+  "initialPromptMatched": true,
+  "report": "**Offline environment-restart proof on the normal job path — final (design only, no implementation)**\n\n**Lever.** Adapt `.audit/verify-pi-worker-44-teardown.mjs`: isolated `pi --mode rpc --offline` issues `bash` → normal `node tools/isswf-job.mjs run --mode offline`; stdin end → Pi exits and ESRCH; fresh Node CLI then observes/reconciles the detached attempt. Same boot; no coordinator provider.\n\n**Minimum sequence.** Disposable project P + store S. Fixture job: `workerTotal:1`, `exclusiveAttempt:true`, one mutable path, protected check green, one committed `offlineCheck` that mutates the mutable path then holds (≤10 s bound).\n1. Isolated Pi runs the normal original; Pi ESRCH; fresh CLI `read` → `running`.\n2. Kill exact recorded host+task while held, only after `native-recovery.json` + first native-tool `started` + partial bytes exist; recheck pid/startTicks/bootId/exe; confirm ESRCH/same-startTicks zombie for task and every namespace init; bootId unchanged.\n3. Fresh CLI `reconcile` → `stopped-review-required`; `review inspect` → approval → `review record`.\n4. Externally commit exact receipt tree/modes as the new base; commit successor input `workerTotal:2`, same contract/models; grant `mode:\"offline\"`, cumulative 2.\n5. Normal successor `run` → write-once edge + second offline worker → terminal; independent review.\n\n**Required controls:** isolated-Pi ESRCH; fresh-process `running` observation then recovery after cessation; exact-identity kill; absent terminal/pi-result; receipt; external tree equality; successor edge/cumulative 2; bootId equality.\n\n**Unnecessary:** new verifier micro-cuts or generic-lifecycle math-fixture repeats; fake-gh PR controls; reboot/power-loss; main-chat teardown; multiwriter/mixed-runtime; provider prompts for this leg.\n\n**Real leg (only after grant).** Under isolated HOME/agent the committed job must carry explicit absolute `sdkPath` and `authPath` (paths only; never read, log, or print values; the offline leg needs neither). The two Luna-high prompts remain the genuine operator-only decision; this offline proof needs no grant and adds no feature code.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

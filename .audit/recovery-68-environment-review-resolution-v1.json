@@ -1,0 +1,15 @@
+{
+  "blocking": "Require string and absolute sdkPath/authPath before committing job",
+  "fix": "type+absolute asserts and boolean output evidence",
+  "nonblockingLimits": [
+    "offline no-prompt flags are branch assertions, not provider transport metrics",
+    "Pi exit/ESRCH proves own initiating process cessation, child evidence separately recorded",
+    "PATH-resolved installed Pi not a pinned distribution",
+    "sameboot only, no mainchat/reboot/realmodel proof"
+  ],
+  "coreEvidence": {
+    "v1": "Retained wrong-script MODULE_NOT_FOUND",
+    "v2": "Actual verify-markdown-core exit0, correct catalogs"
+  },
+  "noScopeExpansion": true
+}

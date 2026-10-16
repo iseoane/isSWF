@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "sourceHead": "66d0cc8f012d4d2c54d3bbc16dd5a131106f799d",
+  "files": {
+    ".audit/launch-normal-job-offline-pi.mjs": "cf3ec1ddfeabdb1c9edf966c254ef75302c937b67e1620312c43920d30debf14",
+    ".audit/verify-recovery-68-native.mjs": "4b7cad25c99ec238d2f1ec03af2e294a2f340443479dc7ab3d384e7456aadb92",
+    ".audit/verify-recovery-68-successor.mjs": "a69c5d4b5d70b5045ccd145be0be3200c951d4f2fc460d0e8c5d8df1810d47e2"
+  }
+}

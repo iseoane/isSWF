@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-native-WBVpfx",
+  "environmentRestart": {
+    "root": "/tmp/isswf-recovery68-env-PY455K",
+    "initiatingPi": {
+      "pid": 879364,
+      "startTicks": "21866954",
+      "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8"
+    },
+    "exit": {
+      "code": 0,
+      "signal": null
+    },
+    "esrchBeforeFreshReader": true,
+    "freshReaderState": "running",
+    "isolatedHome": true,
+    "coordinatorProviderPromptStarted": false,
+    "workerMode": "offline",
+    "limits": "isolated Pi/runtime-process restart on same boot, not main-chat or machine reboot; SDK host auth remains opaque",
+    "explicitAbsoluteSDKPath": true,
+    "explicitAbsoluteOpaqueAuthPath": true
+  },
+  "runtimeSha": "a11243ea044f592c7f8551581ec2d18b4aeaf4d8",
+  "successor": {
+    "version": 1,
+    "successor": {
+      "version": 1,
+      "key": "c42d8dcd6be9ed5268a3930036d6722acaf8f4f676ce692ce14723bf40c7138b",
+      "sha256": "c73181a7496f495701c9b87b7eba86ae4af40976e7cbeec7ca488200ddeecbc8",
+      "admissionKey": "209b86f3fa98e8df2f91bf6ada3581ded57600a8feacb49d0d33359517c1238f",
+      "predecessorAttemptId": "R68-host-task-loss",
+      "cumulativeWorkerTotal": 2
+    },
+    "logicalJobRef": "R68-host-task-loss",
+    "attemptId": "successor-A002",
+    "repo": "/tmp/isswf-recovery68-native-WBVpfx/project",
+    "grantRef": "explicit-fixture-successor-only",
+    "packageRoot": "/tmp/isswf-operational44-phgxLp/packages/a11243ea044f592c7f8551581ec2d18b4aeaf4d8",
+    "runtimeSha": "a11243ea044f592c7f8551581ec2d18b4aeaf4d8",
+    "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+    "inputSha": "2e6282baa0a55021d615cb0b9a7b2c8ad278f734",
+    "targetBase": "dc2f1b843ee58cd52f8267a825bb5c54a0682897",
+    "jobPath": ".factory/jobs/R68-successor/job.json",
+    "jobSha256": "ccdef0f042a2b5383f24840c81c325de441dbfdb716f958de60eb1d477b11703",
+    "models": {
+      "sha": "c8c1740cadd9d03186603f1fea99db234c09cacb",
+      "path": ".factory/models.json",
+      "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+    },
+    "prepared": true,
+    "mode": "offline",
+    "taskSha256": "e796c41b4b26048b3236ddf0ee378ea620563518eec04ba7cc8adf4b1422fe1e",
+    "briefPath": ".factory/jobs/R68-successor/brief.md",
+    "briefSha256": "f4e6985df5b9b3f5a46ec7e50631e6ff53320e078d43bcee9841ccca82320fbe",
+    "providerPromptStarted": false,
+    "reviewRequired": true
+  },
+  "providerPromptStarted": false,
+  "results": [
+    "missing-grant-reset-missing-budget-ack-owner-receipt-fingerprint-input-job-base-mode-block-before-prepare",
+    "externally-committed-nonmatching-base-tree-refused",
+    "missing-receipt-and-local-submitted-unknown-PR-block-without-query",
+    "protected-command-scope-methodology-and-old-runtime-drift-refused",
+    "fresh-no-edge-symlink-gitlink-extra-empty-tree-refused-before-slot-or-preparation-root-records-preserved",
+    "actual-stale-receipt-blocks-before-prepare",
+    "one-explicit-offline-successor-success-joins-edge-original-admission-and-preserves-predecessor-bytes",
+    "successor-readonly-observation-corrupt-edge-unknown-no-repair",
+    "terminal-successor-cannot-become-another-predecessor",
+    "valid0600receipt-blocks-successor-without-dropping-permission-bits",
+    "actual-exit-after-durable-edge-before-prepare-consumes-slot-no-retry",
+    "competing-distinct-successors-one-writeonce-edge-one-preparation-one-worker"
+  ],
+  "fixtures": {
+    "permissions": "/tmp/isswf-recovery68-native-ofY1hF",
+    "crash": "/tmp/isswf-recovery68-native-kELwUC",
+    "race": "/tmp/isswf-recovery68-native-kFBlWq"
+  },
+  "limits": [
+    "one original-to-one successor only, fixedprivate store same runtime",
+    "trusted grant provenance and independentreviewquality remain caller duties",
+    "explicit cumulative2workerslot accounting not providercharge reconciliation",
+    "no real provider or GitHub calls, no reboot/generalrecovery or multiwriter proof"
+  ]
+}

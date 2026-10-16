@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "committedJobHasExplicitAbsoluteSDKPath": true,
+  "committedJobHasExplicitAbsoluteOpaqueAuthPath": true,
+  "generatedTaskMatchesBothCommittedPaths": true,
+  "authFileContentsInspected": false,
+  "limitation": "actual v1 inputs verified; v1 fixture does not yet reject omitted path fields"
+}

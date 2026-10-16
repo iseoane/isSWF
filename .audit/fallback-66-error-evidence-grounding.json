@@ -1,0 +1,12 @@
+{
+  "agent": "a6f0246ac990be194",
+  "sourceLog": "2026-10-16T20-23-28-478Z_39983568-a11e-42f1-b70d-be6ea4d8a6a4.jsonl",
+  "initialPromptMatched": true,
+  "report": "## #66 SDK seam — read-only finding\n\n**Safe and supported:** The researcher’s configured route is OpenCode Go GLM-5.3-Flash/high → Luna/medium (`.factory/models.json`; `docs/model-routing.md`). GLM resolves to `openai-completions` (`pi-ai/dist/providers/data/opencode-go.json`, `opencodeGoProvider()`).\n\n`ModelRuntime.streamSimple()` accepts `ModelsSimpleStreamOptions`, including Pi AI’s standard `fetch` option (`pi-coding-agent/dist/core/model-runtime.d.ts:100`; `pi-ai/dist/types.d.ts:41–72, 227`). A **call-scoped fetch wrapper** can observe each returned `Response.status`, tag it with the already-selected model/attempt, and return the response unchanged—without inspecting or logging request headers/body or response headers/body. The selected adapter passes that fetch to its OpenAI client (`pi-ai/dist/api/openai-completions.js`, `createClient`; request at line 197). This is supported instrumentation, not a global patch.\n\n**Limited hook:** `onResponse({status, headers}, model)` is also supported, but the OpenAI-completions adapter calls it only after `.withResponse()` succeeds (`openai-completions.js:197–202`). Non-2xx responses take the error path instead, so this hook alone cannot observe them.\n\n**Unavailable in the message:** `AssistantMessage` exposes `stopReason` and optional `errorMessage`, not HTTP status or a structured cause (`pi-ai/dist/types.d.ts:357–374`; `docs/message-types.md`, AssistantMessage). The adapter internally normalizes SDK errors, including status, then emits formatted text (`utils/error-body.js:16–45`; `openai-completions.js:502–503`). No supported consumer hook returns that structured error object.\n\n**Decision boundary:** The fetch observer supplies authoritative per-request HTTP status, not a general quota/unavailability classification. A 429 establishes a rate-limit response; status alone cannot distinguish exhausted quota from transient throttling. Do not advance on that inference. No evidence here supports a generic provider-error classifier, and this does not authorize implementation or execution before #68 gates and explicit budgets.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}
