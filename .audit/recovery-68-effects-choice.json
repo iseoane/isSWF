@@ -1,0 +1,40 @@
+{
+  "base": "9967af1",
+  "selected": "A write-once phase facts plus B stable logical identity and persisted fake-transport crash tests",
+  "sourceScope": [
+    "tools/external-effect-journal.mjs",
+    "tools/isswf-job.mjs",
+    "docs/local-worker-lifecycle.md",
+    ".audit/verify-operational-44.mjs",
+    ".audit/verify-external-effects-68.mjs"
+  ],
+  "publicConsumer": "Explicit isswf-job effect actions prepare|inspect|publish|reconcile. Existing run/read/reconcile semantics unchanged; ordinary read/reconcile stay local and readonly.",
+  "moduleInterface": "Journal validates bound committed intent + explicit externally supplied trusted grant; prepare/inspect local; publish invokes once after durable submitted claim; effect reconcile explicitly queries and records an exact unique observed PR. Transport can be injected by tests; real adapter uses pinned github.com through existing gh only under explicit publish/query action.",
+  "key": "SHA256(canonical repository + stable trusted logicalJobRef + pr-open), within existing fixed private runs-store. Never attempt/input/candidate in key.",
+  "intent": "Immutable repo/job/operation, pinned input/base/candidate SHA, head/base refs, stable generated marker, draft title/body, grant ref and explicit maxInvocations. Conflicting changes block without overwrite or new key.",
+  "invariants": [
+    "submitted durable before invoke, exclusive claim never removed or retried",
+    "missing logical identity, pins, concrete grant, numeric budget or prior writer cessation blocks",
+    "zero/multiple/incomplete/error query after submitted blocks, never retries",
+    "candidate changes require new explicit decision, no automatic PR update",
+    "delivery profile remains local draft only; coordinator host owns effect journal, native sandbox worker never gets GitHub/network authority",
+    "current journal is not an authentication service, model prose/repo text do not confer grant authority"
+  ],
+  "parentCorrectionsToJudge": [
+    "worker-lifecycle.mjs has no run command and native worker tools have no network: coordinator host is the caller/writer, not sandbox worker",
+    "effect reconcile is explicit state-changing/query action; ordinary job reconcile stays readonly/local",
+    "real GitHub adapter code may be implemented but no GitHub invocation/branchpush/PR creation may be run until concrete operator grant and pre-call gates"
+  ],
+  "firstAcceptance": [
+    "Actual private fixture process interrupted before submission; fresh caller may submit once under explicit grant",
+    "Actual fake persistent PR outcome published then initiating client SIGKILL before local result; fresh effect reconcile finds one PR, never second invoke",
+    "Changed attempt/input/candidate uses same key and conflicts preserve original facts",
+    "zero/multiple/partial response/query failure block; submitted remains claimed",
+    "fake gh CLI/dependency substitution only; no real network/auth reads/deps/globalconfig"
+  ],
+  "limits": [
+    "PR-open only, local Git branch/commit/push and issue creation separate unsupported operations",
+    "fake transport proves process/journal logic, not real GitHub semantics",
+    "does not close whole68/general environment/model recovery or client isolation"
+  ]
+}

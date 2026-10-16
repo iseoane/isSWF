@@ -1,0 +1,1 @@
+import{readFile}from'node:fs/promises';import{externalEffect}from "file:///home/iseoane/Work/isSWF/tools/external-effect-journal.mjs";const config=JSON.parse(await readFile(process.argv[2],'utf8'));try{console.log(JSON.stringify(await externalEffect({...config,action:process.argv[3]})));}catch(error){console.error(error.message);process.exitCode=1;}

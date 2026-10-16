@@ -1,0 +1,13 @@
+{
+  "agent": "aae80a24ff2e57bc5",
+  "sourceLog": "2026-10-16T15-20-03-264Z_1ea7cd94-eed6-400e-9049-795a63b3722d.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-effects-snapshot-v1/manifest.json",
+  "report": "## Standards — PASS\nNo blocking maintainability or Standards findings.\n\n## Spec — PASS\nNo blocking findings. The CLI uses the journal policy, and the guide matches the implementation’s stated limits. The evidence covers fake-GitHub transport and SIGKILL recovery, not real GitHub behavior or broader recovery.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

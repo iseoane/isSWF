@@ -1,0 +1,25 @@
+{
+  "agent": "abe71c16143435782",
+  "sourceLog": "2026-10-16T14-58-21-393Z_7e567e21-fe5b-4d8e-869a-1319abb7b639.jsonl",
+  "initialPromptMatched": true,
+  "finals": [
+    {
+      "time": "2026-10-16T14:58:55.529Z",
+      "report": "## #68 — smallest useful cut: journal one PR-create effect\n\n**Caller and seam.** Keep `tools/isswf-job.mjs` as the caller; it already owns pinned job identity and the operator-owned `--runs-store`. Add one narrow `tools/external-effect-journal.mjs` module—not a dispatcher, registry, queue, or daemon. This is a design proposal, not authorization to implement or call GitHub.\n\n**Record and API.** Store write-once facts under the existing attempt directory, keyed by a stable effect ID derived from the job and operation. The intent records trusted job ID, repository, target base, head branch, candidate SHA, stable PR marker, operation, and trusted grant reference. Proposed interface:\n\n```js\nrecordIntent(store, attemptId, intent)\nrecordSubmitted(store, effectId)\nrecordOutcome(store, effectId, result)\nreconcilePullRequest(store, effectId, github)\n```\n\nCreate each fact atomically with exclusive creation; reject conflicting duplicates. Never derive grant authority from job text or model output. Numeric budgets and grants must be explicit—no defaults.\n\n**States and crash windows.** `prepared` means intent is durable and the external call has not been marked submitted; recovery may proceed to submission only with an applicable explicit grant. Persist `submitted` *before* the call. A crash after that point—including before the request actually leaves the process—is uncertain: reconcile by repository, head, base, and exact stable marker. One exact match records the existing PR outcome; zero or multiple matches block. Never blindly retry an uncertain submission. A confirmed response is recorded write-once.\n\n**Local Git boundary.** Treat local branch creation/checkout/commit as a **separate unit**: it has different effects and recovery evidence. This slice only journals an already identified candidate; it does not push branches or create PRs.\n\n**Tests and permission boundary.** Use dependency-injected fake GitHub and persisted outcomes. Test process-kill before submission, kill after submission with lost response, unique-match recovery, zero/multiple-match blocking, conflicting writes, and restart in a fresh process. These prove local recovery behavior only—not real GitHub semantics. No real GitHub create, network call, branch push, or dependency change until a concrete H1 grant and gates authorize it.\n\nGrounding: `docs/spec-v1.md` OPS-04–06 and `docs/plan-v1.md` S04; `docs/durable-work.md` rejects treating Git checkpoints as atomic/recovery guarantees. `tools/isswf-job.mjs` is the existing pinned-job/run-store seam.",
+      "metadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high"
+      }
+    },
+    {
+      "time": "2026-10-16T15:00:41.897Z",
+      "report": "Yes. The intent must outlive an attempt: store it under a per-effect subdirectory in the existing runs store, keyed by stable logical job identity + repository + operation—not attempt ID or candidate SHA. Keep candidate SHA immutable in the intent; a changed candidate is a conflict/new explicit decision, never a new key that hides the uncertain effect.\n\nIf trusted logical job identity or repository is missing, block before recording or acting. No new service or framework. The attempt can reference the effect record, but cannot own its durability.",
+      "metadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high"
+      }
+    }
+  ]
+}

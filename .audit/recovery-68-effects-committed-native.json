@@ -1,0 +1,158 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-recovery68-native-d4av1M",
+  "runtimeSha": "dcb51105f650f217768bf215ae4dbb34f979e5f9",
+  "input": "55f65ec5968e3a51dcfad3ff4fcfb9d5ab351e2a",
+  "targetBase": "837dbbe53f0175eecfaa08de897473f34f10cc87",
+  "providerPromptStarted": false,
+  "hostLossWhileTaskLive": {
+    "attemptId": "R68-host-task-loss",
+    "state": "unknown",
+    "reason": "owner identity absent or mismatched",
+    "executionChild": {
+      "state": "live",
+      "identity": {
+        "pid": 575514,
+        "startTicks": "20027147",
+        "pgid": 575514,
+        "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+        "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+        "spawnedAt": "2026-10-16T15:36:33.389Z"
+      },
+      "descendants": "unproven"
+    },
+    "job": {
+      "version": 1,
+      "attemptId": "R68-host-task-loss",
+      "repo": "/tmp/isswf-recovery68-native-d4av1M/project",
+      "grantRef": "explicit-offline-recovery-fixture",
+      "packageRoot": "/tmp/isswf-operational44-FTC9UO/packages/dcb51105f650f217768bf215ae4dbb34f979e5f9",
+      "runtimeSha": "dcb51105f650f217768bf215ae4dbb34f979e5f9",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "55f65ec5968e3a51dcfad3ff4fcfb9d5ab351e2a",
+      "targetBase": "837dbbe53f0175eecfaa08de897473f34f10cc87",
+      "jobPath": ".factory/jobs/R68/job.json",
+      "jobSha256": "ee1abc6b7745aa34d2ad5ff4c105febc958f4a4734599ba13f772ebdd944182c",
+      "models": {
+        "sha": "837dbbe53f0175eecfaa08de897473f34f10cc87",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "offline",
+      "taskSha256": "fa2084275f779b782cfe879c702191c54968335cedd8e29ddd1148103ce00f4f",
+      "briefPath": ".factory/jobs/R68/brief.md",
+      "briefSha256": "2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true,
+    "recovery": {
+      "status": "blocked",
+      "reason": "execution task cessation not confirmed",
+      "reviewRequired": true,
+      "retry": "never"
+    }
+  },
+  "stopped": {
+    "attemptId": "R68-host-task-loss",
+    "state": "unknown",
+    "reason": "owner identity absent or mismatched",
+    "executionChild": {
+      "state": "not-live",
+      "identity": {
+        "pid": 575514,
+        "startTicks": "20027147",
+        "pgid": 575514,
+        "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+        "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+        "spawnedAt": "2026-10-16T15:36:33.389Z"
+      },
+      "descendants": "unproven"
+    },
+    "job": {
+      "version": 1,
+      "attemptId": "R68-host-task-loss",
+      "repo": "/tmp/isswf-recovery68-native-d4av1M/project",
+      "grantRef": "explicit-offline-recovery-fixture",
+      "packageRoot": "/tmp/isswf-operational44-FTC9UO/packages/dcb51105f650f217768bf215ae4dbb34f979e5f9",
+      "runtimeSha": "dcb51105f650f217768bf215ae4dbb34f979e5f9",
+      "methodologySha": "37a56ebc902e94f21fc10666f33fceac44946af7",
+      "inputSha": "55f65ec5968e3a51dcfad3ff4fcfb9d5ab351e2a",
+      "targetBase": "837dbbe53f0175eecfaa08de897473f34f10cc87",
+      "jobPath": ".factory/jobs/R68/job.json",
+      "jobSha256": "ee1abc6b7745aa34d2ad5ff4c105febc958f4a4734599ba13f772ebdd944182c",
+      "models": {
+        "sha": "837dbbe53f0175eecfaa08de897473f34f10cc87",
+        "path": ".factory/models.json",
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+      },
+      "prepared": true,
+      "mode": "offline",
+      "taskSha256": "fa2084275f779b782cfe879c702191c54968335cedd8e29ddd1148103ce00f4f",
+      "briefPath": ".factory/jobs/R68/brief.md",
+      "briefSha256": "2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4",
+      "providerPromptStarted": false,
+      "reviewRequired": true
+    },
+    "reviewRequired": true,
+    "recovery": {
+      "status": "stopped-review-required",
+      "reviewRequired": true,
+      "retry": "never",
+      "taskSha256": "fa2084275f779b782cfe879c702191c54968335cedd8e29ddd1148103ce00f4f",
+      "targetBase": "837dbbe53f0175eecfaa08de897473f34f10cc87",
+      "changedPaths": [
+        "heartbeat.txt",
+        "src/counter.mjs",
+        "tool-ready.json"
+      ],
+      "candidateHashes": {
+        "heartbeat.txt": "29ce8c8ac038059ad8107f77fdd64ac8f426686390fc0604c4cd4d465445ab81",
+        "src/counter.mjs": "3cf33d38bac183a2373d815e7a5338d6975fcc814f400705ba8e39c716ac15d8",
+        "tool-ready.json": "1d8135e3901ff009e815335d4960ce5542cc9d89166d1848eb9616ca91176b80"
+      },
+      "namespacesCeased": 2,
+      "protectedHashesPreserved": true,
+      "remoteEffects": "not-reconciled"
+    }
+  },
+  "namespaceInit": {
+    "pid": 575967,
+    "startTicks": "20027346",
+    "state": "R",
+    "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+    "exe": "/usr/bin/bwrap",
+    "namespace": "pid:[4026532455]"
+  },
+  "heartbeatStable": true,
+  "immutableRecordsPreserved": true,
+  "negatives": [
+    "reserved-looking name: mode:payload",
+    "reserved-looking name: mode:link",
+    "reserved-looking name: dir:payload",
+    "reserved-looking name: __proto__",
+    "unexpected executable-mode change",
+    "protected partial mutation",
+    "boot mismatch",
+    "PID reuse mismatch",
+    "invalid namespace",
+    "corrupt started",
+    "missing startup record",
+    "same ID retry refused"
+  ],
+  "publicationFailureGate": {
+    "terminal": "failure",
+    "commandNeverStarted": true
+  },
+  "limits": [
+    "stopped means review, not successor authorization",
+    "remote effects not reconciled",
+    "no real provider recovery run"
+  ],
+  "normalAcceptanceScopeControl": {
+    "root": "/tmp/isswf-recovery68-acceptance-guO7fj",
+    "terminal": "failure",
+    "unauthorizedFilePresent": true
+  }
+}

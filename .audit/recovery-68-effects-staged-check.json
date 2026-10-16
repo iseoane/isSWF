@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "files": 546,
+  "archiveAndNegativeFixtureExceptions": [
+    ".audit/recovery-68-effects-portable-committed/fixture/large-grant.json:1: trailing whitespace.",
+    ".audit/recovery-68-effects-portable-committed/fixture/large-grant.json:1: new blank line at EOF.",
+    ".audit/recovery-68-effects-portable-v2/fixture/large-grant.json:1: trailing whitespace.",
+    ".audit/recovery-68-effects-portable-v2/fixture/large-grant.json:1: new blank line at EOF.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:21: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:24: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:26: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:28: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:30: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:73: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:84: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:159: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:166: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v1/tracked.patch:172: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:21: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:24: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:26: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:28: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:30: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:73: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:84: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:159: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:166: trailing whitespace.",
+    ".audit/recovery-68-effects-snapshot-v2/tracked.patch:172: trailing whitespace."
+  ],
+  "reason": "Historical patch context and exact intentionally oversized whitespace-only grant bytes; no production source exception. Initial checker rejected the intentional fixture EOF warning until this exact path-specific allowance."
+}

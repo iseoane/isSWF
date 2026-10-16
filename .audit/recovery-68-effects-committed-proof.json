@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "sourceCommit": "2b7d8228dd345f80fee96f823a7fa78082bba2cd",
+  "blobs": {
+    "tools/external-effect-journal.mjs": {
+      "sha256": "6dfcaef6077654d16e0cca45470633eb9e5d2466d92253f33d4348d5d2e1efbd",
+      "equalsFrozen": true
+    },
+    "tools/isswf-job.mjs": {
+      "sha256": "5df15f5d8036dc378fcadd2622cd4cb3707868d85c7bdb8a78a6c0b0018b267e",
+      "equalsFrozen": true
+    },
+    "docs/local-worker-lifecycle.md": {
+      "sha256": "31c90821fc04536b56002ef1b09e8d260efcac19a3999050c08c1b39c7b71510",
+      "equalsFrozen": true
+    }
+  },
+  "checks": {
+    "effects": {
+      "status": "PASS",
+      "sha256": "cd7e5cc701729fdd2299e412108bd4a0b79d4a3325d59588527c89859ece8704"
+    },
+    "native": {
+      "status": "PASS",
+      "sha256": "273f25a65f217a1a31dd3a35d7f6a3ec2f7b5bd61c191bc966424c2d238bcc9d"
+    },
+    "core": {
+      "exitCode": 0,
+      "catalogs": [
+        {
+          "approved": true,
+          "coordinatorCount": 1
+        },
+        {
+          "approved": false,
+          "coordinatorCount": 0
+        }
+      ],
+      "sha256": "604354b8d94e1de49c48222e594823063e5c1325e04b962564454f868235cf2a",
+      "resultSchema": "catalogs/files/checkedLinks, no status field"
+    }
+  },
+  "reviews": {
+    "deepseek": {
+      "agent": "afdc0a8e2032df0fa",
+      "metadata": {
+        "provider": "opencode-go",
+        "model": "deepseek-v4.1-flash",
+        "effort": "max",
+        "stopReason": "stop"
+      },
+      "reportSha256": "6e0de0f7ceae2faf5e501075ff1c3d087788fb3366abfb4654d1516970451579"
+    },
+    "luna": {
+      "agent": "a764fe5278d8f8ec2",
+      "metadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "stopReason": "stop"
+      },
+      "reportSha256": "3a1875afd63272f309cffe42a62874c0a6941781999e25f61938c6882a956490"
+    }
+  },
+  "actualControls": 22,
+  "offlineWorkerProviderPromptStarted": false,
+  "transport": {
+    "kind": "fixture-gh-on-exclusive-PATH",
+    "executableSha256": "a13af47630f8ca53541284ae1f3d128f0713f66136c626e40385ab02574d0d00",
+    "kernelNetworkExclusionClaimed": false
+  },
+  "limits": [
+    "fake GitHub transport only; no real GitHub integration proof",
+    "no automatic preclaim adoption, local Git effects, reboot/model environment recovery, general job exclusion or whole68 closure"
+  ],
+  "scope": "immutable PR intent and one-invocation journal; explicit trusted operator grant needed for real use"
+}

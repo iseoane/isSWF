@@ -1,0 +1,11 @@
+{
+  "runtimeSha": "3212a4f74ee77d838fe91b5324d82a3fac3f2562",
+  "inputSha": "130230de3fcfdd1c46be162c54a2586253a12c91",
+  "targetBase": "279931fe87aa9740b697137e39cd27f9d0413c49",
+  "bundleVerification": "The bundle contains these 2 refs:\n130230de3fcfdd1c46be162c54a2586253a12c91 refs/heads/main\n130230de3fcfdd1c46be162c54a2586253a12c91 HEAD\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1\n",
+  "scope": "fake GitHub fixture evidence only; absolute paths are historical test references",
+  "runtimeBundle": {
+    "prerequisite": "9967af15d531314236f5f86b5a2b578188a1b7b8",
+    "verified": true
+  }
+}
