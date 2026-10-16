@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "sourceSha": "2b99e5a0e21f431c4b617f4345414f2175bdb639",
+  "runtimeSha": "8a8a01e11c426ff5a40447b30d5d09e833e85249",
+  "eightRuntimeGitBlobHashes": {
+    "tools/isswf-job.mjs": "ad92b1dc6e7796e233c331c310aed948fd909da39bc255a692d90d0f7c511404",
+    "tools/factory-package.mjs": "17f7907eccb51c2e622ea9554572ff54789eb060a02ceaae16b7415ab9bfdfa7",
+    "tools/pi-worker-task.mjs": "39fa280d95a493ff19190ba83e717dce1a187165cb2968a6161415285b15f341",
+    "tools/worker-lifecycle.mjs": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a",
+    "tools/native-recovery.mjs": "68200ee86a884d8d8933fb2d4eec0a8f28f331fafc50edd24d9dbe08a044a03f",
+    "tools/external-effect-journal.mjs": "6dfcaef6077654d16e0cca45470633eb9e5d2466d92253f33d4348d5d2e1efbd",
+    "tools/recovery-review.mjs": "303c103bbdae05dce145466a53c5b5913227e27e5fbd26c5ba86b352ca3a52df",
+    "tools/job-successor.mjs": "ad8a159eb9a01bdfb51601c2288fac6b6aab21a5795339902e88bab60dfd9f7e"
+  },
+  "snapshotIdentity": true,
+  "actualChecks": {
+    "successor": [
+      "missing-grant-reset-missing-budget-ack-owner-receipt-fingerprint-input-job-base-mode-block-before-prepare",
+      "externally-committed-nonmatching-base-tree-refused",
+      "missing-receipt-and-local-submitted-unknown-PR-block-without-query",
+      "protected-command-scope-methodology-and-old-runtime-drift-refused",
+      "fresh-no-edge-symlink-gitlink-extra-empty-tree-refused-before-slot-or-preparation-root-records-preserved",
+      "actual-stale-receipt-blocks-before-prepare",
+      "one-explicit-offline-successor-success-joins-edge-original-admission-and-preserves-predecessor-bytes",
+      "successor-readonly-observation-corrupt-edge-unknown-no-repair",
+      "terminal-successor-cannot-become-another-predecessor",
+      "valid0600receipt-blocks-successor-without-dropping-permission-bits",
+      "actual-exit-after-durable-edge-before-prepare-consumes-slot-no-retry",
+      "competing-distinct-successors-one-writeonce-edge-one-preparation-one-worker"
+    ],
+    "review": true,
+    "admission": true,
+    "effects": true,
+    "core": true
+  },
+  "providerPromptStarted": false,
+  "githubCalls": false,
+  "reviewers": {
+    "luna": {
+      "agent": "a722e82d92e23a795",
+      "sourceLog": "2026-10-16T20-08-48-875Z_1450efa4-2143-4e91-89e0-e6d4b97705af.jsonl",
+      "initialPromptMatched": true,
+      "afterSnapshot": ".audit/recovery-68-successor-snapshot-v2/manifest.json",
+      "report": "## Standards\nNo material blockers. The strict baseline applies only to the successor path; existing baseline callers retain their default behavior.\n\n## Spec\nNo material blockers. Snapshot v2 adds directory entries to the strict `-rtz` baseline, rejects unsupported Git entries, and documents the boundary. The v2 acceptance record reports the fresh negative and positive fixture cases passing.\n\n## Maint\nNo material blockers. The verifier’s dense scenario construction is a readability concern, not a blocker for this scoped delta.\n\n**Verdict:** Standards PASS · Spec PASS · Maint PASS. Static review only; no tests or probes run.",
+      "metadata": {
+        "provider": "openai-codex",
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "stopReason": "stop"
+      }
+    },
+    "deepseek": {
+      "agent": "a62ccfa5f3ea85c53",
+      "sourceLog": "2026-10-16T20-08-48-900Z_6e60fc08-3bd3-4396-9944-d8b77170461c.jsonl",
+      "initialPromptMatched": true,
+      "afterSnapshot": ".audit/recovery-68-successor-snapshot-v2/manifest.json",
+      "report": "DELTA GATE 68-SUCCESSOR-V2: PASS\n\nMaterial findings:\n- Frozen unit intact: snapshot-v2 manifest hashes equal live files; payload delta v1→v2 is exactly 3 files — tools/isswf-job.mjs, docs/local-worker-lifecycle.md, .audit/verify-recovery-68-successor.mjs; job-successor.mjs and verify-operational-44.mjs byte-identical.\n- `baselineTree` strict=true only at the successor call site (isswf-job.mjs:170), using `ls-tree -rtz` so 040000 directories are explicit; 120000 symlinks, 160000 gitlinks, and any other non-100644/100755 entry throw with mode+path. Review/reconcile call sites (:203, :298) keep the `-rz` default unchanged.\n- Verifier v2, fresh no-edge before any success: symlink, gitlink, and extra empty tree are each refused with zero `.prepare-*` growth, empty `successors/`, and hash-identical predecessor facts; the ordinary symlink-free positive then launches one edge and one worker. Guide sentence documents all three rejections.\n- Parent v1 symlink RED reached only the consumed-edge guard; `noNewPreparationOrWorker` is true, so the reviewer's actual-execution hypothesis is correctly clarified.\n- parent-v4 (12/12 result strings, new control included), review-regression-v2, admission-v2, core-v2: PASS; no result dropped.\n\nMaterial blocker closed; no material delta regressions found.",
+      "metadata": {
+        "provider": "opencode-go",
+        "model": "deepseek-v4.1-flash",
+        "effort": "max",
+        "stopReason": "stop"
+      }
+    }
+  },
+  "limits": [
+    "one original to one successor same-runtime fixedprivate store only",
+    "uncertain prior worker slot consumed, provider billing not reconciled",
+    "mixed-runtime/generic/crossstore actors excluded by external trusted exclusivity, not this guard",
+    "no reboot/generalmodelstate/realtimeGitHub semantics or fullv1 claim"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "R68-unpublished-tool",
+  "createdAt": "2026-10-16T19:56:29.079Z",
+  "repo": "/tmp/isswf-recovery68-native-aTVTsn/project",
+  "inputSha": "882a90add7459d5962341a1a74ddc6bf2ab9885e",
+  "targetBase": "e30c5219dd2e42e5c86de03dd2c3cdd786cf3a54",
+  "briefPath": ".factory/jobs/R68/brief.md",
+  "briefSha256": "2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4",
+  "grantRef": "explicit-offline-recovery-fixture",
+  "taskSha256": "78c5dd44dd0977d19851309154a3a16a96cdf2b931c6b6069ec85c3064071d42",
+  "timeoutMs": 120000,
+  "outputBytes": 16000,
+  "workspace": "/tmp/isswf-recovery68-native-aTVTsn/runs/R68-unpublished-tool/workspace",
+  "taskCopy": "/tmp/isswf-recovery68-native-aTVTsn/runs/R68-unpublished-tool/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-recovery68-native-aTVTsn/runs/R68-unpublished-tool/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a"
+}

@@ -1,0 +1,13 @@
+{
+  "agent": "aed6eb5297c1246f6",
+  "sourceLog": "2026-10-16T19-58-36-311Z_c560882a-1ca0-4445-ae52-c3b0c76d7538.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-successor-snapshot-v1/manifest.json",
+  "report": "Zero accepted deletions or `MUST KILL` flags. Skipped the snapshot documentation payload.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "medium",
+    "stopReason": "stop"
+  }
+}

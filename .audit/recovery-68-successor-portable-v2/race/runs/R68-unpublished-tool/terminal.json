@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "attemptId": "R68-unpublished-tool",
+  "finishedAt": "2026-10-16T20:07:52.967Z",
+  "outcome": "failure",
+  "exitCode": 2,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"version\":1,\"mode\":\"offline\",\"briefPath\":\".factory/jobs/R68/brief.md\",\"inputSha\":\"57336470f58fcd6dc2359f65e16bbf964860d442\",\"briefSha256\":\"2c96f33e7469ad8178cfdb4d5af4b9ac22a77f533ac90300e4a67d27808ff1a4\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":false,\"sdkInitialized\":true,\"toolCalls\":1,\"acceptance\":false,\"protectedHashesPreserved\":false,\"stage\":\"setup\",\"errorName\":\"Error\",\"status\":\"partial\"}\n",
+  "stderr": "",
+  "stdoutTruncated": false,
+  "stderrTruncated": false,
+  "captureIncomplete": false,
+  "descendants": "not-claimed",
+  "timedOut": false,
+  "workspace": "/tmp/isswf-recovery68-native-OsxZL7/runs/R68-unpublished-tool/workspace"
+}

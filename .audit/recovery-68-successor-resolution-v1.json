@@ -1,0 +1,17 @@
+{
+  "accepted": "Exact successor Git base comparison skipped nonregularentries. New successor-only strict baseline includes explicitdirectoryentries (-rtz), rejects symlink120000/gitlink160000 and compares emptydirectories. Other baseline callers default behavior unchanged.",
+  "changed": [
+    "tools/isswf-job.mjs",
+    "docs/local-worker-lifecycle.md",
+    ".audit/verify-recovery-68-successor.mjs"
+  ],
+  "red": ".audit/recovery-68-successor-symlink-red.json",
+  "actualGreen": ".audit/recovery-68-successor-parent-v4.json",
+  "newControls": "Fresh no-edge cases symlink/gitlink/extraemptytree each assert noedge/nopreparation/rootrecordsidentical, then ordinary symlinkfree successcontrol.",
+  "reviewClarification": "v1 reviewer hypothesized actual worker symlink execution; parent evidence proves exactgate omission only. Existing consumededge blocked every preparation/worker in RED; no actual symlink execution claimed.",
+  "unchanged": [
+    "job-successor module",
+    "original baseline/native acceptance semantics",
+    "no provider/GHcalls"
+  ]
+}

@@ -18,7 +18,7 @@ const run = (exe, args, cwd, expected = 0, env = process.env) => {
 };
 const git = (cwd, ...args) => run('git', args, cwd).stdout.trim();
 run('git', ['clone', '--quiet', '--local', '--no-hardlinks', source, runtimeSource]);
-const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs'];
+const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs'];
 for (const path of runtimeFiles) await copyFile(join(source, path), join(runtimeSource, path));
 git(runtimeSource, 'add', '--', ...runtimeFiles);
 git(runtimeSource, '-c', 'user.name=Local test', '-c', 'user.email=local@example.invalid', 'commit', '--allow-empty', '-qm', 'Test exact operational runtime payload');

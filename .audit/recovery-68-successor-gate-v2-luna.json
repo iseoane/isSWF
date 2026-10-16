@@ -1,0 +1,13 @@
+{
+  "agent": "a722e82d92e23a795",
+  "sourceLog": "2026-10-16T20-08-48-875Z_1450efa4-2143-4e91-89e0-e6d4b97705af.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-successor-snapshot-v2/manifest.json",
+  "report": "## Standards\nNo material blockers. The strict baseline applies only to the successor path; existing baseline callers retain their default behavior.\n\n## Spec\nNo material blockers. Snapshot v2 adds directory entries to the strict `-rtz` baseline, rejects unsupported Git entries, and documents the boundary. The v2 acceptance record reports the fresh negative and positive fixture cases passing.\n\n## Maint\nNo material blockers. The verifier’s dense scenario construction is a readability concern, not a blocker for this scoped delta.\n\n**Verdict:** Standards PASS · Spec PASS · Maint PASS. Static review only; no tests or probes run.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

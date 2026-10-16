@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "successor-A002",
+  "createdAt": "2026-10-16T20:15:24.073Z",
+  "repo": "/tmp/isswf-recovery68-native-ciZ564/project",
+  "inputSha": "f200d87bd09c82778a7fb3fd8fe73691c3a0eea9",
+  "targetBase": "ed5121fbbc30a3742e82dd119c3738b0a6089020",
+  "briefPath": ".factory/jobs/R68-successor/brief.md",
+  "briefSha256": "f4e6985df5b9b3f5a46ec7e50631e6ff53320e078d43bcee9841ccca82320fbe",
+  "grantRef": "explicit-fixture-successor-only",
+  "taskSha256": "c8af09c1ab7e3b16d674938a8cb80a7f8398dd6f1b03b46f4738c525f6c7bd31",
+  "timeoutMs": 120000,
+  "outputBytes": 16000,
+  "workspace": "/tmp/isswf-recovery68-native-ciZ564/runs/successor-A002/workspace",
+  "taskCopy": "/tmp/isswf-recovery68-native-ciZ564/runs/successor-A002/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-recovery68-native-ciZ564/runs/successor-A002/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a"
+}

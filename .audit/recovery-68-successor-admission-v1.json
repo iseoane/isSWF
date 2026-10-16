@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-admission68-0SbsGn",
+  "project": "/tmp/isswf-operational44-fcCH7C/project",
+  "store": "/tmp/isswf-operational44-fcCH7C/runs",
+  "input": "6ccd8092abdf429f5b72dd1e5d4419c281cca490",
+  "changedInput": "6155c1b4fdb25ad8de179d5d517f04f193499c77",
+  "runtimeSha": "923dd4b88dbbe87a9a31dce90e8b0e0deb92010f",
+  "ownerKilled": {
+    "pid": 731249,
+    "startTicks": "21587331"
+  },
+  "unknownWhileChildLive": "unknown",
+  "offlineWorkerProviderPromptStarted": false,
+  "results": [
+    "terminal-does-not-release-one-worker-total-admission",
+    "actual-host-SIGKILL-live-task-unknown-blocks-distinct-attempt-before-preparation",
+    "changed-committed-input-does-not-reset-logical-admission",
+    "corrupt-and-legacy-ambiguous-binding-block-before-preparation",
+    "reader-validates-admission-evidence-without-repair",
+    "independent-logical-job-has-separate-admission",
+    "missing-committed-logical-identity-blocks",
+    "crash-after-durable-admission-before-prepare-remains-claimed",
+    "competing-distinct-attempts-one-atomic-admission-and-one-preparation"
+  ],
+  "limits": [
+    "one admission per logical job in one fixed store; no successor release or review receipt",
+    "no provider/GitHub prompt or general global multiwriter/reboot proof"
+  ]
+}

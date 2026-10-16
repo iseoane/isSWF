@@ -1,0 +1,38 @@
+{
+  "root": "/tmp/isswf-recovery68-native-XPO4ZE",
+  "terminal": {
+    "version": 1,
+    "attemptId": "successor-A002",
+    "finishedAt": "2026-10-16T19:52:14.292Z",
+    "outcome": "failure",
+    "exitCode": 2,
+    "signal": null,
+    "error": null,
+    "stdout": "{\"version\":1,\"mode\":\"offline\",\"briefPath\":\".factory/jobs/R68-successor/brief.md\",\"inputSha\":\"6459365accba7d55365d449552fc79cda2580d7b\",\"briefSha256\":\"f4e6985df5b9b3f5a46ec7e50631e6ff53320e078d43bcee9841ccca82320fbe\",\"provider\":\"openai-codex\",\"model\":\"gpt-6-luna\",\"effort\":\"high\",\"providerPromptStarted\":false,\"sdkInitialized\":true,\"toolCalls\":1,\"acceptance\":false,\"protectedHashesPreserved\":false,\"stage\":\"setup\",\"errorName\":\"Error\",\"status\":\"partial\"}\n",
+    "stderr": "",
+    "stdoutTruncated": false,
+    "stderrTruncated": false,
+    "captureIncomplete": false,
+    "descendants": "not-claimed",
+    "timedOut": false,
+    "workspace": "/tmp/isswf-recovery68-native-XPO4ZE/runs/successor-A002/workspace"
+  },
+  "piResult": {
+    "version": 1,
+    "mode": "offline",
+    "briefPath": ".factory/jobs/R68-successor/brief.md",
+    "inputSha": "6459365accba7d55365d449552fc79cda2580d7b",
+    "briefSha256": "f4e6985df5b9b3f5a46ec7e50631e6ff53320e078d43bcee9841ccca82320fbe",
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "providerPromptStarted": false,
+    "sdkInitialized": true,
+    "toolCalls": 1,
+    "acceptance": false,
+    "protectedHashesPreserved": false,
+    "stage": "setup",
+    "errorName": "Error",
+    "status": "partial"
+  }
+}

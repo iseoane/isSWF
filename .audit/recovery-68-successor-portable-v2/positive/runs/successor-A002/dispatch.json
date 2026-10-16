@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "successor-A002",
+  "createdAt": "2026-10-16T20:06:53.138Z",
+  "repo": "/tmp/isswf-recovery68-native-Ooqrog/project",
+  "inputSha": "153da0f0cf0e64730d99fa0253c6bfa05957bfd7",
+  "targetBase": "d3f2b9db6875be7287aafe0b52cd14982a55427d",
+  "briefPath": ".factory/jobs/R68-successor/brief.md",
+  "briefSha256": "f4e6985df5b9b3f5a46ec7e50631e6ff53320e078d43bcee9841ccca82320fbe",
+  "grantRef": "explicit-fixture-successor-only",
+  "taskSha256": "4ef512190d45e75c50ab330a29de9d857525f761fed8f9aa9f52bbd77ff38ce1",
+  "timeoutMs": 120000,
+  "outputBytes": 16000,
+  "workspace": "/tmp/isswf-recovery68-native-Ooqrog/runs/successor-A002/workspace",
+  "taskCopy": "/tmp/isswf-recovery68-native-Ooqrog/runs/successor-A002/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-recovery68-native-Ooqrog/runs/successor-A002/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a"
+}

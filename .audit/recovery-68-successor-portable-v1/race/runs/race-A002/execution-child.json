@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "attemptId": "race-A002",
+  "taskSha256": "a8484d00ae56a16dea49e566e0b157d7d5456b3a14623647aa6a22b06a2737b3",
+  "child": {
+    "pid": 741393,
+    "startTicks": "21591591",
+    "pgid": 741393,
+    "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+    "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+    "spawnedAt": "2026-10-16T19:57:17.824Z"
+  }
+}

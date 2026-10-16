@@ -1,0 +1,13 @@
+{
+  "agent": "ad757bd71d8ec0fb0",
+  "sourceLog": "2026-10-16T19-58-36-294Z_92eb9a45-3d5a-4fd2-af21-dde77d660601.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-successor-snapshot-v1/manifest.json",
+  "report": "## Standards — Pass\nNo documented-standard breach or material smell found. The small successor domain module owns grant, receipt, tree, and edge validation; the CLI invokes it before preparation or launch (`job-successor.mjs:41–62`; `isswf-job.mjs:158–170`). That boundary fits the repo’s guidance to keep state and responsibilities local.\n\n## Spec — Pass\nThe source matches the bounded contract: explicit cumulative `workerTotal: 2`, same-runtime/original-contract checks, receipt and full tree/mode comparison, and a write-once edge before preparation (`job-successor.mjs:43–62`). The offline verifier covers rejection cases, readonly joins, a crash after edge publication, and competing claims (`verify-recovery-68-successor.mjs:39–64`). The guide states the limits and caller duties (`local-worker-lifecycle.md:120–132`). No provider or GitHub grant is exercised.\n\n## Maint — Pass\nThe API stays narrow; no standalone admission command or extra framework. The guide adds one focused section, and the recorded parent-v3 output reports PASS. The retained initial verifier assertion failure and first runtime partial are visible rather than concealed; the failure artifact attributes the assertion to a no-change fixture.\n\n**Material blockers: none. Optional: none.** I assessed the frozen snapshot and recorded outputs only; I did not rerun tests or perform live probes.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

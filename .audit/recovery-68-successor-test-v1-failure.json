@@ -1,0 +1,5 @@
+{
+  "exitCode": 1,
+  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'failure'\n- 'success'\n\n    at file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-successor.mjs:50:123 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'failure',\n  expected: 'success',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
+  "resolution": "First fixture requested no mutable change; existing adapter correctly rejects no-change acceptance. Revised trusted offline fixture makes one allowed semantic-preserving counter byte change; no adapter rule changed. Actual first runtime partial preserved separately."
+}

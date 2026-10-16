@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "attemptId": "R68-unpublished-tool",
+  "taskSha256": "c69c90ec5e1aa56c4ca5dd6974b69d3186ffe61f2dc0c66e59f17a52a47d0f30",
+  "child": {
+    "pid": 735427,
+    "startTicks": "21588754",
+    "pgid": 735427,
+    "bootId": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+    "exe": "/home/iseoane/.local/share/mise/installs/node/26.8.1/bin/node",
+    "spawnedAt": "2026-10-16T19:56:49.454Z"
+  }
+}

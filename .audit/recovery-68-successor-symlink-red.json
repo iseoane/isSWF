@@ -1,0 +1,14 @@
+{
+  "status": "RED",
+  "fixture": "/tmp/isswf-recovery68-native-sLmQYP",
+  "source": "frozenv1",
+  "base": "8a2ee5bb630591ae13224f2e05c31c28f969ed24",
+  "input": "aa75bdb7388a5fd9f4eea006f8a9a130ed792a00",
+  "exitCode": 1,
+  "stderr": "predecessor successor slot already consumed; no retry or replacement\n",
+  "expected": "reject extra Git symlink during exact base comparison",
+  "actual": "extra symlink skipped by baselineTree; reached already-consumed edge instead",
+  "noNewPreparationOrWorker": true,
+  "existingEdgePreserved": true,
+  "limits": "does not claim actual symlink workspace execution; independent exclusive-edge gate correctly blocked"
+}
