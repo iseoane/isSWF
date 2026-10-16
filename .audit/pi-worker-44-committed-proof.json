@@ -1,0 +1,68 @@
+{
+  "status": "PASS",
+  "sourceCommit": "b17743c18778108d35a42e7109458d185f2ef057",
+  "payloads": [
+    {
+      "path": "tools/pi-worker-task.mjs",
+      "sha256": "49dfc09d8088be6802f89194990caf19f4c7e85c1c4083227c6f0cb7f6de61e5",
+      "mainMatch": true,
+      "committed": true
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "sha256": "51d034e5950c92b50a6afe46bdc9eb6cd267d8d066514e6614b04420d410b77f",
+      "mainMatch": true,
+      "committed": true
+    },
+    {
+      "path": ".audit/verify-pi-worker-44.mjs",
+      "sha256": "e410cee9bb483e2ab1c7144e8fef0c9ef42abdc7b5976408c22971633fdcc0a0",
+      "mainMatch": true,
+      "committed": false
+    }
+  ],
+  "postCommitOffline": {
+    "mode": "verify-pi-worker-44",
+    "status": "PASS",
+    "baseline": "37a56ebc902e94f21fc10666f33fceac44946af7",
+    "fixtureSha": "e2dfc62c81f6732b14f3053c7a90ceb9f0dc977f",
+    "preparedTaskSha256": "559942e8385b5ce872486e9a79584be5008376b732a27b677c6084b649c8008a",
+    "attemptId": "pi44-offline-a1",
+    "lifecycleOutcome": "success",
+    "providerPromptStarted": false,
+    "sdkInitialized": true,
+    "boundaryCheckPassed": true,
+    "controls": {
+      "fakeEnvAbsent": true,
+      "outsideRead": "ENOENT",
+      "outsideWrite": "ENOENT",
+      "factoryWrite": "EROFS",
+      "sdkWrite": "EROFS",
+      "network": "ECONNREFUSED"
+    },
+    "offlineChecks": [
+      {
+        "name": "bug-is-red",
+        "exitCode": 1
+      },
+      {
+        "name": "deterministic-fix",
+        "exitCode": 0
+      },
+      {
+        "name": "bug-is-green",
+        "exitCode": 0
+      }
+    ],
+    "fixtureRoot": "/tmp/isSWF-pi44-yYa54k"
+  },
+  "realTaskEvidence": {
+    "path": ".audit/pi-worker-44-real-v2.json",
+    "status": "PASS",
+    "providerTaskInvocations": 1,
+    "piExitedBeforeRelease": true,
+    "exactVersion": "v2; production differs only by removal of one trailing space in generated code. Guide updated separately.",
+    "runtimeLogicUnchanged": true
+  },
+  "scope": "Source commit and current audit payload binding; no second provider task. Not a native coordinator, main-chat teardown, recovery, or complete #44."
+}

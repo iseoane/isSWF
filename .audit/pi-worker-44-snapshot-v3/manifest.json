@@ -1,0 +1,18 @@
+{
+  "base": "37a56ebc902e94f21fc10666f33fceac44946af7",
+  "change": "Guide only relative to v2. Adapter/verifier bytes identical to actual real-task version.",
+  "files": [
+    {
+      "path": "tools/pi-worker-task.mjs",
+      "sha256": "24c3df1c67cefef7a879c7c4bb0af704e22bc0c0386b6b707a5fc62a635f7354"
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "sha256": "51d034e5950c92b50a6afe46bdc9eb6cd267d8d066514e6614b04420d410b77f"
+    },
+    {
+      "path": ".audit/verify-pi-worker-44.mjs",
+      "sha256": "e410cee9bb483e2ab1c7144e8fef0c9ef42abdc7b5976408c22971633fdcc0a0"
+    }
+  ]
+}

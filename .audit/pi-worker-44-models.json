@@ -1,0 +1,130 @@
+{
+  "actors": [
+    {
+      "role": "ground",
+      "id": "ae6962ec814a59da0",
+      "log": "2026-10-16T03-56-34-646Z_07a7a68e-3e37-4314-98aa-ce3ce445a9d0.jsonl",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "effort": [
+        "high"
+      ],
+      "finalAt": "2026-10-16T03:57:13.014Z"
+    },
+    {
+      "role": "choice",
+      "id": "a3181bc0a24d7f2c0",
+      "log": "2026-10-16T04-00-05-783Z_852ce593-4df5-46db-978f-b793e267c587.jsonl",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "effort": [
+        "max"
+      ],
+      "finalAt": "2026-10-16T04:01:50.916Z"
+    },
+    {
+      "role": "writer",
+      "id": "a77f6e1524dec64dc",
+      "log": "2026-10-16T04-04-29-592Z_ec266839-4733-4c18-bb81-83bee130d5cb.jsonl",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "effort": [
+        "high"
+      ],
+      "finalAt": "2026-10-16T04:10:56.026Z"
+    },
+    {
+      "role": "correction",
+      "id": "a16878d8ecd355f5f",
+      "log": "2026-10-16T04-21-35-666Z_ac965a71-9c3c-4200-82ab-a152adf5d429.jsonl",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "effort": [
+        "high"
+      ],
+      "finalAt": "2026-10-16T04:23:28.401Z"
+    },
+    {
+      "role": "precall-v1",
+      "id": "af567c6dd2da541ce",
+      "log": "2026-10-16T04-14-15-736Z_9c42b810-602d-493e-9584-3deb844c9820.jsonl",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "effort": [
+        "max"
+      ],
+      "finalAt": "2026-10-16T04:20:09.548Z"
+    },
+    {
+      "role": "precall-final",
+      "id": "a57d8b58cf7184dd7",
+      "log": "2026-10-16T04-29-00-999Z_363783e3-768b-4c79-8575-fc20ecd837fc.jsonl",
+      "model": "deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "effort": [
+        "max"
+      ],
+      "finalAt": "2026-10-16T04:41:54.610Z"
+    },
+    {
+      "role": "final-standards",
+      "id": "a0e575585078e6fbe",
+      "log": "2026-10-16T04-41-31-760Z_004d66d5-f745-432a-aeec-f20ec3fc251f.jsonl",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "effort": [
+        "high"
+      ],
+      "finalAt": "2026-10-16T04:42:08.498Z"
+    },
+    {
+      "role": "doc-correction",
+      "id": "a1b0eb30a67b817bb",
+      "log": "2026-10-16T04-45-32-845Z_5c0b0038-00ad-4362-a1a8-d2e004a06a6a.jsonl",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "effort": [
+        "high"
+      ],
+      "finalAt": "2026-10-16T04:46:40.032Z"
+    },
+    {
+      "role": "final-standards-corrected",
+      "id": "a0e575585078e6fbe",
+      "log": "2026-10-16T04-41-31-760Z_004d66d5-f745-432a-aeec-f20ec3fc251f.jsonl",
+      "model": "gpt-6-luna",
+      "provider": "openai-codex",
+      "effort": [
+        "high"
+      ],
+      "finalAt": "2026-10-16T04:50:28.787Z"
+    }
+  ],
+  "modelTask": {
+    "requested": {
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high"
+    },
+    "actual": {
+      "provider": "openai-codex",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "toolCalls": 5
+    },
+    "evidence": "Host adapter checks session.model, thinkingLevel and singleton callable tool names before actual prompt; safe task result only, not independent provider transcript/usage proof.",
+    "providerTaskInvocations": 1,
+    "fallback": false
+  },
+  "scope": "Actual actor transcript metadata and safe task result only; no auth/raw commands/assistant model output.",
+  "archiveWhitespaceExceptions": [
+    ".audit/pi-worker-44-snapshot-v1/payload/tools/pi-worker-task.mjs",
+    ".audit/pi-worker-44-snapshot-v2/payload/tools/pi-worker-task.mjs",
+    ".audit/pi-worker-44-snapshot-v3/payload/tools/pi-worker-task.mjs",
+    ".audit/pi-worker-44-portable/trusted-gated-task.mjs",
+    ".audit/pi-worker-44-snapshot-v1/candidate.diff",
+    ".audit/pi-worker-44-snapshot-v2/candidate.diff"
+  ],
+  "archiveWhitespaceReason": "Immutable historical v1/v2/v3 source snapshots and actual executed portable task retain the single trailing space after factoryRoot declaration; archived raw patch context blank lines retain their required space prefix. Exact six archive paths only excluded from audit whitespace check. Final production/v4 source is clean.",
+  "sourceCommit": "b17743c18778108d35a42e7109458d185f2ef057"
+}

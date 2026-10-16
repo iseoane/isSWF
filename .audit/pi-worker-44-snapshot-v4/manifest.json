@@ -1,0 +1,18 @@
+{
+  "base": "37a56ebc902e94f21fc10666f33fceac44946af7",
+  "change": "Relative v3: one trailing space removed after factoryRoot declaration inside generated code. No executable logic change. Model task evidence remains exact v2 bytes.",
+  "files": [
+    {
+      "path": "tools/pi-worker-task.mjs",
+      "sha256": "49dfc09d8088be6802f89194990caf19f4c7e85c1c4083227c6f0cb7f6de61e5"
+    },
+    {
+      "path": "docs/local-worker-lifecycle.md",
+      "sha256": "51d034e5950c92b50a6afe46bdc9eb6cd267d8d066514e6614b04420d410b77f"
+    },
+    {
+      "path": ".audit/verify-pi-worker-44.mjs",
+      "sha256": "e410cee9bb483e2ab1c7144e8fef0c9ef42abdc7b5976408c22971633fdcc0a0"
+    }
+  ]
+}

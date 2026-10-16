@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "J602-pi-teardown",
+  "createdAt": "2026-10-16T04:40:32.265Z",
+  "repo": "/tmp/isswf-pi-worker44-Vye1Kz",
+  "inputSha": "1b26a7c8bd8d6b7b304161ef61d5898ae7e3e942",
+  "targetBase": "1b26a7c8bd8d6b7b304161ef61d5898ae7e3e942",
+  "briefPath": ".factory/jobs/J602/brief-r1.md",
+  "briefSha256": "d37c77a1fa49cf1ff108d9abb857c25935b7a07cae369c256bb9296cffb1ed6b",
+  "grantRef": "operator-approved-one-LunaHigh-disposable-sandbox-task",
+  "taskSha256": "57607e1507e7478aef61af41083d7f2f84724b6538b24530baf664aeef570e48",
+  "timeoutMs": 120000,
+  "outputBytes": 16384,
+  "workspace": "/tmp/isswf-pi-worker44-teardown-aQrbJh/runs/J602-pi-teardown/workspace",
+  "taskCopy": "/tmp/isswf-pi-worker44-teardown-aQrbJh/runs/J602-pi-teardown/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-pi-worker44-teardown-aQrbJh/runs/J602-pi-teardown/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+}
