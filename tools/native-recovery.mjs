@@ -51,11 +51,11 @@ child.once('error',()=>{process.exitCode=125;});
 child.once('exit',(code,signal)=>{process.exitCode=signal?128:code??125;});
 `, { flag:'wx', mode:0o444 });
   let sequence = 0;
-  return async (args, command, timeout = 10000) => {
+  return async (args, command, timeout = 10000, modelCall) => {
     const seq = ++sequence;
     if (seq > 64) throw Error('native tool record budget exceeded');
     const prefix = String(seq).padStart(6, '0');
-    const binding = { version:1, attemptId, taskSha256, seq };
+    const binding = { version:1, attemptId, taskSha256, seq, ...(modelCall ? {modelCall} : {}) };
     await atomic(join(records, prefix + '.intent.json'), binding);
     const release = join(factoryRoot, 'release-' + prefix);
     return new Promise(resolveRun => {

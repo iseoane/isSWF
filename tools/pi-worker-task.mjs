@@ -87,7 +87,7 @@ function runtimeSource() {
 import { createRequire } from 'node:module';
 import { createHash as hashFn } from 'node:crypto';
 import { readFile as read, writeFile as write, mkdir as makeDir, mkdtemp as tempDir, rm as remove } from 'node:fs/promises';
-import { join as pathJoin, dirname as pathDirname, resolve as pathResolve } from 'node:path';
+import { join as pathJoin, dirname as pathDirname, resolve as pathResolve, basename as pathBasename } from 'node:path';
 import net from 'node:net';
 const hash = value => hashFn('sha256').update(value).digest('hex');
 ${matchesBoundaryControls.toString()}
@@ -104,12 +104,23 @@ const finish = async (ok, extra = {}) => {
   process.stdout.write(JSON.stringify(result) + '\n');
   if (!ok) process.exitCode = 2;
 };
-let nativeRun;
-const bounded = async (command, timeout = 10000) => {
+let nativeRun, invocationSha256;
+const publishInvocation = async value => {
+  const fs = await import('node:fs/promises'), {randomBytes} = await import('node:crypto');
+  const directory=pathDirname(pathResolve(work)), path=pathJoin(directory,'pi-model-invocation.json');
+  const bytes=JSON.stringify(value)+'\n', temp=path+'.'+randomBytes(8).toString('hex')+'.tmp';
+  const file=await fs.open(temp,'wx',0o600);
+  try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
+  await fs.link(temp,path); await fs.unlink(temp);
+  const parent=await fs.open(directory,'r');
+  try { await parent.sync(); } finally { await parent.close(); }
+  return hash(bytes);
+};
+const bounded = async (command, timeout = 10000, modelCall) => {
   const args = ['--unshare-user','--unshare-pid','--unshare-net','--unshare-ipc','--unshare-uts','--new-session','--die-with-parent','--cap-drop','ALL','--clearenv','--ro-bind','/usr','/usr','--symlink','usr/bin','/bin','--symlink','usr/lib','/lib','--symlink','usr/lib','/lib64','--proc','/proc','--dev','/dev','--tmpfs','/tmp','--dir','/tmp/home','--ro-bind',CONFIG.nodeBinary,'/runtime/node','--ro-bind',CONFIG.sdkPath,'/runtime/sdk','--bind',work,'/work'];
   args.push('--dir','/factory','--ro-bind',factoryRoot,'/factory');
   args.push('--chdir','/work','--remount-ro','/','--setenv','PATH','/runtime:/usr/bin:/bin','--setenv','HOME','/tmp/home','--setenv','LANG','C.UTF-8');
-  return nativeRun(args, command, timeout);
+  return nativeRun(args, command, timeout, modelCall);
 };
 const tree = workspaceTree;
 let session, runtime, listener, runtimeRoot, trustedRoot, tools=0, failure='setup', boundaryAttributed=false;
@@ -143,7 +154,12 @@ try {
     const canaryIntactBefore=!isBoundary||hash(await read(boundaryPath))===boundaryHash;
     if(!canaryIntactBefore) return {content:[{type:'text',text:'boundary check unavailable'}],details:{exitCode:1,canaryHashPreserved:false},isError:true};
     const command=isBoundary ? 'node /factory/boundary-check.mjs' : args.command;
-    const result=await bounded(command,10000); tools++;
+    let modelCall;
+    if(CONFIG.mode==='real') {
+      if(!invocationSha256||typeof _id!=='string'||!_id) throw Error('SDK model call identity unavailable');
+      modelCall={sdkCallSha256:hash(_id),operation:args.operation,invocationSha256};
+    }
+    const result=await bounded(command,10000,modelCall); tools++;
     const canaryHashPreserved=!isBoundary||hash(await read(boundaryPath))===boundaryHash;
     return {content:[{type:'text',text:result.output}],details:{exitCode:canaryHashPreserved?result.code:1,truncated:result.truncated,...(isBoundary?{canaryHashPreserved}:{})},isError:result.code!==0||!canaryHashPreserved};
   }};
@@ -156,6 +172,7 @@ try {
   else {
     failure='provider prompt';
     const before=await tree(work); let deadlineHit=false;
+    invocationSha256=await publishInvocation({version:1,attemptId:pathBasename(pathDirname(pathResolve(work))),taskSha256:hash(await read(process.argv[1])),provider:session.model.provider,model:session.model.id,effort:session.thinkingLevel,callableTools:session.getCallableToolNames(),providerPromptStarted:true});
     const promptBudget=remainingBudget();
     if(promptBudget===0) throw Error('real-mode budget exhausted during setup');
     const timer=setTimeout(()=>{deadlineHit=true;void session.abort();},promptBudget), pending=new Map();
