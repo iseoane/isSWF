@@ -55,18 +55,31 @@ async function prepare(args) {
     const object = entry.slice(0, entry.indexOf('\t')).split(' ')[2];
     files[path] = git(repo, ['cat-file', 'blob', object]).toString('utf8');
   }
-  if (typeof config.briefText !== 'string' || !config.briefText.trim() || Buffer.byteLength(config.briefText) > 32000) throw new Error('briefText must be non-empty and <=32KB');
+  if (Object.hasOwn(config, 'briefText')) throw new Error('legacy briefText is not accepted');
+  const brief = config.brief;
+  if (!brief || typeof brief !== 'object' || Array.isArray(brief) || Object.keys(brief).sort().join(',') !== 'inputSha,path,repo') throw new Error('brief must contain exactly repo, inputSha, and path');
+  if (typeof brief.inputSha !== 'string' || !/^[0-9a-f]{40}$/.test(brief.inputSha)) throw new Error('brief.inputSha must be a full lowercase commit SHA');
+  if (typeof brief.path !== 'string' || brief.path.startsWith('/') || brief.path.includes('\\') || brief.path.includes('\0') || brief.path.split('/').some(part => !part || part === '.' || part === '..')) throw new Error('brief.path must be a safe relative path');
+  const briefRepo = await realpath(safePath(brief.repo, 'brief.repo'));
+  git(briefRepo, ['cat-file', '-e', `${brief.inputSha}^{commit}`]);
+  const briefEntry = git(briefRepo, ['ls-tree', '-z', brief.inputSha, '--', brief.path]).toString().split('\0').find(entry => entry.slice(entry.indexOf('\t') + 1) === brief.path);
+  if (!briefEntry || !/^100(?:644|755) blob [0-9a-f]{40}\t/.test(briefEntry)) throw new Error('brief.path must name a committed regular-file blob');
+  const briefOid = briefEntry.slice(0, briefEntry.indexOf('\t')).split(' ')[2];
+  const briefBytes = git(briefRepo, ['cat-file', 'blob', briefOid]);
+  const briefText = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(briefBytes);
+  if (!briefBytes.length || briefBytes.length > 32000 || !briefText.trim()) throw new Error('brief must be non-empty and <=32KB');
+  const briefSha256 = sha(briefBytes);
   if (!Array.isArray(config.expectedMutablePaths) || !config.expectedMutablePaths.length || config.expectedMutablePaths.some(path => typeof path !== 'string' || path.startsWith('/') || path.split('/').some(part => !part || part === '..' || part === '.'))) throw new Error('expectedMutablePaths invalid');
   if (typeof config.protectedCheckCommand !== 'string' || !config.protectedCheckCommand || config.protectedCheckCommand.length > 1000) throw new Error('protectedCheckCommand invalid');
   const checks = config.checks ?? [];
   if (!Array.isArray(checks) || checks.length > 10 || checks.some(check => !check || typeof check.name !== 'string' || !check.name || typeof check.command !== 'string' || !check.command || check.command.length > 8000 || !Number.isInteger(check.expectedExitCode) || check.expectedExitCode < 0 || check.expectedExitCode > 255)) throw new Error('checks invalid');
-  const body = { version: 1, mode: config.mode, sdkPath, nodeBinary, authPath, files, briefText: config.briefText, expectedMutablePaths: config.expectedMutablePaths, protectedCheckCommand: config.protectedCheckCommand, checks };
+  const body = { version: 1, mode: config.mode, sdkPath, nodeBinary, authPath, files, briefText, briefPath: brief.path, inputSha: brief.inputSha, briefSha256, expectedMutablePaths: config.expectedMutablePaths, protectedCheckCommand: config.protectedCheckCommand, checks };
   const generated = `#!/usr/bin/env node\nconst CONFIG=${JSON.stringify(body)};\n${runtimeSource()}`;
   const temp = `${output}.${process.pid}.tmp`;
   const handle = await open(temp, 'wx', 0o600);
   try { await handle.writeFile(generated); await handle.sync(); } finally { await handle.close(); }
   try { await link(temp, output); await unlink(temp); } catch (error) { await rm(temp, { force: true }); throw error; }
-  process.stdout.write(`${JSON.stringify({ prepared: true, mode: config.mode, taskSha256: sha(generated), providerPromptStarted: false })}\n`);
+  process.stdout.write(`${JSON.stringify({ prepared: true, mode: config.mode, taskSha256: sha(generated), briefPath: brief.path, inputSha: brief.inputSha, briefSha256, providerPromptStarted: false })}\n`);
 }
 function runtimeSource() {
   return String.raw`
@@ -83,7 +96,7 @@ const remainingBudget = () => Math.max(0, 110000 - (Date.now() - processStartedA
 const work = process.argv[2];
 const resultPath = pathJoin(pathDirname(pathResolve(work)), 'pi-result.json');
 let factoryRoot = '';
-const safeResult = { version: 1, mode: CONFIG.mode, provider: 'openai-codex', model: 'gpt-6-luna', effort: 'high', providerPromptStarted: false, sdkInitialized: false, toolCalls: 0, acceptance: false, protectedHashesPreserved: false };
+const safeResult = { version: 1, mode: CONFIG.mode, briefPath: CONFIG.briefPath, inputSha: CONFIG.inputSha, briefSha256: CONFIG.briefSha256, provider: 'openai-codex', model: 'gpt-6-luna', effort: 'high', providerPromptStarted: false, sdkInitialized: false, toolCalls: 0, acceptance: false, protectedHashesPreserved: false };
 const finish = async (ok, extra = {}) => {
   const result = { ...safeResult, ...extra, status: ok ? 'completed' : 'partial' };
   if (resultPath) { const temp = resultPath + '.' + process.pid + '.tmp'; await write(temp, JSON.stringify(result) + '\n', { mode: 0o600, flag: 'wx' }); await (await import('node:fs/promises')).rename(temp, resultPath); }
