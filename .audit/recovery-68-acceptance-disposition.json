@@ -1,0 +1,85 @@
+{
+  "task": 68,
+  "disposition": "supported-contract-accepted",
+  "authority": [
+    "docs/spec-v1.md OPS-04 through OPS-06",
+    "docs/plan-v1.md S04"
+  ],
+  "runtimeSource": "f25b6d197bd7391932b0e1da45f0fdbf61c73b9b",
+  "realRuntimeSlotsConsumed": 2,
+  "furtherRealRuntimeCallsAuthorized": false,
+  "criteria": [
+    {
+      "criterion": "before-PR no duplicate effects",
+      "evidence": [
+        "recovery-68-real-parent-final.json",
+        "recovery-68-effects-parent-v2.json"
+      ],
+      "fidelity": "real local recovery; controlled PR transport; no issue creation capability"
+    },
+    {
+      "criterion": "lost PR response reconciles existing PR",
+      "evidence": [
+        "recovery-68-effects-parent-v2.json"
+      ],
+      "fidelity": "persistent fake GitHub transport, actual initiating process SIGKILL, unique POST"
+    },
+    {
+      "criterion": "unknown identity blocks another writer",
+      "evidence": [
+        "recovery-68-admission-parent-v3.json",
+        "recovery-68-real-main-offline-interrupt.json"
+      ],
+      "fidelity": "actual same-boot host loss and live task; offline SDK"
+    },
+    {
+      "criterion": "stale review cannot cover changed candidate",
+      "evidence": [
+        "recovery-68-environment-parent-v2.json",
+        "recovery-68-real-parent-final.json"
+      ],
+      "fidelity": "offline negative controls and real positive receipt/base binding"
+    },
+    {
+      "criterion": "uncertain remote result blocks repetition",
+      "evidence": [
+        "recovery-68-effects-parent-v2.json",
+        "recovery-68-environment-parent-v2.json"
+      ],
+      "fidelity": "controlled remote errors; local submitted-unknown blocks successor without query"
+    }
+  ],
+  "independentScopeAssessment": "recovery-68-acceptance-scope-deepseek.json",
+  "resolvedFiniteGap": "recovery-68-acceptance-scope-luna-followup.json",
+  "retainedEarlierVerdicts": [
+    "recovery-68-real-final-deepseek.json",
+    "recovery-68-real-final-luna.json",
+    "recovery-68-acceptance-scope-luna.json"
+  ],
+  "parentResolution": {
+    "accept": [
+      "Original real driver failure remains partial, not a successful planned interruption",
+      "Missing real live-task interval and pre-kill baseline remain explicitly unclaimed",
+      "Remote integration has only controlled transport evidence"
+    ],
+    "rejectAsNewClosureRequirements": [
+      "Exactly-once effects or billing, explicitly disclaimed by spec",
+      "General multiwriter scheduling assigned to task67",
+      "Main chat teardown or unrestricted machine reboot as required substitutes for supported same-boot recovery",
+      "Actual GitHub integration as an implicit new remote grant; H1 task70 must establish actual delivery integration"
+    ],
+    "reason": "The written contract requires convergence of supported cases and safe blocking of uncertain cases, not recovery of every possible interruption. This does not change runtime behavior or authorize effects."
+  },
+  "unsupported": [
+    "machine reboot or power loss",
+    "arbitrary surviving writers",
+    "general multiwriter or cross-store exclusion",
+    "real GitHub integration",
+    "exactly-once external effects or billing"
+  ],
+  "completedGates": {
+    "independentDocReview": "recovery-68-acceptance-doc-review.json",
+    "core": "recovery-68-acceptance-core.json",
+    "postcommitParent": "recovery-68-real-postcommit-parent.json"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "agent": "a3d0f5772ecd33ec3",
+  "sourceLog": "2026-10-16T22-09-42-550Z_09fd949e-3ea9-4e29-a677-82a14e5fe3a2.jsonl",
+  "initialPromptMatched": true,
+  "report": "**Material gap:** OPS-05’s guard exists in `native-recovery.mjs`, but the real-parent evidence does not capture the critical live-task intermediate state. The smallest necessary no-provider test is to use the normal entry, observe the predecessor task still live, and prove recovery refuses successor admission; then confirm cessation and prove the existing recovery path can proceed. This tests a supported same-boot recovery boundary, not general recovery.\n\nKeep H1 chat independence and #67 multiwriter out of this test. The effects evidence uses fake `gh`; it does not establish actual GitHub integration. Don’t claim otherwise or claim exactly-once.\n\n**Finite acceptance wording:** “Same-boot recovery through the normal entry is demonstrated for the tested predecessor-cessation and successor path. Uncertain/live predecessors block recovery. Remote PR reconciliation is tested with a fake `gh` transport, not GitHub. Reboot recovery, H1 chat independence, multiwriter safety, and exactly-once effects are not established.”",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

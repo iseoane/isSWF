@@ -26,7 +26,7 @@ La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec 
 
 Secuencia autorizada por el operador, sin grants implícitos para nuevas ejecuciones o efectos remotos:
 
-1. #68: recuperación general, incluido reinicio de coordinador/modelo/entorno, sin repetir efectos inciertos. Los cortes locales entregados no cierran por sí solos este alcance.
+1. #68: recuperación verificada para la entrada normal en el mismo arranque, con reinicio del proceso Pi y un sucesor de modelo autorizado. S04 detalla la evidencia real, los casos remotos simulados y los estados no soportados que bloquean; no acredita reinicio de la máquina.
 2. #66: fallback entre rutas aprobadas, sin usar fallos de tests como motivo de cambio.
 3. #70: seleccionar una issue real y obtener el grant concreto para demostrar H1 con una PR revisable. #61 y J802 no acreditan H1.
 4. #69: consumidores runtime de Engram y Codegraph.
@@ -96,7 +96,7 @@ La ruta inicial de modelo y effort es explícita. En esta slice una cuota agotad
 - [ ] Ningún paso hace merge ni despliega; la ejecución está confinada al alcance y permisos autorizados.
 - [ ] El resultado y las instrucciones permiten explicar el comportamiento sin wrappers o helpers duplicados innecesarios.
 
-H1 se demuestra sobre una issue real, no solo sobre un worker que imprime done. La recuperación tras caída del entorno todavía no está entregada. A partir de H1 se pueden delegar cambios acotados de la propia factory manteniendo aceptación e integración humanas.
+H1 se demuestra sobre una issue real, no solo sobre un worker que imprime done. S04 verifica recuperación en el mismo arranque; no demuestra recuperación tras reiniciar la máquina. A partir de H1 se pueden delegar cambios acotados de la propia factory manteniendo aceptación e integración humanas.
 
 ## S03. Continuar ante una cuota agotada
 
@@ -114,15 +114,15 @@ Las comprobaciones de error usan respuestas controladas, sin consumir deliberada
 
 ## S04. Recuperar un trabajo interrumpido
 
-Estado parcial: la [entrada normal](local-worker-lifecycle.md) conserva identidad del proceso y admisión, revalida candidatos y permite un sucesor con grant explícito y presupuesto acumulado. El [replay integrado](../.audit/recovery-68-successor-committed-proof.json) usa el SDK sin prompts de proveedor; la reconciliación de PR se ha probado con transporte simulado. Los fallos anteriores y los límites quedan conservados en esa evidencia. No demuestra por sí solo recuperación general de modelo o entorno, semántica real de GitHub ni cierre de S04/#68.
+Verificada para los casos soportados de la [entrada normal](local-worker-lifecycle.md): mismo arranque, un intento original y como máximo un sucesor con revisión y grant explícitos. La [prueba de reinicio del proceso Pi](../.audit/recovery-68-environment-parent-v2.json) confirma su salida antes de consultar el worker desde otro proceso. En la [prueba real de modelo](../.audit/recovery-68-real-parent-final.json), A001 quedó parcial por un fallo del instrumento; se revisó sin repetirlo y A002 terminó correctamente. Ambos slots quedaron consumidos. La [reconciliación remota](../.audit/recovery-68-effects-parent-v2.json) usa un transporte GitHub simulado y SIGKILL real del cliente, no GitHub real. La [evaluación de los cinco criterios](../.audit/recovery-68-acceptance-scope-deepseek.json) distingue esas evidencias. Este cierre de #68 no acredita H1, reinicio de máquina, concurrencia multiwriter ni facturación exactly-once. Los estados inciertos o no soportados bloquean, sin autorización implícita para repetir efectos.
 
 El operador reinicia el entorno después de una interrupción. La factory inspecciona estado, artefactos y operaciones conocidas antes de decidir qué reanudar. Una operación de resultado incierto no se repite a ciegas.
 
-- [ ] Una interrupción antes de crear una PR no duplica commits, ramas, PRs o issues al reanudar.
-- [ ] Una interrupción después de crear la PR pero antes de registrar su respuesta local reconcilia la PR existente.
-- [ ] Un proceso cuya identidad no está confirmada impide lanzar otro escritor sobre el trabajo.
-- [ ] Una revisión anterior no se aplica a un candidato que cambió durante la recuperación.
-- [ ] Una operación remota que no puede reconciliarse queda bloqueada con su incertidumbre visible.
+- [x] Una interrupción antes de crear una PR no duplica commits, ramas, PRs o issues al reanudar. El flujo soportado no crea issues; la publicación de PR se comprueba con transporte simulado.
+- [x] Una interrupción después de crear la PR pero antes de registrar su respuesta local reconcilia la PR existente. Comprobado con PR persistente simulada y pérdida real del proceso cliente.
+- [x] Un proceso cuya identidad no está confirmada impide lanzar otro escritor sobre el trabajo.
+- [x] Una revisión anterior no se aplica a un candidato que cambió durante la recuperación.
+- [x] Una operación remota que no puede reconciliarse queda bloqueada con su incertidumbre visible.
 
 La evidencia incluye identificadores de los efectos antes y después. No se promete exactly-once sobre sistemas externos; se demuestra convergencia de los casos soportados y bloqueo seguro del resto.
 
