@@ -9,10 +9,11 @@ import { verifyPackage, canonicalPath } from './factory-package.mjs';
 import { inspectNativeRecovery } from './native-recovery.mjs';
 import { effectIntent, externalEffect } from './external-effect-journal.mjs';
 import { recoveryReview } from './recovery-review.mjs';
+import { admission, claimSuccessor, validateSuccessorBinding } from './job-successor.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const methodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs'];
+const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md'];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
@@ -28,12 +29,20 @@ function blob(repo, revision, path) {
   if (!entry || !/^100(?:644|755) blob [0-9a-f]{40}\t/.test(entry)) throw new Error(`committed regular file required: ${path}`);
   return invoke('git', ['-C', repo, 'cat-file', 'blob', entry.slice(0, entry.indexOf('\t')).split(' ')[2]]);
 }
-function baselineTree(repo, revision) {
+function baselineTree(repo, revision, strict = false) {
   const tree = Object.create(null);
-  const entries = invoke('git', ['-C', repo, 'ls-tree', '-rz', '--full-tree', revision]).toString().split('\0').filter(Boolean);
+  const entries = invoke('git', ['-C', repo, 'ls-tree', strict ? '-rtz' : '-rz', '--full-tree', revision]).toString().split('\0').filter(Boolean);
   for (const entry of entries) {
     const tab = entry.indexOf('\t'), [mode, type, object] = entry.slice(0, tab).split(' '), path = entry.slice(tab+1);
-    if (type !== 'blob' || !['100644','100755'].includes(mode)) continue;
+    if (strict && type === 'tree' && mode === '040000') {
+      if (!safeRelative(path)) throw Error('unsafe committed baseline path');
+      tree[path] = {kind:'directory'};
+      continue;
+    }
+    if (type !== 'blob' || !['100644','100755'].includes(mode)) {
+      if (strict) throw Error(`unsupported successor Git baseline entry: ${mode} ${path}`);
+      continue;
+    }
     if (!safeRelative(path)) throw Error('unsafe committed baseline path');
     tree[path] = {kind:'file',sha256:digest(invoke('git', ['-C', repo, 'cat-file', 'blob', object])),executable:mode === '100755'};
     const parts = path.split('/');
@@ -45,7 +54,7 @@ function options(values) {
   const result = {};
   for (let i = 0; i < values.length; i += 2) {
     const key = values[i];
-    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file', '--review-file'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
+    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file', '--review-file', '--successor-grant'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
     result[key.slice(2)] = values[i + 1];
   }
   return result;
@@ -101,10 +110,6 @@ async function activePackage(project, revision) {
   await verifyPackage(matches[0].path, revision);
   return matches[0].path;
 }
-function admission(binding) {
-  const key = digest(JSON.stringify(['job-admission-v1', binding.repo, binding.logicalJobRef]));
-  return { version: 1, key, repo: binding.repo, logicalJobRef: binding.logicalJobRef, attemptId: binding.attemptId, inputSha: binding.inputSha, jobSha256: binding.jobSha256, grantRef: binding.grantRef, workerTotal: 1 };
-}
 async function claimAdmission(store, record) {
   for (const name of await readdir(store)) {
     if (!name.endsWith('.job.json')) continue;
@@ -130,7 +135,7 @@ async function claimAdmission(store, record) {
   } finally { await unlink(pending); }
 }
 async function run(args) {
-  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode'].includes(key))) throw Error('unsupported run option');
+  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode', 'successor-grant'].includes(key))) throw Error('unsupported run option');
   if (!isAbsolute(args.project || '') || !fullSha(args['input-sha']) || !safeRelative(args.job)) throw new Error('run requires --project absolute --input-sha fullSHA --job committed/relative.json');
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(args['attempt-id'] || '') || ['.', '..'].includes(args['attempt-id']) || !args['grant-ref']?.trim()) throw new Error('explicit attempt ID and trusted grant reference required');
   const mode = args.mode || 'real';
@@ -139,7 +144,7 @@ async function run(args) {
   const jobBytes = blob(project, args['input-sha'], args.job);
   const job = JSON.parse(jobBytes);
   if (job.version !== 1 || !fullSha(job.runtimeSha) || !fullSha(job.targetBase) || job.methodologySha !== methodologySha) throw new Error('job version/runtime/base/methodology pins invalid');
-  if (job.exclusiveAttempt !== true || job.workerTotal !== 1) throw new Error('trusted exclusive-attempt grant and workerTotal=1 required');
+  if (job.exclusiveAttempt !== true || job.workerTotal !== (args['successor-grant'] ? 2 : 1)) throw new Error('trusted exclusive-attempt grant and explicit workerTotal=1 (original) or2 (successor) required');
   if (typeof job.logicalJobRef !== 'string' || !job.logicalJobRef.trim() || job.logicalJobRef.length > 200 || /[\x00-\x1f\x7f]/.test(job.logicalJobRef)) throw Error('committed logicalJobRef required for serial job admission');
   const packageRoot = await activePackage(project, job.runtimeSha);
   for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(blob(root, job.runtimeSha, path))) throw new Error(`runtime working bytes differ from activated revision: ${path}`);
@@ -157,15 +162,20 @@ async function run(args) {
   for (const path of [join(store, args['attempt-id']), bindingPath]) {
     try { await lstat(path); throw new Error('attempt already exists; read/reconcile before any operator-authorized replacement'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-  const admitted = admission({ repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], inputSha: args['input-sha'], jobSha256: digest(jobBytes), grantRef: args['grant-ref'] });
-  await claimAdmission(store, admitted);
+  const request = { repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, briefPath: job.briefPath, briefSha256: digest(briefBytes), mode };
+  let successor;
+  if (args['successor-grant']) {
+    const grant = await trustedJSON(args['successor-grant'], project, '--successor-grant', store);
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(grant.predecessorAttemptId || '')) throw Error('explicit predecessor attempt ID required');
+    successor = await claimSuccessor({ store, request, job, baseline: baselineTree(project, job.targetBase, true), grant, load: reviewLoader({ 'runs-store': store, 'attempt-id': grant.predecessorAttemptId }) });
+  } else await claimAdmission(store, admission(request));
   const prepared = await mkdtemp(join(store, '.prepare-'));
   const configPath = join(prepared, 'config.json'), taskPath = join(prepared, 'task.mjs');
   const config = { version: 1, mode, ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };
   await writeFile(configPath, JSON.stringify(config) + '\n', { mode: 0o600, flag: 'wx' });
   const preparedResult = JSON.parse(invoke(process.execPath, [join(root, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', taskPath]));
   if (preparedResult.inputSha !== args['input-sha'] || preparedResult.briefPath !== job.briefPath || preparedResult.briefSha256 !== digest(briefBytes) || preparedResult.taskSha256 !== digest(await readFile(taskPath))) throw new Error('prepared task/brief identity mismatch');
-  const binding = { version: 1, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
+  const binding = { version: 1, ...(successor ? { successor } : {}), logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
   await writeFile(bindingPath, JSON.stringify(binding) + '\n', { mode: 0o600, flag: 'wx' });
   const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000']));
   console.log(JSON.stringify({ ...launched, mode, bindingPath, reviewRequired: true }));
@@ -181,9 +191,8 @@ async function trustedJSON(path, project, label, store) {
   if (!stat.isFile() || stat.size > 16000) throw Error('bounded regular approval file required');
   return JSON.parse(await readFile(canonical, 'utf8'));
 }
-async function review(args) {
-  if (Object.keys(args).some(key => !['runs-store', 'attempt-id', 'action', 'review-file'].includes(key)) || !['inspect', 'record', 'check'].includes(args.action) || (args.action !== 'record' && args['review-file'])) throw Error('review requires --action inspect|record|check; only record accepts --review-file');
-  const load = async () => {
+function reviewLoader(args) {
+  return async () => {
     const observation = JSON.parse(invoke(process.execPath, [join(root, 'tools/isswf-job.mjs'), 'reconcile', '--runs-store', args['runs-store'] || '', '--attempt-id', args['attempt-id'] || '']));
     const binding = observation.job;
     if (!binding || observation.recovery?.status !== 'stopped-review-required') throw Error('known stopped native recovery required for candidate review');
@@ -193,6 +202,10 @@ async function review(args) {
     if (digest(bytes) !== binding.jobSha256) throw Error('review job binding changed');
     return { observation, binding, dispatch, job: JSON.parse(bytes), baseline: baselineTree(project, binding.targetBase), attemptDir, store };
   };
+}
+async function review(args) {
+  if (Object.keys(args).some(key => !['runs-store', 'attempt-id', 'action', 'review-file'].includes(key)) || !['inspect', 'record', 'check'].includes(args.action) || (args.action !== 'record' && args['review-file'])) throw Error('review requires --action inspect|record|check; only record accepts --review-file');
+  const load = reviewLoader(args);
   const initial = await load();
   const approval = args.action === 'record' ? await trustedJSON(args['review-file'], initial.binding.repo, '--review-file', initial.store) : undefined;
   console.log(JSON.stringify(await recoveryReview({ action: args.action, load, approval })));
@@ -245,6 +258,9 @@ Required for review: --runs-store ABS_PATH --attempt-id ID
   --action inspect|record|check
   --review-file ABS_PATH (record only; explicit independent review/check grant)
 Review never releases a job admission or authorizes a successor.
+Optional for run: --successor-grant ABS_PATH
+  Explicit same-runtime original-to-one-successor grant; cumulative workerTotal=2.
+  Unknown prior invocation remains consumed, never a retry or charge reconciliation.
 Optional for run: --mode real|offline
 An independent review remains required for every worker result.`);
     return;
@@ -260,8 +276,11 @@ An independent review remains required for every worker result.`);
     binding = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'] + '.job.json'), 'utf8'));
     if (typeof binding.logicalJobRef !== 'string' || !binding.logicalJobRef.trim() || await realpath(binding.repo) !== binding.repo) throw Error('missing canonical admission identity');
     const admitted = admission(binding);
-    const actual = JSON.parse(await readFile(join(args['runs-store'], 'admissions', admitted.key + '.json'), 'utf8'));
-    if (JSON.stringify(actual) !== JSON.stringify(admitted)) throw Error('logical admission mismatch');
+    if (binding.successor) await validateSuccessorBinding({ store: args['runs-store'], binding });
+    else {
+      const actual = JSON.parse(await readFile(join(args['runs-store'], 'admissions', admitted.key + '.json'), 'utf8'));
+      if (JSON.stringify(actual) !== JSON.stringify(admitted)) throw Error('logical admission mismatch');
+    }
     dispatch = JSON.parse(await readFile(join(args['runs-store'], args['attempt-id'], 'dispatch.json'), 'utf8'));
     if (binding.version !== 1 || !fullSha(binding.runtimeSha) || binding.methodologySha !== methodologySha || !/^[0-9a-f]{64}$/.test(binding.jobSha256) || !fullSha(binding.models?.sha) || !/^[0-9a-f]{64}$/.test(binding.models?.sha256) || !['real', 'offline'].includes(binding.mode) || binding.reviewRequired !== true || dispatch.timeoutMs !== 120000 || dispatch.outputBytes !== 16000 || ['attemptId', 'repo', 'grantRef', 'inputSha', 'targetBase', 'briefPath', 'briefSha256', 'taskSha256'].some(key => typeof binding[key] !== 'string' || binding[key] !== dispatch[key]) || binding.attemptId !== args['attempt-id']) throw new Error('binding mismatch');
   } catch {
