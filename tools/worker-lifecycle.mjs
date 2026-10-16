@@ -48,6 +48,21 @@ const atomicWriteOnce = async (path, value) => {
 };
 const parseJson = async path => JSON.parse(await readFile(path, 'utf8'));
 
+function linuxStat(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
+  const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
+  const fields = stat.slice(stat.lastIndexOf(')') + 2).trim().split(/\s+/);
+  return { pid, startTicks: fields[19], pgid: Number(fields[2]), state: fields[0] };
+}
+
+function linuxProcess(pid) {
+  return {
+    ...linuxStat(pid),
+    bootId: readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim(),
+    exe: realpathSync(`/proc/${pid}/exe`),
+  };
+}
+
 function linuxIdentity(pid, nonce) {
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
   if (typeof nonce !== 'string' || !/^[0-9a-f]{48}$/.test(nonce)) throw new Error('process nonce must be 48 lowercase hexadecimal characters');
@@ -183,6 +198,19 @@ async function host(attemptDir, nonce) {
     cwd: dispatch.workspace, detached: true, stdio: ['ignore', 'pipe', 'pipe'],
     env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: '/nonexistent', LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8' },
   });
+  const childRecord = new Promise(resolveRecord => {
+    child.once('error', () => resolveRecord());
+    child.once('spawn', async () => {
+      try {
+        const { state, ...identity } = linuxProcess(child.pid);
+        await atomicWriteOnce(join(attemptDir, 'execution-child.json'), {
+          version: 1, attemptId: dispatch.attemptId, taskSha256: dispatch.taskSha256,
+          child: { ...identity, spawnedAt: new Date().toISOString() },
+        });
+      } catch { /* A missing record remains unknown; it never authorizes replacement. */ }
+      resolveRecord();
+    });
+  });
   const killGroup = signal => { try { process.kill(-child.pid, signal); } catch {} };
   const result = await new Promise(resolveResult => {
     let settled = false;
@@ -220,6 +248,7 @@ async function host(attemptDir, nonce) {
     child.once('error', error => finish({ exitCode: null, signal: null, error: error.message }));
     child.once('close', (code, signal) => finish({ exitCode: code, signal, error: null }));
   });
+  await childRecord;
   const renderedStdout = textOutput(stdout, stdoutTruncated, dispatch.outputBytes);
   const renderedStderr = textOutput(stderr, stderrTruncated, dispatch.outputBytes);
   const terminal = {
@@ -233,6 +262,28 @@ async function host(attemptDir, nonce) {
     timedOut, workspace: dispatch.workspace,
   };
   await atomicWriteOnce(join(attemptDir, 'terminal.json'), terminal);
+}
+
+async function observeExecutionChild(attemptDir, dispatch) {
+  let record;
+  try { record = await parseJson(join(attemptDir, 'execution-child.json')); }
+  catch (error) { return { state: 'unknown', reason: error.code === 'ENOENT' ? 'child identity not published' : 'corrupt child identity' }; }
+  const child = record?.child;
+  if (record?.version !== 1 || record.attemptId !== dispatch.attemptId || record.taskSha256 !== dispatch.taskSha256 || !child || !Number.isInteger(child.pid) || child.pid <= 0 || child.pgid !== child.pid || typeof child.bootId !== 'string' || !/^[0-9a-f-]{36}$/.test(child.bootId) || typeof child.startTicks !== 'string' || !/^\d+$/.test(child.startTicks) || typeof child.exe !== 'string' || !isAbsolute(child.exe) || typeof child.spawnedAt !== 'string' || !Number.isFinite(Date.parse(child.spawnedAt))) return { state: 'unknown', reason: 'invalid child identity' };
+  try {
+    if (readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim() !== child.bootId) return { state: 'unknown', reason: 'child boot identity mismatched' };
+    let actual;
+    try { actual = linuxStat(child.pid); }
+    catch (error) {
+      return error.code === 'ENOENT' || error.code === 'ESRCH'
+        ? { state: 'not-live', identity: child, descendants: 'unproven' }
+        : { state: 'unknown', reason: 'child process observation unavailable' };
+    }
+    if (actual.startTicks !== child.startTicks || actual.pgid !== child.pgid) return { state: 'unknown', reason: 'child process identity mismatched' };
+    if (actual.state === 'Z') return { state: 'not-live', identity: child, descendants: 'unproven' };
+    if (realpathSync(`/proc/${child.pid}/exe`) !== child.exe) return { state: 'unknown', reason: 'child executable identity mismatched' };
+    return { state: 'live', identity: child, descendants: 'unproven' };
+  } catch { return { state: 'unknown', reason: 'child process observation unavailable' }; }
 }
 
 async function observe(attemptDir) {
@@ -250,10 +301,11 @@ async function observe(attemptDir) {
       if (terminal.version !== 1 || terminal.attemptId !== dispatch.attemptId || terminal.workspace !== dispatch.workspace || !['success', 'failure', 'timeout'].includes(terminal.outcome) || typeof terminal.finishedAt !== 'string' || typeof terminal.timedOut !== 'boolean' || !(Number.isInteger(terminal.exitCode) || terminal.exitCode === null) || typeof terminal.stdout !== 'string' || typeof terminal.stderr !== 'string' || Buffer.byteLength(terminal.stdout) > dispatch.outputBytes || Buffer.byteLength(terminal.stderr) > dispatch.outputBytes || typeof terminal.stdoutTruncated !== 'boolean' || typeof terminal.stderrTruncated !== 'boolean' || typeof terminal.captureIncomplete !== 'boolean' || terminal.descendants !== (terminal.captureIncomplete ? 'uncertain' : 'not-claimed') || !validResult) return { state: 'unknown', reason: 'invalid terminal' };
       return { state: 'terminal', terminal };
     }
+    const executionChild = await observeExecutionChild(attemptDir, dispatch);
     let owner;
-    try { owner = await parseJson(join(attemptDir, 'owner.json')); } catch (error) { return { state: 'unknown', reason: error.code === 'ENOENT' ? 'owner not published' : 'corrupt owner' }; }
-    if (identityMatches(owner)) return { state: 'running', owner: { pid: owner.pid, startedAt: owner.startedAt } };
-    return { state: 'unknown', reason: 'owner identity absent or mismatched' };
+    try { owner = await parseJson(join(attemptDir, 'owner.json')); } catch (error) { return { state: 'unknown', reason: error.code === 'ENOENT' ? 'owner not published' : 'corrupt owner', executionChild }; }
+    if (identityMatches(owner)) return { state: 'running', owner: { pid: owner.pid, startedAt: owner.startedAt }, executionChild };
+    return { state: 'unknown', reason: 'owner identity absent or mismatched', executionChild };
   } catch { return { state: 'unknown', reason: 'missing or corrupt dispatch' }; }
 }
 
