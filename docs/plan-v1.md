@@ -24,13 +24,14 @@ El cierre acordado de #44 se limita al arranque local operativo de un job: versi
 
 La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec y plan, artefactos bajo `.factory/jobs/`, ownership y entradas fijadas. No crea un nuevo store ni garantiza liveness, recuperación o backup. Las rutas configuradas viven en [`.factory/models.json`](../.factory/models.json); [la guía de modelos](model-routing.md) define interpretación y preflight manuales, no un resolver runtime.
 
-Siguiente secuencia propuesta, sin ampliar autorización:
+Secuencia autorizada por el operador, sin grants implícitos para nuevas ejecuciones o efectos remotos:
 
-1. #66: fallback entre rutas aprobadas, sin usar fallos de tests como motivo de cambio.
-2. #67: concurrencia y exclusión multiwriter; un ID de intento distinto no prueba ownership exclusivo del job.
-3. #68: recuperación general, incluido reinicio de coordinador/modelo/entorno, sin repetir efectos inciertos.
-4. #69: consumidores runtime de Engram y Codegraph. Estas tareas quedan separadas de #44 y requieren su alcance y gates propios; no se activan por cerrar el arranque local.
-5. Seleccionar una issue y obtener el grant para el recorrido completo que podría demostrar H1/PR. H1 no se considera logrado por #61 ni por J802; traducción operativa y verificación más profunda siguen pendientes.
+1. #68: recuperación general, incluido reinicio de coordinador/modelo/entorno, sin repetir efectos inciertos. Los cortes locales entregados no cierran por sí solos este alcance.
+2. #66: fallback entre rutas aprobadas, sin usar fallos de tests como motivo de cambio.
+3. #70: seleccionar una issue real y obtener el grant concreto para demostrar H1 con una PR revisable. #61 y J802 no acreditan H1.
+4. #69: consumidores runtime de Engram y Codegraph.
+5. #67: concurrencia y exclusión multiwriter; un ID de intento distinto no prueba ownership exclusivo del job.
+6. #71: pulir instrucciones y flujos reales de v1. Cada tarea conserva sus gates y permisos; cerrar un corte anterior no autoriza nuevos costes o efectos externos.
 
 El [siguiente corte operativo](next-operational-cut.md) conserva la propuesta anterior al probe; sus opciones no son evidencia actual ni decisiones de implementación. Esta secuencia no cambia la [especificación v1](spec-v1.md) ni declara S01, S02, H1 o los 61 criterios completos. El operador autorizó pushes normales periódicos de checkpoints revisados a `origin/main`; no es permiso para PR, merge, despliegue o force-push.
 
@@ -112,6 +113,8 @@ La ruta de un rol contiene destino inicial y fallbacks con su propio effort. Una
 Las comprobaciones de error usan respuestas controladas, sin consumir deliberadamente cuotas reales. Se añade una ejecución con un destino real autorizado para comprobar la integración, sin afirmar que el caso simulado valida la calidad del modelo.
 
 ## S04. Recuperar un trabajo interrumpido
+
+Estado parcial: la [entrada normal](local-worker-lifecycle.md) conserva identidad del proceso y admisión, revalida candidatos y permite un sucesor con grant explícito y presupuesto acumulado. El [replay integrado](../.audit/recovery-68-successor-committed-proof.json) usa el SDK sin prompts de proveedor; la reconciliación de PR se ha probado con transporte simulado. Los fallos anteriores y los límites quedan conservados en esa evidencia. No demuestra por sí solo recuperación general de modelo o entorno, semántica real de GitHub ni cierre de S04/#68.
 
 El operador reinicia el entorno después de una interrupción. La factory inspecciona estado, artefactos y operaciones conocidas antes de decidir qué reanudar. Una operación de resultado incierto no se repite a ciegas.
 
