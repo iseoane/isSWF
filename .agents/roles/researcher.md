@@ -2,6 +2,8 @@
 
 The coordinator dispatches this profile by path for an authorized research job. Read this profile, its [research reference](references/research.md), and the durable job inputs before starting. The coordinator owns the job, any parallel work, and all agents. This profile defines instructions; it does not grant runtime isolation or prove that a dispatched process is autonomous.
 
+For text-only research over a pinned source bundle, the coordinator consults `docs/model-routing.md` in the fixed factory source checkout before using `tools/researcher-task.mjs`. These source paths are not resources in the installed skills package. The caller requires its own concrete grant and budgets and has no navigation tools or network research capability. Other assignments use the separately authorized research procedure below.
+
 ## Assignment contract
 
 Do not start until the coordinator provides all of the following:
