@@ -39,9 +39,9 @@ async function validate(f) {
   for (const path of f.referencedInputs) assert(gitBytes(f.repo, `${f.inputSha}:${path}`).equals(gitBytes(f.repo, `${f.targetBase}:${path}`)), 'referenced inputs must match target base');
   for (const path of ['tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', '.agents/skills/isswf-coordinator/SKILL.md', '.audit/verify-pi-worker-44-parent.mjs', '.audit/coordinator-44-diagnostic.mjs']) assert((await readFile(join(SOURCE, path))).equals(gitBytes(SOURCE, `${f.factorySha}:${path}`)), 'approved source bytes must still match');
   assert.deepEqual(f.writePaths, ['src/math.mjs']);
-  assert.equal(f.attemptId, 'J704-native-A001');
+  assert(['J704-native-A001', 'J705-native-A001'].includes(f.attemptId));
 }
-async function createBridge(f, root, mode) {
+async function createBridge(f, root, mode, releasePath) {
   await validate(f);
   const runs = join(root, 'runs');
   const attemptDir = join(runs, f.attemptId);
@@ -63,7 +63,7 @@ async function createBridge(f, root, mode) {
   ] : [] };
   const configPath = join(root, 'worker-config.json'), taskPath = join(root, 'worker-task.mjs');
   await writeFile(configPath, JSON.stringify(config), { flag: 'wx', mode: 0o600 });
-  let state = 'fresh', prepared, launch, terminal;
+  let state = 'fresh', prepared, launch, terminal, dispatchTaskSha256;
   const trace = [];
   let toolCalls = 0;
   const observe = operation => JSON.parse(command(process.execPath, [cli, operation, '--runs-store', runs, '--attempt-id', f.attemptId]));
@@ -78,18 +78,30 @@ async function createBridge(f, root, mode) {
       prepared = JSON.parse(command(process.execPath, [preparer, 'prepare', '--config', configPath, '--output', taskPath]));
       assert.deepEqual([prepared.briefPath, prepared.inputSha, prepared.briefSha256], [f.briefPath, f.inputSha, f.briefSha256]);
       assert.equal(prepared.taskSha256, hash(await readFile(taskPath)));
+      dispatchTaskSha256 = prepared.taskSha256;
+      if (releasePath !== undefined) {
+        assert.equal(releasePath, join(root, 'parent-release'), 'trusted barrier must use the private run root');
+        const original = await readFile(taskPath);
+        const barrier = `const barrierFs=await import('node:fs/promises');let barrierReady=false;for(let i=0;i<400;i++){try{await barrierFs.access(${JSON.stringify(releasePath)});barrierReady=true;break;}catch{}await new Promise(r=>setTimeout(r,25));}if(!barrierReady)process.exit(9);\n`;
+        await writeFile(join(root, 'worker-task-original.mjs'), original, { flag: 'wx', mode: 0o600 });
+        const gated = barrier + original.toString('utf8').replace(/^#![^\n]*(?:\n|$)/, '');
+        await writeFile(taskPath, gated, { mode: 0o600 });
+        command(process.execPath, ['--check', taskPath]);
+        dispatchTaskSha256 = hash(gated);
+        prepared = { ...prepared, originalTaskSha256: prepared.taskSha256, dispatchTaskSha256, barrierSha256: hash(barrier), transform: 'Remove initial shebang and prefix trusted 10-second parent-release barrier before SDK imports' };
+      }
       state = 'prepared';
       output = prepared;
     } else if (operation === 'launch') {
       assert.equal(state, 'prepared', 'one total worker: launch only after successful preparation');
       assert.equal(await access(attemptDir).then(() => true, error => { assert.equal(error.code, 'ENOENT'); return false; }), false, 'fresh attempt requires explicit absence');
-      assert.equal(hash(await readFile(taskPath)), prepared.taskSha256);
+      assert.equal(hash(await readFile(taskPath)), dispatchTaskSha256);
       state = 'claimed';
       launch = JSON.parse(command(process.execPath, [cli, 'launch', '--repo', f.repo, '--input-sha', f.inputSha, '--brief', f.briefPath, '--target-base', f.targetBase, '--attempt-id', f.attemptId, '--runs-store', runs, '--grant-ref', 'operator-native-coordinator-E2E-one-worker-total', '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16384']));
       const dispatch = JSON.parse(await readFile(join(attemptDir, 'dispatch.json'), 'utf8'));
-      assert.equal(dispatch.taskSha256, prepared.taskSha256);
+      assert.equal(dispatch.taskSha256, dispatchTaskSha256);
       state = 'launched';
-      output = { attemptId: launch.attemptId, state: 'launched', taskSha256: prepared.taskSha256 };
+      output = { attemptId: launch.attemptId, state: 'launched', taskSha256: dispatchTaskSha256 };
     } else {
       assert.equal(state, 'launched', 'observation requires this attempt to have launched');
       await delay(1500);
@@ -208,4 +220,5 @@ async function main() {
     await session.dispose();
   }
 }
+export { createBridge, runtime, validate };
 if (process.argv[1] && resolve(process.argv[1]) === selfPath) await main();

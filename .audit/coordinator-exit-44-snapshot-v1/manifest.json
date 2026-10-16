@@ -1,0 +1,32 @@
+{
+  "base": "3cc796f27b948069b628e1809b1fad49267d4cfd",
+  "diffSha256": "493e17ae478ab1c763c419932695a65ca4923f8dd2d34cf6b11eaf2554648901",
+  "files": [
+    {
+      "path": ".audit/coordinator-exit-44-fixture.json",
+      "mode": "100644",
+      "sha256": "37a055d980065cb8751b961d44fe05d7779f1287542c2d2d0a8fdc1bb38782a2"
+    },
+    {
+      "path": ".audit/prepare-coordinator-exit-44.mjs",
+      "mode": "100644",
+      "sha256": "091029b78498352af12bb8ce884a69aa83d924c9679121a58a9b56c123cd5384"
+    },
+    {
+      "path": ".audit/verify-coordinator-exit-44-controls.mjs",
+      "mode": "100644",
+      "sha256": "768ba660baae51d846a0b56c3c9332cbfc1034a2383c9d8d43b47f2826bd6e6d"
+    },
+    {
+      "path": ".audit/verify-coordinator-exit-44.mjs",
+      "mode": "100644",
+      "sha256": "72057bf4f2b4cee32e5a916beae681bc2ec1febbed2657bdecdccf96386ce78e"
+    },
+    {
+      "path": ".audit/verify-native-coordinator-44.mjs",
+      "mode": "100644",
+      "sha256": "022e2a5462bd87f8242d5afa4a38971b320cdefeff09aa8a9adeb002b0e4939d"
+    }
+  ],
+  "snapshot": "05e8980c8afd93699e1301abf268ac8a5370ac7322138b12ddf0e7bad58f3ec7"
+}

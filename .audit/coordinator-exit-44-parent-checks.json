@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "sourceCommit": "3cc796f27b948069b628e1809b1fad49267d4cfd",
+  "frozenCandidateUnchanged": true,
+  "originalTaskAndGatedTaskDistinct": true,
+  "originalBodyUnchanged": true,
+  "briefAndMethodologyExactGitBytes": true,
+  "dispatchPinsMatch": true,
+  "coordinatorEsrchBeforeRelease": true,
+  "parentReplay": {
+    "status": "PASS",
+    "stage": "after",
+    "workspace": "/tmp/isswf-coordinator-exit44-YFfYu6/real/runs/J705-native-A001/workspace",
+    "changed": [
+      "src/math.mjs"
+    ],
+    "originalChecksPreserved": true,
+    "checkExit": 0,
+    "observed": "PASS two sum and three product assertions",
+    "evidence": "Independent project outcome only, not provider attribution or lifecycle/OS isolation proof."
+  },
+  "readOnlyReconcileLeavesTerminalAndAttemptCountUnchanged": true,
+  "workerTotal": 1,
+  "scope": "One tested own-child coordinator exit and same-worker fresh-reader observation, not general recovery/mainchat/modelrestart/clientreadiness",
+  "finalIndependentReview": ".audit/coordinator-exit-44-final-review.json",
+  "unitStatus": "PASS bounded coordinator-exit observation proof"
+}

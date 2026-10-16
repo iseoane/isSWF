@@ -1,0 +1,1 @@
+import assert from 'node:assert/strict';import {add,multiply} from './src/math.mjs';assert.equal(multiply(3,7),21);assert.equal(multiply(-2,3),-6);assert.equal(multiply(0,8),0);assert.equal(add(7,3),10);assert.equal(add(-2,3),1);console.log('PASS two sum and three product assertions');

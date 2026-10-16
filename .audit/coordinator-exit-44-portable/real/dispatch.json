@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "attemptId": "J705-native-A001",
+  "createdAt": "2026-10-16T09:05:28.270Z",
+  "repo": "/tmp/isswf-coordinator-exit44-YFfYu6/repo",
+  "inputSha": "36d5a910151bac6ecff9c74fc5916520fc26e5f7",
+  "targetBase": "b6da4ea07085aaa385c315cd2a2201c28b10bfae",
+  "briefPath": ".factory/jobs/J705/brief-r1.md",
+  "briefSha256": "2a00fcc15b4f5705cadcfa8095c27adbdd2880f3f9da996c146c70aac4ec3b22",
+  "grantRef": "operator-native-coordinator-E2E-one-worker-total",
+  "taskSha256": "1104b010b4c68790b14996d93419b6b15c41d38708223541f237e83b1d06cf8e",
+  "timeoutMs": 120000,
+  "outputBytes": 16384,
+  "workspace": "/tmp/isswf-coordinator-exit44-YFfYu6/real/runs/J705-native-A001/workspace",
+  "taskCopy": "/tmp/isswf-coordinator-exit44-YFfYu6/real/runs/J705-native-A001/task.mjs",
+  "lifecycleCopy": "/tmp/isswf-coordinator-exit44-YFfYu6/real/runs/J705-native-A001/worker-lifecycle.mjs",
+  "lifecycleSourceSha256": "405e16fe8dfc754a4c098f4dbee2aafd7a52b52165b797dcc8c5c9e758d8fe36"
+}

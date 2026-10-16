@@ -1,0 +1,8 @@
+{
+  "inputSha": "36d5a910151bac6ecff9c74fc5916520fc26e5f7",
+  "targetBase": "b6da4ea07085aaa385c315cd2a2201c28b10bfae",
+  "bundleSha256": "35eb60ac33b1bc19b4683a770898b33cc6404310e386304ae35a179279986076",
+  "bundleVerified": true,
+  "fixtureClean": true,
+  "phase": "Prepared pinned fixture only; no real call yet"
+}
