@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile, rename, unlink, symlink, chmod } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rename, unlink, symlink, chmod, readdir } from 'node:fs/promises';
 import { readFileSync, realpathSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, isAbsolute } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const source=resolve(process.argv[2]||'.');
@@ -46,6 +46,18 @@ const base=git('rev-parse','HEAD');
 const packageRoot=join(seed.root,'packages',seed.runtimeSha);
 run(process.execPath,[join(seed.root,'source/tools/factory-package.mjs'),'activate','--package',packageRoot,'--project',project]);
 const job={version:1,logicalJobRef:'R68-host-task-loss',runtimeSha:seed.runtimeSha,targetBase:base,methodologySha:'37a56ebc902e94f21fc10666f33fceac44946af7',exclusiveAttempt:true,workerTotal:1,models:{sha:base,path:'.factory/models.json',sha256:hash(models)},briefPath:'.factory/jobs/R68/brief.md',referencedInputs:['src/counter.mjs','check.mjs','trusted-hold.mjs'],expectedMutablePaths:['src/counter.mjs','heartbeat.txt','tool-ready.json'],protectedCheckCommand:'node check.mjs',offlineChecks:[{name:'hold-after-partial',command:"printf 'export const counter=()=>1;\\n' > src/counter.mjs; node trusted-hold.mjs",expectedExitCode:0}]};
+if(process.argv.includes('--launch-via-pi')) {
+  const paths=[];
+  for(const name of await readdir(join(seed.root,'runs')))if(name.startsWith('.prepare-')) {
+    const config=JSON.parse(await readFile(join(seed.root,'runs',name,'config.json'),'utf8'));
+    if(config.mode==='offline'&&config.brief.inputSha===seed.inputSha) {
+      for(const key of ['sdkPath','authPath'])assert(typeof config[key]==='string'&&isAbsolute(config[key]),key+' must be an explicit absolute opaque path before committing job');
+      paths.push({sdkPath:config.sdkPath,authPath:config.authPath});
+    }
+  }
+  assert.equal(paths.length,1,'one original offline SDK configuration supplies opaque paths');
+  Object.assign(job,paths[0]);
+}
 await writeFile(join(project,job.briefPath),'Disposable offline recovery fixture; no provider call.\n');
 const jobPath='.factory/jobs/R68/job.json';
 await writeFile(join(project,jobPath),JSON.stringify(job)+'\n');git('add','.');git('commit','-qm','recovery inputs');
@@ -62,7 +74,10 @@ const signalOwned=(identity,signal)=>{
   process.kill(identity.pid,signal);
 };
 const id='R68-host-task-loss';
-const launched=launch(id), dir=launched.attemptDir, work=join(dir,'workspace');
+const launched=process.argv.includes('--launch-via-pi')
+  ? JSON.parse(run(process.execPath,[join(source,'.audit/launch-normal-job-offline-pi.mjs'),cli,project,input,jobPath,runs,id,'explicit-offline-recovery-fixture']))
+  : launch(id);
+const dir=launched.attemptDir, work=join(dir,'workspace');
 await wait(async()=>{try{await readFile(join(work,'heartbeat.txt'));return true;}catch{return false;}},'tool descendant actively writes');
 const owner=JSON.parse(await readFile(join(dir,'owner.json'),'utf8'));
 const childRecord=JSON.parse(await readFile(join(dir,'execution-child.json'),'utf8'));
@@ -111,7 +126,7 @@ await wait(async()=>{gatedResult=await read(gateId,'read');return gatedResult.st
 assert.equal(gatedResult.terminal.outcome,'failure');
 assert.equal(await readFile(join(gateWork,'src/counter.mjs'),'utf8'),'export const counter=()=>0;\n','command cannot run before startup evidence publication');
 assert.equal(await readFile(join(gateWork,'tool-ready.json')).then(()=>true).catch(()=>false),false);
-const result={status:'PASS',root,runtimeSha:seed.runtimeSha,input,targetBase:base,providerPromptStarted:false,hostLossWhileTaskLive:live,stopped,namespaceInit:init,heartbeatStable:true,immutableRecordsPreserved:true,negatives,publicationFailureGate:{terminal:gatedResult.terminal.outcome,commandNeverStarted:true},limits:['stopped means review, not successor authorization','remote effects not reconciled','no real provider recovery run']};
+const result={status:'PASS',root,runtimeSha:seed.runtimeSha,input,targetBase:base,environmentRestart:launched.environmentRestart?{...launched.environmentRestart,explicitAbsoluteSDKPath:true,explicitAbsoluteOpaqueAuthPath:true}:undefined,providerPromptStarted:false,hostLossWhileTaskLive:live,stopped,namespaceInit:init,heartbeatStable:true,immutableRecordsPreserved:true,negatives,publicationFailureGate:{terminal:gatedResult.terminal.outcome,commandNeverStarted:true},limits:['stopped means review, not successor authorization','remote effects not reconciled','no real provider recovery run']};
 const proofPath=join(root,'recovery-result.json');
 await writeFile(proofPath,JSON.stringify(result)+'\n');
 const acceptanceControl=JSON.parse(run(process.execPath,[join(source,'.audit/verify-recovery-68-acceptance.mjs'),proofPath]));
