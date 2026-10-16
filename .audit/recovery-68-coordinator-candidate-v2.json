@@ -1,0 +1,6 @@
+{
+  "base": "2ccba26",
+  "file": ".agents/skills/isswf-coordinator/SKILL.md",
+  "sha256": "cd9ceef7ca5d7679f3eb3078611a79652979616c4d809a502da35725132afd6e",
+  "scope": "Existing skill only; normal entry and safe recovered-partial review, fixed-source guide pointer, no package expansion"
+}

@@ -1,0 +1,51 @@
+{
+  "canonicalModelConfig": ".factory/models.json",
+  "routingGuide": "docs/model-routing.md",
+  "actualConfig": {
+    "schemaVersion": 1,
+    "roles": {
+      "worker": [
+        {
+          "model": "openai-codex/gpt-6-luna",
+          "effort": "high"
+        }
+      ],
+      "researcher": [
+        {
+          "model": "opencode-go/glm-5.3-flash",
+          "effort": "high"
+        },
+        {
+          "model": "openai-codex/gpt-6-luna",
+          "effort": "medium"
+        }
+      ],
+      "reviewer": [
+        {
+          "model": "openai-codex/gpt-6-luna",
+          "effort": "high"
+        }
+      ],
+      "additional-review": [
+        {
+          "model": "opencode-go/deepseek-v4.1-flash",
+          "effort": "max"
+        }
+      ]
+    }
+  },
+  "adopted": [
+    "Per-job explicit numeric budgets; no invented defaults",
+    "Current worker singleton has no fallback to activate",
+    "Researcher route cannot be silently used as worker route",
+    "Configuration membership is not permission"
+  ],
+  "corrections": [
+    {
+      "source": ".audit/fallback-66-design-b.json",
+      "claim": "#68 cessation + partial reconciliation absent",
+      "actual": "Native local task/namespace cessation plus partial revalidation implemented5031d3a and coordinator instruction integrationce43072; remote effects/general environment recovery still missing"
+    }
+  ],
+  "status": "Future66 design only; implementation remains blockedBy68"
+}

@@ -1,0 +1,13 @@
+{
+  "commit": "ce4307231b7a4daf301b8450b88b26f691f127af",
+  "file": ".agents/skills/isswf-coordinator/SKILL.md",
+  "sha256": "cd9ceef7ca5d7679f3eb3078611a79652979616c4d809a502da35725132afd6e",
+  "gitBlobIdentity": true,
+  "core": ".audit/recovery-68-coordinator-committed-core.json",
+  "normalEntryOfflineReplay": ".audit/recovery-68-coordinator-committed-operational.json",
+  "status": "COORDINATOR_INSTRUCTION_INTEGRATION_PASS",
+  "remainingTask68": [
+    "S04 remote effect intent/reconciliation before and after PR creation not implemented",
+    "General model/environment recovery not established; unknown effects remain blocked"
+  ]
+}

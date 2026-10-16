@@ -1,0 +1,13 @@
+{
+  "agent": "a8a5115ac82400dd7",
+  "sourceLog": "2026-10-16T14-48-12-159Z_586808af-97a0-48c4-9f70-7eafb3042188.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/recovery-68-coordinator-candidate-v2.json",
+  "report": "**Standards: PASS. Spec: PASS.** The source-pointer replacements address the packaging blocker without expanding the payload. Per the supplied evidence, the frozen candidate passes core v2 and `git diff --check`, with no other affected-gate failures reported. Original raw FAIL retained; no re-open or probes performed.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}
