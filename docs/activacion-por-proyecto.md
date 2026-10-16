@@ -39,7 +39,7 @@ Pi loads project package declarations only after project trust is granted. Revie
 
 ## Git checkpoint boundary
 
-A materialized resource package is not a Git checkout. Its full-SHA directory name and receipt identify the packaged resource version; neither is the target job's document-input checkpoint. When a trusted grant requires checkpoint-pinned reads, it must still name the source checkout and full Git SHA. Read checkpoint files from that source with the existing Git workflow (for example, `git show <full-sha>:<path>`). Do not treat the extracted package as a Git source or add a resolver/runtime to bridge the two.
+A materialized resource package is not a Git checkout. Its full-SHA directory name and receipt identify the packaged resource version; neither is the target job's document-input checkpoint. When a trusted grant requires checkpoint-pinned reads, it must still name the source checkout and full Git SHA. Read checkpoint files from that source with the existing Git workflow (for example, `git show <full-sha>:<path>`). Do not treat the extracted package as a Git source. For authorized native jobs, the source checkout's [normal job entry](local-worker-lifecycle.md#run-a-job-from-an-activated-project) verifies the active package receipt and source runtime bytes before using the existing preparer and runner. It does not add executable files to the resource package or start a coordinator model.
 
 ## Operational limits
 

@@ -11,6 +11,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const revisionPattern = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const receiptName = ".isswf-package-receipt.json";
@@ -94,7 +95,7 @@ function isWithin(parent, child) {
   return path === "" || (!path.startsWith(`..${sep}`) && path !== "..");
 }
 
-async function canonicalPath(path) {
+export async function canonicalPath(path) {
   let candidate = resolve(path);
   const missing = [];
   while (true) {
@@ -195,7 +196,7 @@ async function materialize({ source, revision, store }) {
   console.log(`Materialized ${revision}: ${destination}`);
 }
 
-async function verifyPackage(packageRoot, expectedRevision) {
+export async function verifyPackage(packageRoot, expectedRevision) {
   const root = resolve(packageRoot);
   const receiptPath = join(root, receiptName);
   let receipt;
@@ -326,15 +327,17 @@ function basename(path) {
   return path.slice(path.lastIndexOf(sep) + 1);
 }
 
-try {
-  const { command, options } = parseArgs(process.argv.slice(2));
-  if (command === "materialize") await materialize({
-    source: options["--source"],
-    revision: options["--revision"],
-    store: options["--store"],
-  });
-  else await activate({ package: options["--package"], project: options["--project"] });
-} catch (error) {
-  console.error(error.message);
-  process.exitCode = 1;
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    const { command, options } = parseArgs(process.argv.slice(2));
+    if (command === "materialize") await materialize({
+      source: options["--source"],
+      revision: options["--revision"],
+      store: options["--store"],
+    });
+    else await activate({ package: options["--package"], project: options["--project"] });
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+  }
 }
