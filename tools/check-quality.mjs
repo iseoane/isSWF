@@ -53,4 +53,5 @@ try {
   await rm(store, { recursive: true, force: true });
 }
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
+console.log(JSON.stringify({ status: 'PASS', sessionResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
