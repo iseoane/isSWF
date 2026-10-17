@@ -1,0 +1,106 @@
+{
+  "sourceCommit": "6c6184ca584dd7fb8acf67e7ec0c53f48aeee3cf",
+  "base": "ab7b0ab24450230d1c4d1579dc3278970825919f",
+  "files": {
+    "tools/researcher-task.mjs": "3c6daea0d40df4405daf7206220c98dff20c12f335c68f621ad30c4e9711975e",
+    "tools/check-quality.mjs": "ed7bd5cba40e4651bedd6cee0d88146568b2520b64c41cf93ea0a82ba95a9b8d",
+    "tests/researcher-quota-fallback.mjs": "fe8609c1cde8e87cb67a5a76e6c77a18ef9d4e52bbaf59fdd5e2ca4d2d0bbc51",
+    "README.md": "583d3af831ccbd2a3847ebf1bd49d8806c7d99b10285a890ccc0ad40be50ff0a",
+    "docs/model-routing.md": "79452f057bfda95d56f7920a6111cb163af7e4fcdf09ac072583cb96683779f3",
+    "docs/plan-v1.md": "85434be8ca6b0194c43f573d676b8796857fb913221d728f12d213501355c5bd",
+    ".audit/fallback-66-quota-contract.json": "9b35f3a4f5ea2b50fe6c3168214712194972acacb56f89aeb437bfde7adde5b7"
+  },
+  "gitBlobIdentity": "PASS",
+  "postcommit": {
+    "quality": {
+      "status": "PASS",
+      "sessionResult": "{\n  \"status\": \"PASS\",\n  \"mode\": \"injected-caller-contract\",\n  \"sameSessionAcrossRetry\": true,\n  \"distinctSessionAcrossJobs\": true,\n  \"persistedOpaqueUUID\": true,\n  \"forbiddenNetworkFetches\": 0,\n  \"realRuntimeCalls\": 0,\n  \"limits\": \"Synthetic provider acceptance only; no real service availability or fallback integration proof.\"\n}",
+      "quotaResult": "{\n  \"status\": \"PASS\",\n  \"controls\": [\n    \"known-Go-quota-advances-without-retry\",\n    \"quota-does-not-widen-total-budget\",\n    \"rate-limit-is-not-quota\",\n    \"free-tier-not-supported-by-Go-contract\",\n    \"prose-never-authorizes-transition\",\n    \"wrong-envelope-blocks\",\n    \"unknown-429-blocks\",\n    \"malformed-JSON-blocks\",\n    \"oversized-body-blocks\",\n    \"auth-status-cannot-be-quota\",\n    \"other-provider-cannot-use-Go-contract\",\n    \"clone-failure-preserves-response\",\n    \"capture-stall-remains-deadline-bounded\"\n  ],\n  \"mode\": \"portable-injected-caller\",\n  \"forbiddenNetworkFetches\": 0,\n  \"realRuntimeCalls\": 0,\n  \"limits\": \"Known versioned Go error envelope only. No current-service quota response, all-provider classifier or actual fallback claim.\"\n}",
+      "revision": "6c6184ca584dd7fb8acf67e7ec0c53f48aeee3cf",
+      "syntaxFiles": 13,
+      "markdownFiles": 22,
+      "checkedLinks": 23,
+      "package": "materialized committed HEAD and verified receipt/payload",
+      "routeResult": "PASS public worker route admission guard and canonical-route positive control",
+      "limits": "No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks."
+    },
+    "primarySDKSynthetic": {
+      "status": "PASS",
+      "controls": [
+        "known-Go-quota-advances-without-retry",
+        "quota-does-not-widen-total-budget",
+        "rate-limit-is-not-quota",
+        "free-tier-not-supported-by-Go-contract",
+        "prose-never-authorizes-transition",
+        "wrong-envelope-blocks",
+        "unknown-429-blocks",
+        "malformed-JSON-blocks",
+        "oversized-body-blocks",
+        "auth-status-cannot-be-quota",
+        "other-provider-cannot-use-Go-contract",
+        "clone-failure-preserves-response",
+        "capture-stall-remains-deadline-bounded"
+      ],
+      "mode": "actual-primary-SDK-synthetic-transport-and-injected-alternate",
+      "forbiddenNetworkFetches": 0,
+      "realRuntimeCalls": 0,
+      "limits": "Known versioned Go error envelope only. No current-service quota response, all-provider classifier or actual fallback claim."
+    },
+    "existingControls": {
+      "status": "PASS",
+      "count": 19,
+      "sourceHash": "3c6daea0d40df4405daf7206220c98dff20c12f335c68f621ad30c4e9711975e",
+      "realRuntimeCalls": 0
+    },
+    "eslint": "PASS",
+    "knip": "PASS"
+  },
+  "implementationReview": {
+    "agent": "ab513a5ff8dc2ab54",
+    "sourceLog": "2026-10-17T18-18-10-892Z_475d0fe6-eb93-4756-9210-1f8eca69ecb9.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/fallback-66-quota-snapshot-v1/manifest.json",
+    "report": "**VERDICT: PASS** (implementation + contract), with one material evidence caveat.\n\n**Correctness** (candidate lines match frozen payload line-for-line):\n- `tools/researcher-task.mjs:18–30`: classifies only provider `opencode-go` + HTTP 429; cumulative 8192 check, fatal UTF-8, exact `type:error`/`error.type:GoUsageLimitError`, swallow→undefined. Prose, headers, RateLimitError, FreeUsageLimitError, other provider, 401, malformed/oversized bodies all fall through to blocked.\n- `:108` returns the original response to the SDK (clone-only read); `:112` awaits the observer under the same deadline before `:113` finally-abort. `:116` needs 429 + code + error/unfinished stream; `:120` persists only `source`/`code`; `:122` advances index without touching `retries`/`calls`; `:97–98` keeps the total-attempt budget. Matches prompt claims.\n- Tests: `tests/researcher-quota-fallback.mjs:17–30` (13 controls), `:76–80` (canary absent, original body unchanged, portable), `:84` actual-primary-SDK synthetic mode with injected alternate.\n- Source citations verified: SDK `retry.js:1–8` (GoUsageLimitError labelled subscription limit; prose helper not authority) and `.audit/fallback-66-quota-provider-legacy-handler.source` 507–532 (429 envelope, RateLimitError listed) and ~913/940/962 weekly/monthly/rolling; `.audit/fallback-66-quota-provider-proxy.source:17` confirms the migration caveat. Contract is honestly bounded.\n- Standards/Spec: `docs/model-routing.md:38–46`, `docs/plan-v1.md:54,101`, `tools/check-quality.mjs:57` updated; no overclaim, no new architecture.\n\n**Material caveat**: the brief-cited `.audit/fallback-66-quota-red-v2.stderr` does not exist. Repo-wide `**/fallback-66-quota-red-v2*` yields only `.exit` (`1`) and a 0-byte `.json` (grep `.` no match). The “blocked vs complete” RED reason is claimed in `payload/.audit/fallback-66-quota-contract.json:28–34` but not preserved; v1 has the same gap.\n\n**Minor**: `:25` size-checks after a whole chunk, so one >8192 chunk exceeds the transient bound; `docs/model-routing.md:40` “at most 8192” is slightly stronger.\n\nRead-only: hashes not recomputed; equality checked by inspection.",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "max",
+      "stopReason": "stop"
+    }
+  },
+  "evidenceDeltaReview": {
+    "agent": "af15be57d89054394",
+    "sourceLog": "2026-10-17T18-23-47-343Z_5b64ce39-3447-4441-96d3-637227125520.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/fallback-66-quota-snapshot-v2/manifest.json",
+    "report": "**PASS.**\n\nVerified by direct read (no ignore-aware discovery):\n\n- **2-file delta confirmed.** v1 vs v2 manifests (`/tmp/isswf-quota66`): only `docs/model-routing.md` (11bc91e7→79452f05) and `.audit/fallback-66-quota-contract.json` (edde90c3→9b35f3a4) differ. `researcher-task.mjs`, `check-quality.mjs`, test, README, plan-v1 byte-identical.\n- **RED SHA anchored.** Contract `testSha256` fe8609c1… equals current test hash; `sameExactTestInBaseline: true`.\n- **Caveat resolved.** `.audit/fallback-66-quota-red-v2.stderr` exists (direct read); its bytes match contract `stderr`/`stderrSha256` 9a9baa57… and `v1-resolution.json`. `.gitignore:12 .audit/*.stderr` explains v1's find/grep miss. Content is assertion text only — no secrets, headers, or account data.\n- **8192 wording honest:** retained parsing bytes, explicitly not the fetch chunk allocation or SDK body-read cap (`model-routing.md:40`).\n- **Scope preserved:** known versioned Go envelope only; provider-migration caveat retained; no runtime calls or grants.\n\nNo material blockers. Minor, non-blocking: post-chunk size check can transiently hold one chunk beyond 8192; the new caveat sentence covers it.",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "high",
+      "stopReason": "stop"
+    }
+  },
+  "resolution": {
+    "sourceReview": "ab513a5ff8dc2ab54",
+    "implementationAndContract": "PASS",
+    "redCaveat": {
+      "disposition": "Actual stderr exists; missing-file inference came from ignore-aware discovery. Retain exact safe stderr inside committed contract artifact.",
+      "source": ".audit/fallback-66-quota-red-v2.stderr",
+      "sha256": "9a9baa571d41623cfceba568ef85385a8485e2b1027d5e62491f3c79a5be3bfe",
+      "ignoredBy": ".gitignore:12 .audit/*.stderr"
+    },
+    "minorBound": {
+      "disposition": "Clarify 8192 is retained parsing bytes, not underlying fetch chunk allocation/SDK read cap."
+    },
+    "runtimeCodeChanged": false,
+    "testsChanged": false
+  },
+  "limits": [
+    "Known historical Go JSON contract, not evidence of current deployed error schema.",
+    "No real quota exhaustion, new provider invocation or universal classifier claim.",
+    "SDK primary transport is synthetic; alternate is injected.",
+    "Earlier real primary success used source24c48b3, not this observer.",
+    "CI pending at evidence checkpoint; manual exact-head green gate before merge."
+  ]
+}
