@@ -1,6 +1,25 @@
 # S01. Preparar una issue y verla en el panel
 
-Estado: U1 y U2 implementadas y verificadas localmente con fixtures; U3, U4 y S01 completa pendientes. Hay skill candidata, persistencia SQLite y panel de lectura comprobados. No hay integración GitHub real ni workers. Este documento desarrolla [S01 del plan](plan-v1.md), sin modificar el alcance de la [spec](spec-v1.md).
+Este documento conserva el contrato y la evidencia histórica U1/U2. El corte nativo siguiente prepara y relee un brief local; no cierra S01 completa ni sustituye el panel histórico. El estado general y las capacidades verificadas están en el [plan vigente](plan-v1.md), no en las limitaciones originales de U1/U2. La [spec](spec-v1.md) permanece sin cambios.
+
+## Preparación nativa de una issue
+
+Desde un checkout fuente autorizado, el coordinador usa `tools/isswf-intake.mjs`; el paquete de recursos Markdown no contiene este ejecutable. Esta ruta no requiere Pstack, Python, SQLite, un modelo ni un worker. Recibe una observación GitHub obtenida mediante una lectura autorizada, un grant externo confiable limitado a preparación y una propuesta curada por el coordinador. No consulta GitHub ni interpreta etiquetas como permisos. La propuesta clara conserva `questions: []`; una decisión pendiente queda como pregunta, no como respuesta inventada.
+
+```sh
+node tools/isswf-intake.mjs prepare --project /absolute/project --repository owner/repo --issue 21 --source /absolute/observation.json --grant /trusted/outside-project/prepare.json --proposal /absolute/proposal.json
+node tools/isswf-intake.mjs read --project /absolute/project --repository owner/repo --issue 21
+```
+
+La observación contiene `{ observedAt, issue }`; `issue` conserva los campos `number`, `title`, `body`, `state`, `url`, `labels` (objetos con `name`) y `updatedAt` de `gh issue view`. El grant contiene exactamente `version: 1`, `project` (raíz Git canónica absoluta), `repository`, `issue`, `reference` y `permissions: ["prepare"]`. Su procedencia debe corresponder a una decisión real del operador. Un archivo fuera del proyecto no autentica por sí solo esa decisión: esta herramienta valida vínculos y forma, no ofrece un servicio de autorización. La propuesta contiene `objective`, `scope`, `exclusions`, `acceptance`, `questions`, `nextStep` y `targetBase` (SHA completo de un commit existente). Las cuatro listas son arrays de texto. Una propuesta sin preguntas exige aceptación observable.
+
+La identidad canónica repositorio/issue deriva un ID legible con prefijo `S01-<número>-` y hash completo, único dentro del proyecto. Preparar escribe exclusivamente `.factory/jobs/<ID>/brief-r1.md` e `intake.json`; es una modificación local visible para Git, no una autorización de commit o ejecución. El Markdown es el brief autoritativo. El registro enlaza sus bytes, fuente, propuesta, grant y base. Un claim de directorio exclusivo impide dos preparaciones del mismo origen. `intake.json`, publicado por enlace exclusivo tras sincronizar los archivos, es también la señal de publicación completa; no hay un tercer marcador. Una publicación incompleta o corrupta bloquea sin reparar ni sobrescribir automáticamente.
+
+Repetir la misma preparación devuelve `reused` y conserva los mismos bytes. El fingerprint incluye título, hash del cuerpo, etiquetas ordenadas, estado y `updatedAt`; no incluye la hora de lectura. Cualquier diferencia en esos campos, el grant o la propuesta bloquea conservadoramente con `reconciliation-required`. Este primer corte no decide si una diferencia es inocua ni publica una revisión nueva. La conciliación explícita posterior queda pendiente; no se borra el claim para eludirla.
+
+`read` no crea directorios, actualiza registros ni hace llamadas de red. Puede recibir `--source` y `--grant` para contrastar una observación y autorización suministradas. Sin ellos muestra solo lo último observado y la autorización como no recontrastada. Incluso con ellos la frescura es la de esa observación, no una consulta viva a GitHub. El resumen conserva preguntas y bloqueos, pero siempre declara `executionAuthorized: false`. Solo una delegación posterior, con grant e inputs Git propios, podría consumir el brief ya revisado y comprometido. Este corte no cambia el JSON ni los comandos históricos U1/U2 de `isswf-triage`.
+
+## Contrato histórico y objetivo completo de S01
 
 ## Experiencia del operador
 
