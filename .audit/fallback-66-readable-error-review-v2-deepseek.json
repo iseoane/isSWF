@@ -1,0 +1,13 @@
+{
+  "agent": "a36a14dee41f9cb0a",
+  "sourceLog": "2026-10-17T05-31-23-280Z_4ffb524f-3f99-40d5-ae54-cb4c77f08bab.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/fallback-66-readable-error-snapshot-v2/manifest.json",
+  "report": "**PASS — no material blocker.**\n\nFrozen v2: manifest/payload hashes match working files. Capture module byte-identical v1→v2 (`6fe3a5e3…`); docs delta is only `grants; it` → `grants. It has no live CLI.` v1 reviews and resolution retained; both named blockers addressed.\n\nDelta verified: v2 verifier has no `prepareResearch`, no consumed `/tmp/isswf-fallback66-live-*` job/grant, no spawnSync or historical replays (separate parent records). It builds a fresh in-memory synthetic job/grant, hash-pins the installed SDK entry, writes synthetic 0600 auth, injects fake `send`. Escaped canary asserts `escapedKey !== quotedKey`, then redacts. Provider-enabled grant refused before backend (`initialized:0`).\n\nReran the sanctioned offline test: repo PASS and isolated four-file copy PASS — 14/14 controls, `observedForbiddenNetworkFetches:0`, `actualRuntimeCalls:0`, no historical/grants files copied.\n\nRemaining contract scope unchanged: offline-only, no live CLI, finite best-effort redaction explicit, HTTP400 cause still unknown/unresolved. No repository writes.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

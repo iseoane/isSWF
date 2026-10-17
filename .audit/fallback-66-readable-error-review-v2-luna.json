@@ -1,0 +1,13 @@
+{
+  "agent": "a7f79253a2f20a18b",
+  "sourceLog": "2026-10-17T05-31-23-285Z_d16eb6db-ea6b-429b-b759-1788fef931cd.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/fallback-66-readable-error-snapshot-v2/manifest.json",
+  "report": "**Standards: PASS. Spec: PASS. Maintainability: PASS.**\n\nThe frozen v2 payload keeps the capture module unchanged from v1 and confines changes to the verifier and one guide punctuation edit. The verifier now prepares a fresh synthetic SDK fixture, adds a distinct quote/backslash escaped-credential canary, and avoids historical-fixture dependence. Recorded parent-v3, core-v2, historical-replay, and isolated-copy proofs report PASS.\n\nNo material issue found in the reviewed artifacts. The documentation and limits correctly preserve that text retention is best-effort, no live CLI or new grant is involved, and the historical HTTP 400 remains undiagnosed. I did not run scripts; obtain the required actual independent PASS before commit or push.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

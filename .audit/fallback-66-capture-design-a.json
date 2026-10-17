@@ -1,0 +1,12 @@
+{
+  "agent": "ad9e8212552e5436f",
+  "sourceLog": "2026-10-17T05-16-18-100Z_25317c20-297b-4d97-bde1-325cc700ac93.jsonl",
+  "initialPromptMatched": true,
+  "report": "**Design A:** Keep both historical files byte-for-byte unchanged; their replay verifier binds frozen v1. Put the correction in a versioned v2 diagnostic driver with a self-contained redactor—not a framework.\n\nAt the trusted SDK send boundary, provide the redactor only credential-header values already in memory. Never inspect auth files or log headers. Redact the captured error before truncating or persisting it; never publish the raw SDK error message. A v2 offline SDK-error consumer should emit and verify only the sanitized result.\n\nUse one API: `redactError(error, { credentialValues }) → { message: { text }, redaction, truncation }`. Extract useful text from top-level/nested JSON messages, JSON strings, and plaintext; preserve unknown error text. Scrub exact credential values plus token-like strings, emails, URLs, paths, and control characters. Cap raw bodies at 8192 bytes and emitted text at 2048 bytes, applying redaction before message truncation. Metadata records redaction and truncation. These finite masks are not universal PII protection.\n\nRun synthetic offline tests freely. Refuse all current grants and any runtime, provider, or network calls; this does not recover the lost 400 body or its cause.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

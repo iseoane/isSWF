@@ -1,0 +1,13 @@
+{
+  "agent": "a6835484a3a607eb2",
+  "sourceLog": "2026-10-17T05-25-35-842Z_5adfb6c8-3a1b-4f52-8947-2a050850e3f0.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/fallback-66-readable-error-snapshot-v1/manifest.json",
+  "report": "Yes—material for the verifier’s rerunnable offline scope. Depending on a consumed historical dispatch/temp fixture makes the regression non-self-contained and potentially environment-specific. The test-only fix is appropriate: prepare the SDK synthetic-auth case from a fresh local fixture, and keep historical replay checks separate. The quote/backslash canary also closes a real coverage gap: the existing key did not distinguish JSON-escaped matching from raw matching.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

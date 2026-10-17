@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "controls": [
+    "legacy-RED-unknown-message-retained-verbatim-with-unknown-code",
+    "plain-text-json-string-top-and-error-message-envelopes",
+    "observed-credential-and-common-encoded-echoes-redacted-in-message-and-code",
+    "finite-generic-token-email-url-path-ip-control-masks",
+    "credential-redacted-before-output-boundary",
+    "2048-byte-cap-preserves-UTF8-boundary",
+    "8192-prefix-truncation-withholds-secret-fragment",
+    "redaction-marker-collision-fails-closed",
+    "missing-context-unsupported-envelope-invalid-encoding-fail-closed",
+    "consumed-real-grant-refused-before-backend",
+    "actual-SDK-synthetic-auth-unknown-JSON-and-plaintext-useful-redacted-one-fetch",
+    "capture-clone-read-timeout-failures-preserve-original-response-and-withhold-text",
+    "SDK-oversized-response-withheld-without-hanging-clone",
+    "both-historical-actual-records-and-frozen-v1-replay-unchanged"
+  ],
+  "actualInstalledSDKWithSyntheticAuth": true,
+  "observedForbiddenNetworkFetches": 0,
+  "actualRuntimeCalls": 0,
+  "readRealAuthFiles": false,
+  "limits": [
+    "Synthetic regression fixes lost-message instrumentation only; actual HTTP400 cause remains unknown",
+    "Finite redaction is best-effort and does not prove universal secret or PII removal",
+    "No live consumer CLI, runtime grant, route substitution or automatic retry added"
+  ]
+}

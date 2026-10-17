@@ -1,0 +1,12 @@
+{
+  "acceptedBlockers": [
+    "Make the regression independently rerunnable instead of borrowing a consumed historical temporary fixture",
+    "Add a distinct quote/backslash credential to actually exercise JSON-escaped matching"
+  ],
+  "correction": "Fresh synthetic SDK prepared fixture and in-memory provider-enabled negative case; historical proof replays run separately by parent; explicit unequal raw/JSON-escaped canary added",
+  "sourceCaptureModuleChanged": false,
+  "otherChange": "One semicolon in the new guide paragraph replaced with a period",
+  "proof": "Parent regression v3 PASS and four-file isolated-copy regression PASS with no historical fixtures or grants copied",
+  "actualRuntimeCalls": 0,
+  "limits": "This corrects offline instrumentation and testability, not the unknown cause of either historical HTTP400"
+}
