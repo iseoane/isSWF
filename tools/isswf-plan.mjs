@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+import { createHash, randomUUID } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { lstat, readFile, realpath, mkdir, open, link, unlink, rename, rmdir } from 'node:fs/promises';
+import { isAbsolute, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
+const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
+const states = ['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed'];
+async function regular(path) {
+  const stat = await lstat(path);
+  if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 256000) throw Error('bounded regular file required');
+  return readFile(path, 'utf8');
+}
+async function directory(path, create = false) {
+  if (create) { try { await mkdir(path, { mode: 0o700 }); } catch (error) { if (error.code !== 'EEXIST') throw error; } }
+  const stat = await lstat(path);
+  if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('regular directory required');
+}
+async function synced(path, bytes) {
+  const handle = await open(path, 'wx', 0o600);
+  try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }
+}
+function render(value, initiative) {
+  if (value.version !== 1 || value.initiative !== initiative || !text(value.title) || !['bug', 'enhancement', 'maintenance', 'research'].includes(value.type) || !Array.isArray(value.jobs) || !value.jobs.length || value.jobs.length > 100) throw Error('invalid initiative plan');
+  const ids = new Set(value.jobs.map(job => job.id));
+  if (ids.size !== value.jobs.length || [...ids].some(job => !id(job))) throw Error('unique job IDs required');
+  for (const job of value.jobs) {
+    if (!text(job.objective) || !states.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
+    if (job.status === 'completed' && !job.evidence.length) throw Error('completed jobs require evidence');
+  }
+  const visiting = new Set(), visited = new Set();
+  function visit(job) {
+    if (visiting.has(job.id)) throw Error('cyclic job dependencies');
+    if (visited.has(job.id)) return;
+    visiting.add(job.id);
+    for (const dep of job.dependsOn) visit(value.jobs.find(item => item.id === dep));
+    visiting.delete(job.id); visited.add(job.id);
+  }
+  for (const job of value.jobs) visit(job);
+  const list = values => values.length ? values.map(item => `- ${item}`).join('\n') : '- None.';
+  return `# ${initiative}: ${value.title}\n\nType: ${value.type}\n\nThis coordinator-owned plan records reported progress, not execution permission or process liveness.\n\n` + value.jobs.map(job => `## ${job.id}\n\n- Status: ${job.status}\n- Objective: ${job.objective}\n- Depends on: ${job.dependsOn.join(', ') || 'None'}\n- Brief: [brief-r1.md](jobs/${job.id}/brief-r1.md) (pending until prepared)\n- Blocker: ${job.blocker}\n- Next step: ${job.nextStep}\n\n### Acceptance\n\n${list(job.acceptance)}\n\n### Evidence\n\n${list(job.evidence)}\n`).join('\n');
+}
+export async function plan({ action, project, initiative, proposalPath, grantPath, expectedSha256 }) {
+  if (!['prepare', 'read', 'revise'].includes(action) || !isAbsolute(project ?? '') || !id(initiative)) throw Error('valid action, absolute project and stable initiative ID required');
+  const root = await realpath(project);
+  const git = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
+  if (git.status !== 0 || await realpath(git.stdout.trim()) !== root) throw Error('project must be Git root');
+  const parents = [join(root, '.factory'), join(root, '.factory/initiatives'), join(root, '.factory/initiatives', initiative)];
+  const path = join(parents[2], 'plan.md');
+  if (action === 'read') {
+    try { for (const parent of parents) await directory(parent); const markdown = await regular(path); return { status: 'recorded', path, sha256: sha(markdown), markdown, executionAuthorized: false }; }
+    catch (error) { if (error.code === 'ENOENT') return { status: 'absent', executionAuthorized: false }; throw error; }
+  }
+  if (!isAbsolute(grantPath ?? '')) throw Error('external plan-only grant required');
+  const external = await realpath(grantPath), rel = relative(root, external);
+  if (rel === '' || (!rel.startsWith('../') && rel !== '..' && !isAbsolute(rel))) throw Error('grant must be external');
+  const grant = JSON.parse(await regular(external));
+  if (Object.keys(grant).sort().join(',') !== 'initiative,permissions,project,reference,version' || grant.version !== 1 || grant.project !== root || grant.initiative !== initiative || !text(grant.reference) || JSON.stringify(grant.permissions) !== '["plan"]') throw Error('matching trusted plan-only grant required');
+  const markdown = render(JSON.parse(await regular(proposalPath)), initiative);
+  if (Buffer.byteLength(markdown) > 256000) throw Error('plan too large');
+  for (const parent of parents) await directory(parent, true);
+  let old;
+  try { old = await regular(path); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  if (old === markdown) return { status: 'reused', path, sha256: sha(old), executionAuthorized: false };
+  if (action === 'prepare' && old !== undefined) throw Error('existing plan differs; explicit revise with expected SHA required');
+  if (action === 'revise' && (old === undefined || !/^[a-f0-9]{64}$/u.test(expectedSha256 ?? '') || sha(old) !== expectedSha256)) throw Error('plan revision conflict');
+  const lock = join(parents[2], '.plan-write');
+  await mkdir(lock, { mode: 0o700 });
+  if (old !== undefined && sha(await regular(path)) !== sha(old)) throw Error('plan revision conflict');
+    const pending = join(lock, randomUUID());
+    await synced(pending, markdown);
+    if (old === undefined) await link(pending, path);
+    else {
+      const history = join(parents[2], `plan-${sha(old)}.md`);
+      try { await synced(history, old); } catch (error) { if (error.code !== 'EEXIST' || await regular(history) !== old) throw error; }
+      await rename(pending, path);
+    }
+    if (old === undefined) await unlink(pending);
+    const handle = await open(parents[2], 'r'); try { await handle.sync(); } finally { await handle.close(); }
+  await rmdir(lock);
+  return { status: action === 'prepare' ? 'prepared' : 'revised', path, sha256: sha(markdown), executionAuthorized: false };
+}
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    const [action, ...parts] = process.argv.slice(2), args = {};
+    for (let i = 0; i < parts.length; i += 2) {
+      if (!['--project', '--initiative', '--proposal', '--grant', '--expected-sha256'].includes(parts[i]) || !parts[i + 1] || Object.hasOwn(args, parts[i])) throw Error('invalid option');
+      args[parts[i]] = parts[i + 1];
+    }
+    console.log(JSON.stringify(await plan({ action, project: args['--project'], initiative: args['--initiative'], proposalPath: args['--proposal'], grantPath: args['--grant'], expectedSha256: args['--expected-sha256'] }), null, 2));
+  } catch (error) { console.error(error.message); process.exitCode = 1; }
+}

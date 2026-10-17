@@ -52,9 +52,11 @@ try {
 } finally {
   await rm(store, { recursive: true, force: true });
 }
+const planResult = run(process.execPath, [join(source, 'tests/initiative-plan.mjs'), source]);
+const inventoryResult = run(process.execPath, [join(source, 'tests/project-quality.mjs'), source]);
 const intakeResult = run(process.execPath, [join(source, 'tests/issue-intake.mjs'), source]);
 const methodologyResult = run(process.execPath, [join(source, 'tests/worker-methodology.mjs'), source]);
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', intakeResult, methodologyResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', planResult, inventoryResult, intakeResult, methodologyResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
