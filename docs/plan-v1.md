@@ -1,6 +1,6 @@
 # Plan funcional de construcción de isSWF v1
 
-Estado revisado el 16 de octubre de 2026. Sigue siendo una propuesta para revisar junto a la [especificación](spec-v1.md), no una orden de ejecución ni un plan técnico con módulos y comandos ya decididos. La asignación documental de criterios y los cierres locales no demuestran que S01, S02, H1 ni los 61 criterios estén completos. Véanse [cierre del núcleo Markdown](../.audit/markdown-core-closure.md), [cierre de calidad #54](../.audit/quality-54-closure.md), [cierre de adaptación #49](../.audit/adaptation-49-closure.md), [comprobación de integración Engram](../.audit/engram-integration.json) y [comprobación del índice Codegraph](../.audit/codegraph-index-verify.json).
+Estado revisado el 17 de octubre de 2026. Sigue siendo una propuesta para revisar junto a la [especificación](spec-v1.md), no una orden de ejecución ni un plan técnico con módulos y comandos ya decididos. La asignación documental de criterios y los cierres locales no demuestran que S01, S02, H1 ni los 61 criterios estén completos. Véanse [cierre del núcleo Markdown](../.audit/markdown-core-closure.md), [cierre de calidad #54](../.audit/quality-54-closure.md), [cierre de adaptación #49](../.audit/adaptation-49-closure.md), [comprobación de integración Engram](../.audit/engram-integration.json) y [comprobación del índice Codegraph](../.audit/codegraph-index-verify.json).
 
 ## Lectura del plan
 
@@ -8,7 +8,7 @@ Cada slice termina en un resultado observable, con evidencias y revisión indepe
 
 Las primeras slices se construyen con Pi, Pstack y las skills de Matt disponibles. La factory asume responsabilidades conforme las demuestra. El soporte externo sigue disponible si una capacidad aún no existe o falla.
 
-El primer hito previsto, H1, comprende S01 y S02. Incluye una issue real y definida, grounding, implementación, revisión, correcciones y PR visual. H1 aún no se ha demostrado: falta una PR real y no se ha probado independencia del chat en el runtime de producto. Las slices posteriores completan v1; no se presentan como disponibles en H1.
+El primer hito previsto, H1, comprende S01 y S02. Incluye una issue real y definida, grounding, implementación, revisión, correcciones y PR visual. El corte técnico de H1 produjo la issue #1 y la PR #2, integrada tras revisión y verificaciones. Esto no completa S01/S02 ni demuestra independencia general del chat en el runtime de producto. Las slices posteriores completan v1; no se presentan como disponibles en H1.
 
 No se obliga a usar TDD, diez revisores o benchmarks en cada slice. Se eligen comprobaciones según riesgo. Todos los cambios de código necesitan verificación de comportamiento y revisión independiente.
 
@@ -27,13 +27,13 @@ La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec 
 Secuencia autorizada por el operador, sin grants implícitos para nuevas ejecuciones o efectos remotos:
 
 1. #68: recuperación verificada para la entrada normal en el mismo arranque, con reinicio del proceso Pi y un sucesor de modelo autorizado. S04 detalla la evidencia real, los casos remotos simulados y los estados no soportados que bloquean; no acredita reinicio de la máquina.
-2. #66: fallback entre rutas aprobadas, sin usar fallos de tests como motivo de cambio.
-3. #70: seleccionar una issue real y obtener el grant concreto para demostrar H1 con una PR revisable. #61 y J802 no acreditan H1.
-4. #69: consumidores runtime de Engram y Codegraph.
-5. #67: concurrencia y exclusión multiwriter; un ID de intento distinto no prueba ownership exclusivo del job.
+2. #66: pausada por el operador tras dos respuestas reales HTTP 400; controles offline disponibles, fallback real no demostrado. Sin nuevas llamadas autorizadas.
+3. #70: corte técnico entregado en issue #1 y PR #2, revisada e integrada. #61 y J802 siguen siendo evidencia distinta.
+4. #69: consumidor del coordinador entregado en issue #3 y PR #4, integrada. Engram y Codegraph son opcionales; el brief fijado conserva solo hechos contrastados con fuentes actuales.
+5. #67: corte cooperativo entregado en issue #5 y PR #6, integrada. A/B avanzaron aislados y C esperó el artefacto integrado; no es un scheduler nativo ni exclusión global de escritores.
 6. #71: pulir instrucciones y flujos reales de v1. Cada tarea conserva sus gates y permisos; cerrar un corte anterior no autoriza nuevos costes o efectos externos.
 
-El [siguiente corte operativo](next-operational-cut.md) conserva la propuesta anterior al probe; sus opciones no son evidencia actual ni decisiones de implementación. Esta secuencia no cambia la [especificación v1](spec-v1.md) ni declara S01, S02, H1 o los 61 criterios completos. El operador autorizó pushes normales periódicos de checkpoints revisados a `origin/main`; no es permiso para PR, merge, despliegue o force-push.
+El [siguiente corte operativo](next-operational-cut.md) conserva la propuesta anterior al probe; sus opciones no son evidencia actual ni decisiones de implementación. Esta secuencia no cambia la [especificación v1](spec-v1.md) ni declara S01, S02, H1 o los 61 criterios completos. El operador autorizó las publicaciones e integraciones de las PR #2, #4 y #6, y los merges necesarios del trabajo acordado en este repositorio, tras revisión y verificación. Un push autorizado no concede por sí solo autoridad de merge; estos grants tampoco autorizan despliegues, force-push ni nuevas llamadas de pago.
 
 Antes de usar la factory con clientes, debe demostrarse aislamiento técnico de archivos, herramientas y efectos autorizados. El demo #61 no lo hizo.
 
@@ -79,13 +79,13 @@ Con S01 funcionando, se usa su intake para preparar issues de las siguientes sli
 
 ## S02. De una issue clara a una PR revisada
 
-Los perfiles worker, diagnostician, reviewer, coordinator, planner y researcher son instrucciones Markdown cargadas manualmente, no roles nativos ni autonomía de runtime. #57 construyó planner/researcher. En su ejercicio, GLM high produjo mapas útiles pero incumplió el alcance; una validación separada con Luna no fue fallback. `.factory/models.json` contiene actualmente la ruta configurada del researcher, GLM 5.3 Flash/high seguida de Luna/medium. La guía prescribe preflight y bloqueos manuales; no hay fallback automático ni fiabilidad de ruta demostrada. #58 ejercitó instrucciones propias sobre un fixture simple, con Pstack todavía visible. #59 ejercitó perfiles manualmente con registros sintéticos, sin PR, tracker o UI reales.
+Los perfiles worker, diagnostician, reviewer, coordinator, planner y researcher son instrucciones Markdown cargadas manualmente, no roles nativos ni autonomía de runtime. #57 construyó planner/researcher. En su ejercicio, GLM high produjo mapas útiles pero incumplió el alcance; una validación separada con Luna no fue fallback. `.factory/models.json` contiene actualmente la ruta configurada del researcher, GLM 5.3 Flash/high seguida de Luna/medium. El caller `tools/researcher-task.mjs` implementa presupuestos y cambios de ruta acotados, probados offline. Las dos ejecuciones reales de #66 devolvieron HTTP 400 sin fallback; la causa sigue desconocida y #66 está pausada por el operador. No se declara integración real de fallback demostrada. #58 ejercitó instrucciones propias sobre un fixture simple, con Pstack todavía visible. #59 ejercitó perfiles manualmente con registros sintéticos, sin PR, tracker o UI reales.
 
 La ruta inicial de modelo y effort es explícita. En esta slice una cuota agotada puede bloquear el trabajo; el fallback automático pertenece a S03. Esto se comunica como límite de H1, no como incumplimiento oculto de una v1 terminada.
 
 - [ ] Una issue real de bajo riesgo recorre triage, grounding, implementación, verificación, revisión y entrega.
 - [ ] Un hallazgo bloqueante provoca corrección y nueva verificación del candidato.
-- [ ] Un cambio tras PASS exige una revisión nueva; una revisión ausente bloquea la entrega.
+- [ ] Un cambio tras PASS exige comprobaciones y revisión independiente de las partes afectadas contra la nueva identidad del candidato; una revisión requerida ausente bloquea la entrega.
 - [ ] El mapa de lectura abre rutas reales, símbolos y líneas vigentes, incluidos tests y consumidores.
 - [ ] Una slice deja un commit verificable y una PR draft antes de acumular el trabajo de las siguientes.
 - [ ] Un checkpoint previo al final preserva el progreso parcial y lo muestra como WIP, con verificaciones pendientes; no se anuncia cierre ni se desbloquea otro trabajo.
@@ -93,7 +93,7 @@ La ruta inicial de modelo y effort es explícita. En esta slice una cuota agotad
 - [ ] La PR contiene resultado, visual pertinente, evidencia, problemas relevantes y riesgo explícito.
 - [ ] Durante la ejecución el operador consulta avances y prepara otra issue en el coordinador.
 - [ ] Cerrar la conversación no mata el worker en curso; al volver se encuentra su resultado o estado real.
-- [ ] Ningún paso hace merge ni despliega; la ejecución está confinada al alcance y permisos autorizados.
+- [ ] Ningún paso hace merge sin autorización explícita que nombre repositorio y alcance, ni despliega; la ejecución está confinada al alcance y permisos autorizados.
 - [ ] El resultado y las instrucciones permiten explicar el comportamiento sin wrappers o helpers duplicados innecesarios.
 
 H1 se demuestra sobre una issue real, no solo sobre un worker que imprime done. S04 verifica recuperación en el mismo arranque; no demuestra recuperación tras reiniciar la máquina. A partir de H1 se pueden delegar cambios acotados de la propia factory manteniendo aceptación e integración humanas.
@@ -128,7 +128,7 @@ La evidencia incluye identificadores de los efectos antes y después. No se prom
 
 ## S05. Avanzar trabajos compatibles en paralelo
 
-El coordinador admite dos trabajos independientes. Otro que depende de su contrato integrado espera. Las ramas y espacios de escritura están aislados y la conversación sigue disponible.
+La PR #6 verificó dos trabajos offline independientes en espacios aislados y un tercero retenido hasta integrar el artefacto exacto. La liberación positiva de capacidad y la cola/panel automatizados siguen sin demostrarse. El coordinador decide cooperativamente qué trabajos compatibles admite. Otro que depende de su contrato integrado espera. Las ramas y espacios de escritura están aislados y la conversación sigue disponible.
 
 - [ ] A y B progresan simultáneamente; C, dependiente de A, espera hasta que exista la condición de desbloqueo.
 - [ ] Un bloqueo de A no cancela B ni bloquea una nueva investigación independiente.
@@ -158,7 +158,7 @@ Una skill de retrospectiva analiza un trabajo completo o el cierre explícito de
 
 ## S08. Retomar contexto mediante Engram
 
-La comprobación del 14 de octubre verificó operaciones del CLI de Engram acotadas al proyecto real `isswf`, incluida lectura y una ejecución sin Engram disponible. El análisis de código no encontró consumidor de Engram en `isswf/` ni `tests/`; por tanto, no demuestra integración runtime ni degradación de un consumidor y no completa S08. Una nueva conversación debe recuperar decisiones y aprendizajes del proyecto; el coordinador contrasta su vigencia contra briefs, código y estado operativo actuales. Si falla la separación entre proyectos o la recuperación, se revisa la propuesta con el operador, no se anuncia completada esta slice. Véase el [registro de integración Engram](../.audit/engram-integration.json).
+La comprobación del 14 de octubre verificó operaciones del CLI de Engram acotadas al proyecto real `isswf`, incluida lectura y una ejecución sin Engram disponible. Ese registro histórico no prueba el consumidor actual. La PR #4 añadió su uso opcional al coordinador y un handoff de hechos contrastados al brief fijado; se observó recuperación en una sesión nueva y descarte de memoria obsoleta. El test de degradación usa un caso controlado, no una caída real del servicio, y no completa S08. Una nueva conversación debe recuperar decisiones y aprendizajes del proyecto; el coordinador contrasta su vigencia contra briefs, código y estado operativo actuales. Si falla la separación entre proyectos o la recuperación, se revisa la propuesta con el operador, no se anuncia completada esta slice. Véase el [registro de integración Engram](../.audit/engram-integration.json).
 
 - [ ] Una decisión guardada se recupera en una conversación nueva sin volver a preguntarla.
 - [ ] Un recuerdo antiguo no sobreescribe una decisión posterior ni marca un trabajo terminado.

@@ -20,7 +20,7 @@ State work status explicitly, such as `in progress`, `partial`, `blocked`, `tech
 
 ## Copyable delivery summary
 
-Use `docs/templates/delivery.md`. Lead with a short visual account selected for the change. A table may relate user-visible change, reason, and evidence. A Mermaid diagram is useful only when it depicts the observed implementation or a meaningful real flow. For UI changes, use genuine before/after captures when available and safe to share. Never substitute a mock, expected state, or code-generated approximation for observed UI evidence.
+Use `docs/templates/delivery.md` for the local evidence record. For a remote issue or PR, write in English and use the concise publication format below; link retained evidence instead of copying the entire local record. Lead with a short visual account selected for the change. A table may relate user-visible change, reason, and evidence. A Mermaid diagram is useful only when it depicts the observed implementation or a meaningful real flow. For UI changes, use genuine before/after captures when available and safe to share. Never substitute a mock, expected state, or code-generated approximation for observed UI evidence.
 
 For non-UI changes, use a compact table, small accurate flow, or prose. Omit decorative visuals. Do not require screenshots for non-UI work. Do not expand a large change into a field-by-field inventory; link exact paths and evidence instead.
 
@@ -37,6 +37,12 @@ The summary covers:
 - Risk to affected users, components, or data; plausible failure; mitigation and evidence; reversibility; and recovery limits. Explain when code can be reverted but side effects cannot be automatically undone. Do not label risk `low` without the facts that support it.
 
 A candidate can be presented for review while partial or blocked, but label it plainly. Do not call it ready for acceptance until technical closure criteria are met. Do not claim it was published, reviewed, accepted, merged, or deployed without direct evidence.
+
+## Concise issue and PR text
+
+Write factory issues and PRs in English. An issue states the objective, scope and observable acceptance criteria. A PR explains **Why the change**, provides a compact **Change outline**, names material caveats under **Special things to note**, and includes **Risk Assessment** and **Testing** with checks actually run and their limits. Omit empty sections; put lengthy supporting evidence behind links or a collapsible block. Use a visual only when it helps explain the actual change.
+
+Keep candidate identity, independent review and authorization evidence available in the linked local record. A concise body does not weaken these gates or turn a draft into acceptance.
 
 ## Authorization and publication boundary
 

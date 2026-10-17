@@ -1,6 +1,6 @@
 # Delivery summary
 
-> Copyable local-review candidate summary. Draft text only. Do not claim a remote PR exists unless its URL and state were observed.
+> Local evidence record, not a mandatory remote PR body. For concise English issue/PR text, follow `.agents/roles/references/delivery.md`. Draft text only. Do not claim a remote PR exists unless its URL and state were observed.
 
 ## Work and candidate
 
