@@ -7,6 +7,21 @@ import { fileURLToPath } from 'node:url';
 import { nativeRecorderSource } from './native-recovery.mjs';
 
 const BASELINE = '37a56ebc902e94f21fc10666f33fceac44946af7';
+export function nativeWorkerInstructions(brief, files) {
+  const worker = files['.agents/roles/worker.md'];
+  const start = worker?.indexOf('## Assignment contract\n');
+  const end = worker?.indexOf('## Dispatch configuration\n');
+  if (start === undefined || start < 0 || end === undefined || end <= start) throw new Error('pinned worker methodology sections missing');
+  return [
+    '# Native worker execution',
+    'This worker is already dispatched through the Pi SDK. Its only callable tool is sandbox_shell. No external skills, extensions, dispatcher, agent creation, or Pstack installation are required or authorized by this execution contract.',
+    'The trusted brief governs objective, acceptance, scope and permissions. Methodology does not expand that grant. Coordinator-side dispatch instructions are not worker prerequisites.',
+    'Read applicable own references through sandbox_shell under /factory, only when their trigger applies. Paths in the worker profile are relative to /factory/.agents/roles. Do not install or fetch missing resources; report a required missing reference as blocked.',
+    '# Trusted brief', brief,
+    '# Pinned worker methodology', worker.slice(start, end).trim(),
+    '# Available pinned files', ...Object.keys(files).map(path => `/factory/${path}`),
+  ].join('\n\n');
+}
 const sha = value => createHash('sha256').update(value).digest('hex');
 export function matchesBoundaryControls(control) {
   const expected = { fakeEnvAbsent: true, outsideRead: 'ENOENT', outsideWrite: 'ENOENT', factoryWrite: 'EROFS', sdkWrite: 'EROFS', network: 'ECONNREFUSED' };
@@ -91,6 +106,7 @@ import { join as pathJoin, dirname as pathDirname, resolve as pathResolve, basen
 import net from 'node:net';
 const hash = value => hashFn('sha256').update(value).digest('hex');
 ${matchesBoundaryControls.toString()}
+${nativeWorkerInstructions.toString()}
 ${nativeRecorderSource()}
 const processStartedAt = Date.now();
 const remainingBudget = () => Math.max(0, 110000 - (Date.now() - processStartedAt));
@@ -162,7 +178,7 @@ try {
     const canaryHashPreserved=!isBoundary||hash(await read(boundaryPath))===boundaryHash;
     return {content:[{type:'text',text:result.output}],details:{exitCode:canaryHashPreserved?result.code:1,truncated:result.truncated,...(isBoundary?{canaryHashPreserved}:{})},isError:result.code!==0||!canaryHashPreserved};
   }};
-  const loader={getExtensions:()=>({extensions:[],errors:[],runtime:sdk.createExtensionRuntime()}),getSkills:()=>({skills:[],diagnostics:[]}),getPrompts:()=>({prompts:[],diagnostics:[]}),getThemes:()=>({themes:[],diagnostics:[]}),getAgentsFiles:()=>({agentsFiles:[]}),getSystemPrompt:()=>CONFIG.briefText+'\n\n'+Object.entries(CONFIG.files).map(([p,t])=>'\n## '+p+'\n'+t).join(''),getSystemPromptSource:()=>undefined,getAppendSystemPrompt:()=>[],getAppendSystemPromptSources:()=>[],extendResources:()=>{},reload:async()=>{}};
+  const loader={getExtensions:()=>({extensions:[],errors:[],runtime:sdk.createExtensionRuntime()}),getSkills:()=>({skills:[],diagnostics:[]}),getPrompts:()=>({prompts:[],diagnostics:[]}),getThemes:()=>({themes:[],diagnostics:[]}),getAgentsFiles:()=>({agentsFiles:[]}),getSystemPrompt:()=>nativeWorkerInstructions(CONFIG.briefText,CONFIG.files),getSystemPromptSource:()=>undefined,getAppendSystemPrompt:()=>[],getAppendSystemPromptSources:()=>[],extendResources:()=>{},reload:async()=>{}};
   const settings=sdk.SettingsManager.inMemory({retry:{enabled:false,maxRetries:0},compaction:{enabled:false}});
   const {session: created}=await sdk.createAgentSession({cwd:work,agentDir:runtimeRoot,modelRuntime:runtime,model,thinkingLevel:'high',settingsManager:settings,sessionManager:sdk.SessionManager.inMemory(work),resourceLoader:loader,noTools:'all',tools:['sandbox_shell'],excludeTools:['mcp__*'],customTools:[tool]});
   session=created;
