@@ -35,6 +35,8 @@
 - Initiative spec path and revision, if applicable:
 - Current plan path and revision, if applicable:
 - Grounding or prior evidence:
+- Advisory context, when used: explicit memory project or indexed checkout, selected observation/source references, and current-source verification at the target base:
+- Context gaps, when relevant: unavailable or rejected lookup, direct-source fallback, or the specific unresolved decision that blocks this job:
 
 ## Dependencies and ownership
 
