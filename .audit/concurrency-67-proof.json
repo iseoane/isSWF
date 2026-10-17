@@ -1,0 +1,107 @@
+{
+  "sourceCommit": "1a30ca54efa38da844aa2ea484c477319e68c769",
+  "sourceBase": "fd79fbc268f9950dfa53372fd8b85d264c45b4d6",
+  "files": {
+    ".agents/skills/isswf-coordinator/SKILL.md": "fdb0de4e34b468eaf4e3f75a4526f08b5a79040d14daf7248ff7e0d5c141e07d",
+    ".agents/roles/references/execution-principles.md": "f7d3101473bfdfc53daccd9ab066ad528d7220f7e7ed1f9305d8a5fd6bd37a74",
+    ".audit/verify-concurrency-67.mjs": "76b0ad634f29d94b5c5f7c00561c2f4f37182ecc396f23ae38bdd7662ece40e8"
+  },
+  "postcommit": {
+    "status": "PASS",
+    "root": "/tmp/isswf-concurrency67-SNRIpu",
+    "runtimeSha": "1a30ca54efa38da844aa2ea484c477319e68c769",
+    "inputSha": "ef0b22126ac7c612920d6edd609b2522f6ffa0be",
+    "targetBase": "333f6cbfe2aad23ceb351d447a58c52bb3468a76",
+    "integratedBase": "99ff3d94394b8a562dcc3e558493f009bd1dbde1",
+    "dependentInputSha": "039feedeeea22c48ad0666aad1d9023bce518646",
+    "overlap": {
+      "A": "running",
+      "B": "running"
+    },
+    "concurrentLimit": 2,
+    "ceasedANamespaces": 3,
+    "decisions": [
+      {
+        "job": "C",
+        "reason": "dependency",
+        "activeWriters": 1,
+        "concurrentLimit": 2,
+        "exitCondition": "A artifact integrated into the named C target base",
+        "dispatched": false
+      }
+    ],
+    "terminals": {
+      "A": "success",
+      "B": "success",
+      "C": "success"
+    },
+    "checks": [
+      "two normal-entry offline jobs overlap in distinct derived workspaces",
+      "same-attempt and same-logical-job replacement refused without new preparation",
+      "A task and every recorded namespace init ceased; awaiting review does not satisfy integration dependency",
+      "unknown A binding does not cancel already-running independent B",
+      "C absent until exact A artifact is committed into its pinned target base",
+      "dependent C consumes integrated artifact successfully"
+    ],
+    "providerPrompts": 0,
+    "limits": "Controlled cooperative caller with a test capacity of two, not a native dependency scheduler or global multiwriter lock. Fixture fault restoration is not production recovery. Normal read reports terminal success, not product acceptance or general descendant cessation."
+  },
+  "independentReview": {
+    "agent": "a4b9e6febf564b8a6",
+    "sourceLog": "2026-10-17T10-19-18-946Z_5dd06011-d5cc-400c-91bc-f4f569010523.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/concurrency-67-snapshot-v2/manifest.json",
+    "report": "**Review 67 v2 — bounded cooperative caller**\n\nChecked: candidate `SKILL.md` §5 delta, `execution-principles.md` added paragraphs, `.audit/verify-concurrency-67.mjs`, parent-v2 PASS, `isswf-job.mjs` admission/run, `worker-lifecycle.mjs`, native-recovery records, spec OPS-07/08/09 + S05. Payload contains the v2 delta. Runtime untouched.\n\nCorrectness: scope wording (\"caller decisions, not a native scheduler/global lock/queue\") matches runtime — admission keyed per `logicalJobRef`, workspace per attempt, refusals before preparation, review never releases admission, binding mismatch yields `unknown`. Offline path never reaches `session.prompt`; `providerPromptStarted:false` is structural, not self-reported. \"Reviewed draft PR is not integration\" matches the artifact≠targetBase assertion. PASS JSON matches v2 (`ceasedANamespaces:3`). PID-identity check rejects reuse correctly.\n\nNits (separate):\n1. OPS-08's positive half, \"waiting for acceptance frees capacity\", is not exercised: C is dependency-blocked, so its absence cannot distinguish capacity from dependency gating. Output wording is correctly scoped — keep it.\n2. `read('B')==='running'` after A terminal races B's ~7.5s write; possible flake under load.\n3. `decisions`/`activeWriters:1` is hardcoded narrative, not measured.\n4. Offline fixture embeds the real `authPath` unnecessarily.\n5. Added prose breaks the file's Trigger/Acción/Límite pattern; §5 switches ES→EN mid-paragraph.\n6. PASS JSON carries no digest tying it to the frozen payload (manifest supplies it).\n\nProduct-level unproven: native dependency/capacity scheduling; universal/global writer exclusion across stores or arbitrary writers; descendant cessation (`descendants:'unproven'`); real-provider concurrency; human/product acceptance; production recovery after genuine binding corruption; publication gate.\n\n**Standards: PASS**\n**Spec (bounded cooperative caller + test unit): PASS**",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "max",
+      "stopReason": "stop"
+    }
+  },
+  "disposition": {
+    "verdict": "Accept Standards PASS and bounded Spec PASS; no source changes after review",
+    "scope": "Existing cooperative caller and normal-entry offline concurrency, not complete S05 or native scheduling",
+    "nonBlockingFindings": [
+      {
+        "finding": "Positive capacity reuse not demonstrated",
+        "disposition": "Retain as a limit. C is withheld by the caller for integration, not proof of a runtime capacity guard or released-slot reuse."
+      },
+      {
+        "finding": "Timed overlap can race on a loaded host",
+        "disposition": "Retain as a reproducibility caveat. Parent and candidate replays both passed; no claim of load-independent timing."
+      },
+      {
+        "finding": "activeWriters=1 is narrative",
+        "disposition": "Treat decisions as the controlled caller's reported state, not an independently enforced or measured queue/capacity result."
+      },
+      {
+        "finding": "Offline auth path unnecessary",
+        "disposition": "No credential values retained. Existing adapter still requires hasConfiguredAuth even offline; do not change production authentication in this slice."
+      },
+      {
+        "finding": "Mixed legacy-language prose and reference pattern",
+        "disposition": "Optional editorial work belongs to71; new operational instructions are English."
+      },
+      {
+        "finding": "PASS JSON lacks own payload digest",
+        "disposition": "The reviewed manifest and subsequent Git blob proof bind the exact payload; do not rewrite historical results."
+      }
+    ],
+    "publication": "Not authorized yet for67. Do not create an issue, push a branch or create a PR until the operator grants it."
+  },
+  "priorCandidate": {
+    "handoff": {
+      "exit": 0,
+      "stdout": "{\n  \"status\": \"PASS\",\n  \"root\": \"/tmp/isswf-concurrency67-7o5vYe\",\n  \"runtimeSha\": \"fd79fbc268f9950dfa53372fd8b85d264c45b4d6\",\n  \"inputSha\": \"356281c355e670cd76259e806817b236c4697341\",\n  \"targetBase\": \"269d8a533a3025c347646fa53126bc032cfb7d80\",\n  \"integratedBase\": \"14a7b460af1de5731a45a8efb73134952d4d2a28\",\n  \"dependentInputSha\": \"e709b9d55438aa2091eb85609fb447fd29d99a2f\",\n  \"overlap\": {\n    \"A\": \"running\",\n    \"B\": \"running\"\n  },\n  \"concurrentLimit\": 2,\n  \"ceasedANamespaces\": 3,\n  \"decisions\": [\n    {\n      \"job\": \"C\",\n      \"reason\": \"dependency\",\n      \"activeWriters\": 1,\n      \"concurrentLimit\": 2,\n      \"exitCondition\": \"A artifact integrated into the named C target base\",\n      \"dispatched\": false\n    }\n  ],\n  \"terminals\": {\n    \"A\": \"success\",\n    \"B\": \"success\",\n    \"C\": \"success\"\n  },\n  \"checks\": [\n    \"two normal-entry offline jobs overlap in distinct derived workspaces\",\n    \"same-attempt and same-logical-job replacement refused without new preparation\",\n    \"A task and every recorded namespace init ceased; awaiting review does not satisfy integration dependency\",\n    \"unknown A binding does not cancel already-running independent B\",\n    \"C absent until exact A artifact is committed into its pinned target base\",\n    \"dependent C consumes integrated artifact successfully\"\n  ],\n  \"providerPrompts\": 0,\n  \"limits\": \"Controlled cooperative caller with a test capacity of two, not a native dependency scheduler or global multiwriter lock. Fixture fault restoration is not production recovery. Normal read reports terminal success, not product acceptance or general descendant cessation.\"\n}\n",
+      "stderr": ""
+    },
+    "core": {
+      "exit": 0,
+      "stdout": "{\n  \"candidate\": \"/tmp/isswf-concurrency67-candidate-5Bo0GT/repo\",\n  \"files\": [\n    \".agents/roles/delivery.md\",\n    \".agents/roles/diagnostician.md\",\n    \".agents/roles/planner.md\",\n    \".agents/roles/references/bug-diagnosis.md\",\n    \".agents/roles/references/code-quality.md\",\n    \".agents/roles/references/comments.md\",\n    \".agents/roles/references/delivery.md\",\n    \".agents/roles/references/design-principles.md\",\n    \".agents/roles/references/execution-principles.md\",\n    \".agents/roles/references/planning.md\",\n    \".agents/roles/references/research.md\",\n    \".agents/roles/references/retrospective.md\",\n    \".agents/roles/references/review.md\",\n    \".agents/roles/references/tdd.md\",\n    \".agents/roles/references/verification-principles.md\",\n    \".agents/roles/researcher.md\",\n    \".agents/roles/retrospective.md\",\n    \".agents/roles/reviewer.md\",\n    \".agents/roles/worker.md\",\n    \".agents/skills/isswf-coordinator/SKILL.md\",\n    \".agents/skills/isswf-setup/SKILL.md\",\n    \".agents/skills/isswf-triage/SKILL.md\"\n  ],\n  \"checkedLinks\": [\n    {\n      \"file\": \".agents/roles/delivery.md\",\n      \"link\": \"references/delivery.md\"\n    },\n    {\n      \"file\": \".agents/roles/diagnostician.md\",\n      \"link\": \"references/bug-diagnosis.md\"\n    },\n    {\n      \"file\": \".agents/roles/planner.md\",\n      \"link\": \"references/planning.md\"\n    },\n    {\n      \"file\": \".agents/roles/references/review.md\",\n      \"link\": \"code-quality.md\"\n    },\n    {\n      \"file\": \".agents/roles/references/review.md\",\n      \"link\": \"comments.md\"\n    },\n    {\n      \"file\": \".agents/roles/references/review.md\",\n      \"link\": \"verification-principles.md\"\n    },\n    {\n      \"file\": \".agents/roles/researcher.md\",\n      \"link\": \"references/research.md\"\n    },\n    {\n      \"file\": \".agents/roles/retrospective.md\",\n      \"link\": \"references/retrospective.md\"\n    },\n    {\n      \"file\": \".agents/roles/reviewer.md\",\n      \"link\": \"references/review.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/bug-diagnosis.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/tdd.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/design-principles.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/execution-principles.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/verification-principles.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/code-quality.md\"\n    },\n    {\n      \"file\": \".agents/roles/worker.md\",\n      \"link\": \"references/comments.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/diagnostician.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/references/design-principles.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/references/execution-principles.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/references/verification-principles.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/worker.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/diagnostician.md\"\n    },\n    {\n      \"file\": \".agents/skills/isswf-coordinator/SKILL.md\",\n      \"link\": \"../../roles/reviewer.md\"\n    }\n  ],\n  \"catalogs\": [\n    {\n      \"approved\": true,\n      \"coordinatorCount\": 1\n    },\n    {\n      \"approved\": false,\n      \"coordinatorCount\": 0\n    }\n  ],\n  \"scope\": \"Native Pi skill discovery and Markdown links only; no LLM, dispatch, Python, host config, or operational store.\",\n  \"cleanup\": \"Temporary directory removed in finally.\"\n}\n",
+      "stderr": ""
+    }
+  },
+  "publication": "Not authorized: local commits only; no GitHub issue, branch push, PR or merge",
+  "scope": "Bounded cooperative caller and offline concurrency regression, not native scheduling or full S05 acceptance"
+}
