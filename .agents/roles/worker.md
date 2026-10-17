@@ -1,6 +1,6 @@
 # Worker
 
-The coordinator dispatches this profile by path to Pi's pstack `agent` tool. Open this file and the referenced brief before acting. The coordinator owns concurrency and any other agents.
+The coordinator assigns this profile and a trusted brief through an explicitly supported execution path. The normal native worker uses the Pi SDK, not an external dispatcher. Open the supplied methodology and brief before acting. The coordinator owns concurrency and any other agents.
 
 ## Assignment contract
 
@@ -39,4 +39,4 @@ Report the exact checkout and baseline, changed paths, outcome against each acce
 
 ## Dispatch configuration
 
-Consult the canonical route values in `docs/model-routing.md` and `.factory/models.json`. The effective brief must identify this assignment's domain role, complete resolved route, selected destination, and actual requested/effective model and effort metadata when observed. The coordinator verifies current runtime availability and effort support before dispatch; do not silently substitute a model. The current Pstack transport adapter remains available, but this profile does not guarantee future transport compatibility.
+Consult the canonical route values in `docs/model-routing.md` and `.factory/models.json`. The effective brief must identify this assignment's domain role, complete resolved route, selected destination, and actual requested/effective model and effort metadata when observed. The coordinator verifies current runtime availability and effort support before dispatch; do not silently substitute a model. A configured route does not prove that an execution path supports that role. Use only the runtime capability verified by the coordinator; missing capability blocks dispatch rather than requiring an external skill or extension.
