@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { readFile, realpath, lstat, mkdir, open, link, unlink } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { qualityInventory } from './project-quality.mjs';
 
 const digest = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
 const text = value => typeof value === 'string' && value.trim().length > 0 && value.length <= 16000 && !/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/u.test(value);
@@ -66,10 +67,13 @@ async function directory(path, create = false) {
   const stat = await lstat(path);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('intake directories must not be symlinks');
 }
-async function load(project, id) {
-  const job = join(project, '.factory/jobs', id.jobId);
+async function load(project, id, initiative) {
+  const parent = initiative ? join(project, '.factory/initiatives', initiative, 'jobs') : join(project, '.factory/jobs');
+  const job = join(parent, id.jobId);
   try {
-    await directory(join(project, '.factory')); await directory(join(project, '.factory/jobs')); await directory(job);
+    await directory(join(project, '.factory'));
+    if (initiative) { await directory(join(project, '.factory/initiatives')); await directory(join(project, '.factory/initiatives', initiative)); }
+    await directory(parent); await directory(job);
     const record = await json(join(job, 'intake.json'));
     const { integritySha256, ...payload } = record;
     const brief = await regular(join(job, 'brief-r1.md'));
@@ -95,9 +99,16 @@ async function synced(path, bytes) {
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
 }
 async function syncDirectory(path) { const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } }
-export async function intake({ action, project, repository: repo, issue, sourcePath, grantPath, proposalPath }) {
+export async function intake({ action, project, repository: repo, issue, sourcePath, grantPath, proposalPath, initiative, jobId, type }) {
   if (!['prepare', 'read'].includes(action)) throw Error('action must be prepare or read');
   const root = await projectRoot(project), id = identity(repo, issue);
+  if (initiative !== undefined) {
+    if (!/^[A-Z][A-Z0-9-]{0,63}$/u.test(initiative) || !/^[A-Z][A-Z0-9-]{0,63}$/u.test(jobId ?? '') || !['bug', 'enhancement', 'maintenance', 'research'].includes(type)) throw Error('initiative, job and type required');
+    await directory(join(root, '.factory')); await directory(join(root, '.factory/initiatives')); await directory(join(root, '.factory/initiatives', initiative));
+    const plan = await regular(join(root, '.factory/initiatives', initiative, 'plan.md'));
+    if (!plan.includes(`## ${jobId}\n`)) throw Error('job must be present in initiative plan');
+    Object.assign(id, { initiative, jobId, type });
+  } else if (jobId !== undefined || type !== undefined) throw Error('job/type requires initiative');
   const grant = grantPath ? await grantAt(grantPath, root, id) : null;
   const source = sourcePath ? await observationAt(sourcePath, id) : null;
   const proposal = proposalPath ? await proposalAt(proposalPath, root) : null;
@@ -105,39 +116,45 @@ export async function intake({ action, project, repository: repo, issue, sourceP
   let brief, recordBytes;
   if (action === 'prepare') {
     brief = briefFor(id, source, grant, proposal);
+    if (initiative) {
+      const inventory = await qualityInventory(root);
+      brief += '\n## Project quality inventory\n\n' + Object.entries(inventory.checks).map(([name, check]) => `- ${name}: ${check.state}. Evidence: ${check.evidence.join(', ') || 'none detected'}. ${check.recommendation}`).join('\n') + `\n\n${inventory.limits}\n`;
+    }
     const payload = { version: 1, project: root, identity: id, source, grantSha256: digest(grant), proposalSha256: digest(proposal), briefSha256: digest(brief), preparation: proposal.questions.length ? 'needs-info' : 'ready-for-agent', questions: proposal.questions };
     recordBytes = JSON.stringify({ ...payload, integritySha256: digest(payload) }) + '\n';
     if (Buffer.byteLength(brief) > 256000 || Buffer.byteLength(recordBytes) > 256000) throw Error('prepared brief or record exceeds byte limit');
   }
-  const current = await load(root, id);
+  const current = await load(root, id, initiative);
   if (action === 'read' || current.status !== 'absent') {
     const result = summary(current, source, grant, proposal);
     if (action === 'prepare' && result.status === 'prepared') result.status = 'reused';
     return result;
   }
-  await directory(join(root, '.factory'), true); await directory(join(root, '.factory/jobs'), true);
-  const job = join(root, '.factory/jobs', id.jobId);
+  await directory(join(root, '.factory'), true);
+  const parent = initiative ? join(root, '.factory/initiatives', initiative, 'jobs') : join(root, '.factory/jobs');
+  await directory(parent, true);
+  const job = join(parent, id.jobId);
   try { await mkdir(job, { mode: 0o700 }); } catch (error) {
     if (error.code !== 'EEXIST') throw error;
-    const result = summary(await load(root, id), source, grant, proposal);
+    const result = summary(await load(root, id, initiative), source, grant, proposal);
     return result.status === 'prepared' ? { ...result, status: 'reused' } : result;
   }
-  await syncDirectory(join(root, '.factory/jobs'));
+  await syncDirectory(parent);
   await synced(join(job, 'brief-r1.md'), brief);
   const pending = join(job, '.intake-' + randomUUID());
   await synced(pending, recordBytes);
   await link(pending, join(job, 'intake.json')); await unlink(pending); await syncDirectory(job);
-  return summary(await load(root, id), source, grant, proposal);
+  return summary(await load(root, id, initiative), source, grant, proposal);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const [action, ...values] = process.argv.slice(2), args = {};
     for (let i = 0; i < values.length; i += 2) {
-      if (!['--project', '--repository', '--issue', '--source', '--grant', '--proposal'].includes(values[i]) || !values[i + 1] || Object.hasOwn(args, values[i])) throw Error('invalid intake option');
+      if (!['--project', '--repository', '--issue', '--source', '--grant', '--proposal', '--initiative', '--job', '--type'].includes(values[i]) || !values[i + 1] || Object.hasOwn(args, values[i])) throw Error('invalid intake option');
       args[values[i]] = values[i + 1];
     }
-    const result = await intake({ action, project: args['--project'], repository: args['--repository'], issue: Number(args['--issue']), sourcePath: args['--source'], grantPath: args['--grant'], proposalPath: args['--proposal'] });
+    const result = await intake({ action, project: args['--project'], repository: args['--repository'], issue: Number(args['--issue']), sourcePath: args['--source'], grantPath: args['--grant'], proposalPath: args['--proposal'], initiative: args['--initiative'], jobId: args['--job'], type: args['--type'] });
     console.log(JSON.stringify(result, null, 2));
     if (action === 'prepare' && !['prepared', 'reused'].includes(result.status)) process.exitCode = 2;
   } catch (error) { console.error(error.message); process.exitCode = 1; }

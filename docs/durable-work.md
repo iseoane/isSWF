@@ -4,18 +4,27 @@ This guide defines the Markdown records for authorized work. It records handoffs
 
 ## Project records
 
-The initiative keeps its specification and plan at their explicit existing paths. For this project they are `docs/spec-v1.md` and `docs/plan-v1.md`. Another initiative may use different explicit paths. These documents may already exist; do not create copies inside jobs. The plan links to each job and remains coordinator-owned.
-
-Jobs use readable, coordinator-assigned IDs that are unique within the project and are never silently reused:
+New project work lives under one stable initiative ID. Keep the type (bug, enhancement, maintenance or research) as data, not part of the directory identity. The initiative's canonical plan is `.factory/initiatives/<id>/plan.md`; its jobs belong to that plan. The factory's existing `docs/spec-v1.md` and `docs/plan-v1.md` describe the factory product, not every target project's execution plan. Existing explicitly pinned historical plan paths and `.factory/jobs` records remain valid and are not moved automatically.
 
 ```text
 .factory/
-  jobs/
-    J001/
-      brief-r1.md
-      A001.md       # when an attempt needs a durable record
-      V001.md       # when an independent review is required
+  templates/
+  initiatives/
+    I0042/
+      plan.md
+      jobs/
+        J001/
+          brief-r1.md
+          intake.json   # when prepared through the native issue intake
+          A001.md       # when an attempt needs a durable record
+          V001.md       # when a review needs a durable record
 ```
+
+The planner proposes units; the coordinator adopts them into the single current plan, maintaining each job's status, dependencies, acceptance, blocker, next step and evidence. A simple request needs only one job and no mandatory planner invocation. Archived plan revisions are history, not a second current plan. Engram and GitHub do not replace this record.
+
+From an authorized source checkout, `node tools/isswf-plan.mjs prepare --project /absolute/project --initiative I0042 --proposal /proposal.json --grant /external-grant.json` publishes the plan. The external trusted grant contains exactly `version: 1`, canonical `project`, `initiative`, nonempty `reference` and `permissions: ["plan"]`. This is a caller-supplied attestation, not an authentication service or execution grant. The proposal contains `version: 1`, `initiative`, `title`, `type`, and `jobs`. Each job has `id`, `objective`, `status`, `dependsOn`, nonempty `acceptance`, `blocker`, `nextStep`, and `evidence`. Statuses are `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human`, and `completed`; completion requires evidence, whose sufficiency the coordinator must check. Dependencies must name jobs in the plan and cannot cycle.
+
+`read` requires only project and initiative and creates nothing. An identical `prepare` is a no-op. A changed plan requires `revise` with `--expected-sha256` from the last read; the prior bytes remain in `plan-<sha256>.md`. A write lock prevents cooperating writers from replacing one another; an interrupted write retains its lock for inspection, not automatic recovery. Saved status is not live process evidence. The native command is a plan recorder, not a scheduler, acceptance evaluator, or permission service. Job brief links may remain pending until their preparation. For a local request without a GitHub issue, the coordinator creates its curated brief from the template under the authorized job path; do not invent a GitHub identity to use the issue-intake command.
 
 Create attempt and review artifacts only when needed. Copy the [job brief template](../.factory/templates/job-brief.md), [attempt template](../.factory/templates/attempt.md), or [review template](../.factory/templates/review.md) when creating that artifact. The brief revision belongs in its filename. Keep previous revisions when criteria change.
 

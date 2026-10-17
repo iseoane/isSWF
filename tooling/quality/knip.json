@@ -3,6 +3,7 @@
   "entry": [
     "tools/isswf-job.mjs",
     "tools/isswf-intake.mjs",
+    "tools/isswf-plan.mjs",
     "tools/worker-lifecycle.mjs",
     "tools/factory-package.mjs",
     "tools/pi-worker-task.mjs",
