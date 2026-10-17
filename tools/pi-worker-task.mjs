@@ -149,7 +149,6 @@ try {
   nativeRun=await createNativeToolRunner({work,factoryRoot});
   const tool = { name:'sandbox_shell', label:'Sandbox shell', description:'Run a bounded command in isolated /work or request the host-selected boundary checks.', parameters:schema, execute:async (_id,args,signal)=>{
     if(signal?.aborted) return {content:[{type:'text',text:'aborted'}],isError:true};
-    if(tools>=12) { void session?.abort(); return {content:[{type:'text',text:'tool-call limit reached'}],isError:true}; }
     const isBoundary=args.operation==='boundary_check';
     const canaryIntactBefore=!isBoundary||hash(await read(boundaryPath))===boundaryHash;
     if(!canaryIntactBefore) return {content:[{type:'text',text:'boundary check unavailable'}],details:{exitCode:1,canaryHashPreserved:false},isError:true};
@@ -179,7 +178,6 @@ try {
     session.subscribe(event=>{
       if(event.type==='tool_execution_start'&&event.toolName==='sandbox_shell'&&typeof event.toolCallId==='string') {
         pending.set(event.toolCallId,event.args?.operation);
-        if(pending.size+tools>12) { deadlineHit=true; void session.abort(); }
       }
       if(event.type==='tool_execution_end'&&event.toolName==='sandbox_shell'&&typeof event.toolCallId==='string') {
         const operation=pending.get(event.toolCallId); pending.delete(event.toolCallId);
