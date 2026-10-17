@@ -38,10 +38,18 @@ export async function prepareResearch({project,inputSha,jobPath,grantFile,store}
  const texts=[blob(project,inputSha,job.briefPath).toString()];
  for(const p of job.sources)texts.push('\n'+p+'\n'+blob(target,job.targetBase,p).toString());
  const prompt=texts.join('\n');assert(Buffer.byteLength(prompt)<=65536,'research-bundle-too-large');
+ const billing=grant.subscriptionAttestations??[];assert(Array.isArray(billing)&&billing.every(e=>e&&route.some(t=>t.model.split('/')[0]===e.provider)&&e.coversCallsWithoutAdditionalApiCost===true&&typeof e.reference==='string'&&e.reference.trim()),'invalid-subscription-attestation');
  const quota=grant.authoritativeQuotaEvidence??[];assert(Array.isArray(quota),'invalid-quota-evidence');
  for(const e of quota)assert(route.some(t=>equal(t,e.tuple))&&e.confirmedExhausted===true&&typeof e.reference==='string'&&e.reference.trim(),'invalid-authoritative-quota-evidence');
  const dir=join(store,hash(project+'\0'+job.logicalJobRef));
  return {project,inputSha,jobPath,job,grant,grantSha256:grantInput.sha256,route,prompt,dir,mode:'real'};
+}
+
+export function subscriptionEvidence(provider,sdkConfirmed,grant){
+ if(sdkConfirmed===true)return {source:'sdk-oauth-subscription'};
+ const evidence=grant.subscriptionAttestations?.find(e=>e.provider===provider);
+ assert(evidence?.coversCallsWithoutAdditionalApiCost===true&&typeof evidence.reference==='string'&&evidence.reference.trim(),'subscription-not-confirmed');
+ return {source:'operator-account-attestation',reference:evidence.reference,...(typeof evidence.accountAlias==='string'&&evidence.accountAlias.trim()?{accountAlias:evidence.accountAlias}:{})};
 }
 
 export async function sdkResearchBackend(job,grant){
@@ -52,7 +60,7 @@ export async function sdkResearchBackend(job,grant){
  const sdk=await import(pathToFileURL(entry).href),auth=await import(pathToFileURL(join(dirname(entry),'core/auth-storage.js')).href),ai=await import(pathToFileURL(join(dirname(findPackageJSON('@earendil-works/pi-ai',pathToFileURL(entry))),'dist/models.js')).href);
  const runtime=await sdk.ModelRuntime.create({credentials:new auth.ReadOnlyAuthStorage(grant.authPath),modelsPath:null,allowModelNetwork:false,refreshOnCreate:true});
  return {
-  async preflight(tuple){const slash=tuple.model.indexOf('/'),provider=tuple.model.slice(0,slash),id=tuple.model.slice(slash+1),model=runtime.getPhysicalModel(provider,id);assert(model&&ai.getSupportedThinkingLevels(model).includes(tuple.effort),'model-effort-incompatible');assert(runtime.hasConfiguredAuth(provider)===true,'auth-unconfigured');assert(runtime.isUsingSubscription(provider)===true,'subscription-not-confirmed');return model;},
+  async preflight(tuple){const slash=tuple.model.indexOf('/'),provider=tuple.model.slice(0,slash),id=tuple.model.slice(slash+1),model=runtime.getPhysicalModel(provider,id);assert(model&&ai.getSupportedThinkingLevels(model).includes(tuple.effort),'model-effort-incompatible');assert(runtime.hasConfiguredAuth(provider)===true,'auth-unconfigured');const billingEvidence=subscriptionEvidence(provider,runtime.isUsingSubscription(provider),grant);return {model,billingEvidence};},
   stream(model,context,options){return runtime.streamSimple(model,context,options);},
   fetch:(...args)=>globalThis.fetch(...args)
  };
@@ -74,11 +82,11 @@ export async function runResearch(request,{backend,mode='real'}={}){
    const remaining=grant.deadlineMs-(Date.now()-started);if(remaining<=0)return await finish('blocked','deadline-exhausted');
    if(calls>=grant.totalAttempts)return await finish('blocked','total-attempt-budget-exhausted');
    const tuple=route[index],quota=grant.authoritativeQuotaEvidence?.find(e=>equal(e.tuple,tuple));
-   let model;if(!quota){try{model=await bounded(backend.preflight(tuple));}catch{return await finish('blocked',Date.now()-started>=grant.deadlineMs?'deadline-exhausted':'preflight-incompatible-auth-or-cost');}}
+   let model,billingEvidence;if(!quota){try{({model,billingEvidence}=await bounded(backend.preflight(tuple)));}catch{return await finish('blocked',Date.now()-started>=grant.deadlineMs?'deadline-exhausted':'preflight-incompatible-auth-or-cost');}}
    if(Date.now()-started>=grant.deadlineMs)return await finish('blocked','deadline-exhausted');
    calls++;const number=String(calls).padStart(4,'0');
-   await publish(join(dir,number+'.claim.json'),{version:1,mode,number:calls,tuple,routeIndex:index,priorAttempts:calls-1,reason:quota?'operator-quota-evidence':'sdk-invocation-intent',...(quota?{evidenceRef:quota.reference}:{})});
-   if(quota){records.push({number:calls,tuple,outcome:'confirmed-quota-exhausted',source:'external-operator-evidence',reference:quota.reference});await publish(join(dir,number+'.outcome.json'),records.at(-1));index++;retries=0;continue;}
+   await publish(join(dir,number+'.claim.json'),{version:1,mode,number:calls,tuple,routeIndex:index,priorAttempts:calls-1,reason:quota?'operator-quota-evidence':'sdk-invocation-intent',...(quota?{evidenceRef:quota.reference}:{billingEvidence})});
+   if(quota){records.push({number:calls,tuple,outcome:'confirmed-quota-exhausted',source:'external-operator-evidence',reference:quota.reference});await publish(join(dir,number+'.outcome.json'),records.at(-1));index++;continue;}
    let fetches=0,status,transportLimit=false,expired=false,result;
    const controller=new AbortController();let timer;
    const timeout=new Promise(resolve=>{timer=setTimeout(()=>{expired=true;controller.abort();resolve(null);},Math.max(1,grant.deadlineMs-(Date.now()-started)));});
@@ -92,11 +100,11 @@ export async function runResearch(request,{backend,mode='real'}={}){
     if(status===503&&(!result||result.stopReason==='error'))outcome='temporary-unavailable';
     else if(status===200&&result?.stopReason==='stop'&&result.provider===model.provider&&result.model===model.id&&result.content.every(c=>c.type==='text'||c.type==='thinking'))outcome='complete';
    }
-   const record={number:calls,tuple,outcome,streamEnded:!expired,fetches,...(status===undefined?{}:{httpStatus:status}),effortEvidence:'requested and runtime-supported, not a provider receipt'};records.push(record);await publish(join(dir,number+'.outcome.json'),record);
+   const record={number:calls,tuple,billingEvidence,outcome,streamEnded:!expired,fetches,...(status===undefined?{}:{httpStatus:status}),effortEvidence:'requested and runtime-supported, not a provider receipt'};records.push(record);await publish(join(dir,number+'.outcome.json'),record);
    if(outcome==='complete'){const text=result.content.filter(c=>c.type==='text').map(c=>c.text).join('\n');if(!text.trim()||Buffer.byteLength(text)>grant.outputBytes)return await finish('blocked','empty-or-oversized-output');return await finish('complete','research-result',text);}
    if(outcome!=='temporary-unavailable')return await finish('blocked',expired?'deadline-cessation-uncertain':'unclassified-result-no-fallback');
    if(retries<grant.retryBudget){retries++;continue;}
-   index++;retries=0;
+   index++;
   }
   return await finish('blocked','approved-route-exhausted');
  }catch{return await finish('blocked','caller-failure-no-replay');}
