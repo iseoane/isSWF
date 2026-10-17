@@ -1,0 +1,157 @@
+{
+  "sourceCommit": "fea280d9a7b6291bc952092547438f304df2ffcc",
+  "base": "9e781051ceb6a407fbb738b5269dc6964e10bf2b",
+  "files": {
+    "docs/plan-v1.md": "44c8bb0117c43da1d4da3655e973bc5091d246c454f32e2fbbaa580c9d013eec",
+    ".agents/roles/references/delivery.md": "dcb0393efae207017a9cdd3d394fbbbdc955f6641cdcbfa8c48404ab42b11d02",
+    "docs/templates/delivery.md": "2b5cc8eb7b1462919c3dfc56623ddbf952c968466b2c1ca8bdf1f84f646bec9f"
+  },
+  "gitBlobIdentity": "PASS",
+  "core": {
+    "candidate": "/tmp/isswf-workflow71",
+    "files": [
+      ".agents/roles/delivery.md",
+      ".agents/roles/diagnostician.md",
+      ".agents/roles/planner.md",
+      ".agents/roles/references/bug-diagnosis.md",
+      ".agents/roles/references/code-quality.md",
+      ".agents/roles/references/comments.md",
+      ".agents/roles/references/delivery.md",
+      ".agents/roles/references/design-principles.md",
+      ".agents/roles/references/execution-principles.md",
+      ".agents/roles/references/planning.md",
+      ".agents/roles/references/research.md",
+      ".agents/roles/references/retrospective.md",
+      ".agents/roles/references/review.md",
+      ".agents/roles/references/tdd.md",
+      ".agents/roles/references/verification-principles.md",
+      ".agents/roles/researcher.md",
+      ".agents/roles/retrospective.md",
+      ".agents/roles/reviewer.md",
+      ".agents/roles/worker.md",
+      ".agents/skills/isswf-coordinator/SKILL.md",
+      ".agents/skills/isswf-setup/SKILL.md",
+      ".agents/skills/isswf-triage/SKILL.md"
+    ],
+    "checkedLinks": [
+      {
+        "file": ".agents/roles/delivery.md",
+        "link": "references/delivery.md"
+      },
+      {
+        "file": ".agents/roles/diagnostician.md",
+        "link": "references/bug-diagnosis.md"
+      },
+      {
+        "file": ".agents/roles/planner.md",
+        "link": "references/planning.md"
+      },
+      {
+        "file": ".agents/roles/references/review.md",
+        "link": "code-quality.md"
+      },
+      {
+        "file": ".agents/roles/references/review.md",
+        "link": "comments.md"
+      },
+      {
+        "file": ".agents/roles/references/review.md",
+        "link": "verification-principles.md"
+      },
+      {
+        "file": ".agents/roles/researcher.md",
+        "link": "references/research.md"
+      },
+      {
+        "file": ".agents/roles/retrospective.md",
+        "link": "references/retrospective.md"
+      },
+      {
+        "file": ".agents/roles/reviewer.md",
+        "link": "references/review.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/bug-diagnosis.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/tdd.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/design-principles.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/execution-principles.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/verification-principles.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/code-quality.md"
+      },
+      {
+        "file": ".agents/roles/worker.md",
+        "link": "references/comments.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/diagnostician.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/references/design-principles.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/references/execution-principles.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/references/verification-principles.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/worker.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/diagnostician.md"
+      },
+      {
+        "file": ".agents/skills/isswf-coordinator/SKILL.md",
+        "link": "../../roles/reviewer.md"
+      }
+    ],
+    "catalogs": [
+      {
+        "approved": true,
+        "coordinatorCount": 1
+      },
+      {
+        "approved": false,
+        "coordinatorCount": 0
+      }
+    ],
+    "scope": "Native Pi skill discovery and Markdown links only; no LLM, dispatch, Python, host config, or operational store.",
+    "cleanup": "Temporary directory removed in finally."
+  },
+  "review": {
+    "agent": "a79f9df9d89b76401",
+    "sourceLog": "2026-10-17T10-34-39-240Z_311f27d9-13c8-4785-b90b-ff09ced2a8f1.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/workflow-71-snapshot-v1/manifest.json",
+    "report": "## Review — #71 docs v1 (read-only)\n\n**Diff inspected** (base `9e78105` → `/tmp/isswf-workflow71`): `docs/plan-v1.md`, `.agents/roles/references/delivery.md`, `docs/templates/delivery.md`. Manifest hashes present; referenced `.audit/recovery-68-*.json`, `tools/researcher-task.mjs`, `.audit/engram-integration.json` exist.\n\n**Standards — PASS.** English issue/PR format added (§Concise issue and PR text: Why / Change outline / Special things to note / Risk Assessment / Testing) matches the request. Template header now says local record, not mandatory remote body. Language is concise; no new framework, translation demand, or paid-call narration added. Plan keeps evidence-backed status labels.\n\n**Spec — PASS.** Status reconciliation is accurate: #66 paused after two HTTP 400s, cause unknown, no fallback success; S04 #68 kept at its bounded same-boot limits; S05 correctly credits merged PR #6 cooperative concurrency without claiming scheduler/multiwriter; S08 notes PR #4 optional Engram/Codegraph and still-open slice. Merge language matches the operator grant: PRs #2/#4/#6 published, integrated, needed in-repo merges authorized, and explicitly **not** deploy/force-push/new cost. Review-affected-parts checkbox and bounded H1 cut are present and non-inflating.\n\n**Material flags: 0.**\n\n**Scope limits.** Judged only these three files vs base; no re-verification of GitHub or in-repo merges, no execution of core/diffcheck artifacts beyond reading `workflow-71-core-v1.json`, no review of the other 20 core files, no independent audit-JSON validation, no Engram/Codegraph runtime check. Evidence-link existence was confirmed, not their contents.",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "low",
+      "stopReason": "stop"
+    }
+  },
+  "limits": "Documentation reconciliation only; no new runtime capability or provider calls. Task66 remains paused."
+}
