@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "sourceCommit": "bc3655e8a0f97a4aa3d34a323f0b82e83ee36759",
+  "base": "f801ae998e0e20161a2698e6fb05f7d68953bf88",
+  "files": {
+    ".agents/roles/worker.md": "35f1f4ba8579f5b0cf6ea3ba354ac88246a127522e762aa0ba185b75f79ec7d0",
+    ".agents/skills/isswf-coordinator/SKILL.md": "03f72e6e00d7293ae4502da3ccba71993e5c7f02512c96a8f5325369c5690afb",
+    "docs/local-worker-lifecycle.md": "b78b1bcf6a63e8cb8ce06dea71aa7f60f1d0b1b9fa843261978019fee8a23b12",
+    "docs/model-routing.md": "5f283746838df8b8720eee609ea797f2d5bcd68494dd13d41c2bcf6b6d8bf3c1",
+    "tools/check-quality.mjs": "8658bd11dbc64d7c44086ae62fb38c839b794534e4be234e2da717196bd65055",
+    "tools/isswf-job.mjs": "7d86a48b83994ad0d8423917f9d9cd87e88185676c57be6a53e7aaab2876ce62",
+    "tools/pi-worker-task.mjs": "49fa47475cc63e1267177d92a2fdcb7f0f23d38781d7403df6b89c05feb4b4cf",
+    "tests/worker-methodology.mjs": "277a5ced21ecbeaf2eede5348fdf0bec06e73bbb23eb54c6f4e26172d75b2917"
+  },
+  "review": {
+    "agent": "a94b9011905043e18",
+    "sourceLog": "2026-10-17T19-12-44-256Z_809aa4e1-ad3b-4b19-850e-9c53051fec71.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/methodology-79-snapshot-v1/manifest.json",
+    "report": "**Methodology disposition (unchanged).** All nine areas have scoped local coverage: diagnosis (`bug-diagnosis.md`), TDD (`tdd.md`), design (`design-principles.md`), review (`reviewer.md`+`review.md`), verification (`verification-principles.md`), research (`research.md`), planning (`planning.md`), delivery (`delivery.md`), retrospective (`retrospective.md`+template). No catalogue migration needed. Three remaining content gaps: (G1) user-path driver + pre-change baseline in `verification-principles.md`; (G2) append-only decision trail for multi-phase runs in `execution-principles.md`; (G3) retrospective escalation ladder + fail-first proof in `reference/retrospective.md`.\n\n**Snapshot integrity.** All eight payload hashes equal `.audit/methodology-79-snapshot-v1/manifest.json` and the working tree (BAD=0). Base `f801ae9…`; `methodologySha` in `tools/isswf-job.mjs:15` stays `37a56bc…` intentionally. `.factory/models.json` and `.agents` methodology bytes outside the eight are untouched.\n\n**Scope confirmed by actual diff/callers.** Only `profileFiles` (`isswf-job.mjs:17`) gained `bug-diagnosis/tdd/design/comments`; `pi-worker-task.mjs` added `nativeWorkerInstructions` and wired it into `getSystemPrompt` (`:181`); `check-quality.mjs` added the new test to its output; three docs/role files reworded transport to native-neutral. No route, role, grant, or model tuple changed; `model-routing.md` only added \"routes are independent of transport\". Prompt projects `worker.md` from `## Assignment contract` to `## Dispatch configuration`, so it retains Assignment/Execution/Boundaries/Return and grant language, omits the historical coordinator dispatch section, and states the SDK-only `sandbox_shell` contract. The function throws when section markers are absent. The test exercises preamble markers, brief injection, real-worker sentence preservation (`safe reproduction…`, `does not create a TDD requirement`, no implied push/merge/deploy), conditional disclosure (\"read only when trigger applies\"), `/factory/...` paths, and malformed-input throws.\n\n**Standards verdict: PASS.** Changes are minimal, single-purpose, and consistent with local contracts (authorization in brief, references conditional, instructions ≠ capability). Non-blocking note: the test asserts omission only against the synthetic worker text; the real-worker projection is not asserted to exclude route/dispatch text. Suggested-for-future, not a blocker.\n\n**Spec verdict: PASS.** The accepted objective — own referenced refs available, prompt preserves grant/worker body while omitting coordinator transport, docs transport-neutral, no pin/route/grant expansion — is met. RED (`red-v2.stderr`: `bug-diagnosis.md` missing) → GREEN (`green-v2.json`: seven `pinnedReferencesAvailable`, publicCli/adapter/quality PASS) matches source I inspected. Independent review is warranted and not self-certified.\n\n**Independence.** I authored no candidate source and edited nothing; I only read the frozen snapshot, diff, callers, and tests.\n\n**Future needs beyond bounded worker scope (not defects of this fix).** Only the worker role has a native adapter; other roles still require a separately authorized supported context or human. G1/G2 are additions to already-mounted refs; G3's retrospective reference is not in the native mount, so it needs its own future projection decision. No claim of all-role runtime support is made.",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "low",
+      "stopReason": "stop"
+    }
+  },
+  "regression": {
+    "red": "normal native worker missing own reference: .agents/roles/references/bug-diagnosis.md; actual undefined, expected string",
+    "green": "Normal public CLI plus installed SDK offline PASS; seven own references match approved pinned Git bytes.",
+    "instrumentCorrection": "First attempt used nonexistent dispatch.taskScript. Corrected to taskCopy before functional RED; no source behavior was inferred from the instrument failure."
+  },
+  "postcommit": {
+    "portableQuality": "PASS",
+    "nativeOffline": "PASS",
+    "eslint": "PASS",
+    "knip": "PASS",
+    "gitBlobHashes": "PASS"
+  },
+  "methodologyPinUnchanged": true,
+  "realProviderCalls": 0,
+  "limits": "Instruction/resource availability and offline execution only. No model-adherence, all-role adapter, S01 or complete methodology coverage claim.",
+  "followupCandidates": [
+    "Risk-triggered user-path baseline/driver guidance",
+    "Append-only decisions for multi-phase runs",
+    "Retrospective escalation and fail-first evidence"
+  ]
+}
