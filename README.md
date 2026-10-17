@@ -38,3 +38,9 @@ El primer hito, S01 + S02, lleva una issue definida a una PR con grounding, veri
 - [Pruebas del SDK A2A JS](docs/research/a2a-js.md): envío no bloqueante, desconexión, cancelación y mensajes repetidos.
 
 La arquitectura, persistencia, aislamiento y composición de instrucciones se elegirán mediante pruebas acotadas antes de implementar. La metodología no será un pipeline obligatorio ni una herramienta distinta por cada skill.
+
+## Controles de calidad
+
+Con Node.js 24 y Git disponibles, ejecuta `node tools/check-quality.mjs`. La misma entrada se ejecuta en el check `Quality / Portable checks` de cada PR y de `main`, sin instalar dependencias ni usar credenciales de modelos. Comprueba sintaxis de `tools/` y tests `.mjs`, formato y enlaces de instrucciones `.agents/`, materialización y hashes del paquete de `HEAD` y admisión de rutas mediante el CLI público. Los archivos locales de sintaxis/instrucciones se comprueban tal como están; el paquete se verifica desde el commit, no desde cambios sin commit.
+
+No hay paso de compilación: el runtime es JavaScript ejecutable. Estos checks no sustituyen lint, análisis de código muerto ni pruebas de Pi/bubblewrap o proveedores reales. Esas verificaciones requieren gates separados; la CI portable no consume llamadas a modelos.
