@@ -1,0 +1,141 @@
+{
+  "scope": "Selected opencode-go HTTP429 only; exact known JSON envelope, not prose or a universal quota classifier",
+  "knownEnvelope": {
+    "type": "error",
+    "error": {
+      "type": "GoUsageLimitError"
+    }
+  },
+  "sources": {
+    "sdk": {
+      "version": "1.2.0",
+      "path": "/home/iseoane/.pi/agent/install/releases/1.2.0/node_modules/@earendil-works/pi-ai/dist/utils/retry.js",
+      "sha256": "2c6a9b87df6b2a97045e631463d5728334d974d1c8473982a38603eff4820ff2",
+      "lines": "4–8 explicitly label GoUsageLimitError as a Zen subscription/account limit rather than transient throttle; helper itself parses prose and is NOT used as quota authority"
+    },
+    "legacyProvider": {
+      "commit": "d21b0790a6c146815f28fea604e41e922f009590",
+      "blob": "48c77a45dc2578a768ebfa6eee7688db827290e6",
+      "url": "https://github.com/anomalyco/opencode/blob/d21b0790a6c146815f28fea604e41e922f009590/packages/console/app/src/routes/zen/util/handler.ts",
+      "lines": "507–532: HTTP429 envelope with error.type=constructor.name; RateLimitError separately listed. 900–963: GoUsageLimitError raised for weekly,monthly,rolling subscription limits."
+    },
+    "currentProvider": {
+      "tree": "8c173a8f3805d8e749d44311054b07e37a1b2ce1",
+      "blob": "b0a2ec0cb99e738c0e54a6b095b5e6fc6a73b11d",
+      "url": "https://api.github.com/repos/anomalyco/opencode/git/blobs/b0a2ec0cb99e738c0e54a6b095b5e6fc6a73b11d",
+      "observation": "Current public route proxies to migrated inference service. The legacy contract is known, NOT proof of current deployed error shape."
+    }
+  },
+  "red": {
+    "baseline": "ab7b0ab24450230d1c4d1579dc3278970825919f",
+    "testSha256": "fe8609c1cde8e87cb67a5a76e6c77a18ef9d4e52bbaf59fdd5e2ca4d2d0bbc51",
+    "sameExactTestInBaseline": true,
+    "exit": 1,
+    "observed": "Known structured Go quota blocked as unclassified-result-no-fallback; expected completion via approved alternate.",
+    "stderrSha256": "9a9baa571d41623cfceba568ef85385a8485e2b1027d5e62491f3c79a5be3bfe",
+    "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: known-Go-quota-advances-without-retry: {\"version\":1,\"mode\":\"fixture\",\"status\":\"blocked\",\"reason\":\"unclassified-result-no-fallback\",\"attemptsConsumed\":1,\"records\":[{\"number\":1,\"tuple\":{\"model\":\"opencode-go/glm-5.3-flash\",\"effort\":\"high\"},\"billingEvidence\":{\"source\":\"synthetic\"},\"outcome\":\"unknown\",\"streamEnded\":true,\"fetches\":1,\"httpStatus\":429,\"effortEvidence\":\"requested and runtime-supported, not a provider receipt\"}],\"limits\":[\"text-only pinned source bundle; no tools or discovery\",\"quota is operator evidence, never inferred from 429 or prose\",\"unknown invocations consumed; no billing or remote exactly-once claim\"]}\n+ actual - expected\n\n+ 'blocked'\n- 'complete'\n\n    at file:///tmp/isswf-quota66-red/tests/researcher-quota-fallback.mjs:72:12 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 'blocked',\n  expected: 'complete',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
+    "retentionNote": "Original stderr exists but .gitignore rule .audit/*.stderr hides it from ignore-aware find/grep. Exact safe assertion output is retained here for portable review."
+  },
+  "checks": {
+    "portable": {
+      "status": "PASS",
+      "controls": [
+        "known-Go-quota-advances-without-retry",
+        "quota-does-not-widen-total-budget",
+        "rate-limit-is-not-quota",
+        "free-tier-not-supported-by-Go-contract",
+        "prose-never-authorizes-transition",
+        "wrong-envelope-blocks",
+        "unknown-429-blocks",
+        "malformed-JSON-blocks",
+        "oversized-body-blocks",
+        "auth-status-cannot-be-quota",
+        "other-provider-cannot-use-Go-contract",
+        "clone-failure-preserves-response",
+        "capture-stall-remains-deadline-bounded"
+      ],
+      "mode": "portable-injected-caller",
+      "forbiddenNetworkFetches": 0,
+      "realRuntimeCalls": 0,
+      "limits": "Known versioned Go error envelope only. No current-service quota response, all-provider classifier or actual fallback claim."
+    },
+    "installedPrimarySDKSynthetic": {
+      "status": "PASS",
+      "controls": [
+        "known-Go-quota-advances-without-retry",
+        "quota-does-not-widen-total-budget",
+        "rate-limit-is-not-quota",
+        "free-tier-not-supported-by-Go-contract",
+        "prose-never-authorizes-transition",
+        "wrong-envelope-blocks",
+        "unknown-429-blocks",
+        "malformed-JSON-blocks",
+        "oversized-body-blocks",
+        "auth-status-cannot-be-quota",
+        "other-provider-cannot-use-Go-contract",
+        "clone-failure-preserves-response",
+        "capture-stall-remains-deadline-bounded"
+      ],
+      "mode": "actual-primary-SDK-synthetic-transport-and-injected-alternate",
+      "forbiddenNetworkFetches": 0,
+      "realRuntimeCalls": 0,
+      "limits": "Known versioned Go error envelope only. No current-service quota response, all-provider classifier or actual fallback claim."
+    },
+    "sessionRegression": {
+      "status": "PASS",
+      "mode": "actual-SDK-synthetic-auth-and-transport",
+      "sameSessionAcrossRetry": true,
+      "distinctSessionAcrossJobs": true,
+      "persistedOpaqueUUID": true,
+      "forbiddenNetworkFetches": 0,
+      "realRuntimeCalls": 0,
+      "limits": "Synthetic provider acceptance only; no real service availability or fallback integration proof."
+    },
+    "existingFallbackControls": {
+      "status": "PASS",
+      "root": "/tmp/isswf-fallback66-sSYXGj",
+      "installedSDKNoProvider": {
+        "observedNetworkAttempts": 0,
+        "sdkPreflight": "auth-unconfigured",
+        "authValuesUsed": false
+      },
+      "fixtureProviderPrompts": 0,
+      "realRuntimeCalls": 0,
+      "backend": "injected SDK contract fixture, not provider integration",
+      "results": [
+        "one-503-retry-then-next-approved-tuple-cumulative-three",
+        "claimed-logical-job-cannot-replay",
+        "429-auth-and-unclassified-errors-block-without-prose-inference",
+        "budget-does-not-reset-at-destination-change",
+        "exhausted-approved-route-blocks",
+        "one-cumulative-retry-budget-never-resets-across-two-destinations",
+        "explicit-operator-quota-evidence-advances-without-retrying-exhausted-tuple-not-provider-classification-proof",
+        "test-quality-and-quota-prose-do-not-trigger-fallback",
+        "observed-model-mismatch-blocks",
+        "hidden-sdk-transport-retry-refused-before-second-network-request",
+        "unfinished-stream-consumes-slot-and-never-advances",
+        "output-bound-blocks-not-quality-retry",
+        "unsupported-effort-or-auth-blocks-before-invocation",
+        "missing-numeric-budget-route-role-cost-or-caller-pin-denied-before-claim",
+        "repository-text-cannot-substitute-external-grant",
+        "live-default-change-does-not-change-pinned-route",
+        "public-cli-does-not-accept-fixture-as-provider-mode",
+        "api-key-is-not-subscription-proof-explicit-external-attestation-required-with-provenance",
+        "actual-installed-SDK-initialized-with-empty-fixture-auth-no-observed-fetch-no-prompt"
+      ],
+      "sourceHash": "3c6daea0d40df4405daf7206220c98dff20c12f335c68f621ad30c4e9711975e",
+      "limits": [
+        "No real runtime66 grant or route availability proof",
+        "Quota transition uses explicit operator fixture evidence, not automatic provider classification",
+        "No tools, worker fallback, additional API costs or live model call"
+      ]
+    }
+  },
+  "limits": [
+    "No real quota response or forced quota exhaustion.",
+    "Primary actual success retained separately at source24c48b3, before this observer.",
+    "Unknown429,RateLimitError,other envelopes/providers/codes block.",
+    "No raw error text, headers, credentials or account metadata retained in quota record.",
+    "Existing operator-evidence path remains distinct."
+  ]
+}
