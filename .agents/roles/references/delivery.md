@@ -20,7 +20,7 @@ State work status explicitly, such as `in progress`, `partial`, `blocked`, `tech
 
 ## Copyable delivery summary
 
-Use `docs/templates/delivery.md` for the local evidence record. For a remote issue or PR, write in English and use the concise publication format below; link retained evidence instead of copying the entire local record. Lead with a short visual account selected for the change. A table may relate user-visible change, reason, and evidence. A Mermaid diagram is useful only when it depicts the observed implementation or a meaningful real flow. For UI changes, use genuine before/after captures when available and safe to share. Never substitute a mock, expected state, or code-generated approximation for observed UI evidence.
+Use `.factory/templates/delivery.md` for the local evidence record. For a remote issue or PR, write in English and use the concise publication format below; link retained evidence instead of copying the entire local record. Lead with a short visual account selected for the change. A table may relate user-visible change, reason, and evidence. A Mermaid diagram is useful only when it depicts the observed implementation or a meaningful real flow. For UI changes, use genuine before/after captures when available and safe to share. Never substitute a mock, expected state, or code-generated approximation for observed UI evidence.
 
 For non-UI changes, use a compact table, small accurate flow, or prose. Omit decorative visuals. Do not require screenshots for non-UI work. Do not expand a large change into a field-by-field inventory; link exact paths and evidence instead.
 

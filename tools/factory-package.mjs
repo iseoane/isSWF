@@ -31,9 +31,9 @@ const payloadPaths = [
   ".agents/roles/references/review.md",
   "docs/durable-work.md",
   "docs/model-routing.md",
-  "docs/templates/job-brief.md",
-  "docs/templates/attempt.md",
-  "docs/templates/review.md",
+  ".factory/templates/job-brief.md",
+  ".factory/templates/attempt.md",
+  ".factory/templates/review.md",
   ".factory/models.json",
   "package.json",
 ];

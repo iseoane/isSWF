@@ -64,7 +64,7 @@ Toda entrega requiere pruebas de comportamiento y revisión independiente propor
 
 Issues y PRs se redactan en inglés. El formato propio lo define la [referencia de publicación](../.agents/roles/references/delivery.md), aplicada por el [perfil delivery](../.agents/roles/delivery.md). Sus apartados son `Why the change`, `Change outline`, `Special things to note`, `Risk Assessment` y `Testing`, omitiendo secciones vacías. Un visual explica el cambio real cuando ayuda; no se exige una captura para un cambio sin interfaz.
 
-La [plantilla de entrega](templates/delivery.md) es el registro local detallado de evidencia, no el cuerpo obligatorio de cada PR. El perfil prepara texto y no publica por sí solo. El coordinador comprueba la autorización y usa el mecanismo GitHub existente para publicar. Las skills de Pstack pueden ayudar, pero no reemplazan este contrato ni son una dependencia obligatoria del formato.
+La [plantilla de entrega](../.factory/templates/delivery.md) es el registro local detallado de evidencia, no el cuerpo obligatorio de cada PR. El perfil prepara texto y no publica por sí solo. El coordinador comprueba la autorización y usa el mecanismo GitHub existente para publicar. Las skills de Pstack pueden ayudar, pero no reemplazan este contrato ni son una dependencia obligatoria del formato.
 
 ### Contexto, recuperación y mejoras
 
