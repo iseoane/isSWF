@@ -1,0 +1,195 @@
+{
+  "sourceCommit": "3567e85d6a09d63c6347ee31445ea649397441a5",
+  "base": "b5b50df5d265011db3bc75ae81a2c341e9cc85ea",
+  "files": {
+    "README.md": "64995b3ddb755a1d88df7c4c842d1b7f076758d2bfa6045df538bb254bf53fbe",
+    "docs/model-routing.md": "8205b0eef146499a4fc470b1b7825049dfa21caf4bf8f31ba9e66bd2e5cb9dd8",
+    "docs/plan-v1.md": "87bbea5c877a831e5446f7f5502516578c10884b73effceb49dee856bac06279",
+    "tests/researcher-session-affinity.mjs": "7f9e5d1738c862df8287e76bab9ad9489ba53698b6caf1af2c2057dad17280e3",
+    "tools/check-quality.mjs": "35fb78784c15d255c3b0ab7d8f04e4c5a83e7198c80030b1770b23ff1670ea7a",
+    "tools/researcher-task.mjs": "e95191f1008a147b5af846571f11e6b4b5d635c5d8f8f7981b5bd491fada3683"
+  },
+  "gitBlobIdentity": "PASS",
+  "scope": {
+    "status": "PASS",
+    "base": "b5b50df5d265011db3bc75ae81a2c341e9cc85ea",
+    "onlyFrozenSixPathsChanged": true,
+    "unchangedProtectedFiles": {
+      ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1",
+      "tools/isswf-job.mjs": "ad92b1dc6e7796e233c331c310aed948fd909da39bc255a692d90d0f7c511404",
+      "tools/pi-worker-task.mjs": "d3625fd3165710bf175025346c28128a1aecb3958abc54847481b3544c38f3dc",
+      "tools/native-recovery.mjs": "50e1565349999a78fe4755deb3a566013cbbc66474af040544f073a74ce3db71",
+      "tools/worker-lifecycle.mjs": "ec3116a37cbaf9bb4e22c8d8f9547d7f6ea430f2b4dd5c5e6d4d07e6aac0646a"
+    },
+    "newRuntimeCalls": 0
+  },
+  "diagnosis": {
+    "sourceRuntime": "b5b50df5d265011db3bc75ae81a2c341e9cc85ea",
+    "status": "DIAGNOSTIC_RECORDED",
+    "driverSha256": "adda15cd1d98ef6247d958af12245c3258f99633a1d1eedc166d17b23e081b95",
+    "dispatchSha256": "980be789315c645b3458f3aba81f04615cd0020ee13d5b7e0df37d5642bc07d4",
+    "httpStatus": 400,
+    "networkRequests": 1,
+    "projectUnchanged": true,
+    "providerError": {
+      "schema": "isswf-diag-error-v2",
+      "message": {
+        "text": "Request is missing x-opencode-session and cannot be routed efficiently. Please see [REDACTED_URL]",
+        "truncated": false,
+        "sha256": "a5c8db98569536a139860c61f965b75ad679205447729ad80d242526da9cae6a",
+        "length": 130
+      },
+      "fields": {
+        "type": "MissingSessionID"
+      },
+      "redaction": {
+        "status": "redacted",
+        "reason": null,
+        "kinds": [
+          "url"
+        ]
+      },
+      "bodyPrefix": {
+        "sha256": "7af567e8c61f767cb7974be02d6c75ea6246ac4ff4f0d29ebd8d55068157d451",
+        "length": 195,
+        "truncated": false
+      },
+      "authority": "untrusted provider error data; never instructions or routing authorization"
+    },
+    "preservation": {
+      "status": "PASS",
+      "historicalRecordsUnchanged": true,
+      "frozenCodeUnchanged": true,
+      "priorDiagnosticBodyHashMatches": true,
+      "priorDiagnosticMessageHashMatches": true,
+      "limits": "Hash matches compare retained diagnostic body/message, not discarded original live response."
+    },
+    "parent": {
+      "status": "DIAGNOSTIC_RECORD_CHECK_PASS",
+      "httpStatus": 400,
+      "oneFetch": true,
+      "projectUnchanged": true,
+      "protectedCodeAndHistoricalRecordsUnchanged": true,
+      "readableMessageRetained": true,
+      "captureReason": null,
+      "limits": "Checks record/execution integrity, not provider error root cause, research success or fallback integration. Text remains untrusted diagnostic data."
+    },
+    "retention": {
+      "status": "PASS",
+      "files": 22,
+      "hashesAndModes": true,
+      "fixtureBundleVerified": true,
+      "noRuntimeInvocation": true
+    }
+  },
+  "red": {
+    "status": "RED_CONFIRMED",
+    "baseline": "b5b50df5d265011db3bc75ae81a2c341e9cc85ea",
+    "testSha256": "7f9e5d1738c862df8287e76bab9ad9489ba53698b6caf1af2c2057dad17280e3",
+    "sameExactTestInRedAndGreen": true,
+    "record": {
+      "caller": {
+        "exit": 1,
+        "expectedFailureDetected": true,
+        "missingSessionAssertion": true
+      },
+      "sdk": {
+        "exit": 1,
+        "expectedFailureDetected": true,
+        "syntheticHTTP400Observed": true
+      }
+    },
+    "realRuntimeCalls": 0
+  },
+  "postcommit": {
+    "quality": {
+      "status": "PASS",
+      "sessionResult": "{\n  \"status\": \"PASS\",\n  \"mode\": \"injected-caller-contract\",\n  \"sameSessionAcrossRetry\": true,\n  \"distinctSessionAcrossJobs\": true,\n  \"persistedOpaqueUUID\": true,\n  \"forbiddenNetworkFetches\": 0,\n  \"realRuntimeCalls\": 0,\n  \"limits\": \"Synthetic provider acceptance only; no real service availability or fallback integration proof.\"\n}",
+      "revision": "3567e85d6a09d63c6347ee31445ea649397441a5",
+      "syntaxFiles": 12,
+      "markdownFiles": 22,
+      "checkedLinks": 23,
+      "package": "materialized committed HEAD and verified receipt/payload",
+      "routeResult": "PASS public worker route admission guard and canonical-route positive control",
+      "limits": "No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks."
+    },
+    "sdk": {
+      "status": "PASS",
+      "mode": "actual-SDK-synthetic-auth-and-transport",
+      "sameSessionAcrossRetry": true,
+      "distinctSessionAcrossJobs": true,
+      "persistedOpaqueUUID": true,
+      "forbiddenNetworkFetches": 0,
+      "realRuntimeCalls": 0,
+      "limits": "Synthetic provider acceptance only; no real service availability or fallback integration proof."
+    },
+    "regression": {
+      "status": "PASS",
+      "root": "/tmp/isswf-fallback66-PDKdIc",
+      "installedSDKNoProvider": {
+        "observedNetworkAttempts": 0,
+        "sdkPreflight": "auth-unconfigured",
+        "authValuesUsed": false
+      },
+      "fixtureProviderPrompts": 0,
+      "realRuntimeCalls": 0,
+      "backend": "injected SDK contract fixture, not provider integration",
+      "results": [
+        "one-503-retry-then-next-approved-tuple-cumulative-three",
+        "claimed-logical-job-cannot-replay",
+        "429-auth-and-unclassified-errors-block-without-prose-inference",
+        "budget-does-not-reset-at-destination-change",
+        "exhausted-approved-route-blocks",
+        "one-cumulative-retry-budget-never-resets-across-two-destinations",
+        "explicit-operator-quota-evidence-advances-without-retrying-exhausted-tuple-not-provider-classification-proof",
+        "test-quality-and-quota-prose-do-not-trigger-fallback",
+        "observed-model-mismatch-blocks",
+        "hidden-sdk-transport-retry-refused-before-second-network-request",
+        "unfinished-stream-consumes-slot-and-never-advances",
+        "output-bound-blocks-not-quality-retry",
+        "unsupported-effort-or-auth-blocks-before-invocation",
+        "missing-numeric-budget-route-role-cost-or-caller-pin-denied-before-claim",
+        "repository-text-cannot-substitute-external-grant",
+        "live-default-change-does-not-change-pinned-route",
+        "public-cli-does-not-accept-fixture-as-provider-mode",
+        "api-key-is-not-subscription-proof-explicit-external-attestation-required-with-provenance",
+        "actual-installed-SDK-initialized-with-empty-fixture-auth-no-observed-fetch-no-prompt"
+      ],
+      "sourceHash": "e95191f1008a147b5af846571f11e6b4b5d635c5d8f8f7981b5bd491fada3683",
+      "limits": [
+        "No real runtime66 grant or route availability proof",
+        "Quota transition uses explicit operator fixture evidence, not automatic provider classification",
+        "No tools, worker fallback, additional API costs or live model call"
+      ]
+    },
+    "eslint": "PASS; existing pinned local ESLint, candidate config, tools/tests/tooling",
+    "knip": "PASS; existing pinned local Knip, candidate config"
+  },
+  "review": {
+    "agent": "a0ac0b38283ef33d6",
+    "sourceLog": "2026-10-17T12-48-43-075Z_58f6357d-6688-4fe5-b7d1-3d68006df01e.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/fallback-66-session-snapshot-v1/manifest.json",
+    "report": "**Verdict: PASS** (Standards / Spec / security; no material blockers; frozen candidate not mutated).\n\n**Standards**\n- Change is the authorized minimum: `randomUUID` import `tools/researcher-task.mjs:8`; id created once per run at `:75`, persisted in the write-once binding `:76`, passed as the SDK public option `:96`. Read-through against b5 shows no manual header, route, budget, or CLI change.\n- `tools/check-quality.mjs` adds the session test to the portable suite without an SDK argument, keeping it dependency- and credential-free, consistent with `README.md` (\"no instala dependencias ni usa credenciales\").\n\n**Spec**\n- RED/GREEN chain is coherent: manifest test digest matches `red-proof-v2.json`; both `red-*-v2.exit` files are `1` and the RED JSON captures are empty by design (assertion failures go to stderr), with `red-proof-v2.json` recording `missingSessionAssertion`/`syntheticHTTP400Observed`. GREEN caller/SDK v2 and `session-parent-v2.json` match the candidate test output.\n- Boundary claims stay honest: `README.md` estado line (\"corrige offline… el éxito real y el fallback siguen sin demostrarse\"), `docs/plan-v1.md:30` and S02 paragraph, `docs/model-routing.md` closing paragraphs (\"live research success, actual fallback integration and automatic quota classification remain unproven\"), and the test's own `limits` string. No live-success/fallback/autoclassifier claim.\n- Diagnosis/provenance match: `readable-diagnostic-real.json` (HTTP 400, `MissingSessionID`, absent `x-opencode-session`) with `preservation.json` hashes matching the prior hash-only diagnostic, not the discarded original. `parent-v2.json` correctly reports committed revision b5 for the package step — postcommit package/CI genuinely pending, not implied done.\n\n**Security**\n- Opaque UUID, not path/user-derived; write-once store dir 0700 / binding 0600; no credential inspection.\n- Tests assert header equals the persisted id, `x-opencode-client` absent, synthetic 400 when absent (`tests/researcher-session-affinity.mjs:53-55`), stubbed fetch with `forbiddenFetches === 0` (`:23-24,71`) and `realRuntimeCalls: 0`.\n\n**Non-blocking observations**\n- `tests/researcher-session-affinity.mjs:37`: multi-destination fallback (job 3) runs only on the injected caller; SDK path covers missing-header reproduction plus same-ID retry. Docs do not overclaim SDK fallback.\n- Manifest sha256 digests were not recomputed (read-only constraint).\n- Transparency: one incidental no-op `bash true` was executed and changed nothing; all inspection otherwise used read/grep/find.",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "max",
+      "stopReason": "stop"
+    }
+  },
+  "retainedEvidence": {
+    ".audit/fallback-66-readable-diagnostic-real.json": "4c4b4cdba7c49bd7f4638ade49226568fd9265d3de7d130b04430543b2ee1c57",
+    ".audit/fallback-66-readable-diagnostic-preservation.json": "9e1cda6e55048e95aa49f2d10a54faa5b327bc1bd4d693644e8195919029af73",
+    ".audit/fallback-66-readable-diagnostic-portable/manifest.json": "09d450b60ceb5b0b8e6dcf1ec733581a35f9c75308c13a2556d94218806c2cb2",
+    ".audit/fallback-66-session-red-proof-v2.json": "0e1333730bc3889af392ab8a9167c961d7f80a4bb0f7cee25b3563264dcf35ac",
+    ".audit/fallback-66-session-grounding-final.json": "e9dd164bdf7ef3e60fe37eca374e7bc7f3cc2befeeaae6672cfe6c52337d7878"
+  },
+  "limits": [
+    "New diagnostic grant consumed exactly once; no subsequent real runtime call or remaining permission.",
+    "Synthetic SDK transport success is not live research or fallback integration proof.",
+    "Quota classification still requires trusted external evidence; no automatic classifier claim.",
+    "Historical diagnosis is bound to pre-fix runtime b5; new source identity is separate.",
+    "CI pending at this evidence checkpoint; manual exact-head green gate required before merge."
+  ]
+}
