@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "base": "cf0a81ba464e188c0d2eb640d9e0bad05d363a49",
+  "files": {
+    "tools/researcher-task.mjs": "437bfe3a60c0e63bd28ea4953b62e54664ef2884615ec7fa941ce8af6ab33081",
+    "docs/model-routing.md": "8c06f29b644c7dc75c01b2cc54ca751471f11af48be36e2157c1a7af2248ed39",
+    ".agents/roles/researcher.md": "1b7a3b75c74b4acb76fd22f814d6fb341299bf154e9182759da3d98aa9a30a7c",
+    ".audit/verify-fallback-66.mjs": "94490ccc5d0b9a9a30004fbe3166bbd1ab2605171cf9a91f66f9a57a2ef6ad64",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "realRuntimeCalls": 0,
+  "fixtureEvidence": ".audit/fallback-66-parent-v6.json",
+  "coreEvidence": ".audit/fallback-66-core-v3.json",
+  "unchangedReferenceInput": ".factory/models.json",
+  "delta": "API-key flat-plan subscription confirmation requires explicit external operator attestation; default-block preserved"
+}

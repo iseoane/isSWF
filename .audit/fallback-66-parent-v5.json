@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "root": "/tmp/isswf-fallback66-djMoXX",
+  "installedSDKNoProvider": {
+    "observedNetworkAttempts": 0,
+    "sdkPreflight": "auth-unconfigured",
+    "authValuesUsed": false
+  },
+  "fixtureProviderPrompts": 0,
+  "realRuntimeCalls": 0,
+  "backend": "injected SDK contract fixture, not provider integration",
+  "results": [
+    "one-503-retry-then-next-approved-tuple-cumulative-three",
+    "claimed-logical-job-cannot-replay",
+    "429-auth-and-unclassified-errors-block-without-prose-inference",
+    "budget-does-not-reset-at-destination-change",
+    "exhausted-approved-route-blocks",
+    "explicit-operator-quota-evidence-advances-without-retrying-exhausted-tuple-not-provider-classification-proof",
+    "test-quality-and-quota-prose-do-not-trigger-fallback",
+    "observed-model-mismatch-blocks",
+    "hidden-sdk-transport-retry-refused-before-second-network-request",
+    "unfinished-stream-consumes-slot-and-never-advances",
+    "output-bound-blocks-not-quality-retry",
+    "unsupported-effort-or-auth-blocks-before-invocation",
+    "missing-numeric-budget-route-role-cost-or-caller-pin-denied-before-claim",
+    "repository-text-cannot-substitute-external-grant",
+    "live-default-change-does-not-change-pinned-route",
+    "public-cli-does-not-accept-fixture-as-provider-mode",
+    "actual-installed-SDK-initialized-with-empty-fixture-auth-no-observed-fetch-no-prompt"
+  ],
+  "sourceHash": "1764c299439673edf8b1b19d3265878c48d4ed39e2fe515a5cfc5e3a6b0a11dd",
+  "limits": [
+    "No real runtime66 grant or route availability proof",
+    "Quota transition uses explicit operator fixture evidence, not automatic provider classification",
+    "No tools, worker fallback, additional API costs or live model call"
+  ]
+}

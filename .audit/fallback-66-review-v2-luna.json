@@ -1,0 +1,13 @@
+{
+  "agent": "a2d5c273fd0645178",
+  "sourceLog": "2026-10-17T04-28-43-582Z_7e76794e-dc85-452d-9344-e266bb2f28d5.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/fallback-66-snapshot-v2/manifest.json",
+  "report": "**Standards: PASS** — The v2 delta updates the caller, its test mock, and the routing guide; unchanged role/config files match the frozen snapshots.\n\n**Spec: PASS** — SDK OAuth confirmation remains valid. Otherwise, a trusted, provider-matched operator attestation must confirm calls incur no additional API cost and include a reference; absent, mismatched, or false evidence blocks. Billing provenance is recorded without claiming SDK verification. The guard tests cover SDK/operator success and unknown, wrong-provider, and false-flag failures. API costs allowed remains blocked.\n\n**Maint: PASS** — The delta is narrowly scoped and preserves default-block behavior. Existing core evidence records source-gate PASS; no live grant or provider call is claimed. This review was read-only; no checks were run.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

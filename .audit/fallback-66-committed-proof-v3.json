@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "sourceRevision": "58a333209238d4998a66a35abe6cbddb33ea8051",
+  "files": {
+    "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+    "docs/model-routing.md": "eb7db3d6db2258cbf9bb896fc1e11aa4023674dc0c70cf7dfe4065f2bb16e860",
+    ".agents/roles/researcher.md": "1b7a3b75c74b4acb76fd22f814d6fb341299bf154e9182759da3d98aa9a30a7c"
+  },
+  "postcommitCaller": ".audit/fallback-66-postcommit-parent-v3.json",
+  "postcommitCore": ".audit/fallback-66-postcommit-core-v3.json",
+  "workerRuntimeFilesUnchanged": 8,
+  "canonicalModelsUnchanged": true,
+  "pendingLiveGrantRefusedBeforeClaim": true,
+  "realRuntimeCalls": 0,
+  "remaining": "Concrete operator grant and subscription coverage confirmation, independent actual-fixture precall gate, then at most authorized integration call"
+}

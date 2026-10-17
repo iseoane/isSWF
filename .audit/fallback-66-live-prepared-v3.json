@@ -1,0 +1,39 @@
+{
+  "status": "PREPARED_NOT_AUTHORIZED",
+  "sourceRevision": "58a333209238d4998a66a35abe6cbddb33ea8051",
+  "root": "/tmp/isswf-fallback66-live-YrrT1S",
+  "request": {
+    "project": "/tmp/isswf-fallback66-live-YrrT1S/project",
+    "inputSha": "7e5ad5be83b2be9749df3877255d573b75c6c77c",
+    "jobPath": "job.json",
+    "grantFile": "/tmp/isswf-fallback66-live-YrrT1S/operator-grant-pending.json",
+    "store": "/tmp/isswf-fallback66-live-YrrT1S/research-store"
+  },
+  "callerSha256": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+  "proposedBudgets": {
+    "maximumModelAttempts": 2,
+    "retries": 0,
+    "deadlineMs": 120000,
+    "outputBytes": 8192,
+    "maxOutputTokens": 512
+  },
+  "route": [
+    {
+      "model": "opencode-go/glm-5.3-flash",
+      "effort": "high"
+    },
+    {
+      "model": "openai-codex/gpt-6-luna",
+      "effort": "medium"
+    }
+  ],
+  "operatorApprovalRequired": true,
+  "providerCallsAllowed": false,
+  "runtimeCallsMade": 0,
+  "limits": [
+    "No provider availability or fallback integration claimed",
+    "Grant intentionally denies provider calls until genuine operator decision",
+    "No additional API costs; unconfirmed subscription blocks",
+    "This script prepares only; it never imports SDK or invokes the researcher caller"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "failuresRetained": [
+    {
+      "output": "fallback-66-parent-v1.json",
+      "outcome": "empty stdout; assertion target-pin-mismatch",
+      "cause": "Test grant omitted required targetRepo and targetBase",
+      "fix": "Test fixture now supplies the explicit target pins",
+      "laterProof": "fallback-66-parent-v2.json"
+    },
+    {
+      "output": "fallback-66-parent-v4.json",
+      "outcome": "empty stdout; ERR_PACKAGE_PATH_NOT_EXPORTED",
+      "cause": "Real installed SDK no-provider check exposed CJS resolution of import-only pi-ai entry",
+      "fix": "Use node:module findPackageJSON scoped to approved SDK, import its models.js as ESM",
+      "laterProof": "fallback-66-parent-v5.json"
+    },
+    {
+      "output": "fallback-66-core-v1.json",
+      "outcome": "empty stdout; ENOENT installed fixture docs/model-routing.md",
+      "cause": "New role link targeted a source-only guide not in the explicit installed resource closure",
+      "fix": "Explicit fixed-source code-path pointer; no package payload expansion",
+      "laterProof": "fallback-66-core-v2.json"
+    },
+    {
+      "output": "fallback-66-live-prepared-v1.json",
+      "outcome": "empty stdout; git128 nonexistent source object",
+      "cause": "Parent supplied an incorrect unverified full SHA rather than resolving actual commit",
+      "fix": "Obtain full actual HEAD with git rev-parse; exact source blob check refused the invalid input",
+      "laterProof": "fallback-66-live-prepared-v2.json",
+      "runtimeCalls": 0
+    }
+  ],
+  "realRuntimeCalls": 0,
+  "noProviderRetryOrFallbackOccurred": true
+}

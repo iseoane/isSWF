@@ -1,0 +1,17 @@
+{
+  "version": 3,
+  "base": "cf0a81ba464e188c0d2eb640d9e0bad05d363a49",
+  "files": {
+    "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+    "docs/model-routing.md": "eb7db3d6db2258cbf9bb896fc1e11aa4023674dc0c70cf7dfe4065f2bb16e860",
+    ".agents/roles/researcher.md": "1b7a3b75c74b4acb76fd22f814d6fb341299bf154e9182759da3d98aa9a30a7c",
+    ".audit/verify-fallback-66.mjs": "e341b364a9424036428df601e31a913171395b7819f01170990b3a269cf49fb6",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "realRuntimeCalls": 0,
+  "fixtureEvidence": ".audit/fallback-66-parent-v7.json",
+  "coreEvidence": ".audit/fallback-66-core-v4.json",
+  "retryRed": ".audit/fallback-66-retry-red-v2.json",
+  "retryGreen": ".audit/fallback-66-retry-green-v3.json",
+  "delta": "Remove both per-destination retry resets; retryBudget explicitly cumulative across complete route"
+}

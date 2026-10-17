@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "sourceRevision": "cf0a81ba464e188c0d2eb640d9e0bad05d363a49",
+  "files": {
+    "tools/researcher-task.mjs": "1764c299439673edf8b1b19d3265878c48d4ed39e2fe515a5cfc5e3a6b0a11dd",
+    "docs/model-routing.md": "42ecd56f809e664e5d52205a1448f8843a6813b4b432da01a596b0b50c4aff8b",
+    ".agents/roles/researcher.md": "1b7a3b75c74b4acb76fd22f814d6fb341299bf154e9182759da3d98aa9a30a7c"
+  },
+  "postcommitCallerProof": ".audit/fallback-66-postcommit-parent.json",
+  "postcommitCoreProof": ".audit/fallback-66-postcommit-core.json",
+  "pendingLiveGrantRefusedBeforeClaim": true,
+  "realRuntimeCalls": 0
+}

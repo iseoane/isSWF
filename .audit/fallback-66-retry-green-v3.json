@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "caller": "/home/iseoane/Work/isSWF/tools/researcher-task.mjs",
+  "root": "/tmp/isswf-fallback66-retry-G4fXYQ",
+  "expected": {
+    "status": "blocked",
+    "reason": "approved-route-exhausted",
+    "attemptsConsumed": 3,
+    "maximumRetriesAcrossRoute": 1
+  },
+  "actual": {
+    "status": "blocked",
+    "reason": "approved-route-exhausted",
+    "attemptsConsumed": 3,
+    "fetches": 3,
+    "attempts": [
+      "opencode-go/glm-5.3-flash",
+      "opencode-go/glm-5.3-flash",
+      "openai-codex/gpt-6-luna"
+    ]
+  },
+  "realRuntimeCalls": 0
+}
