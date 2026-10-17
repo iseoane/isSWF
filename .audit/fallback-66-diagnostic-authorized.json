@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "fixtureFile": ".audit/fallback-66-diagnostic-prepared.json",
+  "fixtureSha256": "132ae606fb4776dd6285ab82d6f4b62baf95a8582e56eb546cc5957de4022ca3",
+  "sourceRevision": "8a9174910c0372a2afae5153aa8d280a400e5b6f",
+  "request": {
+    "project": "/tmp/isswf-fallback66-live-cxqrp7/project",
+    "inputSha": "a8f140f8c7144e8b8607fe98b5b894581dfc0d58",
+    "jobPath": "job.json",
+    "grantFile": "/tmp/isswf-fallback66-live-cxqrp7/operator-diagnostic-grant.json",
+    "store": "/tmp/isswf-fallback66-live-cxqrp7/research-store"
+  },
+  "grantSha256": "3e8b54324f0fc2f044824ddeacd805002aa910704ff43d41b1ab1ad8dfc7e592",
+  "selectedTuple": {
+    "model": "opencode-go/glm-5.3-flash",
+    "effort": "high"
+  },
+  "files": {
+    "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "operatorReference": "User Si approving ONE additional GLM/high diagnostic invocation after review, max120s/512tokens, no retries/fallback/additionalAPIcosts; prior Go subscription coverage confirmation remains applicable",
+  "invocationMarker": "/tmp/isswf-fallback66-live-cxqrp7/diagnostic-invocation.json",
+  "resultFile": "/tmp/isswf-fallback66-live-cxqrp7/diagnostic-result.json",
+  "maximumCalls": 1,
+  "noFallback": true,
+  "noRetry": true,
+  "sanitization": "Bounded error body parsed only in memory; retain finite whitelisted diagnostic categories/parameters/numeric constraints, never headers or arbitrary response text"
+}

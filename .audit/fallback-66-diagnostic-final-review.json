@@ -1,0 +1,13 @@
+{
+  "agent": "aa5a4cb3a5e296144",
+  "sourceLog": "2026-10-17T05-08-51-583Z_5a780084-c0b4-431f-aa0d-718666d14609.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/fallback-66-diagnostic-real.json",
+  "report": "**Execution/evidence: PASS.** Fixed evidence chain holds — frozen v1 hashes, DeepSeek+Luna precall PASS, offline v2 13 controls/0 runtime calls, one fetched request, stream ended, exit 0, DIAGNOSTIC_RECORDED, project bytes/modes unchanged, original PARTIAL preserved, parent verifier PASS with 0 verifier calls. Archiving this failure is acceptable; nothing more needs buying.\n\n**Diagnostic utility: FAIL/insufficient.** HTTP 400 recurred. The 195-byte body was untruncated and the provider message was 130 bytes, but the sanitizer kept only hashes/lengths and discarded both texts; category unknown, parameter null, no recognized conditions. The provider did supply a message; it was not retained. Cause remains unknown, with no actionable detail. The 400 alone supports no model substitution, source fix, fallback claim, or further automatic/paid call.\n\n**Proposed last-paragraph replacement (not applied): truthful and materially accurate.** It correctly merges both 400 runs, preserves no-claim language, and archives the unknown cause. Two wording notes: (1) it uses typographic apostrophes (caller’s, diagnostic’s) — use ASCII ' if ever applied; (2) \"retained hashes\" could read as sufficient detail — consider \"retained only hashes and lengths (195/130 bytes) with no recognized signal\", which also avoids implying the provider sent nothing. Suggested minimal next action: operator decides whether #66 closes thus; no new runtime call.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

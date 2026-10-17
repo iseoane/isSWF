@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "verifiedScope": "one authorized audit-only diagnostic observation, not normal caller/fallback acceptance",
+  "httpStatus": 400,
+  "sanitizedProviderError": {
+    "schema": "isswf-diag-error-v1",
+    "signal": {
+      "category": "unknown",
+      "parameter": null,
+      "constraint": null
+    },
+    "recognizedMessageSignals": {
+      "parameters": [],
+      "conditions": [],
+      "authority": "finite text matches only; never a routing decision"
+    },
+    "bodyPrefix": {
+      "sha256": "7af567e8c61f767cb7974be02d6c75ea6246ac4ff4f0d29ebd8d55068157d451",
+      "length": 195,
+      "truncated": false
+    },
+    "message": {
+      "sha256": "a5c8db98569536a139860c61f965b75ad679205447729ad80d242526da9cae6a",
+      "length": 130
+    }
+  },
+  "oneAttemptedFetchNoRetryOrFallback": true,
+  "projectBytesAndModesUnchanged": true,
+  "originalPartialPreserved": true,
+  "additionalRuntimeCallsByVerifier": 0
+}

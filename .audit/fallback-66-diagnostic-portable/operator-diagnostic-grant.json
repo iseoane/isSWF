@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "role": "researcher",
+  "project": "/tmp/isswf-fallback66-live-cxqrp7/project",
+  "inputSha": "a8f140f8c7144e8b8607fe98b5b894581dfc0d58",
+  "jobPath": "job.json",
+  "jobSha256": "ca0ab8d88aee53f1c1e8f3d1ccd2a1d9a9141214abd84b7699c964376c5c94ae",
+  "logicalJobRef": "R66-one-live-integration",
+  "grantRef": "operator66-one-diagnostic-only",
+  "targetRepo": "/tmp/isswf-fallback66-live-cxqrp7/project",
+  "targetBase": "5692af683d0429f9d415b1580b3211301c0fc0ef",
+  "store": "/tmp/isswf-fallback66-live-cxqrp7/research-store",
+  "allowResultArtifact": true,
+  "callerSha256": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+  "approvedRoute": [
+    {
+      "model": "opencode-go/glm-5.3-flash",
+      "effort": "high"
+    },
+    {
+      "model": "openai-codex/gpt-6-luna",
+      "effort": "medium"
+    }
+  ],
+  "totalAttempts": 1,
+  "retryBudget": 0,
+  "deadlineMs": 120000,
+  "outputBytes": 8192,
+  "maxOutputTokens": 512,
+  "apiCostsAllowed": false,
+  "temporaryUnavailableStatuses": [
+    503
+  ],
+  "allowProviderCalls": true,
+  "authPath": "/home/iseoane/.pi/agent/auth.json",
+  "sdkEntrySha256": "5482298b995db935f7b96f5d6056fa1c36ac6fc80456be594ef65b83c62b0d30",
+  "subscriptionAttestations": [
+    {
+      "provider": "opencode-go",
+      "coversCallsWithoutAdditionalApiCost": true,
+      "reference": "User Si approving ONE additional GLM/high diagnostic invocation after review, max120s/512tokens, no retries/fallback/additionalAPIcosts; prior Go subscription coverage confirmation remains applicable"
+    }
+  ]
+}

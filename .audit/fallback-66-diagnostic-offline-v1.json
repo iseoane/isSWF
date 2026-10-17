@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "controls": [
+    "installed-SDK-synthetic-400-one-fetch-original-response-readable-no-fallback-no-secret",
+    "installed-SDK-synthetic-503-one-fetch-original-response-readable-no-fallback-no-secret",
+    "unknown-structured-fields-and-message-hash-only",
+    "malformed-body-no-raw-retention",
+    "message-only-finite-hints-not-routing-classification",
+    "oversized-response-prefix-cap-and-clone-cancellation",
+    "unfinished-stream-blocks-without-retry",
+    "invalid-gate-verdict-refused-before-marker-or-SDK",
+    "invalid-gate-driverSha256-refused-before-marker-or-SDK",
+    "invalid-gate-dispatchSha256-refused-before-marker-or-SDK",
+    "invalid-gate-files-refused-before-marker-or-SDK",
+    "invalid-gate-independentReviewRef-refused-before-marker-or-SDK"
+  ],
+  "installedSDKUsedWithSyntheticAuth": true,
+  "realAuthValuesRead": false,
+  "actualRuntimeCalls": 0,
+  "observedForbiddenGlobalFetches": 0,
+  "preflight": {
+    "status": "OFFLINE_CHECK_PASS",
+    "driverSha256": "90b05be5373f14a2deac66905f92920854fae459ffc9c7374927106be7f7c456",
+    "dispatchSha256": "15f35c6ab89a338745bb1de35a1abd44358ca54c0f78cae5f34ed5d152dd9714",
+    "files": {
+      "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+      ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+    },
+    "protectedProjectFiles": {
+      ".factory/models.json": {
+        "sha256": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1",
+        "mode": 420
+      },
+      "brief.md": {
+        "sha256": "1ced803fc5e7fa3183bdfd4e370f706f60fb3175304b5b891b19c5db749be8d9",
+        "mode": 420
+      },
+      "facts.md": {
+        "sha256": "f06b9f51cb96e3a28af3b5e8337ddcbfb3ff3242f5ac1accfc365d8e67cc9005",
+        "mode": 420
+      },
+      "job.json": {
+        "sha256": "ca0ab8d88aee53f1c1e8f3d1ccd2a1d9a9141214abd84b7699c964376c5c94ae",
+        "mode": 420
+      }
+    },
+    "markerAbsent": true,
+    "storeEmpty": true,
+    "providerCalls": 0
+  },
+  "limits": [
+    "Fake responses do not prove actual provider cause or acceptance",
+    "Prepared helper describes proposed max2; approved diagnostic grant and driver enforce exactly max1",
+    "Sanitized message hints never authorize fallback or a further call"
+  ]
+}

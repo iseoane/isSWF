@@ -1,0 +1,12 @@
+{
+  "agent": "a54a03a537c17856f",
+  "sourceLog": "2026-10-17T04-57-52-932Z_fa233213-d7c3-4d4f-9d12-26d3e753a5d8.jsonl",
+  "initialPromptMatched": true,
+  "report": "**Final bounded design** — one `resultFile`, schema `isswf-diag-error-v1`:\n\n```js\n{ schema, attempt:1, tuple:{model:'opencode-go/glm-5.3-flash',effort:'high'},\n  stopReason, httpStatus:null|int,\n  signal:{ category, parameter:null|string,\n           constraint:{parameter,min|max,value:int}|null },\n  body:{sha256,length,truncated}, message:{sha256,length} }\n```\n\nExtraction uses **structured fields only**:\n\n- `category` ← finite map over `error.code`/`error.type`: `invalid_request_error, invalid_parameter, unsupported_parameter, unsupported_value, rate_limit_exceeded, insufficient_quota, context_length_exceeded, model_not_found, authentication_error`; else `unknown`.\n- `parameter` ← `error.param` ∈ `{max_tokens, max_completion_tokens, reasoning_effort, stream_options, messages, model, temperature, tools, store, input}`; else `null`.\n- `constraint` only when `parameter` non-null: one integer, `0..1e6`, `min`/`max`.\n- Unknown rule: `category==='unknown'` or `parameter===null` ⇒ drop constraint; hashes+length only. `length` = bytes read (≤8192), `truncated` = numeric Content-Length > 8192.\n\n**Essential traps**\n\n1. Fixtures disagree: prepared says `maximumModelAttempts:2`, authorized says `maximumCalls:1`. Authorized wins; refuse on grantSha256/callerSha256/models-pin mismatch; never attempt 2.\n2. Guard returns the original Response unmodified, counts fetches, asserts exactly 1, `maxRetries:0`.\n3. Read the clone, then cancel the reader / release the lock — otherwise the stream stalls to the 120s deadline.\n4. One emit path; hashes only. Never headers, request, `JSON.stringify(err)`, or message text.\n5. Offline control: synthetic 400 body containing secret-looking strings; assert no raw substring anywhere in output, exactly one fetch, and `unknown` for an unrecognized code.",
+  "metadata": {
+    "provider": "opencode-go",
+    "model": "deepseek-v4.1-flash",
+    "effort": "max",
+    "stopReason": "stop"
+  }
+}

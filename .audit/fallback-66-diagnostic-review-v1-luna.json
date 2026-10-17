@@ -1,0 +1,13 @@
+{
+  "agent": "a3bbb55929084d2a9",
+  "sourceLog": "2026-10-17T05-03-41-413Z_824d8bac-6816-46e8-8b30-0920d20f37d9.jsonl",
+  "initialPromptMatched": true,
+  "afterSnapshot": ".audit/fallback-66-diagnostic-snapshot-v1/manifest.json",
+  "report": "**PASS — Standards / Spec / Maintainability.** Reviewed the snapshot manifest, all four payloads, and the three actual diagnostic records. The prepared helper’s proposed max-two route is obsolete: the authorized dispatch and driver require exactly one attempt, zero retries, no fallback, 120 seconds, and 512 tokens. The driver checks the approved grant and exact request shape before sending; it records no headers or raw provider error text. Error categories and parameters are finite allowlists, message-derived hints are explicitly non-authoritative, and the cloned error body is capped at 8192 bytes with only hashes and bounded signals retained. Offline evidence covers synthetic SDK responses and negative guards; it does not establish real provider behavior.\n\nThe preservation record reports one prior HTTP 400 attempt, unchanged original project files, and no fallback or retry; it does not prove successful research or fallback integration. **No blocker found for the requested audit-only diagnostic scope.** I did not run scripts, invoke providers, or modify files.",
+  "metadata": {
+    "provider": "openai-codex",
+    "model": "gpt-6-luna",
+    "effort": "high",
+    "stopReason": "stop"
+  }
+}

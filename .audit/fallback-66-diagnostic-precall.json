@@ -1,0 +1,10 @@
+{
+  "verdict": "PASS",
+  "driverSha256": "6779d58604312864ff6209f20ff280cbe35c7c5b12b5ce28b6dc6d82c0631d14",
+  "dispatchSha256": "15f35c6ab89a338745bb1de35a1abd44358ca54c0f78cae5f34ed5d152dd9714",
+  "files": {
+    "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "independentReviewRef": "a25f1511282b5e7be + a3bbb55929084d2a9; actual final reports retained; both PASS"
+}
