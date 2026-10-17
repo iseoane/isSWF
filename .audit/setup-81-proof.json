@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "sourceCommit": "61c66879f4ee6694e2bb8c795ff637ce216a6ff3",
+  "files": {
+    ".agents/roles/planner.md": "19aabfe7e27b7e6ac32f4c629b5a6273febc699091cd71d1982f5ce82f6e161d",
+    ".agents/skills/isswf-coordinator/SKILL.md": "b7202438e3e1751fda42d9418a6922cbd0a00adb3dcf3dd14afc9c43594a54f3",
+    ".agents/skills/isswf-setup/SKILL.md": "33f7792d4fb238b32b1f13ba69c30388fca22cdd8b1ccffc63c93b6e95b45abd",
+    "docs/durable-work.md": "b7056b540ffe36cb8616e942338da8c8ab39104a10c2d8c63cb647039d1deec5",
+    "docs/s01-intake.md": "32179d4d0e0a735baa067039f302b091c5a9a8e900551a8733328661cbfcdeb6",
+    "tests/issue-intake.mjs": "e36fe9b89c41df431d2b7187a228c2013818de1acb42698a00d6c982a75b343a",
+    "tooling/quality/knip.json": "94332320b6714703598fd4e043e18f0c1bef5e2454a45bfff64a80b70430b79f",
+    "tools/check-quality.mjs": "aefa51a7ae24e9b985fad6b92e5ff25b1d835aa608ea8bbc323ad04107cbd16a",
+    "tools/isswf-intake.mjs": "349926c7e179031be1194c120fca81fc81c5e5df4064f48c6dcf5d4332dd6543",
+    "tools/isswf-plan.mjs": "c71de133b4abdce2705922658f49ee36365bae32413b911a8e0231176ebd2ca5",
+    "tools/project-quality.mjs": "c728dd2a2bc7553f7639b9da75fd151f0a01d753514c658608f8b79695df66ab",
+    "tests/initiative-plan.mjs": "25ec27b0550cbdc853491ffd4d3a87600fe4aef2e14c63391a1542b92506ee93",
+    "tests/project-quality.mjs": "4d3e638695a57930382fcf55c158d560113af3f9d9f4b005b5a49d477c914e57"
+  },
+  "review": {
+    "agent": "a66d955aca23f26ad",
+    "initialPromptMatched": true,
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "low",
+      "stopReason": "stop"
+    },
+    "verdict": "PASS"
+  },
+  "checks": {
+    "publicPlanCli": "PASS",
+    "publicIntakeCli": "PASS",
+    "qualityDiscovery": "PASS",
+    "postcommitQuality": "PASS",
+    "eslint": "PASS",
+    "knip": "PASS",
+    "gitBlobs": "PASS",
+    "historicalBriefPreserved": "PASS"
+  },
+  "labels": {
+    "repository": "iseoane/isSWF",
+    "created": [
+      "maintenance",
+      "research",
+      "needs-triage",
+      "needs-info",
+      "ready-for-agent",
+      "ready-for-human"
+    ],
+    "observedIssue": 27,
+    "assigned": [
+      "enhancement",
+      "ready-for-agent"
+    ]
+  },
+  "scope": {
+    "planRecorder": "native local CLI",
+    "initiativeIntake": "native issue preparation",
+    "setupAndRemoteLabels": "existing skill workflow, no native autosynchronization",
+    "localWithoutGitHub": "plan CLI and curated template briefs, not a fabricated issue",
+    "quality": "bounded discovery, not executed check results"
+  },
+  "limits": [
+    "Not a scheduler, authorization service or full factory-v1 completion",
+    "No live provider calls or new dependencies",
+    "Historical records are not automatically migrated"
+  ]
+}
