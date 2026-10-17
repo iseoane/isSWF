@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
-import { readFile, writeFile, link, unlink, open, mkdir, mkdtemp, rm, realpath, stat } from 'node:fs/promises';
+import { readFile, link, unlink, open, rm, realpath, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

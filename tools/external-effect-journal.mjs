@@ -54,7 +54,7 @@ function outcome(pull, intent) {
   return { version: 1, key: intent.key, observedState: 'open', number: pull.number, url: `https://github.com/${intent.repository}/pull/${pull.number}`, candidateSha: intent.candidateSha, baseSha: intent.baseSha };
 }
 
-export function githubTransport() {
+function githubTransport() {
   return {
     request(method, path, body) {
       const args = ['api', '--hostname', 'github.com', '--method', method, path];

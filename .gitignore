@@ -10,3 +10,4 @@ __pycache__/
 .env.*
 .codegraph/
 .audit/*.stderr
+node_modules/

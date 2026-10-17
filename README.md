@@ -41,6 +41,16 @@ La arquitectura, persistencia, aislamiento y composición de instrucciones se el
 
 ## Controles de calidad
 
-Con Node.js 24 y Git disponibles, ejecuta `node tools/check-quality.mjs`. La misma entrada se ejecuta en el check `Quality / Portable checks` de cada PR y de `main`, sin instalar dependencias ni usar credenciales de modelos. Comprueba sintaxis de `tools/` y tests `.mjs`, formato y enlaces de instrucciones `.agents/`, materialización y hashes del paquete de `HEAD` y admisión de rutas mediante el CLI público. Los archivos locales de sintaxis/instrucciones se comprueban tal como están; el paquete se verifica desde el commit, no desde cambios sin commit.
+Con Node.js 24 y Git disponibles, ejecuta `node tools/check-quality.mjs`. Esta etapa no instala dependencias ni usa credenciales de modelos. Comprueba sintaxis de `tools/` y tests `.mjs`, formato y enlaces de instrucciones `.agents/`, materialización y hashes del paquete de `HEAD` y admisión de rutas mediante el CLI público. Los archivos locales de sintaxis/instrucciones se comprueban tal como están; el paquete se verifica desde el commit, no desde cambios sin commit.
 
-No hay paso de compilación: el runtime es JavaScript ejecutable. Estos checks no sustituyen lint, análisis de código muerto ni pruebas de Pi/bubblewrap o proveedores reales. Esas verificaciones requieren gates separados; la CI portable no consume llamadas a modelos.
+Para el análisis estático local, desde la raíz:
+
+```sh
+npm ci --prefix tooling/quality --ignore-scripts --no-audit --no-fund
+node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs
+node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress
+```
+
+ESLint comprueba errores y variables/imports sin usar. Knip busca archivos, exports de módulos internos, duplicados y referencias no resueltas en el JavaScript activo. Los entrypoints CLI y tests se declaran explícitamente; `check-quality.mjs` se alcanza desde el workflow. Los exports de entrypoints se conservan como API pública. No se analizan los archivos históricos de `.audit/`, el prototipo Python ni el código generado dentro de strings; tampoco se declara cobertura de dependencias npm. Las herramientas y su lockfile viven en `tooling/quality/`, fuera del paquete Pi sin dependencias.
+
+El check `Quality / Portable checks` ejecuta ambas etapas en cada PR y en `main`. No hay paso de compilación: el runtime es JavaScript ejecutable. Esto no sustituye pruebas de Pi/bubblewrap o proveedores reales; la CI no consume llamadas a modelos. La instalación local/CI descarga las dependencias fijadas, con scripts de instalación desactivados.
