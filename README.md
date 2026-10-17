@@ -2,7 +2,7 @@
 
 Definición de una software factory personal: un coordinador conversacional, agentes en background y procedimientos adaptativos expresados principalmente en skills y perfiles Markdown.
 
-**Estado:** existe una entrada nativa de jobs con worker Pi, ejecución aislada y consulta posterior de resultados. Una issue real recorrió implementación, verificación y revisión hasta una PR integrada ([issue #1](https://github.com/iseoane/isSWF/issues/1), [PR #2](https://github.com/iseoane/isSWF/pull/2)). La recuperación soportada se limita al mismo arranque; el paralelismo es cooperativo, no un scheduler global. Esto no completa S01/S02 ni toda la v1. El [plan vigente](docs/plan-v1.md) distingue entregas, evidencia y pendientes; #66 sigue pausada tras dos respuestas HTTP 400, sin fallback real demostrado.
+**Estado:** existe una entrada nativa de jobs con worker Pi, ejecución aislada y consulta posterior de resultados. Una issue real recorrió implementación, verificación y revisión hasta una PR integrada ([issue #1](https://github.com/iseoane/isSWF/issues/1), [PR #2](https://github.com/iseoane/isSWF/pull/2)). La recuperación soportada se limita al mismo arranque; el paralelismo es cooperativo, no un scheduler global. Esto no completa S01/S02 ni toda la v1. El [plan vigente](docs/plan-v1.md) distingue entregas, evidencia y pendientes; #66 corrige offline la cabecera de sesión ausente identificada en un diagnóstico autorizado; el éxito real y el fallback siguen sin demostrarse.
 
 ## Uso coordinado en Pi
 
