@@ -1,0 +1,10 @@
+{
+  "status": "EXPECTED_FAIL",
+  "successOnlyVerifierExit": 1,
+  "disagreement": {
+    "actual": "PARTIAL",
+    "expected": "PASS"
+  },
+  "runtimeCalls": 0,
+  "successAcceptanceRemainsClosed": true
+}

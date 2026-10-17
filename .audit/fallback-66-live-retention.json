@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "destination": "/home/iseoane/Work/isSWF/.audit/fallback-66-live-portable",
+  "retainedFiles": 10,
+  "hashesAndModesVerified": true,
+  "gitBundleVerified": true,
+  "authValuesCopied": false,
+  "additionalRuntimeCalls": 0
+}

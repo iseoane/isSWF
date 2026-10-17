@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "fixtureFile": ".audit/fallback-66-live-prepared-v3.json",
+  "fixtureSha256": "66b1e40cff527b28c893fcb718792651bad624324beaab6087e48555da392afb",
+  "sourceRevision": "58a333209238d4998a66a35abe6cbddb33ea8051",
+  "request": {
+    "project": "/tmp/isswf-fallback66-live-YrrT1S/project",
+    "inputSha": "7e5ad5be83b2be9749df3877255d573b75c6c77c",
+    "jobPath": "job.json",
+    "grantFile": "/tmp/isswf-fallback66-live-YrrT1S/operator-grant-approved.json",
+    "store": "/tmp/isswf-fallback66-live-YrrT1S/research-store"
+  },
+  "grantSha256": "a3008487e996c7800a7c74b056ce2765b5e8a217c56960847cd0d8f41f490070",
+  "files": {
+    "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "invocationMarker": "/tmp/isswf-fallback66-live-YrrT1S/real-invocation.json",
+  "operatorReference": "operator response Ok y si to explicit #66 max2attempts retry0 total120s 512tokens and Go no-additional-API-cost coverage question",
+  "caps": {
+    "totalAttempts": 2,
+    "retryBudget": 0,
+    "deadlineMs": 120000,
+    "maxOutputTokens": 512,
+    "outputBytes": 8192
+  },
+  "prohibited": [
+    "source writes",
+    "tools",
+    "GitHub effects",
+    "additional API costs",
+    "automatic new invocation or logical job"
+  ]
+}

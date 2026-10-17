@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "dispatchSha256": "2da8d5c9ca12b62f19b9085f7e0f9c36fc5a71b2303ce4e8d84110b6718d9132",
+  "driverSha256": "c645731bcddacf5a1651aa7e426382f0b8054972522ae74087ab22a4d020a339",
+  "files": {
+    "tools/researcher-task.mjs": "4521016e19e2509aced2cec652f7dfe4bdf4b555a6aab1e1847f71f8420c30ed",
+    ".factory/models.json": "5d17d3cc4c2d401a522643cfaaa9236896b61b233792a755097323d75825b8c1"
+  },
+  "independentReviewRef": "af6d10da6ad8f1901",
+  "reviewFile": ".audit/fallback-66-live-precall-review.json"
+}

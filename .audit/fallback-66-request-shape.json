@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "diagnostic": "OFFLINE_REQUEST_CONSTRUCTION_ONLY",
+  "interceptedSyntheticFetches": 1,
+  "realNetworkFetches": 0,
+  "realAuthValuesRead": false,
+  "requestShape": {
+    "urlOriginAndPath": "https://opencode.ai/zen/go/v1/chat/completions",
+    "method": "POST",
+    "keys": [
+      "max_tokens",
+      "messages",
+      "model",
+      "reasoning_effort",
+      "stream",
+      "stream_options"
+    ],
+    "model": "glm-5.3-flash",
+    "max_tokens": 512,
+    "reasoning_effort": "high",
+    "stream": true,
+    "messageRoles": [
+      "system",
+      "user"
+    ],
+    "messageCount": 2,
+    "toolsPresent": false,
+    "storePresent": false,
+    "extraBodyFields": [
+      "stream_options"
+    ]
+  },
+  "syntheticResponseRejected": true,
+  "limits": [
+    "Synthetic400 does not reproduce the actual provider cause",
+    "Actual response body and errorMessage were not retained",
+    "No assertion that the provider accepts this payload; no runtime retry authorized"
+  ]
+}
