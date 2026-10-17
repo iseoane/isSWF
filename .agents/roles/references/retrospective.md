@@ -24,4 +24,4 @@ Do not convert one preference or isolated event into a general rule without evid
 
 ## Return
 
-Use `docs/templates/retrospective.md`. Identify the reviewed interval or completed job, evidence inspected, findings, proposals, duplicate check, limits, and next action. For a session review, list pending jobs without treating their status as live or complete. If analysis fails, record what failed and leave the retrospective pending. This pending analysis does not block a delivery already verified on its own merits.
+Use `.factory/templates/retrospective.md`. Identify the reviewed interval or completed job, evidence inspected, findings, proposals, duplicate check, limits, and next action. For a session review, list pending jobs without treating their status as live or complete. If analysis fails, record what failed and leave the retrospective pending. This pending analysis does not block a delivery already verified on its own merits.

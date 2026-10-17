@@ -67,7 +67,7 @@ El caso propio de issue #1/PR #2 ya demostró implementación y entrega real. La
 
 En prioridad 2 se propone una consulta de lectura que muestre trabajo, estado observado, última actualización, candidato, evidencias, bloqueos, decisiones y PR. El coordinador debe explicar esa misma vista y avisar de datos antiguos o indisponibles. No se duplica estado editable para una interfaz nueva. La primera consulta no elimina el objetivo de panel local de la v1 completa.
 
-Las entregas siguen el [perfil delivery](../.agents/roles/delivery.md) y su [referencia de publicación](../.agents/roles/references/delivery.md). El perfil prepara texto; no publica ni concede permisos. El coordinador publica con el mecanismo GitHub existente solo dentro del grant. La [plantilla local](templates/delivery.md) conserva evidencia detallada y no impone un cuerpo extenso a todas las PRs.
+Las entregas siguen el [perfil delivery](../.agents/roles/delivery.md) y su [referencia de publicación](../.agents/roles/references/delivery.md). El perfil prepara texto; no publica ni concede permisos. El coordinador publica con el mecanismo GitHub existente solo dentro del grant. La [plantilla local](../.factory/templates/delivery.md) conserva evidencia detallada y no impone un cuerpo extenso a todas las PRs.
 
 El formato remoto propio es conciso y en inglés: motivo, cambio, aspectos relevantes, riesgo y pruebas. Usa un visual cuando explique el comportamiento real. Mantiene checkpoints y PRs tempranas sin anunciar aceptación antes de resolver verificaciones y revisión. Un cambio tras PASS exige renovar la evidencia y revisión afectadas. El merge necesita autorización vigente y CI verde del head exacto; esa comprobación es manual en este repositorio.
 

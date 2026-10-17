@@ -17,7 +17,7 @@ Jobs use readable, coordinator-assigned IDs that are unique within the project a
       V001.md       # when an independent review is required
 ```
 
-Create attempt and review artifacts only when needed. Copy the [job brief template](templates/job-brief.md), [attempt template](templates/attempt.md), or [review template](templates/review.md) when creating that artifact. The brief revision belongs in its filename. Keep previous revisions when criteria change.
+Create attempt and review artifacts only when needed. Copy the [job brief template](../.factory/templates/job-brief.md), [attempt template](../.factory/templates/attempt.md), or [review template](../.factory/templates/review.md) when creating that artifact. The brief revision belongs in its filename. Keep previous revisions when criteria change.
 
 The coordinator owns current plans, job IDs, assignments, and brief revisions. A worker owns its attempt artifact. A reviewer owns its review artifact. Workers and reviewers write in exclusive checkouts. They return artifacts and references; the coordinator integrates references into the plan without rewriting their conclusions. The coordinator records the operator's product-acceptance decision and evidence in the canonical plan.
 
