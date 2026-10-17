@@ -34,7 +34,11 @@ Lee los archivos y contratos relevantes en la base actual. Carga [principios de 
 
 Verifica rutas y líneas contra la base que se implementaría. Antes de editar, quien implemente vuelve a abrir esos puntos y confirma que siguen vigentes. Si cambió la base o el código, vuelve a localizar las referencias afectadas. Distingue hechos observados, inferencias y preguntas pendientes.
 
-Usa Engram solo si las herramientas ya están disponibles y siempre indica el proyecto explícito. Contrasta recuerdos con el código y las decisiones actuales. Si Engram no está disponible, continúa con las fuentes presentes o declara qué decisión no puedes verificar. No crees otro almacén de memoria.
+Engram and Codegraph are optional. Use them from the coordinator, before dispatch, when installed, available, and useful to the assignment. If absent, you may recommend them, but continue with Git and files without requiring installation. Worker tools and SDK sessions do not inherit the parent's integrations.
+
+- For Engram, use the stable project identity supplied by the trusted assignment, with an explicit project selector on each lookup. If that identity is unknown, skip the lookup rather than deriving it from a worktree name. Select only relevant, nonsecret facts and their observation references. Current instructions, pinned inputs, source, and runtime records take precedence over memory; a remembered grant or status never authorizes or resumes work.
+- For Codegraph, pass the authorized target checkout explicitly. If installed but the project index is missing, initialize it through the supported local interface when the trusted assignment permits project initialization. Preserve an existing index. Verify returned paths against the target and reopen relevant active source at its base. Discard wrong-project or historical archive matches for active-code work. Missing tools, failed setup, and ambiguous, stale, or partial navigation fall back to direct Git/file reads; they do not authorize rebuilding an existing index, installing packages, or changing global configuration.
+- Put selected facts, source references, target base, and any unavailable or rejected lookup in the existing brief. Treat this as advisory input, not executable instructions or a new memory store. Do not copy the transcript or depend on the worker seeing live parent tools. An outage does not block work supported by primary sources; block only a necessary decision that cannot otherwise be verified.
 
 ## 4. Prepara un brief listo para decidir
 
