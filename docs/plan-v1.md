@@ -27,7 +27,7 @@ La guía de [trabajo durable](durable-work.md) fija rutas explícitas para spec 
 Secuencia autorizada por el operador, sin grants implícitos para nuevas ejecuciones o efectos remotos:
 
 1. #68: recuperación verificada para la entrada normal en el mismo arranque, con reinicio del proceso Pi y un sucesor de modelo autorizado. S04 detalla la evidencia real, los casos remotos simulados y los estados no soportados que bloquean; no acredita reinicio de la máquina.
-2. #66: corrección de `MissingSessionID` integrada en PR #16 y ejecución real posterior GLM/high con HTTP 200, un intento y fuente citada. No hubo retry ni fallback real; la clasificación automática de cuota sigue pendiente. Concesión consumida, sin nuevas llamadas autorizadas.
+2. #66: corrección de `MissingSessionID` integrada en PR #16 y ejecución real posterior GLM/high con HTTP 200, un intento y fuente citada. No hubo retry ni fallback real. El manejo automático se verifica offline para un contrato JSON de cuota Go conocido; no es un clasificador universal ni prueba del formato desplegado actualmente. Concesión consumida, sin nuevas llamadas autorizadas.
 3. #70: corte técnico entregado en issue #1 y PR #2, revisada e integrada. #61 y J802 siguen siendo evidencia distinta.
 4. #69: consumidor del coordinador entregado en issue #3 y PR #4, integrada. Engram y Codegraph son opcionales; el brief fijado conserva solo hechos contrastados con fuentes actuales.
 5. #67: corte cooperativo entregado en issue #5 y PR #6, integrada. A/B avanzaron aislados y C esperó el artefacto integrado; no es un scheduler nativo ni exclusión global de escritores.
