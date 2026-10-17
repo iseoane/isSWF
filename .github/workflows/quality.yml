@@ -25,3 +25,9 @@ jobs:
         with:
           node-version: '24'
       - run: node tools/check-quality.mjs
+      - name: Install locked local analysis tools
+        run: npm ci --prefix tooling/quality --ignore-scripts --no-audit --no-fund
+      - name: Lint
+        run: node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs
+      - name: Dead code
+        run: node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress

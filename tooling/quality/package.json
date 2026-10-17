@@ -1,0 +1,10 @@
+{
+  "name": "isswf-quality-tools",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "devDependencies": {
+    "eslint": "10.13.0",
+    "knip": "6.41.0"
+  }
+}

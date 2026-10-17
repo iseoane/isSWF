@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+  "entry": [
+    "tools/isswf-job.mjs",
+    "tools/worker-lifecycle.mjs",
+    "tools/factory-package.mjs",
+    "tools/pi-worker-task.mjs",
+    "tools/researcher-task.mjs",
+    "tests/*.mjs",
+    "tooling/quality/eslint.config.mjs"
+  ],
+  "project": ["tools/**/*.mjs", "tests/**/*.mjs", "tooling/quality/*.mjs"],
+  "include": ["files", "exports", "duplicates", "unresolved"]
+}
