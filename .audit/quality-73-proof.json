@@ -1,0 +1,51 @@
+{
+  "sourceCommit": "80f233f18af0f68486184c416f94b9adf1d478b8",
+  "files": {
+    "tools/check-quality.mjs": "b013d9d31ff401d027780616fac74be8130ce30235462ba5a675adefe5f09532",
+    ".github/workflows/quality.yml": "5f529c04867222b1327aa8db6e2b576d752d10dffa14b337f6e9a863b00d038e",
+    "README.md": "635789ae2d2fa4426d516c8ab2468b133dac138020188dfbb2c4fcfe2e3316d2"
+  },
+  "gitBlobIdentity": "PASS",
+  "localNode": "v26.8.1",
+  "postcommit": {
+    "status": "PASS",
+    "revision": "80f233f18af0f68486184c416f94b9adf1d478b8",
+    "syntaxFiles": 11,
+    "markdownFiles": 22,
+    "checkedLinks": 23,
+    "package": "materialized committed HEAD and verified receipt/payload",
+    "routeResult": "PASS public worker route admission guard and canonical-route positive control",
+    "limits": "No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks."
+  },
+  "negativeControls": {
+    "status": "PASS",
+    "records": [
+      {
+        "path": "tests/worker-route-admission.mjs",
+        "mutation": "const = ;",
+        "exit": 1,
+        "expectedFailureDetected": true
+      },
+      {
+        "path": ".agents/skills/isswf-coordinator/SKILL.md",
+        "mutation": "[Missing control](missing-quality-control.md)",
+        "exit": 1,
+        "expectedFailureDetected": true
+      }
+    ]
+  },
+  "independentReview": {
+    "agent": "a5e0ae11c10eafcfa",
+    "sourceLog": "2026-10-17T10-40-17-985Z_0c40cdf9-c47b-472b-8787-1239080ffbf9.jsonl",
+    "initialPromptMatched": true,
+    "afterSnapshot": ".audit/quality-73-snapshot-v1/manifest.json",
+    "report": "**Material findings: none.**\n\nVerified from actual reads:\n\n- Snapshot manifest (`base d000cde`) matches candidate HEAD; the three payload digests are the only staged changes. `check-quality.mjs` exports/imports `verifyPackage` correctly and passes absolute `--source`/`--rev`/`--store`.\n- Package check genuinely reads committed HEAD blobs (`git cat-file`), not the working tree — the README's committed-vs-local claim is true.\n- Workflow is read-only (`contents: read`, `persist-credentials: false`, SHA-pinned actions, no npm/cache/secrets).\n- Positive route control walks the public CLI and stops at `job.sdkPath must be absolute`; invalids fail before any store is created. Parent v1/v2 plus syntax/broken-link negative controls agree.\n\n**Labeling obligation (not a finding, a non-overclaim rule):**\n\n- `worker-route-admission.mjs` runs under a scrubbed env (`{ PATH, HOME }`), so it exercises the admission gate only — **it is not native Pi, provider, or bwrap proof.** Keep that phrasing in the check's `limits` string.\n- `check-quality.mjs` inherits `process.env` (only `GIT_CONFIG_*` overridden), so ambient `GIT_DIR`/`GIT_WORK_TREE` could redirect the HEAD resolution. CI is controlled, but the local-usage docs should not claim hermetic git env.\n- This initial 73 unit is explicitly **not** full 73 lint/dead-code/native coverage; the README and `limits` already say so — do not upgrade that wording.\n\nNo mutation pending your final.",
+    "metadata": {
+      "provider": "opencode-go",
+      "model": "deepseek-v4.1-flash",
+      "effort": "low",
+      "stopReason": "stop"
+    }
+  },
+  "limits": "Initial portable CI only, not lint/dead-code/native isolation. GitHub Actions execution still pending at this evidence checkpoint. Local environment is not hermetic."
+}
