@@ -191,12 +191,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J011
 
-- Status: pending
+- Status: in-progress
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
-- Blocker: Current parent-session grounding and review still use the Pstack subagent launcher; existing native worker proof does not cover every role.
-- Next step: Ground the smallest native delegation seam and separate offline proof from any real calls requiring a new explicit runtime grant.
+- Blocker: Native reviewer delegation seam is being grounded; no real runtime call or expanded worker route is authorized.
+- Next step: Implement the smallest role-specific native delegation cut, prove offline safety and retain explicit gaps before any real-call request.
 
 ### Acceptance
 
@@ -209,12 +209,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J012
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Show short descriptive initiative labels alongside stable IDs
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md) (pending until prepared)
-- Blocker: Canonical title display in the existing status consumer is being implemented; full panel remains J009.
-- Next step: Verify the label from the canonical plan without renaming IDs/paths or adding editable state.
+- Blocker: Canonical title/label contract integrated in PR36; operator functional acceptance pending. Full panel remains J009.
+- Next step: Use the actual status label and report corrections or accept the bounded display contract.
 
 ### Acceptance
 
@@ -223,7 +223,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- https://github.com/iseoane/isSWF/pull/36
+- 840c0eba2525b8559c17d96ac3c8c9844cc2f09c
+- .factory/initiatives/I0001/jobs/J012/A001.md
+- .factory/initiatives/I0001/jobs/J012/V001.md
 
 ## J013
 
