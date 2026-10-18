@@ -36,9 +36,24 @@ try {
   assert.notEqual(run('prepare', mutation).status, 0);
   assert.notEqual(run('revise', [...mutation, '--expected-sha256', '0'.repeat(64)]).status, 0);
   assert.equal(await readFile(first.path, 'utf8'), bytes);
+  const uncommitted = run('revise', [...mutation, '--expected-sha256', first.sha256]);
+  assert.notEqual(uncommitted.status, 0, 'Uncommitted prior plan must block revision');
+  assert.match(uncommitted.stderr, /checkpoint required/u);
+  assert.equal(await readFile(first.path, 'utf8'), bytes);
+  await assert.rejects(readdir(join(project, '.factory/initiatives/I0042/.plan-write')), { code: 'ENOENT' });
+  const gitEnv = { PATH: process.env.PATH, HOME: root, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' };
+  assert.equal(spawnSync('git', ['-C', project, 'add', '.factory'], { env: gitEnv }).status, 0);
+  assert.equal(spawnSync('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Checkpoint original plan'], { env: gitEnv }).status, 0);
   const revised = run('revise', [...mutation, '--expected-sha256', first.sha256]); assert.equal(revised.status, 0, revised.stderr);
   assert.equal(JSON.parse(revised.stdout).status, 'revised');
-  assert.equal(await readFile(join(project, '.factory/initiatives/I0042', `plan-${first.sha256}.md`), 'utf8'), bytes);
+  assert.equal(spawnSync('git', ['-C', project, 'show', 'HEAD:.factory/initiatives/I0042/plan.md'], { env: gitEnv, encoding: 'utf8' }).stdout, bytes);
+  assert.deepEqual(await readdir(join(project, '.factory/initiatives/I0042')), ['plan.md']);
+  input.jobs[1].nextStep = 'A further change'; await save();
+  assert.equal(spawnSync('git', ['-C', project, 'add', '.factory'], { env: gitEnv }).status, 0);
+  const stagedOnly = run('revise', [...mutation, '--expected-sha256', JSON.parse(revised.stdout).sha256]);
+  assert.notEqual(stagedOnly.status, 0); assert.match(stagedOnly.stderr, /checkpoint required/u);
+  assert.equal(JSON.parse(run('read').stdout).sha256, JSON.parse(revised.stdout).sha256);
+  await assert.rejects(readdir(join(project, '.factory/initiatives/I0042/.plan-write')), { code: 'ENOENT' });
   input.jobs[0].dependsOn = ['J002']; await save();
   assert.notEqual(run('revise', [...mutation, '--expected-sha256', JSON.parse(revised.stdout).sha256]).status, 0);
   input.jobs[0].dependsOn = []; authority.permissions = ['plan', 'execute']; await save();
@@ -47,5 +62,5 @@ try {
   const unsafe = spawnSync(process.execPath, [join(source, 'tools/isswf-plan.mjs'), 'read', '--project', project, '--initiative', 'I0043'], { encoding: 'utf8' });
   assert.notEqual(unsafe.status, 0);
   assert.deepEqual(await readdir(join(root, 'elsewhere')), []);
-  console.log('PASS: local multi-job plan, dependencies, readonly read, repeat, guarded revision/history, missing authority, evidence and cycle guards');
+  console.log('PASS: local multi-job plan, dependencies, readonly read, repeat, guarded revisions with exact prior Git checkpoint and no duplicate history files, missing authority, evidence and cycle guards');
 } finally { await rm(root, { recursive: true, force: true }); }

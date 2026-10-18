@@ -23,6 +23,11 @@ async function synced(path, bytes) {
   const handle = await open(path, 'wx', 0o600);
   try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }
 }
+async function checkpoint(root, path, old) {
+  const result = spawnSync('git', ['-C', root, 'show', 'HEAD:' + relative(root, path).split('\\').join('/')], { timeout: 10000, maxBuffer: 256001, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const bytes = await readFile(path);
+  if (result.error || result.status !== 0 || !bytes.equals(Buffer.from(old)) || !result.stdout.equals(bytes)) throw Error('Git checkpoint required: commit the exact current plan before revise');
+}
 function render(value, initiative) {
   if (value.version !== 1 || value.initiative !== initiative || !text(value.title) || !['bug', 'enhancement', 'maintenance', 'research'].includes(value.type) || !Array.isArray(value.jobs) || !value.jobs.length || value.jobs.length > 100) throw Error('invalid initiative plan');
   const ids = new Set(value.jobs.map(job => job.id));
@@ -67,19 +72,18 @@ export async function plan({ action, project, initiative, proposalPath, grantPat
   if (old === markdown) return { status: 'reused', path, sha256: sha(old), executionAuthorized: false };
   if (action === 'prepare' && old !== undefined) throw Error('existing plan differs; explicit revise with expected SHA required');
   if (action === 'revise' && (old === undefined || !/^[a-f0-9]{64}$/u.test(expectedSha256 ?? '') || sha(old) !== expectedSha256)) throw Error('plan revision conflict');
+  if (old !== undefined) await checkpoint(root, path, old);
   const lock = join(parents[2], '.plan-write');
   await mkdir(lock, { mode: 0o700 });
-  if (old !== undefined && sha(await regular(path)) !== sha(old)) throw Error('plan revision conflict');
-    const pending = join(lock, randomUUID());
-    await synced(pending, markdown);
-    if (old === undefined) await link(pending, path);
-    else {
-      const history = join(parents[2], `plan-${sha(old)}.md`);
-      try { await synced(history, old); } catch (error) { if (error.code !== 'EEXIST' || await regular(history) !== old) throw error; }
-      await rename(pending, path);
-    }
-    if (old === undefined) await unlink(pending);
-    const handle = await open(parents[2], 'r'); try { await handle.sync(); } finally { await handle.close(); }
+  if (old !== undefined) {
+    if (sha(await regular(path)) !== sha(old)) throw Error('plan revision conflict');
+    await checkpoint(root, path, old);
+  }
+  const pending = join(lock, randomUUID());
+  await synced(pending, markdown);
+  if (old === undefined) { await link(pending, path); await unlink(pending); }
+  else await rename(pending, path);
+  const handle = await open(parents[2], 'r'); try { await handle.sync(); } finally { await handle.close(); }
   await rmdir(lock);
   return { status: action === 'prepare' ? 'prepared' : 'revised', path, sha256: sha(markdown), executionAuthorized: false };
 }

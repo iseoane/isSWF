@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Expose a read-only initiative/job status view
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: No worker dispatched; coordinator is preparing and grounding this job.
-- Next step: Inspect record formats and implement the bounded read-only consumer.
+- Blocker: First read-only CLI cut integrated in PR31; operator product acceptance pending. The complete v1 panel is tracked separately in J009.
+- Next step: Operator can accept the bounded CLI or report corrections; no worker remains active for this cut.
 
 ### Acceptance
 
@@ -19,7 +19,11 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- .factory/initiatives/I0001/jobs/J001/brief-r1.md
+- https://github.com/iseoane/isSWF/pull/31
+- 018fa69f5b774c26ccf280df499fb02582f22343
+- .factory/initiatives/I0001/jobs/J001/A001.md
+- .factory/initiatives/I0001/jobs/J001/V001.md
+- .audit/status-84-proof.json
 
 ## J002
 
@@ -127,7 +131,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - Status: pending
 - Objective: Review complete v1 evidence and obtain operator acceptance
-- Depends on: J001, J002, J003, J004, J005, J006, J007
+- Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
 - Blocker: All v1 evidence and operator acceptance are pending.
 - Next step: Ground and authorize the bounded implementation/checks before starting.
@@ -139,3 +143,40 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - None.
+
+## J009
+
+- Status: pending
+- Objective: Complete the v1 local observation panel beyond the CLI first cut
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Blocker: The CLI first cut is not the full v1 panel. Define the bounded panel interaction and its security checks before implementation.
+- Next step: Ground the smallest panel using the integrated PR31 read-only contract; no separate writable state store.
+
+### Acceptance
+
+- The panel and coordinator consume the same canonical records, distinguish unknown/stale/runtime evidence and keep commands behind the coordinator boundary.
+
+### Evidence
+
+- docs/spec-v1.md
+- https://github.com/iseoane/isSWF/pull/31
+
+## J010
+
+- Status: in-review
+- Objective: Remove redundant plan snapshots and use guarded Git history
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
+- Blocker: Parent implementation and RED/GREEN controls passed; independent review, exact-head CI and integration are pending.
+- Next step: Review the exact candidate, then publish and integrate only after CI passes.
+
+### Acceptance
+
+- A changed revise requires exact prior bytes committed at HEAD, keeps expected-SHA guards, creates no plan-hash copy and preserves existing snapshot bytes in Git before removal.
+
+### Evidence
+
+- .audit/plan-85-retention.json
+- .audit/plan-85-red.stderr
+- .audit/plan-85-green.txt
