@@ -93,7 +93,10 @@ try {
       } };
     },
   });
-  const result = await runDiagnosis(request, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture('normal') });
+  mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  let result;
+  try { result = await runDiagnosis(request, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture('normal') }); }
+  finally { mock.timers.reset(); }
   assert.equal(result.status, 'diagnosis-report-complete'); assert.equal(result.fetches, 1); assert.equal(result.attemptsConsumed, 1); assert.match(result.report, /Diagnostic report/u);
   assert.deepEqual(await readFile(join(project,'.factory/initiatives/I0001/plan.md')),canonicalBefore);
   const before = await readFile(join(p.dir, 'result.json'));
@@ -105,12 +108,12 @@ try {
     const caseStore = join(root, kind); await mkdir(caseStore);
     await json(grantFile, { ...grant, store: caseStore, deadlineMs: kind === 'deadline' ? 50 : 1000 });
     const current = { ...request, store: caseStore };
-    if (kind === 'deadline') mock.timers.enable({ apis: ['setTimeout'] });
+    mock.timers.enable({ apis: ['setTimeout', 'Date'] });
     let r;
     try { r = await runDiagnosis(current, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
-    finally { if (kind === 'deadline') mock.timers.reset(); }
+    finally { mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
-    assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1);
+    assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');
     await assert.rejects(runDiagnosis(current, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture('normal') }));
   }
   const probeFailureStore = join(root,'probe-failure'); await mkdir(probeFailureStore);
