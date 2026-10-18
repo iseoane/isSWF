@@ -51,12 +51,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Objective: Validate a real ambiguous idea through delivery
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
-- Blocker: No implementation assigned yet; ordering is priority, not an invented code dependency.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md) (pending until prepared)
+- Blocker: Approved real idea is being prepared as I0002/J001; implementation, review, demonstration and operator acceptance remain pending.
+- Next step: Validate the idea-to-delivery flow through I0002/J001 without duplicating its feature plan or reopening accepted jobs.
 
 ### Acceptance
 
@@ -64,7 +64,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- Operator conversation: Adelante! (next useful panel action, main recommendation with reason)
+- .factory/initiatives/I0002/plan.md
 
 ## J004
 
