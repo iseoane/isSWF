@@ -153,12 +153,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J009
 
-- Status: pending
+- Status: in-progress
 - Objective: Complete the v1 local observation panel beyond the CLI first cut
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
-- Blocker: The CLI first cut is not the full v1 panel. Define the bounded panel interaction and its security checks before implementation.
-- Next step: Build the smallest shared-record panel and acceptance cards on the accepted J001/J012 CLI contract; preserve coordinator-owned decisions.
+- Blocker: Read-only local panel and explicit delivery cards are being implemented; runtime process/slot inspection remains separate.
+- Next step: Render canonical status and existing delivery summaries with unknown fields explicit; verify local HTTP boundaries and readonly behavior.
 
 ### Acceptance
 
