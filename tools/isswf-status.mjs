@@ -91,13 +91,15 @@ export async function status({ project, initiative }) {
   try {
     const file = await snapshot(record.path);
     if (file.sha256 !== record.sha256) throw Error('changed-plan');
-    if (!record.markdown.startsWith(`# ${initiative}: `)) throw Error('invalid-plan-identity');
+    const heading = record.markdown.split('\n', 1)[0], prefix = `# ${initiative}: `;
+    const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
+    if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-plan-identity');
     const parsed = parse(record.markdown), jobs = [];
     for (const job of parsed) {
       const { briefName, ...fields } = job;
       jobs.push({ ...fields, artifacts: await artifacts(dirname(record.path), { ...job, initiative }), processState: 'not-inspected' });
     }
-    return { status: 'observed', observedAt, initiative, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
+    return { status: 'observed', observedAt, initiative, title, label: `${initiative} · ${title}`, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
   } catch { return { status: 'unknown', observedAt, reason: 'invalid-or-changing-plan', executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits }; }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

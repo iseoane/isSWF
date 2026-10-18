@@ -33,6 +33,9 @@ try {
   await writeFile(join(job, 'V001.md'), '# Review report\n- Verdict: pass\n');
   const before = await tree(project), observed = inspect();
   assert.equal(observed.freshness, 'not-verified');
+  assert.equal(observed.initiative, 'I0001');
+  assert.equal(observed.title, 'Status fixture');
+  assert.equal(observed.label, 'I0001 · Status fixture');
   assert.equal(observed.status, 'observed'); assert.equal(observed.executionAuthorized, false); assert.equal(observed.processState, 'not-inspected');
   assert.equal(observed.jobs.length, 2); assert.equal(observed.jobs[0].reportedStatus, 'in-progress');
   assert.equal(observed.jobs[0].artifacts.reports[0].reportedStatus, 'complete');
@@ -45,6 +48,11 @@ try {
   await symlink(join(root, 'private'), join(directory, 'jobs/J002'));
   assert.equal(inspect().jobs[1].artifacts.status, 'unknown');
   const planPath = join(directory, 'plan.md'), original = await readFile(planPath, 'utf8');
+  await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: Factory v1'));
+  assert.equal(inspect().label, 'I0001 · Factory v1');
+  assert.equal(inspect().initiative, 'I0001');
+  await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: '));
+  assert.equal(inspect().status, 'unknown');
   await writeFile(planPath, original.replace('jobs/J001/brief-r1.md', '../../outside.md'));
   assert.equal(inspect().status, 'unknown'); assert.equal(inspect().freshness, 'not-verified');
   await writeFile(planPath, original.replace('- Status: in-progress', '- Status: invented'));

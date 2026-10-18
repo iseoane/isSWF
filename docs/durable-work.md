@@ -52,6 +52,8 @@ A worker returns its attempt artifact, changed paths, observed checks, candidate
 
 From an authorized source checkout, run `node tools/isswf-status.mjs --project /absolute/project --initiative I0001`. The command reads the existing canonical plan and the brief/report/intake artifacts under each named job. It creates no records and follows no external evidence links. It reports declared status, dependencies, blockers, next step, acceptance, evidence references and per-file hashes/modification times. A missing brief is `not-prepared`; malformed or unsafe artifacts are `unknown`. Reported attempt completion does not overwrite the plan's status or establish product acceptance.
 
+The result includes `initiative` as the stable ID, `title` from the canonical plan heading, and a derived `label` such as `I0001 · Factory v1`. Use a concise plan title for readable lists; no separate editable label or renamed directory is needed. A missing or malformed heading is unknown. The full panel remains separate work and should consume this same display contract.
+
 The result includes query time and file provenance, but `processState: not-inspected` and `freshness: not-verified` remain explicit. A file timestamp is not a heartbeat. The coordinator must not describe a worker as running, stopped or fresh from this snapshot. The files are not one atomic runtime snapshot. Live process inspection, the complete panel, current remote PR state and automatic dependency satisfaction remain separate work. This first consumer is a source-checkout CLI, not part of the Markdown resource package.
 
 ## Model routing
