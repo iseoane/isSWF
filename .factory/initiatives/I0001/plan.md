@@ -153,12 +153,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J009
 
-- Status: in-progress
+- Status: completed
 - Objective: Complete the v1 local observation panel beyond the CLI first cut
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J009/brief-r3.md) (pending until prepared)
-- Blocker: Readonly project-wide panel delivered in PR39/40; bounded coordinator notes are being implemented. Automatic acceptance and live runtime remain excluded.
-- Next step: Deliver pinned local notes with explicit recorded-not-applied state, HTTP/browser safety tests, independent review and exact-head CI.
+- Blocker: None for the delivered panel scope; operator explicitly accepted it after disclosure of manual startup and remaining limits.
+- Next step: No active work for this accepted cut. Static HTML or managed startup require a separate scoped change; capacity, continuity and security stay with their owning jobs.
 
 ### Acceptance
 
@@ -175,6 +175,11 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/40
 - .factory/initiatives/I0001/jobs/J009/A002.md
 - .factory/initiatives/I0001/jobs/J009/V002.md
+- https://github.com/iseoane/isSWF/pull/41
+- .factory/initiatives/I0001/jobs/J009/A003.md
+- .factory/initiatives/I0001/jobs/J009/V003.md
+- GitHub Actions run 39132510085: exact-head success 0c62b1953eb34f3d4ce0e2eb27694fa55c39e329
+- Operator conversation: Aceptado (after J009 delivery and manual-server startup limitations were disclosed)
 
 ## J010
 
