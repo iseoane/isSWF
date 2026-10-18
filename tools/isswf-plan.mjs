@@ -33,7 +33,7 @@ function render(value, initiative) {
   const ids = new Set(value.jobs.map(job => job.id));
   if (ids.size !== value.jobs.length || [...ids].some(job => !id(job))) throw Error('unique job IDs required');
   for (const job of value.jobs) {
-    if (!text(job.objective) || !states.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
+    if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !states.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
     if (job.status === 'completed' && !job.evidence.length) throw Error('completed jobs require evidence');
   }
   const visiting = new Set(), visited = new Set();
@@ -46,7 +46,7 @@ function render(value, initiative) {
   }
   for (const job of value.jobs) visit(job);
   const list = values => values.length ? values.map(item => `- ${item}`).join('\n') : '- None.';
-  return `# ${initiative}: ${value.title}\n\nType: ${value.type}\n\nThis coordinator-owned plan records reported progress, not execution permission or process liveness.\n\n` + value.jobs.map(job => `## ${job.id}\n\n- Status: ${job.status}\n- Objective: ${job.objective}\n- Depends on: ${job.dependsOn.join(', ') || 'None'}\n- Brief: [brief-r1.md](jobs/${job.id}/brief-r1.md) (pending until prepared)\n- Blocker: ${job.blocker}\n- Next step: ${job.nextStep}\n\n### Acceptance\n\n${list(job.acceptance)}\n\n### Evidence\n\n${list(job.evidence)}\n`).join('\n');
+  return `# ${initiative}: ${value.title}\n\nType: ${value.type}\n\nThis coordinator-owned plan records reported progress, not execution permission or process liveness.\n\n` + value.jobs.map(job => `## ${job.id}\n\n- Status: ${job.status}\n- Objective: ${job.objective}\n- Depends on: ${job.dependsOn.join(', ') || 'None'}\n- Brief: [brief-r${job.briefRevision ?? 1}.md](jobs/${job.id}/brief-r${job.briefRevision ?? 1}.md) (pending until prepared)\n- Blocker: ${job.blocker}\n- Next step: ${job.nextStep}\n\n### Acceptance\n\n${list(job.acceptance)}\n\n### Evidence\n\n${list(job.evidence)}\n`).join('\n');
 }
 export async function plan({ action, project, initiative, proposalPath, grantPath, expectedSha256 }) {
   if (!['prepare', 'read', 'revise'].includes(action) || !isAbsolute(project ?? '') || !id(initiative)) throw Error('valid action, absolute project and stable initiative ID required');

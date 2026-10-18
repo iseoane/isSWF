@@ -27,12 +27,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Objective: Reconcile changed intake and duplicate requests
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: No implementation assigned yet; ordering is priority, not an invented code dependency.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Blocker: Explicit reconciliation first cut in preparation; duplicate linking remains part of the remaining J002 criteria.
+- Next step: Implement and verify predecessor-bound reconciliation offline; preserve r1 records and require explicit plan adoption.
 
 ### Acceptance
 
@@ -40,7 +40,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- .audit/intake-86-grounding-final.json
 
 ## J003
 
@@ -164,12 +164,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J010
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Remove redundant plan snapshots and use guarded Git history
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
-- Blocker: Parent implementation and RED/GREEN controls passed; independent review, exact-head CI and integration are pending.
-- Next step: Review the exact candidate, then publish and integrate only after CI passes.
+- Blocker: Integrated in PR32 with exact-head CI green; operator product acceptance pending.
+- Next step: Operator can accept the bounded Git-only history behavior or report corrections; no worker remains active.
 
 ### Acceptance
 
@@ -180,3 +180,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .audit/plan-85-retention.json
 - .audit/plan-85-red.stderr
 - .audit/plan-85-green.txt
+- https://github.com/iseoane/isSWF/pull/32
+- ad85a9ddec07895ca6d91955cf7cc3b92135eaab
+- .audit/plan-85-proof.json
