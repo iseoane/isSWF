@@ -209,9 +209,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J011/brief-r2.md) (pending until prepared)
-- Blocker: Native reviewer caller and one real invocation exist; that review was inconclusive because historical evidence was omitted. Existing contextPaths can carry those committed records. Other native roles remain pending.
-- Next step: Verify unchanged historical context selection, fail-closed missing evidence and preparation guidance offline; do not introduce an evidence registry or repeat the consumed live grant.
+- Brief: [brief-r3.md](jobs/J011/brief-r3.md) (pending until prepared)
+- Blocker: Native worker/researcher/reviewer paths exist; reviewer evidence preparation was verified in PR43. Own planner proposal caller is being implemented offline; diagnostics and full role independence remain pending.
+- Next step: Deliver pinned own planner prepare/run/read with proposal-only output, explicit finite grants and synthetic SDK safety tests, then independent review and exact-head CI. No real planner call is granted.
 
 ### Acceptance
 
@@ -225,6 +225,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J011/A001.md
 - .factory/initiatives/I0001/jobs/J011/V001.md
 - Private real reviewer result SHA256 03bcfe2d41204f8d45fc2d99d417b30262d0bbb1d05da0a0c9b16493028e9039; HTTP200, one attempt, one fetch, aggregate inconclusive; no repeat authorization.
+- https://github.com/iseoane/isSWF/pull/43
+- .factory/initiatives/I0001/jobs/J011/A002.md
+- .factory/initiatives/I0001/jobs/J011/V002.md
 
 ## J012
 

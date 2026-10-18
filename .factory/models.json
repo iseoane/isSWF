@@ -11,6 +11,9 @@
     "reviewer": [
       { "model": "openai-codex/gpt-6-luna", "effort": "high" }
     ],
+    "planner": [
+      { "model": "openai-codex/gpt-6-luna", "effort": "high" }
+    ],
     "additional-review": [
       { "model": "opencode-go/deepseek-v4.1-flash", "effort": "max" }
     ]
