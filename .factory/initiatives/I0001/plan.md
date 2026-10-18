@@ -31,8 +31,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Reconcile changed intake and duplicate requests
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: Explicit reconciliation first cut in preparation; duplicate linking remains part of the remaining J002 criteria.
-- Next step: Implement and verify predecessor-bound reconciliation offline; preserve r1 records and require explicit plan adoption.
+- Blocker: Explicit revision reconciliation integrated in PR33; duplicate-request linking remains pending.
+- Next step: Implement the remaining explicit evidence-backed duplicate link without authorizing another writer.
 
 ### Acceptance
 
@@ -41,6 +41,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .audit/intake-86-grounding-final.json
+- https://github.com/iseoane/isSWF/pull/33
 
 ## J003
 
@@ -131,7 +132,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - Status: pending
 - Objective: Review complete v1 evidence and obtain operator acceptance
-- Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010
+- Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010, J011, J012
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
 - Blocker: All v1 evidence and operator acceptance are pending.
 - Next step: Ground and authorize the bounded implementation/checks before starting.
@@ -183,3 +184,39 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/32
 - ad85a9ddec07895ca6d91955cf7cc3b92135eaab
 - .audit/plan-85-proof.json
+
+## J011
+
+- Status: pending
+- Objective: Replace Pstack delegation with native factory agents
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
+- Blocker: Current parent-session grounding and review still use the Pstack subagent launcher; existing native worker proof does not cover every role.
+- Next step: Ground the smallest native delegation seam and separate offline proof from any real calls requiring a new explicit runtime grant.
+
+### Acceptance
+
+- Coordinator grounding, implementation and independent review use native factory delegation with pinned own-role instructions, explicit grants and durable results, without requiring Pstack launchers.
+- An end-to-end controlled case verifies the actual delegation boundary; Markdown-only role adaptation is not proof of runtime independence.
+
+### Evidence
+
+- None.
+
+## J012
+
+- Status: pending
+- Objective: Show short descriptive initiative labels alongside stable IDs
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J012/brief-r1.md) (pending until prepared)
+- Blocker: Current status primarily exposes the initiative ID; a concise user-facing label is not implemented.
+- Next step: Use the canonical initiative title to define the smallest consistent display contract and verify it with existing initiative records.
+
+### Acceptance
+
+- Lists, status and panel show a concise label such as I0001 · Factory v1, derived from one canonical initiative title.
+- Stable IDs and paths remain unchanged; no duplicate editable plan or title state is introduced.
+
+### Evidence
+
+- None.
