@@ -11,6 +11,9 @@
     "reviewer": [
       { "model": "openai-codex/gpt-6-luna", "effort": "high" }
     ],
+    "diagnostician": [
+      { "model": "openai-codex/gpt-6-luna", "effort": "high" }
+    ],
     "planner": [
       { "model": "openai-codex/gpt-6-luna", "effort": "high" }
     ],

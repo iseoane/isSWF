@@ -12,6 +12,7 @@
     "tools/researcher-task.mjs",
     "tools/reviewer-task.mjs",
     "tools/planner-task.mjs",
+    "tools/diagnostic-task.mjs",
     "tests/*.mjs",
     "tooling/quality/eslint.config.mjs"
   ],
