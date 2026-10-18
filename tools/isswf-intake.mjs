@@ -141,8 +141,77 @@ async function reconcile({ root, id, initiative, revision, reconciliationPath, g
   await unlink(pending); await rmdir(lock); await syncDirectory(job);
   return { ...summary(await load(root, id, initiative, revision), source, grant, proposal), status: 'reconciled' };
 }
-export async function intake({ action, project, repository: repo, issue, sourcePath, grantPath, proposalPath, initiative, jobId, type, revision = 1, reconciliationPath }) {
-  if (!['prepare', 'read', 'reconcile'].includes(action)) throw Error('action must be prepare, read or reconcile');
+function duplicateIdentity(value) {
+  const scoped = value?.initiative !== undefined;
+  const keys = scoped ? 'initiative,issue,jobId,repository,type' : (value?.jobId === undefined ? 'issue,repository' : 'issue,jobId,repository');
+  if (!value || Object.keys(value).sort().join(',') !== keys) throw Error('invalid duplicate target identity');
+  const id = identity(value.repository, value.issue);
+  if (!scoped && value.jobId !== undefined && value.jobId !== id.jobId) throw Error('invalid derived duplicate identity');
+  if (scoped) {
+    if (!/^[A-Z][A-Z0-9-]{0,63}$/u.test(value.initiative) || !/^[A-Z][A-Z0-9-]{0,63}$/u.test(value.jobId) || !['bug', 'enhancement', 'maintenance', 'research'].includes(value.type)) throw Error('invalid duplicate target scope');
+    Object.assign(id, { initiative: value.initiative, jobId: value.jobId, type: value.type });
+  }
+  return id;
+}
+async function unlinkedTarget(root, id) {
+  try { await lstat(join(jobPath(root, id), 'duplicate.json')); throw Error('duplicate target is already linked'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+}
+function jobPath(root, id) { return join(root, id.initiative ? '.factory/initiatives/' + id.initiative + '/jobs' : '.factory/jobs', id.jobId); }
+async function duplicateAt(root, id) {
+  let value;
+  try {
+    await directory(join(root, '.factory'));
+    if (id.initiative) { await directory(join(root, '.factory/initiatives')); await directory(join(root, '.factory/initiatives', id.initiative)); }
+    await directory(join(root, id.initiative ? '.factory/initiatives/' + id.initiative + '/jobs' : '.factory/jobs'));
+    await directory(jobPath(root, id));
+    value = await json(join(jobPath(root, id), 'duplicate.json'));
+  } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
+  const { integritySha256, ...payload } = value;
+  if (value.version !== 1 || digest(payload) !== integritySha256 || JSON.stringify(value.source?.identity) !== JSON.stringify(id) || !text(value.reference) || !text(value.reason) || !Array.isArray(value.evidence) || !value.evidence.length || value.evidence.length > 30 || value.evidence.some(item => !text(item.reference) || !text(item.observation))) throw Error('invalid duplicate binding');
+  for (const ref of [value.source, value.target]) {
+    const target = duplicateIdentity(ref.identity);
+    if (!Number.isSafeInteger(ref.revision) || ref.revision < 1 || ref.revision > 10000) throw Error('invalid duplicate revision');
+    const current = await load(root, target, target.initiative, ref.revision);
+    if (!current.record || current.record.integritySha256 !== ref.recordSha256 || current.record.briefSha256 !== ref.briefSha256) throw Error('duplicate reference changed or unavailable');
+  }
+  await unlinkedTarget(root, value.target.identity);
+  if (jobPath(root, id) === jobPath(root, value.target.identity)) throw Error('duplicate cannot target itself');
+  return value;
+}
+async function linkDuplicate(root, id, revision, path) {
+  if (!isAbsolute(path ?? '')) throw Error('external duplicate decision required');
+  const external = await realpath(path);
+  if (within(root, external)) throw Error('duplicate decision must be external');
+  const decision = await json(external);
+  if (Object.keys(decision).sort().join(',') !== 'evidence,permissions,project,reason,reference,source,target,version' || decision.version !== 1 || decision.project !== root || JSON.stringify(decision.permissions) !== '["link-duplicate"]' || !text(decision.reference) || !text(decision.reason) || !Array.isArray(decision.evidence) || !decision.evidence.length || decision.evidence.length > 30 || decision.evidence.some(item => Object.keys(item).sort().join(',') !== 'observation,reference' || !text(item.reference) || !text(item.observation))) throw Error('matching explicit duplicate decision and evidence required');
+  for (const ref of [decision.source, decision.target]) if (!ref || Object.keys(ref).sort().join(',') !== 'briefSha256,identity,recordSha256,revision' || !hex(ref.recordSha256) || !hex(ref.briefSha256)) throw Error('pinned duplicate references required');
+  const sourceId = duplicateIdentity(decision.source.identity);
+  if (JSON.stringify(sourceId) !== JSON.stringify(id) || decision.source.revision !== revision) throw Error('duplicate source identity/revision mismatch');
+  const payload = { version: 1, source: { ...decision.source, identity: sourceId }, target: { ...decision.target, identity: duplicateIdentity(decision.target.identity) }, reference: decision.reference, reason: decision.reason, evidence: decision.evidence, decisionSha256: digest(decision) };
+  const record = { ...payload, integritySha256: digest(payload) };
+  const existing = await duplicateAt(root, id);
+  if (existing) {
+    if (existing.integritySha256 !== record.integritySha256) throw Error('duplicate decision conflict');
+    return { status: 'duplicate-linked', duplicate: existing, executionAuthorized: false };
+  }
+  for (const ref of [record.source, record.target]) {
+    if (!Number.isSafeInteger(ref.revision) || ref.revision < 1 || ref.revision > 10000) throw Error('invalid duplicate revision');
+    const bound = await load(root, ref.identity, ref.identity.initiative, ref.revision);
+    if (!bound.record || bound.record.integritySha256 !== ref.recordSha256 || bound.record.briefSha256 !== ref.briefSha256) throw Error('duplicate reference changed or unavailable');
+  }
+  await unlinkedTarget(root, record.target.identity);
+  if (jobPath(root, id) === jobPath(root, record.target.identity)) throw Error('duplicate cannot target itself');
+  const job = jobPath(root, id), lock = join(job, '.intake-write');
+  await mkdir(lock, { mode: 0o700 });
+  const pending = join(lock, randomUUID());
+  const bytes = JSON.stringify(record) + '\n';
+  if (Buffer.byteLength(bytes) > 256000) throw Error('duplicate decision exceeds byte limit');
+  await synced(pending, bytes); await link(pending, join(job, 'duplicate.json')); await syncDirectory(job);
+  await unlink(pending); await rmdir(lock); await syncDirectory(job);
+  return { status: 'duplicate-linked', duplicate: await duplicateAt(root, id), executionAuthorized: false };
+}
+export async function intake({ action, project, repository: repo, issue, sourcePath, grantPath, proposalPath, initiative, jobId, type, revision = 1, reconciliationPath, duplicatePath }) {
+  if (!['prepare', 'read', 'reconcile', 'link-duplicate'].includes(action)) throw Error('action must be prepare, read or reconcile');
   if (!Number.isSafeInteger(revision) || revision < 1 || revision > 10000 || (action === 'prepare' && revision !== 1) || (action === 'reconcile' && revision < 2)) throw Error('invalid explicit revision');
   const root = await projectRoot(project), id = identity(repo, issue);
   if (initiative !== undefined) {
@@ -152,6 +221,13 @@ export async function intake({ action, project, repository: repo, issue, sourceP
     if (!plan.includes(`## ${jobId}\n`)) throw Error('job must be present in initiative plan');
     Object.assign(id, { initiative, jobId, type });
   } else if (jobId !== undefined || type !== undefined) throw Error('job/type requires initiative');
+  if (action === 'link-duplicate') return linkDuplicate(root, id, revision, duplicatePath);
+  let duplicate;
+  try { duplicate = await duplicateAt(root, id); } catch (error) {
+    if (action === 'read') return { status: 'unknown-incomplete-or-corrupt', executionAuthorized: false };
+    throw error;
+  }
+  if (duplicate) return { status: 'duplicate-linked', duplicate, executionAuthorized: false };
   const grant = grantPath ? await grantAt(grantPath, root, id) : null;
   const source = sourcePath ? await observationAt(sourcePath, id) : null;
   const proposal = proposalPath ? await proposalAt(proposalPath, root) : null;
@@ -195,11 +271,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     const [action, ...values] = process.argv.slice(2), args = {};
     for (let i = 0; i < values.length; i += 2) {
-      if (!['--project', '--repository', '--issue', '--source', '--grant', '--proposal', '--initiative', '--job', '--type', '--revision', '--reconciliation'].includes(values[i]) || !values[i + 1] || Object.hasOwn(args, values[i])) throw Error('invalid intake option');
+      if (!['--project', '--repository', '--issue', '--source', '--grant', '--proposal', '--initiative', '--job', '--type', '--revision', '--reconciliation', '--duplicate'].includes(values[i]) || !values[i + 1] || Object.hasOwn(args, values[i])) throw Error('invalid intake option');
       args[values[i]] = values[i + 1];
     }
-    const result = await intake({ action, project: args['--project'], repository: args['--repository'], issue: Number(args['--issue']), sourcePath: args['--source'], grantPath: args['--grant'], proposalPath: args['--proposal'], initiative: args['--initiative'], jobId: args['--job'], type: args['--type'], revision: args['--revision'] === undefined ? 1 : Number(args['--revision']), reconciliationPath: args['--reconciliation'] });
+    const result = await intake({ action, project: args['--project'], repository: args['--repository'], issue: Number(args['--issue']), sourcePath: args['--source'], grantPath: args['--grant'], proposalPath: args['--proposal'], initiative: args['--initiative'], jobId: args['--job'], type: args['--type'], revision: args['--revision'] === undefined ? 1 : Number(args['--revision']), reconciliationPath: args['--reconciliation'], duplicatePath: args['--duplicate'] });
     console.log(JSON.stringify(result, null, 2));
-    if (action !== 'read' && !['prepared', 'reused', 'reconciled'].includes(result.status)) process.exitCode = 2;
+    if (action !== 'read' && !(action === 'link-duplicate' && result.status === 'duplicate-linked') && !['prepared', 'reused', 'reconciled'].includes(result.status)) process.exitCode = 2;
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
