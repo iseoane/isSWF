@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { mock } from 'node:test';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -72,7 +73,11 @@ try {
         assert.equal(intent.reason, 'sdk-invocation-intent'); assert.deepEqual(intent.tuple, grant.approvedRoute[0]);
         await options.fetch('https://synthetic.invalid');
         if (kind === 'second-fetch') { try { await options.fetch('https://synthetic.invalid'); } catch { /* SDKs may convert transport errors to messages. */ } }
-        if (kind === 'deadline') await new Promise(done => options.signal.addEventListener('abort', done, { once: true }));
+        if (kind === 'deadline') {
+          const aborted = new Promise(done => options.signal.addEventListener('abort', done, { once: true }));
+          mock.timers.tick(50);
+          await aborted;
+        }
         return { provider: model.provider, model: kind === 'wrong-model' ? 'wrong' : model.id, stopReason: 'stop', content: [{ type: 'text', text: kind === 'oversize' ? 'x'.repeat(3000) : 'Standards: inconclusive. Spec: inconclusive. Supplied evidence only; no checks rerun.' }] };
       } };
     },
@@ -88,7 +93,10 @@ try {
     const caseStore = join(root, kind); await mkdir(caseStore);
     await json(grantFile, { ...grant, store: caseStore, deadlineMs: kind === 'deadline' ? 50 : 1000 });
     const current = { ...request, store: caseStore };
-    const r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) });
+    if (kind === 'deadline') mock.timers.enable({ apis: ['setTimeout'] });
+    let r;
+    try { r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
+    finally { if (kind === 'deadline') mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
     assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1);
     await assert.rejects(runReview(current, { mode: 'fixture', backend: fixture('normal') }));
