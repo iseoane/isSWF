@@ -9,6 +9,7 @@
     "tools/factory-package.mjs",
     "tools/pi-worker-task.mjs",
     "tools/researcher-task.mjs",
+    "tools/reviewer-task.mjs",
     "tests/*.mjs",
     "tooling/quality/eslint.config.mjs"
   ],
