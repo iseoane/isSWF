@@ -11,6 +11,7 @@
     "tools/pi-worker-task.mjs",
     "tools/researcher-task.mjs",
     "tools/reviewer-task.mjs",
+    "tools/planner-task.mjs",
     "tests/*.mjs",
     "tooling/quality/eslint.config.mjs"
   ],
