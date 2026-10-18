@@ -10,6 +10,36 @@ import { readResponses } from './isswf-response.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const states = ['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed'];
+export function recommendation(jobs = []) {
+  const priorities = [
+    ['awaiting-human', 'human', 'Resolver la aceptación humana'],
+    ['in-progress', 'follow-up', 'Dar seguimiento al trabajo en curso'],
+    ['in-review', 'review', 'Revisar la entrega declarada'],
+    ['pending', 'prepare', 'Preparar el trabajo pendiente'],
+    ['pending-dependencies', 'verify-dependencies', 'Verificar dependencias antes de preparar'],
+    ['blocked', 'unblock', 'Resolver el bloqueo declarado'],
+  ];
+  let selected, selectedType, title;
+  for (const [state, type, label] of priorities) {
+    selected = jobs.find(job => state === 'pending-dependencies'
+      ? job.reportedStatus === 'pending' && (job.dependencies ?? []).length > 0
+      : job.reportedStatus === state && (state !== 'pending' || (job.dependencies ?? []).length === 0));
+    if (selected) { selectedType = type; title = label; break; }
+  }
+  if (!selected) return { type: 'complete', jobId: null, title: jobs.length ? 'Todos los trabajos constan completados' : 'No hay trabajos observados', reason: jobs.length ? 'El plan declara todos los trabajos completados; esto no verifica integración, aceptación ni estado externo.' : 'No se observaron trabajos; no se infiere que exista trabajo completado.', executionAuthorized: false };
+  let reason = `${title}; es una sugerencia basada únicamente en el estado declarado del plan, no una autorización de ejecución.`;
+  if (selectedType === 'human') {
+    const artifact = selected.artifacts;
+    if (!artifact) reason += ' La evidencia y la ficha de entrega no se han inspeccionado en esta vista; hay que revisarlas en el detalle antes de aceptar.';
+    else if (artifact.status !== 'recorded' || artifact.delivery?.status !== 'recorded') reason += ' Falta evidencia o ficha de entrega verificable; no se debe asumir que se puede aceptar.';
+    else reason += ' La aceptación corresponde a una persona y requiere revisar la evidencia y ficha disponibles.';
+  }
+  if (selectedType === 'verify-dependencies') reason += ' Aunque las dependencias consten completadas, todavía hay que comprobar la integración; las etiquetas no prueban integración, permiso ni capacidad.';
+  if (selectedType === 'prepare') reason += ' Preparar no prueba integración, permisos ni capacidad.';
+  if (selectedType === 'unblock' && selected.blocker) reason += ` Bloqueo declarado (dato no confiable): ${selected.blocker}`;
+  if (selected.nextStep) reason += ` Siguiente paso declarado (dato no confiable): ${selected.nextStep}`;
+  return { type: selectedType, jobId: selected.id, title, reason, executionAuthorized: false };
+}
 async function directory(path) {
   const stat = await lstat(path);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('unsafe-directory');
@@ -128,7 +158,7 @@ export async function initiatives({ project }) {
       const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
       if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-title');
       const jobs = parse(record.markdown);
-      items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.reportedStatus === state).length])), jobs: jobs.length, blockers: jobs.filter(job => job.reportedStatus === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
+      items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.reportedStatus === state).length])), jobs: jobs.length, recommendation: recommendation(jobs), blockers: jobs.filter(job => job.reportedStatus === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
     } catch { items.push({ initiative, status: 'unknown', reason: 'invalid-changing-or-unsafe-plan' }); }
   }
   return { status: 'observed', observedAt, initiatives: items, limits: 'Declared canonical plan states only; no live process, remote PR, freshness or dependency verification. Records are read separately.' };
@@ -151,7 +181,7 @@ export async function status({ project, initiative }) {
       const { briefName, ...fields } = job;
       jobs.push({ ...fields, artifacts: await artifacts(dirname(record.path), { ...job, initiative }), processState: 'not-inspected' });
     }
-    return { status: 'observed', observedAt, initiative, title, label: `${initiative} · ${title}`, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
+    return { status: 'observed', observedAt, initiative, title, recommendation: recommendation(jobs), label: `${initiative} · ${title}`, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
   } catch { return { status: 'unknown', observedAt, reason: 'invalid-or-changing-plan', executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits }; }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
