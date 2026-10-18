@@ -104,6 +104,13 @@ try {
   assert.match(scopedBytes, /lint: not-detected/u); assert.match(scopedBytes, /No installation or script execution/u);
   assert.equal(cli('prepare', [...inputs, ...scoped]).status, 'reused');
   assert.equal(cli('read', scoped).briefSha256, scopedFirst.briefSha256);
+  const statusRead = command(process.execPath, [join(source, 'tools/isswf-status.mjs'), '--project', project, '--initiative', 'I0021']);
+  assert.equal(statusRead.status, 0, statusRead.stderr);
+  const statusView = JSON.parse(statusRead.stdout);
+  assert.equal(statusView.jobs[0].artifacts.intake.status, 'bound');
+  assert.equal(statusView.jobs[0].artifacts.intake.preparation, 'ready-for-agent');
+  assert.equal(statusView.jobs[0].reportedStatus, 'pending');
+  assert.equal(statusView.processState, 'not-inspected');
   assert.equal(await readFile(manifestPath, 'utf8'), manifest);
   assert.match(cli('prepare', [...inputs, '--initiative', 'I0021', '--job', 'J999', '--type', 'bug'], 1), /present in initiative plan/u);
   const alias = join(root, 'symlink-project'); await mkdir(alias);
