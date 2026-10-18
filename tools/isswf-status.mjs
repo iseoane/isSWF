@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
-import { lstat, open, readdir } from 'node:fs/promises';
+import { lstat, open, opendir, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { plan } from './isswf-plan.mjs';
@@ -104,6 +104,33 @@ async function artifacts(root, job) {
     } catch (error) { if (error.code !== 'ENOENT') intake = { status: 'unknown', reason: 'invalid-or-unsafe-intake' }; }
     return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports, delivery: await deliveryAt(path) };
   } catch (error) { return { status: error.code === 'ENOENT' ? 'not-prepared' : 'unknown', reason: error.code === 'ENOENT' ? 'missing-job-or-brief' : 'invalid-or-unsafe-artifact' }; }
+}
+export async function initiatives({ project }) {
+  const observedAt = new Date().toISOString(), entries = [];
+  try {
+    await directory(join(project, '.factory')); await directory(join(project, '.factory/initiatives'));
+    const dir = await opendir(join(project, '.factory/initiatives'));
+    for await (const entry of dir) {
+      if (entries.length >= 100) throw Error('too-many-initiatives');
+      entries.push(entry.name);
+    }
+  } catch (error) { return { status: error.code === 'ENOENT' ? 'absent' : 'unknown', observedAt, reason: error.code === 'ENOENT' ? 'no-initiative-directory' : 'unsafe-or-oversized-initiative-directory', initiatives: [] }; }
+  const items = [];
+  for (const initiative of entries.sort()) {
+    if (!/^[A-Z][A-Z0-9-]{0,63}$/u.test(initiative)) continue;
+    try {
+      const record = await plan({ action: 'read', project, initiative });
+      if (record.status === 'absent') { items.push({ initiative, status: 'absent', reason: 'missing-plan' }); continue; }
+      const file = await snapshot(record.path);
+      if (file.sha256 !== record.sha256) throw Error('changed-plan');
+      const prefix = '# ' + initiative + ': ', heading = record.markdown.split('\n', 1)[0];
+      const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
+      if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-title');
+      const jobs = parse(record.markdown);
+      items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.reportedStatus === state).length])), jobs: jobs.length, blockers: jobs.filter(job => job.reportedStatus === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
+    } catch { items.push({ initiative, status: 'unknown', reason: 'invalid-changing-or-unsafe-plan' }); }
+  }
+  return { status: 'observed', observedAt, initiatives: items, limits: 'Declared canonical plan states only; no live process, remote PR, freshness or dependency verification. Records are read separately.' };
 }
 export async function status({ project, initiative }) {
   const observedAt = new Date().toISOString();
