@@ -18,15 +18,15 @@ Notas locales limitadas, con autor no autenticado y archivos por ID exclusivos. 
 
 ## Checks and results
 
-Pruebas HTTP cubren token/Origin/Host, evidencia obsoleta, cuerpo y nota limitados, stores inseguros, replay y concurrencia sin sobrescribir; el plan permanece intacto. Chromium real envió una nota en un proyecto sintético, observó la confirmación y la leyó en la ficha sin alterar el plan. No es una aceptación real. Los resultados finales de calidad/revisión/CI se registran por separado en A/V.
+Pruebas HTTP cubren token/Origin/Host, evidencia obsoleta, cuerpo y nota limitados, stores inseguros, replay y concurrencia sin sobrescribir; el plan permanece intacto. Chromium real envió una nota en un proyecto sintético, observó la confirmación y la leyó en la ficha sin alterar el plan. No es una aceptación real. PR41 está integrada en main eae28aa170c6c6a9c17ce13bdfb0fe2f9498249a, que contiene el source checkpoint 72a55b5 de A003/V003. CI 39132510085 pasó sobre el head exacto 0c62b1953eb34f3d4ce0e2eb27694fa55c39e329; calidad, ESLint y Knip postmerge pasaron. No se atribuyen al revisor las comprobaciones de CI hechas por el coordinador.
 
 ## Independent review
 
-V001/V002 retienen las revisiones de los cortes previos. Las notas requieren una revisión independiente del candidato exacto antes de integrar.
+V001/V002 retienen las revisiones de los cortes previos. V003 retiene PASS sobre el candidato exacto y la reproducción independiente del formulario nativo en Chromium. La entrega técnica está integrada; esto no es aceptación del operador.
 
 ## Closure and acceptance
 
-J009 sigue en curso. Se registran entradas para el coordinador, no decisiones aplicadas. Falta reconciliación segura de decisiones y los criterios runtime; no pedir aceptación del panel completo.
+Corte técnico entregado, pendiente de aceptación del operador. Hay un servidor loopback por proyecto, Kanban/fichas y notas registradas, no decisiones aplicadas. El operador cuestionó tener que arrancar el servidor manualmente; esa objeción de experiencia sigue abierta. No se ha implementado HTML estático ni arranque gestionado. No se presupone conformidad ni se acepta la v1 completa. Capacidad/slots corresponden a J005; continuidad/reinicio a J006, seguridad de clientes a J007 y reconciliación global a J008.
 
 ## Integration risk and recovery
 
@@ -34,4 +34,4 @@ Loopback y token de sesión no prueban identidad del operador ni aíslan proceso
 
 ## Blockers and next action
 
-Completar revisión/CI del corte de notas. El coordinador verifica los pins de cada nota y registra por separado decisiones auténticas; no confundir el texto recibido con autorización de ejecución. Abordar después criterios runtime del panel.
+Mostrar lo entregado y resolver con el operador la fricción del arranque manual antes de registrar aceptación. Un HTML estático sería una foto con fecha; datos actuales y respuestas requieren acceso local mediante servidor o permisos explícitos del navegador. No añadir ambos mecanismos por inercia. El coordinador verifica los pins de las notas y registra decisiones auténticas por separado; el texto recibido nunca es un grant.
