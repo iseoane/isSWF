@@ -209,9 +209,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
-- Blocker: Native reviewer source integrated in PR37; one authorized real invocation completed HTTP200, but its aggregate review was inconclusive due to missing historical evidence. Remaining role coverage and full independence are not complete.
-- Next step: Improve evidence completeness and ground remaining native role coverage offline; the single real reviewer grant is consumed and cannot be replayed.
+- Brief: [brief-r2.md](jobs/J011/brief-r2.md) (pending until prepared)
+- Blocker: Native reviewer caller and one real invocation exist; that review was inconclusive because historical evidence was omitted. Existing contextPaths can carry those committed records. Other native roles remain pending.
+- Next step: Verify unchanged historical context selection, fail-closed missing evidence and preparation guidance offline; do not introduce an evidence registry or repeat the consumed live grant.
 
 ### Acceptance
 
