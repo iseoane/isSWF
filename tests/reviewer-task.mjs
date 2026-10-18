@@ -82,7 +82,10 @@ try {
       } };
     },
   });
-  const result = await runReview(request, { mode: 'fixture', backend: fixture('normal') });
+  mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  let result;
+  try { result = await runReview(request, { mode: 'fixture', backend: fixture('normal') }); }
+  finally { mock.timers.reset(); }
   assert.equal(result.status, 'response-complete'); assert.equal(result.fetches, 1); assert.equal(result.attemptsConsumed, 1); assert.match(result.report, /inconclusive/u);
   const before = await readFile(join(p.dir, 'result.json'));
   const record = await readReview({ project, store, logicalJobRef: job.logicalJobRef });
@@ -93,12 +96,12 @@ try {
     const caseStore = join(root, kind); await mkdir(caseStore);
     await json(grantFile, { ...grant, store: caseStore, deadlineMs: kind === 'deadline' ? 50 : 1000 });
     const current = { ...request, store: caseStore };
-    if (kind === 'deadline') mock.timers.enable({ apis: ['setTimeout'] });
+    mock.timers.enable({ apis: ['setTimeout', 'Date'] });
     let r;
     try { r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
-    finally { if (kind === 'deadline') mock.timers.reset(); }
+    finally { mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
-    assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1);
+    assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');
     await assert.rejects(runReview(current, { mode: 'fixture', backend: fixture('normal') }));
   }
   const incompleteStore = join(root, 'incomplete'); await mkdir(incompleteStore);
