@@ -72,12 +72,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Objective: Validate retrospective proposals without duplicates
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
-- Blocker: No implementation assigned yet; ordering is priority, not an invented code dependency.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Blocker: Offline implementation and verification in progress; no model or publication grant inferred.
+- Next step: Implement bounded local needs-triage proposals with explicit evidence, stable finding identity and idempotent repeat handling.
 
 ### Acceptance
 
