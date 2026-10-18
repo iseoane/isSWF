@@ -206,12 +206,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J011
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
 - Brief: [brief-r5.md](jobs/J011/brief-r5.md) (pending until prepared)
-- Blocker: Operator acceptance of the delivered bounded native role paths is pending. Native review transport succeeded but its historical report was inconclusive; no all-role PASS chain is claimed.
-- Next step: Review J011 delivery.md and decide acceptance of direct native role delegation with existing grants/results. No scheduler or autonomous coordinator is required. Pending-job planner optimization still needs its missing pinned briefs/specification; consumed invocations must not be repeated.
+- Blocker: None for the delivered bounded native-delegation scope; operator explicitly accepted J011 after the role demonstrations, inconclusive historical review and excluded all-role PASS chain were disclosed.
+- Next step: Preserve the accepted cut. Prepare checkpoint-pinned missing briefs/specification for pending-job planner optimization; do not adopt the provisional proposal or repeat consumed invocations.
 
 ### Acceptance
 
@@ -238,6 +238,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .audit/native-coordinator-44-real.json
 - .factory/initiatives/I0001/jobs/J011/delivery.md
 - https://github.com/iseoane/isSWF/pull/46
+- https://github.com/iseoane/isSWF/pull/49
+- Operator conversation: Si (explicit acceptance of J011 delivered native role paths, not full v1 or new provider calls)
 
 ## J012
 
