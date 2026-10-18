@@ -50,6 +50,23 @@ function parse(markdown) {
     return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence: job.evidence.filter(item => item !== 'None.'), briefName: `brief-r${brief[1]}.md` };
   });
 }
+async function deliveryAt(path) {
+  try {
+    const file = await snapshot(join(path, 'delivery.md'));
+    if (Buffer.byteLength(file.text) > 32768) throw Error('oversized-delivery');
+    const allowed = new Set(['What changed and why', 'Visual summary', 'Scope', 'Checks and results', 'Independent review', 'Closure and acceptance', 'Integration risk and recovery', 'Blockers and next action']);
+    const sections = {}; let current;
+    for (const line of file.text.split('\n')) {
+      if (line.startsWith('## ')) {
+        const name = line.slice(3); current = allowed.has(name) ? name : null;
+        if (current) { if (Object.hasOwn(sections, current)) throw Error('duplicate-delivery-section'); sections[current] = ''; }
+      } else if (current) sections[current] += line + '\n';
+    }
+    if (!Object.keys(sections).length) throw Error('missing-delivery-sections');
+    for (const name of Object.keys(sections)) sections[name] = sections[name].trim().replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\u202a-\u202e\u2066-\u2069]/gu, '\ufffd');
+    return { status: 'recorded', path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt, sections, provenance: 'curated delivery record; assertions not independently authenticated' };
+  } catch (error) { return { status: error.code === 'ENOENT' ? 'absent' : 'unknown', reason: error.code === 'ENOENT' ? 'no-delivery-summary' : 'invalid-or-unsafe-delivery' }; }
+}
 async function artifacts(root, job) {
   const path = join(root, 'jobs', job.id);
   try {
@@ -61,7 +78,14 @@ async function artifacts(root, job) {
       if (reports.length >= 100) throw Error('too-many-reports');
       const report = await snapshot(join(path, entry));
       const reportedStatus = /^- Reported status: (.+)$/mu.exec(report.text)?.[1] ?? null;
-      reports.push({ path: report.path, sha256: report.sha256, modifiedAt: report.modifiedAt, reportedStatus });
+      const declaredMetadata = {};
+      for (const line of report.text.split('\n')) {
+        const field = /^- (Actor|Actual model|Requested model and effort|Observed actual model and effort metadata|Profile path and revision, if available|Skills and revisions, if available|Resolved ordered route and selected destination): (.+)$/u.exec(line);
+        if (!field) continue;
+        if (Object.hasOwn(declaredMetadata, field[1])) declaredMetadata[field[1]] = 'Unknown: duplicate metadata field';
+        else declaredMetadata[field[1]] = field[2].length <= 1024 ? field[2].replace(/[\x00-\x1f\x7f\u202a-\u202e\u2066-\u2069]/gu, '\ufffd') : 'Unknown: oversized metadata field';
+      }
+      reports.push({ path: report.path, sha256: report.sha256, modifiedAt: report.modifiedAt, reportedStatus, declaredMetadata });
     }
     let intake = { status: 'absent' };
     try {
@@ -78,7 +102,7 @@ async function artifacts(root, job) {
       } catch (error) { if (error.code !== 'ENOENT') throw error; }
 
     } catch (error) { if (error.code !== 'ENOENT') intake = { status: 'unknown', reason: 'invalid-or-unsafe-intake' }; }
-    return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports };
+    return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports, delivery: await deliveryAt(path) };
   } catch (error) { return { status: error.code === 'ENOENT' ? 'not-prepared' : 'unknown', reason: error.code === 'ENOENT' ? 'missing-job-or-brief' : 'invalid-or-unsafe-artifact' }; }
 }
 export async function status({ project, initiative }) {
