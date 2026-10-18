@@ -206,12 +206,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J011
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
-- Brief: [brief-r4.md](jobs/J011/brief-r4.md) (pending until prepared)
-- Blocker: Direct diagnostic-to-planner real integration succeeded with two bounded HTTP 200 calls. Complete native coordination/advisory-launcher independence and operator acceptance remain unproven; no invocation budget remains.
-- Next step: Ground the remaining native-coordination acceptance against existing evidence; supply pending-job briefs/specification before adopting detailed planner optimization. Do not repeat consumed calls or reopen accepted jobs.
+- Brief: [brief-r5.md](jobs/J011/brief-r5.md) (pending until prepared)
+- Blocker: Operator acceptance of the delivered bounded native role paths is pending. Native review transport succeeded but its historical report was inconclusive; no all-role PASS chain is claimed.
+- Next step: Review J011 delivery.md and decide acceptance of direct native role delegation with existing grants/results. No scheduler or autonomous coordinator is required. Pending-job planner optimization still needs its missing pinned briefs/specification; consumed invocations must not be repeated.
 
 ### Acceptance
 
@@ -234,6 +234,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/45
 - .factory/initiatives/I0001/jobs/J011/A005.md
 - .factory/initiatives/I0001/jobs/J011/V005.md
+- .audit/fallback-66-session-live-proof.json
+- .audit/native-coordinator-44-real.json
+- .factory/initiatives/I0001/jobs/J011/delivery.md
+- https://github.com/iseoane/isSWF/pull/46
 
 ## J012
 
