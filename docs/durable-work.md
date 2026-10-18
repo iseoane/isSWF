@@ -48,6 +48,12 @@ Git checkpoints make committed files referable and reviewable. They are not a fu
 
 A worker returns its attempt artifact, changed paths, observed checks, candidate or checkpoint references, risks, and blockers. A reviewer returns its artifact against that exact candidate. A new candidate needs a new review. The coordinator reconciles the evidence and updates plan references; a report of `complete` alone does not satisfy a dependency or establish technical closure.
 
+## Read an initiative status snapshot
+
+From an authorized source checkout, run `node tools/isswf-status.mjs --project /absolute/project --initiative I0001`. The command reads the existing canonical plan and the brief/report/intake artifacts under each named job. It creates no records and follows no external evidence links. It reports declared status, dependencies, blockers, next step, acceptance, evidence references and per-file hashes/modification times. A missing brief is `not-prepared`; malformed or unsafe artifacts are `unknown`. Reported attempt completion does not overwrite the plan's status or establish product acceptance.
+
+The result includes query time and file provenance, but `processState: not-inspected` and `freshness: not-verified` remain explicit. A file timestamp is not a heartbeat. The coordinator must not describe a worker as running, stopped or fresh from this snapshot. The files are not one atomic runtime snapshot. Live process inspection, the complete panel, current remote PR state and automatic dependency satisfaction remain separate work. This first consumer is a source-checkout CLI, not part of the Markdown resource package.
+
 ## Model routing
 
 Use [`.factory/models.json`](../.factory/models.json) as the canonical source for configured role routes and [`model-routing.md`](model-routing.md) for manual preflight, precedence, availability, and transition rules. Neither document grants work or guarantees runtime support; pin the configuration path and full input Git SHA in each attempt.
