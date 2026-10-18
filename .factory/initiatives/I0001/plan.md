@@ -209,9 +209,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J011/brief-r3.md) (pending until prepared)
-- Blocker: Native worker/researcher/reviewer paths exist; reviewer evidence preparation was verified in PR43. Own planner proposal caller is being implemented offline; diagnostics and full role independence remain pending.
-- Next step: Deliver pinned own planner prepare/run/read with proposal-only output, explicit finite grants and synthetic SDK safety tests, then independent review and exact-head CI. No real planner call is granted.
+- Brief: [brief-r4.md](jobs/J011/brief-r4.md) (pending until prepared)
+- Blocker: Own planner integrated in PR44. Diagnostic caller with host-selected read-only probes is being verified offline; full integrated native delegation and real-role proof remain pending.
+- Next step: Deliver bounded diagnostic probe evidence and own report caller with offline/actual-sandbox/synthetic-SDK gates, independent review and CI. Real integration and planner reassessment require a separate concrete grant.
 
 ### Acceptance
 
@@ -228,6 +228,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/43
 - .factory/initiatives/I0001/jobs/J011/A002.md
 - .factory/initiatives/I0001/jobs/J011/V002.md
+- https://github.com/iseoane/isSWF/pull/44
+- .factory/initiatives/I0001/jobs/J011/A003.md
+- .factory/initiatives/I0001/jobs/J011/V003.md
 
 ## J012
 

@@ -54,6 +54,8 @@ try {
 }
 const statusResult = run(process.execPath, [join(source, 'tests/initiative-status.mjs'), source]);
 const panelResult = run(process.execPath, [join(source, 'tests/initiative-panel.mjs'), source]);
+const diagnosticResult = run(process.execPath, [join(source, 'tests/diagnostic-task.mjs'), source]);
+const probeResult = run(process.execPath, [join(source, 'tests/diagnostic-probes.mjs'), source]);
 const plannerResult = run(process.execPath, [join(source, 'tests/planner-task.mjs'), source]);
 const reviewerResult = run(process.execPath, [join(source, 'tests/reviewer-task.mjs'), source]);
 const planResult = run(process.execPath, [join(source, 'tests/initiative-plan.mjs'), source]);
@@ -63,4 +65,4 @@ const methodologyResult = run(process.execPath, [join(source, 'tests/worker-meth
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', statusResult, panelResult, plannerResult, reviewerResult, planResult, inventoryResult, intakeResult, methodologyResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', statusResult, panelResult, diagnosticResult, probeResult, plannerResult, reviewerResult, planResult, inventoryResult, intakeResult, methodologyResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
