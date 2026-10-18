@@ -26,7 +26,7 @@ V001/V002 retienen las revisiones de los cortes previos. V003 retiene PASS sobre
 
 ## Closure and acceptance
 
-Corte técnico entregado, pendiente de aceptación del operador. Hay un servidor loopback por proyecto, Kanban/fichas y notas registradas, no decisiones aplicadas. El operador cuestionó tener que arrancar el servidor manualmente; esa objeción de experiencia sigue abierta. No se ha implementado HTML estático ni arranque gestionado. No se presupone conformidad ni se acepta la v1 completa. Capacidad/slots corresponden a J005; continuidad/reinicio a J006, seguridad de clientes a J007 y reconciliación global a J008.
+Corte entregado y aceptado explícitamente. El operador respondió «Aceptado» después de explicarle la entrega técnica y la fricción del arranque manual. El coordinador registra esa decisión auténtica en el plan canónico; no se deduce de una nota del navegador. Hay un servidor loopback por proyecto, Kanban/fichas y notas registradas, no decisiones aplicadas automáticamente. No se ha implementado HTML estático ni arranque gestionado, y la aceptación no autoriza esas ampliaciones ni cierra la v1 completa. Capacidad/slots corresponden a J005; continuidad/reinicio a J006, seguridad de clientes a J007 y reconciliación global a J008.
 
 ## Integration risk and recovery
 
@@ -34,4 +34,4 @@ Loopback y token de sesión no prueban identidad del operador ni aíslan proceso
 
 ## Blockers and next action
 
-Mostrar lo entregado y resolver con el operador la fricción del arranque manual antes de registrar aceptación. Un HTML estático sería una foto con fecha; datos actuales y respuestas requieren acceso local mediante servidor o permisos explícitos del navegador. No añadir ambos mecanismos por inercia. El coordinador verifica los pins de las notas y registra decisiones auténticas por separado; el texto recibido nunca es un grant.
+Ningún bloqueo del corte aceptado. El arranque manual fue explicado antes de la aceptación; cualquier mejora de esa experiencia requiere su propio alcance, no más trabajo implícito en J009. Un HTML estático sería una foto con fecha; datos actuales y respuestas requieren acceso local mediante servidor o permisos explícitos del navegador. No añadir ambos mecanismos por inercia. El coordinador verifica los pins de las notas y registra decisiones auténticas por separado; el texto recibido nunca es un grant.
