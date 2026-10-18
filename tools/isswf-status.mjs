@@ -64,9 +64,9 @@ async function artifacts(root, job) {
     }
     let intake = { status: 'absent' };
     try {
-      const file = await snapshot(join(path, 'intake.json')), value = JSON.parse(file.text);
+      const file = await snapshot(join(path, job.briefName === 'brief-r1.md' ? 'intake.json' : job.briefName.replace('brief-', 'intake-').replace('.md', '.json'))), value = JSON.parse(file.text);
       const { integritySha256, ...payload } = value;
-      if (value.version !== 1 || value.project !== resolve(root, '../../..') || !['needs-info', 'ready-for-agent'].includes(value.preparation) || sha(JSON.stringify(payload)) !== integritySha256 || value.briefSha256 !== brief.sha256 || value.identity?.initiative !== job.initiative || value.identity?.jobId !== job.id) throw Error('invalid-intake');
+      if ((value.revision ?? 1) !== Number(/^brief-r([0-9]+)\.md$/u.exec(job.briefName)[1]) || value.version !== 1 || value.project !== resolve(root, '../../..') || !['needs-info', 'ready-for-agent'].includes(value.preparation) || sha(JSON.stringify(payload)) !== integritySha256 || value.briefSha256 !== brief.sha256 || value.identity?.initiative !== job.initiative || value.identity?.jobId !== job.id) throw Error('invalid-intake');
       intake = { status: 'bound', path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt, preparation: value.preparation, sourceObservedAt: value.source?.observedAt ?? null };
     } catch (error) { if (error.code !== 'ENOENT') intake = { status: 'unknown', reason: 'invalid-or-unsafe-intake' }; }
     return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports };
