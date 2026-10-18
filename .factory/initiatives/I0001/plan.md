@@ -30,9 +30,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Reconcile changed intake and duplicate requests
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: Explicit revision reconciliation integrated in PR33; duplicate-request linking remains pending.
-- Next step: Implement the remaining explicit evidence-backed duplicate link without authorizing another writer.
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md) (pending until prepared)
+- Blocker: Revision reconciliation integrated; duplicate-link implementation and verification in progress.
+- Next step: Implement an explicit evidence-backed duplicate link to a pinned existing intake; no new writer or automatic matching.
 
 ### Acceptance
 

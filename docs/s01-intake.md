@@ -25,7 +25,15 @@ Repetir la misma preparación devuelve `reused` y conserva los mismos bytes. El 
 
 La revisión 1 conserva `intake.json` y `brief-r1.md`. Cada revisión posterior publica `brief-rN.md` y después `intake-rN.json` sin modificar los anteriores. El registro enlaza su predecesor y la atestación. Una repetición idéntica reutiliza esa revisión; inputs distintos, predecesor obsoleto, claim ocupado o publicación parcial bloquean sin limpieza automática. El claim es cooperativo dentro del mismo almacén, no una garantía frente a escritores externos.
 
-`read` sigue seleccionando r1 por defecto; `--revision N` selecciona otra revisión expresamente. No hay puntero a «latest». En iniciativas, la propuesta de `isswf-plan.mjs` puede indicar `briefRevision: N` para ese job; omitirlo conserva r1. Revisar el plan requiere su checkpoint Git y permiso propio. El estado consulta el registro de la revisión fijada en el plan, no adopta la más nueva. Este corte no enlaza todavía peticiones duplicadas ni completa S01.
+`read` sigue seleccionando r1 por defecto; `--revision N` selecciona otra revisión expresamente. No hay puntero a «latest». En iniciativas, la propuesta de `isswf-plan.mjs` puede indicar `briefRevision: N` para ese job; omitirlo conserva r1. Revisar el plan requiere su checkpoint Git y permiso propio. El estado consulta el registro de la revisión fijada en el plan, no adopta la más nueva. Esta conciliación por sí sola no resuelve duplicados ni completa S01.
+
+## Enlazar una petición duplicada
+
+Tras contrastar la evidencia, el coordinador puede ejecutar `link-duplicate` sobre un intake existente, con `--revision N` y `--duplicate /trusted/outside-project/decision.json`. La decisión externa contiene exactamente `version: 1`, `project`, `permissions: ["link-duplicate"]`, `reference`, `reason`, `evidence: [{ reference, observation }]`, `source` y `target`. Ambas referencias contienen `identity`, `revision`, `recordSha256` y `briefSha256`. La identidad contiene `repository` e `issue`; para un job de iniciativa incluye además `initiative`, `jobId` y `type`. La decisión debe proceder realmente del operador; ni el archivo ni la evidencia se autentican por sí mismos.
+
+El destino debe ser otro intake existente y no enlazado ya como duplicado, con revisión y hashes exactos. No se comparan títulos ni se escoge la última revisión. Se publica un único `duplicate.json` inmutable junto al intake de origen, bajo el claim cooperativo existente. Repetir la misma decisión reutiliza el enlace; otra decisión bloquea. Todos los briefs e intakes previos se conservan. Un destino alterado o indisponible deja el enlace como desconocido, no como prueba vigente.
+
+`read` muestra `duplicate-linked`; `prepare` y `reconcile` devuelven esa disposición sin crear otra revisión. La consulta de estado muestra el enlace sin cambiar el estado del job que pertenece al plan. El coordinador no debe despachar otra implementación del duplicado. El enlace no concede permisos, cancela procesos existentes ni sustituye la admisión runtime y sus grants. Tampoco hace un censo global entre iniciativas, detecta duplicados semánticamente o prueba que no existan otros escritores. Fuente y destino necesitan preparación previa; no se crea un brief nuevo al enlazarlos.
 
 ## Contrato histórico y objetivo completo de S01
 

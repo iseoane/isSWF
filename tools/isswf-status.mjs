@@ -5,6 +5,7 @@ import { lstat, open, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { plan } from './isswf-plan.mjs';
+import { intake as readIntake } from './isswf-intake.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const states = ['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed'];
@@ -68,6 +69,14 @@ async function artifacts(root, job) {
       const { integritySha256, ...payload } = value;
       if ((value.revision ?? 1) !== Number(/^brief-r([0-9]+)\.md$/u.exec(job.briefName)[1]) || value.version !== 1 || value.project !== resolve(root, '../../..') || !['needs-info', 'ready-for-agent'].includes(value.preparation) || sha(JSON.stringify(payload)) !== integritySha256 || value.briefSha256 !== brief.sha256 || value.identity?.initiative !== job.initiative || value.identity?.jobId !== job.id) throw Error('invalid-intake');
       intake = { status: 'bound', path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt, preparation: value.preparation, sourceObservedAt: value.source?.observedAt ?? null };
+      try {
+        await snapshot(join(path, 'duplicate.json'));
+        const disposition = await readIntake({ action: 'read', project: value.project, repository: value.identity.repository, issue: value.identity.issue, initiative: value.identity.initiative, jobId: value.identity.jobId, type: value.identity.type, revision: value.revision ?? 1 });
+        if (disposition.status !== 'duplicate-linked') throw Error('invalid-duplicate');
+        intake.duplicate = disposition.duplicate;
+        intake.executionAuthorized = false;
+      } catch (error) { if (error.code !== 'ENOENT') throw error; }
+
     } catch (error) { if (error.code !== 'ENOENT') intake = { status: 'unknown', reason: 'invalid-or-unsafe-intake' }; }
     return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports };
   } catch (error) { return { status: error.code === 'ENOENT' ? 'not-prepared' : 'unknown', reason: error.code === 'ENOENT' ? 'missing-job-or-brief' : 'invalid-or-unsafe-artifact' }; }
