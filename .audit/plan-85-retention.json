@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "removedCurrentPath": ".factory/initiatives/I0001/plan-e91939fb9c2bf6d50ee1b87dc42da4bc6b817643f2e1151d6223a2489c19a0b1.md",
+  "preservedAt": "f13b9c9ed511f1d6a18fa2bfe96d3ae2ff140933:.factory/initiatives/I0001/plan-e91939fb9c2bf6d50ee1b87dc42da4bc6b817643f2e1151d6223a2489c19a0b1.md",
+  "sha256": "e91939fb9c2bf6d50ee1b87dc42da4bc6b817643f2e1151d6223a2489c19a0b1",
+  "bytes": 4391,
+  "mode": 33188,
+  "scope": "Only this redundant tracked plan snapshot; Git history and unrelated artifacts retained"
+}
