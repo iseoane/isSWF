@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Expose a read-only initiative/job status view
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: First read-only CLI cut integrated in PR31; operator product acceptance pending. The complete v1 panel is tracked separately in J009.
-- Next step: Operator can accept the bounded CLI or report corrections; no worker remains active for this cut.
+- Blocker: None for the delivered bounded scope; explicitly accepted by the operator after delivery cards and demonstrations.
+- Next step: Extend the observation experience in J009, including actionable acceptance cards; do not reopen the accepted CLI cut.
 
 ### Acceptance
 
@@ -24,15 +24,16 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J001/A001.md
 - .factory/initiatives/I0001/jobs/J001/V001.md
 - .audit/status-84-proof.json
+- Operator conversation: Del 001 lo vamos a mejorar en algún Job posterior? acepto los 4
 
 ## J002
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Reconcile changed intake and duplicate requests
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md) (pending until prepared)
-- Blocker: Revision and duplicate-link cuts integrated in PR33 and PR35; operator functional acceptance pending.
-- Next step: Show the actual revision and duplicate-link outcomes to the operator; do not infer acceptance from CI.
+- Blocker: None for the delivered bounded scope; explicitly accepted by the operator after delivery cards and demonstrations.
+- Next step: No active work for this accepted cut; further changes require their own scope.
 
 ### Acceptance
 
@@ -46,6 +47,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - f43b685ec20429f8a21a96836a4bfb4be4dab0b6
 - .factory/initiatives/I0001/jobs/J002/A002.md
 - .factory/initiatives/I0001/jobs/J002/V002.md
+- Operator conversation: Del 001 lo vamos a mejorar en algún Job posterior? acepto los 4
 
 ## J003
 
@@ -156,11 +158,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
 - Blocker: The CLI first cut is not the full v1 panel. Define the bounded panel interaction and its security checks before implementation.
-- Next step: Ground the smallest panel using the integrated PR31 read-only contract; no separate writable state store.
+- Next step: Build the smallest shared-record panel and acceptance cards on the accepted J001/J012 CLI contract; preserve coordinator-owned decisions.
 
 ### Acceptance
 
 - The panel and coordinator consume the same canonical records, distinguish unknown/stale/runtime evidence and keep commands behind the coordinator boundary.
+- For each awaiting-human delivery, show the requested result, delivered behavior, concrete demo, verification/review/PR evidence, limitations and exact acceptance decision, without requiring the operator to reconstruct job files.
 
 ### Evidence
 
@@ -169,12 +172,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J010
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Remove redundant plan snapshots and use guarded Git history
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
-- Blocker: Integrated in PR32 with exact-head CI green; operator product acceptance pending.
-- Next step: Operator can accept the bounded Git-only history behavior or report corrections; no worker remains active.
+- Blocker: None for the delivered bounded scope; explicitly accepted by the operator after delivery cards and demonstrations.
+- Next step: No active work for this accepted cut; further changes require their own scope.
 
 ### Acceptance
 
@@ -188,6 +191,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/32
 - ad85a9ddec07895ca6d91955cf7cc3b92135eaab
 - .audit/plan-85-proof.json
+- Operator conversation: Del 001 lo vamos a mejorar en algún Job posterior? acepto los 4
 
 ## J011
 
@@ -195,8 +199,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
-- Blocker: Native reviewer delegation seam is being grounded; no real runtime call or expanded worker route is authorized.
-- Next step: Implement the smallest role-specific native delegation cut, prove offline safety and retain explicit gaps before any real-call request.
+- Blocker: Native reviewer source integrated in PR37; one authorized real invocation completed HTTP200, but its aggregate review was inconclusive due to missing historical evidence. Remaining role coverage and full independence are not complete.
+- Next step: Improve evidence completeness and ground remaining native role coverage offline; the single real reviewer grant is consumed and cannot be replayed.
 
 ### Acceptance
 
@@ -205,16 +209,20 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- https://github.com/iseoane/isSWF/pull/37
+- dd3b8e406d58b5bde174faecf3474092bdc199da
+- .factory/initiatives/I0001/jobs/J011/A001.md
+- .factory/initiatives/I0001/jobs/J011/V001.md
+- Private real reviewer result SHA256 03bcfe2d41204f8d45fc2d99d417b30262d0bbb1d05da0a0c9b16493028e9039; HTTP200, one attempt, one fetch, aggregate inconclusive; no repeat authorization.
 
 ## J012
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Show short descriptive initiative labels alongside stable IDs
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md) (pending until prepared)
-- Blocker: Canonical title/label contract integrated in PR36; operator functional acceptance pending. Full panel remains J009.
-- Next step: Use the actual status label and report corrections or accept the bounded display contract.
+- Blocker: None for the delivered bounded scope; explicitly accepted by the operator after delivery cards and demonstrations.
+- Next step: No active work for this accepted cut; further changes require their own scope.
 
 ### Acceptance
 
@@ -227,6 +235,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - 840c0eba2525b8559c17d96ac3c8c9844cc2f09c
 - .factory/initiatives/I0001/jobs/J012/A001.md
 - .factory/initiatives/I0001/jobs/J012/V001.md
+- Operator conversation: Del 001 lo vamos a mejorar en algún Job posterior? acepto los 4
 
 ## J013
 
