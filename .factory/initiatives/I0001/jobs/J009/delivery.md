@@ -2,36 +2,36 @@
 
 ## Work and candidate
 
-J009, brief-r1.md; candidato aún sin commit. No sustituir estos bytes por HEAD como identidad del candidato.
+J009, brief-r2.md. Project-wide navigation extends the readonly cut integrated in PR39. Current candidate identity is established by its source commit and review, not inferred from this record.
 
 ## What changed and why
 
-Panel HTML local de lectura con Kanban por estado del plan, nombres descriptivos, detalle y fichas de entrega. Usa los registros canónicos, sin otro estado editable.
+Un solo panel por proyecto lista las iniciativas por nombre, progreso declarado y bloqueos. Desde cada iniciativa se abre su Kanban y sus fichas, con enlace para volver. No requiere un servidor por iniciativa ni otro estado editable.
 
 ## Visual summary
 
-Ejecutar desde el checkout fuente autorizado: node tools/isswf-panel.mjs --project /absolute/project --initiative I0001 --port 0. Abrir la URL loopback impresa en el mismo equipo, elegir Ver ficha y evidencias y volver al tablero. Actualizar consulta de nuevo los registros; no es telemetría automática.
+Ejecutar node tools/isswf-panel.mjs --project /absolute/project --port 0 y abrir la URL loopback impresa. Elegir Abrir Kanban, abrir una ficha y volver a Todas las iniciativas. --initiative I0001 permite abrir directamente ese Kanban sin restringir el servidor a él.
 
 ## Scope
 
-Primer corte readonly. Sin respuestas/aceptación desde el navegador, arrastrar tarjetas, ejecución de comandos, modelos, merge, servicios globales ni llamadas GitHub. Las decisiones siguen pasando por el coordinador.
+Solo lectura. Sin respuestas/aceptación desde el navegador, arrastrar tarjetas, comandos, modelos, merge, servicios globales ni llamadas GitHub. Los estados siguen siendo los del plan. No hay telemetría viva ni prueba de uso efectivo de referencias.
 
 ## Checks and results
 
-Tests HTTP locales pasan: seis columnas, API igual al status canónico, escape de texto hostil, campos ausentes/desconocidos, Host/Origin/métodos/rutas denegados, symlinks y bytes del proyecto sin cambios. Calidad portable, ESLint y Knip pasan localmente. Chromium real verificó las seis columnas, abrir la ficha J009, volver al tablero y navegación móvil sin desbordar la página. Revisión independiente y CI siguen pendientes antes de integración.
+La base PR39 pasó revisión, CI exact-head y comprobaciones postmerge. Este corte añade pruebas HTTP con dos iniciativas, datos canónicos, navegación, escape de texto, registros ausentes/inseguros y límite del listado. Los resultados definitivos de calidad, navegador, revisión e integración se conservan en A/V del job; no se deducen de este resumen.
 
 ## Independent review
 
-Pendiente sobre el candidato exacto; no es una entrega aprobada todavía.
+PR39 tiene revisión independiente PASS retenida en V001. Este corte requiere su propia revisión exacta, registrada por separado antes de integrar.
 
 ## Closure and acceptance
 
-J009 sigue en curso. No pedir aceptación de panel completo: faltan respuestas seguras y la evidencia de integración. El operador ya aceptó los cortes anteriores; no se reabren.
+J009 sigue en curso. No se pide aceptar el panel completo. Faltan respuestas seguras desde el navegador y criterios runtime. Los cuatro jobs ya aceptados no se reabren.
 
 ## Integration risk and recovery
 
-No verifica procesos vivos, slots, PRs actuales ni uso efectivo de referencias. Los campos de agentes son declaraciones de los informes, no prueba de actividad. Loopback no autentica usuarios locales. Las fichas deben ser aptas para mostrar y no contener credenciales; no hay sanitizador universal de secretos. No está acreditado para clientes.
+Loopback no autentica usuarios locales. Las fichas deben contener evidencia apta para mostrar y no credenciales; no hay sanitizador universal. No verifica procesos, slots, PRs actuales ni dependencias satisfechas. El listado es acotado y los registros se leen por separado, no como snapshot atómico. No está acreditado para clientes.
 
 ## Blockers and next action
 
-Inspeccionar la página real, completar checks y revisión, integrar el corte readonly y abordar las respuestas mediante el coordinador en un corte seguro.
+Integrar la navegación multiiniciativa tras pruebas/revisión/CI y abordar después las respuestas mediante un límite seguro del coordinador.
