@@ -22,9 +22,9 @@ async function tree(path) {
   }
   return output;
 }
-const get = (url, path = '/', headers = {}, method = 'GET') => new Promise((done, reject) => {
+const get = (url, path = '/', headers = {}, method = 'GET', body) => new Promise((done, reject) => {
   const req = request(new URL(path, url), { method, headers, agent: false }, response => { let body = ''; response.setEncoding('utf8'); response.on('data', data => body += data); response.on('end', () => done({ code: response.statusCode, headers: response.headers, body })); });
-  req.on('error', reject); req.end();
+  req.on('error', reject); req.end(body);
 });
 let panel;
 try {
@@ -58,6 +58,8 @@ try {
   assert(secondPage.body.includes('href="/">Todas las iniciativas'));
   const page = await get(panel.url, '/i/I0001');
   assert.equal(page.code, 200); assert.match(page.headers['content-type'], /text\/html; charset=utf-8/u);
+  assert.equal(page.headers['referrer-policy'], 'same-origin');
+  assert.match(page.headers['content-security-policy'], /form-action 'self'/u);
   assert.equal(page.headers['x-content-type-options'], 'nosniff'); assert.equal(page.headers['cache-control'], 'no-store');
   assert.match(page.headers['content-security-policy'], /default-src 'none'/u); assert.equal(page.headers['access-control-allow-origin'], undefined);
   assert.match(page.body, /I0001 · Factory &lt;script&gt;bad\(\)&lt;\/script&gt;/u);
@@ -82,6 +84,47 @@ try {
   assert.equal((await get(panel.url, '/', {}, 'OPTIONS')).code, 405);
   for (const path of ['/i/../I0001', '/i/%49%30%30%30%31', '/i/I0001?project=/other', '/api/status/I0001/extra', '/private', '/.git/config', '/api/status?project=/other', '/accept/J001']) assert.equal((await get(panel.url, path)).code, 404);
   assert.deepEqual(await tree(project), before);
+  const form = Object.fromEntries([...page.body.matchAll(/<input type="hidden" name="([^"<>]+)" value="([^"<>]*)">/gu)].slice(0, 5).map(match => [match[1], match[2]]));
+  assert.deepEqual(Object.keys(form), ['token','responseId','planSha256','briefSha256','deliverySha256']);
+  const post = (fields = {}, headers = {}, path = '/responses/I0001/J001') => get(panel.url, path, { origin: panel.url, 'content-type': 'application/x-www-form-urlencoded', ...headers }, 'POST', new URLSearchParams({ ...form, note: 'Please change <script>not-code</script>', ...fields }).toString());
+  const untouched = await tree(project);
+  assert.equal((await post({ token: '0'.repeat(64) })).code, 403);
+  assert.equal((await post({}, { origin: 'https://evil.example' })).code, 403);
+  assert.equal((await post({}, { origin: '' })).code, 403);
+  assert.equal((await post({}, { 'content-type': 'application/json' })).code, 403);
+  assert.equal((await post({ planSha256: '0'.repeat(64) })).code, 409);
+  assert.equal((await post({ briefSha256: '0'.repeat(64) })).code, 409);
+  assert.equal((await post({ deliverySha256: '0'.repeat(64) })).code, 409);
+  assert.equal((await post({ note: 'x'.repeat(4001) })).code, 400);
+  assert.equal((await post({ note: '  ' })).code, 400);
+  assert.equal((await get(panel.url, '/responses/I0001/J001', {origin:panel.url,'content-type':'application/x-www-form-urlencoded'}, 'POST', new URLSearchParams({...form,note:'first'}).toString()+'&note=second')).code, 400);
+  assert.equal((await post({ note: 'bad\u0000note' })).code, 400);
+  assert.equal((await post({}, {}, '/responses/I0001/J002')).code, 409);
+  assert.equal((await post({}, {}, '/responses/OTHER/J001')).code, 409);
+  assert.equal((await post({ note: 'x'.repeat(33000) })).code, 413);
+  assert.deepEqual(await tree(project), untouched);
+  await writeFile(join(job,'delivery.md'), delivery + '\nChanged after display.\n');
+  assert.equal((await post()).code, 409);
+  await writeFile(join(job,'delivery.md'), delivery);
+  const planBefore = await readFile(join(project, '.factory/initiatives/I0001/plan.md'));
+  const saved = await post(); assert.equal(saved.code, 201); assert.match(saved.body, /Nota registrada, no aplicada/u);
+  assert.equal((await post()).code, 409);
+  const responses = JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.responses;
+  assert.equal(responses.status, 'recorded'); assert.equal(responses.records.length, 1); assert.equal(responses.records[0].applied, false);
+  assert.equal(responses.records[0].note, 'Please change <script>not-code</script>');
+  assert.deepEqual(await readFile(join(project, '.factory/initiatives/I0001/plan.md')), planBefore);
+  assert.match((await get(panel.url, '/i/I0001')).body, /Please change &lt;script&gt;not-code&lt;\/script&gt;/u);
+  const raceId = '1'.repeat(32), raced = await Promise.all([post({ responseId: raceId }), post({ responseId: raceId })]);
+  assert.deepEqual(raced.map(r=>r.code).sort(), [201,409]);
+  const responseDir = join(job, 'responses'), originalRecord = await readFile(join(responseDir, form.responseId + '.json'));
+  await symlink(grant, join(responseDir, '2'.repeat(32) + '.json'));
+  assert.equal((await post({ responseId: '3'.repeat(32) })).code, 400);
+  assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.responses.status, 'unknown');
+  assert.deepEqual(await readFile(join(responseDir, form.responseId + '.json')), originalRecord);
+  await rm(responseDir, { recursive: true }); await symlink(root, responseDir);
+  assert.equal((await post({ responseId: '4'.repeat(32) })).code, 400);
+  await rm(responseDir);
+
   await writeFile(join(job, 'delivery.md'), delivery + '\n## Visual summary\nRepeated\n');
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'unknown');
   await writeFile(join(job, 'delivery.md'), '# Delivery\n## Visual summary\n' + 'x'.repeat(33000));
@@ -102,5 +145,5 @@ try {
   await assert.rejects(startPanel({ project: unsafeProject }), /unsafe-or-unreadable-project/u);
   for (let i = 0; i < 101; i++) await mkdir(join(project, '.factory/initiatives/X' + i));
   assert.equal(JSON.parse((await get(panel.url, '/api/status')).body).status, 'unknown');
-  console.log('PASS readonly multiinitiative panel: actual loopback HTTP, canonical data/cards, explicit missing evidence, hostile text escaping, host/origin/method/path refusal, unsafe/absent records and unchanged project bytes; no provider calls');
+  console.log('PASS multiinitiative panel and pinned coordinator notes: actual loopback HTTP, canonical data/cards, explicit missing evidence, hostile text escaping, host/origin/method/path refusal, unsafe/absent records and unchanged project bytes; no provider calls');
 } finally { if (panel) await new Promise(done => panel.server.close(done)); await rm(root, { recursive: true, force: true }); }

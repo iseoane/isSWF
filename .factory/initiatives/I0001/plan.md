@@ -156,9 +156,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Complete the v1 local observation panel beyond the CLI first cut
 - Depends on: J001
-- Brief: [brief-r2.md](jobs/J009/brief-r2.md) (pending until prepared)
-- Blocker: Readonly single-initiative panel delivered in PR39; project-wide navigation is being implemented. Browser responses and runtime evidence remain separate.
-- Next step: Deliver one project landing page and initiative Kanban navigation with readonly tests, independent review and exact-head CI.
+- Brief: [brief-r3.md](jobs/J009/brief-r3.md) (pending until prepared)
+- Blocker: Readonly project-wide panel delivered in PR39/40; bounded coordinator notes are being implemented. Automatic acceptance and live runtime remain excluded.
+- Next step: Deliver pinned local notes with explicit recorded-not-applied state, HTTP/browser safety tests, independent review and exact-head CI.
 
 ### Acceptance
 
@@ -172,6 +172,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/39
 - .factory/initiatives/I0001/jobs/J009/A001.md
 - .factory/initiatives/I0001/jobs/J009/V001.md
+- https://github.com/iseoane/isSWF/pull/40
+- .factory/initiatives/I0001/jobs/J009/A002.md
+- .factory/initiatives/I0001/jobs/J009/V002.md
 
 ## J010
 

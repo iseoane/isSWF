@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { plan } from './isswf-plan.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
+import { readResponses } from './isswf-response.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const states = ['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed'];
@@ -102,7 +103,7 @@ async function artifacts(root, job) {
       } catch (error) { if (error.code !== 'ENOENT') throw error; }
 
     } catch (error) { if (error.code !== 'ENOENT') intake = { status: 'unknown', reason: 'invalid-or-unsafe-intake' }; }
-    return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports, delivery: await deliveryAt(path) };
+    return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports, delivery: await deliveryAt(path), responses: await readResponses({ project: resolve(root, '../../..'), initiative: job.initiative, jobId: job.id }) };
   } catch (error) { return { status: error.code === 'ENOENT' ? 'not-prepared' : 'unknown', reason: error.code === 'ENOENT' ? 'missing-job-or-brief' : 'invalid-or-unsafe-artifact' }; }
 }
 export async function initiatives({ project }) {
