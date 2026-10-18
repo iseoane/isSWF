@@ -1,4 +1,4 @@
-# I0001: Complete the remaining factory v1 features
+# I0001: Factory v1
 
 Type: enhancement
 
@@ -27,12 +27,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J002
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Reconcile changed intake and duplicate requests
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md) (pending until prepared)
-- Blocker: Revision reconciliation integrated; duplicate-link implementation and verification in progress.
-- Next step: Implement an explicit evidence-backed duplicate link to a pinned existing intake; no new writer or automatic matching.
+- Blocker: Revision and duplicate-link cuts integrated in PR33 and PR35; operator functional acceptance pending.
+- Next step: Show the actual revision and duplicate-link outcomes to the operator; do not infer acceptance from CI.
 
 ### Acceptance
 
@@ -42,6 +42,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - .audit/intake-86-grounding-final.json
 - https://github.com/iseoane/isSWF/pull/33
+- https://github.com/iseoane/isSWF/pull/35
+- f43b685ec20429f8a21a96836a4bfb4be4dab0b6
+- .factory/initiatives/I0001/jobs/J002/A002.md
+- .factory/initiatives/I0001/jobs/J002/V002.md
 
 ## J003
 
@@ -132,7 +136,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - Status: pending
 - Objective: Review complete v1 evidence and obtain operator acceptance
-- Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010, J011, J012
+- Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010, J011, J012, J013, J014
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
 - Blocker: All v1 evidence and operator acceptance are pending.
 - Next step: Ground and authorize the bounded implementation/checks before starting.
@@ -205,17 +209,53 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J012
 
-- Status: pending
+- Status: in-progress
 - Objective: Show short descriptive initiative labels alongside stable IDs
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md) (pending until prepared)
-- Blocker: Current status primarily exposes the initiative ID; a concise user-facing label is not implemented.
-- Next step: Use the canonical initiative title to define the smallest consistent display contract and verify it with existing initiative records.
+- Blocker: Canonical title display in the existing status consumer is being implemented; full panel remains J009.
+- Next step: Verify the label from the canonical plan without renaming IDs/paths or adding editable state.
 
 ### Acceptance
 
 - Lists, status and panel show a concise label such as I0001 · Factory v1, derived from one canonical initiative title.
 - Stable IDs and paths remain unchanged; no duplicate editable plan or title state is introduced.
+
+### Evidence
+
+- None.
+
+## J013
+
+- Status: pending
+- Objective: Review audit retention and distribution before v1 closure
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J013/brief-r1.md) (pending until prepared)
+- Blocker: Operator explicitly requires careful audit review before v1 closure; no bulk cleanup authorized.
+- Next step: Inventory dependencies and propose retention choices before moving or deleting evidence.
+
+### Acceptance
+
+- Review tracked audit evidence, references and reproducibility needs; distinguish durable job evidence from temporary logs and CI artifacts.
+- Agree and apply a bounded retention policy before accepting v1, without indiscriminate deletion or rewriting history.
+
+### Evidence
+
+- None.
+
+## J014
+
+- Status: pending
+- Objective: Keep target-installed factory executables under .factory/tools
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J014/brief-r1.md) (pending until prepared)
+- Blocker: Current Markdown package and source-checkout runtime are separate; the target executable distribution cut is not implemented.
+- Next step: Ground the smallest distribution change without moving source files indiscriminately or copying development dependencies.
+
+### Acceptance
+
+- Executables actually installed in target projects live under .factory/tools with coherent imports and activation references.
+- Development tooling and historical audit archives are not copied to target projects; installation and source-checkout use are distinguished and tested.
 
 ### Evidence
 
