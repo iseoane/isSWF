@@ -210,8 +210,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Replace Pstack delegation with native factory agents
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J011/brief-r4.md) (pending until prepared)
-- Blocker: Own planner integrated in PR44. Diagnostic caller with host-selected read-only probes is being verified offline; full integrated native delegation and real-role proof remain pending.
-- Next step: Deliver bounded diagnostic probe evidence and own report caller with offline/actual-sandbox/synthetic-SDK gates, independent review and CI. Real integration and planner reassessment require a separate concrete grant.
+- Blocker: Direct diagnostic-to-planner real integration succeeded with two bounded HTTP 200 calls. Complete native coordination/advisory-launcher independence and operator acceptance remain unproven; no invocation budget remains.
+- Next step: Ground the remaining native-coordination acceptance against existing evidence; supply pending-job briefs/specification before adopting detailed planner optimization. Do not repeat consumed calls or reopen accepted jobs.
 
 ### Acceptance
 
@@ -231,6 +231,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/44
 - .factory/initiatives/I0001/jobs/J011/A003.md
 - .factory/initiatives/I0001/jobs/J011/V003.md
+- https://github.com/iseoane/isSWF/pull/45
+- .factory/initiatives/I0001/jobs/J011/A005.md
+- .factory/initiatives/I0001/jobs/J011/V005.md
 
 ## J012
 
