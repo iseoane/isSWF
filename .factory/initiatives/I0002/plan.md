@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Show one explainable advisory next step per initiative
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: Source implementation and exact-candidate verification pending; no runtime model grant is available.
-- Next step: Ground the current status/panel seams, implement a deterministic advisory selection and verify public CLI/HTTP/browser behavior.
+- Blocker: None for the delivered bounded scope; operator explicitly accepted PR55 feature.
+- Next step: No active work for the accepted bounded feature.
 
 ### Acceptance
 
@@ -24,3 +24,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - Operator conversation: Adelante! (main recommendation and reason, no automatic agent dispatch)
 - Parent validation job: I0001/J003
+- https://github.com/iseoane/isSWF/pull/55
+- 8304928a1f0c9dfa11809a364b3e77f4bec951f6
+- Operator conversation: Aceptado! (after PR55 technical delivery and feature demonstration)
