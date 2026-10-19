@@ -92,12 +92,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
-- Blocker: No implementation assigned yet; ordering is priority, not an invented code dependency.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Blocker: Source-grounded native planner proposal received; coordinator is grounding the explicit shared capacity scope and cessation hooks before the bounded implementation.
+- Next step: Implement and verify finite admission without conflating permanent writer claims, product acceptance and integrated dependencies.
 
 ### Acceptance
 
@@ -105,7 +105,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- .factory/initiatives/I0001/jobs/J005/A002.md
 
 ## J006
 
@@ -290,12 +290,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J014
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Keep target-installed factory executables under .factory/tools
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md) (pending until prepared)
-- Blocker: Source installer is integrated in PR59 after a third native review passed both axes; the first two were inconclusive. Follow-up guide, aggregate-test registration and plan reconciliation remain under independent review. Fresh necessary native review calls are authorized by the operator.
-- Next step: Preserve the integrated source proof; review the pending integration unit before claiming J014 delivered.
+- Blocker: Bounded installation delivery is technically integrated; operator product acceptance remains pending. No runtime SDK installation or client use is claimed.
+- Next step: Review the concrete delivery card while other jobs continue; do not infer acceptance or reopen source changes.
 
 ### Acceptance
 
@@ -308,3 +308,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - 3c8696a49fd5d856f8ece45cfcec189c2b9a93cd
 - .factory/initiatives/I0001/jobs/J014/A001.md
 - Native source review 3: .audit/install-109-review-real3.json; Standards PASS and Spec PASS; earlier reviews 1 and 2 inconclusive.
+- https://github.com/iseoane/isSWF/pull/61
+- a6f96cb929da25c4cc02d172da6c613991b7c06e
+- .factory/initiatives/I0001/jobs/J014/integration-verification.json
+- .factory/initiatives/I0001/jobs/J014/delivery.md
