@@ -17,9 +17,10 @@ const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !p
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/reviewer.md', '.agents/roles/references/review.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', '.agents/roles/references/verification-principles.md'];
-function git(repo, args) {
-  const result = spawnSync('git', ['-C', repo, ...args], { maxBuffer: 1024 * 1024, timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
-  assert(result.status === 0 && !result.error, 'pinned-git-operation-failed');
+function git(repo, args, deadlineAt = Infinity) {
+  const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'review-operation-deadline');
+  const result = spawnSync('git', ['-C', repo, ...args], { maxBuffer: 1024 * 1024, timeout, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+  assert(result.status === 0 && !result.error && Date.now() < deadlineAt, 'pinned-git-operation-failed');
   return result.stdout;
 }
 function blob(repo, checkpoint, path) {
@@ -123,7 +124,7 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
     try {
       const results = await (probeRunner ?? runDiagnosticProbes)({ targetRepo: job.workspace.repo, targetBase: job.candidateSha, probes: job.workspace.probes, deadlineAt });
       assert(results.length === job.workspace.probes.length && results.every(result => result.expectationMatched === true && result.targetBase === job.candidateSha), 'review-probe-expectation-failed');
-      assert(decode(git(job.workspace.repo, ['rev-parse', 'HEAD'])).trim() === job.candidateSha, 'review-workspace-changed');
+      assert(decode(git(job.workspace.repo, ['rev-parse', 'HEAD'], deadlineAt)).trim() === job.candidateSha, 'review-workspace-changed');
       workspaceVerification = { candidateSha: job.candidateSha, repo: job.workspace.repo, probes: job.workspace.probes, probeRunnerSha256: grant.probeRunnerSha256, results, limits: 'Host-selected review-runtime probes, not model-selected commands or authenticated reviewer identity' };
       p.prompt = JSON.stringify({ ...JSON.parse(p.prompt), workspaceVerification }); p.bundleSha256 = hash(p.prompt);
       assert(Date.now() < deadlineAt && Buffer.byteLength(p.prompt) + Buffer.byteLength(p.instructions) <= p.inputBytes, 'review-probe-budget');
