@@ -96,8 +96,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md) (pending until prepared)
-- Blocker: First reviewer/planner shared-pool cut implemented and locally verified; independent source review remains pending. Worker and other role admission, verified worker cessation and dependency/integration gating remain incomplete.
-- Next step: Review the bounded SDK admission cut, then integrate the remaining J005 lifecycle/dependency guarantees without treating this first cut as full MOD-07.
+- Blocker: The reviewer/planner-only shared-capacity source cut passed independent Standards and Spec review at 8e7004e. Worker/researcher/diagnostic admission, descendant cessation, dependency/cycle and code-integration gates and full cross-role review-panel operation remain pending. The affected records review and publication gates are separate from this source verdict.
+- Next step: Publish the independently reviewed reviewer/planner capacity cut after affected record review and exact PR/main CI gates, then implement the remaining role and dependency gates without claiming J005 complete.
 
 ### Acceptance
 
@@ -108,6 +108,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J005/A002.md
 - 8e7004e7c940bf25d76234db6438e808023ab6d7
 - .factory/initiatives/I0001/jobs/J005/brief-r2.md
+- Native independent review of 8e7004e: Standards PASS and Spec PASS; .audit/capacity-109-review-real-v3.json
 
 ## J006
 
