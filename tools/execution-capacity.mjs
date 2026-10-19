@@ -30,7 +30,7 @@ export async function prepareCapacity(descriptor, excludedRoots, runnerSha256) {
 }
 export async function acquireCapacity(scope, { role, logicalJobRef, mode }) {
   if (!scope) return { info: null, async complete() {} };
-  assert(['real', 'fixture'].includes(mode) && ['reviewer', 'planner', 'diagnostician'].includes(role) && typeof logicalJobRef === 'string' && logicalJobRef.trim() && Buffer.byteLength(logicalJobRef) <= 2000 && !/[\x00-\x1f\x7f]/u.test(logicalJobRef), 'capacity-owner-required');
+  assert(['real', 'fixture'].includes(mode) && ['reviewer', 'planner', 'diagnostician', 'researcher'].includes(role) && typeof logicalJobRef === 'string' && logicalJobRef.trim() && Buffer.byteLength(logicalJobRef) <= 2000 && !/[\x00-\x1f\x7f]/u.test(logicalJobRef), 'capacity-owner-required');
   const value = await policy(scope); assert(value.limit === scope.limit, 'capacity-policy-changed');
   for (let slot = 0; slot < scope.limit; slot++) {
     const directory = join(scope.pool, 'slot-' + slot);

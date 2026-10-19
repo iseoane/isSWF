@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import {readFile,realpath,mkdir,open,link,unlink} from 'node:fs/promises';
+import {readFile,realpath,mkdir,open,link,unlink,rmdir} from 'node:fs/promises';
 import {resolve,join,relative,isAbsolute,dirname} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createRequire,findPackageJSON} from 'node:module';
 import {spawnSync} from 'node:child_process';
 import {createHash,randomUUID} from 'node:crypto';
+import {prepareCapacity,acquireCapacity} from './execution-capacity.mjs';
 const source=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const inside=(a,b)=>{const r=relative(a,b);return r===''||(!r.startsWith('../')&&r!=='..'&&!isAbsolute(r));};
@@ -49,6 +50,7 @@ export async function prepareResearch({project,inputSha,jobPath,grantFile,store}
  assert(Array.isArray(job.sources)&&job.sources.length>0,'pinned-source-bundle-required');
  const target=await realpath(job.targetRepo);assert(target===grant.targetRepo&&job.targetBase===grant.targetBase,'target-pin-mismatch');
  assert(!inside(target,grantFile)&&!inside(target,store),'target-cannot-own-grant-or-store');
+ const capacity=await prepareCapacity(grant.capacity,[project,target,store,source],grant.capacityRunnerSha256);
  const texts=[blob(project,inputSha,job.briefPath).toString()];
  for(const p of job.sources)texts.push('\n'+p+'\n'+blob(target,job.targetBase,p).toString());
  const prompt=texts.join('\n');assert(Buffer.byteLength(prompt)<=65536,'research-bundle-too-large');
@@ -56,7 +58,7 @@ export async function prepareResearch({project,inputSha,jobPath,grantFile,store}
  const quota=grant.authoritativeQuotaEvidence??[];assert(Array.isArray(quota),'invalid-quota-evidence');
  for(const e of quota)assert(route.some(t=>equal(t,e.tuple))&&e.confirmedExhausted===true&&typeof e.reference==='string'&&e.reference.trim(),'invalid-authoritative-quota-evidence');
  const dir=join(store,hash(project+'\0'+job.logicalJobRef));
- return {project,inputSha,jobPath,job,grant,grantSha256:grantInput.sha256,route,prompt,dir,mode:'real'};
+ return {project,store,inputSha,jobPath,job,grant,grantSha256:grantInput.sha256,capacity,route,prompt,dir,mode:'real'};
 }
 
 export function subscriptionEvidence(provider,sdkConfirmed,grant){
@@ -86,11 +88,14 @@ export async function runResearch(request,{backend,mode='real'}={}){
  if(mode==='real')assert(grant.allowProviderCalls===true&&!backend,'explicit-provider-grant-required');
  else assert(backend&&grant.allowProviderCalls===false,'fixture-backend-required');
  await mkdir(dir,{mode:0o700});
+ const parent=await open(p.store,'r');try{await parent.sync();}finally{await parent.close();}
+ const reservation=await acquireCapacity(p.capacity,{role:'researcher',logicalJobRef:job.logicalJobRef,mode});
+ if(!reservation){await rmdir(dir);const parent=await open(p.store,'r');try{await parent.sync();}finally{await parent.close();}return {version:1,status:'blocked',reason:'capacity',attemptsConsumed:0,records:[],capacity:p.capacity,executionAuthorized:false};}
  const sessionId=randomUUID();
- await publish(join(dir,'binding.json'),{version:1,mode,sessionId,callerSha256:grant.callerSha256,project:p.project,inputSha:p.inputSha,jobPath:p.jobPath,logicalJobRef:job.logicalJobRef,grantSha256:p.grantSha256,models:job.models,route,budgets:{totalAttempts:grant.totalAttempts,retryBudget:grant.retryBudget,deadlineMs:grant.deadlineMs,outputBytes:grant.outputBytes,maxOutputTokens:grant.maxOutputTokens},authority:'external-grant; no replay or automatic recovery'});
+ await publish(join(dir,'binding.json'),{version:1,mode,sessionId,...(reservation.info?{capacity:reservation.info}:{}),callerSha256:grant.callerSha256,project:p.project,inputSha:p.inputSha,jobPath:p.jobPath,logicalJobRef:job.logicalJobRef,grantSha256:p.grantSha256,models:job.models,route,budgets:{totalAttempts:grant.totalAttempts,retryBudget:grant.retryBudget,deadlineMs:grant.deadlineMs,outputBytes:grant.outputBytes,maxOutputTokens:grant.maxOutputTokens},authority:'external-grant; no replay or automatic recovery'});
  let calls=0,retries=0,index=0;const started=Date.now(),records=[];
  const bounded=async promise=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('preflight-deadline')),Math.max(1,grant.deadlineMs-(Date.now()-started)));})]);}finally{clearTimeout(timer);}};
- const finish=async(status,reason,text)=>{const value={version:1,mode,status,reason,attemptsConsumed:calls,records,...(text===undefined?{}:{text}),limits:['text-only pinned source bundle; no tools or discovery','quota uses exact structured Go error or external evidence, never 429 alone or prose','unknown invocations consumed; no billing or remote exactly-once claim']};await publish(join(dir,'result.json'),value);return value;};
+ const finish=async(status,reason,text)=>{if(status==='complete')await reservation.complete();const value={version:1,mode,status,reason,...(reservation.info?{capacity:reservation.info}:{}),attemptsConsumed:calls,records,...(text===undefined?{}:{text}),limits:['text-only pinned source bundle; no tools or discovery','quota uses exact structured Go error or external evidence, never 429 alone or prose','unknown invocations consumed; no billing or remote exactly-once claim']};await publish(join(dir,'result.json'),value);return value;};
  try{
   backend??=await bounded(sdkResearchBackend(job,grant));
   while(index<route.length){
