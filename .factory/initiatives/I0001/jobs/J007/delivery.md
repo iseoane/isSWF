@@ -27,7 +27,7 @@ Existing reviewer and planner tests verify committed context bytes, ignored work
 
 ## Independent review
 
-Pending exact-candidate native review. Neither the coordinator's observations nor fixture responses are an independent review.
+Native independent review: Standards PASS and Spec PASS for the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`. The exact report, observed probes and prior inconclusive outcomes are retained in `context-verification.json`. This does not accept complete J007 or v1.
 
 ## Integration risk and recovery
 

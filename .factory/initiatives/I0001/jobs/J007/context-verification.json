@@ -191,7 +191,7 @@
     "limit": "Not a real outage or proof that a model always handles missing decisions correctly."
   },
   "nativeReview": {
-    "status": "pending",
+    "status": "pass-for-bounded-source-unit",
     "priorResults": [
       {
         "version": 1,
@@ -211,6 +211,20 @@
         "spec": "inconclusive",
         "reason": "Unchanged caller context absent; suggested filesystem isolation for optional executable. Optional test now sandboxed; source context must accompany affected review."
       }
+    ],
+    "candidateSha": "41a2e19c26797083c2d931c882369d8f83d1150f",
+    "targetBase": "af05457b1bd98362902bb1f7aff789fd9368653e",
+    "bundleSha256": "d61c09314d8eba9114ab35bd31934fb9920eb8476281b9990658a1e00c53d4b1",
+    "mode": "real",
+    "attemptsConsumed": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Independent review report\n\n**Base:** `af05457b1bd98362902bb1f7aff789fd9368653e`  \n**Candidate:** `41a2e19c26797083c2d931c882369d8f83d1150f`  \n**Reviewed scope:** `.factory/initiatives/I0001/jobs/J007/{brief-r2.md,context-verification.json,delivery.md}`, `.factory/initiatives/I0001/plan.md`, `tests/project-context-engram.mjs`, `tests/project-context-handoff.mjs`, and `tools/check-quality.mjs`.\n\n### Standards — pass\n\nThe tests exercise bounded, explicit behavior: the optional Engram integration uses synthetic data and a reported bwrap boundary; the handoff test calls `preparePlanProposal` and checks the pinned payload, mutable-worktree exclusion, and a source-only case. The test and delivery text correctly avoid claims of automatic semantic filtering, provider execution, or client-ready isolation. The quality-check wiring runs the new handoff test and fails on unsuccessful subprocesses. The extra indentation in `tools/check-quality.mjs` is cosmetic and not a finding.\n\nThe supplied exact-candidate runtime observations report successful planner/handoff and sandbox probes. I did not run checks. The Engram execution and CI results are supplied evidence, not independently rerun observations.\n\n### Spec — pass, for this bounded unit only\n\nThe brief’s scoped acceptance is supported by the retained synthetic Engram observations, the coordinator selection record, the actual prepare-only handoff observation, controlled source-only case, and named native/sandbox check results. The supplied coordinator guidance establishes that memory is advisory and current source takes precedence; the selection record reports discarding a stale memory claim after checking primary evidence.\n\nThat selection record is evidence, not authenticated actor identity. I cannot independently verify the underlying memory lookup or the raw CI observation from the supplied materials. This does not establish broader MEM/SEC gates, a real service outage, MCP/cloud authentication, or universal secret filtering.\n\n### Findings\n\nNone for the reviewed bounded scope. This is not a finding that J007 or v1 is complete.\n\n### Checks, limitations, and outcome\n\nHost-selected probes recorded against the candidate passed: planner contracts plus `tests/project-context-handoff.mjs`, and `tests/diagnostic-probes.mjs . --sandbox`. The supplied receipt also reports exact-candidate aggregate quality, ESLint, Knip, PR CI, and an installed Engram observation. **I did not execute these checks.** Existing reviewer checks are ancillary evidence; I did not audit the reviewer implementation or its API.\n\n**Aggregate: pass for this bounded source review.** J007 remains in progress as stated; no product acceptance, merge permission, client-ready claim, or whole-v1 completion is implied.",
+    "limits": [
+      "only explicit host-selected read-only review-runtime probes executed; no model tools",
+      "actor identities are external operator attestations, not authenticated by this caller",
+      "response completion is not a passing verdict, merge permission or human acceptance",
+      "unknown invocation consumed; no automatic retry, fallback or recovery"
     ]
   },
   "limits": [
@@ -223,5 +237,19 @@
   "historicalAggregate": {
     "revision": "af05457b1bd98362902bb1f7aff789fd9368653e",
     "disposition": "Pre-checkpoint observation only, not candidate-quality proof. Current exact-candidate aggregate and CI are separate publication evidence."
-  }
+  },
+  "verifiedSources": [
+    {
+      "path": "tests/project-context-engram.mjs",
+      "sha256": "bdbc6632c42447c1d57d47012ea1ff48d82f4bee0b3fa0556ac44ad1c5a95cb6"
+    },
+    {
+      "path": "tests/project-context-handoff.mjs",
+      "sha256": "50e5f8ccd436216598a2cd01ffb4015fb3d18aab080d5787f8b958f66bc5454e"
+    },
+    {
+      "path": "tools/check-quality.mjs",
+      "sha256": "b6944214c953ac502d308bcbc42cc6b6d3b95fb429a106e7e15a6349c988d782"
+    }
+  ]
 }
