@@ -292,12 +292,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J014
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Keep target-installed factory executables under .factory/tools
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md) (pending until prepared)
-- Blocker: Bounded installation delivery is technically integrated; operator product acceptance remains pending. No runtime SDK installation or client use is claimed.
-- Next step: Review the concrete delivery card while other jobs continue; do not infer acceptance or reopen source changes.
+- Blocker: None for the delivered installation scope; explicitly accepted by the operator.
+- Next step: Preserve the accepted delivery; do not infer acceptance of J013 or the whole v1.
 
 ### Acceptance
 
@@ -314,3 +314,4 @@ This coordinator-owned plan records reported progress, not execution permission 
 - a6f96cb929da25c4cc02d172da6c613991b7c06e
 - .factory/initiatives/I0001/jobs/J014/integration-verification.json
 - .factory/initiatives/I0001/jobs/J014/delivery.md
+- Operator conversation: J014 aceptada
