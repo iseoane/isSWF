@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "scope": "Preserve-all proposal with per-path metadata census, not cleanup approval",
+  "sourceBase": "63e2145d4a0692a18087345f2bc013071ab6374e",
+  "observationTime": "2026-10-19T20:02:53.872Z",
+  "census": {
+    "localPath": ".audit/retention-109-census-v4.json",
+    "sha256": "792d85410dcbad2fe8879c4af5d73333970cc54d31275ce7aec130e26388180a",
+    "inventorySha256": "6e516cc62e4fb08196daf80d3b909253ee50cd77efe0621f47a3cf8375bd72f4",
+    "bytes": 1603804,
+    "counts": {
+      "tracked": 3184,
+      "untracked": 1716,
+      "ignored": 156,
+      "literalEdges": 113,
+      "unresolvedLiteralReferences": 1,
+      "artifactsWithObservedReferences": 90
+    },
+    "skippedConsumerCount": 0,
+    "unresolvedLiteralReferences": [
+      {
+        "consumer": ".factory/initiatives/I0001/jobs/J009/V003.md",
+        "line": 29,
+        "path": ".audit/panel-95-",
+        "kind": "literal reference; not proof of execution"
+      }
+    ],
+    "distribution": "Do not publish the full census automatically: local artifact names may be private."
+  },
+  "verifiedSources": [
+    {
+      "path": ".factory/initiatives/I0001/jobs/J013/inventory.mjs",
+      "sha256": "7f2fe4279cfc2a0a2e5b212a3973b676e29c53c7d6e0794d7ea84bb940c1b4ef"
+    },
+    {
+      "path": ".factory/initiatives/I0001/jobs/J013/inventory.test.mjs",
+      "sha256": "8a0e159b2d024f0d6b3893f35ebaffa18bd67631205b2db107411c930710888d"
+    }
+  ],
+  "consumerSourcePins": [
+    {
+      "path": "tools/check-quality.mjs",
+      "sha256": "b6944214c953ac502d308bcbc42cc6b6d3b95fb429a106e7e15a6349c988d782"
+    },
+    {
+      "path": "tools/factory-package.mjs",
+      "sha256": "aeaa717b8110b5e3510291f5735004f4bc37710aad59d1aa1f4db2f982ddfe3a"
+    },
+    {
+      "path": "tooling/quality/eslint.config.mjs",
+      "sha256": "bb77d29a01a5f7e1527bf39312fac16da0421e20e0c85ed773239a5b10e3b3dc"
+    },
+    {
+      "path": "tooling/quality/knip.json",
+      "sha256": "8e5f484eff320d94fcbd9eeb0334b6891d2490565c7e3d34c686e016cb65bd25"
+    }
+  ],
+  "checks": [
+    {
+      "command": "node .factory/initiatives/I0001/jobs/J013/inventory.test.mjs",
+      "exitCode": 0,
+      "stdout": "PASS audit metadata fixture: tracked/untracked paths, exact reference, explicit unresolved/unknown roles, forbidden payload reads and unchanged evidence; no deletion policy inferred.\n"
+    },
+    {
+      "command": "node --check inventory.mjs; node --check inventory.test.mjs",
+      "exitCode": 0,
+      "scope": "Job-local reproduction sources are outside the portable tools/tests syntax walk"
+    }
+  ],
+  "policyDecision": {
+    "status": "pending-operator-agreement",
+    "existingArtifacts": "Preserve all existing paths and Git history, including unknown roles and reproduction dependencies",
+    "newArtifacts": "Reviewed curated receipts under owning job; raw/private logs, fixtures and archives remain local",
+    "distribution": "Keep existing explicit allowlist exclusions",
+    "retirement": "Separate scoped authority and preserved-byte/mode/checkpoint/retrievability proof required; none granted"
+  },
+  "nativeReview": {
+    "status": "pending"
+  },
+  "limits": [
+    "Per-path roles and reproduction dependencies remain unknown unless separately inspected; no inferred deletability",
+    "Literal references are not dynamic read/import/effect proof; nonliteral paths, large or nontext consumers and manual harness dependencies are not resolved",
+    "All unknown or unresolved artifacts remain preserved; no policy acceptance, move, deletion, archive or history rewrite",
+    "No operator policy agreement or v1 acceptance inferred",
+    "SourcePins are observed bytes; census snapshot can differ after local artifact creation",
+    "No claimed secret scan, complete dynamic dependency audit or per-artifact semantic classification"
+  ]
+}
