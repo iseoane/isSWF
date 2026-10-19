@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import {
   lstat,
   mkdir,
+  rmdir,
   readFile,
   readdir,
   realpath,
@@ -37,6 +38,8 @@ const payloadPaths = [
   ".factory/models.json",
   "package.json",
 ];
+const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs"];
+const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
   "./.agents/skills/isswf-coordinator",
   "./.agents/skills/isswf-setup",
@@ -60,8 +63,8 @@ function runGit(source, args, encoding = "utf8") {
 
 function parseArgs(argv) {
   const [command, ...parts] = argv;
-  if (!command || !["materialize", "activate"].includes(command)) {
-    fail("Usage: node tools/factory-package.mjs materialize|activate --name value ...");
+  if (!command || !["materialize", "activate", "install-tools"].includes(command)) {
+    fail("Usage: node tools/factory-package.mjs materialize|activate|install-tools --name value ...");
   }
   const options = {};
   for (let index = 0; index < parts.length; index += 1) {
@@ -75,7 +78,7 @@ function parseArgs(argv) {
   }
   const required = command === "materialize"
     ? ["--source", "--revision", "--store"]
-    : ["--package", "--project"];
+    : command === "install-tools" ? ["--source", "--revision", "--project"] : ["--package", "--project"];
   const allowed = new Set(required);
   for (const key of Object.keys(options)) {
     if (!allowed.has(key)) fail(`Unexpected option: ${key}`);
@@ -323,6 +326,51 @@ async function activate({ package: packagePath, project }) {
   console.log(`Activated ${packageRoot} in ${settingsPath}`);
 }
 
+async function installTools({ source, revision, project }) {
+  if (!isAbsolute(source) || !isAbsolute(project) || !revisionPattern.test(revision)) fail("Absolute source/project and full revision required");
+  const sourceRoot = await realpath(source), projectRoot = await realpath(project);
+  if (await realpath(runGit(sourceRoot, ["rev-parse", "--show-toplevel"]).trim()) !== sourceRoot) fail("Source must be a Git root");
+  assertSeparateTrees(sourceRoot, projectRoot, "Source and installation target must be separate trees");
+  if (runGit(sourceRoot, ["rev-parse", "--verify", `${revision}^{commit}`]).trim() !== revision) fail("Exact source revision required");
+  if (await realpath(runGit(projectRoot, ["rev-parse", "--show-toplevel"]).trim()) !== projectRoot) fail("Target must be a Git root");
+  const payload = new Map();
+  for (const name of installedToolNames) {
+    const entry = runGit(sourceRoot, ["ls-tree", "-z", revision, "--", `tools/${name}`]).split("\0").filter(Boolean);
+    if (entry.length !== 1 || !/^100(?:644|755) blob [0-9a-f]+\t/u.test(entry[0])) fail(`Missing regular committed tool: ${name}`);
+    payload.set(name, runGit(sourceRoot, ["cat-file", "blob", entry[0].slice(0, entry[0].indexOf("\t")).split(" ")[2]], null));
+  }
+  const receipt = `${JSON.stringify({ format: 1, revision, files: Object.fromEntries([...payload].map(([name, bytes]) => [name, digest(bytes)])) }, null, 2)}\n`;
+  const factory = join(projectRoot, ".factory"), destination = join(factory, "tools");
+  async function regularDirectory(path) {
+    const stat = await lstat(path);
+    if (!stat.isDirectory() || stat.isSymbolicLink()) fail(`Regular directory required: ${path}`);
+  }
+  async function verify(path) {
+    await regularDirectory(path);
+    const entries = await readdir(path, { withFileTypes: true });
+    const names = [...installedToolNames, toolsReceiptName].sort();
+    if (entries.map(entry => entry.name).sort().join("\n") !== names.join("\n") || entries.some(entry => !entry.isFile() || entry.isSymbolicLink())) fail("Installed tools contain missing or unexpected entries");
+    if ((await readFile(join(path, toolsReceiptName), "utf8")) !== receipt) fail("Installed tools revision or receipt conflict");
+    for (const [name, bytes] of payload) if (!(await readFile(join(path, name))).equals(bytes)) fail(`Installed tool hash mismatch: ${name}`);
+  }
+  try { await mkdir(factory, { mode: 0o700 }); } catch (error) { if (error.code !== "EEXIST") throw error; }
+  await regularDirectory(factory);
+  try { await lstat(destination); await verify(destination); console.log(`Already installed tools: ${destination}`); return; }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+  const claim = join(factory, ".tools-install");
+  await mkdir(claim, { mode: 0o700 });
+  const stage = join(claim, "payload");
+  await mkdir(stage, { mode: 0o700 });
+  for (const [name, bytes] of payload) await writeFile(join(stage, name), bytes, { flag: "wx", mode: 0o600 });
+  await writeFile(join(stage, toolsReceiptName), receipt, { flag: "wx", mode: 0o600 });
+  await verify(stage);
+  try { await lstat(destination); fail("Installation destination appeared during publication"); }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+  await rename(stage, destination);
+  await rmdir(claim);
+  console.log(`Installed observation and planning tools: ${destination}`);
+}
+
 function basename(path) {
   return path.slice(path.lastIndexOf(sep) + 1);
 }
@@ -335,6 +383,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       revision: options["--revision"],
       store: options["--store"],
     });
+    else if (command === "install-tools") await installTools({ source: options["--source"], revision: options["--revision"], project: options["--project"] });
     else await activate({ package: options["--package"], project: options["--project"] });
   } catch (error) {
     console.error(error.message);
