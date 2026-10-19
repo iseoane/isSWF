@@ -52,6 +52,7 @@ try {
 } finally {
   await rm(store, { recursive: true, force: true });
 }
+const toolsInstallResult = run(process.execPath, [join(source, 'tests/factory-tools-install.mjs'), source]);
 const statusResult = run(process.execPath, [join(source, 'tests/initiative-status.mjs'), source]);
 const panelResult = run(process.execPath, [join(source, 'tests/initiative-panel.mjs'), source]);
 const nextActionResult = run(process.execPath, [join(source, 'tests/initiative-next-action.mjs'), source]);
@@ -66,4 +67,4 @@ const methodologyResult = run(process.execPath, [join(source, 'tests/worker-meth
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, planResult, inventoryResult, intakeResult, methodologyResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, planResult, inventoryResult, intakeResult, methodologyResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));

@@ -37,6 +37,25 @@ Activation resolves the package and project to canonical paths, refuses overlapp
 
 Pi loads project package declarations only after project trust is granted. Review the package and project declaration before approving trust. Project trust is not a process boundary or sandbox. Skill discovery means Pi can advertise the instructions; it does not prove the skills can complete a task, that `agent` is available, or that a worker runtime is safe or ready.
 
+## Install local planning and observation tools
+
+From the source checkout, explicitly install the committed planning and observation subset into a separate owned Git project:
+
+```sh
+node tools/factory-package.mjs install-tools \
+  --source /absolute/path/to/isSWF \
+  --revision <full-commit-sha> \
+  --project /absolute/path/to/project
+node /absolute/path/to/project/.factory/tools/isswf-status.mjs \
+  --project /absolute/path/to/project --initiative I0001
+```
+
+The six-file import closure supports plan, intake, status, panel and response operations. It lives only under `.factory/tools` with a separate revision/hash receipt. No dependency, test, development tooling or audit archive is installed. Resource activation and `.pi/settings.json` are unchanged. Plan and intake writes still require their existing explicit external authority.
+
+An identical repeat verifies the exact receipt and committed bytes without rewriting. A conflicting version, tampered file, unexpected entry or symlink blocks. Publication uses a cooperative `.factory/.tools-install` claim and staged directory. Interrupted claims remain for explicit inspection; the installer does not repair or upgrade them automatically. The target directory is trusted and must not have concurrent hostile writers.
+
+This subset does not install the SDK role callers or job runtime. Those still require the fixed factory source checkout, pinned methodology, existing SDK and any genuine execution grant. An installed planning tool is not permission or proof of runtime availability.
+
 ## Git checkpoint boundary
 
 A materialized resource package is not a Git checkout. Its full-SHA directory name and receipt identify the packaged resource version; neither is the target job's document-input checkpoint. When a trusted grant requires checkpoint-pinned reads, it must still name the source checkout and full Git SHA. Read checkpoint files from that source with the existing Git workflow (for example, `git show <full-sha>:<path>`). Do not treat the extracted package as a Git source. For authorized native jobs, the source checkout's [normal job entry](local-worker-lifecycle.md#run-a-job-from-an-activated-project) verifies the active package receipt and source runtime bytes before using the existing preparer and runner. It does not add executable files to the resource package or start a coordinator model.
