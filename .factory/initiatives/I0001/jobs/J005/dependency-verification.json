@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "sourceCandidate": "2072e939135865224d5bfc2d76857f0ec7d17b2d",
+  "sourceFiles": {
+    "tools/isswf-job.mjs": "a1d3f5d21b5861b1e7c5b1892755d8016ca1c1e7a09d13032817d57feb0de939",
+    "tools/isswf-plan.mjs": "7f9e7f375eaa5c0e6296affc4f0c292a51f69d5d0546d839a9391c534a7786aa",
+    "tools/isswf-status.mjs": "5b2d4e9e1759993cd47c71d2857f0aa2e2468d18508474d5c5d25c63c81278ff",
+    "tests/worker-dependencies.mjs": "1eb79ec2e847c1b94fe4b713a994290faf775a5d82527ec2777f06de5c3ef362"
+  },
+  "review": {
+    "comparisonBase": "d5bb6099d3dbfc4582c4d0149e22916cc467043b",
+    "status": "response-complete",
+    "httpStatus": 200,
+    "attempts": 1,
+    "fetches": 1,
+    "bundleSha256": "f1ab33f05424a5673cb6b99d130ccc70d52cbf924c52383b461be74f9a2e0c19",
+    "model": "openai-codex/gpt-6-luna",
+    "effort": "high",
+    "report": "## Independent review report\n\n- **Base:** `d5bb6099d3dbfc4582c4d0149e22916cc467043b`\n- **Candidate:** `2072e939135865224d5bfc2d76857f0ec7d17b2d`\n- **Reviewed scope:** `tools/isswf-job.mjs`, `tests/worker-dependencies.mjs`\n- **Standards:** **pass** for this source checkpoint\n- **Spec:** **pass** for the stated ancestry-correction checkpoint\n- **Aggregate:** **pass** for this checkpoint only\n\n### Findings\n\nNo findings for the reviewed checkpoint.\n\nThe worker now sets `GIT_GRAFT_FILE=/dev/null` alongside `GIT_NO_REPLACE_OBJECTS=1` for the ancestry check. The updated fixture creates an unrelated commit and grafts it as a parent of the target base; the blocked result verifies that this false ancestry does not pass admission. The test also asserts zero attempts and no plan rewrite. Inspection of the caller confirms this gate runs before package activation, capacity handling, permanent admission, and attempt preparation.\n\nThe prerequisite remains a dispatch-time cooperative operator attestation—not authenticated identity or fresh readiness—and does not itself authorize acceptance or provider execution.\n\n### Checks and limits\n\nThe host-selected probes on the pinned candidate **passed**:\n\n- `node tests/worker-dependencies.mjs /work && node tests/initiative-plan.mjs /work`\n- `node tests/initiative-status.mjs /work && node tests/factory-tools-install.mjs /work`\n\nThese are runtime observations, not commands I ran. They support the ancestry correction and unchanged adjacent checks; they do **not** demonstrate worker execution or the successful integrated-SDK dispatch path. The supplied parent SDK evidence is not proof that its fixture is committed in this candidate.\n\nThe later SDK-fixture copy, positive SDK tests, quality wiring, documentation, and plan integration remain separate gates. This result is not whole-J005 delivery approval, merge permission, or product acceptance."
+  },
+  "history": {
+    "initialCoreCandidate": "d5bb6099d3dbfc4582c4d0149e22916cc467043b",
+    "initialVerdict": "fail: mutable Git graft ancestry",
+    "initialRecordSha256": "ab571926cd2fb4d427ed9200086bb9df734d676ae208d46641c096586e34becb",
+    "disposition": "Real adversarial Git regression reproduced the finding; affected source review passes after neutralizing graft and replacement metadata. Prior report retained, not relabeled."
+  },
+  "parentEvidence": {
+    "public": "Gate refusal and pinned-source checks PASS; missing activation sentinel is not worker execution.",
+    "installedSDK": "Actual synthetic-auth offline normal CLI executes verified integrated dependency and unrelated job; decision blocks before occupied pool. No provider prompt.",
+    "quality": "Aggregate quality, ESLint and Knip PASS before integration."
+  },
+  "limits": [
+    "Source checkpoint only; fixture/docs/records integration requires its separate gate",
+    "Operator-owned attestations are not an identity/authentication service or proof of who merged a commit",
+    "Optional original-worker admission; legacy jobs remain outside prerequisite guarantee; successors unsupported",
+    "J005 successive review-panel and complete integration acceptance remain pending; no reboot or v1 acceptance"
+  ]
+}

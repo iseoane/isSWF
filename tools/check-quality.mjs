@@ -61,12 +61,14 @@ const probeResult = run(process.execPath, [join(source, 'tests/diagnostic-probes
 const plannerResult = run(process.execPath, [join(source, 'tests/planner-task.mjs'), source]);
 const reviewerResult = run(process.execPath, [join(source, 'tests/reviewer-task.mjs'), source]);
 const planResult = run(process.execPath, [join(source, 'tests/initiative-plan.mjs'), source]);
+const dependencyPlanResult = run(process.execPath, [join(source, 'tests/initiative-dependencies.mjs'), source]);
 const inventoryResult = run(process.execPath, [join(source, 'tests/project-quality.mjs'), source]);
 const intakeResult = run(process.execPath, [join(source, 'tests/issue-intake.mjs'), source]);
 const methodologyResult = run(process.execPath, [join(source, 'tests/worker-methodology.mjs'), source]);
+const workerDependencyResult = run(process.execPath, [join(source, 'tests/worker-dependencies.mjs'), source]);
 const workerCapacityResult = run(process.execPath, [join(source, 'tests/worker-capacity.mjs'), source]);
 const workerCapacityAPIResult = run(process.execPath, [join(source, 'tests/worker-capacity-api.mjs'), source]);
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, planResult, inventoryResult, intakeResult, methodologyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, planResult, dependencyPlanResult, inventoryResult, intakeResult, methodologyResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));

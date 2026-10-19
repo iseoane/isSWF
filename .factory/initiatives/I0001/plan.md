@@ -96,8 +96,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J005/brief-r4.md) (pending until prepared)
-- Blocker: Worker capacity source and affected native review pass; publication and remaining dependency/cycle/integration coverage pending. No live worker provider grant or reboot authorization.
-- Next step: Publish verified original-worker admission and cessation cut, then implement remaining J005 dependency/cycle and integration gates.
+- Blocker: Reviewer/planner, diagnostician, researcher and worker shared-capacity cuts are integrated in PR62-65 with exact PR and main CI success. Dependency, cycle, code-integration and successive review-panel evidence remain pending.
+- Next step: Ground the smallest dependency/admission seam against the current source, preserve existing pool and worker cessation guarantees, then verify remaining J005 scenarios without a broader scheduler.
 
 ### Acceptance
 
@@ -118,6 +118,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - f54311f8c8bdd0a1774827a276f0276787ba0ba1
 - .factory/initiatives/I0001/jobs/J005/brief-r4.md
 - 663ab1bc3d8901768cb2b972c0de13a5adad27c6
+- https://github.com/iseoane/isSWF/pull/65
+- 06db01fa10f2b3a436a608155b5647450b4fed9e
+- .factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json
 
 ## J006
 
