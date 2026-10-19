@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 async function processEvidence(pid) {
@@ -131,7 +131,12 @@ export function nativeRecorderSource() {
 }
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const load = async path => JSON.parse(await readFile(path, 'utf8'));
+const load = async path => {
+  const stat = await lstat(path);
+  if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 64000) throw Error('bounded regular native evidence required');
+  const bytes = await readFile(path); if (bytes.length > 64000) throw Error('native evidence too large');
+  return JSON.parse(new TextDecoder('utf-8', {fatal:true}).decode(bytes));
+};
 const blocked = reason => ({ status:'blocked', reason, reviewRequired:true, retry:'never' });
 async function ceased(identity) {
   if (!identity || !Number.isSafeInteger(identity.pid) || identity.pid<=0 || typeof identity.startTicks!=='string' || !/^\d+$/.test(identity.startTicks) || typeof identity.bootId!=='string' || !/^[0-9a-f-]{36}$/.test(identity.bootId) || typeof identity.namespace!=='string' || !/^pid:\[\d+\]$/.test(identity.namespace) || typeof identity.exe!=='string' || !identity.exe.startsWith('/')) return false;
@@ -143,12 +148,10 @@ async function ceased(identity) {
   return fields[19]===identity.startTicks && fields[0]==='Z';
 }
 
-export async function inspectNativeRecovery({ attemptDir, dispatch, observation, job, baseline }) {
+async function inspectCessation(attemptDir, dispatch, child) {
   try {
-    if (observation.state!=='unknown' || observation.executionChild?.state!=='not-live') return blocked('execution task cessation not confirmed');
     if (digest(await readFile(join(attemptDir,'task.mjs')))!==dispatch.taskSha256) return blocked('task snapshot changed');
     const policy=await load(join(attemptDir,'native-recovery.json'));
-    const child=observation.executionChild.identity;
     if (policy.version!==1 || policy.policy!=='native-tools-pidns-v1' || policy.attemptId!==dispatch.attemptId || policy.taskSha256!==dispatch.taskSha256 || !child || ['pid','startTicks','bootId','exe'].some(key=>policy.task?.[key]!==child[key])) return blocked('native task policy identity mismatch');
     if (!await ceased(policy.task)) return blocked('native task cessation not confirmed');
     if (digest(await readFile('/usr/bin/bwrap'))!==policy.bwrapSha256) return blocked('native namespace runtime changed');
@@ -164,9 +167,30 @@ export async function inspectNativeRecovery({ attemptDir, dispatch, observation,
       for(const record of [intent,started]) if(record.version!==1 || record.attemptId!==dispatch.attemptId || record.taskSha256!==dispatch.taskSha256 || record.seq!==index+1) return blocked('tool binding mismatch');
       if (!await ceased(started.init)) return blocked('tool namespace cessation not confirmed');
     }
+    return {status:'ceased', taskSha256:dispatch.taskSha256, namespacesCeased:intents.length, task:policy.task};
+  } catch { return blocked('missing, corrupt or unreadable native cessation evidence'); }
+}
+
+export async function inspectWorkerCessation({attemptDir, dispatch}) {
+  try {
+    const terminal=await load(join(attemptDir,'terminal.json'));
+    if (terminal.version!==1 || terminal.attemptId!==dispatch.attemptId || terminal.workspace!==dispatch.workspace || terminal.outcome!=='success' || terminal.exitCode!==0 || terminal.signal!==null || terminal.error!==null || terminal.timedOut!==false || terminal.captureIncomplete!==false) return blocked('successful complete terminal required for worker capacity');
+    const record=await load(join(attemptDir,'execution-child.json'));
+    if (record.version!==1 || record.attemptId!==dispatch.attemptId || record.taskSha256!==dispatch.taskSha256) return blocked('worker execution identity binding mismatch');
+    const result=await inspectCessation(attemptDir,dispatch,record.child);
+    if(result.status!=='ceased')return result;
+    return {...result, terminalSha256:digest(await readFile(join(attemptDir,'terminal.json')))};
+  } catch { return blocked('missing, corrupt or unreadable worker completion evidence'); }
+}
+
+export async function inspectNativeRecovery({ attemptDir, dispatch, observation, job, baseline }) {
+  try {
+    if (observation.state!=='unknown' || observation.executionChild?.state!=='not-live') return blocked('execution task cessation not confirmed');
+    const cessation=await inspectCessation(attemptDir,dispatch,observation.executionChild.identity);
+    if(cessation.status!=='ceased')return cessation;
     const current=await workspaceTree(dispatch.workspace);
     const changed=Object.keys({...baseline,...current}).filter(path=>JSON.stringify(baseline[path])!==JSON.stringify(current[path])).sort();
     if(!Array.isArray(job.expectedMutablePaths) || changed.some(path=>!job.expectedMutablePaths.includes(path)) || Object.keys(baseline).some(path=>current[path]===undefined) || changed.some(path=>current[path]?.kind!=='file' || !/^[0-9a-f]{64}$/.test(current[path].sha256) || (baseline[path]?.kind==='file' && baseline[path].executable!==current[path].executable))) return blocked('partial tree exceeds committed mutable scope');
-    return { status:'stopped-review-required', reviewRequired:true, retry:'never', taskSha256:dispatch.taskSha256, targetBase:dispatch.targetBase, changedPaths:changed, candidateHashes:Object.fromEntries(changed.map(path=>[path,current[path].sha256])), namespacesCeased:intents.length, protectedHashesPreserved:true, remoteEffects:'not-reconciled' };
+    return { status:'stopped-review-required', reviewRequired:true, retry:'never', taskSha256:dispatch.taskSha256, targetBase:dispatch.targetBase, changedPaths:changed, candidateHashes:Object.fromEntries(changed.map(path=>[path,current[path].sha256])), namespacesCeased:cessation.namespacesCeased, protectedHashesPreserved:true, remoteEffects:'not-reconciled' };
   } catch { return blocked('missing, corrupt or unreadable native recovery evidence'); }
 }

@@ -95,9 +95,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J005/brief-r3.md) (pending until prepared)
-- Blocker: Worker admission, verified descendant cessation, dependency/cycle reasons, code-integration gates and complete cross-role review-panel coverage remain incomplete. Reviewer/planner capacity is delivered in PR62 and diagnostic admission in PR63. The researcher extension has a source checkpoint, not a publication or whole-job acceptance.
-- Next step: Integrate the researcher source unit after independent review and exact PR/main CI gates, then implement the remaining worker and dependency guarantees. Keep J005 in progress.
+- Brief: [brief-r4.md](jobs/J005/brief-r4.md) (pending until prepared)
+- Blocker: Worker capacity source and affected native review pass; publication and remaining dependency/cycle/integration coverage pending. No live worker provider grant or reboot authorization.
+- Next step: Publish verified original-worker admission and cessation cut, then implement remaining J005 dependency/cycle and integration gates.
 
 ### Acceptance
 
@@ -114,6 +114,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 - 6f24a68294e43700f66ff129afacdeff1c8adcd6
 - .factory/initiatives/I0001/jobs/J005/diagnostic-capacity-verification.json
 - 5f570cfb0567843a1376bdd28c18431e3de21024
+- https://github.com/iseoane/isSWF/pull/64
+- f54311f8c8bdd0a1774827a276f0276787ba0ba1
+- .factory/initiatives/I0001/jobs/J005/brief-r4.md
+- 663ab1bc3d8901768cb2b972c0de13a5adad27c6
 
 ## J006
 

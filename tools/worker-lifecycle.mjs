@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile, link, unlink, realpath, open, rm } from 'node:fs/promises';
 import { dirname, join, resolve, relative, isAbsolute } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const self = fileURLToPath(import.meta.url);
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -103,7 +103,7 @@ async function materialize(repo, targetBase, workspace) {
 }
 
 async function launch(args) {
-  onlyOptions(args, ['repo', 'input-sha', 'brief', 'target-base', 'attempt-id', 'runs-store', 'grant-ref', 'task-script', 'timeout-ms', 'output-bytes']);
+  onlyOptions(args, ['repo', 'input-sha', 'brief', 'target-base', 'attempt-id', 'runs-store', 'grant-ref', 'task-script', 'timeout-ms', 'output-bytes', 'capacity-file']);
   const repoInput = required(args, 'repo');
   if (!isAbsolute(repoInput)) throw new Error('--repo must be absolute');
   const repo = await realpath(repoInput);
@@ -147,6 +147,18 @@ async function launch(args) {
     targetBase, briefPath, briefSha256: hash(brief), grantRef, taskSha256: hash(scriptBytes),
     timeoutMs, outputBytes, workspace, taskCopy, lifecycleCopy, lifecycleSourceSha256: hash(lifecycleBytes),
   };
+  if(args['capacity-file']) {
+    const bytes=await readFile(required(args,'capacity-file'));if(bytes.length>128000)throw Error('bounded private capacity dispatch required');
+    const capacity=JSON.parse(bytes);
+    if(capacity.info?.role!=='worker' || capacity.info.worker?.attemptDir!==directory || capacity.info.worker.attemptId!==id || capacity.info.worker.inputSha!==inputSha || capacity.info.worker.targetBase!==targetBase)throw Error('worker capacity dispatch binding mismatch');
+    const modules={};
+    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {
+      const record=capacity.modules?.[name];if(!record || typeof record.base64!=='string' || !/^[a-f0-9]{64}$/.test(record.sha256))throw Error('pinned capacity runtime snapshot required');
+      const data=Buffer.from(record.base64,'base64');if(hash(data)!==record.sha256)throw Error('capacity runtime snapshot hash mismatch');
+      await writeFile(join(directory,name),data,{flag:'wx',mode:0o400});modules[name]=record.sha256;
+    }
+    dispatch.capacity={scope:capacity.scope,info:capacity.info,grantSha256:capacity.grantSha256,modules};
+  }
   await atomicWriteOnce(join(directory, 'dispatch.json'), dispatch);
   const child = spawn(process.execPath, [lifecycleCopy, 'host', '--attempt-dir', directory, '--nonce', nonce], {
     detached: true, stdio: 'ignore', env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: process.env.HOME || '/tmp', LANG: process.env.LANG || 'C.UTF-8' },
@@ -262,6 +274,16 @@ async function host(attemptDir, nonce) {
     timedOut, workspace: dispatch.workspace,
   };
   await atomicWriteOnce(join(attemptDir, 'terminal.json'), terminal);
+  if(dispatch.capacity) {
+    try {
+      for(const name of ['execution-capacity.mjs','native-recovery.mjs'])if(hash(await readFile(join(attemptDir,name)))!==dispatch.capacity.modules[name])throw Error('capacity runtime snapshot changed');
+      const {completeWorkerCapacity}=await import(pathToFileURL(join(attemptDir,'execution-capacity.mjs')));
+      const completed=await completeWorkerCapacity({scope:dispatch.capacity.scope,info:dispatch.capacity.info});
+      await atomicWriteOnce(join(attemptDir,'capacity-completion.json'),completed);
+    } catch {
+      await atomicWriteOnce(join(attemptDir,'capacity-retained.json'),{version:1,status:'retained',id:dispatch.capacity.info.id,reason:'bound successful task and tool-namespace cessation could not be proved; no automatic release'});
+    }
+  }
 }
 
 async function observeExecutionChild(attemptDir, dispatch) {
