@@ -72,12 +72,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Objective: Validate retrospective proposals without duplicates
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
-- Blocker: Offline implementation and verification in progress; no model or publication grant inferred.
-- Next step: Implement bounded local needs-triage proposals with explicit evidence, stable finding identity and idempotent repeat handling.
+- Blocker: None for the disclosed bounded skill-first validation; explicitly accepted by the operator.
+- Next step: Continue remaining jobs autonomously within existing authority; no new runtime budget, cleanup or reboot inferred.
 
 ### Acceptance
 
@@ -85,7 +85,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- https://github.com/iseoane/isSWF/pull/57
+- .factory/initiatives/I0001/jobs/J004/retrospective-r1.md
+- .factory/initiatives/I0001/jobs/J004/A001.md
+- Operator conversation: Acepto y realiza el resto de jobs, sin parar a preguntarme a no ser que necesites alguna aclaración por mi parte
 
 ## J005
 
