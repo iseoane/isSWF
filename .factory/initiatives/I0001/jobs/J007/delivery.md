@@ -36,7 +36,7 @@ Existing reviewer and planner tests verify committed context bytes, ignored work
 
 ## Independent review
 
-Earlier independent review passed the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`; it did not establish MCP summary isolation. The additional diagnostic/guidance source review passed Standards and Spec at `c0f3a428597b8722dab047da9b2374f10aa9e887`. Its exact report and nonblocking suggestion disposition are retained in `mcp-verification.json`; exact publication CI remains separate. No report accepts complete J007 or v1. The additional isolated-store profile unit is pending its own source review and exact CI; see `isolated-memory-verification.json`.
+Earlier independent review passed the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`; it did not establish MCP summary isolation. The additional diagnostic/guidance source review passed Standards and Spec at `c0f3a428597b8722dab047da9b2374f10aa9e887`. Its exact report and nonblocking suggestion disposition are retained in `mcp-verification.json`; exact publication CI remains separate. No report accepts complete J007 or v1. The isolated-store profile source review passed Standards and Spec at `c56eb4a47c595b613dcba511a275b9db4047746a`; see the exact report and scope in `isolated-memory-verification.json`. Exact publication CI remains separate.
 
 ## Integration risk and recovery
 

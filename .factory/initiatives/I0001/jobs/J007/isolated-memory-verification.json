@@ -172,7 +172,21 @@
     "required": "Verify actual assigned project/store/process boundary before client use, otherwise use separately verified supported facts or pinned files; no automatic configuration or permission from this evidence"
   },
   "nativeReview": {
-    "status": "pending"
+    "status": "pass-for-bounded-profile-source-unit",
+    "candidateSha": "c56eb4a47c595b613dcba511a275b9db4047746a",
+    "targetBase": "c89aeec0c8c5dfb040c580cc8ea5045067840aa1",
+    "bundleSha256": "18066a2cde4fcb7994a1a423a42d1658100d45fffefb0774175ff46387ef80ab",
+    "mode": "real",
+    "attemptsConsumed": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Review report\n\n**Base:** `c89aeec0c8c5dfb040c580cc8ea5045067840aa1`  \n**Candidate:** `c56eb4a47c595b613dcba511a275b9db4047746a`  \n**Reviewed scope:** The five changed files supplied: J007 brief, delivery, isolated-memory harness and verification record, and initiative plan.  \n**Identity limitation:** I reviewed the supplied candidate diff and candidate-pinned runtime observations; I could not independently recompute the commit/diff identity.\n\n### Standards: pass\n\nThe harness is appropriately job-local and opt-in. Its disposable fixtures, restricted process profile, bounded MCP requests, child cleanup, and narrow temporary-directory removal fit the stated scope. Assertions distinguish successful own-store retrieval from a query echo, test both directions, and retain the shared-store counterexample rather than implying it is fixed.\n\nThe recorded MCP children were stopped with `SIGTERM`; this supports controlled cleanup, but is not evidence of graceful shutdown. The path-absence control is correctly described as a separate command using the same profile, not an in-process MCP filesystem test.\n\n### Spec: pass\n\nFor this bounded synthetic-profile unit, the supplied observations support the stated claims: both stores have positive controls, both directions reject the other fixture’s broad query while own broad queries work, and context responses omit foreign fixture markers. The record preserves the shared-store failure and explicitly withholds deployment approval and adoption.\n\nThis does **not** establish isolation of the configured parent server, client readiness, universal/cloud isolation, or complete J007/v1 acceptance.\n\n### Findings\n\nNo blocking findings for the reviewed scope.\n\n### Checks and limitations\n\nThe pinned review runtime observed exit 0 for `node --check` on the harness, `tests/project-context-handoff.mjs .`, and `tests/worker-methodology.mjs .`. The supplied verification record reports the actual Engram 3.4.0 run and binary hash; I did not rerun it or independently access that binary. Aggregate quality, ESLint, Knip, and exact PR/main CI are reported as passing or required by the brief, but were not observed in the reviewer runtime. Exact publication CI remains a separate gate.\n\n**Aggregate: pass** for this bounded source-review scope only. This report is not merge permission, deployment approval, or product acceptance.",
+    "limits": [
+      "only explicit host-selected read-only review-runtime probes executed; no model tools",
+      "actor identities are external operator attestations, not authenticated by this caller",
+      "response completion is not a passing verdict, merge permission or human acceptance",
+      "unknown invocation consumed; no automatic retry, fallback or recovery"
+    ]
   },
   "limits": [
     "Synthetic physically separate stores and process profile, not an audit or migration of existing user data",
