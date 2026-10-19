@@ -28,5 +28,15 @@
     "Original caller FAIL and API inconclusive reports retained; affected report supersedes only stated scope",
     "J005 remaining dependency/cycle/integration acceptance not completed",
     "No live worker provider call, operator acceptance, cleanup or reboot authorization"
-  ]
+  ],
+  "recordsReview": {
+    "candidate": "93ba0f7342e4ce30d8fec6b6c1e13433a9747bb4",
+    "comparisonBase": "663ab1bc3d8901768cb2b972c0de13a5adad27c6",
+    "status": "response-complete",
+    "httpStatus": 200,
+    "attemptsConsumed": 1,
+    "fetches": 1,
+    "bundleSha256": "d0cf6a05f8cb7c32024175613be58bbbb596ea8998e9f640fee1c39e21389f14",
+    "report": "## Review report\n\n**Base:** `663ab1bc3d8901768cb2b972c0de13a5adad27c6`  \n**Candidate:** commit `93ba0f7342e4ce30d8fec6b6c1e13433a9747bb4`  \n**Reviewed scope:** the five changed files in the supplied diff: J005 brief and verification record, initiative plan, model-routing documentation, and `tools/check-quality.mjs`.\n\n### Standards — pass\n\nThe documentation distinguishes worker capacity from provider authorization, describes the admission and release boundaries, and keeps J005’s remaining work and J006’s unauthorized reboot explicit. The retained source-review report discloses its scope and limitations; it does not present parent checks as independent reviewer execution. The quality runner adds both portable worker-capacity tests and asserts their successful exit status. No findings.\n\n### Spec — pass\n\nThe candidate documents the worker-capacity cut, records its bounded review and verification evidence, and updates the plan without marking J005 complete or implying operator acceptance. The supplied host observations support the portable controls and actual native cessation probe. The supplied PR CI result is for the exact candidate SHA. No findings.\n\n### Checks and limitations\n\nHost-selected observations for this review reported exit 0 for:\n\n- `node tests/worker-capacity.mjs . && node tests/worker-capacity-api.mjs .`\n- `node tests/worker-capacity-api.mjs /work --sandbox`\n\nThese are runtime-supplied observations, not commands I ran. The installed-SDK synthetic-auth run and exact-head PR CI success are attributed parent evidence, not independent execution by me. Main CI remains a subsequent gate; it is not reported as passing here. I did not independently verify the retained source-file digests or rerun checks.\n\n**Aggregate: pass**, limited to the reviewed documentation, records, and quality wiring. This report is not merge permission or product acceptance."
+  }
 }
