@@ -149,12 +149,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J007
 
-- Status: in-progress
+- Status: blocked
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J007/brief-r2.md) (pending until prepared)
-- Blocker: Bounded context selection/handoff and sandboxed optional integration delivered through PR69 with exact PR/main CI success. Broader required client isolation and remaining MEM/SEC acceptance are not inferred.
-- Next step: Reconcile remaining criteria explicitly with J008 evidence; do not repeat already passing scoped tests or claim universal isolation.
+- Brief: [brief-r3.md](jobs/J007/brief-r3.md) (pending until prepared)
+- Blocker: Actual installed Engram3.4.0 MCP scoped search succeeds, but explicit-project mem_context appends foreign project names in global statistics. Shared-store client-context summary isolation is not satisfied; diagnostic/guidance source review and CI are pending.
+- Next step: Deliver the fail-closed diagnostic and source guidance without patching global Engram; use separately verified scoped queries or pinned files for supported work. Required unverified client isolation continues to block client dispatch.
 
 ### Acceptance
 
@@ -166,6 +166,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/69
 - 63e2145d4a0692a18087345f2bc013071ab6374e
 - .factory/initiatives/I0001/jobs/J007/context-verification.json
+- .factory/initiatives/I0001/jobs/J007/brief-r3.md
+- .factory/initiatives/I0001/jobs/J007/mcp-verification.json
 
 ## J008
 
@@ -298,12 +300,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J013
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Review audit retention and distribution before v1 closure
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J013/brief-r2.md) (pending until prepared)
-- Blocker: Per-path metadata and literal references prepared; unknown roles/reproduction dependencies preserved. Exact independent review/publication and explicit operator preserve-all policy agreement remain pending.
-- Next step: Finish this inventory/policy decision delivery; ask only the actual preserve-all agreement after source gates, never infer cleanup authority.
+- Blocker: Inventory/preserve-all proposal delivered through PR70 with native source review and exact PR/main CI success; operator policy agreement remains pending.
+- Next step: Obtain the explicit preserve-all agreement from the delivered card; no cleanup authority inferred.
 
 ### Acceptance
 
@@ -315,6 +317,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J013/A001.md
 - .factory/initiatives/I0001/jobs/J013/retention-verification.json
 - .factory/initiatives/I0001/jobs/J013/delivery.md
+- https://github.com/iseoane/isSWF/pull/70
+- 52aa4440aad1ca6afea2999841465f79c16add09
 
 ## J014
 
