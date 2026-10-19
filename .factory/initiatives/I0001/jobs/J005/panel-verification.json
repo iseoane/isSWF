@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "scope": "Final J005 panel verification; no runtime implementation change",
+  "verifiedWorkingSources": {
+    "tests/review-panel-capacity.mjs": "34a98cf57f0c07720534d3b471781077b399e221e5ae77f83381808d5e82d11e",
+    "tools/check-quality.mjs": "7380189311e3e0e5a5e6ef50d643afd621b5aa91619292c64222cb8586d80779"
+  },
+  "observation": {
+    "command": "node tests/review-panel-capacity.mjs .",
+    "exitCode": 0,
+    "stdout": "PASS native caller fixture panel: three distinct reviewer refs share two global slots with planner, blocked entries consume zero attempts, successive slots complete without deadlock, pending verdicts retain no execution slot, unrelated work proceeds and replay refuses; no provider calls or actual product review\n",
+    "mode": "fixture",
+    "providerCalls": 0,
+    "assertedControls": [
+      "three distinct reviewer references",
+      "planner shares the same two-slot pool",
+      "capacity refusal consumes zero attempts and leaves no attempt record",
+      "successive entries finish without deadlock in this controlled case",
+      "inconclusive review frees execution slot without acceptance",
+      "unrelated work progresses",
+      "completed participant replay refuses",
+      "five distinct opaque session IDs; high effort; zero SDK retries"
+    ]
+  },
+  "priorCuts": [
+    {
+      "pr": 62,
+      "record": "sdk-capacity-verification.json"
+    },
+    {
+      "pr": 63,
+      "record": "diagnostic-capacity-verification.json"
+    },
+    {
+      "pr": 64,
+      "record": "researcher-capacity-verification.json"
+    },
+    {
+      "pr": 65,
+      "record": "worker-capacity-verification.json"
+    },
+    {
+      "pr": 66,
+      "record": "dependency-verification.json",
+      "main": "e1e2ab69e82299cf9107364d515a71d9c3a781a0",
+      "mainCI": 39281666526,
+      "conclusion": "success"
+    }
+  ],
+  "nativeReview": {
+    "status": "pending"
+  },
+  "limits": [
+    "Fixture responses are not actual independent reviews or provider-availability evidence",
+    "Prior records retain historical scopes; no five-role live-provider panel claimed",
+    "Operator-owned grants/pool records do not authenticate identities",
+    "No product acceptance, reboot or client authorization"
+  ]
+}

@@ -38,6 +38,7 @@ try {
   }
   const planner = await assignment('planner', 'planner'), panel = [];
   for (const id of ['P1', 'P2', 'P3']) panel.push(await assignment(id, 'reviewer'));
+  assert.equal(new Set(panel.map(item => item.job.logicalJobRef)).size, 3);
   const unrelated = await assignment('unrelated-planner', 'planner');
   function backend(id) { return {
     async preflight(tuple) { assert.deepEqual(tuple, route[0]); return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic' } }; },
@@ -60,14 +61,14 @@ try {
   controls.get('planner').finish.resolve(); assert.equal((await wait(plannerRun, 'planner completion')).status, 'proposal-complete');
   const second = start(panel[1]); await entered(panel[1], second);
   await capacityRefusal(panel[2]);
-  controls.get('P1').finish.resolve(); const firstResult = await wait(first, 'first reviewer completes'); assert.equal(firstResult.status, 'response-complete'); assert.match(firstResult.report, /inconclusive/u);
+  controls.get('P1').finish.resolve(); const firstResult = await wait(first, 'first reviewer completes'); assert.equal(firstResult.status, 'response-complete'); assert.match(firstResult.report, /inconclusive/u); assert.equal(firstResult.reason, 'review-report-requires-coordinator-assessment');
   const third = start(panel[2]); await entered(panel[2], third);
   controls.get('P2').finish.resolve(); controls.get('P3').finish.resolve();
   for (const result of await wait(Promise.all([second, third]), 'panel completion')) assert.equal(result.status, 'response-complete');
   assert.equal(peak, 2); assert.equal(active, 0); assert.equal(fetches, 4);
   assert.equal((await readdir(pool)).filter(name => name.startsWith('slot-')).length, 0);
   assert.equal((await readdir(join(pool, 'completed'))).length, 4);
-  for (const item of panel) { const read = await readReview({ project, store: item.request.store, logicalJobRef: item.job.logicalJobRef }); assert.equal(read.status, 'recorded'); assert.equal(read.binding.capacity.pool, pool); assert.equal(read.binding.capacity.role, 'reviewer'); assert.equal(read.result.mode, 'fixture'); assert.match(read.result.report, /inconclusive/u); }
+  for (const item of panel) { const read = await readReview({ project, store: item.request.store, logicalJobRef: item.job.logicalJobRef }); assert.equal(read.status, 'recorded'); assert.equal(read.binding.capacity.pool, pool); assert.equal(read.binding.capacity.role, 'reviewer'); assert.equal(read.result.mode, 'fixture'); assert.equal(read.executionAuthorized, false); assert.match(read.result.report, /inconclusive/u); }
   await assert.rejects(start(panel[0])); assert.equal(fetches, 4, 'completed participant cannot replay');
   controls.get(unrelated.id).finish.resolve(); assert.equal((await wait(start(unrelated), 'unrelated job progress')).status, 'proposal-complete');
   assert.equal((await readdir(join(pool, 'completed'))).length, 5); assert.equal(fetches, 5); assert.equal(sessions.size, 5);
