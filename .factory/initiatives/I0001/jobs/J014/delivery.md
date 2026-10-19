@@ -30,7 +30,7 @@ Source evidence: [A001.md](A001.md). Integration evidence and actual report: [in
 
 ## Closure and acceptance
 
-Technical delivery is ready for operator review. Product acceptance remains pending. The J013 retention proposal is not accepted by this delivery, and v1 is not closed.
+The operator explicitly accepted this bounded delivery: “J014 aceptada.” J014 is completed for the documented six-tool installation subset. This acceptance does not accept the J013 retention proposal or close v1.
 
 ## Integration risk and recovery
 
@@ -38,4 +38,4 @@ Installation is explicit and receipt-bound. Partial claims and conflicts block r
 
 ## Blockers and next action
 
-To review this delivery, confirm that the documented six-tool subset and separation from the source-bound runtime meet the requested installation layout. Other v1 jobs continue without waiting for this product decision.
+No acceptance blocker remains for this bounded delivery. Preserve the accepted six-tool subset and separation from the source-bound runtime; continue the remaining v1 jobs.
