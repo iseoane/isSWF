@@ -152,9 +152,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: blocked
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J007/brief-r3.md) (pending until prepared)
-- Blocker: Actual installed Engram3.4.0 MCP scoped search succeeds, but explicit-project mem_context appends foreign project names in global statistics. Shared-store client-context summary isolation is not satisfied; diagnostic/guidance source review and CI are pending.
-- Next step: Deliver the fail-closed diagnostic and source guidance without patching global Engram; use separately verified scoped queries or pinned files for supported work. Required unverified client isolation continues to block client dispatch.
+- Brief: [brief-r4.md](jobs/J007/brief-r4.md) (pending until prepared)
+- Blocker: Mixed-store MCP client summaries remain unsupported. Two physically separate synthetic stores/process namespaces now pass both-direction broad-query and metadata controls; actual deployment/adoption is not verified or authorized. Profile source review and CI remain pending.
+- Next step: Deliver the bounded isolated-profile proof with exact review/CI; before any client use verify the actual assigned store/process boundary. Preserve the mixed-store counterexample and source-only fallback; do not change global configuration or infer full acceptance.
 
 ### Acceptance
 
@@ -168,6 +168,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J007/context-verification.json
 - .factory/initiatives/I0001/jobs/J007/brief-r3.md
 - .factory/initiatives/I0001/jobs/J007/mcp-verification.json
+- https://github.com/iseoane/isSWF/pull/71
+- c89aeec0c8c5dfb040c580cc8ea5045067840aa1
+- .factory/initiatives/I0001/jobs/J007/brief-r4.md
+- .factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json
 
 ## J008
 
