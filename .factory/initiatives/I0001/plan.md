@@ -95,9 +95,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
-- Blocker: Source-grounded native planner proposal received; coordinator is grounding the explicit shared capacity scope and cessation hooks before the bounded implementation.
-- Next step: Implement and verify finite admission without conflating permanent writer claims, product acceptance and integrated dependencies.
+- Brief: [brief-r2.md](jobs/J005/brief-r2.md) (pending until prepared)
+- Blocker: First reviewer/planner shared-pool cut implemented and locally verified; independent source review remains pending. Worker and other role admission, verified worker cessation and dependency/integration gating remain incomplete.
+- Next step: Review the bounded SDK admission cut, then integrate the remaining J005 lifecycle/dependency guarantees without treating this first cut as full MOD-07.
 
 ### Acceptance
 
@@ -106,6 +106,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J005/A002.md
+- 8e7004e7c940bf25d76234db6438e808023ab6d7
+- .factory/initiatives/I0001/jobs/J005/brief-r2.md
 
 ## J006
 
