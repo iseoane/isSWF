@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "candidate": "5f570cfb0567843a1376bdd28c18431e3de21024",
+  "scope": "Optional explicit shared pool includes researcher; one reservation across existing logicalcall retries and fallback",
+  "review": {
+    "status": "response-complete",
+    "attempts": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Review report\n\n**Base:** `6f24a68294e43700f66ff129afacdeff1c8adcd6`  \n**Candidate:** `5f570cfb0567843a1376bdd28c18431e3de21024`  \n**Reviewed scope:** `tools/researcher-task.mjs`, `tools/execution-capacity.mjs`, `tests/researcher-session-affinity.mjs`, `tests/researcher-quota-fallback.mjs`, `docs/model-routing.md`.\n\n### Standards — pass\n\nThe supplied diff and candidate contents show a focused extension of the existing capacity helper and researcher caller. Admission occurs before SDK setup/preflight or provider work; a full pool removes the temporary logical-job directory and returns zero attempts; one reservation spans retries and route transitions. Only a complete matching response completes the reservation. Other outcomes retain it. The legacy no-capacity path remains, and the tests exercise both modes. No dependency changes are shown.\n\n### Spec — pass\n\nThe supplied acceptance criteria are supported by source inspection and runtime evidence:\n\n- The host-selected probe ran `node tests/researcher-session-affinity.mjs` and `node tests/researcher-quota-fallback.mjs` against the pinned candidate; both passed with exit code 0.\n- The session suite checks full-pool blocking against a held planner reservation, zero sends, lease identity across retries, completion, replay refusal, and an unbound legacy call.\n- The quota suite checks retained capacity for blocked/final-budget-exhausted cases and completion for the matching successful response.\n- Separately supplied actual-SDK synthetic evidence reports same-session retry affinity, distinct sessions across jobs, and zero forbidden network fetches. It does not establish live-service behavior.\n\n### Findings\n\n**No findings** within the reviewed scope.\n\n### Checks, limitations, and unreviewed areas\n\nI did not run commands or independently recompute the candidate identity; the SHA, diff, candidate contents, and host observations are supplied evidence. The repository-wide suite, live provider behavior, and complete J005 integration were not reviewed or verified. Worker integration, dependency gating, cycle handling, cessation/recovery, and full J005/v1 remain outside this candidate’s stated scope.\n\n**Aggregate: pass** for this scoped review only. This is not merge permission or product acceptance."
+  },
+  "checks": [
+    "Full-pool mixed planner/researcher regression RED then GREEN",
+    "Same lease across retries and fallback, zero provider attempts on refusal, replay refusal",
+    "Exact helper/policy hash refusal and conservative blocked-result retention",
+    "Successful matching response archives reservation; unbound legacy call control",
+    "Actual installed SDK synthetic transport session/quota suites, no external network",
+    "Aggregate quality, ESLint and Knip"
+  ],
+  "limits": [
+    "No live researcher provider invocation",
+    "Worker admission and cessation, dependency/cycle/integration gates remain pending; J005 not closed"
+  ]
+}

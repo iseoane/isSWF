@@ -95,9 +95,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-progress
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J005/brief-r2.md) (pending until prepared)
-- Blocker: The reviewer/planner-only shared-capacity source cut passed independent Standards and Spec review at 8e7004e. Worker/researcher/diagnostic admission, descendant cessation, dependency/cycle and code-integration gates and full cross-role review-panel operation remain pending. The affected records review and publication gates are separate from this source verdict.
-- Next step: Publish the independently reviewed reviewer/planner capacity cut after affected record review and exact PR/main CI gates, then implement the remaining role and dependency gates without claiming J005 complete.
+- Brief: [brief-r3.md](jobs/J005/brief-r3.md) (pending until prepared)
+- Blocker: Worker admission, verified descendant cessation, dependency/cycle reasons, code-integration gates and complete cross-role review-panel coverage remain incomplete. Reviewer/planner capacity is delivered in PR62 and diagnostic admission in PR63. The researcher extension has a source checkpoint, not a publication or whole-job acceptance.
+- Next step: Integrate the researcher source unit after independent review and exact PR/main CI gates, then implement the remaining worker and dependency guarantees. Keep J005 in progress.
 
 ### Acceptance
 
@@ -109,6 +109,11 @@ This coordinator-owned plan records reported progress, not execution permission 
 - 8e7004e7c940bf25d76234db6438e808023ab6d7
 - .factory/initiatives/I0001/jobs/J005/brief-r2.md
 - Native independent review of 8e7004e: Standards PASS and Spec PASS; .audit/capacity-109-review-real-v3.json
+- https://github.com/iseoane/isSWF/pull/62
+- https://github.com/iseoane/isSWF/pull/63
+- 6f24a68294e43700f66ff129afacdeff1c8adcd6
+- .factory/initiatives/I0001/jobs/J005/diagnostic-capacity-verification.json
+- 5f570cfb0567843a1376bdd28c18431e3de21024
 
 ## J006
 
