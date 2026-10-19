@@ -34,5 +34,15 @@
     "Operator-owned attestations are not an identity/authentication service or proof of who merged a commit",
     "Optional original-worker admission; legacy jobs remain outside prerequisite guarantee; successors unsupported",
     "J005 successive review-panel and complete integration acceptance remain pending; no reboot or v1 acceptance"
-  ]
+  ],
+  "integrationReview": {
+    "candidate": "f82edb958a7f3e7365dcdd0a5f182e57be9b4502",
+    "comparisonBase": "2072e939135865224d5bfc2d76857f0ec7d17b2d",
+    "status": "response-complete",
+    "httpStatus": 200,
+    "attempts": 1,
+    "fetches": 1,
+    "bundleSha256": "7d03938d7e6fcb92fcf106ab5a2d3ca15b9e0e3580b4e9c497698bec25e4fcc6",
+    "report": "## Independent review report\n\n- **Base:** `2072e939135865224d5bfc2d76857f0ec7d17b2d`\n- **Candidate:** `f82edb958a7f3e7365dcdd0a5f182e57be9b4502`\n- **Reviewed scope:** The supplied diff: J005 brief and verification record, initiative plan, worker-admission documentation, dependency parser test, worker-capacity and route-admission fixtures, and quality-check wiring.\n- **Standards:** **pass** for this integration delta.\n- **Spec:** **pass** for this bounded dependency-integration cut.\n- **Aggregate:** **pass** for this candidate and scope only.\n\n### Findings\n\nNo findings for the reviewed delta.\n\nThe added parser test checks canonical status and dependency edges, plus cycle, duplicate, missing, and self-dependency rejection. The quality wiring includes both new dependency checks. The capacity fixture copies the plan tool needed by worker fixtures and adds integrated-dependency and pending-decision cases to its installed-SDK path. Documentation and the J005 plan accurately keep operator attestations distinct from authenticated identity, execution permission, product acceptance, and whole-J005 completion.\n\n### Checks and evidence\n\nI did not run commands. The pinned host-selected observations report:\n\n- Dependency integration tests passed: `initiative-dependencies` and `worker-dependencies`.\n- Worker compatibility and cessation probes passed: capacity, route admission, and capacity API tests.\n\nThe supplied parent evidence also reports that the actual installed-SDK offline path ran on this exact candidate: an integrated dependency and unrelated worker executed, while a pending decision refused before occupied capacity; no provider prompts. This is supplied evidence, not a check I ran. The host-selected capacity probe did **not** pass an SDK argument, so it does not independently reproduce that positive SDK path.\n\n### Limits\n\nThis is not a full review of the unchanged prerequisite-gate implementation or all J005 criteria. The earlier review record and supplied unchanged gate context support the source claims, but the full relevant source files were not supplied here. The successive cross-role review-panel scenario, final J005 acceptance, and exact PR/main CI remain pending; this report does not claim them complete. No merge permission or product acceptance is implied."
+  }
 }
