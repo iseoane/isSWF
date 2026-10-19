@@ -75,7 +75,21 @@
     "retirement": "Separate scoped authority and preserved-byte/mode/checkpoint/retrievability proof required; none granted"
   },
   "nativeReview": {
-    "status": "pending"
+    "status": "pass-for-bounded-source-unit",
+    "candidateSha": "8e9608bb31c6ee3491ae31171240adbbb5337bfc",
+    "targetBase": "63e2145d4a0692a18087345f2bc013071ab6374e",
+    "bundleSha256": "6831842f699a5d7988cf7279e5493f25781d44da282a74f0e42d48f21d4218b4",
+    "mode": "real",
+    "attemptsConsumed": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Independent review report\n\n**Base:** `63e2145d4a0692a18087345f2bc013071ab6374e`  \n**Candidate:** commit `8e9608bb31c6ee3491ae31171240adbbb5337bfc`  \n**Reviewed scope:** the five changed paths shown in the supplied diff: J013 brief, delivery card, scanner, fixture test, and retention receipt; plus the J013 plan update recording J007/PR69 progress.  \n**Identity basis:** the supplied candidate-pinned diff and host observations. I did not independently recompute the commit or inspect a checkout.\n\n### Standards: pass\n\nThe scanner uses Git metadata for tracked, untracked, and ignored `.audit` paths, records tracked mode/blob where available, and does not read audit payloads. Literal matches are presented as observations—not proof of execution or grounds for deletion—and unknown roles and reproduction dependencies remain preserved. The synthetic test exercises tracked/untracked files, a resolved and unresolved reference, a payload-read guard, and unchanged evidence. The policy and delivery materials consistently avoid claiming secret scanning, cleanup authority, or client-ready security.\n\nNo findings.\n\n### Spec: pass, bounded to the supplied source unit\n\nThe implementation and fixture address the stated inventory behavior and its key safety boundary. The receipt and delivery card describe the preserve-all proposal, distribution exclusions, limitations, and pending operator decision without treating review or earlier cleanup as acceptance.\n\nNo findings. This is **not** a finding that the proposed policy has operator agreement or that J013, SEC-04, or v1 is complete.\n\n### Checks and limitations\n\n- Host-selected fixture probe: **passed**; observed output confirms the guarded synthetic case.\n- Host-selected existing installer/distribution probe: **passed**; observed output confirms the six-tool installation boundary and refusal cases.\n- Aggregate quality, ESLint, Knip, syntax checks, and the production census are reported as passing in supplied evidence; I did not rerun them.\n- The full census was intentionally not supplied. Its path-level contents and the reported counts/hash therefore remain unverified by this review; I reviewed the scanner source and curated receipt, not the private census itself.\n- Exact PR/head and post-merge CI are not established by the supplied evidence for this candidate.\n\n**Aggregate: pass for this bounded source review only.** This report is not merge permission, policy acceptance, or product acceptance.",
+    "limits": [
+      "only explicit host-selected read-only review-runtime probes executed; no model tools",
+      "actor identities are external operator attestations, not authenticated by this caller",
+      "response completion is not a passing verdict, merge permission or human acceptance",
+      "unknown invocation consumed; no automatic retry, fallback or recovery"
+    ]
   },
   "limits": [
     "Per-path roles and reproduction dependencies remain unknown unless separately inspected; no inferred deletability",

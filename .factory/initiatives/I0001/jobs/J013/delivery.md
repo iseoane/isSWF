@@ -23,7 +23,7 @@ The inventory matches literal references, not arbitrary dynamic reads. A missing
 
 ## Independent review
 
-Pending exact-candidate independent native review. Parent checks alone do not approve this delivery or policy.
+Native independent review: Standards PASS and Spec PASS for the bounded source unit at `8e9608bb31c6ee3491ae31171240adbbb5337bfc`. The exact report is retained in `retention-verification.json`. Runtime-observed fixture and installed-distribution probes passed. This does not agree the policy or accept J013/v1.
 
 ## Scope
 
