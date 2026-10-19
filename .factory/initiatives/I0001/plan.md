@@ -153,8 +153,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J007/brief-r2.md) (pending until prepared)
-- Blocker: Installed disposable-store selection verified; current-source selection, capability evidence and independent review remain pending. No client-ready isolation claim.
-- Next step: Complete one coherent context verification delivery with explicit capability and service limits.
+- Blocker: Bounded context selection/handoff and sandboxed optional integration delivered through PR69 with exact PR/main CI success. Broader required client isolation and remaining MEM/SEC acceptance are not inferred.
+- Next step: Reconcile remaining criteria explicitly with J008 evidence; do not repeat already passing scoped tests or claim universal isolation.
 
 ### Acceptance
 
@@ -163,6 +163,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J007/brief-r2.md
+- https://github.com/iseoane/isSWF/pull/69
+- 63e2145d4a0692a18087345f2bc013071ab6374e
+- .factory/initiatives/I0001/jobs/J007/context-verification.json
 
 ## J008
 
@@ -295,12 +298,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J013
 
-- Status: in-progress
+- Status: in-review
 - Objective: Review audit retention and distribution before v1 closure
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J013/brief-r1.md) (pending until prepared)
-- Blocker: Bounded inventory and preserve-all policy candidate prepared; independent review and operator policy agreement remain pending. No retirement is authorized.
-- Next step: Review the conservative policy and inventory; keep all historical paths and private archives unchanged.
+- Brief: [brief-r2.md](jobs/J013/brief-r2.md) (pending until prepared)
+- Blocker: Per-path metadata and literal references prepared; unknown roles/reproduction dependencies preserved. Exact independent review/publication and explicit operator preserve-all policy agreement remain pending.
+- Next step: Finish this inventory/policy decision delivery; ask only the actual preserve-all agreement after source gates, never infer cleanup authority.
 
 ### Acceptance
 
@@ -310,6 +313,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J013/A001.md
+- .factory/initiatives/I0001/jobs/J013/retention-verification.json
+- .factory/initiatives/I0001/jobs/J013/delivery.md
 
 ## J014
 
