@@ -30,6 +30,16 @@ Create attempt and review artifacts only when needed. Copy the [job brief templa
 
 The coordinator owns current plans, job IDs, assignments, and brief revisions. A worker owns its attempt artifact. A reviewer owns its review artifact. Workers and reviewers write in exclusive checkouts. They return artifacts and references; the coordinator integrates references into the plan without rewriting their conclusions. The coordinator records the operator's product-acceptance decision and evidence in the canonical plan.
 
+## Proposed audit retention policy
+
+This policy is a J013 proposal pending operator agreement. It does not authorize cleanup or record acceptance.
+
+Preserve existing audit files, references and Git history. Retiring an artifact needs separately authorized scope and a proof of its preserved bytes, mode and retrievable checkpoint before any path changes. No automatic cleanup or history rewrite is part of normal job completion.
+
+For new work, keep a small curated receipt or review under the owning `.factory/initiatives/<id>/jobs/<job>/` directory. Keep raw transport logs, temporary fixtures, private archives and reproduction bundles local unless an individual artifact is reviewed as necessary and safe to publish. Do not copy credentials, authentication state or unrelated project material into job evidence. This is a retention boundary, not a universal secret scanner.
+
+Existing development `.audit` references remain valid. Active quality checks inspect source/test modules and agent references; manually documented historical harnesses remain separate dependencies of their own reproduction paths. The Markdown resource package and target planning-tool installer use explicit file allowlists, so neither distributes `.audit`, tests, development tooling or private backups. Preserving local evidence does not mean installing it in target projects.
+
 ## Pin inputs and hand off
 
 A dispatch names the job brief path and a full Git SHA for the document-input checkpoint. It also records the target codebase base SHA separately. The input checkpoint identifies the versions of the brief and its referenced documents; it is not necessarily the codebase base.

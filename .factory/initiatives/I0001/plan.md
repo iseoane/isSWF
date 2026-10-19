@@ -272,12 +272,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J013
 
-- Status: pending
+- Status: in-progress
 - Objective: Review audit retention and distribution before v1 closure
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md) (pending until prepared)
-- Blocker: Operator explicitly requires careful audit review before v1 closure; no bulk cleanup authorized.
-- Next step: Inventory dependencies and propose retention choices before moving or deleting evidence.
+- Blocker: Bounded inventory and preserve-all policy candidate prepared; independent review and operator policy agreement remain pending. No retirement is authorized.
+- Next step: Review the conservative policy and inventory; keep all historical paths and private archives unchanged.
 
 ### Acceptance
 
@@ -286,16 +286,16 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- .factory/initiatives/I0001/jobs/J013/A001.md
 
 ## J014
 
-- Status: pending
+- Status: in-progress
 - Objective: Keep target-installed factory executables under .factory/tools
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md) (pending until prepared)
-- Blocker: Current Markdown package and source-checkout runtime are separate; the target executable distribution cut is not implemented.
-- Next step: Ground the smallest distribution change without moving source files indiscriminately or copying development dependencies.
+- Blocker: Source installer is integrated in PR59 after a third native review passed both axes; the first two were inconclusive. Follow-up guide, aggregate-test registration and plan reconciliation remain under independent review. Fresh necessary native review calls are authorized by the operator.
+- Next step: Preserve the integrated source proof; review the pending integration unit before claiming J014 delivered.
 
 ### Acceptance
 
@@ -304,4 +304,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- https://github.com/iseoane/isSWF/pull/59
+- 3c8696a49fd5d856f8ece45cfcec189c2b9a93cd
+- .factory/initiatives/I0001/jobs/J014/A001.md
+- Native source review 3: .audit/install-109-review-real3.json; Standards PASS and Spec PASS; earlier reviews 1 and 2 inconclusive.
