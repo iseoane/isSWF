@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
-const states = ['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed'];
+export const planStates = Object.freeze(['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed']);
 async function regular(path) {
   const stat = await lstat(path);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 256000) throw Error('bounded regular file required');
@@ -28,23 +28,55 @@ async function checkpoint(root, path, old) {
   const bytes = await readFile(path);
   if (result.error || result.status !== 0 || !bytes.equals(Buffer.from(old)) || !result.stdout.equals(bytes)) throw Error('Git checkpoint required: commit the exact current plan before revise');
 }
+function validateDependencyGraph(jobs) {
+  const byId = new Map(jobs.map(job => [job.id, job])), visiting = new Set(), visited = new Set();
+  function visit(job) {
+    if (visiting.has(job.id)) throw Error('cyclic job dependencies');
+    if (visited.has(job.id)) return;
+    visiting.add(job.id);
+    for (const dep of job.dependencies) visit(byId.get(dep));
+    visiting.delete(job.id); visited.add(job.id);
+  }
+  for (const job of jobs) visit(job);
+}
+export function parsePlan(markdown) {
+  const jobs = [], seen = new Set(); let current, section;
+  for (const line of markdown.split('\n')) {
+    const header = /^## ([A-Z][A-Z0-9-]{0,63})$/u.exec(line);
+    if (header) {
+      if (seen.has(header[1])) throw Error('duplicate-job');
+      seen.add(header[1]); current = { id: header[1], acceptance: [], evidence: [] }; jobs.push(current); section = null;
+    } else if (current) {
+      const field = section ? null : /^- (Status|Objective|Depends on|Brief|Blocker|Next step): (.+)$/u.exec(line);
+      if (field) {
+        if (Object.hasOwn(current, field[1])) throw Error('duplicate-field');
+        current[field[1]] = field[2];
+      } else if (line === '### Acceptance') section = 'acceptance';
+      else if (line === '### Evidence') section = 'evidence';
+      else if (section && line.startsWith('- ')) current[section].push(line.slice(2));
+    }
+  }
+  if (!jobs.length || jobs.length > 100) throw Error('invalid-plan');
+  const parsed = jobs.map(job => {
+    if (!planStates.includes(job.Status) || ['Objective', 'Depends on', 'Brief', 'Blocker', 'Next step'].some(field => !job[field]) || !job.acceptance.length) throw Error('invalid-job');
+    const brief = /^\[brief-r([1-9][0-9]*)\.md\]\(jobs\/([A-Z][A-Z0-9-]{0,63})\/brief-r\1\.md\)(?: \(pending until prepared\))?$/u.exec(job.Brief);
+    if (!brief || brief[2] !== job.id) throw Error('unsafe-brief-reference');
+    const dependencies = job['Depends on'] === 'None' ? [] : job['Depends on'].split(', ');
+    if (new Set(dependencies).size !== dependencies.length || dependencies.some(dep => !seen.has(dep) || dep === job.id)) throw Error('invalid-dependency');
+    return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence: job.evidence.filter(item => item !== 'None.'), briefName: `brief-r${brief[1]}.md` };
+  });
+  validateDependencyGraph(parsed);
+  return parsed;
+}
 function render(value, initiative) {
   if (value.version !== 1 || value.initiative !== initiative || !text(value.title) || !['bug', 'enhancement', 'maintenance', 'research'].includes(value.type) || !Array.isArray(value.jobs) || !value.jobs.length || value.jobs.length > 100) throw Error('invalid initiative plan');
   const ids = new Set(value.jobs.map(job => job.id));
   if (ids.size !== value.jobs.length || [...ids].some(job => !id(job))) throw Error('unique job IDs required');
   for (const job of value.jobs) {
-    if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !states.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
+    if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !planStates.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
     if (job.status === 'completed' && !job.evidence.length) throw Error('completed jobs require evidence');
   }
-  const visiting = new Set(), visited = new Set();
-  function visit(job) {
-    if (visiting.has(job.id)) throw Error('cyclic job dependencies');
-    if (visited.has(job.id)) return;
-    visiting.add(job.id);
-    for (const dep of job.dependsOn) visit(value.jobs.find(item => item.id === dep));
-    visiting.delete(job.id); visited.add(job.id);
-  }
-  for (const job of value.jobs) visit(job);
+  validateDependencyGraph(value.jobs.map(job => ({ id: job.id, dependencies: job.dependsOn })));
   const list = values => values.length ? values.map(item => `- ${item}`).join('\n') : '- None.';
   return `# ${initiative}: ${value.title}\n\nType: ${value.type}\n\nThis coordinator-owned plan records reported progress, not execution permission or process liveness.\n\n` + value.jobs.map(job => `## ${job.id}\n\n- Status: ${job.status}\n- Objective: ${job.objective}\n- Depends on: ${job.dependsOn.join(', ') || 'None'}\n- Brief: [brief-r${job.briefRevision ?? 1}.md](jobs/${job.id}/brief-r${job.briefRevision ?? 1}.md) (pending until prepared)\n- Blocker: ${job.blocker}\n- Next step: ${job.nextStep}\n\n### Acceptance\n\n${list(job.acceptance)}\n\n### Evidence\n\n${list(job.evidence)}\n`).join('\n');
 }

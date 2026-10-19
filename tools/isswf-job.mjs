@@ -10,10 +10,11 @@ import { inspectNativeRecovery } from './native-recovery.mjs';
 import { effectIntent, externalEffect } from './external-effect-journal.mjs';
 import { recoveryReview } from './recovery-review.mjs';
 import { admission, claimSuccessor, validateSuccessorBinding } from './job-successor.mjs';
+import { parsePlan } from './isswf-plan.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const methodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs'];
+const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md'];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
@@ -54,7 +55,7 @@ function options(values) {
   const result = {};
   for (let i = 0; i < values.length; i += 2) {
     const key = values[i];
-    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file', '--review-file', '--successor-grant', '--capacity-grant'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
+    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file', '--review-file', '--successor-grant', '--capacity-grant', '--dependency-grant'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
     result[key.slice(2)] = values[i + 1];
   }
   return result;
@@ -138,8 +139,51 @@ async function claimAdmission(store, record, checkOnly = false) {
     await sync(directory);
   } finally { await unlink(pending); }
 }
+async function dependencyAdmission(args, project, job, jobBytes) {
+  if (job.prerequisites === undefined && !args['dependency-grant']) return null;
+  const exactKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === keys;
+  const descriptor = job.prerequisites;
+  if (!exactKeys(descriptor, 'jobId,path,sha256') || !/^[A-Z][A-Z0-9-]{0,63}$/.test(descriptor.jobId) || !/^[a-f0-9]{64}$/.test(descriptor.sha256)) throw Error('explicit dependency plan descriptor required');
+  const identity = /^\.factory\/initiatives\/([A-Z][A-Z0-9-]{0,63})\/plan\.md$/.exec(descriptor.path);
+  if (!identity || job.logicalJobRef !== identity[1] + '/' + descriptor.jobId) throw Error('dependency plan job identity mismatch');
+  const store = await canonicalStore(args['runs-store'], project, false);
+  const grant = await trustedJSON(args['dependency-grant'], project, '--dependency-grant', store);
+  if (grant.version !== 1 || grant.role !== 'worker' || grant.allowDependencyCheck !== true || grant.project !== project || grant.runsStore !== store || grant.inputSha !== args['input-sha'] || grant.jobPath !== args.job || grant.jobSha256 !== digest(jobBytes) || grant.runtimeSha !== job.runtimeSha || grant.targetBase !== job.targetBase || grant.attemptId !== args['attempt-id'] || grant.logicalJobRef !== job.logicalJobRef || grant.grantRef !== args['grant-ref'] || !exactKeys(grant.prerequisites, 'jobId,path,sha256') || Object.keys(descriptor).some(key => grant.prerequisites[key] !== descriptor[key])) throw Error('dependency grant binding mismatch');
+  const bytes = blob(project, args['input-sha'], descriptor.path);
+  if (bytes.length > 256000 || digest(bytes) !== descriptor.sha256) throw Error('pinned dependency plan digest mismatch');
+  const markdown = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  if (!markdown.startsWith('# ' + identity[1] + ': ')) throw Error('pinned dependency plan identity mismatch');
+  const blocked = (reason, dependency) => ({ status: 'blocked', reason, ...(dependency ? { dependency } : {}), attemptsConsumed: 0, executionAuthorized: false });
+  let jobs;
+  try { jobs = parsePlan(markdown); } catch (error) { if (error.message === 'cyclic job dependencies') return blocked('dependency-cycle'); throw error; }
+  const byId = new Map(jobs.map(item => [item.id, item])), selected = byId.get(descriptor.jobId);
+  if (!selected) throw Error('dependency job missing from pinned plan');
+  if (['blocked', 'awaiting-human', 'in-review'].includes(selected.reportedStatus)) return blocked('decision', selected.id);
+  if (selected.reportedStatus === 'completed') return blocked('already-completed', selected.id);
+  const required = new Set();
+  function collect(item) { for (const id of item.dependencies) if (!required.has(id)) { required.add(id); collect(byId.get(id)); } }
+  collect(selected);
+  if (!grant.attestations || typeof grant.attestations !== 'object' || Array.isArray(grant.attestations) || Object.keys(grant.attestations).some(id => !required.has(id))) throw Error('dependency attestations must match the prerequisite closure');
+  const observations = [], deadlineAt = Date.now() + 10000;
+  for (const id of required) {
+    const dependency = byId.get(id), attestation = grant.attestations[id];
+    if (!attestation) return blocked(['blocked', 'awaiting-human', 'in-review'].includes(dependency.reportedStatus) ? 'decision' : 'dependency-evidence', id);
+    if (attestation.kind === 'code') {
+      if (!exactKeys(attestation, 'commit,kind') || !fullSha(attestation.commit)) throw Error('full attested integration commit required');
+      const timeout = deadlineAt - Date.now(); if (timeout <= 0) throw Error('integration ancestry deadline');
+      const result = spawnSync('git', ['-C', project, 'merge-base', '--is-ancestor', attestation.commit, job.targetBase], { timeout, stdio: 'ignore', env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1', GIT_GRAFT_FILE: '/dev/null' } });
+      if (result.error || ![0, 1].includes(result.status) || Date.now() >= deadlineAt) throw Error('integration ancestry unverifiable');
+      if (result.status === 1) return blocked('code-integration', id);
+    } else if (attestation.kind === 'decision') {
+      if (!exactKeys(attestation, 'kind,reference') || typeof attestation.reference !== 'string' || !attestation.reference.trim() || attestation.reference.length > 4000 || /[\x00-\x1f\x7f]/.test(attestation.reference)) throw Error('explicit dependency decision attestation required');
+      if (dependency.reportedStatus !== 'completed' || !dependency.evidence.length) return blocked('decision', id);
+    } else throw Error('explicit code or decision dependency kind required');
+    observations.push({ id, ...attestation });
+  }
+  return { status: 'ready', inputSha: args['input-sha'], plan: descriptor, observations, grantValueSha256: digest(JSON.stringify(grant)), provenance: 'operator-attested prerequisite checks at dispatch, not current status or authenticated identity' };
+}
 async function run(args) {
-  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode', 'successor-grant', 'capacity-grant'].includes(key))) throw Error('unsupported run option');
+  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode', 'successor-grant', 'capacity-grant', 'dependency-grant'].includes(key))) throw Error('unsupported run option');
   if (!isAbsolute(args.project || '') || !fullSha(args['input-sha']) || !safeRelative(args.job)) throw new Error('run requires --project absolute --input-sha fullSHA --job committed/relative.json');
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(args['attempt-id'] || '') || ['.', '..'].includes(args['attempt-id']) || !args['grant-ref']?.trim()) throw new Error('explicit attempt ID and trusted grant reference required');
   const mode = args.mode || 'real';
@@ -151,6 +195,9 @@ async function run(args) {
   if (job.version !== 1 || !fullSha(job.runtimeSha) || !fullSha(job.targetBase) || job.methodologySha !== methodologySha) throw new Error('job version/runtime/base/methodology pins invalid');
   if (job.exclusiveAttempt !== true || job.workerTotal !== (args['successor-grant'] ? 2 : 1)) throw new Error('trusted exclusive-attempt grant and explicit workerTotal=1 (original) or2 (successor) required');
   if (typeof job.logicalJobRef !== 'string' || !job.logicalJobRef.trim() || job.logicalJobRef.length > 200 || /[\x00-\x1f\x7f]/.test(job.logicalJobRef)) throw Error('committed logicalJobRef required for serial job admission');
+  if (args['successor-grant'] && (job.prerequisites !== undefined || args['dependency-grant'])) throw Error('dependency-bound successors require a separate lifecycle contract');
+  const prerequisites = await dependencyAdmission(args, project, job, jobBytes);
+  if (prerequisites?.status === 'blocked') { console.log(JSON.stringify(prerequisites)); process.exitCode = 2; return; }
   const packageRoot = await activePackage(project, job.runtimeSha);
   for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(blob(root, job.runtimeSha, path))) throw new Error(`runtime working bytes differ from activated revision: ${path}`);
   if (!job.models || !fullSha(job.models.sha) || !safeRelative(job.models.path)) throw new Error('committed model config pin required');
@@ -167,7 +214,7 @@ async function run(args) {
   for (const path of [join(store, args['attempt-id']), bindingPath]) {
     try { await lstat(path); throw new Error('attempt already exists; read/reconcile before any operator-authorized replacement'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-  const request = { repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, briefPath: job.briefPath, briefSha256: digest(briefBytes), mode };
+  const request = { repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, briefPath: job.briefPath, briefSha256: digest(briefBytes), mode, ...(prerequisites ? { prerequisites } : {}) };
   let capacity, capacityReservation;
   if(args['capacity-grant']) {
     const grant=await trustedJSON(args['capacity-grant'],project,'--capacity-grant',store);
@@ -200,7 +247,7 @@ async function run(args) {
   await writeFile(configPath, JSON.stringify(config) + '\n', { mode: 0o600, flag: 'wx' });
   const preparedResult = JSON.parse(invoke(process.execPath, [join(root, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', taskPath]));
   if (preparedResult.inputSha !== args['input-sha'] || preparedResult.briefPath !== job.briefPath || preparedResult.briefSha256 !== digest(briefBytes) || preparedResult.taskSha256 !== digest(await readFile(taskPath))) throw new Error('prepared task/brief identity mismatch');
-  const binding = { version: 1, ...(capacity ? {capacity:capacity.info} : {}), ...(successor ? { successor } : {}), logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
+  const binding = { version: 1, ...(capacity ? {capacity:capacity.info} : {}), ...(successor ? { successor } : {}), logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true, ...(prerequisites ? { prerequisites } : {}) };
   await writeFile(bindingPath, JSON.stringify(binding) + '\n', { mode: 0o600, flag: 'wx' });
   let capacityArgs=[];
   if(capacity) {
@@ -289,6 +336,9 @@ Required for review: --runs-store ABS_PATH --attempt-id ID
   --action inspect|record|check
   --review-file ABS_PATH (record only; explicit independent review/check grant)
 Review never releases a job admission or authorizes a successor.
+Optional for run: --dependency-grant ABS_PATH
+  Exact committed plan and external code-integration/decision attestations; no execution authority.
+  Prerequisite refusal happens before capacity, permanent writer admission or attempt preparation.
 Optional for run: --capacity-grant ABS_PATH
   Bound operator-owned shared capacity; known task/tool cessation is required to release.
   Capacity-bound successors are not supported by this first cut.

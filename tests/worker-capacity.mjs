@@ -24,7 +24,7 @@ try {
     await mkdir(dirname(join(project, path)), { recursive: true }); await cp(join(source, path), join(project, path), { recursive: true });
   }
   await mkdir(join(project, 'tools'));
-  for (const name of ['isswf-job', 'factory-package', 'pi-worker-task', 'worker-lifecycle', 'native-recovery', 'external-effect-journal', 'recovery-review', 'job-successor', 'execution-capacity']) await cp(join(source, 'tools', name + '.mjs'), join(project, 'tools', name + '.mjs'));
+  for (const name of ['isswf-job', 'factory-package', 'pi-worker-task', 'worker-lifecycle', 'native-recovery', 'external-effect-journal', 'recovery-review', 'job-successor', 'execution-capacity', 'isswf-plan']) await cp(join(source, 'tools', name + '.mjs'), join(project, 'tools', name + '.mjs'));
   await writeFile(join(project, 'result.txt'), 'unchanged\n');
   git('init', '-q'); git('config', 'user.name', 'Capacity fixture'); git('config', 'user.email', 'fixture@invalid');
   git('add', '.'); git('commit', '-qm', 'Pin fixture runtime'); const runtimeSha = git('rev-parse', 'HEAD');
@@ -65,17 +65,34 @@ try {
     const token=['synthetic',Buffer.from(JSON.stringify({'https://api.openai.com/auth':{chatgpt_account_id:'synthetic-offline-account'}})).toString('base64url'),'signature'].join('.');
     await json(authPath,{'openai-codex':{type:'oauth',access:token,refresh:'synthetic-not-usable',expires:4102444800000}});
     for(const slot of [0,1])await rm(join(pool,'slot-'+slot),{recursive:true,force:true});
+    const dependencyPath = '.factory/initiatives/I0001/plan.md';
+    const planProposal = join(root, 'dependency-proposal.json'), planGrant = join(root, 'dependency-plan-grant.json');
+    const record = (id, dependsOn, status) => ({ id, dependsOn, status, objective: id, acceptance: ['Observable result'], blocker: 'None', nextStep: 'Prepare', evidence: status === 'completed' ? [runtimeSha] : [] });
+    await json(planProposal, { version: 1, initiative: 'I0001', title: 'Actual worker dependency fixture', type: 'enhancement', jobs: [record('J001', [], 'completed'), record('J002', ['J001'], 'pending'), record('J003', [], 'pending'), record('J004', [], 'awaiting-human')] });
+    await json(planGrant, { version: 1, project, initiative: 'I0001', permissions: ['plan'], reference: 'Synthetic test-only plan authority' });
+    const preparedPlan = command(process.execPath, ['tools/isswf-plan.mjs', 'prepare', '--project', project, '--initiative', 'I0001', '--proposal', planProposal, '--grant', planGrant]); assert.equal(preparedPlan.status, 0, preparedPlan.stderr);
+    const planSha256 = hash(await readFile(join(project, dependencyPath)));
     const inputs=[];
     for(const [id,check]of [['worker-a','while ! test -f gate; do sleep 0.02; done; printf done > result.txt'],['worker-b','while ! test -f gate; do sleep 0.02; done; printf done > result.txt'],['worker-third','printf third > result.txt'],['worker-failed','exit 7'],['worker-unrelated','printf unrelated > result.txt']]) {
-      const selected={...job,logicalJobRef:'I0001/J005/'+id,sdkPath:actualSDK,authPath,expectedMutablePaths:['result.txt','gate'],offlineChecks:[{name:'owned-offline-control',command:check,expectedExitCode:0}]};
+      const prerequisiteId = id === 'worker-third' ? 'J002' : id === 'worker-unrelated' ? 'J003' : undefined;
+      const selected={...job,logicalJobRef:prerequisiteId ? 'I0001/' + prerequisiteId : 'I0001/J005/'+id,sdkPath:actualSDK,authPath,expectedMutablePaths:['result.txt','gate'],offlineChecks:[{name:'owned-offline-control',command:check,expectedExitCode:0}], ...(prerequisiteId ? { prerequisites: { path: dependencyPath, sha256: planSha256, jobId: prerequisiteId } } : {})};
       await json(join(project,id+'.json'),selected);git('add','.');git('commit','-qm','Pin '+id);const selectedInput=git('rev-parse','HEAD');
       const selectedGrant={...grant,inputSha:selectedInput,jobPath:id+'.json',jobSha256:hash(await readFile(join(project,id+'.json'))),attemptId:id,logicalJobRef:selected.logicalJobRef};
       const selectedFile=join(root,id+'-grant.json');await json(selectedFile,selectedGrant);
-      inputs.push({id,grant:selectedGrant,args:['tools/isswf-job.mjs','run','--project',project,'--input-sha',selectedInput,'--job',id+'.json','--runs-store',store,'--attempt-id',id,'--grant-ref',grant.grantRef,'--mode','offline','--capacity-grant',selectedFile]});
+      const dependencyFile = join(root, id + '-dependency-grant.json');
+      if (prerequisiteId) await json(dependencyFile, { ...selectedGrant, targetBase: runtimeSha, allowDependencyCheck: true, prerequisites: selected.prerequisites, attestations: prerequisiteId === 'J002' ? { J001: { kind: 'code', commit: runtimeSha } } : {} });
+      inputs.push({id,job:selected,grant:selectedGrant,args:['tools/isswf-job.mjs','run','--project',project,'--input-sha',selectedInput,'--job',id+'.json','--runs-store',store,'--attempt-id',id,'--grant-ref',grant.grantRef,'--mode','offline','--capacity-grant',selectedFile,...(prerequisiteId ? ['--dependency-grant',dependencyFile] : [])]});
     }
     retainFixture=true;
     for(const selected of inputs.slice(0,2)){const launched=command(process.execPath,selected.args);assert.equal(launched.status,0,launched.stderr);assert.equal(JSON.parse(launched.stdout).attemptId,selected.id);}
     for(const selected of inputs.slice(0,2))await waitFor(async()=>{try{await readFile(join(store,selected.id,'native-tools/000002.started.json'));return true;}catch{try{const terminal=JSON.parse(await readFile(join(store,selected.id,'terminal.json')));throw Error(JSON.stringify(terminal));}catch(error){if(error.code!=='ENOENT')throw error;}return false;}},selected.id+' waiting gate');
+    const waitingJob = { ...inputs[2].job, logicalJobRef: 'I0001/J004', prerequisites: { path: dependencyPath, sha256: planSha256, jobId: 'J004' } };
+    await json(join(project, 'waiting.json'), waitingJob); git('add', '.'); git('commit', '-qm', 'Pin waiting decision'); const waitingInput = git('rev-parse', 'HEAD');
+    const waitingGrantFile = join(root, 'waiting-dependency-grant.json');
+    await json(waitingGrantFile, { ...grant, targetBase: runtimeSha, inputSha: waitingInput, jobPath: 'waiting.json', jobSha256: hash(await readFile(join(project, 'waiting.json'))), attemptId: 'worker-waiting', logicalJobRef: waitingJob.logicalJobRef, allowDependencyCheck: true, prerequisites: waitingJob.prerequisites, attestations: {} });
+    const waiting = command(process.execPath, ['tools/isswf-job.mjs', 'run', '--project', project, '--input-sha', waitingInput, '--job', 'waiting.json', '--runs-store', store, '--attempt-id', 'worker-waiting', '--grant-ref', grant.grantRef, '--mode', 'offline', '--dependency-grant', waitingGrantFile]);
+    assert.equal(waiting.status, 2, waiting.stderr); assert.equal(JSON.parse(waiting.stdout).reason, 'decision'); assert.equal((await readdir(pool)).filter(name => name.startsWith('slot-')).length, 2);
+    await assert.rejects(readFile(join(store, 'worker-waiting.job.json')), error => error.code === 'ENOENT');
     const third=command(process.execPath,inputs[2].args);assert.equal(third.status,2,third.stderr);assert.equal(JSON.parse(third.stdout).reason,'capacity');
     await assert.rejects(readFile(join(store,'worker-third.job.json')),error=>error.code==='ENOENT');
     const {completeWorkerCapacity}=await import(new URL('../tools/execution-capacity.mjs',import.meta.url));
@@ -92,6 +109,8 @@ try {
       assert.equal(receipt.evidence.kind,'verified-worker-task-and-tool-namespace-cessation');assert(receipt.evidence.namespacesCeased>=3);
     }
     const thirdRetry=command(process.execPath,inputs[2].args);assert.equal(thirdRetry.status,0,thirdRetry.stderr);
+    const integratedBinding = JSON.parse(await readFile(join(store, 'worker-third.job.json')));
+    assert.equal(integratedBinding.prerequisites.status, 'ready'); assert.deepEqual(integratedBinding.prerequisites.observations, [{ id: 'J001', kind: 'code', commit: runtimeSha }]);
     await waitFor(async()=>(await observed('worker-third')).capacity?.status==='released','later admission');
     const repeated=command(process.execPath,inputs[0].args);assert.equal(repeated.status,1);assert.match(repeated.stderr,/attempt already exists/);
     const failed=command(process.execPath,inputs[3].args);assert.equal(failed.status,0,failed.stderr);
@@ -102,7 +121,7 @@ try {
     assert.equal((await readdir(pool)).filter(name=>name.startsWith('slot-')).length,1);
     assert.equal((await readdir(join(store,'admissions'))).filter(name=>name.endsWith('.json')).length,5);
     retainFixture=false;
-    console.log('PASS actual normal offline worker CLI: two concurrent namespace-bound workers, third blocked before permanent admission, live-task release refused, verified cessation releases, later admission, permanent replay refusal and failed-worker retention with unrelated progress; no provider prompts');
+    console.log('PASS actual normal offline worker CLI: two concurrent namespace-bound workers, third blocked before permanent admission, decision refuses before capacity, verified integrated dependency and unrelated worker execute, live-task release refused, verified cessation releases, permanent replay refusal and failed-worker retention; no provider prompts');
   }
   console.log('PASS normal worker CLI capacity refusal before permanent admission, preparation or execution; bound grant mismatches fail closed; no provider calls');
 } finally { if(retainFixture)console.error('Preserved owned failing worker fixture: '+root);else await rm(root, { recursive: true, force: true }); }

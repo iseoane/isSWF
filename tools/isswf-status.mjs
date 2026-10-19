@@ -4,12 +4,11 @@ import { constants } from 'node:fs';
 import { lstat, open, opendir, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { plan } from './isswf-plan.mjs';
+import { plan, parsePlan, planStates as states } from './isswf-plan.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-const states = ['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed'];
 export function recommendation(jobs = []) {
   const priorities = [
     ['awaiting-human', 'human', 'Resolver la aceptación humana'],
@@ -53,33 +52,6 @@ async function snapshot(path) {
     if (bytes.length > 256000) throw Error('invalid-record');
     return { path, sha256: sha(bytes), modifiedAt: stat.mtime.toISOString(), text: bytes.toString('utf8') };
   } finally { await handle.close(); }
-}
-function parse(markdown) {
-  const jobs = [], seen = new Set(); let current, section;
-  for (const line of markdown.split('\n')) {
-    const header = /^## ([A-Z][A-Z0-9-]{0,63})$/u.exec(line);
-    if (header) {
-      if (seen.has(header[1])) throw Error('duplicate-job');
-      seen.add(header[1]); current = { id: header[1], acceptance: [], evidence: [] }; jobs.push(current); section = null;
-    } else if (current) {
-      const field = section ? null : /^- (Status|Objective|Depends on|Brief|Blocker|Next step): (.+)$/u.exec(line);
-      if (field) {
-        if (Object.hasOwn(current, field[1])) throw Error('duplicate-field');
-        current[field[1]] = field[2];
-      } else if (line === '### Acceptance') section = 'acceptance';
-      else if (line === '### Evidence') section = 'evidence';
-      else if (section && line.startsWith('- ')) current[section].push(line.slice(2));
-    }
-  }
-  if (!jobs.length || jobs.length > 100) throw Error('invalid-plan');
-  return jobs.map(job => {
-    if (!states.includes(job.Status) || ['Objective', 'Depends on', 'Brief', 'Blocker', 'Next step'].some(field => !job[field]) || !job.acceptance.length) throw Error('invalid-job');
-    const brief = /^\[brief-r([1-9][0-9]*)\.md\]\(jobs\/([A-Z][A-Z0-9-]{0,63})\/brief-r\1\.md\)(?: \(pending until prepared\))?$/u.exec(job.Brief);
-    if (!brief || brief[2] !== job.id) throw Error('unsafe-brief-reference');
-    const dependencies = job['Depends on'] === 'None' ? [] : job['Depends on'].split(', ');
-    if (dependencies.some(dep => !seen.has(dep) || dep === job.id)) throw Error('invalid-dependency');
-    return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence: job.evidence.filter(item => item !== 'None.'), briefName: `brief-r${brief[1]}.md` };
-  });
 }
 async function deliveryAt(path) {
   try {
@@ -157,7 +129,7 @@ export async function initiatives({ project }) {
       const prefix = '# ' + initiative + ': ', heading = record.markdown.split('\n', 1)[0];
       const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
       if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-title');
-      const jobs = parse(record.markdown);
+      const jobs = parsePlan(record.markdown);
       items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.reportedStatus === state).length])), jobs: jobs.length, recommendation: recommendation(jobs), blockers: jobs.filter(job => job.reportedStatus === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
     } catch { items.push({ initiative, status: 'unknown', reason: 'invalid-changing-or-unsafe-plan' }); }
   }
@@ -176,7 +148,7 @@ export async function status({ project, initiative }) {
     const heading = record.markdown.split('\n', 1)[0], prefix = `# ${initiative}: `;
     const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
     if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-plan-identity');
-    const parsed = parse(record.markdown), jobs = [];
+    const parsed = parsePlan(record.markdown), jobs = [];
     for (const job of parsed) {
       const { briefName, ...fields } = job;
       jobs.push({ ...fields, artifacts: await artifacts(dirname(record.path), { ...job, initiative }), processState: 'not-inspected' });
