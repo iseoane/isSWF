@@ -108,6 +108,17 @@ try {
   await json(grantFile, { ...grant, store: incompleteStore });
   const prepared = await prepareReview({ ...request, store: incompleteStore }); await mkdir(prepared.dir);
   assert.equal((await readReview({ project, store: incompleteStore, logicalJobRef: job.logicalJobRef })).status, 'unknown');
+  await writeFile(join(project, 'large-context.md'), 'x'.repeat(60000)); const largeBase = commit();
+  await writeFile(join(project, 'app.mjs'), 'export const answer = 3;\n'); const largeCandidate = commit();
+  const largeJob = { ...job, targetBase: largeBase, candidateSha: largeCandidate, contextPaths: ['large-context.md'] };
+  await json(join(project, 'large-review.json'), largeJob); const largeInput = commit();
+  const largeGrant = { ...grant, inputSha: largeInput, jobPath: 'large-review.json', jobSha256: hash(await readFile(join(project, 'large-review.json'))), targetBase: largeBase, candidateSha: largeCandidate };
+  const largeRequest = { ...request, inputSha: largeInput, jobPath: 'large-review.json' };
+  await json(grantFile, largeGrant); await assert.rejects(prepareReview(largeRequest), /review-bundle-too-large/u);
+  await json(grantFile, { ...largeGrant, inputBytes: 131072 });
+  const largePrepared = await prepareReview(largeRequest);
+  assert.equal(JSON.parse(largePrepared.prompt).context[0].text.length, 60000);
+  for (const inputBytes of [0, 131073, 1.5]) { await json(grantFile, { ...largeGrant, inputBytes }); await assert.rejects(prepareReview(largeRequest)); }
   await json(join(project, 'review.json'), { ...job, evidenceMode: 'candidate-and-diff' }); const compactInput = commit();
   const compactGrant = { ...grant, inputSha: compactInput, jobSha256: hash(await readFile(join(project, 'review.json'))), evidenceMode: 'candidate-and-diff' };
   await json(grantFile, compactGrant);
