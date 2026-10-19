@@ -44,9 +44,12 @@ try {
   await writeFile(authPath, JSON.stringify({ 'opencode-go': { type: 'api_key', key: 'synthetic-quota-test-key' } }), { mode: 0o600 });
   for (const [i, c] of cases.entries()) {
     const logicalJobRef = `quota-fixture-${i}`, store = join(root, `store-${i}`); await mkdir(store);
+    const pool=join(root,`capacity-${i}`);await mkdir(pool);await mkdir(join(pool,'completed'));
+    const policy=JSON.stringify({version:1,limit:1,reference:'Synthetic researcher quota capacity'});await writeFile(join(pool,'policy.json'),policy);
+    const capacity={pool,policySha256:hash(policy)},capacityRunnerSha256=hash(await readFile(join(source,'tools/execution-capacity.mjs')));
     const job = { version: 1, logicalJobRef, models: { sha: targetBase, path: '.factory/models.json', sha256: hash(config) }, briefPath: 'brief.md', sources: ['facts.md'], targetRepo: project, targetBase, sdkPath: sdkPath || '/unused-injected-sdk' };
     await writeFile(join(project, 'job.json'), JSON.stringify(job)); const inputSha = commit();
-    const grant = { version: 1, role: 'researcher', project, inputSha, jobPath: 'job.json', jobSha256: hash(await readFile(join(project, 'job.json'))), logicalJobRef, grantRef: 'synthetic-not-runtime-authority', targetRepo: project, targetBase, store, allowResultArtifact: true, callerSha256: hash(await readFile(join(source, 'tools/researcher-task.mjs'))), approvedRoute: route, totalAttempts: c.totalAttempts || 3, retryBudget: 1, deadlineMs: c.stall ? 100 : 5000, outputBytes: 1024, maxOutputTokens: 256, apiCostsAllowed: false, temporaryUnavailableStatuses: [503], allowProviderCalls: false, authPath, subscriptionAttestations: [{ provider: 'opencode-go', coversCallsWithoutAdditionalApiCost: true, reference: 'synthetic-only' }] };
+    const grant = { version: 1, capacity, capacityRunnerSha256, role: 'researcher', project, inputSha, jobPath: 'job.json', jobSha256: hash(await readFile(join(project, 'job.json'))), logicalJobRef, grantRef: 'synthetic-not-runtime-authority', targetRepo: project, targetBase, store, allowResultArtifact: true, callerSha256: hash(await readFile(join(source, 'tools/researcher-task.mjs'))), approvedRoute: route, totalAttempts: c.totalAttempts || 3, retryBudget: 1, deadlineMs: c.stall ? 100 : 5000, outputBytes: 1024, maxOutputTokens: 256, apiCostsAllowed: false, temporaryUnavailableStatuses: [503], allowProviderCalls: false, authPath, subscriptionAttestations: [{ provider: 'opencode-go', coversCallsWithoutAdditionalApiCost: true, reference: 'synthetic-only' }] };
     if (sdkPath) grant.sdkEntrySha256 = hash(await readFile(join(sdkPath, 'dist/index.js')));
     const grantFile = join(root, `grant-${i}.json`); await writeFile(grantFile, JSON.stringify(grant));
     const actual = sdkPath ? await sdkResearchBackend(job, grant) : null;
@@ -79,6 +82,8 @@ try {
     assert(!JSON.stringify(result).includes(canary));
     if (!actual || c.otherProvider) assert.equal(originalBodies[0], c.body, c.name);
     const [dir] = await readdir(store), durable = JSON.parse(await readFile(join(store, dir, 'result.json'))); assert.deepEqual(durable, result);
+    const binding=JSON.parse(await readFile(join(store,dir,'binding.json')));assert.deepEqual(binding.capacity,result.capacity);assert.equal(binding.capacity.role,'researcher');
+    assert.equal((await readdir(pool)).includes('slot-0'),!c.advance,c.name);assert.equal((await readdir(join(pool,'completed'))).length,c.advance?1:0,c.name);
   }
   assert.equal(forbiddenFetches, 0);
   console.log(JSON.stringify({ status: 'PASS', controls: cases.map(c => c.name), mode: sdkPath ? 'actual-primary-SDK-synthetic-transport-and-injected-alternate' : 'portable-injected-caller', forbiddenNetworkFetches: forbiddenFetches, realRuntimeCalls: 0, limits: 'Known versioned Go error envelope only. No current-service quota response, all-provider classifier or actual fallback claim.' }, null, 2));

@@ -69,7 +69,7 @@ The SDK receives a new opaque session ID, fixed reviewer effort, no tools, SSE, 
 
 ## Shared SDK execution capacity
 
-The optional finite-capacity cut currently covers native reviewers, planners and diagnosticians. Diagnostic admission occurs before workspace probes as well as provider work. A multi-agent review panel can use distinct existing logical references for successive entries. The HTML dashboard is not an execution participant. Worker and researcher integration, dependency gating and the complete MOD-07 guarantee remain pending in J005.
+The optional finite-capacity cut currently covers native reviewers, planners, diagnosticians and researchers. Diagnostic admission occurs before workspace probes as well as provider work. Researcher admission reserves one slot across the logical call's existing retries and fallback route; it does not increase either budget or release an uncertain outcome. A multi-agent review panel can use distinct existing logical references for successive entries. The HTML dashboard is not an execution participant. Worker integration, dependency gating and the complete MOD-07 guarantee remain pending in J005.
 
 An operator-owned pool is a separate canonical directory outside project, source and result stores. Prepare its `completed/` directory and immutable regular `policy.json` through trusted setup. The policy contains `version: 1`, a positive integer `limit` up to 16, and a nonempty `reference`. The initial approved limit is two. Capacity is separate from authorization to call a provider or create another actor.
 
