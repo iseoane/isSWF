@@ -16,6 +16,8 @@ Gate an original worker's declared prerequisites before execution-capacity or pe
 - Verify portable normal-CLI refusals, plan/status consistency and installed-tool closure. The actual installed-SDK synthetic-auth offline path must execute a valid integrated dependency and unrelated worker, while a pending decision refuses before occupied capacity. No provider prompts.
 - Independent native source review and the integration review precede publication. Exact PR and main CI must pass before claiming delivery.
 
+See [worker admission](../../../../../docs/worker-admission.md) for the exact job and grant fields and the verification commands.
+
 ## Grounding and remaining work
 
 PR62–65 delivered participating reviewer/planner, diagnostic, researcher and worker shared-capacity behavior. Source checkpoint `2072e939135865224d5bfc2d76857f0ec7d17b2d` records the prerequisite gate and a passing affected native review after a reproduced graft-ancestry finding. A checkpoint alone is not publication or acceptance.
