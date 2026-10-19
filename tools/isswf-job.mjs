@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat, readdir, open, link, unlink } from 'node:fs/promises';
 import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:path';
 import { homedir } from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
 import { inspectNativeRecovery } from './native-recovery.mjs';
 import { effectIntent, externalEffect } from './external-effect-journal.mjs';
@@ -54,7 +54,7 @@ function options(values) {
   const result = {};
   for (let i = 0; i < values.length; i += 2) {
     const key = values[i];
-    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file', '--review-file', '--successor-grant'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
+    if (!['--project', '--input-sha', '--job', '--runs-store', '--attempt-id', '--grant-ref', '--mode', '--action', '--grant-file', '--review-file', '--successor-grant', '--capacity-grant'].includes(key) || !values[i + 1] || Object.hasOwn(result, key.slice(2))) throw new Error('invalid or repeated job option');
     result[key.slice(2)] = values[i + 1];
   }
   return result;
@@ -110,7 +110,7 @@ async function activePackage(project, revision) {
   await verifyPackage(matches[0].path, revision);
   return matches[0].path;
 }
-async function claimAdmission(store, record) {
+async function claimAdmission(store, record, checkOnly = false) {
   for (const name of await readdir(store)) {
     if (!name.endsWith('.job.json')) continue;
     let prior;
@@ -120,6 +120,10 @@ async function claimAdmission(store, record) {
     if (await realpath(prior.repo) === record.repo && (typeof prior.logicalJobRef !== 'string' || !prior.logicalJobRef.trim() || prior.logicalJobRef === record.logicalJobRef)) throw Error('prior logical job binding blocks admission; no automatic replacement');
   }
   const directory = join(store, 'admissions');
+  if(checkOnly) {
+    try {await lstat(join(directory,record.key+'.json'));} catch(error) {if(error.code==='ENOENT')return;throw error;}
+    throw Error('logical job admission already claimed; no automatic replacement');
+  }
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const stat = await lstat(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('admission directory must be a real private directory');
@@ -135,11 +139,12 @@ async function claimAdmission(store, record) {
   } finally { await unlink(pending); }
 }
 async function run(args) {
-  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode', 'successor-grant'].includes(key))) throw Error('unsupported run option');
+  if (Object.keys(args).some(key => !['project', 'input-sha', 'job', 'runs-store', 'attempt-id', 'grant-ref', 'mode', 'successor-grant', 'capacity-grant'].includes(key))) throw Error('unsupported run option');
   if (!isAbsolute(args.project || '') || !fullSha(args['input-sha']) || !safeRelative(args.job)) throw new Error('run requires --project absolute --input-sha fullSHA --job committed/relative.json');
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(args['attempt-id'] || '') || ['.', '..'].includes(args['attempt-id']) || !args['grant-ref']?.trim()) throw new Error('explicit attempt ID and trusted grant reference required');
   const mode = args.mode || 'real';
   if (!['real', 'offline'].includes(mode)) throw new Error('mode must be real or offline');
+  if(args['capacity-grant'] && args['successor-grant'])throw Error('capacity-bound successors require a separately implemented lifecycle contract');
   const project = await realpath(args.project);
   const jobBytes = blob(project, args['input-sha'], args.job);
   const job = JSON.parse(jobBytes);
@@ -163,6 +168,19 @@ async function run(args) {
     try { await lstat(path); throw new Error('attempt already exists; read/reconcile before any operator-authorized replacement'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
   const request = { repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, briefPath: job.briefPath, briefSha256: digest(briefBytes), mode };
+  let capacity;
+  if(args['capacity-grant']) {
+    const grant=await trustedJSON(args['capacity-grant'],project,'--capacity-grant',store);
+    if(grant.version!==1 || grant.role!=='worker' || grant.mode!==mode || grant.project!==project || grant.runsStore!==store || grant.inputSha!==request.inputSha || grant.jobPath!==request.jobPath || grant.jobSha256!==request.jobSha256 || grant.runtimeSha!==request.runtimeSha || grant.attemptId!==request.attemptId || grant.logicalJobRef!==request.logicalJobRef || grant.grantRef!==request.grantRef || grant.allowCapacity!==true || !grant.capacity)throw Error('worker capacity grant binding mismatch');
+    const helper=await readFile(join(root,'tools/execution-capacity.mjs'));
+    if(digest(helper)!==grant.capacityRunnerSha256 || digest(helper)!==digest(blob(root,job.runtimeSha,'tools/execution-capacity.mjs')))throw Error('pinned worker capacity helper required');
+    const {prepareCapacity,acquireCapacity}=await import(pathToFileURL(join(root,'tools/execution-capacity.mjs')));
+    const scope=await prepareCapacity(grant.capacity,[project,root,store],grant.capacityRunnerSha256);
+    await claimAdmission(store,admission(request),true);
+    const reservation=await acquireCapacity(scope,{role:'worker',logicalJobRef:job.logicalJobRef,mode:mode==='offline'?'fixture':'real',worker:{attemptDir:join(store,request.attemptId),attemptId:request.attemptId,inputSha:request.inputSha,jobSha256:request.jobSha256,runtimeSha:request.runtimeSha,targetBase:request.targetBase}});
+    if(!reservation){console.log(JSON.stringify({status:'blocked',reason:'capacity',attemptsConsumed:0,executionAuthorized:false}));process.exitCode=2;return;}
+    capacity={scope,info:reservation.info,grantSha256:digest(await readFile(await realpath(args['capacity-grant'])))};
+  }
   let successor;
   if (args['successor-grant']) {
     const grant = await trustedJSON(args['successor-grant'], project, '--successor-grant', store);
@@ -175,9 +193,15 @@ async function run(args) {
   await writeFile(configPath, JSON.stringify(config) + '\n', { mode: 0o600, flag: 'wx' });
   const preparedResult = JSON.parse(invoke(process.execPath, [join(root, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', taskPath]));
   if (preparedResult.inputSha !== args['input-sha'] || preparedResult.briefPath !== job.briefPath || preparedResult.briefSha256 !== digest(briefBytes) || preparedResult.taskSha256 !== digest(await readFile(taskPath))) throw new Error('prepared task/brief identity mismatch');
-  const binding = { version: 1, ...(successor ? { successor } : {}), logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
+  const binding = { version: 1, ...(capacity ? {capacity:capacity.info} : {}), ...(successor ? { successor } : {}), logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], repo: project, grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, ...preparedResult, mode, reviewRequired: true };
   await writeFile(bindingPath, JSON.stringify(binding) + '\n', { mode: 0o600, flag: 'wx' });
-  const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000']));
+  let capacityArgs=[];
+  if(capacity) {
+    const modules={};
+    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(blob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
+    const path=join(prepared,'capacity.json');await writeFile(path,JSON.stringify({...capacity,modules})+'\n',{flag:'wx',mode:0o600});capacityArgs=['--capacity-file',path];
+  }
+  const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000', ...capacityArgs]));
   console.log(JSON.stringify({ ...launched, mode, bindingPath, reviewRequired: true }));
 }
 async function trustedJSON(path, project, label, store) {
@@ -258,6 +282,9 @@ Required for review: --runs-store ABS_PATH --attempt-id ID
   --action inspect|record|check
   --review-file ABS_PATH (record only; explicit independent review/check grant)
 Review never releases a job admission or authorizes a successor.
+Optional for run: --capacity-grant ABS_PATH
+  Bound operator-owned shared capacity; known task/tool cessation is required to release.
+  Capacity-bound successors are not supported by this first cut.
 Optional for run: --successor-grant ABS_PATH
   Explicit same-runtime original-to-one-successor grant; cumulative workerTotal=2.
   Unknown prior invocation remains consumed, never a retry or charge reconciliation.
@@ -287,6 +314,14 @@ An independent review remains required for every worker result.`);
     console.log(JSON.stringify({ attemptId: args['attempt-id'], state: 'unknown', reason: 'missing, corrupt or mismatched job/dispatch binding', reviewRequired: true }));
     return;
   }
+  let capacityStatus;
+  if(binding.capacity!==undefined || dispatch.capacity!==undefined) {
+    if(JSON.stringify(binding.capacity)!==JSON.stringify(dispatch.capacity?.info) || binding.capacity?.role!=='worker' || binding.capacity.logicalJobRef!==binding.logicalJobRef || binding.capacity.worker?.attemptDir!==join(args['runs-store'],binding.attemptId))throw Error('worker capacity observation binding mismatch');
+    capacityStatus={status:'unverified',id:binding.capacity.id};
+    for(const [file,status]of [['capacity-completion.json','released'],['capacity-retained.json','retained']]) {
+      try {const proof=JSON.parse(await readFile(join(args['runs-store'],binding.attemptId,file),'utf8'));if(proof.status!==status || proof.id!==binding.capacity.id)throw Error('capacity receipt mismatch');capacityStatus={status,id:proof.id};break;} catch(error){if(error.code!=='ENOENT')throw error;}
+    }
+  }
   let recovery;
   if (command === 'reconcile' && result.state === 'unknown') {
     try {
@@ -298,6 +333,6 @@ An independent review remains required for every worker result.`);
       recovery=await inspectNativeRecovery({attemptDir:join(args['runs-store'],args['attempt-id']),dispatch,observation:result,job,baseline:baselineTree(binding.repo,binding.targetBase)});
     } catch { recovery={status:'blocked',reason:'committed recovery pins or runtime could not be revalidated',reviewRequired:true,retry:'never'}; }
   }
-  console.log(JSON.stringify({ ...result, job: binding, reviewRequired: true, ...(recovery ? {recovery} : {}) }));
+  console.log(JSON.stringify({ ...result, job: binding, reviewRequired: true, ...(recovery ? {recovery} : {}), ...(capacityStatus ? {capacity:capacityStatus} : {}) }));
 }
 try { await main(); } catch (error) { console.error(error.message); process.exitCode = 1; }
