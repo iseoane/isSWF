@@ -30,7 +30,7 @@ Existing reviewer and planner tests verify committed context bytes, ignored work
 
 ## Independent review
 
-Earlier independent review passed the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`; it did not establish MCP summary isolation. The additional diagnostic/guidance unit requires its own source review and exact CI. See `mcp-verification.json` for that review status. No report accepts complete J007 or v1.
+Earlier independent review passed the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`; it did not establish MCP summary isolation. The additional diagnostic/guidance source review passed Standards and Spec at `c0f3a428597b8722dab047da9b2374f10aa9e887`. Its exact report and nonblocking suggestion disposition are retained in `mcp-verification.json`; exact publication CI remains separate. No report accepts complete J007 or v1.
 
 ## Integration risk and recovery
 
