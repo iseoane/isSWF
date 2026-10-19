@@ -130,6 +130,74 @@ try {
   assert.match(compact.diff, /-export const answer = 1;\n\+export const answer = 2;/u);
   await json(grantFile, { ...compactGrant, evidenceMode: 'unknown' }); await assert.rejects(prepareReview(compactRequest));
   await json(grantFile, grant);
+  const pool = join(root, 'shared-pool'); await mkdir(pool); await mkdir(join(pool, 'completed'));
+  const policy = JSON.stringify({ version: 1, limit: 2, reference: 'Synthetic operator-owned scope' }) + '\n';
+  await writeFile(join(pool, 'policy.json'), policy);
+  const capacity = { pool, policySha256: hash(policy) };
+  const capacityGrant = { capacity, capacityRunnerSha256: hash(await readFile(join(source, 'tools/execution-capacity.mjs'))) };
+  const gate = Promise.withResolvers(), entered = [Promise.withResolvers(), Promise.withResolvers()];
+  let concurrentCalls = 0;
+  const waitingBackend = index => ({
+    async preflight() { return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic' } }; },
+    async fetch() { concurrentCalls++; return new Response('', { status: 200 }); },
+    stream(model, context, options) { return { async result() { await options.fetch('https://synthetic.invalid'); entered[index].resolve(); await gate.promise; return { provider: model.provider, model: model.id, stopReason: 'stop', content: [{ type: 'text', text: 'Standards: inconclusive. Spec: inconclusive. Synthetic result.' }] }; } }; },
+  });
+  const scoped = [];
+  for (let index = 0; index < 3; index++) {
+    const caseStore = join(root, 'pooled-' + index); await mkdir(caseStore);
+    const caseGrant = join(root, 'pool-grant-' + index + '.json'); await json(caseGrant, { ...grant, store: caseStore, deadlineMs: 10000, ...capacityGrant });
+    scoped.push({ ...request, store: caseStore, grantFile: caseGrant });
+  }
+  const { runPlanProposal, readPlanProposal } = await import(pathToFileURL(join(source, 'tools/planner-task.mjs')));
+  const plannerJob = { ...job, logicalJobRef: 'I0001/J005/synthetic-planner', coordinatorRef: 'synthetic-coordinator' };
+  await json(join(project, 'pooled-planner.json'), plannerJob); const plannerInput = commit();
+  const plannerGrantFile = join(root, 'pool-planner-grant.json');
+  await json(plannerGrantFile, { ...grant, role: 'planner', store: scoped[1].store, inputSha: plannerInput, jobPath: 'pooled-planner.json', jobSha256: hash(await readFile(join(project, 'pooled-planner.json'))), logicalJobRef: plannerJob.logicalJobRef, coordinatorRef: plannerJob.coordinatorRef, plannerRef: 'synthetic-planner', callerSha256: hash(await readFile(join(source, 'tools/planner-task.mjs'))), deadlineMs: 10000, ...capacityGrant });
+  const plannerRequest = { ...scoped[1], inputSha: plannerInput, jobPath: 'pooled-planner.json', grantFile: plannerGrantFile };
+  const running = [runReview(scoped[0], { mode: 'fixture', backend: waitingBackend(0) }), runPlanProposal(plannerRequest, { mode: 'fixture', backend: waitingBackend(1) })];
+  let full, beforeFull;
+  try { await Promise.all(entered.map(item => item.promise)); beforeFull = backendCalls; full = await runReview(scoped[2], { mode: 'fixture', backend: fixture('normal') }); }
+  finally { gate.resolve(); await Promise.all(running); }
+  assert.equal(full.status, 'blocked', 'third reviewer must wait for the shared finite pool');
+  assert.equal(full.reason, 'capacity'); assert.equal(full.attemptsConsumed, 0); assert.equal(concurrentCalls, 2); assert.equal(backendCalls, beforeFull);
+  assert.deepEqual(await readdir(scoped[2].store), []);
+  const reviewCapacityRecord = await readReview({ project, store: scoped[0].store, logicalJobRef: job.logicalJobRef });
+  const plannerCapacityRecord = await readPlanProposal({ project, store: scoped[1].store, logicalJobRef: plannerJob.logicalJobRef });
+  assert.equal(reviewCapacityRecord.status, 'recorded'); assert.equal(plannerCapacityRecord.status, 'recorded');
+  assert.equal(reviewCapacityRecord.binding.capacity.pool, plannerCapacityRecord.binding.capacity.pool);
+  assert.equal(reviewCapacityRecord.binding.capacity.role, 'reviewer'); assert.equal(plannerCapacityRecord.binding.capacity.role, 'planner');
+  const successive = await runReview(scoped[2], { mode: 'fixture', backend: fixture('normal', join(scoped[2].store, p.dir.split('/').at(-1))) });
+  assert.equal(successive.status, 'response-complete', 'a later panel entry can use a completed execution slot');
+  assert.equal((await readdir(join(pool, 'completed'))).length, 3, 'completed reservations remain preserved');
+  for (const id of await readdir(join(pool, 'completed'))) {
+    const lease = JSON.parse(await readFile(join(pool, 'completed', id, 'lease.json')));
+    const completion = JSON.parse(await readFile(join(pool, 'completed', id, 'completion.json')));
+    assert.equal(lease.mode, 'fixture'); assert.match(completion.evidence, /synthetic fixture/u);
+  }
+  const deniedPoolGrant = join(root, 'denied-pool-grant.json');
+  await json(deniedPoolGrant, { ...grant, ...capacityGrant, capacityRunnerSha256: '0'.repeat(64) });
+  await assert.rejects(prepareReview({ ...request, grantFile: deniedPoolGrant }), /capacity-runner-binding-required/u);
+  await json(deniedPoolGrant, { ...grant, ...capacityGrant, capacity: { ...capacity, policySha256: '0'.repeat(64) } });
+  await assert.rejects(prepareReview({ ...request, grantFile: deniedPoolGrant }), /capacity-policy-changed/u);
+  for (let index = 0; index < 2; index++) {
+    const caseStore = join(root, 'uncertain-pool-' + index); await mkdir(caseStore);
+    const caseGrant = join(root, 'uncertain-pool-' + index + '.json'); await json(caseGrant, { ...grant, store: caseStore, ...capacityGrant });
+    const result = await runReview({ ...request, store: caseStore, grantFile: caseGrant }, { mode: 'fixture', backend: fixture('http400', join(caseStore, p.dir.split('/').at(-1))) });
+    assert.equal(result.status, 'blocked');
+  }
+  assert.equal((await readdir(pool)).filter(name => name.startsWith('slot-')).length, 2, 'uncertain provider outcomes retain capacity');
+  const waitStore = join(root, 'wait-for-uncertain'); await mkdir(waitStore);
+  const waitGrant = join(root, 'wait-for-uncertain.json'); await json(waitGrant, { ...grant, store: waitStore, ...capacityGrant });
+  const beforeWait = backendCalls;
+  const waiting = await runReview({ ...request, store: waitStore, grantFile: waitGrant }, { mode: 'fixture', backend: fixture('normal') });
+  assert.equal(waiting.reason, 'capacity'); assert.equal(waiting.attemptsConsumed, 0); assert.equal(backendCalls, beforeWait);
+  assert.deepEqual(await readdir(waitStore), []);
+  const partialPool = join(root, 'partial-pool'); await mkdir(partialPool); await mkdir(join(partialPool, 'completed')); await mkdir(join(partialPool, 'slot-0'));
+  await writeFile(join(partialPool, 'policy.json'), policy);
+  const partialStore = join(root, 'partial-allowed'); await mkdir(partialStore);
+  const partialGrant = join(root, 'partial-grant.json'); await json(partialGrant, { ...grant, store: partialStore, ...capacityGrant, capacity: { ...capacity, pool: partialPool } });
+  const unrelated = await runReview({ ...request, store: partialStore, grantFile: partialGrant }, { mode: 'fixture', backend: fixture('normal', join(partialStore, p.dir.split('/').at(-1))) });
+  assert.equal(unrelated.status, 'response-complete'); assert.deepEqual(await readdir(join(partialPool, 'slot-0')), [], 'incomplete claims remain occupied without blocking the other slot');
   const probeStore = join(root, 'workspace-review'); await mkdir(probeStore);
   const workspaceRepo = join(root, 'candidate-checkout');
   const clone = command('git', ['clone', '--quiet', '--no-hardlinks', project, workspaceRepo]); assert.equal(clone.status, 0, clone.stderr);

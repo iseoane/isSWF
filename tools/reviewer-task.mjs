@@ -2,11 +2,12 @@
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile, realpath, mkdir, open, link, unlink, lstat } from 'node:fs/promises';
+import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
 import { validateProbes, runDiagnosticProbes } from './diagnostic-probes.mjs';
+import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -69,6 +70,7 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   assert(grant.allowResultArtifact === true && typeof grant.allowProviderCalls === 'boolean' && grant.apiCostsAllowed === false, 'explicit-review-capabilities-required');
   assert(grant.totalAttempts === 1 && grant.retryBudget === 0, 'one-attempt-no-retry-required');
   for (const [key, max] of [['deadlineMs', 120000], ['outputBytes', 65536], ['maxOutputTokens', 8192]]) assert(Number.isSafeInteger(grant[key]) && grant[key] > 0 && grant[key] <= max, 'finite-review-budget-required');
+  const capacity = await prepareCapacity(grant.capacity, [project, target, source, store], grant.capacityRunnerSha256);
   const inputBytes = grant.inputBytes ?? 65536;
   assert(Number.isSafeInteger(inputBytes) && inputBytes > 0 && inputBytes <= 131072, 'finite-review-input-budget-required');
   assert(sha(job.targetBase) && sha(job.candidateSha), 'committed-candidate-required');
@@ -108,7 +110,7 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   assert(Buffer.byteLength(prompt) + Buffer.byteLength(instructions) <= inputBytes, 'review-bundle-too-large');
   const effectiveInstructions = job.workspace ? instructions + '\nThe review runtime will execute only the explicit host-selected probes in an isolated read-only checkout pinned to the candidate, before any provider call. workspaceVerification contains actual runtime observations, not implementer summaries or commands you executed. Assess these observations and source independently. No additional tools or authenticated actor identity are implied.' : instructions;
   assert(Buffer.byteLength(prompt) + Buffer.byteLength(effectiveInstructions) <= inputBytes, 'review-bundle-too-large');
-  return { project, store, inputSha, jobPath, job, grant, grantSha256, inputBytes, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
+  return { project, store, inputSha, jobPath, job, grant, grantSha256, capacity, inputBytes, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
 }
 export async function runReview(request, { backend, mode = 'real', probeRunner } = {}) {
   const p = await prepareReview(request), { job, grant, dir } = p;
@@ -117,6 +119,12 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
   assert(!probeRunner || job.workspace, 'probe-runner-requires-workspace');
   await mkdir(dir, { mode: 0o700 });
   const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+  const reservation = await acquireCapacity(p.capacity, { role: 'reviewer', logicalJobRef: job.logicalJobRef, mode });
+  if (!reservation) {
+    await rmdir(dir);
+    const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+    return { version: 1, status: 'blocked', reason: 'capacity', attemptsConsumed: 0, fetches: 0, capacity: p.capacity, executionAuthorized: false };
+  }
   const deadlineAt = Date.now() + grant.deadlineMs;
   let workspaceVerification;
   if (job.workspace) {
@@ -135,11 +143,12 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
   }
   await publish(join(dir, 'evidence.json'), { version: 1, prompt: p.prompt, instructions: p.instructions, bundleSha256: p.bundleSha256, methodologySha256: p.methodologySha256 });
   const sessionId = randomUUID();
-  await publish(join(dir, 'binding.json'), { version: 1, mode, sessionId, logicalJobRef: job.logicalJobRef, project: p.project, inputSha: p.inputSha, jobPath: p.jobPath, jobSha256: grant.jobSha256, grantSha256: p.grantSha256, callerSha256: grant.callerSha256, backendSha256: grant.backendSha256, bundleSha256: p.bundleSha256, methodologySha256: p.methodologySha256, sourceRoot: source, methodologySha: job.methodologySha, targetBase: job.targetBase, candidateSha: job.candidateSha, models: job.models, route, evidenceMode: job.evidenceMode ?? 'base-and-candidate', implementerRef: job.implementerRef, reviewerRef: grant.reviewerRef, ...(workspaceVerification ? { workspace: workspaceVerification } : {}), budgets: { inputBytes: p.inputBytes, totalAttempts: 1, retryBudget: 0, deadlineMs: grant.deadlineMs, outputBytes: grant.outputBytes, maxOutputTokens: grant.maxOutputTokens } });
+  await publish(join(dir, 'binding.json'), { version: 1, mode, sessionId, logicalJobRef: job.logicalJobRef, project: p.project, inputSha: p.inputSha, jobPath: p.jobPath, jobSha256: grant.jobSha256, grantSha256: p.grantSha256, callerSha256: grant.callerSha256, backendSha256: grant.backendSha256, bundleSha256: p.bundleSha256, methodologySha256: p.methodologySha256, sourceRoot: source, methodologySha: job.methodologySha, targetBase: job.targetBase, candidateSha: job.candidateSha, models: job.models, route, evidenceMode: job.evidenceMode ?? 'base-and-candidate', implementerRef: job.implementerRef, reviewerRef: grant.reviewerRef, ...(workspaceVerification ? { workspace: workspaceVerification } : {}), ...(reservation.info ? { capacity: reservation.info } : {}), budgets: { inputBytes: p.inputBytes, totalAttempts: 1, retryBudget: 0, deadlineMs: grant.deadlineMs, outputBytes: grant.outputBytes, maxOutputTokens: grant.maxOutputTokens } });
   const controller = new AbortController(); let timer, claimed = false, fetches = 0, httpStatus, expired = false, limited = false;
   const timeout = new Promise(resolve => { timer = setTimeout(() => { expired = true; controller.abort(); resolve(null); }, Math.max(1, deadlineAt - Date.now())); });
   const finish = async (status, reason, report) => {
-    const value = { version: 1, mode, status, reason, attemptsConsumed: claimed ? 1 : 0, fetches, ...(httpStatus === undefined ? {} : { httpStatus }), ...(report === undefined ? {} : { report }), candidateSha: job.candidateSha, targetBase: job.targetBase, bundleSha256: p.bundleSha256, limits: [workspaceVerification ? 'only explicit host-selected read-only review-runtime probes executed; no model tools' : 'text-only supplied bundle; no workspace inspection or checks executed', 'actor identities are external operator attestations, not authenticated by this caller', 'response completion is not a passing verdict, merge permission or human acceptance', 'unknown invocation consumed; no automatic retry, fallback or recovery'] };
+    if (status === 'response-complete') await reservation.complete();
+    const value = { version: 1, mode, status, reason, ...(reservation.info ? { capacity: reservation.info } : {}), attemptsConsumed: claimed ? 1 : 0, fetches, ...(httpStatus === undefined ? {} : { httpStatus }), ...(report === undefined ? {} : { report }), candidateSha: job.candidateSha, targetBase: job.targetBase, bundleSha256: p.bundleSha256, limits: [workspaceVerification ? 'only explicit host-selected read-only review-runtime probes executed; no model tools' : 'text-only supplied bundle; no workspace inspection or checks executed', 'actor identities are external operator attestations, not authenticated by this caller', 'response completion is not a passing verdict, merge permission or human acceptance', 'unknown invocation consumed; no automatic retry, fallback or recovery'] };
     await publish(join(dir, 'result.json'), value); return value;
   };
   try {
@@ -172,6 +181,7 @@ export async function readReview({ project, store, logicalJobRef }) {
     const evidence = (await json(join(dir, 'evidence.json'))).value;
     assert(typeof evidence.prompt === 'string' && typeof evidence.instructions === 'string' && hash(evidence.prompt) === binding.bundleSha256 && hash(evidence.instructions) === binding.methodologySha256, 'invalid-evidence-binding');
     assert(binding.version === 1 && binding.project === project && binding.logicalJobRef === logicalJobRef && sha(binding.inputSha) && sha(binding.candidateSha) && result.version === 1 && ['response-complete', 'blocked'].includes(result.status) && result.candidateSha === binding.candidateSha && result.targetBase === binding.targetBase && result.bundleSha256 === binding.bundleSha256, 'invalid-result-binding');
+    if (binding.capacity !== undefined || result.capacity !== undefined) assert(equal(binding.capacity, result.capacity) && binding.capacity.role === 'reviewer' && binding.capacity.logicalJobRef === logicalJobRef && binding.capacity.mode === binding.mode, 'invalid-capacity-binding');
     if (binding.evidenceMode !== undefined) assert(binding.evidenceMode === JSON.parse(evidence.prompt).evidenceMode && ['base-and-candidate', 'candidate-and-diff'].includes(binding.evidenceMode), 'invalid-evidence-mode');
     if (binding.workspace) {
       const verification = JSON.parse(evidence.prompt).workspaceVerification;
