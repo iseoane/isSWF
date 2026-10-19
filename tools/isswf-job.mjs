@@ -168,7 +168,7 @@ async function run(args) {
     try { await lstat(path); throw new Error('attempt already exists; read/reconcile before any operator-authorized replacement'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
   const request = { repo: project, logicalJobRef: job.logicalJobRef, attemptId: args['attempt-id'], grantRef: args['grant-ref'], packageRoot, runtimeSha: job.runtimeSha, methodologySha, inputSha: args['input-sha'], targetBase: job.targetBase, jobPath: args.job, jobSha256: digest(jobBytes), models: job.models, briefPath: job.briefPath, briefSha256: digest(briefBytes), mode };
-  let capacity;
+  let capacity, capacityReservation;
   if(args['capacity-grant']) {
     const grant=await trustedJSON(args['capacity-grant'],project,'--capacity-grant',store);
     if(grant.version!==1 || grant.role!=='worker' || grant.mode!==mode || grant.project!==project || grant.runsStore!==store || grant.inputSha!==request.inputSha || grant.jobPath!==request.jobPath || grant.jobSha256!==request.jobSha256 || grant.runtimeSha!==request.runtimeSha || grant.attemptId!==request.attemptId || grant.logicalJobRef!==request.logicalJobRef || grant.grantRef!==request.grantRef || grant.allowCapacity!==true || !grant.capacity)throw Error('worker capacity grant binding mismatch');
@@ -179,6 +179,7 @@ async function run(args) {
     await claimAdmission(store,admission(request),true);
     const reservation=await acquireCapacity(scope,{role:'worker',logicalJobRef:job.logicalJobRef,mode:mode==='offline'?'fixture':'real',worker:{attemptDir:join(store,request.attemptId),attemptId:request.attemptId,inputSha:request.inputSha,jobSha256:request.jobSha256,runtimeSha:request.runtimeSha,targetBase:request.targetBase}});
     if(!reservation){console.log(JSON.stringify({status:'blocked',reason:'capacity',attemptsConsumed:0,executionAuthorized:false}));process.exitCode=2;return;}
+    capacityReservation=reservation;
     capacity={scope,info:reservation.info,grantSha256:digest(await readFile(await realpath(args['capacity-grant'])))};
   }
   let successor;
@@ -186,7 +187,13 @@ async function run(args) {
     const grant = await trustedJSON(args['successor-grant'], project, '--successor-grant', store);
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(grant.predecessorAttemptId || '')) throw Error('explicit predecessor attempt ID required');
     successor = await claimSuccessor({ store, request, job, baseline: baselineTree(project, job.targetBase, true), grant, load: reviewLoader({ 'runs-store': store, 'attempt-id': grant.predecessorAttemptId }) });
-  } else await claimAdmission(store, admission(request));
+  } else {
+    try { await claimAdmission(store, admission(request)); }
+    catch(error) {
+      if(capacityReservation)await capacityReservation.cancelBeforeDispatch();
+      throw error;
+    }
+  }
   const prepared = await mkdtemp(join(store, '.prepare-'));
   const configPath = join(prepared, 'config.json'), taskPath = join(prepared, 'task.mjs');
   const config = { version: 1, mode, ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };

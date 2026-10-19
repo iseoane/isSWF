@@ -49,13 +49,22 @@ try {
   for (const change of [{ mode: 'real' }, { attemptId: 'different' }, { jobSha256: '0'.repeat(64) }, { capacityRunnerSha256: '0'.repeat(64) }]) {
     await json(grantFile, { ...grant, ...change }); const denied = command(process.execPath, args); assert.equal(denied.status, 1); assert.deepEqual(await readdir(store), []);
   }
+  await json(grantFile, grant);
+  for(const slot of [0,1])await rm(join(pool,'slot-'+slot),{recursive:true});
+  const hook=join(root,'lose-admission.mjs');
+  await writeFile(hook,`import fs from 'node:fs/promises'; import {syncBuiltinESMExports} from 'node:module'; const original=fs.link; fs.link=async(a,b)=>{if(b.includes('/admissions/'))throw Object.assign(new Error('synthetic competing admission'),{code:'EEXIST'});return original(a,b);}; syncBuiltinESMExports();`);
+  const lost=command(process.execPath,['--import',hook,...args]);
+  assert.equal(lost.status,1,lost.stderr);
+  assert.equal((await readdir(pool)).filter(name=>name.startsWith('slot-')).length,0,'losing admission must not strand execution capacity');
+  assert.equal((await readdir(pool+'/completed')).length,1);
+  await assert.rejects(readFile(join(store,grant.attemptId+'.job.json')),error=>error.code==='ENOENT');
   if(process.argv[3]) {
     const actualSDK=resolve(process.argv[3]);
     git('fetch','--quiet',source,job.methodologySha);
     const authPath=join(root,'synthetic-offline-auth.json');
     const token=['synthetic',Buffer.from(JSON.stringify({'https://api.openai.com/auth':{chatgpt_account_id:'synthetic-offline-account'}})).toString('base64url'),'signature'].join('.');
     await json(authPath,{'openai-codex':{type:'oauth',access:token,refresh:'synthetic-not-usable',expires:4102444800000}});
-    for(const slot of [0,1])await rm(join(pool,'slot-'+slot),{recursive:true});
+    for(const slot of [0,1])await rm(join(pool,'slot-'+slot),{recursive:true,force:true});
     const inputs=[];
     for(const [id,check]of [['worker-a','while ! test -f gate; do sleep 0.02; done; printf done > result.txt'],['worker-b','while ! test -f gate; do sleep 0.02; done; printf done > result.txt'],['worker-third','printf third > result.txt'],['worker-failed','exit 7'],['worker-unrelated','printf unrelated > result.txt']]) {
       const selected={...job,logicalJobRef:'I0001/J005/'+id,sdkPath:actualSDK,authPath,expectedMutablePaths:['result.txt','gate'],offlineChecks:[{name:'owned-offline-control',command:check,expectedExitCode:0}]};

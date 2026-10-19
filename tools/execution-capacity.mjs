@@ -70,6 +70,14 @@ export async function acquireCapacity(scope, { role, logicalJobRef, mode, worker
       assert(role!=='worker','worker-completion-requires-bound-cessation');
       await archiveReservation(scope,info,bytes,mode === 'fixture' ? 'synthetic fixture completed matching response; no real provider execution' : 'own native caller observed complete matching provider response; no active stream remains');
       completed = true;
+    }, async cancelBeforeDispatch() {
+      assert(role==='worker' && process.pid===info.pid && !completed,'worker-predispatch-owner-required');
+      for(const path of [worker.attemptDir,join(dirname(worker.attemptDir),worker.attemptId+'.job.json')]) {
+        try { await lstat(path); } catch(error) { if(error.code==='ENOENT')continue; throw error; }
+        throw Error('worker-dispatch-may-have-started');
+      }
+      await archiveReservation(scope,info,bytes,{kind:'worker-admission-refused-before-dispatch'});
+      completed=true;
     } };
   }
   return null;
