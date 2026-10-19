@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "candidate": "e58f1c92ad66f0d661d85e84bc84b08fcd0d76dc",
+  "scope": "Diagnostician joins the optional explicit reviewer/planner execution pool; not whole J005",
+  "review": {
+    "status": "response-complete",
+    "attempts": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Review report\n\n**Base:** `e9ee9b9b9368e268369a2f691aea900c6e56b30c`  \n**Candidate:** commit `e58f1c92ad66f0d661d85e84bc84b08fcd0d76dc`  \n**Reviewed scope:** `tools/diagnostic-task.mjs`, `tools/execution-capacity.mjs`, `tests/diagnostic-task.mjs`, and `docs/model-routing.md`.\n\n### Standards — pass\n\nThe implementation adds diagnostician admission through the existing shared capacity helper, before diagnostic probes or provider work. Full-pool refusal removes the fresh empty attempt directory; uncertain and failed attempts retain their reservation; successful reports complete the reservation. Readback checks that capacity metadata matches between binding and result and identifies the diagnostician role and logical job. The change preserves the stated legacy path when capacity is omitted.\n\nThe supplied test evidence covers full-pool refusal with zero probes/calls, successful completion, reservation retention after an uncertain call, and rejection of mismatched capacity metadata. The supplied actual bwrap observation and installed-SDK synthetic OAuth/SSE and empty-auth observations support the relevant isolation and transport boundaries.\n\n### Spec — pass\n\nThe candidate matches the stated scope: diagnostician joins the reviewer/planner capacity pool, admission precedes probes, blocked admission consumes no attempt, and worker/researcher integration and broader dependency gates remain explicitly pending. The documentation reflects those boundaries.\n\n### Findings\n\nNone.\n\n### Checks and limitations\n\nI did not execute checks. The reported bwrap, SDK, public-test, ESLint, and Knip results are supplied parent/runtime observations, not my runs. They report the exact candidate as pinned; I did not independently recompute the candidate identity or rerun those checks. These observations do not establish worker/researcher integration, a live provider integration, or the full MOD-07 guarantee; those are outside this candidate’s claimed scope and remain pending.\n\n**Aggregate: pass.** This is a review result, not merge permission or product acceptance."
+  },
+  "checks": [
+    "Actual full-pool regression RED then GREEN",
+    "Zero diagnostic probes or provider attempts when pool full",
+    "Successful completion archive and uncertain claim retention",
+    "Readback tamper rejection",
+    "Actual normalcaller readonly bwrap",
+    "Installed SDK synthetic OAuth/SSE and empty-auth boundaries",
+    "Aggregate quality, ESLint and Knip"
+  ],
+  "limits": [
+    "No live provider invocation for diagnostics in this change",
+    "Worker/researcher admission, descendant cessation and dependency/cycle/integration gating remain pending"
+  ]
+}
