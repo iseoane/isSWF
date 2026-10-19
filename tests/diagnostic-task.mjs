@@ -93,6 +93,22 @@ try {
       } };
     },
   });
+  const pool = join(root, 'capacity'); await mkdir(pool); await mkdir(join(pool, 'completed'));
+  const policy = JSON.stringify({version:1,limit:1,reference:'Synthetic diagnostic shared pool'});
+  await writeFile(join(pool, 'policy.json'), policy); await mkdir(join(pool, 'slot-0'));
+  const capacity = {pool,policySha256:hash(policy)};
+  const capacityGrant = {...grant,capacity,capacityRunnerSha256:hash(await readFile(join(source,'tools/execution-capacity.mjs')))};
+  await json(grantFile,capacityGrant);
+  let capacityProbes = 0;
+  const callsBeforeCapacity = backendCalls;
+  const refused = await runDiagnosis(request,{mode:'fixture',backend:fixture('normal'),probeRunner:async options=>{capacityProbes++;return syntheticProbes(options);}});
+  assert.equal(refused.reason,'capacity'); assert.equal(refused.attemptsConsumed,0); assert.equal(refused.fetches,0);
+  assert.equal(capacityProbes,0); assert.equal(backendCalls,callsBeforeCapacity); assert.deepEqual(await readdir(store),[]);
+  await rm(join(pool,'slot-0'),{recursive:true});
+  for(const change of [{capacityRunnerSha256:'0'.repeat(64)},{capacity:{pool,policySha256:'0'.repeat(64)}}]){
+    await json(grantFile,{...capacityGrant,...change});await assert.rejects(prepareDiagnosis(request));
+  }
+  await json(grantFile,capacityGrant);
   mock.timers.enable({ apis: ['setTimeout', 'Date'] });
   let result;
   try { result = await runDiagnosis(request, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture('normal') }); }
@@ -102,6 +118,12 @@ try {
   const before = await readFile(join(p.dir, 'result.json'));
   const record = await readDiagnosis({ project, store, logicalJobRef: job.logicalJobRef });
   assert.equal(record.status, 'recorded'); assert.equal(record.binding.inputSha, inputSha);
+  assert.equal(record.binding.capacity.role,'diagnostician'); assert.deepEqual(record.binding.capacity,result.capacity);
+  assert.equal((await readdir(join(pool,'completed'))).length,1); assert.equal((await readdir(pool)).includes('slot-0'),false);
+  const originalBinding = await readFile(join(p.dir,'binding.json'));
+  await json(join(p.dir,'binding.json'),{...record.binding,capacity:{...record.binding.capacity,role:'planner'}});
+  assert.equal((await readDiagnosis({project,store,logicalJobRef:job.logicalJobRef})).status,'unknown');
+  await writeFile(join(p.dir,'binding.json'),originalBinding);
   assert.equal(await readFile(join(p.dir, 'result.json'), 'utf8'), before.toString());
   await assert.rejects(runDiagnosis(request, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture('normal') })); assert.equal(backendCalls, 1);
   for (const kind of ['preflight', 'http400', 'second-fetch', 'deadline', 'wrong-model', 'oversize']) {
@@ -116,6 +138,14 @@ try {
     assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');
     await assert.rejects(runDiagnosis(current, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture('normal') }));
   }
+  const uncertainStore = join(root,'capacity-uncertain'); await mkdir(uncertainStore);
+  await json(grantFile,{...capacityGrant,store:uncertainStore});
+  const uncertain = await runDiagnosis({...request,store:uncertainStore},{mode:'fixture',probeRunner:syntheticProbes,backend:fixture('http400',join(uncertainStore,p.dir.split('/').at(-1)))});
+  assert.equal(uncertain.status,'blocked'); assert.equal(uncertain.attemptsConsumed,1);
+  assert.equal((await readdir(pool)).includes('slot-0'),true);
+  const waitingStore=join(root,'capacity-waiting'); await mkdir(waitingStore); await json(grantFile,{...capacityGrant,store:waitingStore});
+  const waiting = await runDiagnosis({...request,store:waitingStore},{mode:'fixture',backend:fixture('normal'),probeRunner:async()=>{throw Error('must not probe while capacity full');}});
+  assert.equal(waiting.reason,'capacity'); assert.equal(waiting.attemptsConsumed,0); assert.deepEqual(await readdir(waitingStore),[]);
   const probeFailureStore = join(root,'probe-failure'); await mkdir(probeFailureStore);
   await json(grantFile,{...grant,store:probeFailureStore});
   const probeFailed = await runDiagnosis({...request,store:probeFailureStore},{mode:'fixture',backend:fixture('normal'),probeRunner:async()=>{throw Error('synthetic sandbox unavailable')}});
