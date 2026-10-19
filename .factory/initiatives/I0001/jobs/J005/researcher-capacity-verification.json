@@ -20,5 +20,13 @@
   "limits": [
     "No live researcher provider invocation",
     "Worker admission and cessation, dependency/cycle/integration gates remain pending; J005 not closed"
-  ]
+  ],
+  "recordsReview": {
+    "candidate": "dde3ef9228d3980e8c262dc97fd1830fe0cabfcd",
+    "status": "response-complete",
+    "attempts": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Review report\n\n**Base:** `5f570cfb0567843a1376bdd28c18431e3de21024`  \n**Candidate:** `dde3ef9228d3980e8c262dc97fd1830fe0cabfcd`  \n**Reviewed paths:** `.factory/initiatives/I0001/jobs/J005/brief-r3.md`, `.factory/initiatives/I0001/jobs/J005/researcher-capacity-verification.json`, `.factory/initiatives/I0001/plan.md`\n\n### Standards — pass\n\nThe candidate is limited to the stated records and brief. It preserves J005 as in progress, distinguishes the researcher source checkpoint from publication and whole-job acceptance, and records remaining work. The supplied runtime observation confirms that the canonical status resolves J005 to `brief-r3.md` and reports `executionAuthorized: false`.\n\n### Spec — pass\n\nThe brief and plan describe the researcher work as a checkpoint awaiting review and integration, not as published or accepted. The verification record identifies the reviewed source candidate as `5f570cfb…`, consistent with this candidate’s base. Nothing in the reviewed records claims J005 is complete or grants new execution authority.\n\n### Finding\n\n**Suggestion — `.factory/initiatives/I0001/plan.md`, J005 brief entry.** The entry labels `brief-r3.md` “pending until prepared,” although this candidate adds the prepared brief and the host probe resolves it as J005’s selected brief. This may be a generic convention, but it reads as stale status. Clarify the label if it means something other than preparation being incomplete.\n\n### Checks and limitations\n\nThe host-selected read-only probe exited 0 and observed J005 as `in-progress`, selected brief `brief-r3.md`, and `executionAuthorized: false`. I did not run commands or independently recompute the candidate identity. I did not independently verify the embedded review’s historical CI, publication, or source-check results; the supplied prior review is evidence for that scoped source review, not a fresh review of the researcher code. No full J005 integration or product acceptance was reviewed.\n\n**Aggregate: pass** for this records-only scope. This is not merge permission or product acceptance."
+  }
 }
