@@ -15,6 +15,7 @@ const commit = () => { git('add', '.'); git('commit', '--allow-empty', '-qm', 'P
 try {
   await mkdir(project); await mkdir(store); git('init', '-q'); git('config', 'user.name', 'Fixture'); git('config', 'user.email', 'fixture@invalid');
   await writeFile(join(project, 'code.txt'), 'already integrated\n'); const base = commit();
+  const unrelated = git('commit-tree', git('rev-parse', base + '^{tree}'), '-m', 'Unrelated root for graft refusal');
   const proposalPath = join(root, 'proposal.json'), planGrant = join(root, 'plan-grant.json');
   const jobRecord = (id, dependsOn, status) => ({ id, dependsOn, status, objective: id, acceptance: ['Observable result'], blocker: 'None', nextStep: 'Prepare', evidence: status === 'completed' ? [base] : [] });
   await json(proposalPath, { version: 1, initiative: 'I0001', title: 'Admission fixture', type: 'enhancement', jobs: [jobRecord('J001', [], 'completed'), jobRecord('J002', ['J001'], 'pending'), jobRecord('J003', [], 'pending')] });
@@ -22,7 +23,7 @@ try {
   const created = await plan({ action: 'prepare', project, initiative: 'I0001', proposalPath, grantPath: planGrant });
   const original = await readFile(created.path, 'utf8'), path = '.factory/initiatives/I0001/plan.md';
   let serial = 0;
-  async function invoke({ markdown = original, attestations = {}, selectedJob = 'J002', descriptor = {}, grantChange = {}, includeGrant = true, dirty = false, legacy = false } = {}) {
+  async function invoke({ markdown = original, attestations = {}, selectedJob = 'J002', descriptor = {}, grantChange = {}, includeGrant = true, dirty = false, legacy = false, graft = false } = {}) {
     await writeFile(created.path, markdown);
     const job = { version: 1, runtimeSha: '2'.repeat(40), targetBase: base, methodologySha: '37a56ebc902e94f21fc10666f33fceac44946af7', exclusiveAttempt: true, workerTotal: 1, logicalJobRef: 'I0001/' + selectedJob, ...(legacy ? {} : { prerequisites: { path, sha256: hash(markdown), jobId: selectedJob, ...descriptor } }) };
     await json(join(project, 'job.json'), job); const inputSha = commit(), attemptId = 'dependency-' + serial++;
@@ -30,12 +31,14 @@ try {
     const grant = { version: 1, role: 'worker', project, runsStore: store, inputSha, jobPath: 'job.json', jobSha256: hash(await readFile(join(project, 'job.json'))), runtimeSha: job.runtimeSha, targetBase: base, attemptId, logicalJobRef: job.logicalJobRef, grantRef: 'synthetic-dependency-only', allowDependencyCheck: true, prerequisites: job.prerequisites, attestations: typeof attestations === 'function' ? attestations(inputSha) : attestations, ...grantChange };
     await json(grantFile, grant);
     if (dirty) await writeFile(created.path, original.replace('- Status: pending', '- Status: awaiting-human'));
+    if (graft) await writeFile(join(project, '.git/info/grafts'), base + ' ' + unrelated + '\n');
     const args = [join(source, 'tools/isswf-job.mjs'), 'run', '--project', project, '--input-sha', inputSha, '--job', 'job.json', '--runs-store', store, '--attempt-id', attemptId, '--grant-ref', grant.grantRef, '--mode', 'offline'];
     if (includeGrant && !legacy) args.push('--dependency-grant', grantFile);
     const before = await readFile(created.path), result = spawnSync(process.execPath, args, { encoding: 'utf8', timeout: 15000 });
     assert.deepEqual(await readdir(store), [], 'gate must not claim a writer, lease, binding or attempt');
     assert((await readFile(created.path)).equals(before), 'gate must not rewrite the canonical plan');
     if (dirty) { await writeFile(created.path, markdown); }
+    if (graft) await rm(join(project, '.git/info/grafts'));
     return result;
   }
   async function blocked(options, reason) { const r = await invoke(options); assert.equal(r.status, 2, r.stderr); const value = JSON.parse(r.stdout); assert.equal(value.reason, reason); assert.equal(value.attemptsConsumed, 0); }
@@ -43,6 +46,7 @@ try {
   await blocked({}, 'dependency-evidence');
   await blocked({ markdown: original.replace('- Status: completed', '- Status: awaiting-human') }, 'decision');
   await blocked({ attestations: sha => ({ J001: { kind: 'code', commit: sha } }) }, 'code-integration');
+  await blocked({ attestations: { J001: { kind: 'code', commit: unrelated } }, graft: true }, 'code-integration');
   await blocked({ markdown: original.replace('- Depends on: None', '- Depends on: J002') }, 'dependency-cycle');
   await blocked({ markdown: original.replace('- Status: completed', '- Status: pending'), attestations: { J001: { kind: 'decision', reference: 'Synthetic operator decision' } } }, 'decision');
   for (const options of [{ includeGrant: false }, { descriptor: { sha256: '0'.repeat(64) } }, { grantChange: { jobSha256: '0'.repeat(64) } }, { grantChange: { allowDependencyCheck: false } }, { attestations: { J001: { kind: 'code', commit: base }, J003: { kind: 'code', commit: base } } }]) {

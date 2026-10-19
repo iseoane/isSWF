@@ -171,7 +171,7 @@ async function dependencyAdmission(args, project, job, jobBytes) {
     if (attestation.kind === 'code') {
       if (!exactKeys(attestation, 'commit,kind') || !fullSha(attestation.commit)) throw Error('full attested integration commit required');
       const timeout = deadlineAt - Date.now(); if (timeout <= 0) throw Error('integration ancestry deadline');
-      const result = spawnSync('git', ['-C', project, 'merge-base', '--is-ancestor', attestation.commit, job.targetBase], { timeout, stdio: 'ignore', env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1' } });
+      const result = spawnSync('git', ['-C', project, 'merge-base', '--is-ancestor', attestation.commit, job.targetBase], { timeout, stdio: 'ignore', env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1', GIT_GRAFT_FILE: '/dev/null' } });
       if (result.error || ![0, 1].includes(result.status) || Date.now() >= deadlineAt) throw Error('integration ancestry unverifiable');
       if (result.status === 1) return blocked('code-integration', id);
     } else if (attestation.kind === 'decision') {
