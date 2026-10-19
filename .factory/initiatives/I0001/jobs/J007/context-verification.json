@@ -7,6 +7,7 @@
     "executable": "/home/linuxbrew/.linuxbrew/Cellar/engram/3.4.0/bin/engram",
     "binarySha256": "ab390cf76d141b2e1e950c5babfdfac4d7023e3fb2dbb96b3ff8eca8a3629479",
     "version": "engram 3.4.0",
+    "isolation": "Actual bwrap: only synthetic home/data writable, host home/store unmounted, network namespace isolated; no environment credentials",
     "observations": [
       {
         "args": [
@@ -51,7 +52,7 @@
           "project"
         ],
         "exitCode": 0,
-        "stdout": "Found 1 memories:\n\n[1] #1 (manual) — Current decision\n    synthetic-current-decision-coral814\n    2026-10-19 19:01:17 | project: fixture-own | scope: project\n\n"
+        "stdout": "Found 1 memories:\n\n[1] #1 (manual) — Current decision\n    synthetic-current-decision-coral814\n    2026-10-19 17:14:22 | project: fixture-own | scope: project\n\n"
       },
       {
         "args": [
@@ -74,7 +75,7 @@
           "project"
         ],
         "exitCode": 0,
-        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-own** (2026-10-19 19:01:17) [1 observations]\n\n### Recent Observations\n- [manual] **Current decision**: synthetic-current-decision-coral814\n\n"
+        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-own** (2026-10-19 17:14:22) [1 observations]\n\n### Recent Observations\n- [manual] **Current decision**: synthetic-current-decision-coral814\n\n"
       },
       {
         "args": [
@@ -85,10 +86,11 @@
           "project"
         ],
         "exitCode": 0,
-        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-foreign** (2026-10-19 19:01:17) [1 observations]\n\n### Recent Observations\n- [manual] **Foreign decision**: synthetic-foreign-decision-violet927\n\n"
+        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-foreign** (2026-10-19 17:14:22) [1 observations]\n\n### Recent Observations\n- [manual] **Foreign decision**: synthetic-foreign-decision-violet927\n\n"
       }
     ],
     "checks": [
+      "fixture database created in mounted data directory",
       "fresh-process own-project recall",
       "explicit project overrides conflicting process default",
       "foreign observation absent from scoped search and context",
@@ -189,7 +191,27 @@
     "limit": "Not a real outage or proof that a model always handles missing decisions correctly."
   },
   "nativeReview": {
-    "status": "pending"
+    "status": "pending",
+    "priorResults": [
+      {
+        "version": 1,
+        "standards": "pass",
+        "spec": "inconclusive",
+        "reason": "Aggregate identity and pending publication CI; actual report retained locally."
+      },
+      {
+        "version": 2,
+        "standards": "pass",
+        "spec": "inconclusive",
+        "reason": "Missing concrete selected-fact handoff observation; new public prepare-only handoff test added."
+      },
+      {
+        "version": 3,
+        "standards": "inconclusive",
+        "spec": "inconclusive",
+        "reason": "Unchanged caller context absent; suggested filesystem isolation for optional executable. Optional test now sandboxed; source context must accompany affected review."
+      }
+    ]
   },
   "limits": [
     "No automatic semantic stale-memory or secret filter exists or is claimed",
