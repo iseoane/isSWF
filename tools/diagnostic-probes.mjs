@@ -3,9 +3,10 @@ import { spawnSync } from 'node:child_process';
 import { lstat, realpath } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 
-const git = (project, args) => {
-  const run = spawnSync('git', ['-C', project, '-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false', ...args], { encoding: 'utf8', timeout: 10000, maxBuffer: 256000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1' } });
-  assert(!run.error && run.status === 0, 'diagnostic-target-unavailable'); return run.stdout.trim();
+const git = (project, args, deadlineAt) => {
+  const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'diagnostic-probe-deadline');
+  const run = spawnSync('git', ['-C', project, '-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false', ...args], { encoding: 'utf8', timeout, maxBuffer: 256000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1' } });
+  assert(!run.error && run.status === 0 && Date.now() < deadlineAt, 'diagnostic-target-unavailable'); return run.stdout.trim();
 };
 export function validateProbes(probes) {
   assert(Array.isArray(probes) && probes.length > 0 && probes.length <= 3, 'one-to-three-explicit-probes-required');
@@ -21,7 +22,7 @@ export async function runDiagnosticProbes({ targetRepo, targetBase, probes, dead
   assert(isAbsolute(targetRepo ?? '') && /^[a-f0-9]{40}$/u.test(targetBase) && Number.isFinite(deadlineAt), 'explicit-probe-target-required');
   targetRepo = await realpath(targetRepo);
   const metadata = await lstat(join(targetRepo, '.git')); assert(metadata.isDirectory() && !metadata.isSymbolicLink(), 'standalone-git-root-required');
-  const unchanged = () => { assert(git(targetRepo, ['rev-parse', '--show-toplevel']) === targetRepo && git(targetRepo, ['rev-parse', 'HEAD']) === targetBase && git(targetRepo, ['status', '--porcelain=v1', '--untracked-files=all']) === '', 'clean-pinned-diagnostic-target-required'); };
+  const unchanged = () => { assert(git(targetRepo, ['rev-parse', '--show-toplevel'], deadlineAt) === targetRepo && git(targetRepo, ['rev-parse', 'HEAD'], deadlineAt) === targetBase && git(targetRepo, ['status', '--porcelain=v1', '--untracked-files=all'], deadlineAt) === '', 'clean-pinned-diagnostic-target-required'); };
   unchanged();
   const results = [], node = await realpath(process.execPath);
   for (const probe of probes) {

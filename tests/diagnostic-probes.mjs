@@ -11,6 +11,16 @@ const { runDiagnosticProbes, validateProbes } = await import(pathToFileURL(join(
 assert.throws(() => validateProbes([]));
 assert.throws(() => validateProbes([{ name: 'bad', command: 'echo\nunsafe', expectedExitCode: 0 }]));
 assert.throws(() => validateProbes(Array.from({ length: 4 }, (_, i) => ({ name: 'p' + i, command: 'true', expectedExitCode: 0 }))));
+const deadlineRoot = await mkdtemp(join(tmpdir(), 'isswf-probe-deadline-'));
+const priorPath = process.env.PATH;
+try {
+  const project = join(deadlineRoot, 'project'); await mkdir(project); await mkdir(join(project, '.git'));
+  await writeFile(join(deadlineRoot, 'git'), '#!' + process.execPath + '\nAtomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,1000);\n', { mode: 0o755 });
+  process.env.PATH = deadlineRoot + ':' + priorPath;
+  const started = Date.now();
+  await assert.rejects(runDiagnosticProbes({ targetRepo: project, targetBase: '1'.repeat(40), probes: [{ name: 'unused', command: 'true', expectedExitCode: 0 }], deadlineAt: started + 80 }));
+  assert(Date.now() - started < 800, 'Git preflight exceeded the whole-probe deadline');
+} finally { process.env.PATH = priorPath; await rm(deadlineRoot, { recursive: true, force: true }); }
 if (!process.argv.includes('--sandbox')) console.log('PASS diagnostic probe input boundaries; actual Linux/bwrap isolation requires the explicit --sandbox test');
 else {
   const root = await mkdtemp(join(tmpdir(), 'isswf-diagnostic-probes-')), project = join(root, 'project'), outside = join(root, 'outside.txt');

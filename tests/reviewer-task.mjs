@@ -108,6 +108,90 @@ try {
   await json(grantFile, { ...grant, store: incompleteStore });
   const prepared = await prepareReview({ ...request, store: incompleteStore }); await mkdir(prepared.dir);
   assert.equal((await readReview({ project, store: incompleteStore, logicalJobRef: job.logicalJobRef })).status, 'unknown');
+  await writeFile(join(project, 'large-context.md'), 'x'.repeat(60000)); const largeBase = commit();
+  await writeFile(join(project, 'app.mjs'), 'export const answer = 3;\n'); const largeCandidate = commit();
+  const largeJob = { ...job, targetBase: largeBase, candidateSha: largeCandidate, contextPaths: ['large-context.md'] };
+  await json(join(project, 'large-review.json'), largeJob); const largeInput = commit();
+  const largeGrant = { ...grant, inputSha: largeInput, jobPath: 'large-review.json', jobSha256: hash(await readFile(join(project, 'large-review.json'))), targetBase: largeBase, candidateSha: largeCandidate };
+  const largeRequest = { ...request, inputSha: largeInput, jobPath: 'large-review.json' };
+  await json(grantFile, largeGrant); await assert.rejects(prepareReview(largeRequest), /review-bundle-too-large/u);
+  await json(grantFile, { ...largeGrant, inputBytes: 131072 });
+  const largePrepared = await prepareReview(largeRequest);
+  assert.equal(JSON.parse(largePrepared.prompt).context[0].text.length, 60000);
+  for (const inputBytes of [0, 131073, 1.5]) { await json(grantFile, { ...largeGrant, inputBytes }); await assert.rejects(prepareReview(largeRequest)); }
+  await json(join(project, 'review.json'), { ...job, evidenceMode: 'candidate-and-diff' }); const compactInput = commit();
+  const compactGrant = { ...grant, inputSha: compactInput, jobSha256: hash(await readFile(join(project, 'review.json'))), evidenceMode: 'candidate-and-diff' };
+  await json(grantFile, compactGrant);
+  const compactRequest = { ...request, inputSha: compactInput };
+  const compact = JSON.parse((await prepareReview(compactRequest)).prompt);
+  assert.equal(Object.hasOwn(compact.changes[0], 'base'), false, 'compact evidence must omit the redundant full base copy');
+  assert.equal(compact.evidenceMode, 'candidate-and-diff');
+  assert.equal(compact.changes[0].candidate, 'export const answer = 2;\n');
+  assert.match(compact.diff, /-export const answer = 1;\n\+export const answer = 2;/u);
+  await json(grantFile, { ...compactGrant, evidenceMode: 'unknown' }); await assert.rejects(prepareReview(compactRequest));
+  await json(grantFile, grant);
+  const probeStore = join(root, 'workspace-review'); await mkdir(probeStore);
+  const workspaceRepo = join(root, 'candidate-checkout');
+  const clone = command('git', ['clone', '--quiet', '--no-hardlinks', project, workspaceRepo]); assert.equal(clone.status, 0, clone.stderr);
+  assert.equal(command('git', ['-C', workspaceRepo, 'checkout', '--quiet', '--detach', candidate]).status, 0);
+  const workspace = { repo: workspaceRepo, probes: [{ name: 'answer', command: 'node -e "console.log(2)"', expectedExitCode: 0 }] };
+  await json(join(project, 'review.json'), { ...job, workspace }); const probeInput = commit();
+  const probeGrant = { ...grant, store: probeStore, inputSha: probeInput, jobSha256: hash(await readFile(join(project, 'review.json'))), allowWorkspaceProbes: true, workspace, targetMode: 'read-only', probeRunnerSha256: hash(await readFile(join(source, 'tools/diagnostic-probes.mjs'))) };
+  await json(grantFile, probeGrant); const probeRequest = { ...request, inputSha: probeInput, store: probeStore };
+  let probesCalled = 0;
+  const observations = [{ name: 'answer', command: workspace.probes[0].command, expectedExitCode: 0, exitCode: 0, expectationMatched: true, stdout: '2\n', stderr: '', targetBase: candidate }];
+  const probeResult = await runReview(probeRequest, { mode: 'fixture', backend: fixture('normal', join(probeStore, p.dir.split('/').at(-1))), probeRunner: async request => { probesCalled++; assert.equal(request.targetBase, candidate); assert.equal(request.targetRepo, workspaceRepo); return observations; } });
+  assert.equal(probesCalled, 1, 'explicit workspace review must execute its authorized probe before the model');
+  assert.equal(probeResult.status, 'response-complete');
+  const probeRead = await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef });
+  assert.equal(probeRead.status, 'recorded'); assert.equal(probeRead.binding.workspace.candidateSha, candidate);
+  const probeEvidence = JSON.parse(await readFile(join(probeStore, p.dir.split('/').at(-1), 'evidence.json')));
+  assert.deepEqual(JSON.parse(probeEvidence.prompt).workspaceVerification.results, observations);
+  const intentPath = join(probeStore, p.dir.split('/').at(-1), 'probe-intent.json');
+  const originalIntent = await readFile(intentPath, 'utf8');
+  const intentRecord = JSON.parse(originalIntent);
+  for (const changed of [{ ...intentRecord, workspace: { ...workspace, probes: [{ ...workspace.probes[0], command: 'false' }] } }, { ...intentRecord, providerPromptStarted: true }]) {
+    await json(intentPath, changed);
+    assert.equal((await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef })).status, 'unknown', 'tampered probe intent must not be recorded');
+  }
+  await writeFile(intentPath, originalIntent);
+  assert.equal((await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef })).status, 'recorded');
+  for (const mutation of [{ allowWorkspaceProbes: false }, { probeRunnerSha256: '0'.repeat(64) }, { workspace: { ...workspace, repo: project } }]) {
+    await json(grantFile, { ...probeGrant, ...mutation }); await assert.rejects(prepareReview(probeRequest));
+  }
+  const failedStore = join(root, 'failed-workspace'); await mkdir(failedStore); await json(grantFile, { ...probeGrant, store: failedStore });
+  const beforeProbeFailure = backendCalls;
+  const failedProbe = await runReview({ ...probeRequest, store: failedStore }, { mode: 'fixture', backend: fixture('normal'), probeRunner: async () => { throw Error('sandbox unavailable'); } });
+  assert.equal(failedProbe.status, 'blocked'); assert.equal(failedProbe.attemptsConsumed, 0); assert.equal(backendCalls, beforeProbeFailure);
+  await assert.rejects(runReview({ ...probeRequest, store: failedStore }, { mode: 'fixture', backend: fixture('normal') }));
+  assert.equal((await readReview({ project, store: failedStore, logicalJobRef: job.logicalJobRef })).status, 'unknown');
+  if (process.env.ISSWF_REVIEW_SANDBOX === '1') {
+    const realStore = join(root, 'actual-workspace'); await mkdir(realStore);
+    await json(grantFile, { ...probeGrant, store: realStore, deadlineMs: 10000 });
+    const sandboxResult = await runReview({ ...probeRequest, store: realStore }, { mode: 'fixture', backend: fixture('normal', join(realStore, p.dir.split('/').at(-1))) });
+    assert.equal(sandboxResult.status, 'response-complete', JSON.stringify(sandboxResult));
+    const sandboxRead = await readReview({ project, store: realStore, logicalJobRef: job.logicalJobRef });
+    assert.equal(sandboxRead.status, 'recorded'); assert.equal(sandboxRead.binding.workspace.results[0].stdout, '2\n');
+    assert.equal(command('git', ['-C', workspaceRepo, 'status', '--porcelain']).stdout, '');
+    console.log('PASS actual reviewer caller readonly bwrap probe, exact candidate binding and durable observed output; synthetic provider only');
+  }
+  for (const kind of ['wrong-candidate', 'dirty', 'mismatch', 'overflow']) {
+    const caseStore = join(root, 'workspace-' + kind); await mkdir(caseStore);
+    await json(grantFile, { ...probeGrant, store: caseStore });
+    const current = { ...probeRequest, store: caseStore };
+    const before = backendCalls;
+    if (kind === 'wrong-candidate') {
+      assert.equal(command('git', ['-C', workspaceRepo, 'checkout', '--quiet', '--detach', base]).status, 0);
+      await assert.rejects(prepareReview(current), /candidate-mismatch/u);
+      assert.equal(command('git', ['-C', workspaceRepo, 'checkout', '--quiet', '--detach', candidate]).status, 0);
+    } else {
+      if (kind === 'dirty') await writeFile(join(workspaceRepo, 'untracked'), 'must block');
+      const runner = kind === 'dirty' ? undefined : async () => kind === 'mismatch' ? [{ ...observations[0], expectationMatched: false }] : [{ ...observations[0], stdout: 'x'.repeat(65536) }];
+      const failed = await runReview(current, { mode: 'fixture', backend: fixture('normal'), ...(runner ? { probeRunner: runner } : {}) });
+      assert.equal(failed.status, 'blocked', kind); assert.equal(failed.attemptsConsumed, 0); assert.equal(backendCalls, before);
+      if (kind === 'dirty') await rm(join(workspaceRepo, 'untracked'));
+    }
+  }
   if (process.argv[3]) {
     const sdkPath = resolve(process.argv[3]), entry = createRequire(import.meta.url).resolve(sdkPath);
     const sdkStore = join(root, 'sdk'); await mkdir(sdkStore);

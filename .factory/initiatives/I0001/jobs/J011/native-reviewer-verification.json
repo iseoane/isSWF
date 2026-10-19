@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "sourceCandidate": "42ebd73420c9e52a0843b3aa6337424f162b59e5",
+  "sourceFiles": {
+    "tools/reviewer-task.mjs": "446f9197fa0ced3c88cd6e759b728712c7f1532fb384cd9375e581d88574ee00",
+    "tests/reviewer-task.mjs": "c29f7ad14a9994c661d04562f707ad09751151180cbf005f236db53d6c7be482",
+    "tools/diagnostic-probes.mjs": "c1fb9875ce0015b4553a76f3b8baf088438fc235ae47f880ecd96cd71699a811",
+    "tests/diagnostic-probes.mjs": "5ac64c565e590da7ca459a605d62053269280067727b3479d085eaf07782f9e9",
+    "docs/model-routing.md": "559ab20b8571f2945a5756d5e487417d9df9d5f432c9a7f5f0b0dfb4ec99ffa2"
+  },
+  "verification": {
+    "quality": "PASS",
+    "revision": "42ebd73420c9e52a0843b3aa6337424f162b59e5",
+    "actualReadonlySandbox": "PASS, recorded by native review runtime",
+    "installedSDK": "Synthetic OAuth/SSE and empty-auth refusal passed; no external provider availability claim"
+  },
+  "review": {
+    "base": "a56b83ea4c084d8e1928b863b7130f8633986efb",
+    "candidate": "42ebd73420c9e52a0843b3aa6337424f162b59e5",
+    "status": "response-complete",
+    "httpStatus": 200,
+    "attempts": 1,
+    "fetches": 1,
+    "model": "openai-codex/gpt-6-luna",
+    "effort": "high",
+    "methodologySha256": "083acffba29c6ea49fda5b26fe560df1b9727f9f08899dd9d039362e30336dfa",
+    "bundleSha256": "5839adb551c8848ecd9c5ba8e2ba42457924d3788a3ac1c5e1f7dd7aa32ddf84",
+    "report": "## Review report\n\n**Base:** `a56b83ea4c084d8e1928b863b7130f8633986efb`  \n**Candidate:** `42ebd73420c9e52a0843b3aa6337424f162b59e5`  \n**Reviewed scope:** `tools/reviewer-task.mjs`, `tools/diagnostic-probes.mjs`, and `tests/diagnostic-probes.mjs`; relevant supplied context: `tests/reviewer-task.mjs` and `docs/model-routing.md`.\n\n### Standards — **pass**\n\nThe prior deadline gap is addressed in the supplied code: Git subprocesses in the diagnostic runner and the caller’s post-probe candidate check receive the attempt deadline, cap their timeout at the lesser of 10 seconds and remaining time, and reject results observed after the deadline. The focused regression uses a deliberately blocking fake Git and verifies the preflight rejects without waiting for the full simulated delay.\n\n### Spec — **pass**\n\nThe supplied runtime observation reports the host-selected probe passed with exit code 0. Its output records successful actual reviewer-caller and diagnostic-sandbox checks, including timeout refusal, read-only workspace behavior, and unchanged Git tree/canary. This supports the required deadline fix and the previously reviewed workspace-probe behavior.\n\n### Findings\n\nNo findings.\n\n### Checks and limitations\n\nI did not rerun checks. The supplied host-selected workspace probe ran the public reviewer tests with `ISSWF_REVIEW_SANDBOX=1` and the diagnostic sandbox test; both reported success. These are runtime observations, not commands I executed. Provider availability and authenticated actor identities are not established. The evidence does not certify unrelated repository behavior or broader external-provider integration.\n\n**Aggregate: pass.** This is a review report, not merge permission or product acceptance."
+  },
+  "history": "Prior complete review failed on Git deadline; the retained affected review addresses that finding and includes unchanged reviewer tests and routing guide as full context. Earlier inconclusive/failed reports remain preserved locally, not represented as PASS.",
+  "limits": [
+    "No Pstack launcher",
+    "Host-selected readonly probes, not interactive model tools or authenticated actor identities",
+    "No product acceptance, whole-v1 completion, cleanup or client-use certification",
+    "Raw transport, auth data and local backup payloads are not published"
+  ]
+}
