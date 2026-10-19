@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "sourceBase": "af05457b1bd98362902bb1f7aff789fd9368653e",
+  "scope": "Current coordinator selection and optional installed CLI; not an automatic memory adapter",
+  "installedEngram": {
+    "status": "PASS",
+    "executable": "/home/linuxbrew/.linuxbrew/Cellar/engram/3.4.0/bin/engram",
+    "binarySha256": "ab390cf76d141b2e1e950c5babfdfac4d7023e3fb2dbb96b3ff8eca8a3629479",
+    "version": "engram 3.4.0",
+    "observations": [
+      {
+        "args": [
+          "version"
+        ],
+        "exitCode": 0,
+        "stdout": "engram 3.4.0\n"
+      },
+      {
+        "args": [
+          "save",
+          "Current decision",
+          "synthetic-current-decision-coral814",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory saved: #1 \"Current decision\" (manual)\n"
+      },
+      {
+        "args": [
+          "save",
+          "Foreign decision",
+          "synthetic-foreign-decision-violet927",
+          "--project",
+          "fixture-foreign",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory saved: #2 \"Foreign decision\" (manual)\n"
+      },
+      {
+        "args": [
+          "search",
+          "synthetic-current-decision-coral814",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "Found 1 memories:\n\n[1] #1 (manual) — Current decision\n    synthetic-current-decision-coral814\n    2026-10-19 19:01:17 | project: fixture-own | scope: project\n\n"
+      },
+      {
+        "args": [
+          "search",
+          "synthetic-foreign-decision-violet927",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "No memories found for: \"synthetic-foreign-decision-violet927\"\n"
+      },
+      {
+        "args": [
+          "context",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-own** (2026-10-19 19:01:17) [1 observations]\n\n### Recent Observations\n- [manual] **Current decision**: synthetic-current-decision-coral814\n\n"
+      },
+      {
+        "args": [
+          "context",
+          "--project",
+          "fixture-foreign",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-foreign** (2026-10-19 19:01:17) [1 observations]\n\n### Recent Observations\n- [manual] **Foreign decision**: synthetic-foreign-decision-violet927\n\n"
+      }
+    ],
+    "checks": [
+      "fresh-process own-project recall",
+      "explicit project overrides conflicting process default",
+      "foreign observation absent from scoped search and context",
+      "reverse separation"
+    ],
+    "limits": [
+      "Synthetic disposable store, not the user store or MCP transport",
+      "Project selectors are cooperative selection, not access-control credentials; broad queries remain possible",
+      "No claim of semantic secret detection, autonomous context selection, real service outage or client-ready isolation"
+    ]
+  },
+  "selection": {
+    "actor": "parent coordinator",
+    "trustedProject": "isswf",
+    "lookup": {
+      "tool": "mem_search",
+      "args": {
+        "project": "isswf",
+        "query": "Engram separation",
+        "match_mode": "any",
+        "limit": 4
+      },
+      "returnedObservationIds": [
+        2800,
+        2905,
+        3202,
+        2956
+      ]
+    },
+    "selectedFacts": [
+      {
+        "id": 2905,
+        "fact": "Model obedience is not a security boundary; required technical isolation remains a client-use gate."
+      },
+      {
+        "id": 3202,
+        "fact": "Engram and Codegraph remain optional; no installation or reindex required."
+      }
+    ],
+    "staleObservation": {
+      "id": 3406,
+      "lookup": "mem_get_observation",
+      "oldClaim": "Coordinator main CI39284228176 queued; task114 pending.",
+      "primaryObservation": "Actual gh run view39284228176: completed success, exact7214a7c. Current base af05457 contains PR67 and PR68.",
+      "disposition": "Discard queued status as current fact; no repeated CI/model dispatch derived from memory."
+    },
+    "authority": "Current operator instructions and pinned source, never memory",
+    "foreignProjectQueries": 0,
+    "clientDataUsed": false
+  },
+  "checks": [
+    {
+      "command": "node tests/reviewer-task.mjs .",
+      "exitCode": 0,
+      "stdout": "PASS native reviewer caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted report, no replay, failure/deadline/output boundaries; no provider calls\n",
+      "sha256": "921a934ce8fda52715174d122d1d5df13cbe2857e29c3c69b7e12415ba84ca7e"
+    },
+    {
+      "command": "node tests/planner-task.mjs .",
+      "exitCode": 0,
+      "stdout": "PASS native planner caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted proposal, no replay, failure/deadline/output boundaries; no provider calls\n",
+      "sha256": "c0bd0f36d8b249898671a463bc8a3b47e064fa46bd713290102a1d0f8beb731d"
+    },
+    {
+      "command": "node tests/diagnostic-probes.mjs . --sandbox",
+      "exitCode": 0,
+      "stdout": "PASS actual diagnostic bwrap: real host positive control, isolated network/home/env/Git, readonly project, unchanged canary and Git tree, timeout/output/dirty-target refusal; no model calls\n",
+      "sha256": "db15845a9c748f2a4b02e3f4958c4915f3a3c394ddeb594f8db8a19ad5a35edc"
+    },
+    {
+      "command": "node tools/check-quality.mjs",
+      "exitCode": 0,
+      "stdout": "{\n  \"status\": \"PASS\",\n  \"toolsInstallResult\": \"PASS committed six-tool installation, source/target CLIs, coherent imports, reuse, tamper and symlink refusal; no runtime or audit payload\",\n  \"statusResult\": \"PASS: actual plan and artifacts summarized without writes; absent/malformed/unsafe records visible; reported progress never becomes liveness or acceptance\",\n  \"panelResult\": \"PASS multiinitiative panel and pinned coordinator notes: actual loopback HTTP, canonical data/cards, explicit missing evidence, hostile text escaping, host/origin/method/path refusal, unsafe/absent records and unchanged project bytes; no provider calls\",\n  \"nextActionResult\": \"PASS recommendation selection, conservative dependency/authority semantics, actual status+multiinitiative HTTP, escaped output and no record writes\",\n  \"diagnosticResult\": \"PASS native diagnostician caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted diagnostic report, no replay, failure/deadline/output boundaries; no provider calls\",\n  \"probeResult\": \"PASS diagnostic probe input boundaries; actual Linux/bwrap isolation requires the explicit --sandbox test\",\n  \"plannerResult\": \"PASS native planner caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted proposal, no replay, failure/deadline/output boundaries; no provider calls\",\n  \"reviewerResult\": \"PASS native reviewer caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted report, no replay, failure/deadline/output boundaries; no provider calls\",\n  \"reviewPanelCapacityResult\": \"PASS native caller fixture panel: three distinct reviewer refs share two global slots with planner, blocked entries consume zero attempts, successive slots complete without deadlock, pending verdicts retain no execution slot, unrelated work proceeds and replay refuses; no provider calls or actual product review\",\n  \"planResult\": \"PASS: local multi-job plan, dependencies, readonly read, repeat, guarded revisions with exact prior Git checkpoint and no duplicate history files, missing authority, evidence and cycle guards\",\n  \"dependencyPlanResult\": \"PASS actual native canonical plan parser: exact status/edges, cycle, duplicate, missing and self-dependency refusal; no execution authority\",\n  \"inventoryResult\": \"PASS: five quality controls discovered without executing scripts, absent controls recommend bounded next steps and never become PASS\",\n  \"intakeResult\": \"PASS public native intake: no duplicate brief, changed inputs block, authority boundaries, readonly absence/read, corruption/partial block, cooperative duplicate claim, and symlink refusal; no network or models invoked\",\n  \"methodologyResult\": \"PASS native worker instructions preserve methodology and grant, omit coordinator transport, and disclose references conditionally\",\n  \"workerDependencyResult\": \"PASS normal worker dependency gate: decision/evidence/ancestry/cycle refusal before all admission effects; pinned input ignores dirty replacement, valid and unrelated cases reach activation; no worker execution claimed\",\n  \"workerCapacityResult\": \"PASS normal worker CLI capacity refusal before permanent admission, preparation or execution; bound grant mismatches fail closed; no provider calls\",\n  \"workerCapacityAPIResult\": \"PASS worker completion API: missing and mismatched private ownership/binding/dispatch evidence never releases capacity; no sandbox or provider calls\",\n  \"sessionResult\": \"{\\n  \\\"status\\\": \\\"PASS\\\",\\n  \\\"mode\\\": \\\"injected-caller-contract\\\",\\n  \\\"sameSessionAcrossRetry\\\": true,\\n  \\\"distinctSessionAcrossJobs\\\": true,\\n  \\\"persistedOpaqueUUID\\\": true,\\n  \\\"forbiddenNetworkFetches\\\": 0,\\n  \\\"realRuntimeCalls\\\": 0,\\n  \\\"limits\\\": \\\"Synthetic provider acceptance only; no real service availability or fallback integration proof.\\\"\\n}\",\n  \"quotaResult\": \"{\\n  \\\"status\\\": \\\"PASS\\\",\\n  \\\"controls\\\": [\\n    \\\"known-Go-quota-advances-without-retry\\\",\\n    \\\"quota-does-not-widen-total-budget\\\",\\n    \\\"rate-limit-is-not-quota\\\",\\n    \\\"free-tier-not-supported-by-Go-contract\\\",\\n    \\\"prose-never-authorizes-transition\\\",\\n    \\\"wrong-envelope-blocks\\\",\\n    \\\"unknown-429-blocks\\\",\\n    \\\"malformed-JSON-blocks\\\",\\n    \\\"oversized-body-blocks\\\",\\n    \\\"auth-status-cannot-be-quota\\\",\\n    \\\"other-provider-cannot-use-Go-contract\\\",\\n    \\\"clone-failure-preserves-response\\\",\\n    \\\"capture-stall-remains-deadline-bounded\\\"\\n  ],\\n  \\\"mode\\\": \\\"portable-injected-caller\\\",\\n  \\\"forbiddenNetworkFetches\\\": 0,\\n  \\\"realRuntimeCalls\\\": 0,\\n  \\\"limits\\\": \\\"Known versioned Go error envelope only. No current-service quota response, all-provider classifier or actual fallback claim.\\\"\\n}\",\n  \"revision\": \"af05457b1bd98362902bb1f7aff789fd9368653e\",\n  \"syntaxFiles\": 42,\n  \"markdownFiles\": 22,\n  \"checkedLinks\": 23,\n  \"package\": \"materialized committed HEAD and verified receipt/payload\",\n  \"routeResult\": \"PASS public worker route admission guard and canonical-route positive control\",\n  \"limits\": \"No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.\"\n}\n",
+      "sha256": "f35c7f60bded764baf01cfc5a71d5a690c4f7dc48925aa59229e2c8d22e2d04e"
+    }
+  ],
+  "sources": [
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "gitBlob": "a01cf0039e1756f45ddd63f4626c9220216c561d"
+    },
+    {
+      "path": "tests/reviewer-task.mjs",
+      "gitBlob": "fd4347a4e3a76bf8f51181c7312740a0c3964fd8"
+    },
+    {
+      "path": "tests/planner-task.mjs",
+      "gitBlob": "b075ce8676dee78cf7e729f616d4f698a24f23ee"
+    },
+    {
+      "path": "tests/diagnostic-probes.mjs",
+      "gitBlob": "4310883b89e6e86012a92f29952151768442717e"
+    }
+  ],
+  "degradation": {
+    "status": "controlled source-supported path",
+    "observation": "Native prepare/run public fixtures require only committed inputs and explicit grants, no optional Engram or Codegraph service. Current source and exact CI state suffice for the selected coordinator decisions.",
+    "limit": "Not a real outage or proof that a model always handles missing decisions correctly."
+  },
+  "nativeReview": {
+    "status": "pending"
+  },
+  "limits": [
+    "No automatic semantic stale-memory or secret filter exists or is claimed",
+    "CLI project selectors are cooperative; broader authorized queries remain possible",
+    "No MCP/cloud access-control certification or general client-ready claim",
+    "Existing sandbox proof covers only named sandbox, not unrestricted parent tools",
+    "Client use requiring stronger unverified separation remains blocked"
+  ]
+}
