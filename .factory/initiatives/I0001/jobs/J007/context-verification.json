@@ -1,0 +1,255 @@
+{
+  "version": 1,
+  "sourceBase": "af05457b1bd98362902bb1f7aff789fd9368653e",
+  "scope": "Current coordinator selection and optional installed CLI; not an automatic memory adapter",
+  "installedEngram": {
+    "status": "PASS",
+    "executable": "/home/linuxbrew/.linuxbrew/Cellar/engram/3.4.0/bin/engram",
+    "binarySha256": "ab390cf76d141b2e1e950c5babfdfac4d7023e3fb2dbb96b3ff8eca8a3629479",
+    "version": "engram 3.4.0",
+    "isolation": "Actual bwrap: only synthetic home/data writable, host home/store unmounted, network namespace isolated; no environment credentials",
+    "observations": [
+      {
+        "args": [
+          "version"
+        ],
+        "exitCode": 0,
+        "stdout": "engram 3.4.0\n"
+      },
+      {
+        "args": [
+          "save",
+          "Current decision",
+          "synthetic-current-decision-coral814",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory saved: #1 \"Current decision\" (manual)\n"
+      },
+      {
+        "args": [
+          "save",
+          "Foreign decision",
+          "synthetic-foreign-decision-violet927",
+          "--project",
+          "fixture-foreign",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "Memory saved: #2 \"Foreign decision\" (manual)\n"
+      },
+      {
+        "args": [
+          "search",
+          "synthetic-current-decision-coral814",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "Found 1 memories:\n\n[1] #1 (manual) — Current decision\n    synthetic-current-decision-coral814\n    2026-10-19 17:14:22 | project: fixture-own | scope: project\n\n"
+      },
+      {
+        "args": [
+          "search",
+          "synthetic-foreign-decision-violet927",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "No memories found for: \"synthetic-foreign-decision-violet927\"\n"
+      },
+      {
+        "args": [
+          "context",
+          "--project",
+          "fixture-own",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-own** (2026-10-19 17:14:22) [1 observations]\n\n### Recent Observations\n- [manual] **Current decision**: synthetic-current-decision-coral814\n\n"
+      },
+      {
+        "args": [
+          "context",
+          "--project",
+          "fixture-foreign",
+          "--scope",
+          "project"
+        ],
+        "exitCode": 0,
+        "stdout": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-foreign** (2026-10-19 17:14:22) [1 observations]\n\n### Recent Observations\n- [manual] **Foreign decision**: synthetic-foreign-decision-violet927\n\n"
+      }
+    ],
+    "checks": [
+      "fixture database created in mounted data directory",
+      "fresh-process own-project recall",
+      "explicit project overrides conflicting process default",
+      "foreign observation absent from scoped search and context",
+      "reverse separation"
+    ],
+    "limits": [
+      "Synthetic disposable store, not the user store or MCP transport",
+      "Project selectors are cooperative selection, not access-control credentials; broad queries remain possible",
+      "No claim of semantic secret detection, autonomous context selection, real service outage or client-ready isolation"
+    ]
+  },
+  "selection": {
+    "actor": "parent coordinator",
+    "trustedProject": "isswf",
+    "lookup": {
+      "tool": "mem_search",
+      "args": {
+        "project": "isswf",
+        "query": "Engram separation",
+        "match_mode": "any",
+        "limit": 4
+      },
+      "returnedObservationIds": [
+        2800,
+        2905,
+        3202,
+        2956
+      ]
+    },
+    "selectedFacts": [
+      {
+        "id": 2905,
+        "fact": "Model obedience is not a security boundary; required technical isolation remains a client-use gate."
+      },
+      {
+        "id": 3202,
+        "fact": "Engram and Codegraph remain optional; no installation or reindex required."
+      }
+    ],
+    "staleObservation": {
+      "id": 3406,
+      "lookup": "mem_get_observation",
+      "oldClaim": "Coordinator main CI39284228176 queued; task114 pending.",
+      "primaryObservation": "Actual gh run view39284228176: completed success, exact7214a7c. Current base af05457 contains PR67 and PR68.",
+      "disposition": "Discard queued status as current fact; no repeated CI/model dispatch derived from memory."
+    },
+    "authority": "Current operator instructions and pinned source, never memory",
+    "foreignProjectQueries": 0,
+    "clientDataUsed": false
+  },
+  "checks": [
+    {
+      "command": "node tests/reviewer-task.mjs .",
+      "exitCode": 0,
+      "stdout": "PASS native reviewer caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted report, no replay, failure/deadline/output boundaries; no provider calls\n",
+      "sha256": "921a934ce8fda52715174d122d1d5df13cbe2857e29c3c69b7e12415ba84ca7e"
+    },
+    {
+      "command": "node tests/planner-task.mjs .",
+      "exitCode": 0,
+      "stdout": "PASS native planner caller: pinned bundle and own methodology, explicit grants, no tools, one attempt/fetch, persisted proposal, no replay, failure/deadline/output boundaries; no provider calls\n",
+      "sha256": "c0bd0f36d8b249898671a463bc8a3b47e064fa46bd713290102a1d0f8beb731d"
+    },
+    {
+      "command": "node tests/diagnostic-probes.mjs . --sandbox",
+      "exitCode": 0,
+      "stdout": "PASS actual diagnostic bwrap: real host positive control, isolated network/home/env/Git, readonly project, unchanged canary and Git tree, timeout/output/dirty-target refusal; no model calls\n",
+      "sha256": "db15845a9c748f2a4b02e3f4958c4915f3a3c394ddeb594f8db8a19ad5a35edc"
+    },
+    {
+      "command": "node tests/project-context-handoff.mjs .",
+      "exitCode": 0,
+      "stdout": "PASS actual native prepare-only handoff: exact coordinator-selected facts and primary source; mutable foreign/secret markers excluded; source-only controlled absence; no SDK, provider, optional service or store writes. Not an automatic semantic filter.\n",
+      "scope": "Actual prepare-only pinned selected-fact handoff; no model execution, automatic filtering or real outage"
+    }
+  ],
+  "sources": [
+    {
+      "path": ".agents/skills/isswf-coordinator/SKILL.md",
+      "gitBlob": "a01cf0039e1756f45ddd63f4626c9220216c561d"
+    },
+    {
+      "path": "tests/reviewer-task.mjs",
+      "gitBlob": "fd4347a4e3a76bf8f51181c7312740a0c3964fd8"
+    },
+    {
+      "path": "tests/planner-task.mjs",
+      "gitBlob": "b075ce8676dee78cf7e729f616d4f698a24f23ee"
+    },
+    {
+      "path": "tests/diagnostic-probes.mjs",
+      "gitBlob": "4310883b89e6e86012a92f29952151768442717e"
+    }
+  ],
+  "degradation": {
+    "status": "controlled source-supported path",
+    "observation": "Native prepare/run public fixtures require only committed inputs and explicit grants, no optional Engram or Codegraph service. Current source and exact CI state suffice for the selected coordinator decisions.",
+    "limit": "Not a real outage or proof that a model always handles missing decisions correctly."
+  },
+  "nativeReview": {
+    "status": "pass-for-bounded-source-unit",
+    "priorResults": [
+      {
+        "version": 1,
+        "standards": "pass",
+        "spec": "inconclusive",
+        "reason": "Aggregate identity and pending publication CI; actual report retained locally."
+      },
+      {
+        "version": 2,
+        "standards": "pass",
+        "spec": "inconclusive",
+        "reason": "Missing concrete selected-fact handoff observation; new public prepare-only handoff test added."
+      },
+      {
+        "version": 3,
+        "standards": "inconclusive",
+        "spec": "inconclusive",
+        "reason": "Unchanged caller context absent; suggested filesystem isolation for optional executable. Optional test now sandboxed; source context must accompany affected review."
+      }
+    ],
+    "candidateSha": "41a2e19c26797083c2d931c882369d8f83d1150f",
+    "targetBase": "af05457b1bd98362902bb1f7aff789fd9368653e",
+    "bundleSha256": "d61c09314d8eba9114ab35bd31934fb9920eb8476281b9990658a1e00c53d4b1",
+    "mode": "real",
+    "attemptsConsumed": 1,
+    "fetches": 1,
+    "httpStatus": 200,
+    "report": "## Independent review report\n\n**Base:** `af05457b1bd98362902bb1f7aff789fd9368653e`  \n**Candidate:** `41a2e19c26797083c2d931c882369d8f83d1150f`  \n**Reviewed scope:** `.factory/initiatives/I0001/jobs/J007/{brief-r2.md,context-verification.json,delivery.md}`, `.factory/initiatives/I0001/plan.md`, `tests/project-context-engram.mjs`, `tests/project-context-handoff.mjs`, and `tools/check-quality.mjs`.\n\n### Standards — pass\n\nThe tests exercise bounded, explicit behavior: the optional Engram integration uses synthetic data and a reported bwrap boundary; the handoff test calls `preparePlanProposal` and checks the pinned payload, mutable-worktree exclusion, and a source-only case. The test and delivery text correctly avoid claims of automatic semantic filtering, provider execution, or client-ready isolation. The quality-check wiring runs the new handoff test and fails on unsuccessful subprocesses. The extra indentation in `tools/check-quality.mjs` is cosmetic and not a finding.\n\nThe supplied exact-candidate runtime observations report successful planner/handoff and sandbox probes. I did not run checks. The Engram execution and CI results are supplied evidence, not independently rerun observations.\n\n### Spec — pass, for this bounded unit only\n\nThe brief’s scoped acceptance is supported by the retained synthetic Engram observations, the coordinator selection record, the actual prepare-only handoff observation, controlled source-only case, and named native/sandbox check results. The supplied coordinator guidance establishes that memory is advisory and current source takes precedence; the selection record reports discarding a stale memory claim after checking primary evidence.\n\nThat selection record is evidence, not authenticated actor identity. I cannot independently verify the underlying memory lookup or the raw CI observation from the supplied materials. This does not establish broader MEM/SEC gates, a real service outage, MCP/cloud authentication, or universal secret filtering.\n\n### Findings\n\nNone for the reviewed bounded scope. This is not a finding that J007 or v1 is complete.\n\n### Checks, limitations, and outcome\n\nHost-selected probes recorded against the candidate passed: planner contracts plus `tests/project-context-handoff.mjs`, and `tests/diagnostic-probes.mjs . --sandbox`. The supplied receipt also reports exact-candidate aggregate quality, ESLint, Knip, PR CI, and an installed Engram observation. **I did not execute these checks.** Existing reviewer checks are ancillary evidence; I did not audit the reviewer implementation or its API.\n\n**Aggregate: pass for this bounded source review.** J007 remains in progress as stated; no product acceptance, merge permission, client-ready claim, or whole-v1 completion is implied.",
+    "limits": [
+      "only explicit host-selected read-only review-runtime probes executed; no model tools",
+      "actor identities are external operator attestations, not authenticated by this caller",
+      "response completion is not a passing verdict, merge permission or human acceptance",
+      "unknown invocation consumed; no automatic retry, fallback or recovery"
+    ]
+  },
+  "limits": [
+    "No automatic semantic stale-memory or secret filter exists or is claimed",
+    "CLI project selectors are cooperative; broader authorized queries remain possible",
+    "No MCP/cloud access-control certification or general client-ready claim",
+    "Existing sandbox proof covers only named sandbox, not unrestricted parent tools",
+    "Client use requiring stronger unverified separation remains blocked"
+  ],
+  "historicalAggregate": {
+    "revision": "af05457b1bd98362902bb1f7aff789fd9368653e",
+    "disposition": "Pre-checkpoint observation only, not candidate-quality proof. Current exact-candidate aggregate and CI are separate publication evidence."
+  },
+  "verifiedSources": [
+    {
+      "path": "tests/project-context-engram.mjs",
+      "sha256": "bdbc6632c42447c1d57d47012ea1ff48d82f4bee0b3fa0556ac44ad1c5a95cb6"
+    },
+    {
+      "path": "tests/project-context-handoff.mjs",
+      "sha256": "50e5f8ccd436216598a2cd01ffb4015fb3d18aab080d5787f8b958f66bc5454e"
+    },
+    {
+      "path": "tools/check-quality.mjs",
+      "sha256": "b6944214c953ac502d308bcbc42cc6b6d3b95fb429a106e7e15a6349c988d782"
+    }
+  ]
+}

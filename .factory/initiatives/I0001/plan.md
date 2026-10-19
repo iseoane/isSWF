@@ -92,12 +92,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J005
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
 - Brief: [brief-r6.md](jobs/J005/brief-r6.md) (pending until prepared)
-- Blocker: Capacity, worker cessation and prerequisite admission are integrated through PR66; final fixture-only successive-panel verification is locally passing and awaiting exact-candidate review and publication gates. No operator acceptance recorded.
-- Next step: Complete the single functional verification delivery, exact PR/main CI, then present the bounded J005 acceptance card and continue independent remaining jobs.
+- Blocker: Technical delivery integrated through PR68 with exact PR/main CI success; operator acceptance remains pending.
+- Next step: Review the delivery card and accept or request changes; continue independent remaining jobs meanwhile.
 
 ### Acceptance
 
@@ -126,6 +126,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - e1e2ab69e82299cf9107364d515a71d9c3a781a0
 - .factory/initiatives/I0001/jobs/J005/panel-verification.json
 - .factory/initiatives/I0001/jobs/J005/delivery.md
+- https://github.com/iseoane/isSWF/pull/68
+- af05457b1bd98362902bb1f7aff789fd9368653e
+- Exact PR CI39289977210 and main CI39290124760: success
 
 ## J006
 
@@ -146,12 +149,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J007
 
-- Status: pending
+- Status: in-progress
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
-- Blocker: No implementation assigned yet; ordering is priority, not an invented code dependency.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Brief: [brief-r2.md](jobs/J007/brief-r2.md) (pending until prepared)
+- Blocker: Installed disposable-store selection verified; current-source selection, capability evidence and independent review remain pending. No client-ready isolation claim.
+- Next step: Complete one coherent context verification delivery with explicit capability and service limits.
 
 ### Acceptance
 
@@ -159,7 +162,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- .factory/initiatives/I0001/jobs/J007/brief-r2.md
 
 ## J008
 
