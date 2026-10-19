@@ -92,12 +92,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
-- Blocker: No implementation assigned yet; ordering is priority, not an invented code dependency.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Brief: [brief-r2.md](jobs/J005/brief-r2.md) (pending until prepared)
+- Blocker: The reviewer/planner-only shared-capacity source cut passed independent Standards and Spec review at 8e7004e. Worker/researcher/diagnostic admission, descendant cessation, dependency/cycle and code-integration gates and full cross-role review-panel operation remain pending. The affected records review and publication gates are separate from this source verdict.
+- Next step: Publish the independently reviewed reviewer/planner capacity cut after affected record review and exact PR/main CI gates, then implement the remaining role and dependency gates without claiming J005 complete.
 
 ### Acceptance
 
@@ -105,7 +105,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- .factory/initiatives/I0001/jobs/J005/A002.md
+- 8e7004e7c940bf25d76234db6438e808023ab6d7
+- .factory/initiatives/I0001/jobs/J005/brief-r2.md
+- Native independent review of 8e7004e: Standards PASS and Spec PASS; .audit/capacity-109-review-real-v3.json
 
 ## J006
 
@@ -290,12 +293,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J014
 
-- Status: in-progress
+- Status: completed
 - Objective: Keep target-installed factory executables under .factory/tools
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md) (pending until prepared)
-- Blocker: Source installer is integrated in PR59 after a third native review passed both axes; the first two were inconclusive. Follow-up guide, aggregate-test registration and plan reconciliation remain under independent review. Fresh necessary native review calls are authorized by the operator.
-- Next step: Preserve the integrated source proof; review the pending integration unit before claiming J014 delivered.
+- Blocker: None for the delivered installation scope; explicitly accepted by the operator.
+- Next step: Preserve the accepted delivery; do not infer acceptance of J013 or the whole v1.
 
 ### Acceptance
 
@@ -308,3 +311,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - 3c8696a49fd5d856f8ece45cfcec189c2b9a93cd
 - .factory/initiatives/I0001/jobs/J014/A001.md
 - Native source review 3: .audit/install-109-review-real3.json; Standards PASS and Spec PASS; earlier reviews 1 and 2 inconclusive.
+- https://github.com/iseoane/isSWF/pull/61
+- a6f96cb929da25c4cc02d172da6c613991b7c06e
+- .factory/initiatives/I0001/jobs/J014/integration-verification.json
+- .factory/initiatives/I0001/jobs/J014/delivery.md
+- Operator conversation: J014 aceptada

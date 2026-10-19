@@ -67,6 +67,18 @@ Running records probe intent, then uses the existing read-only diagnostic sandbo
 
 The SDK receives a new opaque session ID, fixed reviewer effort, no tools, SSE, zero SDK retries, an abort signal and one-fetch maximum. Unknown errors, deadline, output limits, second fetch or nonmatching response block without retry/fallback. `response-complete` records transport completion only; report content remains untrusted and requires independent coordinator assessment. A separately authorized real reviewer invocation returned HTTP 200 with one attempt and one fetch; its aggregate review was inconclusive because supplied evidence was incomplete. The [J011 plan evidence](../.factory/initiatives/I0001/plan.md#j011) records the retained result digest. Transport success does not turn that report into a passing review or authorize replay.
 
+## Shared SDK execution capacity
+
+The optional finite-capacity cut currently covers native reviewers and planners only. A multi-agent review panel can use distinct existing logical references for successive entries. The HTML dashboard is not an execution participant. Worker, researcher and diagnostic integration, dependency gating and the complete MOD-07 guarantee remain pending in J005.
+
+An operator-owned pool is a separate canonical directory outside project, source and result stores. Prepare its `completed/` directory and immutable regular `policy.json` through trusted setup. The policy contains `version: 1`, a positive integer `limit` up to 16, and a nonempty `reference`. The initial approved limit is two. Capacity is separate from authorization to call a provider or create another actor.
+
+Each participating caller's external grant must contain `capacity: {pool, policySha256}` and `capacityRunnerSha256`, the exact SHA-256 of `tools/execution-capacity.mjs`. All participating grants must bind the same pool and policy to share a limit. Omitting capacity retains the legacy path outside this guarantee. The pool is a cooperative runtime boundary, not a machine-wide service or authenticated actor registry.
+
+The normal caller claims one directory per slot before probes or provider work. If all slots are occupied, it returns `blocked` with reason `capacity` and zero attempts/fetches, without a permanent attempt record. It can try admission again when capacity changes; that is not replaying an invocation. Complete matching provider responses move the caller's own reservation to `completed/` before publishing its result. This frees capacity even when the review remains inconclusive or the product awaits a human. It does not accept a result, integrate code or reset an actor budget.
+
+Blocked, uncertain, crashed and partially published reservations stay occupied. No caller-supplied cessation boolean releases them, and there is no automatic reconciliation or cleanup. Inspect such evidence before designing or granting recovery. Permanent logical-job claims remain unchanged and cannot be reused to repeat an invocation.
+
 ## Native planner proposals
 
 `tools/planner-task.mjs` follows the same bounded private-attempt lifecycle as the reviewer and reuses `sdkResearchBackend`. It supplies pinned `.agents/roles/planner.md`, planning guidance and durable-work ownership rules, not a Pstack launcher. Its explicit planner route is Luna/high with no alternate; existing worker, researcher and reviewer routes are unchanged. A configuration entry is neither a grant nor evidence that an account can use the route.
