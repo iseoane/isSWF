@@ -136,6 +136,15 @@ try {
   assert.equal(probeRead.status, 'recorded'); assert.equal(probeRead.binding.workspace.candidateSha, candidate);
   const probeEvidence = JSON.parse(await readFile(join(probeStore, p.dir.split('/').at(-1), 'evidence.json')));
   assert.deepEqual(JSON.parse(probeEvidence.prompt).workspaceVerification.results, observations);
+  const intentPath = join(probeStore, p.dir.split('/').at(-1), 'probe-intent.json');
+  const originalIntent = await readFile(intentPath, 'utf8');
+  const intentRecord = JSON.parse(originalIntent);
+  for (const changed of [{ ...intentRecord, workspace: { ...workspace, probes: [{ ...workspace.probes[0], command: 'false' }] } }, { ...intentRecord, providerPromptStarted: true }]) {
+    await json(intentPath, changed);
+    assert.equal((await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef })).status, 'unknown', 'tampered probe intent must not be recorded');
+  }
+  await writeFile(intentPath, originalIntent);
+  assert.equal((await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef })).status, 'recorded');
   for (const mutation of [{ allowWorkspaceProbes: false }, { probeRunnerSha256: '0'.repeat(64) }, { workspace: { ...workspace, repo: project } }]) {
     await json(grantFile, { ...probeGrant, ...mutation }); await assert.rejects(prepareReview(probeRequest));
   }

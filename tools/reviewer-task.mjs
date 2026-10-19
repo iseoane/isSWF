@@ -122,7 +122,7 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
       const results = await (probeRunner ?? runDiagnosticProbes)({ targetRepo: job.workspace.repo, targetBase: job.candidateSha, probes: job.workspace.probes, deadlineAt });
       assert(results.length === job.workspace.probes.length && results.every(result => result.expectationMatched === true && result.targetBase === job.candidateSha), 'review-probe-expectation-failed');
       assert(decode(git(job.workspace.repo, ['rev-parse', 'HEAD'])).trim() === job.candidateSha, 'review-workspace-changed');
-      workspaceVerification = { candidateSha: job.candidateSha, repo: job.workspace.repo, probeRunnerSha256: grant.probeRunnerSha256, results, limits: 'Host-selected review-runtime probes, not model-selected commands or authenticated reviewer identity' };
+      workspaceVerification = { candidateSha: job.candidateSha, repo: job.workspace.repo, probes: job.workspace.probes, probeRunnerSha256: grant.probeRunnerSha256, results, limits: 'Host-selected review-runtime probes, not model-selected commands or authenticated reviewer identity' };
       p.prompt = JSON.stringify({ ...JSON.parse(p.prompt), workspaceVerification }); p.bundleSha256 = hash(p.prompt);
       assert(Date.now() < deadlineAt && Buffer.byteLength(p.prompt) + Buffer.byteLength(p.instructions) <= 65536, 'review-probe-budget');
     } catch {
@@ -174,7 +174,8 @@ export async function readReview({ project, store, logicalJobRef }) {
       const verification = JSON.parse(evidence.prompt).workspaceVerification;
       assert(equal(verification, binding.workspace) && verification.candidateSha === binding.candidateSha && verification.results.every(item => item.targetBase === binding.candidateSha && item.expectationMatched === true), 'invalid-workspace-verification');
       const intent = (await json(join(dir, 'probe-intent.json'))).value;
-      assert(intent.candidateSha === binding.candidateSha && intent.workspace.repo === verification.repo && intent.probeRunnerSha256 === verification.probeRunnerSha256, 'invalid-probe-intent');
+      assert(intent.version === 1 && intent.providerPromptStarted === false && intent.candidateSha === binding.candidateSha && equal(intent.workspace, { repo: verification.repo, probes: verification.probes }) && intent.probeRunnerSha256 === verification.probeRunnerSha256, 'invalid-probe-intent');
+      assert(verification.results.length === verification.probes.length && verification.results.every((item, index) => item.name === verification.probes[index].name && item.command === verification.probes[index].command && item.expectedExitCode === verification.probes[index].expectedExitCode && item.exitCode === item.expectedExitCode), 'invalid-probe-result-correspondence');
     }
     return { status: 'recorded', binding, result, executionAuthorized: false };
   }
