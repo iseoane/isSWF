@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "scope": "Installed Engram MCP synthetic-store capability probe, not user-server/client isolation approval",
+  "sourceBase": "52aa4440aad1ca6afea2999841465f79c16add09",
+  "command": "node tests/project-context-engram.mjs /absolute/existing/engram --mcp",
+  "exitCode": 2,
+  "status": "BLOCKED-CLIENT-CONTEXT-SUMMARY",
+  "versionObserved": "engram 3.4.0",
+  "binarySha256": "ab390cf76d141b2e1e950c5babfdfac4d7023e3fb2dbb96b3ff8eca8a3629479",
+  "isolation": "Actual bwrap: only synthetic home/data writable, host home/store unmounted, network namespace isolated; no environment credentials",
+  "mcp": {
+    "server": {
+      "name": "engram",
+      "version": "3.4.0"
+    },
+    "protocol": "2024-11-05",
+    "selected": {
+      "project": "fixture-own",
+      "project_path": "",
+      "project_source": "explicit_override",
+      "result": "Found 1 memories:\n\n[1] #1 (manual) — Current decision\n    synthetic-current-decision-coral814\n    2026-10-19 20:29:21 | project: fixture-own | scope: project\n\n",
+      "results": [
+        {
+          "id": 1,
+          "pinned": false,
+          "project": "fixture-own",
+          "scope": "project",
+          "state": "active",
+          "sync_id": "obs-c673aacbea2d56ac",
+          "title": "Current decision",
+          "type": "manual"
+        }
+      ]
+    },
+    "excluded": {
+      "project": "fixture-own",
+      "project_path": "",
+      "project_source": "explicit_override",
+      "result": "No memories found for: \"synthetic-foreign-decision-violet927\""
+    },
+    "recalled": {
+      "project": "fixture-own",
+      "project_path": "",
+      "project_source": "explicit_override",
+      "result": "## Memory from Previous Sessions\n\n### Recent Sessions\n- **fixture-own** (2026-10-19 20:29:21) [1 observations]\n\n### Recent Observations\n- [manual] **Current decision**\n\n\n---\nMemory stats: 2 sessions, 2 observations across projects: fixture-own, fixture-foreign"
+    },
+    "processDefaultProject": "fixture-foreign",
+    "requestProject": "fixture-own",
+    "contextSummaryIsolation": {
+      "status": "blocked",
+      "observedForeignProjectMetadata": true,
+      "approvedForClientUse": false,
+      "reason": "Explicit-project shared-store context summary includes another project name in global statistics"
+    },
+    "processExit": {
+      "code": null,
+      "signal": "SIGTERM"
+    }
+  },
+  "verifiedTestSha256": "f428941c9ec85d4dce3b6e312c80bd9c3657bf67636dc46d95f7ef329d747976",
+  "positiveControl": {
+    "command": "node tests/project-context-engram.mjs /absolute/existing/engram",
+    "exitCode": 0,
+    "status": "PASS"
+  },
+  "coordinatorDisposition": {
+    "scopedSearch": "Supported for the observed explicit project query in this synthetic process",
+    "sharedStoreSummary": "Blocked for client context because another project name appears in global statistics",
+    "fallback": "Reject unrelated data; use separately verified scoped facts or pinned Git/files",
+    "clientDispatch": "Remain blocked where required context isolation is not verified",
+    "upstreamFix": "Not performed or claimed; global Engram changes and client configuration outside this unit"
+  },
+  "nativeReview": {
+    "status": "pending"
+  },
+  "limits": [
+    "Actual installed CLI; additional MCP diagnostic only with --mcp, synthetic disposable store, not the user configured server/store or cloud",
+    "Project selectors are cooperative selection, not access-control credentials; broad queries remain possible",
+    "No claim of semantic secret detection, autonomous context selection, real service outage or client-ready isolation",
+    "No user credentials, real client data or existing user store was accessed",
+    "A passing CLI/scoped search does not validate shared-store summary metadata isolation",
+    "Diagnostic exit2 is deliberate fail-closed observation, not a fixed upstream boundary or whole-J007/v1 completion"
+  ]
+}
