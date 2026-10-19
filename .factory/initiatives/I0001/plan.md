@@ -92,12 +92,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J005
 
-- Status: in-progress
+- Status: in-review
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
-- Brief: [brief-r5.md](jobs/J005/brief-r5.md) (pending until prepared)
-- Blocker: Shared capacity and worker cessation are integrated through PR65. Dependency admission source passes native affected review after graft correction; its fixtures, documentation and plan integration are under review. Successive cross-role review-panel verification and final J005 acceptance remain pending.
-- Next step: Finish the exact dependency integration review and PR/main CI gates, then verify the finite successive review-panel scenario without a scheduler or new live worker grants.
+- Brief: [brief-r6.md](jobs/J005/brief-r6.md) (pending until prepared)
+- Blocker: Capacity, worker cessation and prerequisite admission are integrated through PR66; final fixture-only successive-panel verification is locally passing and awaiting exact-candidate review and publication gates. No operator acceptance recorded.
+- Next step: Complete the single functional verification delivery, exact PR/main CI, then present the bounded J005 acceptance card and continue independent remaining jobs.
 
 ### Acceptance
 
@@ -122,6 +122,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 - 06db01fa10f2b3a436a608155b5647450b4fed9e
 - .factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json
 - .factory/initiatives/I0001/jobs/J005/dependency-verification.json
+- https://github.com/iseoane/isSWF/pull/66
+- e1e2ab69e82299cf9107364d515a71d9c3a781a0
+- .factory/initiatives/I0001/jobs/J005/panel-verification.json
+- .factory/initiatives/I0001/jobs/J005/delivery.md
 
 ## J006
 
