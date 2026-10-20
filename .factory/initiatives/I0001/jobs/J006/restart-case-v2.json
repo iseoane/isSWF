@@ -47,12 +47,18 @@
   },
   "scope": "One actual physical restart of an authorized synthetic offline case. Records and allowed partial work preserved, unknown identity blocks replacement/retry and requires review. Not successful worker execution, automatic continuation, external effects or whole-v1 acceptance.",
   "independentReview": {
-    "status": "pending"
+    "status": "pending-baseline-fix-review",
+    "previous": {
+      "candidate": "6eabd8f83536d624a321dedb93ff68416e7d1304",
+      "resultSha256": "90094b88441cb2277530f37dd54176e155d9d344b2d67d77dc9287808cc78bc3",
+      "report": "## Review report\n\n**Base:** `cd9d7254055a532a215013f641c64c6a822641d9`  \n**Candidate:** `6eabd8f83536d624a321dedb93ff68416e7d1304`  \n**Reviewed scope:** The supplied five-file J006 delivery diff and the J006 plan update. Candidate identity is as supplied and was pinned by the review runtime; I could not independently recompute its SHA.\n\n### Standards — fail\n\n**Blocking — baseline comparison misses added files and executable-mode changes.** In `.factory/initiatives/I0001/jobs/J006/verify-restart.mjs:82–86`, the baseline comparison walks only paths from `git ls-tree` and compares content hashes. It never checks for workspace files absent from that baseline, or compares baseline file modes. Thus the verifier could report only `result.txt` changed even if another file had been added or an executable bit changed. The separate before/after snapshot comparison does not close this gap: it checks against the pre-reboot snapshot, not the Git baseline. This weakens the verifier’s central evidence claim. **Recommendation:** compare complete baseline and workspace trees, including additions, removals, file types, content, and executable bits; explicitly allow only the stated `result.txt` difference.\n\n### Spec — fail\n\nThe same gap means the verifier does not establish acceptance criterion 2’s claim that, against the original Git baseline, only the allowed `result.txt` partial differs. The supplied runtime observation does show the expected changed boot ID, four metadata records, 41 matching snapshot files, unknown child identity, and blocked reconciliation. Those results do not establish the missing baseline-tree checks.\n\n### Checks and limitations\n\nThe host-selected read-only probes both matched expectations:\n\n- `original-restart-full-verifier`: exit 0; reported the bounded changed-boot verification and blocked recovery.\n- `plan-and-binding-regressions`: exit 0.\n\nThese are runtime observations, not checks I executed. The brief also calls for syntax, public quality, ESLint, Knip, and exact new PR/main CI; no results for those are provided here. The brief makes the new CI a delivery gate, so it remains outstanding. I did not rerun checks or access the original fixture independently. The historical access review is prerequisite evidence, not a review of this candidate.\n\n**Aggregate: fail.** The verifier’s baseline comparison has a concrete coverage gap, and the required publication CI is not evidenced. This report is not merge permission or product acceptance.",
+      "disposition": "Complete baseline comparison now checks union of paths, regular-file types, sizes, content and executable modes. Dedicated public regression covers additions/removals/types/modes; original fixture untouched."
+    }
   },
   "readOnlyVerification": {
     "command": "node .factory/initiatives/I0001/jobs/J006/verify-restart.mjs <original-owned-case2>",
     "exitCode": 0,
-    "verifierSha256": "2dbf2433f83dced14b6bab53d304de74cdfdff15d3c77e74da4cfa4fe1cca90f",
+    "verifierSha256": "97a36d5705149f091eb4b542bd2d3b54702cc155e5821edee5732b6fab053bcb",
     "observation": {
       "status": "PASS-bounded-changed-boot-verification",
       "approvedRuntimeSource": "33103a97937ff7b5a8d843681af81364edbdb3fb",
@@ -92,6 +98,7 @@
     },
     "negativeControl": "Simulated blocked result due failed pin/package validation rejected; original case files unchanged, not a new actual failure or worker run.",
     "previousVerifierSha256": "f73aa1f3583890d3b64e41003c3fe71e519775f44c5d427e2072d025cad144e9",
-    "source": "Current standalone verifier uses the exact approved Git blob hashes; earlier verifier hash retained, no fixture change"
+    "source": "Current standalone verifier uses the exact approved Git blob hashes; earlier verifier hash retained, no fixture change",
+    "preBaselineFixVerifierSha256": "2dbf2433f83dced14b6bab53d304de74cdfdff15d3c77e74da4cfa4fe1cca90f"
   }
 }

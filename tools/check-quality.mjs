@@ -61,6 +61,7 @@ const probeResult = run(process.execPath, [join(source, 'tests/diagnostic-probes
 const plannerResult = run(process.execPath, [join(source, 'tests/planner-task.mjs'), source]);
 const reviewerResult = run(process.execPath, [join(source, 'tests/reviewer-task.mjs'), source]);
 const originalEvidenceResult = run(process.execPath, [join(source, 'tests/reviewer-original-evidence.mjs'), source]);
+const restartBaselineResult = run(process.execPath, [join(source, 'tests/restart-baseline.mjs'), source]);
 const contextHandoffResult = run(process.execPath, [join(source, 'tests/project-context-handoff.mjs'), source]);
  const reviewPanelCapacityResult = run(process.execPath, [join(source, 'tests/review-panel-capacity.mjs'), source]);
 const planResult = run(process.execPath, [join(source, 'tests/initiative-plan.mjs'), source]);
@@ -74,4 +75,4 @@ const workerCapacityAPIResult = run(process.execPath, [join(source, 'tests/worke
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, originalEvidenceResult, contextHandoffResult, reviewPanelCapacityResult, planResult, dependencyPlanResult, inventoryResult, intakeResult, methodologyResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, originalEvidenceResult, restartBaselineResult, contextHandoffResult, reviewPanelCapacityResult, planResult, dependencyPlanResult, inventoryResult, intakeResult, methodologyResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
