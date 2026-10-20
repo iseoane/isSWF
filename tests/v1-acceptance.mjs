@@ -53,6 +53,6 @@ for (const mutate of [
   value => value.specSha256 = '0'.repeat(64),
   value => value.records[0][1] = '0'.repeat(64),
   value => value.records.push(value.records[0]),
-  value => value.operatorAcceptance = 'explicit-operator-acceptance-recorded',
+  value => { value.operatorAcceptance = 'explicit-operator-acceptance-recorded'; delete value.operatorAcceptanceEvidence; },
 ]) { const copy = structuredClone(matrix); mutate(copy); assert.throws(() => validate(copy)); }
 console.log(`PASS v1 evidence structure: ${expected.length} exact criteria, ${records} current record hashes and explicit scope/limits; not semantic review, deployment approval or operator acceptance`);

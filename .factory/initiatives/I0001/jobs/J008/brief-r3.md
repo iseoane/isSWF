@@ -1,6 +1,6 @@
 # I0001 / J008 / r3
 
-Reconcile all 61 criteria in `docs/spec-v1.md` against exact current source and retained bounded evidence. Base: `01c31f80f8ac997af6c8f19c468e406800cee778`. This is the final evidence/acceptance unit, not another runtime framework or authorization for workers, reboot, client deployment, cleanup or global changes.
+Reconcile all 61 criteria in `docs/spec-v1.md` against exact current source and retained bounded evidence. Base: `6cca0d2c47907396e1a7aacf1219233b3a781966`. This is the final evidence/acceptance unit, not another runtime framework or authorization for workers, reboot, client deployment, cleanup or global changes.
 
 ## Acceptance
 
@@ -8,8 +8,8 @@ Reconcile all 61 criteria in `docs/spec-v1.md` against exact current source and 
 - Pin every referenced current source/report byte sequence. Preserve the expected failing NAV-02 synthetic review as positive detector evidence, not a production failure.
 - Distinguish actual changed-boot preservation from chat-close controls and simulated remote-effect reconciliation. Do not use the reboot to claim those separate scenarios.
 - Preserve the mixed-store memory counterexample, before-client-use isolation gate, known-quota-envelope limit and source-only degradation scope.
-- Reconcile delivered J006 to awaiting-human through the native plan command. The canonical plan owns current job-acceptance states. No further job or whole-v1 acceptance is inferred here.
-- Run structural/negative controls, public quality and independent semantic/source review. Require exact PR/main CI before technical delivery. The operator alone accepts v1.
+- Record the actual operator decision “Y da todos por aceptados” through the native plan command. The canonical plan owns current job-acceptance states; acceptance does not replace technical checks.
+- Run structural/negative controls, public quality and independent semantic/source review. Require exact PR/main CI before technical delivery. The operator has accepted all reported jobs; do not repeat that request.
 
 ## Source and checks
 

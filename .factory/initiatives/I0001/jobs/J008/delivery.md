@@ -10,8 +10,8 @@
 
 ## Closure and acceptance
 
-Whole-v1 acceptance is not recorded. Current bounded-job acceptance states are recorded in the canonical plan; accepting one cut does not accept the others. Shared-store client summaries remain blocked; actual client store/process verification is required before use. No new worker, reboot, deployment or cleanup is authorized.
+The operator explicitly accepted all reported jobs: “Y da todos por aceptados”. The canonical plan records that decision separately from pending technical checks. Shared-store client summaries remain blocked; actual client store/process verification is required before use. No new worker, reboot, deployment or cleanup is authorized.
 
 ## Blockers and next action
 
-Complete the independent final reconciliation review and exact PR/main CI. Then present the bounded product and remaining limits for one explicit operator decision. Do not mark v1 completed from passing tests alone.
+Complete the independent final reconciliation review and exact PR/main CI. Preserve the recorded acceptance and limitations; do not ask for the same acceptance again or mark missing checks as passed.

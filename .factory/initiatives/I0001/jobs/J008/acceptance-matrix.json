@@ -1,10 +1,15 @@
 {
   "version": 1,
   "status": "coordinator-reconciliation-awaiting-independent-review-and-operator-acceptance",
-  "sourceBase": "01c31f80f8ac997af6c8f19c468e406800cee778",
+  "sourceBase": "6cca0d2c47907396e1a7aacf1219233b3a781966",
   "specSha256": "4ba3fdc91071d4c02742ba68a4cc4d8c69bb660810f819af41cc8af3aa217230",
   "criteriaCount": 61,
-  "operatorAcceptance": "not-recorded-for-whole-v1",
+  "operatorAcceptance": "explicit-operator-acceptance-recorded",
+  "operatorAcceptanceEvidence": {
+    "quote": "Y da todos por aceptados",
+    "reference": "Operator conversation during task109, after J007 acceptance",
+    "scope": "All reported jobs accepted. This decision does not assert that outstanding technical review or publication gates passed, approve client deployment, or remove recorded limitations."
+  },
   "introducedRecords": [
     ".factory/initiatives/I0001/jobs/J008/navigation-review.json"
   ],
@@ -22,6 +27,8 @@
   ],
   "scope": "Evidence kinds are not product PASS. Authority, limits and pending decisions are defined in brief-r3.md, delivery.md and the canonical plan, not duplicated here.",
   "records": [
+    ["tests/successor-model-config.mjs","19b83c5d9d3c6b83b35d7d090364aee90456d4e45893e73df11d44157073ee5f",["delegation","models"]],
+    ["tools/job-successor.mjs","4947c28207893ceb43bc8b7f89006cbba2f65b04313bee2df0929429440a1eb6",["delegation","models"]],
     [".agents/roles/references/code-quality.md","d1d74637c71d74c8f0c00987fe727a904debf05f8ba67d013ae884c36446fc75",["navigation"]],
     [".agents/skills/isswf-coordinator/SKILL.md","23657f8ec5fce8a554df7393809f6858cf1716b47752625c7c7bfd6787cdd963",["grounding","navigation"]],
     [".audit/fallback-66-quota-proof.json","babb687df4fb6f495595a7450349a8a504869412b70d7a6e49f1b3684e06d9e4",["models"]],
@@ -51,7 +58,7 @@
     [".factory/initiatives/I0001/jobs/J013/retention-verification.json","b4fb5834f2ba6c30683f85f5ec726545cf890b1a4208ad6fa5822d200263f143",["security","delivery"]],
     [".factory/initiatives/I0002/plan.md","37c5b593395b846a8b2d91a74041f3a62959948a80da478247b110cf98604343",["product"]],
     [".factory/models.json","f25ca74f71a523367986ac113f83d1128acba89153cb8434812931dbf3823910",["models"]],
-    ["docs/local-worker-lifecycle.md","b78b1bcf6a63e8cb8ce06dea71aa7f60f1d0b1b9fa843261978019fee8a23b12",["recovery"]],
+    ["docs/local-worker-lifecycle.md","1f39c4825051442bca700a02098e424281e298c0de692e7b6d2d4294a0599033",["recovery"]],
     ["docs/s01-intake.md","2d999801019e1582d64c7f1763fd4cb5bc872c34ac70868c0965b4de918f9ee3",["intake"]],
     ["tests/diagnostic-probes.mjs","6e7e57341a1bae49189c99812d5673d6fb7f60d7f9394d3a031f3620bf956975",["security"]],
     ["tests/initiative-next-action.mjs","3c239acb44e19762e23a91fb3293046c9bd70c82cd61c9619a13d1e2cde14a9e",["product","observation"]],
@@ -98,7 +105,7 @@
     ["MOD-02","controlled-proof-only","models","Controlled known GoUsageLimitError handling advances only an approved fallback without same-route retry.","Live/current-service fallback unproven; unknown shapes block. No deliberate account exhaustion or universal classifier."],
     ["MOD-03","bounded-supported","models","Quota tests distinguish provider-envelope outcomes from work/test failures and reject prose-based route authority.","Actual fallback scope remains the documented researcher contract."],
     ["MOD-04","bounded-supported","models","Worker route admission and reviewer/planner/diagnostic grant tests reject unsupported route/effort before invocation.","Configured route alone does not establish every runtime capability."],
-    ["MOD-05","bounded-supported","delegation","Immutable input/model/config hashes and successor-grant records distinguish attempts; input drift cannot replace pinned context.","Cross-boot continuation is not supported or implied."],
+    ["MOD-05","bounded-supported","delegation","Pinned active inputs remain unchanged. Explicit previous/next configuration authority records a distinct successor with new input/attempt and immutable edge.","Only the supported worker route; synthetic record/readback checks, no new live resumed-worker run. Cross-boot continuation unsupported."],
     ["MOD-06","bounded-supported","models","Tests retain blocked failures with finite total attempts, no unapproved fallback/API spend and no prose-based budget expansion.","Unknown invocation consumes authority; no automatic replay."],
     ["MOD-07","controlled-proof-only","capacity","Three fixture reviewers and a planner share pool2, block without attempts and reuse freed slots without deadlock.","Not a live provider panel; unbound callers are outside the guarantee."],
     ["NAV-01","documented-and-observed","navigation","Briefs/cards link real entry points, tests and contracts; aggregate checks verify selected links.","Reopen historical line ranges; existing links do not prove semantics."],
