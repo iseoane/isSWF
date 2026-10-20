@@ -132,12 +132,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J006
 
-- Status: pending
+- Status: in-review
 - Objective: Validate machine-restart recovery and remaining continuity cases
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
-- Blocker: No authorization for reboot or new runtime calls.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Brief: [brief-r6.md](jobs/J006/brief-r6.md) (pending until prepared)
+- Blocker: Original physical restart, preservation and conservative refusal verified; PR75 original-evidence review access delivered with exact CI success. Separate case-delivery review/publication gates pending, no acceptance or remaining worker/reboot budget inferred.
+- Next step: Publish the bounded original-case evidence with independent review and exact PR/main CI, then present acceptance. Never repeat or replace these consumed experiments.
 
 ### Acceptance
 
@@ -145,7 +145,11 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- None.
+- https://github.com/iseoane/isSWF/pull/75
+- .factory/initiatives/I0001/jobs/J006/restart-case-v1.json
+- .factory/initiatives/I0001/jobs/J006/restart-case-v2.json
+- .factory/initiatives/I0001/jobs/J006/delivery.md
+- .factory/initiatives/I0001/jobs/J006/original-access-verification.json
 
 ## J007
 

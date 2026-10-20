@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "case": "I0001/J006/restart-case-v2",
+  "attemptId": "I0001-J006-restart-v2-A001",
+  "result": "actual-changed-boot-conservative-recovery-observed",
+  "sourceBase": "53cea8cdb86ba92dca2614af2b14a6e6c41e4aaa",
+  "inputSha": "de455c78ea4cb9efa4754e088c7e2548f325e446",
+  "bootBefore": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+  "bootAfter": "5af19d45-168f-46ad-a4f5-2f52d1048aed",
+  "systemctlExitCode": 0,
+  "immutableMetadataVerified": [
+    "dispatch.json",
+    "owner.json",
+    "execution-child.json",
+    "native-recovery.json"
+  ],
+  "workspaceFilesVerified": 41,
+  "protectedBaselineComparison": {
+    "targetBase": "0848d97304695e7cf1c334e159751e3a5afd9b93",
+    "changedPaths": [
+      "result.txt"
+    ],
+    "onlyAllowedPartialResultChanged": true
+  },
+  "normalRead": {
+    "state": "unknown",
+    "reason": "owner identity absent or mismatched",
+    "executionChild": {
+      "state": "unknown",
+      "reason": "child boot identity mismatched"
+    }
+  },
+  "normalReconcile": {
+    "status": "blocked",
+    "reason": "execution task cessation not confirmed",
+    "reviewRequired": true,
+    "retry": "never"
+  },
+  "modelInvocationMarkerAbsent": true,
+  "retryPerformed": false,
+  "replacementWorkerLaunched": false,
+  "workerBudget": {
+    "case1": 1,
+    "case2": 1,
+    "cumulativeConsumed": 2,
+    "remaining": 0
+  },
+  "scope": "One actual physical restart of an authorized synthetic offline case. Records and allowed partial work preserved, unknown identity blocks replacement/retry and requires review. Not successful worker execution, automatic continuation, external effects or whole-v1 acceptance.",
+  "independentReview": {
+    "status": "pending"
+  },
+  "readOnlyVerification": {
+    "command": "node .factory/initiatives/I0001/jobs/J006/verify-restart.mjs <original-owned-case2>",
+    "exitCode": 0,
+    "verifierSha256": "2dbf2433f83dced14b6bab53d304de74cdfdff15d3c77e74da4cfa4fe1cca90f",
+    "observation": {
+      "status": "PASS-bounded-changed-boot-verification",
+      "approvedRuntimeSource": "33103a97937ff7b5a8d843681af81364edbdb3fb",
+      "bootBefore": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+      "bootAfter": "5af19d45-168f-46ad-a4f5-2f52d1048aed",
+      "metadataVerified": [
+        "dispatch.json",
+        "owner.json",
+        "execution-child.json",
+        "native-recovery.json"
+      ],
+      "workspaceFilesVerified": 41,
+      "protectedChanges": [
+        "result.txt"
+      ],
+      "normalRead": {
+        "state": "unknown",
+        "reason": "owner identity absent or mismatched",
+        "executionChild": {
+          "state": "unknown",
+          "reason": "child boot identity mismatched"
+        }
+      },
+      "normalReconcile": {
+        "status": "blocked",
+        "reason": "execution task cessation not confirmed",
+        "reviewRequired": true,
+        "retry": "never"
+      },
+      "mode": "offline",
+      "modelInvocationMarkerAbsent": true,
+      "limits": [
+        "Original trusted synthetic fixture only; not authentication of relocated or foreign evidence",
+        "No task launch, repair, replay, model call, GitHub call or reboot requested by this verifier",
+        "Conservative blocked recovery, not worker success, automatic continuation or external-effect reconciliation"
+      ]
+    },
+    "negativeControl": "Simulated blocked result due failed pin/package validation rejected; original case files unchanged, not a new actual failure or worker run.",
+    "previousVerifierSha256": "f73aa1f3583890d3b64e41003c3fe71e519775f44c5d427e2072d025cad144e9",
+    "source": "Current standalone verifier uses the exact approved Git blob hashes; earlier verifier hash retained, no fixture change"
+  }
+}
