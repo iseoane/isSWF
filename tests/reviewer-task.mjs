@@ -227,6 +227,31 @@ try {
   for (const mutation of [{ allowWorkspaceProbes: false }, { probeRunnerSha256: '0'.repeat(64) }, { workspace: { ...workspace, repo: project } }]) {
     await json(grantFile, { ...probeGrant, ...mutation }); await assert.rejects(prepareReview(probeRequest));
   }
+  const { evidenceDigest } = await import(pathToFileURL(join(source, 'tools/diagnostic-probes.mjs')));
+  const evidencePath = join(root, 'retained-evidence'); await mkdir(evidencePath); await writeFile(join(evidencePath, 'record'), 'original');
+  const originalWorkspace = { ...workspace, probes: [{ name: 'original', command: `node -e 'const f=require("node:fs");if(f.readFileSync(${JSON.stringify(join(evidencePath, 'record'))},"utf8")!=="original")throw Error("missing");try{f.writeFileSync(${JSON.stringify(join(evidencePath, 'record'))},"bad");process.exitCode=1}catch(e){if(e.code!=="EROFS")throw e}console.log(2)'`, expectedExitCode: 0 }], evidence: { path: evidencePath, sha256: await evidenceDigest(evidencePath) } };
+  await json(join(project, 'original-review.json'), { ...job, workspace: originalWorkspace }); const originalInput = commit();
+  const originalStore = join(root, 'original-store'); await mkdir(originalStore);
+  const originalGrant = { ...probeGrant, workspace: originalWorkspace, inputSha: originalInput, jobPath: 'original-review.json', jobSha256: hash(await readFile(join(project, 'original-review.json'))), store: originalStore, allowOriginalEvidence: true };
+  const originalRequest = { ...request, store: originalStore, inputSha: originalInput, jobPath: 'original-review.json' };
+  for (const mutation of [{ allowOriginalEvidence: false }, { workspace }, { workspace: { ...originalWorkspace, evidence: { ...originalWorkspace.evidence, sha256: '0'.repeat(64) } } }]) {
+    await json(grantFile, { ...originalGrant, ...mutation }); await assert.rejects(prepareReview(originalRequest));
+    assert.deepEqual(await readdir(originalStore), []);
+  }
+  await json(grantFile, originalGrant); await prepareReview(originalRequest);
+  await writeFile(join(evidencePath, 'record'), 'tampered'); await assert.rejects(prepareReview(originalRequest), /evidence-pin-mismatch/u);
+  await writeFile(join(evidencePath, 'record'), 'original');
+  const evidenceResult = await runReview(originalRequest, { mode: 'fixture', backend: fixture('normal', join(originalStore, p.dir.split('/').at(-1))), probeRunner: async request => { assert.deepEqual(request.evidence, originalWorkspace.evidence); return [{ ...observations[0], ...originalWorkspace.probes[0] }]; } });
+  assert.equal(evidenceResult.status, 'response-complete');
+  const evidenceRead = await readReview({ project, store: originalStore, logicalJobRef: job.logicalJobRef });
+  assert.equal(evidenceRead.status, 'recorded'); assert.deepEqual(evidenceRead.binding.workspace.evidence, originalWorkspace.evidence);
+  const { sourceObjectsPath } = await import(pathToFileURL(join(source, 'tools/diagnostic-probes.mjs')));
+  const objectsWorkspace = { ...originalWorkspace, evidence: { ...originalWorkspace.evidence, sourceObjectsSha256: await evidenceDigest(sourceObjectsPath) } };
+  await json(join(project, 'objects-review.json'), { ...job, workspace: objectsWorkspace }); const objectsInput = commit();
+  const objectsGrant = { ...originalGrant, inputSha: objectsInput, jobPath: 'objects-review.json', jobSha256: hash(await readFile(join(project, 'objects-review.json'))), workspace: objectsWorkspace, allowSourceObjects: true };
+  const objectsRequest = { ...originalRequest, inputSha: objectsInput, jobPath: 'objects-review.json' };
+  await json(grantFile, { ...objectsGrant, allowSourceObjects: false }); await assert.rejects(prepareReview(objectsRequest), /source-object-pin/u);
+  await json(grantFile, objectsGrant); await prepareReview(objectsRequest);
   const failedStore = join(root, 'failed-workspace'); await mkdir(failedStore); await json(grantFile, { ...probeGrant, store: failedStore });
   const beforeProbeFailure = backendCalls;
   const failedProbe = await runReview({ ...probeRequest, store: failedStore }, { mode: 'fixture', backend: fixture('normal'), probeRunner: async () => { throw Error('sandbox unavailable'); } });
@@ -241,6 +266,12 @@ try {
     const sandboxRead = await readReview({ project, store: realStore, logicalJobRef: job.logicalJobRef });
     assert.equal(sandboxRead.status, 'recorded'); assert.equal(sandboxRead.binding.workspace.results[0].stdout, '2\n');
     assert.equal(command('git', ['-C', workspaceRepo, 'status', '--porcelain']).stdout, '');
+    const originalRealStore = join(root, 'actual-original-evidence'); await mkdir(originalRealStore);
+    await json(grantFile, { ...originalGrant, store: originalRealStore, deadlineMs: 10000 });
+    const originalReal = await runReview({ ...originalRequest, store: originalRealStore }, { mode: 'fixture', backend: fixture('normal', join(originalRealStore, p.dir.split('/').at(-1))) });
+    assert.equal(originalReal.status, 'response-complete', JSON.stringify(originalReal));
+    const originalRealRead = await readReview({ project, store: originalRealStore, logicalJobRef: job.logicalJobRef });
+    assert.equal(originalRealRead.status, 'recorded'); assert.deepEqual(originalRealRead.binding.workspace.evidence, originalWorkspace.evidence);
     console.log('PASS actual reviewer caller readonly bwrap probe, exact candidate binding and durable observed output; synthetic provider only');
   }
   for (const kind of ['wrong-candidate', 'dirty', 'mismatch', 'overflow']) {
