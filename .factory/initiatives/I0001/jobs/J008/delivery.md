@@ -10,7 +10,7 @@
 
 ## Closure and acceptance
 
-Whole-v1 acceptance is not recorded. J007's bounded context delivery is explicitly accepted. J005 capacity/dependencies and J006 original restart still require operator acceptance. Shared-store client summaries remain blocked; actual client store/process verification is required before use. No new worker, reboot, deployment or cleanup is authorized.
+Whole-v1 acceptance is not recorded. Current bounded-job acceptance states are recorded in the canonical plan; accepting one cut does not accept the others. Shared-store client summaries remain blocked; actual client store/process verification is required before use. No new worker, reboot, deployment or cleanup is authorized.
 
 ## Blockers and next action
 

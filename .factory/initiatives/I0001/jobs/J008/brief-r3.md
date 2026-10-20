@@ -8,7 +8,7 @@ Reconcile all 61 criteria in `docs/spec-v1.md` against exact current source and 
 - Pin every referenced current source/report byte sequence. Preserve the expected failing NAV-02 synthetic review as positive detector evidence, not a production failure.
 - Distinguish actual changed-boot preservation from chat-close controls and simulated remote-effect reconciliation. Do not use the reboot to claim those separate scenarios.
 - Preserve the mixed-store memory counterexample, before-client-use isolation gate, known-quota-envelope limit and source-only degradation scope.
-- Reconcile delivered J006 to awaiting-human through the native plan command. J007's bounded delivery is explicitly accepted. J005/J006 and whole-v1 operator acceptance remain pending.
+- Reconcile delivered J006 to awaiting-human through the native plan command. The canonical plan owns current job-acceptance states. No further job or whole-v1 acceptance is inferred here.
 - Run structural/negative controls, public quality and independent semantic/source review. Require exact PR/main CI before technical delivery. The operator alone accepts v1.
 
 ## Source and checks
