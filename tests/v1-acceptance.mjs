@@ -44,6 +44,21 @@ function validate(value) {
     assert(stat.isFile() && !stat.isSymbolicLink() && stat.size <= 2 * 1024 * 1024 && fs.realpathSync(absolute) === absolute, 'bounded canonical regular record');
     assert.equal(hash(fs.readFileSync(absolute)), sha256, path + ': exact evidence bytes required');
   }
+  const auditReference = value.independentSemanticAudit;
+  assert(records.some(record => record.path === auditReference?.record), 'semantic audit must be an exact pinned evidence record');
+  const audit = JSON.parse(fs.readFileSync(join(source, auditReference.record)));
+  assert.equal(audit.version, 1); assert.equal(audit.criteriaCount, expected.length);
+  assert.equal(audit.operatorAcceptanceSubstitutesForVerification, false);
+  assert.deepEqual(audit.domains.flatMap(domain => domain.ids).sort(), expected, 'all criteria assigned once across independent audit scopes');
+  const axes = audit.domains.map(domain => domain.coordinatorReading.spec);
+  assert(axes.every(axis => ['pass', 'fail', 'inconclusive'].includes(axis)));
+  const outcome = axes.includes('fail') ? 'fail' : axes.includes('inconclusive') ? 'inconclusive' : 'pass';
+  assert.equal(audit.conclusion, outcome); assert.equal(auditReference.status, outcome, 'operator acceptance cannot promote an inconclusive audit');
+  for (const domain of audit.domains) {
+    assert.match(domain.candidate, /^[a-f0-9]{40}$/u); assert.match(domain.base, /^[a-f0-9]{40}$/u);
+    assert(domain.report && domain.ids.length && domain.transport.status === 'response-complete');
+    assert.equal(domain.transport.httpStatus, 200); assert.equal(domain.transport.attempts, 1); assert.equal(domain.transport.fetches, 1);
+  }
   return records.length;
 }
 const records = validate(matrix);
@@ -58,5 +73,7 @@ for (const mutate of [
   value => value.records.push(value.records[0]),
   value => { value.operatorAcceptance = 'explicit-operator-acceptance-recorded'; delete value.operatorAcceptanceEvidence; },
   value => value.status = 'coordinator-reconciliation-awaiting-independent-review-and-operator-acceptance',
+  value => value.independentSemanticAudit.status = 'pass',
+  value => delete value.independentSemanticAudit,
 ]) { const copy = structuredClone(matrix); mutate(copy); assert.throws(() => validate(copy)); }
 console.log(`PASS v1 evidence structure: ${expected.length} exact criteria, ${records} current record hashes and explicit scope/limits; not semantic review, deployment approval or operator acceptance`);

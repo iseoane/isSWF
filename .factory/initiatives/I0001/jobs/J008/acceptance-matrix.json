@@ -10,7 +10,13 @@
     "reference": "Operator conversation during task109, after J007 acceptance",
     "scope": "All reported jobs accepted. This decision does not assert that outstanding technical review or publication gates passed, approve client deployment, or remove recorded limitations."
   },
+  "independentSemanticAudit": {
+    "status": "inconclusive",
+    "record": ".factory/initiatives/I0001/jobs/J008/semantic-review.json",
+    "meaning": "All 61 mappings were assigned to independent audits; no complete semantic PASS was obtained. Operator acceptance is separate."
+  },
   "introducedRecords": [
+    ".factory/initiatives/I0001/jobs/J008/semantic-review.json",
     ".factory/initiatives/I0001/jobs/J008/navigation-review.json"
   ],
   "columns": [
@@ -25,8 +31,9 @@
     "sha256",
     "groups"
   ],
-  "scope": "Evidence kinds are not product PASS. Authority, limits and pending decisions are defined in brief-r3.md, delivery.md and the canonical plan, not duplicated here.",
+  "scope": "Rows are coordinator evidence classifications, not an independent product PASS. The final semantic audit remains inconclusive and is retained verbatim. Acceptance, source-publication checks and runtime proof are separate; all stated limits remain in force.",
   "records": [
+    [".factory/initiatives/I0001/jobs/J008/semantic-review.json","79fccaab79f28c2857a1228566f2ec748726689572e65cccda2c488cc72eb0fa",["delivery"]],
     ["tests/successor-model-config.mjs","19b83c5d9d3c6b83b35d7d090364aee90456d4e45893e73df11d44157073ee5f",["delegation","models"]],
     ["tools/job-successor.mjs","4947c28207893ceb43bc8b7f89006cbba2f65b04313bee2df0929429440a1eb6",["delegation","models"]],
     [".agents/roles/references/code-quality.md","d1d74637c71d74c8f0c00987fe727a904debf05f8ba67d013ae884c36446fc75",["navigation"]],

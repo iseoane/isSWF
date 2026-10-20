@@ -15,4 +15,6 @@ Reconcile all 61 criteria in `docs/spec-v1.md` against exact current source and 
 
 `acceptance-matrix.json` declares criterion and record columns once. It preserves all IDs, observations and limitations, with each record path/hash stored once alongside its group memberships. Requirement wording remains authoritative in the pinned spec. `tests/v1-acceptance.mjs` detects missing/duplicate IDs, stale pins and missing limits/acceptance provenance. It does not prove semantics or approve deployment. `navigation-review.json` is the unchanged retained synthetic observation newly published with this unit. Other references existed at the base.
 
+The completed independent semantic audits remain inconclusive; `semantic-review.json` retains all three reports with exact candidate identities and disjoint 61-ID coverage. Publication review assesses whether this reconciliation faithfully records evidence, unresolved verification and operator acceptance. It must not promote those semantic outcomes to PASS or certify all spec behaviors.
+
 No new implementation or repeated physical experiment is assumed from a missing observation. If independent review finds a real remaining criterion gap, identify that gap and the smallest authorized check instead of changing the requirement or inventing acceptance.
