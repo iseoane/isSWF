@@ -30,9 +30,9 @@ Create attempt and review artifacts only when needed. Copy the [job brief templa
 
 The coordinator owns current plans, job IDs, assignments, and brief revisions. A worker owns its attempt artifact. A reviewer owns its review artifact. Workers and reviewers write in exclusive checkouts. They return artifacts and references; the coordinator integrates references into the plan without rewriting their conclusions. The coordinator records the operator's product-acceptance decision and evidence in the canonical plan.
 
-## Proposed audit retention policy
+## Audit retention policy
 
-This policy is a J013 proposal pending operator agreement. It does not authorize cleanup or record acceptance.
+The operator accepted the J013 preserve-all policy through the recorded “Acepto la política” decision. This agreement preserves unknown roles and reproduction dependencies; it does not authorize cleanup, relocation, private-archive publication or whole-product acceptance.
 
 Preserve existing audit files, references and Git history. Retiring an artifact needs separately authorized scope and a proof of its preserved bytes, mode and retrievable checkpoint before any path changes. No automatic cleanup or history rewrite is part of normal job completion.
 

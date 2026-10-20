@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "scope": "Preserve-all proposal with per-path metadata census, not cleanup approval",
+  "scope": "Metadata inventory with separately recorded operator-accepted preserve-all policy; not cleanup approval",
   "sourceBase": "63e2145d4a0692a18087345f2bc013071ab6374e",
   "observationTime": "2026-10-19T20:02:53.872Z",
   "census": {
@@ -68,7 +68,7 @@
     }
   ],
   "policyDecision": {
-    "status": "pending-operator-agreement",
+    "status": "accepted-preserve-all-scope",
     "existingArtifacts": "Preserve all existing paths and Git history, including unknown roles and reproduction dependencies",
     "newArtifacts": "Reviewed curated receipts under owning job; raw/private logs, fixtures and archives remain local",
     "distribution": "Keep existing explicit allowlist exclusions",
@@ -95,8 +95,20 @@
     "Per-path roles and reproduction dependencies remain unknown unless separately inspected; no inferred deletability",
     "Literal references are not dynamic read/import/effect proof; nonliteral paths, large or nontext consumers and manual harness dependencies are not resolved",
     "All unknown or unresolved artifacts remain preserved; no policy acceptance, move, deletion, archive or history rewrite",
-    "No operator policy agreement or v1 acceptance inferred",
+    "Policy agreement comes from the separately recorded explicit operator answer, never technical checks; whole v1 is not accepted",
     "SourcePins are observed bytes; census snapshot can differ after local artifact creation",
     "No claimed secret scan, complete dynamic dependency audit or per-artifact semantic classification"
-  ]
+  ],
+  "operatorAcceptance": {
+    "status": "accepted-preserve-all-scope",
+    "answer": "Acepto la política",
+    "scope": "Conserve all existing files/history; raw new records private; reviewed curated summaries only; no deletion/movement authority and unknowns preserved",
+    "wholeV1Acceptance": false,
+    "sourceReview": {
+      "candidate": "c76c2569b92081ac5e65a1043d0b265e058d8bdb",
+      "base": "33103a97937ff7b5a8d843681af81364edbdb3fb",
+      "bundleSha256": "ddbafa08568b65473a1d2254a2aed2c5a1b4fb21a70a1af3b5dd2ace594a994a",
+      "report": "## Independent review\n\n**Base:** `33103a97937ff7b5a8d843681af81364edbdb3fb`  \n**Candidate:** commit `c76c2569b92081ac5e65a1043d0b265e058d8bdb`  \n**Reviewed scope:** the four supplied changed files: J013 delivery, retention receipt, I0001 plan, and `docs/durable-work.md`.\n\n### Standards: pass\n\nThe changes consistently record a preserve-all decision without granting cleanup, relocation, private-archive publication, or whole-v1 acceptance. The prior review remains unchanged in the supplied diff, while the new acceptance is recorded separately. The policy heading and text now present the policy as accepted, not proposed.\n\n### Spec: pass\n\nThe supplied structured answer, “Acepto la política,” matches the bounded decision recorded in the receipt, plan, and durable-work guide. The records preserve the stated boundaries: existing files/history stay; new raw records remain private; curated summaries are reviewed; unknowns remain preserved; future retirement requires separate authorization and proof. J013 completion is not represented as whole-v1 acceptance.\n\n**Findings:** None.\n\n### Checks and limitations\n\n- Host-selected `operator-record-consistency` probe: **passed** for receipt decision, parsed J013 status, and policy heading.\n- I did not run checks. The supplied parent quality results are not independent reruns for this documentation change.\n- The supplied diff shows the historical review report unchanged; the consistency probe itself does not verify that.\n- Exact PR/main CI for this candidate remains a later gate; the prior PR70 review and CI do not establish it.\n- I relied on the pinned candidate identity and supplied diff/content; I could not independently recompute the commit or authenticate the operator’s identity.\n\n**Aggregate: pass for this bounded source review only.** This is not merge permission or whole-product acceptance."
+    }
+  }
 }
