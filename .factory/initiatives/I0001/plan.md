@@ -156,12 +156,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J007
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J007/brief-r4.md) (pending until prepared)
-- Blocker: Bounded context and isolated-store profile delivered through PR72 with exact PR/main CI success; operator acceptance pending. Mixed-store summaries remain blocked and actual client deployment is unverified.
-- Next step: Review the bounded delivery and limitations. Before client use verify its assigned store/process boundary; do not reimplement the delivered synthetic profile or infer client approval.
+- Blocker: Operator explicitly accepted the delivered bounded scope: J007 aprobada. Actual client deployment remains separately unverified and unauthorized.
+- Next step: Preserve the accepted context/profile cut and its shared-store counterexample. Verify the actual assigned store/process boundary before any client use; no global migration inferred.
 
 ### Acceptance
 
@@ -182,6 +182,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/72
 - 33103a97937ff7b5a8d843681af81364edbdb3fb
 - Exact PR CI39323472808 and main CI39323583027: success
+- Operator conversation: J007 aprobada
 
 ## J008
 
