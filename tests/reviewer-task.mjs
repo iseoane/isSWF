@@ -246,7 +246,11 @@ try {
   const evidenceRead = await readReview({ project, store: originalStore, logicalJobRef: job.logicalJobRef });
   assert.equal(evidenceRead.status, 'recorded'); assert.deepEqual(evidenceRead.binding.workspace.evidence, originalWorkspace.evidence);
   const { sourceObjectsPath } = await import(pathToFileURL(join(source, 'tools/diagnostic-probes.mjs')));
-  const objectsWorkspace = { ...originalWorkspace, evidence: { ...originalWorkspace.evidence, sourceObjectsSha256: await evidenceDigest(sourceObjectsPath) } };
+  const objectsEvidencePath = join(root, 'alternate-backed-evidence'); await mkdir(objectsEvidencePath);
+  const alternateRepo = join(objectsEvidencePath, 'repo');
+  const alternateClone = command('git', ['clone', '--quiet', '--shared', '--no-checkout', source, alternateRepo]); assert.equal(alternateClone.status, 0, alternateClone.stderr);
+  assert.equal((await readFile(join(alternateRepo, '.git/objects/info/alternates'), 'utf8')).trim(), sourceObjectsPath);
+  const objectsWorkspace = { ...workspace, probes: [{ name: 'alternate-backed-evidence', command: `git -C ${JSON.stringify(alternateRepo)} cat-file -e ${actual.stdout.trim()}:tools/diagnostic-probes.mjs && node -e 'const f=require("node:fs");if(!f.statSync(${JSON.stringify(sourceObjectsPath)}).isDirectory()||f.existsSync(${JSON.stringify(join(source, '.git/config'))}))throw Error("object-only-boundary");console.log("alternate-objects-visible-config-hidden")'`, expectedExitCode: 0 }], evidence: { path: objectsEvidencePath, sha256: await evidenceDigest(objectsEvidencePath), sourceObjectsSha256: await evidenceDigest(sourceObjectsPath) } };
   await json(join(project, 'objects-review.json'), { ...job, workspace: objectsWorkspace }); const objectsInput = commit();
   const objectsGrant = { ...originalGrant, inputSha: objectsInput, jobPath: 'objects-review.json', jobSha256: hash(await readFile(join(project, 'objects-review.json'))), workspace: objectsWorkspace, allowSourceObjects: true };
   const objectsRequest = { ...originalRequest, inputSha: objectsInput, jobPath: 'objects-review.json' };
@@ -272,7 +276,14 @@ try {
     assert.equal(originalReal.status, 'response-complete', JSON.stringify(originalReal));
     const originalRealRead = await readReview({ project, store: originalRealStore, logicalJobRef: job.logicalJobRef });
     assert.equal(originalRealRead.status, 'recorded'); assert.deepEqual(originalRealRead.binding.workspace.evidence, originalWorkspace.evidence);
-    console.log('PASS actual reviewer caller readonly bwrap probe, exact candidate binding and durable observed output; synthetic provider only');
+    const objectsRealStore = join(root, 'actual-alternate-evidence'); await mkdir(objectsRealStore);
+    await json(grantFile, { ...objectsGrant, store: objectsRealStore, deadlineMs: 10000 });
+    const objectsReal = await runReview({ ...objectsRequest, store: objectsRealStore }, { mode: 'fixture', backend: fixture('normal', join(objectsRealStore, p.dir.split('/').at(-1))) });
+    assert.equal(objectsReal.status, 'response-complete', JSON.stringify(objectsReal));
+    const objectsRead = await readReview({ project, store: objectsRealStore, logicalJobRef: job.logicalJobRef });
+    assert.equal(objectsRead.status, 'recorded'); assert.equal(objectsRead.binding.workspace.results[0].stdout, 'alternate-objects-visible-config-hidden\n');
+    assert.deepEqual(objectsRead.binding.workspace.evidence, objectsWorkspace.evidence);
+    console.log('PASS actual reviewer caller readonly bwrap, original and alternate-backed evidence, source objects visible but config hidden; synthetic provider only');
   }
   for (const kind of ['wrong-candidate', 'dirty', 'mismatch', 'overflow']) {
     const caseStore = join(root, 'workspace-' + kind); await mkdir(caseStore);
