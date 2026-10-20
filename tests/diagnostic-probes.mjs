@@ -1,19 +1,30 @@
 import assert from 'node:assert/strict';
+import { mock } from 'node:test';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, symlink, link } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createServer, connect } from 'node:net';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] ?? '.');
-const { runDiagnosticProbes, validateProbes } = await import(pathToFileURL(join(source, 'tools/diagnostic-probes.mjs')));
+const { runDiagnosticProbes, validateProbes, evidenceDigest } = await import(pathToFileURL(join(source, 'tools/diagnostic-probes.mjs')));
 assert.throws(() => validateProbes([]));
 assert.throws(() => validateProbes([{ name: 'bad', command: 'echo\nunsafe', expectedExitCode: 0 }]));
 assert.throws(() => validateProbes(Array.from({ length: 4 }, (_, i) => ({ name: 'p' + i, command: 'true', expectedExitCode: 0 }))));
 const deadlineRoot = await mkdtemp(join(tmpdir(), 'isswf-probe-deadline-'));
 const priorPath = process.env.PATH;
 try {
+  const evidence = join(deadlineRoot, 'evidence'); await mkdir(evidence); await writeFile(join(evidence, 'original'), 'retained');
+  const pin = await evidenceDigest(evidence);
+  await writeFile(join(evidence, 'original'), 'changed'); assert.notEqual(await evidenceDigest(evidence), pin);
+  await symlink(join(evidence, 'original'), join(evidence, 'alias')); await assert.rejects(evidenceDigest(evidence), /regular-evidence/u);
+  await rm(join(evidence, 'alias')); await link(join(evidence, 'original'), join(evidence, 'hard-alias'));
+  await assert.rejects(evidenceDigest(evidence), /single-link-evidence/u);
+  await assert.rejects(evidenceDigest('/tmp'), /canonical-temporary/u);
+  const bounded = join(deadlineRoot, 'bounded'); await mkdir(bounded); await writeFile(join(bounded, 'record'), 'bounded');
+  let clockCalls = 0; const clock = mock.method(Date, 'now', () => clockCalls++ === 0 ? 0 : 20000);
+  try { await assert.rejects(evidenceDigest(bounded), /evidence-bound-or-deadline/u); } finally { clock.mock.restore(); }
   const project = join(deadlineRoot, 'project'); await mkdir(project); await mkdir(join(project, '.git'));
   await writeFile(join(deadlineRoot, 'git'), '#!' + process.execPath + '\nAtomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,1000);\n', { mode: 0o755 });
   process.env.PATH = deadlineRoot + ':' + priorPath;
@@ -41,6 +52,10 @@ else {
     assert.equal(actual[0].expectationMatched, true);
     assert.deepEqual(JSON.parse(actual[0].stdout), { environmentAbsent: true, outside: 'ENOENT', workspaceWrite: 'EROFS', gitHidden: 'ENOENT', network: 'ECONNREFUSED' });
     assert.equal(await readFile(outside, 'utf8'), 'outside-canary-unchanged'); assert.equal(git('status', '--porcelain'), '');
+    const evidence = { path: outside, sha256: await evidenceDigest(outside) };
+    const observed = await runDiagnosticProbes({ ...request, evidence, deadlineAt: Date.now() + 20000, probes: [{ name: 'original-evidence', command: `node -e 'const f=require("node:fs");console.log(f.readFileSync(${JSON.stringify(outside)},"utf8"));try{f.writeFileSync(${JSON.stringify(outside)},"bad");process.exitCode=1}catch(e){console.log(e.code)}'`, expectedExitCode: 0 }] });
+    assert.equal(observed[0].stdout, 'outside-canary-unchanged\nEROFS\n');
+    await assert.rejects(runDiagnosticProbes({ ...request, evidence: { ...evidence, sha256: '0'.repeat(64) }, deadlineAt: Date.now() + 20000 }), /evidence-pin-mismatch/u);
     await assert.rejects(runDiagnosticProbes({ ...request, deadlineAt: Date.now() + 80, probes: [{ name: 'hang', command: 'node -e "setInterval(()=>{},1000)"', expectedExitCode: 0 }] }));
     await assert.rejects(runDiagnosticProbes({ ...request, probes: [{ name: 'overflow', command: 'node -e "console.log(\'x\'.repeat(9000))"', expectedExitCode: 0 }] }));
     await writeFile(join(project, 'dirty'), 'untracked'); await assert.rejects(runDiagnosticProbes(request), /clean-pinned/u);
