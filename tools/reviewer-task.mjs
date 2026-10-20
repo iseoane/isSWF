@@ -89,8 +89,9 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
       const evidence = job.workspace.evidence;
       assert(grant.allowOriginalEvidence === true && evidence && ['path,sha256', 'path,sha256,sourceObjectsSha256'].includes(Object.keys(evidence).sort().join(',')) && isAbsolute(evidence.path ?? '') && /^[a-f0-9]{64}$/u.test(evidence.sha256), 'explicit-original-evidence-grant-required');
       for (const protectedPath of [target, source, project, store, workspace, authPath, grantFile]) assert(evidence.path !== protectedPath && !inside(evidence.path, protectedPath) && !inside(protectedPath, evidence.path), 'separate-original-evidence-required');
-      assert(await evidenceDigest(evidence.path) === evidence.sha256, 'original-evidence-pin-mismatch');
-      if (evidence.sourceObjectsSha256 !== undefined) assert(grant.allowSourceObjects === true && /^[a-f0-9]{64}$/u.test(evidence.sourceObjectsSha256) && await evidenceDigest(sourceObjectsPath) === evidence.sourceObjectsSha256, 'explicit-source-object-pin-required');
+      const evidenceDeadlineAt = Date.now() + Math.min(10000, grant.deadlineMs);
+      assert(await evidenceDigest(evidence.path, evidenceDeadlineAt) === evidence.sha256, 'original-evidence-pin-mismatch');
+      if (evidence.sourceObjectsSha256 !== undefined) assert(grant.allowSourceObjects === true && /^[a-f0-9]{64}$/u.test(evidence.sourceObjectsSha256) && await evidenceDigest(sourceObjectsPath, evidenceDeadlineAt) === evidence.sourceObjectsSha256, 'explicit-source-object-pin-required');
       else assert(grant.allowSourceObjects !== true, 'source-object-pin-required');
     } else assert(grant.allowOriginalEvidence !== true, 'original-evidence-descriptor-required');
   } else assert(grant.allowWorkspaceProbes !== true, 'review-probes-require-workspace');
@@ -122,6 +123,7 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   return { project, store, inputSha, jobPath, job, grant, grantSha256, capacity, inputBytes, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
 }
 export async function runReview(request, { backend, mode = 'real', probeRunner } = {}) {
+  const startedAt = Date.now();
   const p = await prepareReview(request), { job, grant, dir } = p;
   assert(mode === 'real' || mode === 'fixture', 'explicit-mode-required');
   assert(mode === 'real' ? grant.allowProviderCalls === true && !backend && !probeRunner : grant.allowProviderCalls === false && backend, 'provider-grant-or-fixture-required');
@@ -134,7 +136,7 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
     const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
     return { version: 1, status: 'blocked', reason: 'capacity', attemptsConsumed: 0, fetches: 0, capacity: p.capacity, executionAuthorized: false };
   }
-  const deadlineAt = Date.now() + grant.deadlineMs;
+  const deadlineAt = startedAt + grant.deadlineMs;
   let workspaceVerification;
   if (job.workspace) {
     await publish(join(dir, 'probe-intent.json'), { version: 1, workspace: job.workspace, candidateSha: job.candidateSha, probeRunnerSha256: grant.probeRunnerSha256, providerPromptStarted: false });

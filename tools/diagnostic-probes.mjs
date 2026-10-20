@@ -22,7 +22,8 @@ export function validateProbes(probes) {
   }
 }
 // Optional original evidence is operator-selected, not a model-selected host mount.
-export async function evidenceDigest(path, deadlineAt = Infinity) {
+export async function evidenceDigest(path, deadlineAt = Date.now() + 10000) {
+  assert(Number.isFinite(deadlineAt), 'finite-evidence-deadline-required');
   assert(typeof path === 'string' && (path === sourceObjectsPath || /^\/(?:var\/)?tmp\/[^/]+(?:\/[^/]+)*$/u.test(path)) && await realpath(path) === path, 'canonical-temporary-evidence-root-required');
   const digest = createHash('sha256'); let entries = 0, bytes = 0;
   async function visit(current, relative) {
@@ -35,7 +36,7 @@ export async function evidenceDigest(path, deadlineAt = Infinity) {
     } else {
       assert(stat.nlink === 1, 'single-link-evidence-required');
       bytes += stat.size; assert(bytes <= 64 * 1024 * 1024, 'evidence-byte-bound');
-      const content = await readFile(current); assert(content.length === stat.size, 'evidence-changed');
+      const content = await readFile(current, { signal: AbortSignal.timeout(Math.max(1, Math.ceil(deadlineAt - Date.now()))) }); assert(content.length === stat.size, 'evidence-changed');
       digest.update(JSON.stringify([content.length, createHash('sha256').update(content).digest('hex')]));
     }
   }

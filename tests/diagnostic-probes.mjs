@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { mock } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, readFile, rm, symlink, link } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -21,6 +22,9 @@ try {
   await rm(join(evidence, 'alias')); await link(join(evidence, 'original'), join(evidence, 'hard-alias'));
   await assert.rejects(evidenceDigest(evidence), /single-link-evidence/u);
   await assert.rejects(evidenceDigest('/tmp'), /canonical-temporary/u);
+  const bounded = join(deadlineRoot, 'bounded'); await mkdir(bounded); await writeFile(join(bounded, 'record'), 'bounded');
+  let clockCalls = 0; const clock = mock.method(Date, 'now', () => clockCalls++ === 0 ? 0 : 20000);
+  try { await assert.rejects(evidenceDigest(bounded), /evidence-bound-or-deadline/u); } finally { clock.mock.restore(); }
   const project = join(deadlineRoot, 'project'); await mkdir(project); await mkdir(join(project, '.git'));
   await writeFile(join(deadlineRoot, 'git'), '#!' + process.execPath + '\nAtomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,1000);\n', { mode: 0o755 });
   process.env.PATH = deadlineRoot + ':' + priorPath;
