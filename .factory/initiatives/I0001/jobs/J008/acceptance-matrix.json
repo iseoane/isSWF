@@ -5,165 +5,6 @@
   "specSha256": "4ba3fdc91071d4c02742ba68a4cc4d8c69bb660810f819af41cc8af3aa217230",
   "criteriaCount": 61,
   "operatorAcceptance": "not-recorded-for-whole-v1",
-  "assessmentRule": "Modes describe the selected bounded evidence, not PASS or automatic completion. Historical pending prose is reconciled against canonical plan; accepted cuts are not reopened or generalized.",
-  "currentBlockingDecisions": [
-    "J005 bounded delivery operator acceptance",
-    "J006 bounded original-restart delivery operator acceptance",
-    "J007 bounded context/profile delivery operator acceptance",
-    "Whole-v1 operator acceptance after final evidence/source review and exact publication CI"
-  ],
-  "evidencePins": {
-    ".agents/roles/references/code-quality.md": "d1d74637c71d74c8f0c00987fe727a904debf05f8ba67d013ae884c36446fc75",
-    ".agents/skills/isswf-coordinator/SKILL.md": "23657f8ec5fce8a554df7393809f6858cf1716b47752625c7c7bfd6787cdd963",
-    ".audit/fallback-66-quota-proof.json": "babb687df4fb6f495595a7450349a8a504869412b70d7a6e49f1b3684e06d9e4",
-    ".audit/recovery-68-acceptance-scope-deepseek.json": "957f52ff85edc29696c7f933b82a85a82890f1f6ca57fc93ed2ca11f1d03e916",
-    ".factory/initiatives/I0001/jobs/J002/V002.md": "d096d999403db5f0ff94305a06cc9ac6c419aa05b612046e768f8e29d9f8b04e",
-    ".factory/initiatives/I0001/jobs/J003/brief-r2.md": "836bfb0bbd70bb9f003a03428f9cf8fea7609937fcb93045485d252aa2f7f0aa",
-    ".factory/initiatives/I0001/jobs/J004/A001.md": "54651165a59e3b8da53a4c24d2ae2f4eab6c7910f4e77439cb17e5411ef29960",
-    ".factory/initiatives/I0001/jobs/J004/proposals/P001.md": "91d94fd930cb1efeb0f0718b776ad7da7fb1d3982c6a198d3ec411401e89d386",
-    ".factory/initiatives/I0001/jobs/J004/retrospective-r1.md": "c29c10ed78011872bb92cea37c33d7ee18519bd3c27b1fad7bc5df219010cee2",
-    ".factory/initiatives/I0001/jobs/J005/brief-r6.md": "728bc59415a50d5cf0bea146736eac73e242ce5e0586e48978939a1672df096c",
-    ".factory/initiatives/I0001/jobs/J005/dependency-verification.json": "d725ceb7eb11de5e33d329e4fee939dc8fbec9ded1e5ca876e393660b7f1c273",
-    ".factory/initiatives/I0001/jobs/J005/panel-verification.json": "5eb0b9b0136d499aeafb350e85e7ccec227398ba610ee8cef9754e84b0c3d141",
-    ".factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json": "78ca7ff62160110f7c30a12768a2ec38121828d66515ceafbfa8b9f3ab40a5d2",
-    ".factory/initiatives/I0001/jobs/J006/brief-r6.md": "f95b4dbf41d502c3b9af621ca1061c6dfa2e9ca5f56aada4e2e79c99937d082f",
-    ".factory/initiatives/I0001/jobs/J006/original-access-verification.json": "defb699981fcca21a2ec3c19432f9ac770f62b12b227c7f2564a0732feaa58e9",
-    ".factory/initiatives/I0001/jobs/J006/restart-case-v1.json": "8c4bf1ae74911c38129ba07628ce53f1518ac1ff99308d8b9cb1502de881ef50",
-    ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json": "012c4e3dfb3d60eb8a1de09afd38f203fb68fd8b270fb8188bb6d14aacbe44a7",
-    ".factory/initiatives/I0001/jobs/J007/context-verification.json": "1db8dd5939b86b8c3090d10d516d066f70f9f37cdaa68281a76420fe68ad4d6f",
-    ".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs": "a602d24eb0a21e3dfcfd8be86ea9e8ea0f2226d0c719cdb79af8760ac27a4ead",
-    ".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json": "befa84d90da2030c10157d4872b6f63088a4112f230763c0ed2fd7ce3b32eecb",
-    ".factory/initiatives/I0001/jobs/J007/mcp-verification.json": "7fec3f00a39995f47bb821dc797c4f71332ba22cfd3061315cf6dabd3fdec0ed",
-    ".factory/initiatives/I0001/jobs/J008/navigation-review.json": "8e32489895d394f200a8e59847c136ca1d73a5851c542f3e787c5f734f33c2e3",
-    ".factory/initiatives/I0001/jobs/J009/V003.md": "8f2e40a3c673638a58aa4d74aab5b27cfdd40cb8f6d35801a395a8d841d77091",
-    ".factory/initiatives/I0001/jobs/J011/V005.md": "20568f33b5cd41a467b5116be1a78a7386f30b668e231b001ae1952eaf920d97",
-    ".factory/initiatives/I0001/jobs/J011/delivery.md": "292f21b95a02de16f643ca1f7b2bcf8f22f29dd5f7b9966c8116ed31bf644070",
-    ".factory/initiatives/I0001/jobs/J013/retention-verification.json": "b4fb5834f2ba6c30683f85f5ec726545cf890b1a4208ad6fa5822d200263f143",
-    ".factory/initiatives/I0002/plan.md": "37c5b593395b846a8b2d91a74041f3a62959948a80da478247b110cf98604343",
-    ".factory/models.json": "f25ca74f71a523367986ac113f83d1128acba89153cb8434812931dbf3823910",
-    "docs/local-worker-lifecycle.md": "b78b1bcf6a63e8cb8ce06dea71aa7f60f1d0b1b9fa843261978019fee8a23b12",
-    "docs/s01-intake.md": "2d999801019e1582d64c7f1763fd4cb5bc872c34ac70868c0965b4de918f9ee3",
-    "tests/diagnostic-probes.mjs": "6e7e57341a1bae49189c99812d5673d6fb7f60d7f9394d3a031f3620bf956975",
-    "tests/initiative-next-action.mjs": "3c239acb44e19762e23a91fb3293046c9bd70c82cd61c9619a13d1e2cde14a9e",
-    "tests/initiative-panel.mjs": "43074309343e061ecaa83e777a9a5355ca49434854f4367b353fd743f7239af3",
-    "tests/initiative-status.mjs": "8f4b82bf479ad685cfe881d35628fd8b8441c944e15bbe2220c5d90485c6541b",
-    "tests/issue-intake.mjs": "a45d70d937079cc9f5ddbe579bd04d044b4320b27bbd49ede9261454ac80eea9",
-    "tests/planner-task.mjs": "d748f0d3e20401518712facb6476f2b5f551822302d25e3caf95bb6ba9d253bf",
-    "tests/project-context-engram.mjs": "f428941c9ec85d4dce3b6e312c80bd9c3657bf67636dc46d95f7ef329d747976",
-    "tests/project-context-handoff.mjs": "50e5f8ccd436216598a2cd01ffb4015fb3d18aab080d5787f8b958f66bc5454e",
-    "tests/researcher-quota-fallback.mjs": "69fdc7cf6b2052b58d4a29e74061223defa33e52148ab0d2ab3ba4a18226bd01",
-    "tests/researcher-session-affinity.mjs": "b855d91f98828481bba00b0a5d4b3b391a01f56278a53f0745164fde57bac493",
-    "tests/reviewer-task.mjs": "34d76fe8af597530135016af0c608ed81646ca0e9ba2acc28c5da7d1a4187f1c",
-    "tests/worker-methodology.mjs": "277a5ced21ecbeaf2eede5348fdf0bec06e73bbb23eb54c6f4e26172d75b2917",
-    "tests/worker-route-admission.mjs": "83f81af586036ed8a9eebcc7e01c4bce1316d486a530efd5ee7485e588c64824",
-    "tools/isswf-job.mjs": "a1d3f5d21b5861b1e7c5b1892755d8016ca1c1e7a09d13032817d57feb0de939",
-    "tools/native-recovery.mjs": "e059633e570be3685a62acacd1e8d2ce552ac01ca7e7dec2cdb2bad3fa31c03e"
-  },
-  "limits": [
-    "Rows classify bounded source, historical reports and named controls, not universal PASS or automatic product acceptance",
-    "Source-only or verified isolated-profile use is supported; current shared-store parent MCP is not certified for client context",
-    "No new worker/reboot, deployment, cleanup, account or runtime grant follows from this matrix",
-    "No universal quota classifier, semantic secret detector, authenticated actor identity or production outage guarantee",
-    "Draft final reconciliation requires independent semantic review and exact PR/main CI; operator acceptance remains separate"
-  ],
-  "evidenceGroups": {
-    "delegation": [
-      ".factory/initiatives/I0001/jobs/J011/delivery.md",
-      ".factory/initiatives/I0001/jobs/J011/V005.md",
-      "tools/isswf-job.mjs",
-      "tests/worker-methodology.mjs",
-      "tests/reviewer-task.mjs",
-      "tests/planner-task.mjs"
-    ],
-    "retrospective": [
-      ".factory/initiatives/I0001/jobs/J004/A001.md",
-      ".factory/initiatives/I0001/jobs/J004/retrospective-r1.md",
-      ".factory/initiatives/I0001/jobs/J004/proposals/P001.md"
-    ],
-    "security": [
-      ".factory/initiatives/I0001/jobs/J007/context-verification.json",
-      "tests/diagnostic-probes.mjs",
-      "tests/reviewer-task.mjs",
-      "tests/worker-route-admission.mjs",
-      ".factory/initiatives/I0001/jobs/J013/retention-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/mcp-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs"
-    ],
-    "intake": [
-      "tests/issue-intake.mjs",
-      ".factory/initiatives/I0001/jobs/J002/V002.md",
-      "docs/s01-intake.md"
-    ],
-    "grounding": [
-      ".agents/skills/isswf-coordinator/SKILL.md",
-      ".factory/initiatives/I0001/jobs/J003/brief-r2.md",
-      ".factory/initiatives/I0001/jobs/J005/dependency-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/context-verification.json"
-    ],
-    "delivery": [
-      ".factory/initiatives/I0001/jobs/J005/dependency-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/context-verification.json",
-      ".factory/initiatives/I0001/jobs/J013/retention-verification.json",
-      ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json"
-    ],
-    "models": [
-      ".factory/models.json",
-      "tests/worker-route-admission.mjs",
-      "tests/researcher-quota-fallback.mjs",
-      "tests/researcher-session-affinity.mjs",
-      ".audit/fallback-66-quota-proof.json"
-    ],
-    "capacity": [
-      ".factory/initiatives/I0001/jobs/J005/brief-r6.md",
-      ".factory/initiatives/I0001/jobs/J005/panel-verification.json",
-      ".factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json",
-      ".factory/initiatives/I0001/jobs/J005/dependency-verification.json"
-    ],
-    "navigation": [
-      ".agents/roles/references/code-quality.md",
-      ".agents/skills/isswf-coordinator/SKILL.md",
-      "tests/worker-methodology.mjs"
-    ],
-    "navFinding": [
-      ".factory/initiatives/I0001/jobs/J008/navigation-review.json"
-    ],
-    "product": [
-      ".factory/initiatives/I0001/jobs/J003/brief-r2.md",
-      ".factory/initiatives/I0002/plan.md",
-      "tests/initiative-next-action.mjs",
-      ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json"
-    ],
-    "observation": [
-      "tests/initiative-status.mjs",
-      "tests/initiative-panel.mjs",
-      "tests/initiative-next-action.mjs",
-      ".factory/initiatives/I0001/jobs/J009/V003.md"
-    ],
-    "recovery": [
-      "docs/local-worker-lifecycle.md",
-      "tools/native-recovery.mjs",
-      ".factory/initiatives/I0001/jobs/J006/brief-r6.md",
-      ".audit/recovery-68-acceptance-scope-deepseek.json",
-      ".factory/initiatives/I0001/jobs/J006/restart-case-v1.json",
-      ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json",
-      ".factory/initiatives/I0001/jobs/J006/original-access-verification.json"
-    ],
-    "memory": [
-      ".factory/initiatives/I0001/jobs/J007/context-verification.json",
-      "tests/project-context-engram.mjs",
-      "tests/project-context-handoff.mjs",
-      ".factory/initiatives/I0001/jobs/J007/mcp-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json",
-      ".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs"
-    ]
-  },
-  "operatorDecisions": {
-    "retention": "Acepto la política; accepted preserve-all scope, not whole v1",
-    "restart": "Original failed case preserved; explicitly authorized additional distinct case performed one physical restart. Both worker admissions consumed, none remain. Actual changed-boot preservation and conservative refusal independently reviewed and integrated in PR76.",
-    "wholeV1": "not-accepted",
-    "clientUse": "No client deployment adopted or authorized. Required actual store/process separation must be verified before client use; shared-store summaries stay blocked."
-  },
   "introducedRecords": [
     ".factory/initiatives/I0001/jobs/J008/navigation-review.json"
   ],
@@ -173,6 +14,59 @@
     "evidenceGroup",
     "observation",
     "remaining"
+  ],
+  "recordColumns": [
+    "path",
+    "sha256",
+    "groups"
+  ],
+  "scope": "Evidence kinds are not product PASS. Authority, limits and pending decisions are defined in brief-r3.md, delivery.md and the canonical plan, not duplicated here.",
+  "records": [
+    [".agents/roles/references/code-quality.md","d1d74637c71d74c8f0c00987fe727a904debf05f8ba67d013ae884c36446fc75",["navigation"]],
+    [".agents/skills/isswf-coordinator/SKILL.md","23657f8ec5fce8a554df7393809f6858cf1716b47752625c7c7bfd6787cdd963",["grounding","navigation"]],
+    [".audit/fallback-66-quota-proof.json","babb687df4fb6f495595a7450349a8a504869412b70d7a6e49f1b3684e06d9e4",["models"]],
+    [".audit/recovery-68-acceptance-scope-deepseek.json","957f52ff85edc29696c7f933b82a85a82890f1f6ca57fc93ed2ca11f1d03e916",["recovery"]],
+    [".factory/initiatives/I0001/jobs/J002/V002.md","d096d999403db5f0ff94305a06cc9ac6c419aa05b612046e768f8e29d9f8b04e",["intake"]],
+    [".factory/initiatives/I0001/jobs/J003/brief-r2.md","836bfb0bbd70bb9f003a03428f9cf8fea7609937fcb93045485d252aa2f7f0aa",["grounding","product"]],
+    [".factory/initiatives/I0001/jobs/J004/A001.md","54651165a59e3b8da53a4c24d2ae2f4eab6c7910f4e77439cb17e5411ef29960",["retrospective"]],
+    [".factory/initiatives/I0001/jobs/J004/proposals/P001.md","91d94fd930cb1efeb0f0718b776ad7da7fb1d3982c6a198d3ec411401e89d386",["retrospective"]],
+    [".factory/initiatives/I0001/jobs/J004/retrospective-r1.md","c29c10ed78011872bb92cea37c33d7ee18519bd3c27b1fad7bc5df219010cee2",["retrospective"]],
+    [".factory/initiatives/I0001/jobs/J005/brief-r6.md","728bc59415a50d5cf0bea146736eac73e242ce5e0586e48978939a1672df096c",["capacity"]],
+    [".factory/initiatives/I0001/jobs/J005/dependency-verification.json","d725ceb7eb11de5e33d329e4fee939dc8fbec9ded1e5ca876e393660b7f1c273",["grounding","delivery","capacity"]],
+    [".factory/initiatives/I0001/jobs/J005/panel-verification.json","5eb0b9b0136d499aeafb350e85e7ccec227398ba610ee8cef9754e84b0c3d141",["capacity"]],
+    [".factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json","78ca7ff62160110f7c30a12768a2ec38121828d66515ceafbfa8b9f3ab40a5d2",["capacity"]],
+    [".factory/initiatives/I0001/jobs/J006/brief-r6.md","f95b4dbf41d502c3b9af621ca1061c6dfa2e9ca5f56aada4e2e79c99937d082f",["recovery"]],
+    [".factory/initiatives/I0001/jobs/J006/original-access-verification.json","defb699981fcca21a2ec3c19432f9ac770f62b12b227c7f2564a0732feaa58e9",["recovery"]],
+    [".factory/initiatives/I0001/jobs/J006/restart-case-v1.json","8c4bf1ae74911c38129ba07628ce53f1518ac1ff99308d8b9cb1502de881ef50",["recovery"]],
+    [".factory/initiatives/I0001/jobs/J006/restart-case-v2.json","012c4e3dfb3d60eb8a1de09afd38f203fb68fd8b270fb8188bb6d14aacbe44a7",["delivery","product","recovery"]],
+    [".factory/initiatives/I0001/jobs/J007/context-verification.json","1db8dd5939b86b8c3090d10d516d066f70f9f37cdaa68281a76420fe68ad4d6f",["security","grounding","delivery","memory"]],
+    [".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs","a602d24eb0a21e3dfcfd8be86ea9e8ea0f2226d0c719cdb79af8760ac27a4ead",["security","memory"]],
+    [".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json","befa84d90da2030c10157d4872b6f63088a4112f230763c0ed2fd7ce3b32eecb",["security","memory"]],
+    [".factory/initiatives/I0001/jobs/J007/mcp-verification.json","7fec3f00a39995f47bb821dc797c4f71332ba22cfd3061315cf6dabd3fdec0ed",["security","memory"]],
+    [".factory/initiatives/I0001/jobs/J008/navigation-review.json","8e32489895d394f200a8e59847c136ca1d73a5851c542f3e787c5f734f33c2e3",["navFinding"]],
+    [".factory/initiatives/I0001/jobs/J009/V003.md","8f2e40a3c673638a58aa4d74aab5b27cfdd40cb8f6d35801a395a8d841d77091",["observation"]],
+    [".factory/initiatives/I0001/jobs/J011/V005.md","20568f33b5cd41a467b5116be1a78a7386f30b668e231b001ae1952eaf920d97",["delegation"]],
+    [".factory/initiatives/I0001/jobs/J011/delivery.md","292f21b95a02de16f643ca1f7b2bcf8f22f29dd5f7b9966c8116ed31bf644070",["delegation"]],
+    [".factory/initiatives/I0001/jobs/J013/retention-verification.json","b4fb5834f2ba6c30683f85f5ec726545cf890b1a4208ad6fa5822d200263f143",["security","delivery"]],
+    [".factory/initiatives/I0002/plan.md","37c5b593395b846a8b2d91a74041f3a62959948a80da478247b110cf98604343",["product"]],
+    [".factory/models.json","f25ca74f71a523367986ac113f83d1128acba89153cb8434812931dbf3823910",["models"]],
+    ["docs/local-worker-lifecycle.md","b78b1bcf6a63e8cb8ce06dea71aa7f60f1d0b1b9fa843261978019fee8a23b12",["recovery"]],
+    ["docs/s01-intake.md","2d999801019e1582d64c7f1763fd4cb5bc872c34ac70868c0965b4de918f9ee3",["intake"]],
+    ["tests/diagnostic-probes.mjs","6e7e57341a1bae49189c99812d5673d6fb7f60d7f9394d3a031f3620bf956975",["security"]],
+    ["tests/initiative-next-action.mjs","3c239acb44e19762e23a91fb3293046c9bd70c82cd61c9619a13d1e2cde14a9e",["product","observation"]],
+    ["tests/initiative-panel.mjs","43074309343e061ecaa83e777a9a5355ca49434854f4367b353fd743f7239af3",["observation"]],
+    ["tests/initiative-status.mjs","8f4b82bf479ad685cfe881d35628fd8b8441c944e15bbe2220c5d90485c6541b",["observation"]],
+    ["tests/issue-intake.mjs","a45d70d937079cc9f5ddbe579bd04d044b4320b27bbd49ede9261454ac80eea9",["intake"]],
+    ["tests/planner-task.mjs","d748f0d3e20401518712facb6476f2b5f551822302d25e3caf95bb6ba9d253bf",["delegation"]],
+    ["tests/project-context-engram.mjs","f428941c9ec85d4dce3b6e312c80bd9c3657bf67636dc46d95f7ef329d747976",["memory"]],
+    ["tests/project-context-handoff.mjs","50e5f8ccd436216598a2cd01ffb4015fb3d18aab080d5787f8b958f66bc5454e",["memory"]],
+    ["tests/researcher-quota-fallback.mjs","69fdc7cf6b2052b58d4a29e74061223defa33e52148ab0d2ab3ba4a18226bd01",["models"]],
+    ["tests/researcher-session-affinity.mjs","b855d91f98828481bba00b0a5d4b3b391a01f56278a53f0745164fde57bac493",["models"]],
+    ["tests/reviewer-task.mjs","34d76fe8af597530135016af0c608ed81646ca0e9ba2acc28c5da7d1a4187f1c",["delegation","security"]],
+    ["tests/worker-methodology.mjs","277a5ced21ecbeaf2eede5348fdf0bec06e73bbb23eb54c6f4e26172d75b2917",["delegation","navigation"]],
+    ["tests/worker-route-admission.mjs","83f81af586036ed8a9eebcc7e01c4bce1316d486a530efd5ee7485e588c64824",["security","models"]],
+    ["tools/isswf-job.mjs","a1d3f5d21b5861b1e7c5b1892755d8016ca1c1e7a09d13032817d57feb0de939",["delegation"]],
+    ["tools/native-recovery.mjs","e059633e570be3685a62acacd1e8d2ce552ac01ca7e7dec2cdb2bad3fa31c03e",["recovery"]]
   ],
   "criteria": [
     ["AGT-01","bounded-supported","delegation","Normal job entry resolves committed job/reference, pinned methodology/configuration and private result bindings. Direct role callers are available; grants repeat permission bindings, not conversational history.","No autonomous coordinator daemon or generic all-role job dispatcher claimed."],

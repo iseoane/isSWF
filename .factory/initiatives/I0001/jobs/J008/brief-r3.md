@@ -13,6 +13,6 @@ Reconcile all 61 criteria in `docs/spec-v1.md` against exact current source and 
 
 ## Source and checks
 
-`acceptance-matrix.json` declares its table columns once and maps all IDs to evidence groups, observations, limitations and exact hashes without repeated field names. Requirement wording remains authoritative in the pinned spec. `tests/v1-acceptance.mjs` detects missing/duplicate IDs, stale pins and missing limits/acceptance provenance. It does not prove semantics or approve deployment. `navigation-review.json` is the unchanged retained synthetic observation newly published with this unit. Other references existed at the base.
+`acceptance-matrix.json` declares criterion and record columns once. It preserves all IDs, observations and limitations, with each record path/hash stored once alongside its group memberships. Requirement wording remains authoritative in the pinned spec. `tests/v1-acceptance.mjs` detects missing/duplicate IDs, stale pins and missing limits/acceptance provenance. It does not prove semantics or approve deployment. `navigation-review.json` is the unchanged retained synthetic observation newly published with this unit. Other references existed at the base.
 
 No new implementation or repeated physical experiment is assumed from a missing observation. If independent review finds a real remaining criterion gap, identify that gap and the smallest authorized check instead of changing the requirement or inventing acceptance.
