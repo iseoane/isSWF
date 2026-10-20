@@ -56,6 +56,12 @@ try {
   await json(objects.grantFile, objects.grant); await prepareReview(objects.request);
   for (const current of [ordinary, objects]) {
     const p = await prepareReview(current.request);
+    const bundle = JSON.parse(p.prompt);
+    assert.deepEqual(bundle.assignment.workspace, current.workspace); assert.deepEqual(bundle.authorization.workspace, current.workspace);
+    assert.equal(bundle.assignment.inputSha, current.request.inputSha); assert.equal(bundle.authorization.jobSha256, bundle.assignment.jobSha256);
+    assert.equal(bundle.authorization.allowOriginalEvidence, true); assert.equal(bundle.authorization.allowSourceObjects, current === objects);
+    assert.equal(p.prompt.includes(auth), false, 'auth locator must not enter the model evidence');
+    assert.equal(Object.hasOwn(bundle.authorization, 'authPath'), false);
     const backend = {
       async preflight() { return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic' } }; },
       async fetch() { fetches++; return new Response('', { status: 200 }); },
