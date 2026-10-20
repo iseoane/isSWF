@@ -200,9 +200,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J008/A001.md
-- .factory/initiatives/I0001/jobs/J008/acceptance-matrix.json
-- .factory/initiatives/I0001/jobs/J008/navigation-review.json
-- .factory/initiatives/I0001/jobs/J008/delivery.md
 
 ## J009
 
