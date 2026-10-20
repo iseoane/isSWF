@@ -149,12 +149,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J007
 
-- Status: blocked
+- Status: awaiting-human
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J007/brief-r4.md) (pending until prepared)
-- Blocker: Mixed-store MCP client summaries remain unsupported. Two physically separate synthetic stores/process namespaces now pass both-direction broad-query and metadata controls; actual deployment/adoption is not verified or authorized. Profile source review and CI remain pending.
-- Next step: Deliver the bounded isolated-profile proof with exact review/CI; before any client use verify the actual assigned store/process boundary. Preserve the mixed-store counterexample and source-only fallback; do not change global configuration or infer full acceptance.
+- Blocker: Bounded context and isolated-store profile delivered through PR72 with exact PR/main CI success; operator acceptance pending. Mixed-store summaries remain blocked and actual client deployment is unverified.
+- Next step: Review the bounded delivery and limitations. Before client use verify its assigned store/process boundary; do not reimplement the delivered synthetic profile or infer client approval.
 
 ### Acceptance
 
@@ -172,6 +172,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - c89aeec0c8c5dfb040c580cc8ea5045067840aa1
 - .factory/initiatives/I0001/jobs/J007/brief-r4.md
 - .factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json
+- https://github.com/iseoane/isSWF/pull/72
+- 33103a97937ff7b5a8d843681af81364edbdb3fb
+- Exact PR CI39323472808 and main CI39323583027: success
 
 ## J008
 

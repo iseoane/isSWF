@@ -36,11 +36,19 @@ Existing reviewer and planner tests verify committed context bytes, ignored work
 
 ## Independent review
 
-Earlier independent review passed the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`; it did not establish MCP summary isolation. The additional diagnostic/guidance source review passed Standards and Spec at `c0f3a428597b8722dab047da9b2374f10aa9e887`. Its exact report and nonblocking suggestion disposition are retained in `mcp-verification.json`; exact publication CI remains separate. No report accepts complete J007 or v1. The isolated-store profile source review passed Standards and Spec at `c56eb4a47c595b613dcba511a275b9db4047746a`; see the exact report and scope in `isolated-memory-verification.json`. Exact publication CI remains separate.
+Earlier independent review passed the bounded source unit at `41a2e19c26797083c2d931c882369d8f83d1150f`; it did not establish MCP summary isolation. The additional diagnostic/guidance source review passed Standards and Spec at `c0f3a428597b8722dab047da9b2374f10aa9e887`. Its exact report and nonblocking suggestion disposition are retained in `mcp-verification.json`; exact publication CI remains separate. No report accepts complete J007 or v1. The isolated-store profile source review passed Standards and Spec at `c56eb4a47c595b613dcba511a275b9db4047746a`; see the exact report and scope in `isolated-memory-verification.json`. PR72 integrated the isolated-profile unit with exact head `b6dc6b679ac6c24c7125c123ba4978f4f3ed5647` CI39323472808 and main `33103a97937ff7b5a8d843681af81364edbdb3fb` CI39323583027 both successful. The coordinator rechecked these GitHub records before this reconciliation. These gates apply to that published unit, not approval of a client deployment.
 
 ## Integration risk and recovery
 
 No production runtime change. The installed integration check runs in a real bwrap namespace: only its synthetic home/data are writable, host home/store are absent, credentials are cleared, and network is isolated. It verifies the fixture database location and deletes its synthetic directories after completion. Existing historical observations remain unchanged. A failed or missing optional service must not lead to installing another store or inventing an unresolved decision.
+
+## Criteria and limits
+
+- `MEM-01`: the fresh-process scoped CLI check recovers the synthetic project facts. This is not a claim that every real conversation recovers all decisions.
+- `MEM-02`: the prepare-only handoff pins current source and explicitly selected facts. Mutable foreign and secret markers do not enter the prepared input. Memory is advisory, not execution authority.
+- `MEM-03`: the source-only handoff succeeds without the optional process after controlled shutdown. This is an absence/degradation check, not an observed production outage.
+- `MEM-04` and `SEC-04`: the two-store synthetic profile passes broad-query and summary metadata controls. The retained mixed-store counterexample fails that boundary. Actual client use requires verification of its assigned store and process; no general secret detector or deployment approval is claimed.
+- `SEC-01` through `SEC-03`: this context unit adds no execution or publication authority. Existing trusted grants, pinned role inputs, and read-only sandbox contracts remain required. The memory-profile check alone does not prove all execution capabilities.
 
 ## Closure and acceptance
 
@@ -48,4 +56,4 @@ Project selectors are not authorization or access-control credentials. The paren
 
 ## Blockers and next action
 
-The PR71 diagnostic/guidance cut is integrated with exact PR/main CI green. Complete the additional isolated-profile source review and publication gates. Shared-store summaries remain blocked. Before client use, verify the actual assigned store/process configuration; the synthetic profile does not approve the current deployment. Supported source-only work can continue without optional memory. No global service reconfiguration or client dispatch is authorized here.
+PR71 and the additional PR72 isolated-profile unit are integrated. Their bounded technical results are delivered; operator acceptance remains pending. Shared-store summaries remain blocked. Before client use, verify the actual assigned store/process configuration; the synthetic profile does not approve the current deployment. Supported source-only work can continue without optional memory. No global service reconfiguration or client dispatch is authorized here.
