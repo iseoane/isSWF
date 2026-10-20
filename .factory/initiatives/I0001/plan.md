@@ -132,12 +132,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J006
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Validate machine-restart recovery and remaining continuity cases
 - Depends on: None
 - Brief: [brief-r6.md](jobs/J006/brief-r6.md) (pending until prepared)
-- Blocker: Original physical restart, preservation and conservative refusal verified; PR75 original-evidence review access delivered with exact CI success. Separate case-delivery review/publication gates pending, no acceptance or remaining worker/reboot budget inferred.
-- Next step: Publish the bounded original-case evidence with independent review and exact PR/main CI, then present acceptance. Never repeat or replace these consumed experiments.
+- Blocker: Bounded original-restart delivery integrated in PR76 with independent source/observed-case PASS and exact PR/main CI success; operator acceptance pending. No further worker or reboot budget remains.
+- Next step: Consider this bounded delivery in the final J008 operator decision. Preserve original evidence and conservative refusal; no automatic continuation or replacement inferred.
 
 ### Acceptance
 
@@ -150,15 +150,18 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J006/restart-case-v2.json
 - .factory/initiatives/I0001/jobs/J006/delivery.md
 - .factory/initiatives/I0001/jobs/J006/original-access-verification.json
+- https://github.com/iseoane/isSWF/pull/76
+- 01c31f80f8ac997af6c8f19c468e406800cee778
+- Exact PR CI39432084146 and main CI39432357408: success
 
 ## J007
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Complete optional context and security boundary evidence
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J007/brief-r4.md) (pending until prepared)
-- Blocker: Bounded context and isolated-store profile delivered through PR72 with exact PR/main CI success; operator acceptance pending. Mixed-store summaries remain blocked and actual client deployment is unverified.
-- Next step: Review the bounded delivery and limitations. Before client use verify its assigned store/process boundary; do not reimplement the delivered synthetic profile or infer client approval.
+- Blocker: Operator explicitly accepted the delivered bounded scope: J007 aprobada. Actual client deployment remains separately unverified and unauthorized.
+- Next step: Preserve the accepted context/profile cut and its shared-store counterexample. Verify the actual assigned store/process boundary before any client use; no global migration inferred.
 
 ### Acceptance
 
@@ -179,15 +182,16 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/72
 - 33103a97937ff7b5a8d843681af81364edbdb3fb
 - Exact PR CI39323472808 and main CI39323583027: success
+- Operator conversation: J007 aprobada
 
 ## J008
 
-- Status: pending
+- Status: in-progress
 - Objective: Review complete v1 evidence and obtain operator acceptance
 - Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010, J011, J012, J013, J014
-- Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
-- Blocker: All v1 evidence and operator acceptance are pending.
-- Next step: Ground and authorize the bounded implementation/checks before starting.
+- Brief: [brief-r3.md](jobs/J008/brief-r3.md) (pending until prepared)
+- Blocker: Final 61-criterion reconciliation and exact evidence pins prepared; independent semantic review/publication and explicit operator acceptance remain pending. Client-isolation deployment and known controlled-proof limits are not generalized.
+- Next step: Validate and independently review the complete final matrix, exact PR/main CI, then present one explicit operator acceptance decision including pending bounded deliveries.
 
 ### Acceptance
 
@@ -196,6 +200,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J008/A001.md
+- .factory/initiatives/I0001/jobs/J008/acceptance-matrix.json
+- .factory/initiatives/I0001/jobs/J008/navigation-review.json
+- .factory/initiatives/I0001/jobs/J008/delivery.md
 
 ## J009
 
