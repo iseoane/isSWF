@@ -16,6 +16,13 @@ export function admission(binding) {
 }
 const requestKeys = ['repo', 'logicalJobRef', 'attemptId', 'grantRef', 'packageRoot', 'runtimeSha', 'methodologySha', 'inputSha', 'targetBase', 'jobPath', 'jobSha256', 'models', 'briefPath', 'briefSha256', 'mode'];
 const requestOf = binding => Object.fromEntries(requestKeys.map(key => [key, binding[key]]));
+function validateModelChange(previous, next, change) {
+  if (same(previous, next)) {
+    if (change !== undefined) throw Error('unchanged model pins require no model-change grant');
+    return;
+  }
+  if (!change || Object.keys(change).sort().join(',') !== 'next,previous' || !same(change.previous, previous) || !same(change.next, next)) throw Error('explicit model-change grant must bind exact previous and next configuration pins');
+}
 async function regularJSON(path) {
   const stat = await lstat(path);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 64000) throw Error('invalid successor admission evidence');
@@ -43,7 +50,9 @@ export async function claimSuccessor({ store, request, job, baseline, grant, loa
   if (prior.successor || prior.attemptId === request.attemptId || prior.inputSha === request.inputSha) throw Error('only one original-to-successor edge with new input/attempt is supported');
   if (prior.repo !== request.repo || prior.logicalJobRef !== request.logicalJobRef || prior.runtimeSha !== request.runtimeSha || prior.packageRoot !== request.packageRoot) throw Error('same project, logical job and pinned runtime required for successor');
   const original = context.job;
-  if (job.workerTotal !== 2 || original.workerTotal !== 1 || job.methodologySha !== original.methodologySha || !same(job.models, original.models) || job.protectedCheckCommand !== original.protectedCheckCommand || !same(job.expectedMutablePaths, original.expectedMutablePaths)) throw Error('successor must carry original contract with explicit cumulative workerTotal=2');
+  if (job.workerTotal !== 2 || original.workerTotal !== 1 || job.methodologySha !== original.methodologySha || job.protectedCheckCommand !== original.protectedCheckCommand || !same(job.expectedMutablePaths, original.expectedMutablePaths)) throw Error('successor must carry original contract with explicit cumulative workerTotal=2');
+  if (!same(request.models, job.models)) throw Error('successor request model pins differ from committed job');
+  validateModelChange(original.models, job.models, grant?.modelChange);
   const checked = await recoveryReview({ action: 'check', load });
   const inspected = await recoveryReview({ action: 'inspect', load });
   if (checked.fingerprint !== inspected.fingerprint) throw Error('predecessor candidate changed during successor validation');
@@ -56,7 +65,7 @@ export async function claimSuccessor({ store, request, job, baseline, grant, loa
   const priorFact = await regularJSON(join(store, prior.attemptId + '.job.json'));
   if (!same(priorFact.value, prior)) throw Error('predecessor binding changed');
   const key = digest(['job-successor-v1', initial.key, prior.attemptId]);
-  const edge = { version: 1, key, admissionKey: initial.key, originalAdmissionSha256: hash(initialFact.bytes), predecessorAttemptId: prior.attemptId, predecessorBindingSha256: hash(priorFact.bytes), receiptSha256: checked.receiptSha256, fingerprint: checked.fingerprint, request: requestOf(request), grant: { grantRef: grant.grantRef, reviewRef: grant.reviewRef, sha256: digest(grant), cumulativeWorkerTotal: 2, priorInvocationUncertainAndConsumed: true, exclusiveSuccessorOwner: true } };
+  const edge = { version: 1, key, admissionKey: initial.key, originalAdmissionSha256: hash(initialFact.bytes), predecessorAttemptId: prior.attemptId, predecessorBindingSha256: hash(priorFact.bytes), receiptSha256: checked.receiptSha256, fingerprint: checked.fingerprint, request: requestOf(request), grant: { grantRef: grant.grantRef, reviewRef: grant.reviewRef, sha256: digest(grant), cumulativeWorkerTotal: 2, priorInvocationUncertainAndConsumed: true, exclusiveSuccessorOwner: true, ...(grant.modelChange ? { modelChange: grant.modelChange } : {}) } };
   const final = await recoveryReview({ action: 'check', load });
   if (final.fingerprint !== checked.fingerprint || final.receiptSha256 !== checked.receiptSha256) throw Error('predecessor review changed before successor claim');
   await publish(join(store, 'successors'), key, edge);
@@ -73,6 +82,7 @@ export async function validateSuccessorBinding({ store, binding }) {
   const prior = priorFact.value;
   const admitted = admission(prior), initialFact = await regularJSON(join(store, 'admissions', initial.key + '.json'));
   if (hash(bytes) !== joined.sha256 || edge.version !== 1 || edge.key !== key || edge.admissionKey !== initial.key || edge.predecessorAttemptId !== prior.attemptId || prior.successor || prior.repo !== binding.repo || prior.logicalJobRef !== binding.logicalJobRef || prior.runtimeSha !== binding.runtimeSha || !same(initialFact.value, admitted) || hash(initialFact.bytes) !== edge.originalAdmissionSha256 || hash(priorFact.bytes) !== edge.predecessorBindingSha256 || !same(edge.request, requestOf(binding)) || edge.grant?.grantRef !== binding.grantRef || !reference(edge.grant?.reviewRef) || edge.grant?.cumulativeWorkerTotal !== 2 || edge.grant?.priorInvocationUncertainAndConsumed !== true || edge.grant?.exclusiveSuccessorOwner !== true) throw Error('successor edge, original admission or bound request changed');
+  validateModelChange(prior.models, binding.models, edge.grant.modelChange);
   const reviewed = await regularJSON(join(store, prior.attemptId, 'recovery-review-receipt.json'));
   if (hash(reviewed.bytes) !== edge.receiptSha256 || reviewed.value.fingerprint !== edge.fingerprint) throw Error('successor predecessor receipt changed');
 }
