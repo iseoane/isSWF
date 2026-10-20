@@ -25,8 +25,9 @@ try {
   const auth = join(root, 'auth.json'); await json(auth, {});
   const original = join(root, 'original'); await mkdir(original); await writeFile(join(original, 'record'), 'original');
   const alternate = join(root, 'alternate'); await mkdir(alternate);
-  git(root, 'clone', '--quiet', '--shared', '--no-checkout', source, join(alternate, 'repo'));
-  assert.equal((await readFile(join(alternate, 'repo/.git/objects/info/alternates'), 'utf8')).trim(), sourceObjectsPath);
+  const alternateRepo = join(alternate, 'repo'); await mkdir(alternateRepo); git(alternateRepo, 'init', '-q');
+  await writeFile(join(alternateRepo, '.git/objects/info/alternates'), sourceObjectsPath + '\n');
+  assert.equal((await readFile(join(alternateRepo, '.git/objects/info/alternates'), 'utf8')).trim(), sourceObjectsPath);
   const sourceSha = git(source, 'rev-parse', 'HEAD');
   async function assignment(name, evidence, command, extra = {}) {
     const store = join(root, name); await mkdir(store);
