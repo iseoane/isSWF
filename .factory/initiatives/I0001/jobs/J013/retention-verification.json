@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "scope": "Preserve-all proposal with per-path metadata census, not cleanup approval",
+  "scope": "Metadata inventory with separately recorded operator-accepted preserve-all policy; not cleanup approval",
   "sourceBase": "63e2145d4a0692a18087345f2bc013071ab6374e",
   "observationTime": "2026-10-19T20:02:53.872Z",
   "census": {
@@ -95,7 +95,7 @@
     "Per-path roles and reproduction dependencies remain unknown unless separately inspected; no inferred deletability",
     "Literal references are not dynamic read/import/effect proof; nonliteral paths, large or nontext consumers and manual harness dependencies are not resolved",
     "All unknown or unresolved artifacts remain preserved; no policy acceptance, move, deletion, archive or history rewrite",
-    "No operator policy agreement or v1 acceptance inferred",
+    "Policy agreement comes from the separately recorded explicit operator answer, never technical checks; whole v1 is not accepted",
     "SourcePins are observed bytes; census snapshot can differ after local artifact creation",
     "No claimed secret scan, complete dynamic dependency audit or per-artifact semantic classification"
   ],
