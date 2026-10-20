@@ -37,8 +37,8 @@ The scanner reads Git metadata and bounded tracked consumer text; it does not re
 
 The requested decision is: **approve preservation of all existing audit paths and Git history through v1; keep new raw/private records local and publish only reviewed curated job evidence; preserve existing distribution exclusions; require separately authorized proof before any later retirement.** Unknown per-artifact roles and reproduction dependencies remain preserved, not silently certified or waived for deletion.
 
-This decision does not authorize cleanup, publication of private archives, client deployment or whole-v1 acceptance. Policy agreement remains pending until the operator explicitly responds.
+This decision does not authorize cleanup, publication of private archives, client deployment or whole-v1 acceptance. The operator explicitly accepted this preserve-all scope through “Acepto la política”. This does not waive unknown dependencies or authorize retirement.
 
 ## Blockers and next action
 
-Complete source review and exact PR/main CI. Then obtain the single policy decision above. There is no need to choose files for deletion to approve the preserve-all scope.
+PR70 source review and exact PR/main CI passed; the operator subsequently accepted the policy. Preserve the stated boundaries. There is no deletion list or further routine confirmation needed for this agreed scope.

@@ -68,7 +68,7 @@
     }
   ],
   "policyDecision": {
-    "status": "pending-operator-agreement",
+    "status": "accepted-preserve-all-scope",
     "existingArtifacts": "Preserve all existing paths and Git history, including unknown roles and reproduction dependencies",
     "newArtifacts": "Reviewed curated receipts under owning job; raw/private logs, fixtures and archives remain local",
     "distribution": "Keep existing explicit allowlist exclusions",
@@ -98,5 +98,11 @@
     "No operator policy agreement or v1 acceptance inferred",
     "SourcePins are observed bytes; census snapshot can differ after local artifact creation",
     "No claimed secret scan, complete dynamic dependency audit or per-artifact semantic classification"
-  ]
+  ],
+  "operatorAcceptance": {
+    "status": "accepted-preserve-all-scope",
+    "answer": "Acepto la política",
+    "scope": "Conserve all existing files/history; raw new records private; reviewed curated summaries only; no deletion/movement authority and unknowns preserved",
+    "wholeV1Acceptance": false
+  }
 }

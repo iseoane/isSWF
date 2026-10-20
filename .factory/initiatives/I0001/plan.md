@@ -304,12 +304,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J013
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Review audit retention and distribution before v1 closure
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J013/brief-r2.md) (pending until prepared)
-- Blocker: Inventory/preserve-all proposal delivered through PR70 with native source review and exact PR/main CI success; operator policy agreement remains pending.
-- Next step: Obtain the explicit preserve-all agreement from the delivered card; no cleanup authority inferred.
+- Blocker: None for the explicitly accepted preserve-all scope; unknown roles/reproduction dependencies stay preserved and no retirement is authorized.
+- Next step: Keep existing paths/history; raw new records private; reviewed curated summaries only. Any future retirement needs separate authority and preservation proof.
 
 ### Acceptance
 
@@ -323,6 +323,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0001/jobs/J013/delivery.md
 - https://github.com/iseoane/isSWF/pull/70
 - 52aa4440aad1ca6afea2999841465f79c16add09
+- Operator structured decision: Acepto la política (preserve all existing files/history, raw new records private; no deletion/movement authority)
 
 ## J014
 
