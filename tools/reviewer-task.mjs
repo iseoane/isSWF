@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { isDeepStrictEqual } from 'node:util';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'node:fs/promises';
@@ -15,7 +16,7 @@ const inside = (root, path) => { const part = relative(root, path); return part 
 const sha = value => typeof value === 'string' && /^[0-9a-f]{40}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
 const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !path.includes('\\') && !path.includes('\0') && path.split('/').every(part => part && part !== '.' && part !== '..');
-const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const equal = isDeepStrictEqual;
 const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/reviewer.md', '.agents/roles/references/review.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', '.agents/roles/references/verification-principles.md'];
 function git(repo, args, deadlineAt = Infinity) {
