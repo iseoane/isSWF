@@ -26,7 +26,10 @@ function validate(value) {
   assert.deepEqual(rows.map(row => row.id).sort(), expected, 'all exact spec IDs required once');
   assert.notEqual(value.status, 'PASS', 'this artifact must not substitute a machine PASS for product acceptance');
   assert(['not-recorded-for-whole-v1', 'explicit-operator-acceptance-recorded'].includes(value.operatorAcceptance));
-  if (value.operatorAcceptance === 'explicit-operator-acceptance-recorded') assert.ok(value.operatorAcceptanceEvidence?.quote && value.operatorAcceptanceEvidence?.reference);
+  if (value.operatorAcceptance === 'explicit-operator-acceptance-recorded') {
+    assert.ok(value.operatorAcceptanceEvidence?.quote && value.operatorAcceptanceEvidence?.reference);
+    assert.equal(value.status, 'coordinator-reconciliation-operator-accepted-technical-review-pending', 'recorded acceptance must not remain awaiting operator acceptance');
+  }
   const groups = new Set(rows.map(row => row.evidenceGroup)), paths = new Set();
   for (const row of rows) {
     assert(Object.values(row).every(item => typeof item === 'string' && item) && modes.has(row.mode), row.id + ': typed evidence mode, scope and limits required');
@@ -54,5 +57,6 @@ for (const mutate of [
   value => value.records[0][1] = '0'.repeat(64),
   value => value.records.push(value.records[0]),
   value => { value.operatorAcceptance = 'explicit-operator-acceptance-recorded'; delete value.operatorAcceptanceEvidence; },
+  value => value.status = 'coordinator-reconciliation-awaiting-independent-review-and-operator-acceptance',
 ]) { const copy = structuredClone(matrix); mutate(copy); assert.throws(() => validate(copy)); }
 console.log(`PASS v1 evidence structure: ${expected.length} exact criteria, ${records} current record hashes and explicit scope/limits; not semantic review, deployment approval or operator acceptance`);

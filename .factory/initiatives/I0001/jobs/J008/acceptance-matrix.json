@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "coordinator-reconciliation-awaiting-independent-review-and-operator-acceptance",
+  "status": "coordinator-reconciliation-operator-accepted-technical-review-pending",
   "sourceBase": "6cca0d2c47907396e1a7aacf1219233b3a781966",
   "specSha256": "4ba3fdc91071d4c02742ba68a4cc4d8c69bb660810f819af41cc8af3aa217230",
   "criteriaCount": 61,
