@@ -3,7 +3,7 @@ import { mock } from 'node:test';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink, link } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -244,6 +244,9 @@ try {
   await assert.rejects(prepareReview(originalRequest), /separate-original-evidence/u, 'canonical auth inside evidence must not be exposed through an outside alias');
   assert.deepEqual(await readdir(originalStore), []);
   await json(grantFile, originalGrant);
+  await link(fixtureAuth, join(evidencePath, 'hard-auth'));
+  await assert.rejects(prepareReview(originalRequest), /single-link-evidence/u);
+  assert.deepEqual(await readdir(originalStore), []); await rm(join(evidencePath, 'hard-auth'));
   await writeFile(join(evidencePath, 'record'), 'tampered'); await assert.rejects(prepareReview(originalRequest), /evidence-pin-mismatch/u);
   await writeFile(join(evidencePath, 'record'), 'original');
   const evidenceResult = await runReview(originalRequest, { mode: 'fixture', backend: fixture('normal', join(originalStore, p.dir.split('/').at(-1))), probeRunner: async request => { assert.deepEqual(request.evidence, originalWorkspace.evidence); return [{ ...observations[0], ...originalWorkspace.probes[0] }]; } });

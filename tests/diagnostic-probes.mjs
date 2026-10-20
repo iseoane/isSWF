@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, symlink, link } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createServer, connect } from 'node:net';
@@ -18,6 +18,8 @@ try {
   const pin = await evidenceDigest(evidence);
   await writeFile(join(evidence, 'original'), 'changed'); assert.notEqual(await evidenceDigest(evidence), pin);
   await symlink(join(evidence, 'original'), join(evidence, 'alias')); await assert.rejects(evidenceDigest(evidence), /regular-evidence/u);
+  await rm(join(evidence, 'alias')); await link(join(evidence, 'original'), join(evidence, 'hard-alias'));
+  await assert.rejects(evidenceDigest(evidence), /single-link-evidence/u);
   await assert.rejects(evidenceDigest('/tmp'), /canonical-temporary/u);
   const project = join(deadlineRoot, 'project'); await mkdir(project); await mkdir(join(project, '.git'));
   await writeFile(join(deadlineRoot, 'git'), '#!' + process.execPath + '\nAtomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,1000);\n', { mode: 0o755 });

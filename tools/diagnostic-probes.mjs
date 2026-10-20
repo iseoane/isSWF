@@ -33,6 +33,7 @@ export async function evidenceDigest(path, deadlineAt = Infinity) {
     if (stat.isDirectory()) {
       for (const name of (await readdir(current)).sort()) await visit(join(current, name), relative + '/' + name);
     } else {
+      assert(stat.nlink === 1, 'single-link-evidence-required');
       bytes += stat.size; assert(bytes <= 64 * 1024 * 1024, 'evidence-byte-bound');
       const content = await readFile(current); assert(content.length === stat.size, 'evidence-changed');
       digest.update(JSON.stringify([content.length, createHash('sha256').update(content).digest('hex')]));
