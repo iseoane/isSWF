@@ -114,5 +114,21 @@
     "Host-selected read-only runtime observations, not model-selected shell or authenticated reviewer identity",
     "Original trusted fixture only; no worker, reboot, replay, repair or external-effect settlement",
     "Source prerequisite reviewed; original-case delivery and exact PR/main CI remain separate"
-  ]
+  ],
+  "ciFixtureFix": {
+    "base": "fe7fc0bd0c9698d5bcefa5be4e1a0f0e04ead97e",
+    "candidate": "588083078e714159fa81eba6a34383eff2079f5e",
+    "resultSha256": "5cd37579b8a4dfe22a7862e17b9e1db66ce9f33919ebb97226347002a09f2552",
+    "failedRun": 39428080364,
+    "failedHead": "fe7fc0bd0c9698d5bcefa5be4e1a0f0e04ead97e",
+    "cause": "Shallow checkout clone optimization omitted info/alternates; explicit synthetic repository/alternates setup now portable",
+    "localReproduction": "Exact shallow ENOENT reproduced, portable and actual bwrap checks passed after fix",
+    "transport": {
+      "status": "response-complete",
+      "httpStatus": 200,
+      "attempts": 1,
+      "fetches": 1
+    },
+    "report": "**Base:** `fe7fc0bd0c9698d5bcefa5be4e1a0f0e04ead97e`  \n**Candidate:** `588083078e714159fa81eba6a34383eff2079f5e`  \n**Reviewed scope:** `tests/reviewer-original-evidence.mjs` only; the supplied diff replaces `git clone --shared` with an initialized repository and an explicit `info/alternates` file.\n\n### Standards — pass\nThe change directly addresses the reported shallow-clone failure while preserving the test’s alternate-object-store check. The supplied sandbox observation reports the focused test passing, including alternate-object visibility with source Git configuration hidden and the existing refusal and durable-binding checks. No findings.\n\n### Spec — pass\nThe stated acceptance is to verify an actual alternate-backed fixture without relying on clone optimization or depth, while retaining the original-evidence boundary checks. The observed focused sandbox probe passes at the candidate and reports those checks. No findings.\n\n### Checks and limitations\nI did not run checks. The host-selected probe reports the focused sandbox test passing; the separate reboot-fixture probe also reports its assertions passing, but that is not evidence for this test-only change. The supplied history records the prior CI failure (`ENOENT` for `info/alternates`); the brief says parent portable checks passed after the fix, but provides no direct log for that rerun. Exact PR/main CI remains pending. Candidate identity and diff are as supplied; I could not independently recompute the commit hash.\n\n**Aggregate: pass** for the reviewed test-fixture change. This is a review report, not merge permission or product acceptance."
+  }
 }
