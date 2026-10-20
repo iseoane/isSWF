@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "status": "coordinator-reconciliation-awaiting-independent-review-and-operator-acceptance",
+  "sourceBase": "01c31f80f8ac997af6c8f19c468e406800cee778",
+  "specSha256": "4ba3fdc91071d4c02742ba68a4cc4d8c69bb660810f819af41cc8af3aa217230",
+  "criteriaCount": 61,
+  "operatorAcceptance": "not-recorded-for-whole-v1",
+  "assessmentRule": "Modes describe the selected bounded evidence, not PASS or automatic completion. Historical pending prose is reconciled against canonical plan; accepted cuts are not reopened or generalized.",
+  "currentBlockingDecisions": [
+    "J005 bounded delivery operator acceptance",
+    "J006 bounded original-restart delivery operator acceptance",
+    "J007 bounded context/profile delivery operator acceptance",
+    "Whole-v1 operator acceptance after final evidence/source review and exact publication CI"
+  ],
+  "evidencePins": {
+    ".agents/roles/references/code-quality.md": "d1d74637c71d74c8f0c00987fe727a904debf05f8ba67d013ae884c36446fc75",
+    ".agents/skills/isswf-coordinator/SKILL.md": "23657f8ec5fce8a554df7393809f6858cf1716b47752625c7c7bfd6787cdd963",
+    ".audit/fallback-66-quota-proof.json": "babb687df4fb6f495595a7450349a8a504869412b70d7a6e49f1b3684e06d9e4",
+    ".audit/recovery-68-acceptance-scope-deepseek.json": "957f52ff85edc29696c7f933b82a85a82890f1f6ca57fc93ed2ca11f1d03e916",
+    ".factory/initiatives/I0001/jobs/J002/V002.md": "d096d999403db5f0ff94305a06cc9ac6c419aa05b612046e768f8e29d9f8b04e",
+    ".factory/initiatives/I0001/jobs/J003/brief-r2.md": "836bfb0bbd70bb9f003a03428f9cf8fea7609937fcb93045485d252aa2f7f0aa",
+    ".factory/initiatives/I0001/jobs/J004/A001.md": "54651165a59e3b8da53a4c24d2ae2f4eab6c7910f4e77439cb17e5411ef29960",
+    ".factory/initiatives/I0001/jobs/J004/proposals/P001.md": "91d94fd930cb1efeb0f0718b776ad7da7fb1d3982c6a198d3ec411401e89d386",
+    ".factory/initiatives/I0001/jobs/J004/retrospective-r1.md": "c29c10ed78011872bb92cea37c33d7ee18519bd3c27b1fad7bc5df219010cee2",
+    ".factory/initiatives/I0001/jobs/J005/brief-r6.md": "728bc59415a50d5cf0bea146736eac73e242ce5e0586e48978939a1672df096c",
+    ".factory/initiatives/I0001/jobs/J005/dependency-verification.json": "d725ceb7eb11de5e33d329e4fee939dc8fbec9ded1e5ca876e393660b7f1c273",
+    ".factory/initiatives/I0001/jobs/J005/panel-verification.json": "5eb0b9b0136d499aeafb350e85e7ccec227398ba610ee8cef9754e84b0c3d141",
+    ".factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json": "78ca7ff62160110f7c30a12768a2ec38121828d66515ceafbfa8b9f3ab40a5d2",
+    ".factory/initiatives/I0001/jobs/J006/brief-r6.md": "f95b4dbf41d502c3b9af621ca1061c6dfa2e9ca5f56aada4e2e79c99937d082f",
+    ".factory/initiatives/I0001/jobs/J006/original-access-verification.json": "defb699981fcca21a2ec3c19432f9ac770f62b12b227c7f2564a0732feaa58e9",
+    ".factory/initiatives/I0001/jobs/J006/restart-case-v1.json": "8c4bf1ae74911c38129ba07628ce53f1518ac1ff99308d8b9cb1502de881ef50",
+    ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json": "012c4e3dfb3d60eb8a1de09afd38f203fb68fd8b270fb8188bb6d14aacbe44a7",
+    ".factory/initiatives/I0001/jobs/J007/context-verification.json": "1db8dd5939b86b8c3090d10d516d066f70f9f37cdaa68281a76420fe68ad4d6f",
+    ".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs": "a602d24eb0a21e3dfcfd8be86ea9e8ea0f2226d0c719cdb79af8760ac27a4ead",
+    ".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json": "befa84d90da2030c10157d4872b6f63088a4112f230763c0ed2fd7ce3b32eecb",
+    ".factory/initiatives/I0001/jobs/J007/mcp-verification.json": "7fec3f00a39995f47bb821dc797c4f71332ba22cfd3061315cf6dabd3fdec0ed",
+    ".factory/initiatives/I0001/jobs/J008/navigation-review.json": "8e32489895d394f200a8e59847c136ca1d73a5851c542f3e787c5f734f33c2e3",
+    ".factory/initiatives/I0001/jobs/J009/V003.md": "8f2e40a3c673638a58aa4d74aab5b27cfdd40cb8f6d35801a395a8d841d77091",
+    ".factory/initiatives/I0001/jobs/J011/V005.md": "20568f33b5cd41a467b5116be1a78a7386f30b668e231b001ae1952eaf920d97",
+    ".factory/initiatives/I0001/jobs/J011/delivery.md": "292f21b95a02de16f643ca1f7b2bcf8f22f29dd5f7b9966c8116ed31bf644070",
+    ".factory/initiatives/I0001/jobs/J013/retention-verification.json": "b4fb5834f2ba6c30683f85f5ec726545cf890b1a4208ad6fa5822d200263f143",
+    ".factory/initiatives/I0002/plan.md": "37c5b593395b846a8b2d91a74041f3a62959948a80da478247b110cf98604343",
+    ".factory/models.json": "f25ca74f71a523367986ac113f83d1128acba89153cb8434812931dbf3823910",
+    "docs/local-worker-lifecycle.md": "b78b1bcf6a63e8cb8ce06dea71aa7f60f1d0b1b9fa843261978019fee8a23b12",
+    "docs/s01-intake.md": "2d999801019e1582d64c7f1763fd4cb5bc872c34ac70868c0965b4de918f9ee3",
+    "tests/diagnostic-probes.mjs": "6e7e57341a1bae49189c99812d5673d6fb7f60d7f9394d3a031f3620bf956975",
+    "tests/initiative-next-action.mjs": "3c239acb44e19762e23a91fb3293046c9bd70c82cd61c9619a13d1e2cde14a9e",
+    "tests/initiative-panel.mjs": "43074309343e061ecaa83e777a9a5355ca49434854f4367b353fd743f7239af3",
+    "tests/initiative-status.mjs": "8f4b82bf479ad685cfe881d35628fd8b8441c944e15bbe2220c5d90485c6541b",
+    "tests/issue-intake.mjs": "a45d70d937079cc9f5ddbe579bd04d044b4320b27bbd49ede9261454ac80eea9",
+    "tests/planner-task.mjs": "d748f0d3e20401518712facb6476f2b5f551822302d25e3caf95bb6ba9d253bf",
+    "tests/project-context-engram.mjs": "f428941c9ec85d4dce3b6e312c80bd9c3657bf67636dc46d95f7ef329d747976",
+    "tests/project-context-handoff.mjs": "50e5f8ccd436216598a2cd01ffb4015fb3d18aab080d5787f8b958f66bc5454e",
+    "tests/researcher-quota-fallback.mjs": "69fdc7cf6b2052b58d4a29e74061223defa33e52148ab0d2ab3ba4a18226bd01",
+    "tests/researcher-session-affinity.mjs": "b855d91f98828481bba00b0a5d4b3b391a01f56278a53f0745164fde57bac493",
+    "tests/reviewer-task.mjs": "34d76fe8af597530135016af0c608ed81646ca0e9ba2acc28c5da7d1a4187f1c",
+    "tests/worker-methodology.mjs": "277a5ced21ecbeaf2eede5348fdf0bec06e73bbb23eb54c6f4e26172d75b2917",
+    "tests/worker-route-admission.mjs": "83f81af586036ed8a9eebcc7e01c4bce1316d486a530efd5ee7485e588c64824",
+    "tools/isswf-job.mjs": "a1d3f5d21b5861b1e7c5b1892755d8016ca1c1e7a09d13032817d57feb0de939",
+    "tools/native-recovery.mjs": "e059633e570be3685a62acacd1e8d2ce552ac01ca7e7dec2cdb2bad3fa31c03e"
+  },
+  "limits": [
+    "Rows classify bounded source, historical reports and named controls, not universal PASS or automatic product acceptance",
+    "Source-only or verified isolated-profile use is supported; current shared-store parent MCP is not certified for client context",
+    "No new worker/reboot, deployment, cleanup, account or runtime grant follows from this matrix",
+    "No universal quota classifier, semantic secret detector, authenticated actor identity or production outage guarantee",
+    "Draft final reconciliation requires independent semantic review and exact PR/main CI; operator acceptance remains separate"
+  ],
+  "evidenceGroups": {
+    "delegation": [
+      ".factory/initiatives/I0001/jobs/J011/delivery.md",
+      ".factory/initiatives/I0001/jobs/J011/V005.md",
+      "tools/isswf-job.mjs",
+      "tests/worker-methodology.mjs",
+      "tests/reviewer-task.mjs",
+      "tests/planner-task.mjs"
+    ],
+    "retrospective": [
+      ".factory/initiatives/I0001/jobs/J004/A001.md",
+      ".factory/initiatives/I0001/jobs/J004/retrospective-r1.md",
+      ".factory/initiatives/I0001/jobs/J004/proposals/P001.md"
+    ],
+    "security": [
+      ".factory/initiatives/I0001/jobs/J007/context-verification.json",
+      "tests/diagnostic-probes.mjs",
+      "tests/reviewer-task.mjs",
+      "tests/worker-route-admission.mjs",
+      ".factory/initiatives/I0001/jobs/J013/retention-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/mcp-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs"
+    ],
+    "intake": [
+      "tests/issue-intake.mjs",
+      ".factory/initiatives/I0001/jobs/J002/V002.md",
+      "docs/s01-intake.md"
+    ],
+    "grounding": [
+      ".agents/skills/isswf-coordinator/SKILL.md",
+      ".factory/initiatives/I0001/jobs/J003/brief-r2.md",
+      ".factory/initiatives/I0001/jobs/J005/dependency-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/context-verification.json"
+    ],
+    "delivery": [
+      ".factory/initiatives/I0001/jobs/J005/dependency-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/context-verification.json",
+      ".factory/initiatives/I0001/jobs/J013/retention-verification.json",
+      ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json"
+    ],
+    "models": [
+      ".factory/models.json",
+      "tests/worker-route-admission.mjs",
+      "tests/researcher-quota-fallback.mjs",
+      "tests/researcher-session-affinity.mjs",
+      ".audit/fallback-66-quota-proof.json"
+    ],
+    "capacity": [
+      ".factory/initiatives/I0001/jobs/J005/brief-r6.md",
+      ".factory/initiatives/I0001/jobs/J005/panel-verification.json",
+      ".factory/initiatives/I0001/jobs/J005/worker-capacity-verification.json",
+      ".factory/initiatives/I0001/jobs/J005/dependency-verification.json"
+    ],
+    "navigation": [
+      ".agents/roles/references/code-quality.md",
+      ".agents/skills/isswf-coordinator/SKILL.md",
+      "tests/worker-methodology.mjs"
+    ],
+    "navFinding": [
+      ".factory/initiatives/I0001/jobs/J008/navigation-review.json"
+    ],
+    "product": [
+      ".factory/initiatives/I0001/jobs/J003/brief-r2.md",
+      ".factory/initiatives/I0002/plan.md",
+      "tests/initiative-next-action.mjs",
+      ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json"
+    ],
+    "observation": [
+      "tests/initiative-status.mjs",
+      "tests/initiative-panel.mjs",
+      "tests/initiative-next-action.mjs",
+      ".factory/initiatives/I0001/jobs/J009/V003.md"
+    ],
+    "recovery": [
+      "docs/local-worker-lifecycle.md",
+      "tools/native-recovery.mjs",
+      ".factory/initiatives/I0001/jobs/J006/brief-r6.md",
+      ".audit/recovery-68-acceptance-scope-deepseek.json",
+      ".factory/initiatives/I0001/jobs/J006/restart-case-v1.json",
+      ".factory/initiatives/I0001/jobs/J006/restart-case-v2.json",
+      ".factory/initiatives/I0001/jobs/J006/original-access-verification.json"
+    ],
+    "memory": [
+      ".factory/initiatives/I0001/jobs/J007/context-verification.json",
+      "tests/project-context-engram.mjs",
+      "tests/project-context-handoff.mjs",
+      ".factory/initiatives/I0001/jobs/J007/mcp-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/isolated-memory-verification.json",
+      ".factory/initiatives/I0001/jobs/J007/isolated-memory-check.mjs"
+    ]
+  },
+  "operatorDecisions": {
+    "retention": "Acepto la política; accepted preserve-all scope, not whole v1",
+    "restart": "Original failed case preserved; explicitly authorized additional distinct case performed one physical restart. Both worker admissions consumed, none remain. Actual changed-boot preservation and conservative refusal independently reviewed and integrated in PR76.",
+    "wholeV1": "not-accepted",
+    "clientUse": "No client deployment adopted or authorized. Required actual store/process separation must be verified before client use; shared-store summaries stay blocked."
+  },
+  "introducedRecords": [
+    ".factory/initiatives/I0001/jobs/J008/navigation-review.json"
+  ],
+  "criteria": [
+    {"id":"AGT-01","mode":"bounded-supported","evidenceGroup":"delegation","observation":"Normal job entry resolves committed job/reference, pinned methodology/configuration and private result bindings. Direct role callers are available; grants repeat permission bindings, not conversational history.","remaining":"No autonomous coordinator daemon or generic all-role job dispatcher claimed."},
+    {"id":"AGT-02","mode":"bounded-supported","evidenceGroup":"delegation","observation":"Bounded briefs and committed context are explicitly embedded; native worker and diagnostic-to-planner cases demonstrate supplied-input handoff.","remaining":"Historical real cases retain their own model/output limits; no inherited full conversation/tools."},
+    {"id":"AGT-03","mode":"workflow-observed","evidenceGroup":"retrospective","observation":"J004 used the existing retrospective profile and local proposal rather than the originally suggested new retrospective CLI.","remaining":"No universal automatic specialty-selection claim."},
+    {"id":"AGT-04","mode":"structural-and-workflow-evidence","evidenceGroup":"delegation","observation":"Worker methodology is pinned separately from mutable input; native tests verify committed instruction composition and missing-section refusal. Retrospective kept active-task inputs unchanged.","remaining":"Not a live adversarial mutation of every skill during every role."},
+    {"id":"AGT-05","mode":"bounded-supported","evidenceGroup":"security","observation":"Actual readonly sandbox controls and reviewer candidate/probe bindings are tested; naming a role is not treated as containment.","remaining":"Applies to named native transports/sandboxes, not unrestricted parent tools."},
+    {"id":"GND-01","mode":"bounded-supported","evidenceGroup":"intake","observation":"Changed/duplicate intake references existing records and fails closed without a second writer/brief.","remaining":"No semantic or global issue census."},
+    {"id":"GND-02","mode":"workflow-observed","evidenceGroup":"grounding","observation":"Dependency ancestry regression reproduced graft-based false integration, fixed the root check and retained the failing and affected passing reviews.","remaining":"This is a concrete observed defect, not a general diagnosis guarantee."},
+    {"id":"GND-03","mode":"workflow-observed","evidenceGroup":"delivery","observation":"J007 reviews and source evidence were repeated only after concrete identity/context or source changes, with old reports retained.","remaining":"New review covers its exact candidate, not arbitrary branch movement."},
+    {"id":"GND-04","mode":"workflow-observed","evidenceGroup":"grounding","observation":"The retained own planner proposal explicitly blocked on absent source grounding; no automatic adoption followed.","remaining":"Historical proposal is not current authority or proof that implementation remained absent."},
+    {"id":"GND-05","mode":"workflow-observed","evidenceGroup":"grounding","observation":"Bounded public-test and evidence changes used parent source inspection without a separate implementation interviewer/researcher.","remaining":"Methodological behavior observed in own work, not enforced by an automated classifier."},
+    {"id":"GND-06","mode":"documented-and-observed","evidenceGroup":"grounding","observation":"Job briefs identify current source, contracts, tests and pinned bases; findings reference actual gate code and concrete regressions.","remaining":"A path/name alone is not sufficient context; source must be reopened when relevant."},
+    {"id":"GND-07","mode":"workflow-observed","evidenceGroup":"grounding","observation":"Current source was reopened rather than editing historical line ranges; pin/digest checks reject changed supplied inputs.","remaining":"No claim that an LLM can never misread a line map."},
+    {"id":"DEL-01","mode":"workflow-observed","evidenceGroup":"delivery","observation":"Own source deliveries PR66, PR69 and PR70 contain behavior evidence, separate native review, risk/limits and exact CI gates.","remaining":"Integrated bounded delivery is not whole-product acceptance."},
+    {"id":"DEL-02","mode":"workflow-observed","evidenceGroup":"delivery","observation":"Actual failing ancestry review and J007 inconclusive evidence gates stopped readiness; corrected source/handoff/context were reviewed before guarded integration.","remaining":"Old failed/inconclusive reports remain historical, not relabeled."},
+    {"id":"DEL-03","mode":"workflow-observed","evidenceGroup":"delivery","observation":"New candidate hashes were supplied for affected review and exact-head CI; source changes did not inherit human acceptance.","remaining":"Evidence-only receipt updates preserve the identified code scope and do not assert independent approval of new code."},
+    {"id":"DEL-04","mode":"workflow-observed","evidenceGroup":"delivery","observation":"Inconclusive review blocked publication until required source/evidence context was available and affected review passed.","remaining":"No universal provider-availability guarantee; caller failures remain blocked."},
+    {"id":"DEL-05","mode":"workflow-observed","evidenceGroup":"delivery","observation":"PR69 and PR70 were published draft while their source review was pending and only marked ready after actual passing bounded review.","remaining":"Draft publication grants no merge, deploy or acceptance."},
+    {"id":"DEL-06","mode":"workflow-observed","evidenceGroup":"delivery","observation":"Functional units checkpoint source/tests/required records together; exact PR/main CI precede moving to the next delivered unit.","remaining":"Planning checkpoints and local preparation are not independently delivered slices."},
+    {"id":"DEL-07","mode":"workflow-observed","evidenceGroup":"grounding","observation":"Retained grounding/planner reports return bounded findings or blockers without requiring a fake implementation PR.","remaining":"Prose alone is not execution or implementation proof."},
+    {"id":"RET-01","mode":"controlled-proof-only","evidenceGroup":"retrospective","observation":"J004 observed a real lifecycle-managed synthetic task running before/after session-close analysis, then naturally completing.","remaining":"Synthetic analysis event, not real chat shutdown; actual machine-restart case belongs to J006."},
+    {"id":"RET-02","mode":"workflow-observed","evidenceGroup":"retrospective","observation":"Supported retrospective finding produced existing local needs-triage draft P001, not execution or rule modification.","remaining":"No remote issue creation implied."},
+    {"id":"RET-03","mode":"workflow-observed","evidenceGroup":"retrospective","observation":"Repeat bounded pass reread and linked P001 while preserving its hash.","remaining":"Not general semantic deduplication or transactional store proof."},
+    {"id":"RET-04","mode":"controlled-proof-only","evidenceGroup":"retrospective","observation":"Proposal/profile/model/brief hashes stayed unchanged while the synthetic task remained active. Skill correction later followed its own reviewed PR67.","remaining":"Not every possible active-skill mutation scenario."},
+    {"id":"RET-05","mode":"controlled-proof-only","evidenceGroup":"retrospective","observation":"Deliberately missing evidence produced ENOENT; retained draft was reread and analysis resumed without recreating the proposal.","remaining":"No general crash-atomic proposal publication claim."},
+    {"id":"MOD-01","mode":"bounded-supported","evidenceGroup":"models","observation":"Canonical routes and grants pin requested model/effort; SDK callers validate returned provider/model before recording success.","remaining":"No unreported server effort, account alias or arbitrary provider/runtime support inferred."},
+    {"id":"MOD-02","mode":"controlled-proof-only","evidenceGroup":"models","observation":"Known recorded Go quota envelope advances only an explicitly approved fallback without retrying the same route; real primary success and session metadata are separate evidence.","remaining":"Current service compatibility/live quota fallback unproven; unknown quota shapes block. No universal quota classifier or deliberate account exhaustion."},
+    {"id":"MOD-03","mode":"bounded-supported","evidenceGroup":"models","observation":"Quota tests distinguish provider-envelope outcomes from work/test failures and reject prose-based route authority.","remaining":"Actual fallback scope remains the documented researcher contract."},
+    {"id":"MOD-04","mode":"bounded-supported","evidenceGroup":"models","observation":"Worker route admission and reviewer/planner/diagnostic grant tests reject unsupported route/effort before invocation.","remaining":"Configured route alone does not establish every runtime capability."},
+    {"id":"MOD-05","mode":"bounded-supported","evidenceGroup":"delegation","observation":"Immutable input/model/config hashes and successor-grant records distinguish attempts; input drift cannot replace pinned context.","remaining":"Cross-boot continuation is not supported or implied."},
+    {"id":"MOD-06","mode":"bounded-supported","evidenceGroup":"models","observation":"Tests retain blocked failures with finite total attempts, no unapproved fallback/API spend and no prose-based budget expansion.","remaining":"Unknown invocation consumes authority; no automatic replay."},
+    {"id":"MOD-07","mode":"controlled-proof-only","evidenceGroup":"capacity","observation":"Three distinct synthetic reviewer refs and a planner share pool2, refuse without attempts, then use successive freed slots without deadlock.","remaining":"Fixture responses, not live provider/product review panel; legacy unbound callers outside guarantee."},
+    {"id":"NAV-01","mode":"documented-and-observed","evidenceGroup":"navigation","observation":"Current briefs and delivery records point to entry points, relevant tests and source contracts; aggregate checks validate selected links.","remaining":"Historical line ranges need reopening; link existence is not semantic correctness."},
+    {"id":"NAV-02","mode":"controlled-native-review","evidenceGroup":"navFinding","observation":"Actual independent native review identified duplicate canonical helper and purposeless one-caller forwarding layer while three arithmetic cases passed.","remaining":"Expected failing synthetic verdict; not factory-source failure or statistical reviewer-quality measurement."},
+    {"id":"NAV-03","mode":"documented-and-observed","evidenceGroup":"navigation","observation":"Coordinator correction changed the owning skill source; native workers retain their separately pinned immutable methodology.","remaining":"Existing historical snapshots are evidence, not copies to synchronize."},
+    {"id":"NAV-04","mode":"documented-and-observed","evidenceGroup":"navigation","observation":"Own profiles, job references, canonical IDs and link checks use existing domain terms; no new role framework was introduced.","remaining":"Naming quality remains source-review judgment, not a universal lint guarantee."},
+    {"id":"NAV-05","mode":"workflow-observed","evidenceGroup":"product","observation":"Accepted actionable-panel delivery explains recommendation entry, conservative decision, no automatic effect, HTTP/status verification and human acceptance.","remaining":"No invented runtime liveness or scheduler activity."},
+    {"id":"TRI-01","mode":"bounded-supported","evidenceGroup":"intake","observation":"Native intake/records support explicit category, prepared immutable brief and acceptance; clear-case path is short.","remaining":"GitHub labels/setup remain coordinator procedure, not automatic live synchronization."},
+    {"id":"TRI-02","mode":"bounded-supported","evidenceGroup":"intake","observation":"Changed or incomplete source/grants and explicit decisions block preparation/reconciliation rather than silently authorizing implementation.","remaining":"Saved labels are not runtime state."},
+    {"id":"TRI-03","mode":"bounded-supported","evidenceGroup":"intake","observation":"External finite prepare/reconcile/duplicate authority is checked separately from issue text, title or labels.","remaining":"Cooperative operator attestations are not an identity authentication service."},
+    {"id":"TRI-04","mode":"bounded-supported","evidenceGroup":"intake","observation":"Repeat unchanged input reuses records; exclusive claim, partial/corrupt and duplicate tests refuse another writer.","remaining":"No global cross-store census or runtime cancellation."},
+    {"id":"TRI-05","mode":"bounded-supported","evidenceGroup":"intake","observation":"Duplicate source/target records require exact pinned evidence and operator authority, block new preparation and expose readonly disposition.","remaining":"Linked-target change can become unknown; no automatic chain adoption."},
+    {"id":"OPS-01","mode":"bounded-supported","evidenceGroup":"observation","observation":"Panel and coordinator use the canonical status reader, hashes, recorded decisions and explicit unknown/not-inspected freshness.","remaining":"Snapshot time is not heartbeat or atomic live process state."},
+    {"id":"OPS-02","mode":"controlled-and-real-case-evidence","evidenceGroup":"delegation","observation":"Detached native worker entry returns a durable attempt identity for later read while coordinator can prepare other work; real bounded worker delivery is retained.","remaining":"No universal scheduler, throughput or unattended chat-server guarantee."},
+    {"id":"OPS-03","mode":"controlled-proof-only","evidenceGroup":"recovery","observation":"Retained same-boot/session controls and the detached normal lifecycle support later actual-state consultation; J004 preserves an active synthetic task across the recorded session-close analysis.","remaining":"Controlled lifecycle/session evidence, not a new literal UI chat-shutdown experiment. The physical reboot result does not substitute for this distinct claim."},
+    {"id":"OPS-04","mode":"controlled-proof-only","evidenceGroup":"recovery","observation":"Retained fake-GitHub before/after interruption controls exercise explicit effect identity, reconciliation and no-repeat handling.","remaining":"Not a real lost GitHub response. The actual offline reboot case requested no remote effect and does not establish one."},
+    {"id":"OPS-05","mode":"actual-case-and-controlled-proof","evidenceGroup":"recovery","observation":"Actual original changed-boot read reports unknown child identity; normal reconcile requires review and retry never. Native reviewer runtime verified the original case read-only.","remaining":"Conservative refusal, not proof of worker success, automatic continuation or authenticated process identity."},
+    {"id":"OPS-06","mode":"actual-case-and-controlled-proof","evidenceGroup":"recovery","observation":"Native runtime revalidated approved consumers and input/model/brief/job bindings, four metadata hashes and all 41 workspace files; complete Git-baseline comparison permits only result.txt content.","remaining":"Original trusted synthetic fixture only; both worker admissions consumed, no replacement or archive-authenticity claim."},
+    {"id":"OPS-07","mode":"controlled-proof-only","evidenceGroup":"capacity","observation":"Participating SDK roles and installed-SDK offline workers share explicit finite pools, isolated workspaces and unrelated progress in scoped controls.","remaining":"Not machine-wide quota or authentication; no live five-role provider concurrency claim."},
+    {"id":"OPS-08","mode":"bounded-supported","evidenceGroup":"capacity","observation":"Permanent worker admission, verified task/tool cessation and typed prerequisite gate separate capacity release from code integration and pending human decisions.","remaining":"Unsupported/legacy callers and cross-store bypass are outside the cooperative grant boundary."},
+    {"id":"OPS-09","mode":"bounded-supported","evidenceGroup":"capacity","observation":"Canonical parser/gate distinguish cycles, invalid edges, decisions, missing attestations, nonancestor code and capacity exhaustion before writer claims.","remaining":"No general scheduler, automatic plan adoption or authenticated integration attestation."},
+    {"id":"SEC-01","mode":"bounded-supported","evidenceGroup":"security","observation":"External grant and exact source/job/runtime/model bindings refuse missing or mismatched authority before native invocation; effect grant is separate.","remaining":"Host coordinator is trusted; caller attestation is not an identity service."},
+    {"id":"SEC-02","mode":"bounded-supported","evidenceGroup":"security","observation":"Source/context are treated as data, not grants; public grant/config negatives and pinned context exclude mutable instruction replacement.","remaining":"No claim of universal semantic prompt-injection immunity."},
+    {"id":"SEC-03","mode":"bounded-supported","evidenceGroup":"security","observation":"Named sandbox/grant controls bound role effects. The actual authorized offline reboot and subsequent readonly verifier used no worker model/GitHub operation or replacement; review access requires separate explicit pins.","remaining":"Parent coordinator tools remain broader. No generic global authentication or deploy/merge privilege is inherited by a worker or model."},
+    {"id":"SEC-04","mode":"actual-deployment-gate-retention-policy-accepted","evidenceGroup":"security","observation":"Curated safe receipts, named sandbox and distribution controls are verified; actual separate-store namespace profile excludes the other synthetic store while preserving the mixed-store failure.","remaining":"J013 preserve-all policy explicitly accepted without deletion/movement authority. Actual client-deployment verification remains pending; no global service fix, universal scanner or cloud/auth certification."},
+    {"id":"PRD-01","mode":"operator-accepted-bounded-case","evidenceGroup":"product","observation":"Approved real own-factory idea became the actionable-panel recommendation feature, not a request that the operator supply code facts.","remaining":"Acceptance applies to delivered I0002/J001/J003 scope, not arbitrary ideas or whole v1."},
+    {"id":"PRD-02","mode":"operator-accepted-bounded-case","evidenceGroup":"product","observation":"One coherent feature job held result, exclusions, criteria, source grounding, implementation and concrete demo; no new planner/interview framework.","remaining":"Other outcomes may need genuine product decisions."},
+    {"id":"PRD-03","mode":"actual-native-review-and-operator-case","evidenceGroup":"product","observation":"Current native review rejected the restart verifier despite green checks because its baseline proof omitted additions/modes. Regression and source fix preceded passing review and gated publication.","remaining":"Review judgment plus named controls, not a universal automated product-acceptance service."},
+    {"id":"MEM-01","mode":"bounded-supported","evidenceGroup":"memory","observation":"Actual scoped parent recall, fresh CLI process and fresh installed Engram MCP process recover the selected synthetic decision with an explicit project overriding a conflicting process default.","remaining":"Synthetic isolated CLI/MCP store, not the user configured server/cloud or a general new-conversation guarantee."},
+    {"id":"MEM-02","mode":"workflow-and-structural-evidence","evidenceGroup":"memory","observation":"Actual stale queued-CI memory was discarded in favor of current Git/CI; native prepare-only handoff ignores mutable foreign/secret marker drift.","remaining":"Selection is coordinator judgment, not an automatic semantic freshness classifier."},
+    {"id":"MEM-03","mode":"controlled-proof-only","evidenceGroup":"memory","observation":"After both actual synthetic MCP servers exited, the existing actual prepare-only source/handoff control succeeded without optional services. Required decisions are not reconstructed from missing memory.","remaining":"Explicit controlled shutdown and source-only preparation, not automatic production outage recovery or interruption of the user server."},
+    {"id":"MEM-04","mode":"supported-isolated-profile-with-deployment-gate","evidenceGroup":"memory","observation":"Shared-store MCP summary metadata counterexample remains valid. A separate actual installed Engram3.4.0 profile uses physically separate synthetic stores/restricted namespaces: both-direction own positives, empty cross-store broad queries, and no foreign summary metadata.","remaining":"Current parent deployment is unchanged/unverified, not automatically adopted or client-approved. Verify the actual assigned store/process before client use; otherwise keep the required boundary blocked and use supported scope or pinned files."}
+  ]
+}
