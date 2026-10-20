@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "scope": "Optional native reviewer original-evidence access prerequisite, not acceptance of full J006 or v1",
+  "base": "919ac4146c6baf4ac9c575b68427490baa97479d",
+  "candidate": "66166e7f965e0823776dbcf9db27d08038d3a585",
+  "bundleSha256": "f152533719a90a6077ccf5fe27df6635f3e37d3a250d63aee97a767e5c121ccc",
+  "methodologySha256": "083acffba29c6ea49fda5b26fe560df1b9727f9f08899dd9d039362e30336dfa",
+  "resultSha256": "165ec7a43c2895225d93812dec97b9082bc57f4a7475311d80c5c3f387f7ab48",
+  "transport": {
+    "status": "response-complete",
+    "httpStatus": 200,
+    "attempts": 1,
+    "fetches": 1
+  },
+  "actualOriginalFixtureObservation": {
+    "status": "original-evidence-PASS",
+    "bootBefore": "7daa6db0-3e89-4966-84ee-edbeaaa2bae8",
+    "bootAfter": "5af19d45-168f-46ad-a4f5-2f52d1048aed",
+    "files": 41,
+    "metadata": 4,
+    "read": "unknown",
+    "reconcile": {
+      "status": "blocked",
+      "reason": "execution task cessation not confirmed",
+      "reviewRequired": true,
+      "retry": "never"
+    },
+    "replayed": false
+  },
+  "report": "## Review report\n\n**Base:** `919ac4146c6baf4ac9c575b68427490baa97479d`  \n**Candidate:** `66166e7f965e0823776dbcf9db27d08038d3a585`  \n**Reviewed scope:** `docs/review-original-evidence.md`, `tests/diagnostic-probes.mjs`, `tests/reviewer-original-evidence.mjs`, `tools/check-quality.mjs`, `tools/diagnostic-probes.mjs`, `tools/reviewer-task.mjs`.\n\n### Standards — pass\n\nThe supplied diff and own-role guidance show explicit evidence grants, bounded digesting, separation checks, read-only mounts, post-probe pin checks, and durable verification correspondence. The host-selected sandbox probe reported passing original-evidence and Git-alternates boundary tests, including refusal cases. No findings.\n\n### Spec — pass\n\nThe supplied assignment and matching authorization fields are included in the review bundle; the runtime reported both selected probes matched expectations. The reboot-fixture observation verified the changed boot ID, four metadata hashes, and 41 workspace-file hashes; read/reconcile reported uncertain cessation, required review, and no replay. No findings.\n\n### Checks and limitations\n\nI did not rerun checks. The host-selected runtime observations are the evidence for the sandbox and reboot-fixture probes; they are not checks I executed. The supplied context reports parent quality, ESLint, Knip, and synthetic SDK checks passing, but provides no direct logs for those checks. Fixture authenticity, operator acceptance, and v1 acceptance remain outside this review. Candidate identity is as supplied; I could not independently recompute its commit hash.\n\n**Aggregate: pass.** This is a review report, not merge permission or product acceptance.",
+  "history": [
+    {
+      "version": 1,
+      "resultSha256": "6bbe5ab200ce812e12c838d546448d597ea8de85f93751c58af07185bec759ac",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "inconclusive: alternate-backed end-to-end test absent"
+    },
+    {
+      "version": 2,
+      "resultSha256": "4795c07b55c9351d551aa87048b8e3f9b35a8a5165455a894ade8a0f378a4c41",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "FAIL: canonical authentication alias; fixed with regression"
+    },
+    {
+      "version": 3,
+      "resultSha256": "16b9bd114c6e7f928a12727bf9ec2b9d7df3bafaf7bdf81061429324b500200e",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "FAIL: hard-linked authentication alias; fixed with regression"
+    },
+    {
+      "version": 4,
+      "resultSha256": "3decacf4c561ef48aa166ffee547b9316aa23cefecd6f96d776680866cdc273c",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "inconclusive: standards/brief context"
+    },
+    {
+      "version": 5,
+      "resultSha256": "434a6e80647feef593f5592dd3be7dfe3da68f2b1de1b13875b3259be4e0e05f",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "inconclusive: broader hardware brief instead of prerequisite"
+    },
+    {
+      "version": 6,
+      "resultSha256": "f59c4a1474bd29140e32a2303e73366db8f2ea06dc88a4d08a6e0cf156663dd8",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "inconclusive: assignment/grant context absent"
+    },
+    {
+      "version": 7,
+      "resultSha256": "10e1ef136a319f31974a4cc878a80cc7234fecc3e8ae9c14b83bf6dbf2d36617",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "FAIL: initial evidence scan deadline; fixed with regression"
+    },
+    {
+      "version": 8,
+      "resultSha256": "4288ed4e8dcc62c2ed35c2373e3e0abca65658c8f5f15a760e982a344d62005e",
+      "transport": "blocked",
+      "attempts": 0,
+      "fetches": 0,
+      "disposition": "zero provider calls: exact workspace input exceeded limit; preparation now calculates actual wrapper"
+    },
+    {
+      "version": 9,
+      "resultSha256": "11ccf0a448e85e3fa8f7a509433867f6b04710c94597de51732f39d713a0a540",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "inconclusive: historical assignment did not match current candidate"
+    },
+    {
+      "version": 10,
+      "resultSha256": "165ec7a43c2895225d93812dec97b9082bc57f4a7475311d80c5c3f387f7ab48",
+      "transport": "response-complete",
+      "attempts": 1,
+      "fetches": 1,
+      "disposition": "Standards PASS, Spec PASS: actual current bindings supplied structurally"
+    }
+  ],
+  "limits": [
+    "Host-selected read-only runtime observations, not model-selected shell or authenticated reviewer identity",
+    "Original trusted fixture only; no worker, reboot, replay, repair or external-effect settlement",
+    "Source prerequisite reviewed; original-case delivery and exact PR/main CI remain separate"
+  ]
+}
