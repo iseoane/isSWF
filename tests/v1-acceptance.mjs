@@ -13,11 +13,16 @@ function validate(value) {
   assert.equal(value.version, 1); assert.equal(value.specSha256, hash(spec));
   assert.match(value.sourceBase, /^[a-f0-9]{40}$/u);
   assert.equal(new Set(expected).size, 61); assert.equal(value.criteriaCount, expected.length);
-  assert.deepEqual(value.criteria.map(row => row.id).sort(), expected, 'all exact spec IDs required once');
+  assert.deepEqual(value.columns, ['id', 'mode', 'evidenceGroup', 'observation', 'remaining']);
+  const rows = value.criteria.map(row => {
+    assert(Array.isArray(row) && row.length === value.columns.length && row.every(item => typeof item === 'string'), 'complete typed table row required');
+    return Object.fromEntries(value.columns.map((column, index) => [column, row[index]]));
+  });
+  assert.deepEqual(rows.map(row => row.id).sort(), expected, 'all exact spec IDs required once');
   assert.notEqual(value.status, 'PASS', 'this artifact must not substitute a machine PASS for product acceptance');
   assert(['not-recorded-for-whole-v1', 'explicit-operator-acceptance-recorded'].includes(value.operatorAcceptance));
   if (value.operatorAcceptance === 'explicit-operator-acceptance-recorded') assert.ok(value.operatorAcceptanceEvidence?.quote && value.operatorAcceptanceEvidence?.reference);
-  for (const row of value.criteria) {
+  for (const row of rows) {
     assert(modes.has(row.mode) && row.observation && row.remaining, row.id + ': evidence mode, observed scope and limits required');
     assert(value.evidenceGroups[row.evidenceGroup]?.length, row.id + ': evidence group required');
   }
@@ -34,9 +39,10 @@ function validate(value) {
 const records = validate(matrix);
 for (const mutate of [
   value => value.criteria.pop(),
-  value => value.criteria[0].id = value.criteria[1].id,
-  value => value.criteria[0].mode = 'automatic-product-pass',
-  value => value.criteria[0].remaining = '',
+  value => value.criteria[0][0] = value.criteria[1][0],
+  value => value.criteria[0][1] = 'automatic-product-pass',
+  value => value.criteria[0][4] = '',
+  value => value.columns.reverse(),
   value => value.specSha256 = '0'.repeat(64),
   value => value.evidencePins[Object.keys(value.evidencePins)[0]] = '0'.repeat(64),
   value => value.operatorAcceptance = 'explicit-operator-acceptance-recorded',
