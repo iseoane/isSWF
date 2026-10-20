@@ -87,7 +87,7 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
     if (job.workspace.evidence !== undefined) {
       const evidence = job.workspace.evidence;
       assert(grant.allowOriginalEvidence === true && evidence && ['path,sha256', 'path,sha256,sourceObjectsSha256'].includes(Object.keys(evidence).sort().join(',')) && isAbsolute(evidence.path ?? '') && /^[a-f0-9]{64}$/u.test(evidence.sha256), 'explicit-original-evidence-grant-required');
-      for (const protectedPath of [target, source, project, store, workspace, grant.authPath, grantFile]) assert(evidence.path !== protectedPath && !inside(evidence.path, protectedPath) && !inside(protectedPath, evidence.path), 'separate-original-evidence-required');
+      for (const protectedPath of [target, source, project, store, workspace, authPath, grantFile]) assert(evidence.path !== protectedPath && !inside(evidence.path, protectedPath) && !inside(protectedPath, evidence.path), 'separate-original-evidence-required');
       assert(await evidenceDigest(evidence.path) === evidence.sha256, 'original-evidence-pin-mismatch');
       if (evidence.sourceObjectsSha256 !== undefined) assert(grant.allowSourceObjects === true && /^[a-f0-9]{64}$/u.test(evidence.sourceObjectsSha256) && await evidenceDigest(sourceObjectsPath) === evidence.sourceObjectsSha256, 'explicit-source-object-pin-required');
       else assert(grant.allowSourceObjects !== true, 'source-object-pin-required');
