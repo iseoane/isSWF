@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver a shared factory methodology with Pi integration preserved and Claude Code integration prepared
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md) (pending until prepared)
-- Blocker: Final source closure review and exact final-head CI pending. V002 confirms coverage fix; its settings finding is discarded against actual PR-base scope. A003 bounded Claude chain passed and operator explicitly authorized merge.
-- Next step: Complete final independent source closure review, then publish, check exact-head CI and perform guarded merge; preserve original partial/FAIL reports without relabeling.
+- Blocker: None for the accepted bounded source delivery: V004 Standards PASS and Spec PASS; A003 live Claude fixture passed and operator requested merge. Historical partial/FAIL/INCONCLUSIVE outcomes remain unchanged. Exact final-head CI and guarded merge/main verification remain separate publication gates.
+- Next step: Publish retained closure evidence, require exact final-head CI, then guarded merge into main and verify merge commit/main CI. No broader host, client or runtime guarantee follows.
 
 ### Acceptance
 
@@ -36,6 +36,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0004/jobs/J001/V002.md
 - .factory/initiatives/I0004/jobs/J002/A003.md
 - Operator: Pues adelante con la pr y hazla merge
+- .factory/initiatives/I0004/jobs/J001/V003.md
+- .factory/initiatives/I0004/jobs/J001/V004.md
+- Source closure candidate: 8a1256ba87419a361129b8821d8884e54ccc345a
 
 ## J002
 
