@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: blocked
+- Status: in-review
 - Objective: Deliver a shared factory methodology with Pi integration preserved and Claude Code integration prepared
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: Native dispatch requires committed job/brief, explicit local checkpoint permission and finite model-call authority/account coverage. No .pi/settings.json is present in this checkout. No provider invocation is authorized by a plan record.
-- Next step: Finalize grounding and brief; obtain only missing checkpoint/provider scope before native dispatch. Do not substitute Pstack or coordinator implementation.
+- Blocker: Native worker retained partial outcome on new-directory scope. Independent V001: Standards PASS, Spec FAIL and medium integration risk. Coverage finding corrected by coordinator; affected exact-candidate review remains pending. Claude live validation is J002; low-risk-only merge condition not met.
+- Next step: Publish a draft PR with candidate checks and preserved V001; obtain an explicitly scoped follow-up review before source closure. Do not merge or replay consumed worker/reviewer calls.
 
 ### Acceptance
 
@@ -27,6 +27,10 @@ This coordinator-owned plan records reported progress, not execution permission 
 - docs/activacion-por-proyecto.md
 - docs/model-routing.md
 - tools/factory-package.mjs
+- .factory/initiatives/I0004/jobs/J001/A001.md
+- .factory/initiatives/I0004/jobs/J001/V001.md
+- Native source candidate: 2ce728c1bbc45a2dd4f11e6dd790aef9e1218587
+- Coverage correction: b98bf57
 
 ## J002
 
