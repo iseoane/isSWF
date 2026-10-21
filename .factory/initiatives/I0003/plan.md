@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-review
+- Status: blocked
 - Objective: Archive development audit artifacts without losing evidence or changing factory runtime
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: Final independent verification and exact PR/main CI remain publication gates.
-- Next step: Review the full procedure with actual preservation evidence, then publish after exact CI gates.
+- Blocker: Local archival and checks passed; native Standards PASS but Spec inconclusive on full private payload independent inspection. No merge approval.
+- Next step: Retain organized archive and review records; resolve only independent preservation verification before publication. Do not repeat model calls with the same unavailable payload.
 
 ### Acceptance
 
@@ -29,3 +29,4 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Preserved audit Git tree: f77aee1d95716e4e14ebf5ec1949882fff64f943
 - Actual preservation receipt: .factory/initiatives/I0003/jobs/J001/A001.md
 - Lookup metadata: .audit/archive.json
+- Independent review: .factory/initiatives/I0003/jobs/J001/V001.md
