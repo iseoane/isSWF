@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "logicalJobRef": "I0004-J001-review-A001",
+  "implementerRef": "I0004-J001-native-worker-A001",
+  "briefPath": ".factory/initiatives/I0004/jobs/J001/review-brief-r1.md",
+  "targetRepo": "/tmp/isswf-I0004-work",
+  "targetBase": "45a03b0447452b140219a2f94e8611b761b9f370",
+  "candidateSha": "2ce728c1bbc45a2dd4f11e6dd790aef9e1218587",
+  "contextPaths": [
+    ".factory/initiatives/I0004/jobs/J001/brief-r2.md",
+    ".agents/roles/worker.md",
+    ".agents/roles/reviewer.md",
+    ".agents/roles/researcher.md",
+    ".agents/roles/planner.md",
+    ".factory/models.json",
+    "package.json"
+  ],
+  "methodologySha": "fed46e4d0f9ebc1a5eef960531cf65b871bc5d90",
+  "sdkPath": "/home/iseoane/.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-coding-agent",
+  "models": {
+    "sha": "2ce728c1bbc45a2dd4f11e6dd790aef9e1218587",
+    "path": ".factory/models.json",
+    "sha256": "f25ca74f71a523367986ac113f83d1128acba89153cb8434812931dbf3823910"
+  },
+  "evidenceMode": "candidate-and-diff"
+}
