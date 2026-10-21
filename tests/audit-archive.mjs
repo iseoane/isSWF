@@ -85,6 +85,16 @@ try {
   const held = await fixture(); await fs.mkdir(join(held.root, 'tooling/.local/audit-archive/.operation-lock'), { recursive: true });
   await assert.rejects(archiveAudit(held.root, { apply: true, expectedHead: held.head }), { code: 'EEXIST' });
   assert.equal(await fs.readFile(join(held.root, '.audit/ignored.log'), 'utf8'), 'private log\n');
+  const oversized = await fixture(), stringify = JSON.stringify;
+  JSON.stringify = (value, ...args) => value?.originalPath === '.audit' && Array.isArray(value.rows) ? stringify(value, ...args) + ' '.repeat(32 * 1024 ** 2) : stringify(value, ...args);
+  try {
+    await assert.rejects(archiveAudit(oversized.root, { apply: true, expectedHead: oversized.head }), error => /serialized manifest exceeds verification limit before move/u.test(error.cause?.message));
+  } finally { JSON.stringify = stringify; }
+  assert.equal(await fs.readFile(join(oversized.root, '.audit/ignored.log'), 'utf8'), 'private log\n');
+  assert.equal(await fs.readFile(join(oversized.root, '.audit/tracked.json'), 'utf8'), '{"retained":true}\n');
+  const oversizedBase = join(oversized.root, 'tooling/.local/audit-archive');
+  const refusedArchive = (await fs.readdir(oversizedBase)).find(name => name.startsWith('audit-'));
+  assert.equal(JSON.parse(await fs.readFile(join(oversizedBase, refusedArchive, 'incomplete.json'))).moved, false);
   const interrupted = await fixture(), mkdir = fs.mkdir;
   fs.mkdir = async (path, ...args) => { if (path === join(interrupted.root, '.audit')) throw Error('synthetic interruption after verified move'); return mkdir(path, ...args); };
   try { await assert.rejects(archiveAudit(interrupted.root, { apply: true, expectedHead: interrupted.head }), /No automatic retry or rollback/u); }

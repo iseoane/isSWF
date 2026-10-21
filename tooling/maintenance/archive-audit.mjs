@@ -148,7 +148,9 @@ export async function archiveAudit(root, { apply = false, expectedHead } = {}) {
     await syncedJSON(join(directory, 'documents.json'), documents);
     const tracked = trackedPaths.size;
     const contentSha256 = hash(encode(contentRows(before.rows)));
-    await syncedJSON(join(directory, 'manifest.json'), { version: 1, originalPath: '.audit', checkpoint: head, gitTree, files: before.files, bytes: before.bytes, contentSha256, rows: before.rows });
+    const manifestRecord = { version: 1, originalPath: '.audit', checkpoint: head, gitTree, files: before.files, bytes: before.bytes, contentSha256, rows: before.rows };
+    assert(Buffer.byteLength(encode(manifestRecord)) <= 32 * 1024 ** 2, 'serialized manifest exceeds verification limit before move');
+    await syncedJSON(join(directory, 'manifest.json'), manifestRecord);
     const recordedManifestSha256 = hash(await fs.readFile(join(directory, 'manifest.json')));
     await syncDirectory(directory); await syncDirectory(parent);
     assert.equal(git(root, ['rev-parse', 'HEAD']), head, 'HEAD changed during preparation');
