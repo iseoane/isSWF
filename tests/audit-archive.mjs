@@ -12,6 +12,8 @@ async function fixture({ ignore = true } = {}) {
   const git = (...args) => { const r = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
   git('init', '-q'); git('remote', 'add', 'origin', 'https://github.com/fixture/repo.git'); await fs.mkdir(join(root, '.audit'));
   await fs.mkdir(join(root, 'docs'));
+  await fs.mkdir(join(root, '.factory/initiatives/I0001/jobs/J001'), { recursive: true });
+  await fs.writeFile(join(root, '.factory/initiatives/I0001/jobs/J001/V001.md'), '# Historical report\n\nObserved [.audit evidence](../../../../../.audit/tracked.json). Verdict unchanged.\n');
   await fs.writeFile(join(root, 'docs/history.md'), '# History\n\n[Tracked](../.audit/tracked.json) [Private](../.audit/private/local.bin) [Other](../source.txt)\n\n```sh\nnode .audit/old.mjs\n```\n');
   await fs.writeFile(join(root, 'source.txt'), 'do not change\n');
   await fs.writeFile(join(root, '.gitignore'), ignore ? '/tooling/.local/\n.audit/*.log\n' : '.audit/*.log\n');
@@ -48,6 +50,9 @@ try {
   assert(guide.includes('[Other](../source.txt)'));
   assert(guide.includes('Restoring files does not renew consumed model or worker grants.'));
   assert.deepEqual(result.documentation, { publicLinks: 1, privateLinks: 1, markedGuides: 1, changedDocs: ['docs/history.md'] });
+  const historicalPath = '.factory/initiatives/I0001/jobs/J001/V001.md';
+  assert.equal(await fs.readFile(join(f.root, historicalPath), 'utf8'), f.git('show', f.head + ':' + historicalPath) + '\n');
+  assert.equal(f.git('show', result.checkpoint + ':.audit/tracked.json'), '{"retained":true}');
   assert.equal((await verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 })).contentSha256, result.contentSha256);
   assert.equal((await archiveAudit(f.root, { apply: true, expectedHead: f.head })).status, 'already-organized');
   assert.equal((await fs.readdir(join(f.root, 'tooling/.local/audit-archive'))).length, 1);
