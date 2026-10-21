@@ -31,6 +31,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0004/jobs/J001/V001.md
 - Native source candidate: 2ce728c1bbc45a2dd4f11e6dd790aef9e1218587
 - Coverage correction: b98bf57
+- https://github.com/iseoane/isSWF/pull/81
 
 ## J002
 
