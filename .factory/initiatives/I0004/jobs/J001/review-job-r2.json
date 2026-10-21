@@ -8,12 +8,9 @@
   "candidateSha": "167a24d9212c222b3e384d87dcc2e59fbe8f57b2",
   "contextPaths": [
     ".factory/initiatives/I0004/jobs/J001/brief-r2.md",
-    ".agents/skills/isswf-coordinator/SKILL.md",
     ".agents/hosts/claude-code.md",
     ".agents/roles/worker.md",
     ".agents/roles/reviewer.md",
-    ".agents/roles/researcher.md",
-    ".agents/roles/planner.md",
     ".factory/models.json",
     "package.json",
     ".claude-plugin/plugin.json",
