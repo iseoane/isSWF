@@ -92,12 +92,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J005
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Complete capacity, dependencies and panel slot guarantees
 - Depends on: None
 - Brief: [brief-r6.md](jobs/J005/brief-r6.md) (pending until prepared)
-- Blocker: Technical delivery integrated through PR68 with exact PR/main CI success; operator acceptance remains pending.
-- Next step: Review the delivery card and accept or request changes; continue independent remaining jobs meanwhile.
+- Blocker: Operator explicitly accepted all delivered jobs: Y da todos por aceptados. Bounded evidence and published limitations remain authoritative.
+- Next step: Preserve accepted delivery and limitations; no extra execution or deployment authority inferred.
 
 ### Acceptance
 
@@ -129,15 +129,16 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/68
 - af05457b1bd98362902bb1f7aff789fd9368653e
 - Exact PR CI39289977210 and main CI39290124760: success
+- Operator conversation: Y da todos por aceptados
 
 ## J006
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Validate machine-restart recovery and remaining continuity cases
 - Depends on: None
 - Brief: [brief-r6.md](jobs/J006/brief-r6.md) (pending until prepared)
-- Blocker: Bounded original-restart delivery integrated in PR76 with independent source/observed-case PASS and exact PR/main CI success; operator acceptance pending. No further worker or reboot budget remains.
-- Next step: Consider this bounded delivery in the final J008 operator decision. Preserve original evidence and conservative refusal; no automatic continuation or replacement inferred.
+- Blocker: Operator explicitly accepted all delivered jobs: Y da todos por aceptados. Bounded evidence and published limitations remain authoritative.
+- Next step: Preserve accepted delivery and limitations; no extra execution or deployment authority inferred.
 
 ### Acceptance
 
@@ -153,6 +154,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/76
 - 01c31f80f8ac997af6c8f19c468e406800cee778
 - Exact PR CI39432084146 and main CI39432357408: success
+- Operator conversation: Y da todos por aceptados
 
 ## J007
 
@@ -186,12 +188,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Objective: Review complete v1 evidence and obtain operator acceptance
 - Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010, J011, J012, J013, J014
 - Brief: [brief-r3.md](jobs/J008/brief-r3.md) (pending until prepared)
-- Blocker: Final 61-criterion reconciliation and exact evidence pins prepared; independent semantic review/publication and explicit operator acceptance remain pending. Client-isolation deployment and known controlled-proof limits are not generalized.
-- Next step: Validate and independently review the complete final matrix, exact PR/main CI, then present one explicit operator acceptance decision including pending bounded deliveries.
+- Blocker: No demonstrated unresolved finding in the accepted closure scope. Existing delivery limits remain unchanged; publication of this proposed record requires its own source review and exact PR/main CI. No global semantic PASS is claimed.
+- Next step: Publish this closure through its source and CI gates; preserve known limits and require separate client-use authorization and isolation verification. Do not reopen unchanged accepted cuts.
 
 ### Acceptance
 
@@ -200,6 +202,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J008/A001.md
+- .factory/initiatives/I0001/jobs/J008/delivery.md
+- Operator conversation: Y da todos por aceptados
+- Operator conversation: Ok dale (close from existing delivery evidence, not a second global audit)
+- https://github.com/iseoane/isSWF/pull/79
+- MOD-05 source fix: 3765cbd2d762443dfec8f36db9d01ed78c8bbdaf, PR CI39478403116 and main CI39478545232 success
+- Historical 61-ID reference index and inconclusive expanded audit: e9176d36aa82306ff07d460d2846ff3f346c9692, .factory/initiatives/I0001/jobs/J008/
 
 ## J009
 
