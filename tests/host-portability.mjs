@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -28,5 +29,12 @@ assert.match(docs, /--plugin-dir/);
 assert.match(docs, /\/isswf:isswf-coordinator/);
 assert.match(docs, /static integration only, not live-model verified/i);
 assert.equal(await read('package.json'), '{\n  "name": "isswf-pi-resources",\n  "version": "1.0.0",\n  "description": "A fixed-version Pi resource package for isSWF project workflows.",\n  "pi": {\n    "skills": [\n      "./.agents/skills/isswf-coordinator",\n      "./.agents/skills/isswf-setup"\n    ]\n  }\n}\n');
-for (const f of ['tools/isswf-job.mjs','tools/pi-worker-task.mjs']) assert.ok((await read(f)).length > 0);
+const piRuntimePins = {
+  'tools/isswf-job.mjs': 'a1d3f5d21b5861b1e7c5b1892755d8016ca1c1e7a09d13032817d57feb0de939',
+  'tools/pi-worker-task.mjs': '49fa47475cc63e1267177d92a2fdcb7f0f23d38781d7403df6b89c05feb4b4cf',
+};
+for (const [file, expected] of Object.entries(piRuntimePins)) {
+  const bytes = await readFile(path.join(root, file));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), expected, `Pi runtime changed: ${file}`);
+}
 console.log('host-portability: ok');
