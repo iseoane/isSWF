@@ -14,6 +14,10 @@ Engram y Codegraph son opcionales. El coordinador contrasta sus resultados con c
 
 U1 y U2 son prototipos históricos locales de intake en Python, no requisitos de la entrada nativa. Sus guías de [triage](docs/u1-usage.md) y [decisiones pendientes](docs/u2-usage.md) conservan fixtures y límites; U3/U4 siguen pendientes. No se declara aislamiento exhaustivo ni preparación para proyectos cliente.
 
+## Uso en Claude Code
+
+La [integración por anfitrión](docs/host-portability.md) permite cargar un plugin local de Claude Code sobre los perfiles compartidos. Una prueba real acotada completó implementación y revisión independiente en Claude Code 2.1.299. No equivale al sandbox ni a la recuperación de Pi, ni autoriza proyectos cliente.
+
 ## Por dónde empezar
 
 - [Visión](docs/vision.md): acuerdos y prioridades del usuario.

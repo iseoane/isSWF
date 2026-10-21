@@ -1,44 +1,45 @@
-# Pi and Claude Code portability candidate
+# Pi and Claude Code portability delivery
 
 ## What changed and why
 
-A local opt-in Claude Code plugin delegates through thin wrappers that read the existing shared factory profiles. A host guide distinguishes Claude-native delegation from the existing Pi SDK path. Pi remains the default supported execution host; its package manifest and native worker/job runtime are unchanged.
+An opt-in local Claude Code plugin delegates through thin wrappers that read shared factory profiles. A host guide separates Claude-native delegation from the existing Pi SDK path. Root package.json and the Pi job/task runtime have no net change against the PR base.
 
 ## Visual summary
 
 ```text
-Pi entry -> existing shared coordinator -> existing Pi SDK path
-Claude local plugin -> shared coordinator + Claude host guide -> native Claude roles
-shared profiles -> one methodology source
-Claude authenticated model/delegation check -> pending J002
+Pi entry -> shared coordinator -> existing Pi SDK path
+Claude local plugin -> shared coordinator + host guide -> native Claude roles
+A003 fixture -> worker fail/fix/pass -> distinct read-only reviewer PASS/PASS
 ```
 
 ## Scope
 
-Static Claude integration only. No global plugin install, login, Claude model prompt, new provider, OpenCode support or Pi-equivalent sandbox/recovery claim. The plugin is loaded explicitly from a trusted checkout with --plugin-dir. Machine-local Pi activation settings are excluded from the final published diff.
+The source adds local plugin integration and documentation. J002 validates one actual synthetic implementation/review chain on Claude Code 2.1.299. No global plugin install, OpenCode integration, client-use approval or Pi-equivalent sandbox/recovery claim. The plugin remains opt-in with --plugin-dir. Pi activation settings have no net change in the published PR.
 
 ## Checks and results
 
-At source checkpoint `4770e4c`, the coordinator ran the aggregate portable checks, ESLint over active source/tests and Knip successfully in a clean standalone clone. The portable entry now includes the new host test. Its earlier linked-worktree failure is retained in A001 and explained by the existing .git-directory fixture requirement, not relabeled as success.
+Existing portable checks, ESLint and Knip passed in a clean standalone clone and PR CI at 167a24d. Updated source and final-head publication gates require their own checks. The host test is registered in the portable quality entry and verifies the two unchanged runtime hashes. Mutation controls demonstrated its original coverage gap and subsequent detection of both runtime changes.
 
-The installed Claude Code 2.1.299 binary accepted the plugin manifest with an optional author warning and marketplace-install advice. This is actual local schema validation, not proof of authenticated model behavior. The wrapper that invokes global mise setup was not used for this check.
+The installed Claude binary's plugin validator passed with optional attribution/marketplace advice. More importantly, [J002/A003](../J002/A003.md) records actual authenticated coordinator discovery, one native worker changing only the allowed file and passing its Node test, followed by a distinct read-only reviewer with Standards PASS and Spec PASS. Parent checks confirm the resulting bytes and protected test preservation.
 
-Mutation controls reproduced V001's test gap before correction: changing either Pi runtime file still passed. After SHA-256 pins were added, each mutation failed while the unchanged candidate passed. These checks were performed by the coordinator, who is a coauthor of that correction. A deliberate future Pi runtime update must reconcile these pins rather than silently weakening them.
+A001/A002 remain unsuccessful permission-harness trials. A003 has no permission denials. Individual agent model/effort and handoff limitations are disclosed; neither a CLI exit code nor a model self-report proves a universal capability.
 
 ## Independent review
 
-V001 records a genuine native one-attempt review of `2ce728c1bbc45a2dd4f11e6dd790aef9e1218587`. Standards PASS, Spec FAIL, medium integration risk. The original report is retained verbatim. The test-coverage finding has been corrected, but its affected independent review is pending against the new candidate. No new reviewer call is inferred from the consumed grant. CI is a separate publication check, not independent review.
+V001's original Standards PASS/Spec FAIL is preserved; its test-coverage finding is corrected. V002 independently confirms that correction with actual read-only mutation probes. Its additional settings-deletion finding is dismissed with exact PR-base evidence: both original base fed46e4 and tested head167a24d lack .pi/settings.json and their path diff is empty. The temporary file existed only at intermediate setup commits. V002 remains verbatim FAIL, not relabeled PASS.
+
+The final closure review is recorded separately as V003 when available. It must assess the corrected source, actual PR-base scope, validation evidence and remaining limitations. CI is not that independent verdict. The A003 reviewer judges the synthetic fixture, not PR81's source.
 
 ## Integration risk and recovery
 
-The plugin is opt-in and leaves root package.json and the Pi job/task runtime unchanged. Host capability claims, model selection and permissions remain relevant integration risks. No merge is permitted under the operator's low-risk-only authority while the medium-risk review and affected recheck remain unresolved.
+The plugin is explicit opt-in. Native Pi runtime, routes, package allowlist and job/task source remain unchanged. Claude tool declarations do not enforce Pi-equivalent sandboxing or recovery; permission policy and assignment must match actual commands.
 
-The native worker's original run remains terminal failure/partial because newly created parent directories exceed its exact-file mutable-entry contract. The coordinator inspected and preserved its output, verified recorded process cessation, and selected only the ten permitted regular files for source review. No worker replacement or automatic retry was launched. This draft does not claim a successful native delivery or fix that separate runtime limitation.
+The original native implementation worker remains failure/partial because new parent directories exceeded its exact-file mutable-entry contract. Its retained candidate was inspected, stopped process identities checked and admitted regular files reviewed. No worker replacement or native-success claim follows from this source delivery. That runner limitation is not fixed here.
 
 ## Closure and acceptance
 
-Not technically closed or product accepted. Draft PR publication is authorized; merge is not performed. Runtime success, independent approval of the corrected candidate, authenticated Claude validation and product acceptance remain distinct.
+The operator accepted the disclosed bounded Claude result and explicitly authorized publication and merge: "Pues adelante con la pr y hazla merge". This supersedes the earlier low-risk-only merge authorization, but does not waive demonstrated defects, required source review or exact-head CI. No product acceptance, merge or main-CI outcome is inferred before it actually occurs.
 
 ## Blockers and next action
 
-Obtain a scoped follow-up independent review for the corrected candidate. J002 then validates real Claude skill discovery, implementation and independent review in an authorized authenticated environment. Retain the runner new-directory limitation as a separate recorded finding; do not change original attempt records or replay consumed calls.
+Finish the bounded final source review, publish the curated records, require CI on the exact PR head and merge with a server-enforced head match. Confirm the resulting main commit and its CI. Preserve all historical report limits and unsuccessful attempts; no automatic extra actors, retry, global config or deployment is authorized.

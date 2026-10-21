@@ -27,7 +27,8 @@ assert.doesNotMatch(host, /bypassPermissions|permissionMode:|hooks:|mcpServers:/
 const docs = await read('docs/host-portability.md');
 assert.match(docs, /--plugin-dir/);
 assert.match(docs, /\/isswf:isswf-coordinator/);
-assert.match(docs, /static integration only, not live-model verified/i);
+assert.match(docs, /bounded live validation/i);
+assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
 assert.equal(await read('package.json'), '{\n  "name": "isswf-pi-resources",\n  "version": "1.0.0",\n  "description": "A fixed-version Pi resource package for isSWF project workflows.",\n  "pi": {\n    "skills": [\n      "./.agents/skills/isswf-coordinator",\n      "./.agents/skills/isswf-setup"\n    ]\n  }\n}\n');
 const piRuntimePins = {
   'tools/isswf-job.mjs': 'a1d3f5d21b5861b1e7c5b1892755d8016ca1c1e7a09d13032817d57feb0de939',

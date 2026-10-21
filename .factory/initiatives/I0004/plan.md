@@ -10,8 +10,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Deliver a shared factory methodology with Pi integration preserved and Claude Code integration prepared
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md) (pending until prepared)
-- Blocker: Native worker retained partial outcome on new-directory scope. Independent V001: Standards PASS, Spec FAIL and medium integration risk. Coverage finding corrected by coordinator; affected exact-candidate review remains pending. Claude live validation is J002; low-risk-only merge condition not met.
-- Next step: Obtain a scoped follow-up independent review of the corrected candidate; draft PR81 is published with green CI at 057614f. Keep medium-risk merge blocked and do not replay consumed worker/reviewer calls.
+- Blocker: Final source closure review and exact final-head CI pending. V002 confirms coverage fix; its settings finding is discarded against actual PR-base scope. A003 bounded Claude chain passed and operator explicitly authorized merge.
+- Next step: Complete final independent source closure review, then publish, check exact-head CI and perform guarded merge; preserve original partial/FAIL reports without relabeling.
 
 ### Acceptance
 
@@ -33,15 +33,18 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Coverage correction: b98bf57
 - https://github.com/iseoane/isSWF/pull/81
 - https://github.com/iseoane/isSWF/actions/runs/39585007640 (success at exact head 057614f6953cf276bd9815bd82ea5b1c811ada4d)
+- .factory/initiatives/I0004/jobs/J001/V002.md
+- .factory/initiatives/I0004/jobs/J002/A003.md
+- Operator: Pues adelante con la pr y hazla merge
 
 ## J002
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Validate the prepared Claude Code integration in an authorized real Claude Code environment
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: No demonstrated unresolved blocker in the bounded A003 fixture chain; worker implementation and distinct reviewer both passed. Individual model/effort and simplified handoff limitations remain disclosed; operator acceptance is separate.
-- Next step: Present A003 for bounded acceptance. Keep PR81 source approval, publication and merge separate; do not claim Pi-equivalent isolation/recovery or repeat consumed trial actors.
+- Blocker: None for the explicitly accepted bounded A003 functional validation. Per-agent effort/model observation and simplified handoff limitations remain; no Pi-equivalent or client certification.
+- Next step: Preserve accepted A001-A003 records and limitations; source closure and merge remain J001.
 
 ### Acceptance
 
@@ -55,3 +58,4 @@ This coordinator-owned plan records reported progress, not execution permission 
 - .factory/initiatives/I0004/jobs/J002/A002.md
 - .factory/initiatives/I0004/jobs/J002/A003.md
 - Operator: Ok (fresh finite A003 validation authority, not product acceptance)
+- Operator: Pues adelante con la pr y hazla merge (after successful A003 and disclosed limits)
