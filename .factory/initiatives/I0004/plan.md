@@ -9,9 +9,9 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Status: in-review
 - Objective: Deliver a shared factory methodology with Pi integration preserved and Claude Code integration prepared
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md) (pending until prepared)
 - Blocker: Native worker retained partial outcome on new-directory scope. Independent V001: Standards PASS, Spec FAIL and medium integration risk. Coverage finding corrected by coordinator; affected exact-candidate review remains pending. Claude live validation is J002; low-risk-only merge condition not met.
-- Next step: Publish a draft PR with candidate checks and preserved V001; obtain an explicitly scoped follow-up review before source closure. Do not merge or replay consumed worker/reviewer calls.
+- Next step: Obtain a scoped follow-up independent review of the corrected candidate; draft PR81 is published with green CI at 057614f. Keep medium-risk merge blocked and do not replay consumed worker/reviewer calls.
 
 ### Acceptance
 
@@ -32,6 +32,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Native source candidate: 2ce728c1bbc45a2dd4f11e6dd790aef9e1218587
 - Coverage correction: b98bf57
 - https://github.com/iseoane/isSWF/pull/81
+- https://github.com/iseoane/isSWF/actions/runs/39585007640 (success at exact head 057614f6953cf276bd9815bd82ea5b1c811ada4d)
 
 ## J002
 
