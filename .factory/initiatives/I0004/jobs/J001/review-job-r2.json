@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "logicalJobRef": "I0004-J001-review-A002",
+  "implementerRef": "I0004-J001-worker-A001-and-coordinator-fix",
+  "briefPath": ".factory/initiatives/I0004/jobs/J001/review-brief-r2.md",
+  "targetRepo": "/tmp/isswf-I0004-work",
+  "targetBase": "2ce728c1bbc45a2dd4f11e6dd790aef9e1218587",
+  "candidateSha": "167a24d9212c222b3e384d87dcc2e59fbe8f57b2",
+  "contextPaths": [
+    ".factory/initiatives/I0004/jobs/J001/brief-r2.md",
+    ".agents/skills/isswf-coordinator/SKILL.md",
+    ".agents/hosts/claude-code.md",
+    ".agents/roles/worker.md",
+    ".agents/roles/reviewer.md",
+    ".agents/roles/researcher.md",
+    ".agents/roles/planner.md",
+    ".factory/models.json",
+    "package.json",
+    ".claude-plugin/plugin.json",
+    "skills/isswf-coordinator/SKILL.md",
+    "agents/isswf-worker.md",
+    "agents/isswf-reviewer.md",
+    "agents/isswf-researcher.md",
+    "agents/isswf-planner.md",
+    "docs/host-portability.md"
+  ],
+  "methodologySha": "fed46e4d0f9ebc1a5eef960531cf65b871bc5d90",
+  "sdkPath": "/home/iseoane/.pi/agent/install/releases/1.3.0/node_modules/@earendil-works/pi-coding-agent",
+  "models": {
+    "sha": "167a24d9212c222b3e384d87dcc2e59fbe8f57b2",
+    "path": ".factory/models.json",
+    "sha256": "f25ca74f71a523367986ac113f83d1128acba89153cb8434812931dbf3823910"
+  },
+  "evidenceMode": "candidate-and-diff",
+  "workspace": {
+    "repo": "/tmp/isswf-I0004-verify",
+    "probes": [
+      {
+        "name": "host-contract",
+        "command": "node tests/host-portability.mjs .",
+        "expectedExitCode": 0
+      },
+      {
+        "name": "runtime-mutation-controls",
+        "command": "node -e 'const fs=require('\"'\"'fs'\"'\"'),p=require('\"'\"'path'\"'\"'),os=require('\"'\"'os'\"'\"'),cp=require('\"'\"'child_process'\"'\"'),a=require('\"'\"'assert/strict'\"'\"');const root=process.cwd(),tmp=fs.mkdtempSync(p.join(os.tmpdir(),'\"'\"'isswf-mut-'\"'\"'));try{const names=['\"'\"'.claude-plugin/plugin.json'\"'\"','\"'\"'skills/isswf-coordinator/SKILL.md'\"'\"','\"'\"'.agents/skills/isswf-coordinator/SKILL.md'\"'\"','\"'\"'.agents/hosts/claude-code.md'\"'\"','\"'\"'docs/host-portability.md'\"'\"','\"'\"'package.json'\"'\"','\"'\"'tools/isswf-job.mjs'\"'\"','\"'\"'tools/pi-worker-task.mjs'\"'\"',...fs.readdirSync('\"'\"'agents'\"'\"').map(n=>'\"'\"'agents/'\"'\"'+n)];for(const n of names){fs.mkdirSync(p.dirname(p.join(tmp,n)),{recursive:true});fs.copyFileSync(p.join(root,n),p.join(tmp,n));}const run=()=>cp.spawnSync(process.execPath,[p.join(root,'\"'\"'tests/host-portability.mjs'\"'\"'),tmp],{encoding:'\"'\"'utf8'\"'\"'});a.equal(run().status,0);for(const n of ['\"'\"'tools/isswf-job.mjs'\"'\"','\"'\"'tools/pi-worker-task.mjs'\"'\"']){const f=p.join(tmp,n),b=fs.readFileSync(f);fs.appendFileSync(f,'\"'\"'\\n// mutation probe\\n'\"'\"');const r=run();a.equal(r.status,1);a.ok(r.stderr.includes('\"'\"'Pi runtime changed: '\"'\"'+n));fs.writeFileSync(f,b);console.log('\"'\"'DETECTED '\"'\"'+n);}a.equal(run().status,0);console.log('\"'\"'POSITIVE CONTROL PASS'\"'\"');}finally{fs.rmSync(tmp,{recursive:true,force:true});}'",
+        "expectedExitCode": 0
+      }
+    ]
+  }
+}
