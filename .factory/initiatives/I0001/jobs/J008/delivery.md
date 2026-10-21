@@ -1,21 +1,38 @@
-# Factory v1 final evidence review
+# Factory v1 closure
 
-## What changed and why
+## Decision and delivered scope
 
-`acceptance-matrix.json` reconciles all 61 spec IDs with exact evidence hashes, observed scope and limitations. It is not an automatic product PASS.
+The operator accepted all reported jobs: **“Y da todos por aceptados”**, and approved closing from existing delivery evidence with **“Ok dale”**. This records that decision, not new execution or deployment authority. MOD-05’s demonstrated defect was fixed in [PR79](https://github.com/iseoane/isSWF/pull/79), with passing independent review and exact PR/main CI.
 
-## Checks and results
+All existing evidence references below were read at main `6cca0d2c47907396e1a7aacf1219233b3a781966`; that Git checkpoint preserves their exact bytes. The new NAV-02 record is retained here unchanged. Canonical job records remain authoritative; this index does not copy their reports or re-review unchanged implementations.
 
-`node tests/v1-acceptance.mjs .` verifies coverage, record bytes and negative controls. Independent semantic review and exact publication CI remain separate gates.
+## Spec references and explicit limits
 
-## Independent semantic outcome
+Each of the 61 IDs in `docs/spec-v1.md` appears once below. References identify the recorded bounded cases, not a new declaration that every spec behavior passed independent verification.
 
-Three independent audit scopes covered all 61 IDs once. Standards passed; Spec remained **inconclusive**. [The retained reports](semantic-review.json) preserve that result and the corrected stale-acceptance finding. The matrix is a coordinator reconciliation, not a claim that every spec behavior passed independent verification. Operator acceptance does not change the audit verdict.
+| Spec IDs | Existing evidence | Limits retained at closure |
+| --- | --- | --- |
+| `AGT-01`, `AGT-02`, `AGT-04`, `MOD-05`, `OPS-02` | [J011 delivery](../J011/delivery.md), [real diagnostic/planner binding review](../J011/V005.md), [MOD-05 fix](https://github.com/iseoane/isSWF/pull/79) | Pinned own-role paths and named cases, not an autonomous dispatcher, inherited conversation/tools or universal scheduling. Configuration resume uses an explicit new input/attempt; only the supported route, with synthetic record/readback coverage and no cross-boot continuation. |
+| `GND-02`, `GND-04`, `GND-05`, `GND-06`, `GND-07`, `DEL-07` | [J003 preparation](../J003/brief-r2.md), [dependency regression/reviews](../J005/dependency-verification.json), [provisional planner proposal](A001.md) | Named inline grounding and source-map workflows, not guaranteed model navigation. The historical planner proposal remained provisional; it did not authorize implementation or automatically adopt a plan. |
+| `GND-01`, `TRI-01`, `TRI-02`, `TRI-03`, `TRI-04`, `TRI-05` | [J002 duplicate review](../J002/V002.md), [native intake contract](../../../../../docs/s01-intake.md) | Explicit pinned revisions and authority; no semantic/global issue census, identity-authentication service or global cross-store cancellation. A later linked target can make a duplicate disposition unknown; no automatic chain adoption. |
+| `AGT-03`, `RET-01`, `RET-02`, `RET-03`, `RET-04`, `RET-05` | [J004 observations](../J004/A001.md), [report](../J004/retrospective-r1.md), [existing proposal](../J004/proposals/P001.md) | Skill-guided local proposal, repeat linkage and controlled missing-evidence recovery. Active-task/session analysis was synthetic, not literal chat shutdown, a crash-atomic proposal store or every active-skill mutation case. No remote issue or policy change was implied. |
+| `GND-03`, `DEL-01`, `DEL-02`, `DEL-03`, `DEL-04`, `DEL-05`, `DEL-06` | [dependency integration review](../J005/dependency-verification.json), [context evidence](../J007/context-verification.json), [retention review](../J013/retention-verification.json) | Reuse exact candidate-scoped delivery reviews and PR/main gates. Old failures and inconclusive attempts remain history; neither operator acceptance nor CI alone substitutes for source review. This closure has its own publication gates. |
+| `MOD-01`, `MOD-02`, `MOD-03`, `MOD-04`, `MOD-06` | [canonical routes](../../../../models.json), [versioned quota controls](../../../../../.audit/fallback-66-quota-proof.json) | Fixed supported model/effort tuples and finite authority. Fallback covers the known GoUsageLimitError envelope in controlled tests, not the current live service or arbitrary errors; unknown outcomes block. No invented account alias, server-effort metadata, extra API spend or replay. |
+| `MOD-07`, `OPS-07`, `OPS-08`, `OPS-09` | [J005 acceptance/evidence map](../J005/brief-r6.md), [panel controls](../J005/panel-verification.json), [worker controls](../J005/worker-capacity-verification.json), [dependency checks](../J005/dependency-verification.json) | Scoped cooperative pools and explicit integration attestations; fixture panel with successive slots, not a live five-role provider panel or machine-wide enforcement. Unbound callers remain outside the guarantee. No general scheduler or status-as-code-integration authority. |
+| `OPS-03`, `OPS-04`, `OPS-05`, `OPS-06` | [J006 actual restart case](../J006/restart-case-v2.json), [original-evidence verification](../J006/original-access-verification.json), [controlled continuity scope](../../../../../.audit/recovery-68-acceptance-scope-deepseek.json) | One physical restart preserved the original evidence and refused uncertain identity; no automatic resumption or successful worker result. Chat-close and remote-effect cases remain controlled, not literal UI shutdown or a real lost GitHub response. Both worker budgets are consumed; no replacement, replay or archive-authenticity claim. |
+| `OPS-01` | [J009 review](../J009/V003.md), [status/panel checks](../../../../../tests/initiative-status.mjs) | Canonical records and explicit unknown/stale/not-inspected states. Snapshot time is not a heartbeat, atomic liveness proof or dispatch authority. |
+| `NAV-01`, `NAV-03`, `NAV-04` | [own coordinator rule source](../../../../../.agents/skills/isswf-coordinator/SKILL.md), [code-quality guidance](../../../../../.agents/roles/references/code-quality.md) | Real named entry points and domain terms; reopen historical line ranges. Rule changes belong in their owning source; retained snapshots are history, not hidden rule copies to synchronize. |
+| `NAV-02` | [retained native synthetic finding](navigation-review.json) | Expected failing review detected duplicate canonical logic and a purposeless wrapper while three arithmetic checks passed. This is detector evidence, not a factory-source failure or a statistical reviewer-quality guarantee. |
+| `NAV-05`, `PRD-01`, `PRD-02`, `PRD-03` | [accepted feature plan](../../../I0002/plan.md), [functional brief](../../../I0002/jobs/J001/brief-r1.md), [restart baseline review/fix](../J006/restart-case-v2.json) | One accepted next-action panel feature, not a scheduler or universal product-acceptance mechanism. A green but incomplete baseline verifier was rejected and corrected before delivery. Do not generalize these cases to arbitrary ideas or all future changes. |
+| `AGT-05`, `SEC-01`, `SEC-02`, `SEC-03`, `SEC-04` | [context/profile boundaries](../J007/delivery.md), [isolated-store proof](../J007/isolated-memory-verification.json), [retention agreement](../J013/retention-verification.json) | Named grants and sandbox controls, not confinement of broader parent tools, authenticated actor identities or universal prompt-injection/secret scanning. Client deployment and its assigned store/process remain unverified; a failed required boundary blocks use. Preserve-all agreement grants no new cleanup or global changes. |
+| `MEM-01`, `MEM-02`, `MEM-03`, `MEM-04` | [scoped CLI/handoff observations](../J007/context-verification.json), [mixed-store counterexample](../J007/mcp-verification.json), [isolated synthetic profile](../J007/isolated-memory-verification.json) | Synthetic scoped processes/stores, not a migrated parent server or cloud/client certification. Shared-store summaries can leak foreign metadata. Source-only preparation after controlled shutdown is not production-outage recovery; memory never overrides current source or later decisions. |
 
-## Closure and acceptance
+## Historical review attempts
 
-The operator explicitly accepted all reported jobs: “Y da todos por aceptados”. The canonical plan records that decision separately from pending technical checks. Shared-store client summaries remain blocked; actual client store/process verification is required before use. No new worker, reboot, deployment or cleanup is authorized.
+The expanded global re-audit was inconclusive. Its exact reports remain at Git checkpoint `e9176d36aa82306ff07d460d2846ff3f346c9692`, path `.factory/initiatives/I0001/jobs/J008/semantic-review.json`. No such outcome is promoted to PASS. Those attempts neither establish global certification nor replace the existing candidate-scoped reviews of delivered code. The operator approved reusing those deliveries instead of reopening them.
 
-## Blockers and next action
+## Publication checks
 
-Complete independent review of this reconciliation's accuracy and guards, then exact PR/main CI. Preserve the inconclusive semantic audit, recorded acceptance and limitations; do not ask for the same acceptance again or mark missing checks as passed.
+Review this closure delta for consistent acceptance, real references, complete ID coverage and retained limits. Run the existing public quality checks and require exact PR CI, guarded merge, actual main CI and postmerge quality before announcing delivery. No production command or new verification framework is added.
+
+Client deployment, broader guarantees and the consumed worker/reboot budgets do not change. Do not request the same product acceptance again.

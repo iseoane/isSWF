@@ -188,12 +188,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Objective: Review complete v1 evidence and obtain operator acceptance
 - Depends on: J001, J002, J003, J004, J005, J006, J007, J009, J010, J011, J012, J013, J014
 - Brief: [brief-r3.md](jobs/J008/brief-r3.md) (pending until prepared)
-- Blocker: Operator accepted all reported jobs. Final technical source review and publication remain pending; acceptance does not turn missing checks into PASS.
-- Next step: Complete final evidence/source review and exact publication gates, preserving the recorded operator acceptance and all bounded limits.
+- Blocker: No unresolved functional finding in the accepted bounded scope. Publication of this proposed closure remains gated by its independent review and exact PR/main CI; no global semantic PASS is claimed.
+- Next step: Publish this closure through its source and CI gates; preserve known limits and require separate client-use authorization and isolation verification. Do not reopen unchanged accepted cuts.
 
 ### Acceptance
 
@@ -202,10 +202,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0001/jobs/J008/A001.md
-- .factory/initiatives/I0001/jobs/J008/acceptance-matrix.json
 - .factory/initiatives/I0001/jobs/J008/navigation-review.json
 - .factory/initiatives/I0001/jobs/J008/delivery.md
 - Operator conversation: Y da todos por aceptados
+- Operator conversation: Ok dale (close from existing delivery evidence, not a second global audit)
+- https://github.com/iseoane/isSWF/pull/79
+- MOD-05 source fix: 3765cbd2d762443dfec8f36db9d01ed78c8bbdaf, PR CI39478403116 and main CI39478545232 success
 
 ## J009
 
