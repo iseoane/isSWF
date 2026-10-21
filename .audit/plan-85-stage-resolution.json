@@ -1,6 +1,0 @@
-{
-  "status": "RESOLVED",
-  "failure": "git add included a path already removed from index by git rm; command failed before adding live paths. Following shell line committed only the previously staged deletion.",
-  "deletionOnlyCommit": "d4e45246b7c1c1f69263d7c378a8ddd7bc484b91",
-  "resolution": "Stage only reviewed live paths; retain separate deletion commit and follow with source commit. No reset/amend/data loss; frozen live hashes unchanged."
-}

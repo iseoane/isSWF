@@ -1,5 +1,0 @@
-# Restituir ready sin pendientes
-
-Candidato d49e535 quitó inadvertidamente guard ready-for-agent con preguntas, al crear helper questions_resolution que sólo revisa resolución. Padre .audit/check-u2-variants.py 96 combinaciones registra5 variantes incompatibles aceptadas en u2-variants-final.json. Reponer regla central con preparación como parámetro: ready exige questionsvacía y resolutionnull en parse_proposal Y parse_snapshot; conservar aceptación no vacía y variantes pending/answered disjuntas y resolución sinpendientes.
-
-Exclusivo /tmp/isswf-u2-guard-tree work/u2-guard desde d49e535. Sólo isswf/contracts.py y tests (regresión cheap por proposal+snapshot readywithquestions se rechaza, verify current/history sin cambios). No modificar otrosárboles/main/audit delpadre/docs innecesarias ni remoto/subagents/network. Un commitlocaltras30testsprevious+regresión. Ejecutar census padre contra propioárbol y exigir0 illegalaccepted (no cambiar checker). Reporte .audit/u2-guard-result.md uncommitted. Modelo Luna high sinfallback. Padre hará revisiónfinal ylive. Esta regresión es estructural explícita, no evidencia de semántica universal.

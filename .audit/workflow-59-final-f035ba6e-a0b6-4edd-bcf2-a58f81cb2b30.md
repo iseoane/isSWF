@@ -1,3 +1,0 @@
-**Correction:** The authorized job input checkpoint and fixture target base are both `e9383baaf97c7dcaa5e6b4ce3f1b5182b9b7440a`. I misidentified `f6608f197d2acb8a66d6013c74b4fae1c5a2ee66`, which is the factory-repository methodology build baseline, not this job’s fixture target. The failed probes against `f660` were irrelevant; they do not block the retrospective.
-
-The findings stand on the records read at `e938`: J201’s supplied check and review records, J202’s last-reported status, and the existing P01 proposal. Limits: these are synthetic records; J202 liveness was not checked, and no real process or runtime state was verified.

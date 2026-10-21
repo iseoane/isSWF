@@ -1,9 +1,0 @@
-{
-  "instrumentHashMatches": true,
-  "cases": 20,
-  "status": "PROBE_COMPLETE_WITH_UNPROVEN_REQUIREMENTS",
-  "settingsUnchangedAfterActivationObserved": true,
-  "replayedAfterInstrumentCommit": "34f5afb",
-  "sourcePinned": "5c9a516fa967a9f7b6fcbaf774a315b59a6cff94",
-  "archiveSha256": "4a55e31234fa440a1a9440b966a917de640285ca86779412f73ac0dca78084bd"
-}

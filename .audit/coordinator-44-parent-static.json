@@ -1,7 +1,0 @@
-{
-  "status": "PASS",
-  "exitCode": 0,
-  "stdout": "DISPATCH_FIXTURE_CHECKS_PASS\n",
-  "checkerUnchanged": true,
-  "scope": "Original protected static/compiler fixture, not model acceptance"
-}

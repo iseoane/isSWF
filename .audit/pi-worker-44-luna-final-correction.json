@@ -1,8 +1,0 @@
-{
-  "actor": "a0e575585078e6fbe",
-  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T04-41-31-760Z_004d66d5-f745-432a-aeec-f20ec3fc251f.jsonl",
-  "model": "gpt-6-luna",
-  "provider": "openai-codex",
-  "timestamp": "2026-10-16T04:50:28.787Z",
-  "report": "**PASS** — The frozen v4 payload and candidate worktree match the manifest hashes. The guide resolves the documentation blocker; the only v3→v4 source change is the reported trailing-space removal. The supplied offline v4 evidence reports PASS without starting a provider prompt. Main-checkout docs were correctly excluded: they remain baseline until the gate passes."
-}

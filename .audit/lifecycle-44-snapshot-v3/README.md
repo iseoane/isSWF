@@ -1,1 +1,0 @@
-Identity: tracked patch plus ALL four payloads. All additions untracked: empty tracked patch expected. V1/v2 retained. Source writer finished; three-path binary-publication correction, guide unchanged.

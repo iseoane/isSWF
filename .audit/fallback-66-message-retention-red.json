@@ -1,9 +1,0 @@
-{
-  "status": "EXPECTED_FAIL",
-  "target": "legacy actual diagnostic sanitizer",
-  "observedMessageText": null,
-  "expectedMessageText": "The account workspace is not enabled for this service. Contact support.",
-  "actualDiff": "undefined != expected useful provider message",
-  "unknownCategory": "unknown",
-  "realRuntimeCalls": 0
-}

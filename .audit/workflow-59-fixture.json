@@ -1,7 +1,0 @@
-{
-  "root": "/tmp/isswf-workflow59-IAaNdY",
-  "reviewed": "0a43ba96ac564992d19c1280d515fabd700baa82",
-  "candidate": "cb4725db3449bccb942e82efad267f6fbe0c60e0",
-  "checkpoint": "e9383baaf97c7dcaa5e6b4ce3f1b5182b9b7440a",
-  "limits": "Synthetic records; no real worker liveness or actual test executions inferred."
-}

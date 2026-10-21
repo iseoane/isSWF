@@ -1,7 +1,7 @@
 export default [
-  { ignores: ['**/node_modules/**', '.audit/**', '.claude/**', '.codegraph/**'] },
+  { ignores: ['**/node_modules/**', '.audit/**', '.claude/**', '.codegraph/**', 'tooling/.local/**'] },
   {
-    files: ['tools/**/*.mjs', 'tests/**/*.mjs', 'tooling/quality/*.mjs'],
+    files: ['tools/**/*.mjs', 'tests/**/*.mjs', 'tooling/quality/*.mjs', 'tooling/maintenance/**/*.mjs'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module' },
     rules: {
       'no-unused-vars': ['error', { args: 'after-used', caughtErrors: 'none', ignoreRestSiblings: true }],

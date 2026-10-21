@@ -1,8 +1,0 @@
-{
-  "root": "/tmp/isswf-quality54-FgJL1I",
-  "variants": [
-    "before",
-    "after"
-  ],
-  "scope": "Owned disposable code fixture; only sum.mjs writable, preserve MIT notice and behavior; no dependencies."
-}

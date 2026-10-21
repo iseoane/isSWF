@@ -1,7 +1,0 @@
-{
-  "actor": "a57d8b58cf7184dd7",
-  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T04-29-00-999Z_363783e3-768b-4c79-8575-fc20ecd837fc.jsonl",
-  "model": "deepseek-v4.1-flash",
-  "provider": "opencode-go",
-  "report": "PASS — sole blocker closed, precall ready.\n\nHelper delta confirmed: `.audit/verify-pi-worker-44-teardown.mjs:24` strips the leading shebang before prefixing the gate; `:25` runs `node --check` on the exact gated bytes; the exclusive `invocationMarker` is written only after that passes (`:29`), then launch. No other behavior changed.\n\nEvidence checked read-only: shebang-bearing control `/tmp/isswf-pi-worker44-shebang-control-IKiUHy/control.mjs` starts `#!`; `pi-worker-44-teardown-shebang-control.json` records Pi ESRCH before release, terminal success, independent outcome PASS; gated hash `e134887…` equals the prior shebang-less gated hash, so stripping is effective. Real prepared task `7e450737…` still starts `#!`; gate+stripped task passes ESM syntax check (reconstructed via stdin). Frozen v2 payload hashes still match manifest; unused prepared copy unchanged.\n\nVerdict: precall PASS. Actual model proof remains pending the one authorized LunaHigh call."
-}

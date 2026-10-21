@@ -14,8 +14,9 @@
     "tools/planner-task.mjs",
     "tools/diagnostic-task.mjs",
     "tests/*.mjs",
-    "tooling/quality/eslint.config.mjs"
+    "tooling/quality/eslint.config.mjs",
+    "tooling/maintenance/*.mjs"
   ],
-  "project": ["tools/**/*.mjs", "tests/**/*.mjs", "tooling/quality/*.mjs"],
+  "project": ["tools/**/*.mjs", "tests/**/*.mjs", "tooling/quality/*.mjs", "tooling/maintenance/**/*.mjs"],
   "include": ["files", "exports", "duplicates", "unresolved"]
 }

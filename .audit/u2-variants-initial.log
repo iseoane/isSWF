@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/home/iseoane/Work/isSWF/.audit/check-u2-variants.py", line 49, in <module>
-    assert not violations, f'{len(violations)} incompatible snapshot variants accepted'
-           ^^^^^^^^^^^^^^
-AssertionError: 9 incompatible snapshot variants accepted

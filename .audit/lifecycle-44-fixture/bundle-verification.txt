@@ -1,7 +1,0 @@
-The bundle contains these 2 refs:
-98d1bce6baa7e4aca53fba3311d16d68f706574c refs/heads/main
-98d1bce6baa7e4aca53fba3311d16d68f706574c HEAD
-The bundle records a complete history.
-The bundle uses this hash algorithm: sha1
-
-Scope: initial committed disposable inputs only; not worker result, uncommitted recovery or backup service.

@@ -1,8 +1,0 @@
-{
-  "mode": "opaque-sdk-initialized-no-provider",
-  "modelExists": true,
-  "configuredAuth": true,
-  "provider": "openai-codex",
-  "model": "gpt-6-luna",
-  "providerRequest": false
-}

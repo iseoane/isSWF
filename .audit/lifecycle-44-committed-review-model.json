@@ -1,7 +1,0 @@
-{
-  "actor": "ad31168dba267a1be",
-  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-16T03-43-08-366Z_bb3838a8-71dd-4ac9-a4c2-7f5b64f89f8a.jsonl",
-  "provider": "opencode-go",
-  "model": "deepseek-v4.1-flash",
-  "thinkingLevel": "max"
-}

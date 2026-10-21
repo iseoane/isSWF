@@ -1,1 +1,0 @@
-{"version":1,"attemptId":"race-B002","taskSha256":"5379ba638f9bd7bcd7575d1f543cac0dbafdd50b2c5161f1ff0c97b1b08a9800","seq":1,"init":{"pid":783393,"startTicks":"21655831","state":"R","bootId":"7daa6db0-3e89-4966-84ee-edbeaaa2bae8","exe":"/usr/bin/bwrap","namespace":"pid:[4026532441]"}}

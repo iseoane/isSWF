@@ -11,3 +11,7 @@ __pycache__/
 .codegraph/
 .audit/*.stderr
 node_modules/
+/tooling/.local/
+/.audit/*
+!/.audit/README.md
+!/.audit/archive.json

@@ -1,3 +1,0 @@
-- **Bloqueante reproducible — `ready-for-agent` acepta preguntas pendientes.** En `isswf/contracts.py:173-175` y `:261-263`, tanto propuesta como snapshot solo exigen aceptación no vacía; falta exigir `questions` vacío. Confirmé que `parse_snapshot` acepta `ready-for-agent` con una pregunta pendiente. El censo actualizado acepta indebidamente **5 de 96** variantes; las cinco corresponden a esta misma incompatibilidad. La suite de 30 tests pasa, pero no cubre esta condición.
-
-No encontré otra incompatibilidad en las 96 combinaciones del censo. **Límites:** no repetí CLI/HTTP/browser; la verificación manual temporal previa se interrumpió por un error en mi fixture al usar la base de autorización equivocada. No modifiqué el candidato.

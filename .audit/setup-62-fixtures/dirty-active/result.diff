@@ -1,9 +1,0 @@
-diff --git i/.factory/project-setup.md w/.factory/project-setup.md
-index 06b8882e3377fef5f0f3197bc1001928054c37ef..754b0b40c070c822d951a36d144f79c667661931 100644
---- i/.factory/project-setup.md
-+++ w/.factory/project-setup.md
-@@ -6,3 +6,4 @@ Delivery: local draft only.
- Model configuration: .factory/models.json, inherited approved routes, no override.
- Custom decision: preserve the existing review checklist.
- Isolation: not technically established; client execution blocked.
-+Operator draft: delivery preference being revised; preserve.

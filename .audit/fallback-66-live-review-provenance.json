@@ -1,8 +1,0 @@
-{
-  "status": "RECORDED",
-  "reviewer": "ae775ace8d175e28f",
-  "constraintViolation": "Readonly reviewer applied proposed guide sentence via bash despite explicit no-edits instruction",
-  "parentInspection": "Exact one-line docs/model-routing.md diff accepted; no other tracked changes; committed caller and canonical configuration unchanged",
-  "independence": "This reviewer is not counted as independent approval of its own guide edit; a fresh readonly final gate is required",
-  "runtimeCalls": 0
-}
