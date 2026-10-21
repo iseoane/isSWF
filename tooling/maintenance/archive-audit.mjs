@@ -99,19 +99,22 @@ async function archivePointer(audit) {
   return pointer;
 }
 
-export async function verifyAuditArchive(root, archivePath) {
+export async function verifyAuditArchive(root, archivePath, { manifestSha256, allowUnanchoredRecovery = false } = {}) {
   root = await repository(root);
   assert(typeof archivePath === 'string' && archivePath.startsWith(privateBase + '/') && archivePath.split('/').every(part => part && part !== '.' && part !== '..') && !archivePath.includes('\\'), 'private archive path required');
   const directory = join(root, archivePath);
   assert.equal(await fs.realpath(directory), directory, 'archive symlink refused');
   const file = join(directory, 'manifest.json'), stat = await fs.lstat(file);
   assert(stat.isFile() && !stat.isSymbolicLink() && stat.nlink === 1 && stat.size <= 32 * 1024 ** 2, 'bounded archive manifest required');
-  const original = JSON.parse(await fs.readFile(file, 'utf8'));
+  const manifestBytes = await fs.readFile(file), actualManifestSha256 = hash(manifestBytes);
+  assert(/^[0-9a-f]{64}$/u.test(manifestSha256 ?? '') || (manifestSha256 === undefined && allowUnanchoredRecovery === true), 'recorded manifest digest required; explicit unanchored recovery is inspection only');
+  if (manifestSha256 !== undefined) assert.equal(actualManifestSha256, manifestSha256, 'archive manifest changed');
+  const original = JSON.parse(manifestBytes);
   assert.equal(original.version, 1); assert.equal(original.originalPath, '.audit');
   const actual = await manifest(join(directory, 'payload'), true);
   assert.equal(hash(encode(contentRows(actual.rows))), original.contentSha256, 'archive bytes/types/modes changed');
   assert.equal(actual.bytes, original.bytes); assert.equal(actual.files, original.files);
-  return { status: 'verified', archivePath, files: actual.files, bytes: actual.bytes, contentSha256: original.contentSha256, manifestSha256: hash(await fs.readFile(file)) };
+  return { status: manifestSha256 === undefined ? 'verified-unanchored-recovery' : 'verified', archivePath, files: actual.files, bytes: actual.bytes, contentSha256: original.contentSha256, manifestSha256: actualManifestSha256 }; 
 }
 
 export async function archiveAudit(root, { apply = false, expectedHead } = {}) {
@@ -146,6 +149,7 @@ export async function archiveAudit(root, { apply = false, expectedHead } = {}) {
     const tracked = trackedPaths.size;
     const contentSha256 = hash(encode(contentRows(before.rows)));
     await syncedJSON(join(directory, 'manifest.json'), { version: 1, originalPath: '.audit', checkpoint: head, gitTree, files: before.files, bytes: before.bytes, contentSha256, rows: before.rows });
+    const recordedManifestSha256 = hash(await fs.readFile(join(directory, 'manifest.json')));
     await syncDirectory(directory); await syncDirectory(parent);
     assert.equal(git(root, ['rev-parse', 'HEAD']), head, 'HEAD changed during preparation');
     assert.equal(git(root, ['status', '--porcelain', '--untracked-files=no']), '', 'tracked source changed during preparation');
@@ -153,7 +157,7 @@ export async function archiveAudit(root, { apply = false, expectedHead } = {}) {
     await syncDirectory(root); await syncDirectory(directory);
     const after = await manifest(join(directory, 'payload'), true);
     assert.deepEqual(after.rows, before.rows, 'archive identity/bytes/types/modes changed during rename');
-    const verified = await verifyAuditArchive(root, archivePath);
+    const verified = await verifyAuditArchive(root, archivePath, { manifestSha256: recordedManifestSha256 });
     const pointer = { version: 1, kind: 'historical-development-archive', checkpoint: head, gitTree, trackedFiles: tracked, localFiles: before.files - tracked, ...verified, documentation: documents.summary, procedureSha256: hash(await fs.readFile(fileURLToPath(import.meta.url))), limitation: 'Preservation and lookup metadata only; no deletion, publication of payloads, script replay or execution authority.' };
     await fs.mkdir(audit);
     await fs.writeFile(join(audit, 'README.md'), '# Historical development audit\n\nThis directory contains archive metadata only. It is not the factory runtime.\n\nTracked historical artifacts remain in Git at `' + head + '` (audit tree `' + gitTree + '`). View a file with `git show ' + head + ':.audit/<path>`. For reproduction, use the full source and exact inputs required by that historical case, not an isolated script copy. Restoring files does not renew consumed model/worker grants.\n\n## Local-only artifacts\n\nHistorical links redirected here retain the original `.audit` path in their title. That local-only file can be found at the corresponding path under the private payload; it was not made public.\n\nThe full local payload and checksum manifest are private under `' + archivePath + '`. They are Git-ignored and must not be installed or published. On another checkout, that private local archive may be absent; Git still preserves the tracked artifacts. Git does not back up the local-only portion: keep the private archive in your own backup before retiring this checkout. No payload was deleted or Git history rewritten.\n\nNew durable job receipts belong under `.factory/initiatives/<id>/jobs/<job>/`; development fixtures and raw temporary logs do not belong in the installed product. Do not add new scripts or raw logs here.\n', { flag: 'wx', mode: 0o644 });
@@ -179,7 +183,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..'), args = process.argv.slice(2);
     if (args.length === 1 && args[0] === '--verify') {
       const pointer = await archivePointer(join(root, '.audit'));
-      console.log(JSON.stringify(await verifyAuditArchive(root, pointer.archivePath), null, 2));
+      console.log(JSON.stringify(await verifyAuditArchive(root, pointer.archivePath, { manifestSha256: pointer.manifestSha256 }), null, 2));
     } else {
       assert(args.length === 0 || (args.length === 3 && args[0] === '--apply' && args[1] === '--expected-head'), 'use no arguments, --verify, or --apply --expected-head FULL_SHA');
       console.log(JSON.stringify(await archiveAudit(root, { apply: args.length > 0, expectedHead: args[2] }), null, 2));

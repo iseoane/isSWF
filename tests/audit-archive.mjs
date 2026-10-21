@@ -47,14 +47,21 @@ try {
   assert(guide.includes('[Other](../source.txt)'));
   assert(guide.includes('Restoring files does not renew consumed model or worker grants.'));
   assert.deepEqual(result.documentation, { publicLinks: 1, privateLinks: 1, markedGuides: 1, changedDocs: ['docs/history.md'] });
-  assert.equal((await verifyAuditArchive(f.root, result.archivePath)).contentSha256, result.contentSha256);
+  assert.equal((await verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 })).contentSha256, result.contentSha256);
   assert.equal((await archiveAudit(f.root, { apply: true, expectedHead: f.head })).status, 'already-organized');
   assert.equal((await fs.readdir(join(f.root, 'tooling/.local/audit-archive'))).length, 1);
   const binary = join(payload, 'private/local.bin'); await fs.writeFile(binary, 'tampered');
-  await assert.rejects(verifyAuditArchive(f.root, result.archivePath), /changed/u);
+  await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
   await fs.writeFile(binary, Buffer.from([0, 255, 7, 10]));
-  await fs.chmod(binary, 0o644); await assert.rejects(verifyAuditArchive(f.root, result.archivePath), /changed/u);
-  await fs.chmod(binary, 0o600); await verifyAuditArchive(f.root, result.archivePath);
+  await fs.chmod(binary, 0o644); await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
+  await fs.chmod(binary, 0o600); await verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 });
+  const manifestPath = join(f.root, result.archivePath, 'manifest.json');
+  const originalManifest = await fs.readFile(manifestPath, 'utf8');
+  const changedManifest = JSON.parse(originalManifest); changedManifest.checkpoint = '0'.repeat(40);
+  await fs.writeFile(manifestPath, JSON.stringify(changedManifest));
+  await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /manifest changed/u);
+  await assert.rejects(verifyAuditArchive(f.root, result.archivePath), /recorded manifest digest required/u);
+  await fs.writeFile(manifestPath, originalManifest);
   await fs.writeFile(join(f.root, '.audit/new.log'), 'new evidence');
   await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: f.head }), /separate reconciliation/u);
 
@@ -79,8 +86,8 @@ try {
   const interruptedBase = join(interrupted.root, 'tooling/.local/audit-archive');
   const preserved = (await fs.readdir(interruptedBase)).find(name => name.startsWith('audit-'));
   assert(preserved); assert((await fs.stat(join(interruptedBase, '.operation-lock'))).isDirectory());
-  const recoverable = await verifyAuditArchive(interrupted.root, 'tooling/.local/audit-archive/' + preserved);
-  assert.equal(recoverable.files, 3);
+  const recoverable = await verifyAuditArchive(interrupted.root, 'tooling/.local/audit-archive/' + preserved, { allowUnanchoredRecovery: true });
+  assert.equal(recoverable.files, 3); assert.equal(recoverable.status, 'verified-unanchored-recovery');
   assert.equal(JSON.parse(await fs.readFile(join(interruptedBase, preserved, 'incomplete.json'))).status, 'inspection-required');
   await assert.rejects(archiveAudit(interrupted.root, { apply: true, expectedHead: interrupted.head }), { code: 'ENOENT' });
   console.log('PASS archive fixtures: tracked/local/ignored bytes, modes and dangling symlink preserved; preview/no-overwrite/replay, head/dirty/ignore/escape/tamper/lock guards and interrupted-move payload recovery; no real audit, providers or workers touched');
