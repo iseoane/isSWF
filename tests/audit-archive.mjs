@@ -43,7 +43,8 @@ try {
   assert.deepEqual(await fs.readFile(join(f.root, 'source.txt')), sourceBytes);
   const guide = await fs.readFile(join(f.root, 'docs/history.md'), 'utf8');
   assert(guide.includes('https://github.com/fixture/repo/blob/' + f.head + '/.audit/tracked.json'));
-  assert(guide.includes('README.md#local-only-artifacts "Original local artifact: .audit/private/local.bin"'));
+  assert(guide.includes('README.md#local-only-artifacts)'));
+  assert(!guide.includes('.audit/private/local.bin'));
   assert(guide.includes('[Other](../source.txt)'));
   assert(guide.includes('Restoring files does not renew consumed model or worker grants.'));
   assert.deepEqual(result.documentation, { publicLinks: 1, privateLinks: 1, markedGuides: 1, changedDocs: ['docs/history.md'] });
