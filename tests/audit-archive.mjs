@@ -58,6 +58,7 @@ try {
   assert.equal((await fs.readdir(join(f.root, 'tooling/.local/audit-archive'))).length, 1);
   const binary = join(payload, 'private/local.bin'); await fs.writeFile(binary, 'tampered');
   await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
+  await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: f.head }), /changed/u);
   await fs.writeFile(binary, Buffer.from([0, 255, 7, 10]));
   await fs.chmod(binary, 0o644); await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
   await fs.chmod(binary, 0o600); await verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 });
@@ -66,8 +67,13 @@ try {
   const changedManifest = JSON.parse(originalManifest); changedManifest.checkpoint = '0'.repeat(40);
   await fs.writeFile(manifestPath, JSON.stringify(changedManifest));
   await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /manifest changed/u);
+  await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: f.head }), /manifest changed/u);
   await assert.rejects(verifyAuditArchive(f.root, result.archivePath), /recorded manifest digest required/u);
   await fs.writeFile(manifestPath, originalManifest);
+  const archiveDirectory = join(f.root, result.archivePath);
+  await fs.rename(archiveDirectory, archiveDirectory + '-held');
+  try { await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: f.head }), { code: 'ENOENT' }); }
+  finally { await fs.rename(archiveDirectory + '-held', archiveDirectory); }
   await fs.writeFile(join(f.root, '.audit/new.log'), 'new evidence');
   await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: f.head }), /separate reconciliation/u);
 

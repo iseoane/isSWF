@@ -126,6 +126,7 @@ export async function archiveAudit(root, { apply = false, expectedHead } = {}) {
   if (names.includes('archive.json')) {
     assert.deepEqual(names.sort(), ['README.md', 'archive.json'], 'new audit files require separate reconciliation');
     const pointer = await archivePointer(audit);
+    await verifyAuditArchive(root, pointer.archivePath, { manifestSha256: pointer.manifestSha256 });
     return { status: 'already-organized', checkpoint: pointer.checkpoint, changed: false };
   }
   if (!apply) { const preview = await manifest(audit, false); return { status: 'preview', checkpoint: head, files: preview.files, bytes: preview.bytes, changed: false }; }
