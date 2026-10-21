@@ -39,6 +39,15 @@ El objetivo completo de S01 + S02 sigue siendo llevar encargos definidos hasta e
 
 Estas investigaciones registran etapas previas; no sustituyen los contratos y límites de la implementación vigente. La metodología no será un pipeline obligatorio ni una herramienta distinta por cada skill.
 
+## Qué pertenece a cada parte
+
+- `tools/` y `.agents/`: implementación y recursos de la factoría. La instalación copia solo los archivos permitidos a `.factory/tools/` y los recursos seleccionados.
+- `.factory/initiatives/`: planes, briefs y evidencias curadas del trabajo de cada proyecto.
+- `tests/` y `tooling/`: pruebas y herramientas de desarrollo de esta factoría; no se instalan en proyectos cliente.
+- `.audit/`: índice del archivo histórico de desarrollo, no comandos del producto. Los archivos publicados se conservan en Git; la copia local completa permanece privada en `tooling/.local/audit-archive/`, ignorada por Git.
+
+Consulta la [política de conservación](docs/durable-work.md#audit-retention-policy). Archivar conserva los datos: no libera el espacio ocupado por la copia privada ni convierte Git en su backup.
+
 ## Controles de calidad
 
 Con Node.js 24 y Git disponibles, ejecuta `node tools/check-quality.mjs`. Esta etapa no instala dependencias ni usa credenciales de modelos. Comprueba sintaxis de `tools/` y tests `.mjs`, formato y enlaces de instrucciones `.agents/`, materialización y hashes del paquete de `HEAD` y admisión de rutas mediante el CLI público. Los archivos locales de sintaxis/instrucciones se comprueban tal como están; el paquete se verifica desde el commit, no desde cambios sin commit.
