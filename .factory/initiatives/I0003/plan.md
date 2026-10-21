@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Archive development audit artifacts without losing evidence or changing factory runtime
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: Archival procedure and preservation checks are being prepared; no artifact has moved yet.
-- Next step: Test the bounded archival operation, apply it under the recorded operator scope, verify preservation and publish the maintenance delta.
+- Blocker: Final independent verification and exact PR/main CI remain publication gates.
+- Next step: Review the full procedure with actual preservation evidence, then publish after exact CI gates.
 
 ### Acceptance
 
@@ -25,3 +25,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - Operator conversation: Haz lo que recomiendas de audit para ordenarlo todo y dejarlo limpio
 - Source checkpoint: 1ad7fc32c38386b537678a4657aba9feaacd1756
+- Applied procedure checkpoint: 7678f6476501c410245d0056a1e1c5e262ff8c21
+- Preserved audit Git tree: f77aee1d95716e4e14ebf5ec1949882fff64f943
+- Actual preservation receipt: .factory/initiatives/I0003/jobs/J001/A001.md
+- Lookup metadata: .audit/archive.json
