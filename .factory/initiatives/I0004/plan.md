@@ -36,12 +36,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J002
 
-- Status: blocked
+- Status: awaiting-human
 - Objective: Validate the prepared Claude Code integration in an authorized real Claude Code environment
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: Actual Claude login/plugin/native worker+reviewer discovery confirmed in A001. Synthetic implementation was blocked by the parent dontAsk Bash allowlist, leaving baseline unchanged; reviewer Spec FAIL/Standards inconclusive. Attempt actors consumed.
-- Next step: Authorize one bounded follow-up with explicit permissions for actual read-only baseline/hash commands and local Node edit/check; preserve A001 and do not replay it.
+- Blocker: No demonstrated unresolved blocker in the bounded A003 fixture chain; worker implementation and distinct reviewer both passed. Individual model/effort and simplified handoff limitations remain disclosed; operator acceptance is separate.
+- Next step: Present A003 for bounded acceptance. Keep PR81 source approval, publication and merge separate; do not claim Pi-equivalent isolation/recovery or repeat consumed trial actors.
 
 ### Acceptance
 
@@ -52,3 +52,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - .factory/initiatives/I0004/jobs/J002/A001.md
+- .factory/initiatives/I0004/jobs/J002/A002.md
+- .factory/initiatives/I0004/jobs/J002/A003.md
+- Operator: Ok (fresh finite A003 validation authority, not product acceptance)
