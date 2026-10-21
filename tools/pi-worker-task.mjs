@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readReleaseSource, verifyRelease } from './release-source.mjs';
 import { createHash } from 'node:crypto';
 import { readFile, link, unlink, open, rm, realpath, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
@@ -59,13 +60,16 @@ async function prepare(args) {
   const authPath = safePath(config.authPath, 'authPath');
   if (config.mode === 'real' && !(await stat(authPath).then(result => result.isFile()).catch(() => false))) throw new Error('real mode authPath must name a host auth file');
   const profile = config.profile;
-  if (!profile || profile.sha !== BASELINE || !Array.isArray(profile.files) || !profile.files.length) throw new Error('profile must pin methodology files at the authorized baseline');
+  if (!profile || !Array.isArray(profile.files) || !profile.files.length) throw new Error('profile must pin methodology files at the authorized baseline');
   const repo = await realpath(safePath(profile.repo, 'profile.repo'));
   if (!/^[0-9a-f]{40}$/.test(profile.sha)) throw new Error('invalid pinned source SHA');
-  git(repo, ['cat-file', '-e', `${profile.sha}^{commit}`]);
+  const released = verifyRelease(repo);
+  if (profile.sha !== (released?.methodologySha ?? BASELINE)) throw new Error('profile must pin methodology files at the authorized baseline');
+  if (released === null) git(repo, ['cat-file', '-e', `${profile.sha}^{commit}`]);
   const files = {};
   for (const path of profile.files) {
     if (typeof path !== 'string' || path.startsWith('/') || path.split('/').some(part => !part || part === '.' || part === '..')) throw new Error('unsafe profile file path');
+    if (released !== null) { files[path] = readReleaseSource(repo, profile.sha, path).toString('utf8'); continue; }
     const entry = git(repo, ['ls-tree', '-z', profile.sha, '--', path]).toString().split('\0').find(Boolean);
     if (!entry || !/^100644 blob /.test(entry)) throw new Error(`profile reference is not a committed regular file: ${path}`);
     const object = entry.slice(0, entry.indexOf('\t')).split(' ')[2];

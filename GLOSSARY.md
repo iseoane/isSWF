@@ -1,63 +1,65 @@
-# Lenguaje de isSWF
+# isSWF language
 
-Términos para conversar sobre el producto, sus trabajos y sus entregas. El mismo lenguaje se aplica a issues, briefs y revisiones.
+[Español de España](GLOSSARY.es.md)
 
-## Lenguaje
+Terms for discussing the product, its work, and its deliveries. Use the same language in issues, briefs, and reviews. This is vocabulary, not an execution contract or a feature list.
 
-**Operador**:
-La persona que define prioridades, autoriza encargos y acepta entregas.
-_Avoid_: cliente cuando se habla de quien dirige la factory.
+## Language
 
-**Coordinador**:
-El responsable del contexto del proyecto, la selección de procedimientos y la supervisión de los trabajos delegados.
-_Avoid_: jefe, encargado, orquestador como nombres alternativos del mismo rol.
+**Operator**:
+The person who sets priorities, authorises assignments, and accepts deliveries.
+_Avoid_: customer when referring to the person directing the factory.
 
-**Encargo**:
-Un objetivo autorizado con alcance y criterios de éxito que puede requerir uno o varios trabajos.
+**Coordinator**:
+The role responsible for project context, procedure selection, and supervision of delegated jobs.
+_Avoid_: boss, manager, orchestrator as alternative names for this role.
 
-**Trabajo**:
-Una unidad acotada de ejecución con brief, dependencias, resultado y comprobaciones propios.
-_Avoid_: sesión para nombrar un trabajo.
+**Assignment**:
+An authorised objective with scope and success criteria that may require one or more jobs.
+
+**Job**:
+A bounded execution unit with its own brief, dependencies, result, and checks.
+_Avoid_: session when referring to a job.
 
 **Slice**:
-Una unidad funcional que entrega un comportamiento completo, acotado y verificable por sí mismo. Un trabajo puede abarcar una o varias slices; un encargo puede requerir varios trabajos.
-_Avoid_: capa como unidad de entrega de una funcionalidad.
+A bounded functional unit that delivers complete, independently verifiable behaviour. A job may cover several slices; an assignment may require several jobs.
+_Avoid_: layer as the unit of feature delivery.
 
 **Brief**:
-El contrato de un trabajo: su objetivo, alcance, contexto, restricciones y criterios de éxito.
+A job's contract: objective, scope, context, constraints, and success criteria.
 
 **Grounding**:
-La comprobación del encargo contra el código y las fuentes pertinentes antes de actuar sobre él.
-_Avoid_: research cuando se quiere dar por obligatorio un agente investigador adicional.
+Checking an assignment against the code and relevant sources before acting on it.
+_Avoid_: research when implying that an extra researcher is always required.
 
 **Worker**:
-Un agente responsable de ejecutar un trabajo dentro de su brief, usando las skills pertinentes.
-_Avoid_: implementador cuando el trabajo es investigación u otra tarea sin cambios de código.
+An agent responsible for executing a job within its brief using relevant skills.
+_Avoid_: implementer when the job is research or another task without code changes.
 
-**Revisor**:
-Un agente con contexto independiente que evalúa un candidato mediante criterios explícitos y devuelve hallazgos o un veredicto.
+**Reviewer**:
+An agent with independent context who assesses a candidate against explicit criteria and returns findings or a verdict.
 
-**Candidato**:
-La versión concreta de una entrega sometida a verificación, revisión o aceptación.
+**Candidate**:
+The exact version of a delivery being checked, reviewed, or accepted.
 
-**Evidencia**:
-Un resultado observado y atribuible a un candidato o contexto concreto que respalda una afirmación.
-_Avoid_: PASS sin indicar qué se comprobó.
+**Evidence**:
+An observed result attributable to a specific candidate or context that supports a claim.
+_Avoid_: PASS without stating what was checked.
 
-**Cierre técnico**:
-La condición de una entrega que cumple el encargo y las comprobaciones requeridas sin hallazgos bloqueantes abiertos.
-_Avoid_: terminado cuando todavía falta aceptación o integración.
+**Technical closure**:
+The condition of a delivery that meets its assignment and required checks without open blocking findings.
+_Avoid_: done when acceptance or integration is still missing.
 
-**Aceptación**:
-La decisión del operador de admitir una entrega concreta como cumplimiento del encargo.
-_Avoid_: merge como sinónimo de aceptación.
+**Acceptance**:
+The operator's decision to accept a specific delivery as fulfilling the assignment.
+_Avoid_: merge as a synonym for acceptance.
 
-**Bloqueo**:
-Una condición identificada que impide avanzar un trabajo hasta que se resuelve.
+**Blocker**:
+An identified condition that prevents a job from progressing until resolved.
 
-**Sesión de trabajo**:
-Un conjunto de actividades que el operador delimita y cierra explícitamente para revisar sus resultados y pendientes.
-_Avoid_: conversación o proceso como sinónimos de sesión de trabajo.
+**Work session**:
+A set of activities that the operator explicitly bounds and closes to review results and outstanding work.
+_Avoid_: conversation or process as synonyms for a work session.
 
-**Retrospectiva**:
-El análisis de evidencias de un trabajo o sesión para proponer mejoras al proyecto o a la factory.
+**Retrospective**:
+Analysis of a job's or session's evidence to propose improvements to the project or factory.

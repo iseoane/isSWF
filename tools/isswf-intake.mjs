@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { readFile, realpath, lstat, mkdir, open, link, unlink, rmdir } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stateDirectory } from './project-state.mjs';
 import { qualityInventory } from './project-quality.mjs';
 
 const digest = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
@@ -69,11 +70,11 @@ async function directory(path, create = false) {
 }
 const recordName = revision => revision === 1 ? 'intake.json' : `intake-r${revision}.json`;
 async function load(project, id, initiative, revision = 1) {
-  const parent = initiative ? join(project, '.factory/initiatives', initiative, 'jobs') : join(project, '.factory/jobs');
+  const parent = initiative ? join(project, stateDirectory(project), 'initiatives', initiative, 'jobs') : join(project, stateDirectory(project), 'jobs');
   const job = join(parent, id.jobId);
   try {
-    await directory(join(project, '.factory'));
-    if (initiative) { await directory(join(project, '.factory/initiatives')); await directory(join(project, '.factory/initiatives', initiative)); }
+    await directory(join(project, stateDirectory(project)));
+    if (initiative) { await directory(join(project, stateDirectory(project), 'initiatives')); await directory(join(project, stateDirectory(project), 'initiatives', initiative)); }
     await directory(parent); await directory(job);
     const record = await json(join(job, recordName(revision)));
     const { integritySha256, ...payload } = record;
@@ -112,7 +113,7 @@ async function reconcile({ root, id, initiative, revision, reconciliationPath, g
   if (Object.keys(authority).sort().join(',') !== 'expected,issue,permissions,project,reason,reference,repository,revision,version' || authority.version !== 1 || authority.project !== root || repository(authority.repository) !== id.repository || authority.issue !== id.issue || authority.revision !== revision || !text(authority.reference) || !text(authority.reason) || JSON.stringify(authority.permissions) !== '["reconcile"]' || !authority.expected || Object.keys(authority.expected).sort().join(',') !== 'briefSha256,recordSha256' || !hex(authority.expected.recordSha256) || !hex(authority.expected.briefSha256)) throw Error('matching explicit reconciliation attestation required');
   const predecessor = await load(root, id, initiative, revision - 1);
   if (!predecessor.record || predecessor.record.integritySha256 !== authority.expected.recordSha256 || predecessor.record.briefSha256 !== authority.expected.briefSha256) throw Error('reconciliation predecessor conflict');
-  const job = join(root, initiative ? '.factory/initiatives/' + initiative + '/jobs' : '.factory/jobs', id.jobId);
+  const job = join(root, stateDirectory(root), initiative ? 'initiatives/' + initiative + '/jobs' : 'jobs', id.jobId);
   let brief = briefFor(id, source, grant, proposal, revision);
   if (initiative) {
     const inventory = await qualityInventory(root);
@@ -156,13 +157,13 @@ function duplicateIdentity(value) {
 async function unlinkedTarget(root, id) {
   try { await lstat(join(jobPath(root, id), 'duplicate.json')); throw Error('duplicate target is already linked'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
 }
-function jobPath(root, id) { return join(root, id.initiative ? '.factory/initiatives/' + id.initiative + '/jobs' : '.factory/jobs', id.jobId); }
+function jobPath(root, id) { return join(root, stateDirectory(root), id.initiative ? 'initiatives/' + id.initiative + '/jobs' : 'jobs', id.jobId); }
 async function duplicateAt(root, id) {
   let value;
   try {
-    await directory(join(root, '.factory'));
-    if (id.initiative) { await directory(join(root, '.factory/initiatives')); await directory(join(root, '.factory/initiatives', id.initiative)); }
-    await directory(join(root, id.initiative ? '.factory/initiatives/' + id.initiative + '/jobs' : '.factory/jobs'));
+    await directory(join(root, stateDirectory(root)));
+    if (id.initiative) { await directory(join(root, stateDirectory(root), 'initiatives')); await directory(join(root, stateDirectory(root), 'initiatives', id.initiative)); }
+    await directory(join(root, stateDirectory(root), id.initiative ? 'initiatives/' + id.initiative + '/jobs' : 'jobs'));
     await directory(jobPath(root, id));
     value = await json(join(jobPath(root, id), 'duplicate.json'));
   } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
@@ -216,8 +217,8 @@ export async function intake({ action, project, repository: repo, issue, sourceP
   const root = await projectRoot(project), id = identity(repo, issue);
   if (initiative !== undefined) {
     if (!/^[A-Z][A-Z0-9-]{0,63}$/u.test(initiative) || !/^[A-Z][A-Z0-9-]{0,63}$/u.test(jobId ?? '') || !['bug', 'enhancement', 'maintenance', 'research'].includes(type)) throw Error('initiative, job and type required');
-    await directory(join(root, '.factory')); await directory(join(root, '.factory/initiatives')); await directory(join(root, '.factory/initiatives', initiative));
-    const plan = await regular(join(root, '.factory/initiatives', initiative, 'plan.md'));
+    await directory(join(root, stateDirectory(root))); await directory(join(root, stateDirectory(root), 'initiatives')); await directory(join(root, stateDirectory(root), 'initiatives', initiative));
+    const plan = await regular(join(root, stateDirectory(root), 'initiatives', initiative, 'plan.md'));
     if (!plan.includes(`## ${jobId}\n`)) throw Error('job must be present in initiative plan');
     Object.assign(id, { initiative, jobId, type });
   } else if (jobId !== undefined || type !== undefined) throw Error('job/type requires initiative');
@@ -250,8 +251,8 @@ export async function intake({ action, project, repository: repo, issue, sourceP
     if (action === 'prepare' && result.status === 'prepared') result.status = 'reused';
     return result;
   }
-  await directory(join(root, '.factory'), true);
-  const parent = initiative ? join(root, '.factory/initiatives', initiative, 'jobs') : join(root, '.factory/jobs');
+  await directory(join(root, stateDirectory(root)), true);
+  const parent = initiative ? join(root, stateDirectory(root), 'initiatives', initiative, 'jobs') : join(root, stateDirectory(root), 'jobs');
   await directory(parent, true);
   const job = join(parent, id.jobId);
   try { await mkdir(job, { mode: 0o700 }); } catch (error) {

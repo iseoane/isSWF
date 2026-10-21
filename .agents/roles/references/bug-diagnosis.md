@@ -1,39 +1,39 @@
-# Diagnóstico de bugs
+# Bug diagnosis
 
-Metodología compartida para investigar defectos con precisión proporcional. Un worker puede usarla directamente en un bug simple; solo se separa el diagnóstico cuando la incertidumbre, intermitencia o alcance lo justifica. Triage organiza la entrada y puede detectar que falta información, pero no demuestra una causa.
+Shared methodology for investigating defects with proportionate precision. A worker may use it directly for a simple bug; separate diagnosis only when uncertainty, intermittence, or scope warrants it. Triage organizes intake and may identify missing information, but does not establish a cause.
 
-## Establecer el síntoma
+## Establish the symptom
 
-- Escribe el resultado esperado y el observado, la superficie, las condiciones conocidas y la revisión examinada. Usa una señal que distinga este defecto de fallos vecinos.
-- Intenta reproducir en la superficie real con comandos o acciones que otra persona pueda repetir. Conserva salida suficiente para comparar, redactando secretos y datos sensibles.
-- Si es intermitente, repite o estrecha las condiciones solo cuando sea seguro y autorizado. Informa cantidad y resultado de intentos; la falta de reproducción no prueba ausencia.
-- Si no se reproduce, enumera qué se intentó, qué no pudo observarse y el siguiente probe concreto. Lee el código y contexto necesarios para diseñar una reproducción segura y discriminante antes de concluir causa. Si el síntoma sigue sin observarse, marca el diagnóstico como inconcluso y no atribuyas una causa.
+- Record expected and observed results, the affected surface, known conditions, and examined revision. Choose a signal that distinguishes this defect from nearby failures.
+- Attempt reproduction on the real surface with commands or actions another person can repeat. Retain enough output for comparison, redacting secrets and sensitive data.
+- For intermittent failures, repeat or narrow conditions only when safe and authorized. Report attempt counts and outcomes; failure to reproduce does not prove absence.
+- If reproduction fails, list attempts, unavailable observations, and the next concrete probe. Read the code and context needed to design a safe, discriminating reproduction before concluding a cause. If the symptom remains unobserved, mark the diagnosis inconclusive and do not attribute a cause.
 
-## Investigar causalidad
+## Investigate causality
 
-- Traza el camino desde la entrada hasta el efecto observado. Lee contratos, invariantes, consumidores y pruebas pertinentes en el baseline real.
-- Formula hipótesis que predigan una observación distinta. Prioriza por impacto informativo y coste; un caso sencillo puede necesitar solo una hipótesis. Descarta cada una con evidencia o conserva su incertidumbre.
-- Distingue correlación, indicio y mecanismo confirmado. Ninguna hipótesis pasa a causa confirmada sin evidencia que conecte el mecanismo con el síntoma en la misma ruta relevante.
-- Busca instancias del mismo patrón donde el riesgo lo justifique. No conviertas una sospecha general en un barrido de alcance abierto.
-- Usa instrumentación puntual para separar hipótesis. Limita ubicación, duración y datos; requiere autorización para cualquier superficie sensible. Registra qué añadiste y elimina lo temporal al terminar.
+- Trace the path from input to observed effect. Read relevant contracts, invariants, consumers, and tests at the actual baseline.
+- Form hypotheses that predict distinct observations. Prioritize by information gained and cost; a simple case may need only one hypothesis. Reject each with evidence or retain its uncertainty.
+- Distinguish correlation, indications, and confirmed mechanisms. No hypothesis becomes a confirmed cause without evidence connecting the mechanism to the symptom on the same relevant path.
+- Look for the same pattern elsewhere when the risk warrants it. Do not turn a general suspicion into an open-ended sweep.
+- Use targeted instrumentation to distinguish hypotheses. Bound its location, duration, and data; sensitive surfaces require authorization. Record additions and remove temporary instrumentation when finished.
 
-## Recomendar una corrección verificable
+## Recommend a verifiable fix
 
-- Identifica la candidata a corrección más pequeña que actúa sobre el mecanismo confirmado. No prescribas cambios para hipótesis que siguen abiertas.
-- Propón una prueba de regresión solo si hay un seam que reproduzca el patrón real. Nombra el seam y el comportamiento visible que probaría. Si no existe, indícalo como limitación; no fuerces una prueba superficial ni hagas TDD obligatorio.
-- Delimita consumidores, rutas y contratos que podrían verse afectados. Distingue impactos observados de riesgos inferidos y explica la base de cada uno.
-- Recomienda si el worker puede proceder con el brief actual, necesita grounding adicional o requiere decisión/autorización del coordinador. No amplíes el objetivo aprobado.
+- Identify the smallest candidate fix that addresses the confirmed mechanism. Do not prescribe changes for hypotheses that remain open.
+- Propose a regression test only when a seam reproduces the real pattern. Name that seam and the observable behavior it would test. If none exists, state the limitation; do not force a superficial test or make TDD mandatory.
+- Bound the consumers, paths, and contracts that could be affected. Distinguish observed impacts from inferred risks and explain the basis of each.
+- Recommend whether the worker can proceed under the current brief, needs more grounding, or requires a coordinator decision or authorization. Do not expand the approved objective.
 
-## Paquete de diagnóstico
+## Diagnosis package
 
-Entrega en el resultado del trabajo:
+Return in the job result:
 
-- Síntoma esperado y actual, superficie, baseline y condiciones de reproducción.
-- Comandos o acciones ejecutados, resultado relevante y rutas a artefactos redactados.
-- Cadena causal con paths, símbolos y líneas; separa evidencia observada de interpretación.
-- Hipótesis descartadas y abiertas, con evidencia o probe necesario.
-- Candidata de regresión y seam, o motivo concreto por el que no hay uno adecuado.
-- Blast radius, consumidores, riesgos, límites de autorización y bloqueos.
-- Próximo paso recomendado y qué evidencia lo habilitaría.
+- Expected and actual symptoms, surface, baseline, and reproduction conditions.
+- Executed commands or actions, relevant outcomes, and paths to redacted artifacts.
+- The causal chain with paths, symbols, and lines; distinguish observed evidence from interpretation.
+- Rejected and open hypotheses, with evidence or the required probe.
+- A regression candidate and seam, or the concrete reason no suitable seam exists.
+- Blast radius, consumers, risks, authorization boundaries, and blockers.
+- The recommended next step and the evidence that would enable it.
 
-No reportes resultado de comandos no ejecutados ni presentes ejemplos de fixtures como pruebas corridas. El paquete recomienda y fundamenta; el worker verifica el código vigente antes de editar.
+Do not report outcomes for unexecuted commands or present fixture examples as executed tests. The package recommends and supports a decision; the worker verifies current code before editing.

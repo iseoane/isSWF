@@ -1,0 +1,95 @@
+# Install and update isSWF
+
+[Home](../../README.md) · [Español de España](../es/installation.md)
+
+Install isSWF once, then initialise each repository where you want to use it. A global installation shares the factory's tools, not the projects' records.
+
+## Before you start
+
+You need:
+
+- Node.js 24 or later and Git.
+- An existing Git project.
+- Pi or Claude Code already installed.
+- A supported, authenticated model account before running agent jobs.
+- Linux for the current complete installed workflow. Isolated Pi workers also need bubblewrap.
+
+Engram and Codegraph are optional. The historical Python and SQLite prototypes are not required.
+
+## Get a prepared release folder
+
+The complete package currently uses local distribution. This guide does not announce an npm release or a public plugin marketplace.
+
+Use a trusted release folder provided by the maintainer, or follow [build a local release](development.md#build-a-local-release). Cloning the repository alone does not prepare the complete installed package.
+
+Replace `/path/to/isswf-release` in the commands below with that folder's absolute path.
+
+## Install in Pi
+
+For your own global installation:
+
+```bash
+pi install /path/to/isswf-release
+```
+
+Or, from the target repository, install only for that project:
+
+```bash
+pi install /path/to/isswf-release --local
+```
+
+Choose one scope. Review the project configuration before granting Pi's project trust. Restart Pi or reload its resources after installation.
+
+## Install in Claude Code
+
+Add the local marketplace and install the plugin for your user:
+
+```bash
+claude plugin marketplace add /path/to/isswf-release
+claude plugin install isswf@isswf --scope user
+```
+
+For project scope, use this installation command instead:
+
+```bash
+claude plugin install isswf@isswf --scope project
+```
+
+Restart or reload Claude Code after installation. Project configuration does not install the plugin on every collaborator's machine.
+
+The plugin uses Claude's own delegation. It does not provide the same execution and recovery features as Pi. See [current support](reference.md#current-support) before using it for important work. These commands are documented here; no Claude execution was used to verify this documentation change.
+
+## Initialise a project
+
+Open the target repository and invoke the setup skill:
+
+| Host | Command |
+| --- | --- |
+| Pi | `/skill:isswf-setup` |
+| Claude Code | `/isswf:isswf-setup` |
+
+State that you want to initialise this project. Choose local tracking or GitHub tracking when asked. GitHub tracking does not grant permission to publish, push, or merge.
+
+Setup creates `.isswf/` and records the project's selected factory version. It preserves existing model settings and setup decisions. Authentication and execution permissions still need to be valid for the work you later request.
+
+If the repository already uses `.factory/`, ask to inspect and migrate that existing state. Do not create a second factory directory beside it.
+
+## Update without changing every repository
+
+First update the package or plugin using your host's manager. For local releases, replace the old registration with the new prepared release folder. A fixed version stays fixed until you select another one.
+
+Then ask setup:
+
+> Check what would change if I updated this project. Do not apply it yet.
+
+Updating the installed package does not update every project's records. Each project keeps its selected version until you explicitly migrate it.
+
+Before migrating, save the affected files in Git and finish or reconcile running work. The migration checks the proposed change, keeps the previous version, and records how to recover. Do not delete retained versions or interrupted-operation records to force an update.
+
+For exact commands, rollback, and recovery, use the [technical installation guide](../installation.md).
+
+## Remove the integration
+
+Use `pi remove` or Claude Code's plugin manager. Removing the integration does not remove your project's `.isswf/`, migration records, or retained factory versions.
+
+Continue with [your first request](getting-started.md).

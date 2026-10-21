@@ -44,6 +44,8 @@ for (const path of markdownFiles) {
     checkedLinks++;
   }
 }
+const docsResult = run(process.execPath, [join(source, 'tooling/quality/check-docs.mjs'), source]);
+const documentationResult = run(process.execPath, [join(source, 'tests/documentation.mjs'), source]);
 const revision = run('git', ['rev-parse', 'HEAD']);
 const store = await mkdtemp(join(tmpdir(), 'isswf-quality-package-'));
 try {
@@ -71,6 +73,7 @@ const auditArchiveResult = run(process.execPath, [join(source, 'tests/audit-arch
 const intakeResult = run(process.execPath, [join(source, 'tests/issue-intake.mjs'), source]);
 const methodologyResult = run(process.execPath, [join(source, 'tests/worker-methodology.mjs'), source]);
 const hostPortabilityResult = run(process.execPath, [join(source, 'tests/host-portability.mjs'), source]);
+const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source]);
 const workerDependencyResult = run(process.execPath, [join(source, 'tests/worker-dependencies.mjs'), source]);
 const workerCapacityResult = run(process.execPath, [join(source, 'tests/worker-capacity.mjs'), source]);
 const workerCapacityAPIResult = run(process.execPath, [join(source, 'tests/worker-capacity-api.mjs'), source]);
@@ -79,4 +82,4 @@ const successorLegacyResult = run(process.execPath, [join(source, 'tests/success
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, originalEvidenceResult, restartBaselineResult, contextHandoffResult, reviewPanelCapacityResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, hostPortabilityResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', successorModelResult, successorLegacyResult, routeResult, limits: 'No lint or dead-code analyzer. No native Pi catalog, SDK, provider, bwrap, Python or external-service checks.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', docsResult, documentationResult, toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, originalEvidenceResult, restartBaselineResult, contextHandoffResult, reviewPanelCapacityResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, hostPortabilityResult, releasePackageResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', successorModelResult, successorLegacyResult, routeResult, limits: 'ESLint and Knip run separately. Native model catalog, SDK sessions, providers, bwrap, Python and external-service behavior are not checked. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));

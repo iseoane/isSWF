@@ -7,6 +7,7 @@ import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'nod
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
+import { readReleaseSource } from './release-source.mjs';
 import { validateProbes, runDiagnosticProbes, evidenceDigest, sourceObjectsPath } from './diagnostic-probes.mjs';
 import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
 
@@ -27,6 +28,7 @@ function git(repo, args, deadlineAt = Infinity) {
 }
 function blob(repo, checkpoint, path) {
   assert(sha(checkpoint) && safe(path), 'explicit-git-pin-required');
+  if (repo === source) { const released = readReleaseSource(source, checkpoint, path); if (released !== null) return released; }
   const entries = git(repo, ['ls-tree', '-z', checkpoint, '--', path]).toString().split('\0');
   const entry = entries.find(item => item.slice(item.indexOf('\t') + 1) === path);
   assert(entry && /^100(?:644|755) blob [0-9a-f]{40}\t/u.test(entry), 'committed-regular-file-required');

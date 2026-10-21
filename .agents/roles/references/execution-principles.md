@@ -1,9 +1,9 @@
-# Principios de ejecución
+# Execution principles
 
-Carga esta referencia cuando haya trabajo paralelo, migración, reintentos, delegación o cambios repetibles; aplica solo las partes pertinentes.
+Load this reference for parallel work, migrations, retries, delegation, or repeatable changes; apply only the relevant parts.
 
-## Ownership antes de paralelizar
-**Trigger:** actores podrían escribir el mismo checkout, rama, archivo, estado o efecto externo. **Acción:** asigna dueño y espacio exclusivo; paraleliza unidades independientes y reúne resultados por una secuencia común. Si un recurso canónico debe compartirse, serializa con mecanismo estructural. **Límite:** instrucciones no son control de concurrencia; separar archivos no evita colisión en efectos remotos. No declares libre un recurso hasta confirmar que su escritor cesó.
+## Ownership before parallelism
+**Trigger:** actors might write the same checkout, branch, file, state, or external effect. **Action:** assign ownership and exclusive workspaces; parallelize independent units and collect results through a shared sequence. If a canonical resource must be shared, serialize it structurally. **Limit:** instructions are not concurrency control; separate files do not prevent collisions in remote effects. Do not declare a resource free until its writer is confirmed to have stopped.
 
 For compatible jobs, the coordinator may use distinct logical job references and attempt IDs through the normal entry, with a separate derived workspace for each writer. Concurrent capacity and cumulative worker authorization are separate limits; neither is inferred from the number of checkouts. Same-workspace overlap is refused even when proposed file scopes differ. Keep an uncertain writer's slot occupied until its cessation is confirmed. Do not release its durable admission or authorize a replacement automatically.
 
@@ -11,17 +11,18 @@ Keep the waiting reason and exit condition in the existing plan or brief: depend
 
 These are caller decisions, not a native dependency scheduler, global lock, or new queue. The normal entry's exclusive claims and derived workspaces protect cooperative use within its fixed private store; they do not control arbitrary external writers or other stores.
 
-## Autonomía dentro del encargo
-**Trigger:** siguiente paso reversible, claro y autorizado. **Acción:** continúa sin pedir permiso rutinario y reporta estado, evidencia y pendientes de forma compacta. Mantén slots útiles disponibles: consume completion/resultados conforme llegan y no los dejes desatendidos hasta el siguiente ping del usuario. **Límite:** una cuota de modelo no se afirma sin medición; decisiones de producto, alcance nuevo y acciones sensibles vuelven al operador.
+## Autonomy within the assignment
+**Trigger:** the next step is reversible, clear, and authorized. **Action:** continue without routine permission requests and report status, evidence, and pending items concisely. Keep useful slots available: consume completions and results as they arrive instead of leaving them unattended until the user's next prompt. **Limit:** do not claim model quota without measurement; product decisions, new scope, and sensitive actions return to the operator.
 
-## Reintentar reconciliando
-**Trigger:** reanudación, fallo parcial o efecto externo con respuesta incierta. **Acción:** inspecciona estado y efectos existentes antes de repetir; reconcilia, reintenta de forma convergente o bloquea con evidencia concreta. **Límite:** no prometas exactly-once ni repitas ciegamente operaciones remotas. Cancelar es una solicitud hasta comprobar cese; cancelar no revierte efectos ni garantiza detener descendientes.
+## Reconcile before retrying
+**Trigger:** resumption, partial failure, or an external effect with an uncertain response. **Action:** inspect existing state and effects before repeating; reconcile, retry convergently, or block with concrete evidence. **Limit:** do not promise exactly-once execution or blindly repeat remote operations. Cancellation is a request until cessation is verified; it does not reverse effects or guarantee descendants stop.
 
-## Migrar contratos con cuidado
-**Trigger:** sustituir API interna y conocer sus consumidores. **Acción:** migra callers internos y elimina la API vieja en la misma unidad verificable. **Límite:** API pública, formato persistido o integración externa requieren política de compatibilidad/versionado y autorización; puede necesitarse adaptación temporal con retirada definida.
+## Migrate contracts carefully
+**Trigger:** replacing an internal API whose consumers are known. **Action:** migrate internal callers and remove the old API in the same verifiable unit. **Limit:** public APIs, persisted formats, and external integrations need compatibility or versioning policy and authorization; a temporary adapter with a defined removal point may be necessary.
 
-## Automatizar y codificar con umbral
-**Trigger:** un procedimiento se repite o verificación manual no deja evidencia suficiente. **Acción:** crea la herramienta/check más pequeño que justifique su coste y sea reejecutable. Convierte errores mecánicos repetidos en estructura/check; deja juicio, excepciones y contexto proporcional en instrucciones. **Límite:** no hagas script, framework, tipo o lint por ritual ni conviertas una regla contextual en mandato universal.
+## Automate and encode when justified
+**Trigger:** a procedure repeats or manual verification leaves insufficient evidence. **Action:** create the smallest tool or check that justifies its cost and can be rerun. Encode recurring mechanical mistakes in structure or checks; keep judgment, exceptions, and proportionate context in instructions. **Limit:** do not add scripts, frameworks, types, or lints as a ritual or turn a contextual rule into a universal mandate.
 
-## Riesgo operativo
-En trabajos sensibles, identifica acceso, permisos, datos, posibilidad de pérdida, migración, recursos y estrategia de cancelación antes de ejecutar. Usa límites del runtime solo si se han observado. No publiques secretos ni datos de clientes. Si el sistema no puede imponer un límite autorizado, bloquea ese paso con el hecho concreto que falta.
+## Operational risk
+
+For sensitive work, identify access, permissions, data, loss risks, migration, resources, and cancellation strategy before execution. Use runtime boundaries only when observed. Do not publish secrets or client data. If the system cannot enforce an authorized boundary, block that step with the concrete missing fact.

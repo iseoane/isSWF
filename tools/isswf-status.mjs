@@ -4,6 +4,7 @@ import { constants } from 'node:fs';
 import { lstat, open, opendir, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stateDirectory } from './project-state.mjs';
 import { plan, parsePlan, planStates as states } from './isswf-plan.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
@@ -11,12 +12,12 @@ import { readResponses } from './isswf-response.mjs';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 export function recommendation(jobs = []) {
   const priorities = [
-    ['awaiting-human', 'human', 'Resolver la aceptación humana'],
-    ['in-progress', 'follow-up', 'Dar seguimiento al trabajo en curso'],
-    ['in-review', 'review', 'Revisar la entrega declarada'],
-    ['pending', 'prepare', 'Preparar el trabajo pendiente'],
-    ['pending-dependencies', 'verify-dependencies', 'Verificar dependencias antes de preparar'],
-    ['blocked', 'unblock', 'Resolver el bloqueo declarado'],
+    ['awaiting-human', 'human', 'Resolve human acceptance'],
+    ['in-progress', 'follow-up', 'Follow up on work in progress'],
+    ['in-review', 'review', 'Review the reported delivery'],
+    ['pending', 'prepare', 'Prepare pending work'],
+    ['pending-dependencies', 'verify-dependencies', 'Verify dependencies before preparation'],
+    ['blocked', 'unblock', 'Resolve the reported blocker'],
   ];
   let selected, selectedType, title;
   for (const [state, type, label] of priorities) {
@@ -25,18 +26,18 @@ export function recommendation(jobs = []) {
       : job.reportedStatus === state && (state !== 'pending' || (job.dependencies ?? []).length === 0));
     if (selected) { selectedType = type; title = label; break; }
   }
-  if (!selected) return { type: 'complete', jobId: null, title: jobs.length ? 'Todos los trabajos constan completados' : 'No hay trabajos observados', reason: jobs.length ? 'El plan declara todos los trabajos completados; esto no verifica integración, aceptación ni estado externo.' : 'No se observaron trabajos; no se infiere que exista trabajo completado.', executionAuthorized: false };
-  let reason = `${title}; es una sugerencia basada únicamente en el estado declarado del plan, no una autorización de ejecución.`;
+  if (!selected) return { type: 'complete', jobId: null, title: jobs.length ? 'All jobs are reported complete' : 'No jobs observed', reason: jobs.length ? 'The plan reports all jobs complete; this does not verify integration, acceptance, or external state.' : 'No jobs were observed; completed work is not inferred.', executionAuthorized: false };
+  let reason = `${title}; this is a suggestion based only on reported plan state, not execution authorization.`;
   if (selectedType === 'human') {
     const artifact = selected.artifacts;
-    if (!artifact) reason += ' La evidencia y la ficha de entrega no se han inspeccionado en esta vista; hay que revisarlas en el detalle antes de aceptar.';
-    else if (artifact.status !== 'recorded' || artifact.delivery?.status !== 'recorded') reason += ' Falta evidencia o ficha de entrega verificable; no se debe asumir que se puede aceptar.';
-    else reason += ' La aceptación corresponde a una persona y requiere revisar la evidencia y ficha disponibles.';
+    if (!artifact) reason += ' Evidence and the delivery record have not been inspected in this view; review the details before accepting.';
+    else if (artifact.status !== 'recorded' || artifact.delivery?.status !== 'recorded') reason += ' Evidence or a verifiable delivery record is missing; do not assume acceptance is possible.';
+    else reason += ' Acceptance belongs to a person and requires reviewing the available evidence and delivery record.';
   }
-  if (selectedType === 'verify-dependencies') reason += ' Aunque las dependencias consten completadas, todavía hay que comprobar la integración; las etiquetas no prueban integración, permiso ni capacidad.';
-  if (selectedType === 'prepare') reason += ' Preparar no prueba integración, permisos ni capacidad.';
-  if (selectedType === 'unblock' && selected.blocker) reason += ` Bloqueo declarado (dato no confiable): ${selected.blocker}`;
-  if (selected.nextStep) reason += ` Siguiente paso declarado (dato no confiable): ${selected.nextStep}`;
+  if (selectedType === 'verify-dependencies') reason += ' Even if dependencies are reported complete, integration still needs verification; labels do not prove integration, permission, or capacity.';
+  if (selectedType === 'prepare') reason += ' Preparation does not prove integration, permission, or capacity.';
+  if (selectedType === 'unblock' && selected.blocker) reason += ` Reported blocker (untrusted data): ${selected.blocker}`;
+  if (selected.nextStep) reason += ` Reported next step (untrusted data): ${selected.nextStep}`;
   return { type: selectedType, jobId: selected.id, title, reason, executionAuthorized: false };
 }
 async function directory(path) {
@@ -111,8 +112,8 @@ async function artifacts(root, job) {
 export async function initiatives({ project }) {
   const observedAt = new Date().toISOString(), entries = [];
   try {
-    await directory(join(project, '.factory')); await directory(join(project, '.factory/initiatives'));
-    const dir = await opendir(join(project, '.factory/initiatives'));
+    await directory(join(project, stateDirectory(project))); await directory(join(project, stateDirectory(project), 'initiatives'));
+    const dir = await opendir(join(project, stateDirectory(project), 'initiatives'));
     for await (const entry of dir) {
       if (entries.length >= 100) throw Error('too-many-initiatives');
       entries.push(entry.name);

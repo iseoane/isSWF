@@ -48,16 +48,16 @@ try {
   assert.equal(panel.initialUrl, panel.url + '/');
   assert.equal(panel.server.address().address, '127.0.0.1');
   const landing = await get(panel.url);
-  assert.equal(landing.code, 200); assert.match(landing.body, /Iniciativas del proyecto/u);
+  assert.equal(landing.code, 200); assert.match(landing.body, /Project initiatives/u);
   assert(landing.body.includes('href="/i/I0001"')); assert(landing.body.includes('href="/i/I0002"'));
   assert.match(landing.body, /Factory &lt;script&gt;bad/u); assert.match(landing.body, /Need &lt;operator&gt; decision/u);
   const catalog = JSON.parse((await get(panel.url, '/api/status')).body);
   assert.deepEqual(catalog.initiatives.map(i => [i.initiative, i.status]), [['I0001','observed'],['I0002','observed'],['IEMPTY','absent'],['IUNSAFE','unknown']]);
   assert.equal(catalog.initiatives[1].counts.blocked, 1); assert.equal(catalog.initiatives[1].jobs, 2);
   const secondPage = await get(panel.url, '/i/I0002'); assert.match(secondPage.body, /I0002 · Second initiative/u);
-  assert(secondPage.body.includes('href="/">Todas las iniciativas'));
+  assert(secondPage.body.includes('href="/">All initiatives'));
   const page = await get(panel.url, '/i/I0001');
-  assert.equal(page.code, 200); assert.match(page.headers['content-type'], /text\/html; charset=utf-8/u);
+  assert.equal(page.code, 200); assert.match(page.body, /<html lang="en">/u); assert.match(page.headers['content-type'], /text\/html; charset=utf-8/u);
   assert.equal(page.headers['referrer-policy'], 'same-origin');
   assert.match(page.headers['content-security-policy'], /form-action 'self'/u);
   assert.equal(page.headers['x-content-type-options'], 'nosniff'); assert.equal(page.headers['cache-control'], 'no-store');
@@ -70,9 +70,9 @@ try {
   assert.match(page.body, /data-state="awaiting-human"/u); assert.match(page.body, /href="#detail-J001"/u);
   assert.match(page.body, /class="job-detail" id="detail-J001"/u);
   assert.match(page.body, /synthetic\/model, high/u);
-  assert.match(page.body, /no demuestra que se haya aplicado/u);
-  assert.match(page.body, /Actual synthetic demo/u); assert.match(page.body, /No consta en la entrega/u);
-  assert.match(page.body, /Decisión pendiente del operador/u); assert.match(page.body, /no actividad comprobada de procesos/u);
+  assert.match(page.body, /does not prove it was applied/u);
+  assert.match(page.body, /Actual synthetic demo/u); assert.match(page.body, /Not recorded in the delivery/u);
+  assert.match(page.body, /Operator decision pending/u); assert.match(page.body, /not verified process activity/u);
   const api = await get(panel.url, '/api/status/I0001'); assert.equal(api.code, 200);
   const data = JSON.parse(api.body), direct = await status({ project, initiative: 'I0001' });
   delete data.observedAt; delete direct.observedAt; assert.deepEqual(data, direct);
@@ -107,7 +107,7 @@ try {
   assert.equal((await post()).code, 409);
   await writeFile(join(job,'delivery.md'), delivery);
   const planBefore = await readFile(join(project, '.factory/initiatives/I0001/plan.md'));
-  const saved = await post(); assert.equal(saved.code, 201); assert.match(saved.body, /Nota registrada, no aplicada/u);
+  const saved = await post(); assert.equal(saved.code, 201); assert.match(saved.body, /Note recorded, not applied/u);
   assert.equal((await post()).code, 409);
   const responses = JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.responses;
   assert.equal(responses.status, 'recorded'); assert.equal(responses.records.length, 1); assert.equal(responses.records[0].applied, false);
@@ -136,10 +136,10 @@ try {
   await symlink(root, join(project, '.factory/initiatives/I0001/jobs/J002'));
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[1].artifacts.status, 'unknown');
   await rm(join(project, '.factory/initiatives/I0001/plan.md'));
-  const absent = await get(panel.url, '/i/I0001'); assert.match(absent.body, /Plan no disponible/u); assert.match(absent.body, /no se interpreta como una lista vacía/u);
+  const absent = await get(panel.url, '/i/I0001'); assert.match(absent.body, /Plan unavailable/u); assert.match(absent.body, /not interpreted as an empty job list/u);
   const emptyProject = join(root, 'empty'); await mkdir(emptyProject);
   const empty = await startPanel({ project: emptyProject });
-  try { assert.match((await get(empty.url)).body, /Listado no disponible/u); assert.equal(JSON.parse((await get(empty.url, '/api/status')).body).status, 'absent'); }
+  try { assert.match((await get(empty.url)).body, /Listing unavailable/u); assert.equal(JSON.parse((await get(empty.url, '/api/status')).body).status, 'absent'); }
   finally { await new Promise(done => empty.server.close(done)); }
   const unsafeProject = join(root, 'unsafe'); await mkdir(unsafeProject); await symlink(project + '/.factory', join(unsafeProject, '.factory'));
   await assert.rejects(startPanel({ project: unsafeProject }), /unsafe-or-unreadable-project/u);

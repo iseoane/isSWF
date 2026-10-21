@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { lstat, readFile, realpath, mkdir, open, link, unlink, rename, rmdir } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stateDirectory } from './project-state.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
@@ -85,7 +86,7 @@ export async function plan({ action, project, initiative, proposalPath, grantPat
   const root = await realpath(project);
   const git = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
   if (git.status !== 0 || await realpath(git.stdout.trim()) !== root) throw Error('project must be Git root');
-  const parents = [join(root, '.factory'), join(root, '.factory/initiatives'), join(root, '.factory/initiatives', initiative)];
+  const parents = [join(root, stateDirectory(root)), join(root, stateDirectory(root), 'initiatives'), join(root, stateDirectory(root), 'initiatives', initiative)];
   const path = join(parents[2], 'plan.md');
   if (action === 'read') {
     try { for (const parent of parents) await directory(parent); const markdown = await regular(path); return { status: 'recorded', path, sha256: sha(markdown), markdown, executionAuthorized: false }; }

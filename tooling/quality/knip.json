@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/knip/schema.json",
   "entry": [
+    "tools/build-release.mjs",
     "tools/isswf-job.mjs",
     "tools/isswf-intake.mjs",
     "tools/isswf-plan.mjs",
@@ -15,6 +16,7 @@
     "tools/diagnostic-task.mjs",
     "tests/*.mjs",
     "tooling/quality/eslint.config.mjs",
+    "tooling/quality/check-docs.mjs",
     "tooling/maintenance/*.mjs"
   ],
   "project": ["tools/**/*.mjs", "tests/**/*.mjs", "tooling/quality/*.mjs", "tooling/maintenance/**/*.mjs"],

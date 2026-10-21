@@ -1,21 +1,21 @@
-# Principios de verificación
+# Verification principles
 
-Carga esta referencia según el cambio y su riesgo; no ejecutes todas las revisiones o pruebas por defecto.
+Load this reference according to the change and its risk; do not run every review or test by default.
 
-## Causa antes que parche
-**Trigger:** defecto, regresión o fallo de recuperación. **Acción:** establece síntoma esperado/observado y una reproducción segura cuando sea posible; lee lo necesario para construirla antes de concluir causa. Formula hipótesis comprobables y llama causa confirmada solo a la que tenga evidencia que conecte mecanismo y síntoma. **Límite:** si no se reproduce o la superficie es inaccesible, informa intentos, evidencia y probe concreto pendiente; no inventes causa ni atribuyas correlación. Dos arreglos con una premisa común que fallen el mismo gate exigen cuestionar esa premisa antes de repetir el arreglo.
+## Cause before patch
+**Trigger:** a defect, regression, or recovery failure. **Action:** establish expected and observed symptoms and a safe reproduction when possible; read what is needed to construct it before concluding a cause. Form testable hypotheses and confirm a cause only with evidence connecting mechanism and symptom. **Limit:** if reproduction fails or the surface is inaccessible, report attempts, evidence, and the concrete pending probe; do not invent a cause or attribute correlation. Two fixes sharing a premise that fail the same gate require challenging that premise before repeating the fix.
 
-## Pruebas selectivas de comportamiento
-**Trigger:** el operador/brief pide explícitamente TDD, o hay un bug con una regresión local barata, o lógica significativa tiene un test focal práctico. **Acción:** invoca el comportamiento como lo usa el consumidor y afirma el resultado observable concreto; usa TDD cuando esa ruta sea útil. **Límite:** el worker no inventa una exigencia TDD. Si el test es caro, ambiguo o ajeno al cambio, elige la comprobación funcional más cercana y explica el límite. No confundas test de implementación con prueba de comportamiento.
+## Selective behavioral tests
+**Trigger:** the operator or brief explicitly requests TDD, a bug has a cheap local regression test, or significant logic has a practical focused test. **Action:** exercise behavior as its consumer does and assert the specific observable result; use TDD when that path is useful. **Limit:** the worker does not invent a TDD requirement. If a test is expensive, ambiguous, or unrelated to the change, choose the closest functional check and explain the limit. Do not confuse an implementation test with behavioral evidence.
 
-## Verifica el candidato exacto
-**Trigger:** antes de declarar resultado listo o apoyar una conclusión en un artefacto. **Acción:** comprueba el checkout/base y candidato efectivos; ejecuta la superficie o lee el valor/evidencia pertinente. Reporta comando y resultado observado; fallo, inaccesibilidad o falta de revisión permanecen pendientes. **Límite:** una build o una respuesta del agente no demuestra comportamiento que no ejercita. La evidencia de un candidato anterior no cubre un candidato cambiado.
+## Verify the exact candidate
+**Trigger:** before declaring a result ready or relying on an artifact for a conclusion. **Action:** verify the effective checkout, base, and candidate; exercise the surface or read the relevant value or evidence. Report the command and observed result; failures, inaccessible resources, and missing reviews remain pending. **Limit:** a build or agent response does not prove behavior it did not exercise. Evidence from an earlier candidate does not cover a changed candidate.
 
-## Unidades coherentes
-**Trigger:** cambio de varias fases, migración, sweep o acumulación que hace difícil revisar/recuperar. **Acción:** define unidades con resultado, dependencia y comprobación; verifica checkpoint antes de construir encima. Usa slices verticales si entregan comportamiento. **Límite:** no hay cuota universal de commits/líneas ni una PR por unidad; refactors mecánicos pueden tener otra secuencia. Un checkpoint parcial no es cierre.
+## Coherent units
+**Trigger:** a multi-phase change, migration, sweep, or accumulation that makes review or recovery difficult. **Action:** define units with outcomes, dependencies, and checks; verify each checkpoint before building on it. Use vertical slices when they deliver behavior. **Limit:** there is no universal commit or line quota, or one PR per unit; mechanical refactors may need another sequence. A partial checkpoint is not closure.
 
-## Producto, accesibilidad y riesgo
-**Trigger:** decisión de producto, interfaz/API visible, datos, permisos, contrato compartido o afirmación cuantitativa. **Acción:** evalúa experiencia y accesibilidad pertinentes; selecciona revisión de seguridad/pérdida de datos o integración según superficie. Para cifras de rendimiento/eval, anota condiciones y evidencia que explique qué limita la medida. **Límite:** no impongas visuales, benchmarks ni paneles completos en cambios sin impacto; si no se midió, no afirmes quota, speedup ni causalidad cuantitativa.
+## Product, accessibility, and risk
+**Trigger:** a product decision, visible interface or API, data, permissions, shared contract, or quantitative claim. **Action:** evaluate relevant experience and accessibility; select security, data-loss, or integration review according to the affected surface. For performance or evaluation figures, record conditions and evidence explaining the measurement's limiting factor. **Limit:** do not impose visuals, benchmarks, or full panels on changes without relevant impact; without measurement, do not claim quota, speedup, or quantitative causality.
 
-## Prototipos
-**Trigger:** interacción novedosa o decisión arquitectónica consecuencial sin precedente, con alternativas plausibles. **Acción:** compara 2–3 prototipos frente a criterios observables antes de comprometer producción. **Límite:** elige directamente si el contrato tiene una solución clara o las alternativas no afectan experiencia, riesgo ni arquitectura. Evita exploración nueva cuando el encargo es de alcance cerrado.
+## Prototypes
+**Trigger:** a novel interaction or consequential architectural decision without precedent, with plausible alternatives. **Action:** compare 2–3 prototypes against observable criteria before committing production code. **Limit:** choose directly if the contract has a clear solution or the alternatives do not affect experience, risk, or architecture. Avoid new exploration in a bounded assignment.

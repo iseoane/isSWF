@@ -13,6 +13,8 @@ import {
 } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { releaseReceiptName, verifyRelease } from "./release-source.mjs";
+import { stateDirectory } from "./project-state.mjs";
 
 const revisionPattern = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const receiptName = ".isswf-package-receipt.json";
@@ -38,12 +40,14 @@ const payloadPaths = [
   ".factory/models.json",
   "package.json",
 ];
-const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs"];
+const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
   "./.agents/skills/isswf-coordinator",
   "./.agents/skills/isswf-setup",
 ];
+
+const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/models.json", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/model-routing.md", "docs/host-portability.md", "docs/source-activation.md", "docs/local-worker-lifecycle.md", "docs/issue-intake.md"];
 
 function fail(message) {
   throw new Error(message);
@@ -126,20 +130,26 @@ function validateManifest(bytes) {
   } catch {
     fail("The committed package.json is not valid JSON");
   }
-  const pi = manifest?.pi;
+  const legacy = Object.keys(manifest ?? {}).sort().join(",") === "description,name,pi,version";
+  const released = Object.keys(manifest ?? {}).sort().join(",") === "bin,description,files,keywords,name,pi,version";
   if (
-    Object.keys(manifest).sort().join(",") !== "description,name,pi,version" ||
+    !legacy && !released ||
     manifest.name !== "isswf-pi-resources" ||
-    manifest.version !== "1.0.0" ||
+    !/^\d+\.\d+\.\d+$/u.test(manifest.version ?? "") ||
     typeof manifest.description !== "string" ||
-    !pi ||
-    Object.keys(pi).sort().join(",") !== "skills" ||
-    JSON.stringify(pi.skills) !== JSON.stringify(expectedSkills) ||
+    !manifest.pi ||
+    Object.keys(manifest.pi).sort().join(",") !== "skills" ||
+    JSON.stringify(manifest.pi.skills) !== JSON.stringify(expectedSkills) ||
+    (released && (
+      JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: "tools/isswf.mjs" }) ||
+      JSON.stringify(manifest.keywords) !== JSON.stringify(["pi-package"]) ||
+      JSON.stringify(manifest.files) !== JSON.stringify(releaseFiles)
+    )) ||
     Object.hasOwn(manifest, "dependencies") ||
     Object.hasOwn(manifest, "devDependencies") ||
     Object.hasOwn(manifest, "scripts")
   ) {
-    fail("The committed package.json does not match the two-skill, no-dependency package contract");
+    fail("The committed package.json does not match the no-dependency package contract");
   }
 }
 
@@ -201,6 +211,17 @@ async function materialize({ source, revision, store }) {
 
 export async function verifyPackage(packageRoot, expectedRevision) {
   const root = resolve(packageRoot);
+  let releaseBytes;
+  try {
+    releaseBytes = await readFile(join(root, releaseReceiptName));
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  if (releaseBytes !== undefined) {
+    const release = verifyRelease(root);
+    if (release.revision !== expectedRevision) fail(`Release revision does not match the expected runtime: ${root}`);
+    return root;
+  }
   const receiptPath = join(root, receiptName);
   let receipt;
   try {
@@ -340,7 +361,7 @@ async function installTools({ source, revision, project }) {
     payload.set(name, runGit(sourceRoot, ["cat-file", "blob", entry[0].slice(0, entry[0].indexOf("\t")).split(" ")[2]], null));
   }
   const receipt = `${JSON.stringify({ format: 1, revision, files: Object.fromEntries([...payload].map(([name, bytes]) => [name, digest(bytes)])) }, null, 2)}\n`;
-  const factory = join(projectRoot, ".factory"), destination = join(factory, "tools");
+  const factory = join(projectRoot, stateDirectory(projectRoot)), destination = join(factory, "tools");
   async function regularDirectory(path) {
     const stat = await lstat(path);
     if (!stat.isDirectory() || stat.isSymbolicLink()) fail(`Regular directory required: ${path}`);

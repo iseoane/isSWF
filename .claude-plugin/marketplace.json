@@ -1,0 +1,7 @@
+{
+  "name": "isswf",
+  "owner": { "name": "iseoane" },
+  "plugins": [
+    { "name": "isswf", "source": "./" }
+  ]
+}

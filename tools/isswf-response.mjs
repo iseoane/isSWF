@@ -1,3 +1,4 @@
+import { stateDirectory } from './project-state.mjs';
 import assert from 'node:assert/strict';
 import { constants } from 'node:fs';
 import { lstat, mkdir, open, opendir } from 'node:fs/promises';
@@ -13,7 +14,7 @@ async function directory(path) {
 async function responseRoot({ project, initiative, jobId }) {
   assert(isAbsolute(project ?? '') && id(initiative) && id(jobId), 'invalid-response-scope');
   let path = project; await directory(path);
-  for (const component of ['.factory', 'initiatives', initiative, 'jobs', jobId]) { path = join(path, component); await directory(path); }
+  for (const component of [stateDirectory(project), 'initiatives', initiative, 'jobs', jobId]) { path = join(path, component); await directory(path); }
   return join(path, 'responses');
 }
 export async function readResponses(scope) {

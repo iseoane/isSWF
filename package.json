@@ -1,7 +1,34 @@
 {
   "name": "isswf-pi-resources",
-  "version": "1.0.0",
-  "description": "A fixed-version Pi resource package for isSWF project workflows.",
+  "version": "1.1.0",
+  "description": "On-demand isSWF workflows for Pi and Claude Code with explicit project installation and migration.",
+  "bin": {
+    "isswf": "tools/isswf.mjs"
+  },
+  "keywords": [
+    "pi-package"
+  ],
+  "files": [
+    ".agents/roles",
+    ".agents/hosts",
+    ".agents/skills/isswf-coordinator",
+    ".agents/skills/isswf-setup",
+    ".claude-plugin",
+    ".factory/models.json",
+    ".factory/templates",
+    ".isswf-release.json",
+    ".isswf-sources",
+    "agents",
+    "skills",
+    "tools/*.mjs",
+    "docs/installation.md",
+    "docs/durable-work.md",
+    "docs/model-routing.md",
+    "docs/host-portability.md",
+    "docs/source-activation.md",
+    "docs/local-worker-lifecycle.md",
+    "docs/issue-intake.md"
+  ],
   "pi": {
     "skills": [
       "./.agents/skills/isswf-coordinator",

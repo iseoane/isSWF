@@ -1,0 +1,95 @@
+# Instalar y actualizar isSWF
+
+[Inicio](../../README.es.md) · [English](../en/installation.md)
+
+Instala isSWF una vez e inicializa cada repositorio donde quieras utilizarlo. Una instalación global comparte las herramientas de la factoría, no los registros de los proyectos.
+
+## Antes de empezar
+
+Necesitas:
+
+- Node.js 24 o posterior y Git.
+- Un proyecto Git existente.
+- Pi o Claude Code ya instalado.
+- Una cuenta de modelos compatible y autenticada antes de ejecutar encargos con agentes.
+- Linux para el flujo instalado completo actual. Los workers aislados de Pi necesitan además bubblewrap.
+
+Engram y Codegraph son opcionales. Los prototipos históricos de Python y SQLite no son necesarios.
+
+## Conseguir una carpeta de versión preparada
+
+El paquete completo se distribuye actualmente de forma local. Esta guía no anuncia una versión publicada en npm ni un marketplace público del plugin.
+
+Utiliza una carpeta de versión de confianza facilitada por quien mantiene el proyecto o sigue los pasos para [preparar una versión local](development.md#preparar-una-versión-local). Clonar el repositorio no prepara por sí solo el paquete instalado completo.
+
+Sustituye `/path/to/isswf-release` en los comandos siguientes por la ruta absoluta de esa carpeta.
+
+## Instalar en Pi
+
+Para instalarlo de forma global para tu usuario:
+
+```bash
+pi install /path/to/isswf-release
+```
+
+O, desde el repositorio de destino, instálalo solo para ese proyecto:
+
+```bash
+pi install /path/to/isswf-release --local
+```
+
+Elige un ámbito. Revisa la configuración del proyecto antes de concederle confianza en Pi. Reinicia Pi o recarga sus recursos tras la instalación.
+
+## Instalar en Claude Code
+
+Añade el marketplace local e instala el plugin para tu usuario:
+
+```bash
+claude plugin marketplace add /path/to/isswf-release
+claude plugin install isswf@isswf --scope user
+```
+
+Para instalarlo en el ámbito del proyecto, utiliza este comando en su lugar:
+
+```bash
+claude plugin install isswf@isswf --scope project
+```
+
+Reinicia o recarga Claude Code tras la instalación. La configuración del proyecto no instala el plugin en el equipo de cada colaborador.
+
+El plugin utiliza la delegación propia de Claude. No ofrece las mismas funciones de ejecución y recuperación que Pi. Consulta la [compatibilidad actual](reference.md#compatibilidad-actual) antes de utilizarlo para trabajo importante. Aquí se documentan los comandos; no se ha ejecutado Claude para verificar este cambio de documentación.
+
+## Inicializar un proyecto
+
+Abre el repositorio de destino e invoca la skill de configuración:
+
+| Entorno | Comando |
+| --- | --- |
+| Pi | `/skill:isswf-setup` |
+| Claude Code | `/isswf:isswf-setup` |
+
+Indica que quieres inicializar este proyecto. Elige seguimiento local o con GitHub cuando se te pregunte. Seleccionar GitHub no concede permiso para publicar, hacer push ni fusionar cambios.
+
+La configuración crea `.isswf/` y registra la versión de la factoría elegida para el proyecto. Conserva los ajustes de modelos y las decisiones de configuración existentes. La autenticación y los permisos de ejecución deberán seguir siendo válidos para el trabajo que solicites después.
+
+Si el repositorio ya utiliza `.factory/`, pide inspeccionar y migrar ese estado existente. No crees una segunda carpeta de la factoría a su lado.
+
+## Actualizar sin cambiar todos los repositorios
+
+Primero actualiza el paquete o el plugin mediante el gestor de tu asistente. Para versiones locales, sustituye el registro anterior por la nueva carpeta de versión preparada. Una versión fijada no cambia hasta que selecciones otra.
+
+Después pide a la skill de configuración:
+
+> Comprueba qué cambiaría si actualizase este proyecto. No lo apliques todavía.
+
+Actualizar el paquete instalado no actualiza los registros de todos los proyectos. Cada proyecto mantiene su versión elegida hasta que lo migres de forma explícita.
+
+Antes de migrar, guarda los archivos afectados en Git y termina o reconcilia el trabajo en ejecución. La migración comprueba el cambio propuesto, conserva la versión anterior y registra cómo recuperarse. No borres versiones conservadas ni registros de operaciones interrumpidas para forzar una actualización.
+
+La [guía técnica de instalación](../installation.md), en inglés, incluye los comandos exactos, la vuelta a una versión anterior y la recuperación.
+
+## Retirar la integración
+
+Utiliza `pi remove` o el gestor de plugins de Claude Code. Retirar la integración no elimina la carpeta `.isswf/` del proyecto, los registros de migración ni las versiones conservadas de la factoría.
+
+Continúa con [tu primera petición](getting-started.md).

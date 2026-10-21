@@ -7,6 +7,7 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { preparePlanProposal, runPlanProposal, readPlanProposal } = await import(pathToFileURL(join(source, 'tools/planner-task.mjs')));
@@ -16,7 +17,8 @@ const command = (binary, args) => spawnSync(binary, args, { encoding: 'utf8', ti
 const git = (...args) => { const r = command('git', ['-C', project, ...args]); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
 const commit = () => { git('add', '.'); git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'fixture'); return git('rev-parse', 'HEAD'); };
 const json = (path, value) => writeFile(path, JSON.stringify(value) + '\n');
-const actual = command('git', ['-C', source, 'rev-parse', 'HEAD']); assert.equal(actual.status, 0);
+const released = verifyRelease(source);
+const actual = released ? { status: 0, stdout: released.revision } : command('git', ['-C', source, 'rev-parse', 'HEAD']); assert.equal(actual.status, 0);
 try {
   await mkdir(project); await mkdir(store); git('init', '-q');
   await mkdir(join(project,'.factory/initiatives/I0001'),{recursive:true});

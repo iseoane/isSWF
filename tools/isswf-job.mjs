@@ -6,6 +6,8 @@ import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:pat
 import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
+import { readReleaseSource, verifyRelease } from './release-source.mjs';
+import { stateDirectory } from './project-state.mjs';
 import { inspectNativeRecovery } from './native-recovery.mjs';
 import { effectIntent, externalEffect } from './external-effect-journal.mjs';
 import { recoveryReview } from './recovery-review.mjs';
@@ -13,8 +15,8 @@ import { admission, claimSuccessor, validateSuccessorBinding } from './job-succe
 import { parsePlan } from './isswf-plan.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const methodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
+const methodologySha = verifyRelease(root)?.methodologySha ?? '37a56ebc902e94f21fc10666f33fceac44946af7';
+const runtimeFiles = ['tools/release-source.mjs', 'tools/project-state.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md'];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
@@ -29,6 +31,13 @@ function blob(repo, revision, path) {
   const entry = invoke('git', ['-C', repo, 'ls-tree', '-z', revision, '--', path]).toString().split('\0').find(value => value.slice(value.indexOf('\t') + 1) === path);
   if (!entry || !/^100(?:644|755) blob [0-9a-f]{40}\t/.test(entry)) throw new Error(`committed regular file required: ${path}`);
   return invoke('git', ['-C', repo, 'cat-file', 'blob', entry.slice(0, entry.indexOf('\t')).split(' ')[2]]);
+}
+function ownSourceBlob(repo, revision, path) {
+  if (repo === root) {
+    const released = readReleaseSource(repo, revision, path);
+    if (released !== null) return released;
+  }
+  return blob(repo, revision, path);
 }
 function baselineTree(repo, revision, strict = false) {
   const tree = Object.create(null);
@@ -91,6 +100,12 @@ async function runtimePaths(job) {
   return { sdkPath, authPath, nodeBinary: process.execPath };
 }
 async function activePackage(project, revision) {
+  const released = verifyRelease(root);
+  if (released !== null) {
+    const pin = JSON.parse(await readFile(join(project, stateDirectory(project), 'install.json'), 'utf8'));
+    if (pin.format !== 1 || pin.schemaVersion !== 1 || pin.runtimeId !== released.runtimeId || pin.revision !== revision || released.revision !== revision || pin.version !== released.version) throw Error('installed runtime must match the explicit project pin; inspect and migrate separately');
+    return root;
+  }
   const settings = JSON.parse(await readFile(join(project, '.pi/settings.json'), 'utf8'));
   if (!Array.isArray(settings.packages)) throw new Error('project must declare one activated isSWF package');
   const matches = [];
@@ -144,7 +159,7 @@ async function dependencyAdmission(args, project, job, jobBytes) {
   const exactKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === keys;
   const descriptor = job.prerequisites;
   if (!exactKeys(descriptor, 'jobId,path,sha256') || !/^[A-Z][A-Z0-9-]{0,63}$/.test(descriptor.jobId) || !/^[a-f0-9]{64}$/.test(descriptor.sha256)) throw Error('explicit dependency plan descriptor required');
-  const identity = /^\.factory\/initiatives\/([A-Z][A-Z0-9-]{0,63})\/plan\.md$/.exec(descriptor.path);
+  const identity = /^\.(?:isswf|factory)\/initiatives\/([A-Z][A-Z0-9-]{0,63})\/plan\.md$/.exec(descriptor.path);
   if (!identity || job.logicalJobRef !== identity[1] + '/' + descriptor.jobId) throw Error('dependency plan job identity mismatch');
   const store = await canonicalStore(args['runs-store'], project, false);
   const grant = await trustedJSON(args['dependency-grant'], project, '--dependency-grant', store);
@@ -199,7 +214,7 @@ async function run(args) {
   const prerequisites = await dependencyAdmission(args, project, job, jobBytes);
   if (prerequisites?.status === 'blocked') { console.log(JSON.stringify(prerequisites)); process.exitCode = 2; return; }
   const packageRoot = await activePackage(project, job.runtimeSha);
-  for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(blob(root, job.runtimeSha, path))) throw new Error(`runtime working bytes differ from activated revision: ${path}`);
+  for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(ownSourceBlob(root, job.runtimeSha, path))) throw new Error(`runtime working bytes differ from activated revision: ${path}`);
   if (!job.models || !fullSha(job.models.sha) || !safeRelative(job.models.path)) throw new Error('committed model config pin required');
   const modelBytes = blob(project, job.models.sha, job.models.path);
   if (digest(modelBytes) !== job.models.sha256) throw new Error('model config digest mismatch');
@@ -220,7 +235,7 @@ async function run(args) {
     const grant=await trustedJSON(args['capacity-grant'],project,'--capacity-grant',store);
     if(grant.version!==1 || grant.role!=='worker' || grant.mode!==mode || grant.project!==project || grant.runsStore!==store || grant.inputSha!==request.inputSha || grant.jobPath!==request.jobPath || grant.jobSha256!==request.jobSha256 || grant.runtimeSha!==request.runtimeSha || grant.attemptId!==request.attemptId || grant.logicalJobRef!==request.logicalJobRef || grant.grantRef!==request.grantRef || grant.allowCapacity!==true || !grant.capacity)throw Error('worker capacity grant binding mismatch');
     const helper=await readFile(join(root,'tools/execution-capacity.mjs'));
-    if(digest(helper)!==grant.capacityRunnerSha256 || digest(helper)!==digest(blob(root,job.runtimeSha,'tools/execution-capacity.mjs')))throw Error('pinned worker capacity helper required');
+    if(digest(helper)!==grant.capacityRunnerSha256 || digest(helper)!==digest(ownSourceBlob(root,job.runtimeSha,'tools/execution-capacity.mjs')))throw Error('pinned worker capacity helper required');
     const {prepareCapacity,acquireCapacity}=await import(pathToFileURL(join(root,'tools/execution-capacity.mjs')));
     const scope=await prepareCapacity(grant.capacity,[project,root,store],grant.capacityRunnerSha256);
     await claimAdmission(store,admission(request),true);
@@ -252,7 +267,7 @@ async function run(args) {
   let capacityArgs=[];
   if(capacity) {
     const modules={};
-    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(blob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
+    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(ownSourceBlob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
     const path=join(prepared,'capacity.json');await writeFile(path,JSON.stringify({...capacity,modules})+'\n',{flag:'wx',mode:0o600});capacityArgs=['--capacity-file',path];
   }
   const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000', ...capacityArgs]));
@@ -297,7 +312,7 @@ async function effect(args) {
   const store = await canonicalStore(args['runs-store'], project, false);
   const bytes = blob(project, binding.inputSha, binding.jobPath), job = JSON.parse(bytes);
   if (digest(bytes) !== binding.jobSha256 || job.version !== 1 || job.runtimeSha !== binding.runtimeSha || job.targetBase !== binding.targetBase || job.methodologySha !== binding.methodologySha) throw Error('effect committed binding mismatch');
-  for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(blob(root, binding.runtimeSha, path))) throw Error('effect runtime identity changed');
+  for (const path of runtimeFiles) if (digest(await readFile(join(root, path))) !== digest(ownSourceBlob(root, binding.runtimeSha, path))) throw Error('effect runtime identity changed');
   await verifyPackage(binding.packageRoot, binding.runtimeSha);
   const intent = effectIntent(binding, job);
   let grant;
@@ -384,7 +399,7 @@ An independent review remains required for every worker result.`);
     try {
       const jobBytes=blob(binding.repo,binding.inputSha,binding.jobPath), job=JSON.parse(jobBytes);
       if (digest(jobBytes)!==binding.jobSha256 || job.version!==1 || job.targetBase!==binding.targetBase || job.runtimeSha!==binding.runtimeSha || job.methodologySha!==binding.methodologySha || job.briefPath!==binding.briefPath || JSON.stringify(job.models)!==JSON.stringify(binding.models) || digest(blob(binding.repo,binding.inputSha,binding.briefPath))!==binding.briefSha256 || digest(blob(binding.repo,binding.models.sha,binding.models.path))!==binding.models.sha256) throw Error('committed recovery inputs changed');
-      for (const path of runtimeFiles) if (digest(await readFile(join(root,path)))!==digest(blob(root,binding.runtimeSha,path))) throw Error('recovery runtime identity changed');
+      for (const path of runtimeFiles) if (digest(await readFile(join(root,path)))!==digest(ownSourceBlob(root,binding.runtimeSha,path))) throw Error('recovery runtime identity changed');
       await verifyPackage(binding.packageRoot,binding.runtimeSha);
       for (const path of job.referencedInputs || []) if (digest(blob(binding.repo,binding.inputSha,path))!==digest(blob(binding.repo,binding.targetBase,path))) throw Error('recovery input/base mismatch');
       recovery=await inspectNativeRecovery({attemptDir:join(args['runs-store'],args['attempt-id']),dispatch,observation:result,job,baseline:baselineTree(binding.repo,binding.targetBase)});

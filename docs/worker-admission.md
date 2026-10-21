@@ -1,6 +1,6 @@
 # Worker dependency admission
 
-An original worker can bind an immutable canonical-plan snapshot before reserving capacity or claiming a writer. Add `prerequisites: {path, sha256, jobId}` to its committed job. The path must name `.factory/initiatives/<initiative>/plan.md` at the assignment input SHA, and `logicalJobRef` must equal `<initiative>/<jobId>`. The existing plan tool and status view share the same parser and cycle validation. No second editable plan is created.
+An original worker can bind an immutable canonical-plan snapshot before reserving capacity or claiming a writer. Add `prerequisites: {path, sha256, jobId}` to its committed job. The path must name `.isswf/initiatives/<initiative>/plan.md` or the legacy `.factory/initiatives/<initiative>/plan.md` at the assignment input SHA, and `logicalJobRef` must equal `<initiative>/<jobId>`. The existing plan tool and status view share the same parser and cycle validation. No second editable plan is created.
 
 Pass an absolute external `--dependency-grant`. Its version-1 record binds role `worker`, canonical `project` and existing `runsStore`, `inputSha`, `jobPath`, `jobSha256`, `runtimeSha`, `targetBase`, `attemptId`, `logicalJobRef`, `grantRef`, `allowDependencyCheck: true`, the identical `prerequisites` descriptor, and `attestations`. Missing or inconsistent inputs fail closed. Jobs without either dependency field retain the legacy path outside this check. Dependency-bound successors are not supported.
 

@@ -6,7 +6,15 @@ disable-model-invocation: true
 
 # isSWF project setup
 
-Run only when the user explicitly invokes this skill. Set up the named target project; never install or copy factory files or create runtime/configuration in it. An explicitly granted route-values update to an existing target config is the sole configuration-edit exception.
+Run only on an explicit operator request to set up, inspect, update, or recover the named project.
+
+## Installed release path
+
+When the package root contains `.isswf-release.json`, read its `docs/installation.md` and use its bundled `tools/isswf.mjs`. Resolve the root from this skill's directory, three parents up, not from the target project's working directory. Inspect before writing. New installations use `.isswf/`. An existing `.factory/` needs the documented explicit `migrate-state` transition before initialization; preserve historical file bytes and refuse two active directories. Ask only for a missing tracking choice or an external-writer reconciliation that the operator must supply. Initialize only under the explicit setup request; migrations and recovery need their own explicit request. Preserve an existing project setup and model configuration. Report actual changed paths and pending project checks; initialization is not execution permission or verified isolation.
+
+For updates, show the inspection's proposed paths and digest, require a Git checkpoint of affected files, and use a fresh transaction ID plus the operator's actual external-writer reconciliation reference. Never manufacture that attestation from saved status. Preserve an interrupted claim and use the documented recovery path; do not force-unlock, rewrite historical records, or select a different runtime silently. A newer global package does not update a project's pin by itself.
+
+If no release receipt exists, follow the source-checkout workflow below. A Markdown-only resource package supplies instructions, not an installed runtime. Set up the named target project; never install or copy factory files or create runtime/configuration through that legacy path. An explicitly granted route-values update to an existing target config is its sole configuration-edit exception.
 
 ## 1. Establish sources and target
 
