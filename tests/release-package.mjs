@@ -20,7 +20,7 @@ function run(binary, args, ok = true, cwd = temp) {
   return result;
 }
 const git = (...args) => run('git', ['-C', fixture, ...args]).stdout.trim();
-const commit = message => { git('add', '-A'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', message); return git('rev-parse', 'HEAD'); };
+const commit = message => { git('add', '-A'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', message); return git('rev-parse', 'HEAD'); };
 const readJSON = async path => JSON.parse(await readFile(path, 'utf8'));
 const writeJSON = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
 async function inventory(root) {
