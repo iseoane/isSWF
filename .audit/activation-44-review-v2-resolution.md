@@ -1,5 +1,0 @@
-# V2 review resolution
-
-Accept the confirmed root-component bug. `relative(parent, candidate)` is already available and avoids manual root-slash indexing. Correct the invalid JSON test seed's escaped newline as a small fixture correction. All original version/alias/refusal fixes remain accepted. A fresh scoped writer and new snapshot/recheck are required before integration.
-
-Do not accept the demand that the tracked patch contain untracked corrections. The established snapshot algorithm retains the tracked binary diff plus every exact scoped regular-file payload and hashes all of them. `tools/factory-package.mjs`, the audit verifier, guide and build brief are untracked additions relative to the base. Their changed v2 payload hashes are the correction identity. The two tracked Markdown changes were unchanged from v1, so an identical `candidate.diff` is expected and does not imply stale source. The v3 packet will explicitly label this convention; no source or review-history mutation is needed. Review the full overlay, not the tracked patch alone.

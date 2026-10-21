@@ -1,8 +1,0 @@
-{
-  "fixtureInput": "ca5a42ec721113e99ded0c24b8134c17978927ae",
-  "targetBase": "10adeb97146e0f302dabea2973e8e1eaa1b9d41a",
-  "bundleSha256": "f7d48430b4cc67723ef4c1be532088aa226e530b34feec04985a8b9574e715d6",
-  "bundleVerified": true,
-  "fixtureClean": true,
-  "phase": "Prepared fixture, no real coordinator or worker call yet"
-}

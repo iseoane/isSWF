@@ -1,1 +1,0 @@
-{"version":1,"attemptId":"R68-host-task-loss","taskSha256":"da0e2d66775a4cc96c76d26e944a65f9fda527b577c178b3b47a06d354d2f034","seq":1,"init":{"pid":727052,"startTicks":"21586210","state":"R","bootId":"7daa6db0-3e89-4966-84ee-edbeaaa2bae8","exe":"/usr/bin/bwrap","namespace":"pid:[4026532441]"}}

@@ -1,8 +1,0 @@
-{
-  "runtimeSha": "32186005b226dd281af2b7a8070a14aa3af43fe5",
-  "inputSha": "685b087ba323a67567a6cfe307c033093a370716",
-  "targetBase": "a6197ca93ada9e9597712db7b206808097a7ccbf",
-  "runtimeBundlePrerequisite": "9967af15d531314236f5f86b5a2b578188a1b7b8",
-  "bundlesVerified": true,
-  "scope": "fake transport fixture; historical absolute paths are references, not portable launch arguments"
-}

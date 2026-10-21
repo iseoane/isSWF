@@ -1,9 +1,0 @@
-{
-  "status": "PASS",
-  "input": "aa75bdb7388a5fd9f4eea006f8a9a130ed792a00",
-  "base": "8a2ee5bb630591ae13224f2e05c31c28f969ed24",
-  "sha256": "d6b4faf8205af160468b48c35feb9156b1c7e23ccd9f7321862a563d18b612b9",
-  "objectPack": ".audit/recovery-68-successor-symlink-red-objects.pack",
-  "indexPackVerified": "pack\t654ade73783b8eeae1500a5a76aa330324977e66",
-  "scope": "own disposable Gitobjects only, no checkout/execution/newworker"
-}

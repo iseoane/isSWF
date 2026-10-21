@@ -1,7 +1,0 @@
-Pre-change regression run
-Command: cd /tmp/isswf-u1-fix-7gkz409 && python -W error::ResourceWarning -m unittest discover -s tests -p test_u1.py -v
-Result: 13 tests, 3 failures and 1 error. Missing-state show returned without IntakeError and created state; valid-JSON corrupted snapshot passed show; malformed Origin http://[ caused an unhandled ValueError and disconnected client; panel omitted repository and requested brief fields. These are the four expected behavioral regressions. The original 9 tests passed before the new regressions were added.
-
-Post-change verification
-Command: cd /tmp/isswf-u1-fix-7gkz409 && python -W error::ResourceWarning -m unittest discover -s tests -v
-Result: all 13 tests passed. This includes the four regressions through CLI/storage and live HTTP behavior, including malformed Origin rejected before state access, corrupt/incomplete snapshots and invalid dates rejected by show/API/HTML, brief fields displayed, private inputs omitted, unchanged read permissions, and exact /panel.css route protected by CSP.

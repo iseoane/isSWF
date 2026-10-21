@@ -1,5 +1,0 @@
-{
-  "exitCode": 1,
-  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: The input did not match the regular expression /outside untrusted/. Input:\n\n'known stopped native recovery required for candidate review\\n'\n\n    at file:///home/iseoane/Work/isSWF/.audit/verify-recovery-68-review.mjs:31:9 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'known stopped native recovery required for candidate review\\n',\n  expected: /outside untrusted/,\n  operator: 'match',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
-  "resolution": "Negative test created an out-of-scope workspace approval path, so reconcile correctly blocked before approval boundary; revised test uses/restores existing allowed heartbeat path. Frozen source unchanged beforev1, subsequent public suite PASS."
-}

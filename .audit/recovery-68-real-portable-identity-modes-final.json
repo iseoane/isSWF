@@ -1,9 +1,0 @@
-{
-  "status": "PASS",
-  "portableFiles": 66,
-  "hashesMatched": 66,
-  "permissionModesMatched": 66,
-  "priorCheck": ".audit/recovery-68-real-portable-identity-final.json",
-  "clarification": "Prior hash check passed but inspected absent optional modes key; this check asserts actual permissionModes for every file.",
-  "additionalRuntimeCalls": 0
-}

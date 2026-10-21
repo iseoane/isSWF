@@ -1,9 +1,0 @@
-{
-  "status": "PASS",
-  "checkedAt": "2026-10-16T15:59:40.275Z",
-  "frozenFiles": 5,
-  "portableFiles": 26,
-  "independentLuna": "PASS",
-  "independentDeepseek": "pending",
-  "scope": "hash identity only; no successor/general recovery claim"
-}

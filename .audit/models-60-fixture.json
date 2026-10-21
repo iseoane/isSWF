@@ -1,8 +1,0 @@
-{
-  "root": "/tmp/isswf-models60-njL7TK",
-  "oldConfig": "ffb0b2aa26d57b2371b72808b02dcb2b0fde2af3",
-  "newConfig": "e5eb4e3649a9e2a2c5ccd87589a0fa5b4f7743ce",
-  "caseCheckpoint": "439357df3311723f63cbe3416002631357506727",
-  "limits": "Supplied synthetic availability/actor states, not provider results or real process observations.",
-  "extendedCaseCheckpoint": "a16f7d52e9c0b6f338ccb5910113deb1e918a3ad"
-}

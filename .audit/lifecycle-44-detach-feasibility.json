@@ -1,8 +1,0 @@
-{
-  "root": "/tmp/isswf-lifecycle44-detach-WReq2D",
-  "launcherExitedBeforeRead": true,
-  "workerPid": 324285,
-  "value": 21,
-  "passed": true,
-  "scope": "One local Node launcher exits before its detached deterministic worker publishes a result. Not chat teardown, supervisor recovery, durable identity authentication, model integration or exactly-once proof."
-}

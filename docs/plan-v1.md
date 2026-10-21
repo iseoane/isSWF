@@ -48,7 +48,7 @@ La prioridad 1 es el siguiente corte propuesto; preparar y releer la issue #21 y
 
 ### Corte entregado
 
-La propia factory sirvió como destino: la [issue #21](https://github.com/iseoane/isSWF/issues/21) quedó cerrada mediante la PR #25. La [evidencia de intake](../.audit/s01-80-proof.json) distingue preparación real, reutilización del mismo brief y ausencia de autorización de ejecución.
+La propia factory sirvió como destino: la [issue #21](https://github.com/iseoane/isSWF/issues/21) quedó cerrada mediante la PR #25. La [evidencia de intake](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/s01-80-proof.json) distingue preparación real, reutilización del mismo brief y ausencia de autorización de ejecución.
 
 - [x] Una issue clara obtiene objetivo, alcance, aceptación y siguiente paso sin entrevista innecesaria.
 - [x] La autorización confiable se distingue del texto y las etiquetas externas.
@@ -57,7 +57,7 @@ La propia factory sirvió como destino: la [issue #21](https://github.com/iseoan
 - [x] El resumen muestra la observación disponible y decisiones pendientes, sin afirmar una consulta viva.
 - [x] Controles públicos, una preparación propia autorizada y revisión independiente verificaron ese corte.
 
-La PR #28 añadió `.factory/initiatives/<id>/plan.md` y jobs dentro de cada iniciativa. El tipo es un dato y no cambia el ID. El planner propone y el coordinador mantiene el plan único. El recorder local permite preparar, leer y revisar el plan con SHA esperado e historial; no ejecuta dependencias ni certifica el progreso declarado. Véase la [evidencia](../.audit/setup-81-proof.json).
+La PR #28 añadió `.factory/initiatives/<id>/plan.md` y jobs dentro de cada iniciativa. El tipo es un dato y no cambia el ID. El planner propone y el coordinador mantiene el plan único. El recorder local permite preparar, leer y revisar el plan con SHA esperado e historial; no ejecuta dependencias ni certifica el progreso declarado. Véase la [evidencia](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/setup-81-proof.json).
 
 El setup recoge la elección local o GitHub, manteniendo el registro local canónico y permisos remotos separados. Las etiquetas de tipo y preparación existen en el repositorio; su aplicación corresponde al coordinador dentro del grant. La detección de calidad recomienda controles no detectados sin ejecutar scripts, instalar herramientas ni fingir resultados. Los briefs antiguos no se reescriben. Estos son procedimientos y soporte acotado, no un setup CLI ni autosincronización general. El contrato de uso está en [trabajo durable](durable-work.md) y [entrada nativa](s01-intake.md).
 
@@ -79,7 +79,7 @@ Falta contrastar de forma integrada toda la experiencia de S02, incluida la cont
 
 ## S03. Continuar ante una cuota agotada
 
-#66 está cerrada con el alcance aceptado por el operador. El caller investigador conserva ruta y brief fijados, presupuestos acumulativos y resultados durables. Las pruebas cubren indisponibilidad, cuota Go reconocida, incompatibilidad, agotamiento de intentos/ruta y rechazo de señales ambiguas. Véanse [guía](model-routing.md), [contrato](../.audit/fallback-66-quota-contract.json) y [revisión/evidencia](../.audit/fallback-66-quota-proof.json).
+#66 está cerrada con el alcance aceptado por el operador. El caller investigador conserva ruta y brief fijados, presupuestos acumulativos y resultados durables. Las pruebas cubren indisponibilidad, cuota Go reconocida, incompatibilidad, agotamiento de intentos/ruta y rechazo de señales ambiguas. Véanse [guía](model-routing.md), [contrato](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/fallback-66-quota-contract.json) y [revisión/evidencia](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/fallback-66-quota-proof.json).
 
 La ejecución real primaria completó una lectura con cita en la versión anterior al observer de cuota. El observer posterior se comprueba con transporte controlado; su envelope publicado es un contrato conocido, no prueba de la respuesta que emita hoy el backend migrado. No se presenta como transición real observada ni clasificador universal.
 
@@ -87,9 +87,9 @@ No se ampliarán ahora proveedores, códigos o dispatchers para cerrar S03 artif
 
 ## S04. Recuperar un trabajo interrumpido
 
-#68 está verificada para los casos soportados de la [entrada normal](local-worker-lifecycle.md): mismo arranque, un intento original y como máximo un sucesor con revisión y grant explícitos. La [prueba de reinicio del proceso Pi](../.audit/recovery-68-environment-parent-v2.json) confirma su salida antes de consultar desde otro proceso. En la [prueba real de modelo](../.audit/recovery-68-real-parent-final.json), A001 quedó parcial por un fallo del instrumento; se revisó sin repetirlo y A002 terminó correctamente.
+#68 está verificada para los casos soportados de la [entrada normal](local-worker-lifecycle.md): mismo arranque, un intento original y como máximo un sucesor con revisión y grant explícitos. La [prueba de reinicio del proceso Pi](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/recovery-68-environment-parent-v2.json) confirma su salida antes de consultar desde otro proceso. En la [prueba real de modelo](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/recovery-68-real-parent-final.json), A001 quedó parcial por un fallo del instrumento; se revisó sin repetirlo y A002 terminó correctamente.
 
-La [reconciliación remota](../.audit/recovery-68-effects-parent-v2.json) usa un transporte GitHub simulado y SIGKILL real del cliente, no GitHub real. La [evaluación de los cinco criterios](../.audit/recovery-68-acceptance-scope-deepseek.json) distingue esas evidencias. Identidad incierta, candidato cambiado o efecto no reconciliable bloquean sin repetir a ciegas.
+La [reconciliación remota](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/recovery-68-effects-parent-v2.json) usa un transporte GitHub simulado y SIGKILL real del cliente, no GitHub real. La [evaluación de los cinco criterios](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/recovery-68-acceptance-scope-deepseek.json) distingue esas evidencias. Identidad incierta, candidato cambiado o efecto no reconciliable bloquean sin repetir a ciegas.
 
 La prioridad 6 aborda lo que falta: recuperar tras reiniciar la máquina, conservando artefactos y referencias de efectos. Sigue siendo un objetivo de v1, no una capacidad ya entregada ni autorización para reiniciar este entorno. No se promete backup ni exactly-once en sistemas externos.
 

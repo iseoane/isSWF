@@ -1,8 +1,0 @@
-{
-  "source": ".audit/activation-44-snapshot-v2/payload/tools/factory-package.mjs",
-  "method": "Exact frozen helper evaluated with a synthetic filesystem where only root exists; no actual root writes or OS canonicalization proof.",
-  "supplied": "/fresh-store",
-  "expected": "/fresh-store",
-  "actual": "/resh-store",
-  "matches": false
-}

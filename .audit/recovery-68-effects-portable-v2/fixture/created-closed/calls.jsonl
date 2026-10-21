@@ -1,4 +1,0 @@
-{"method":"GET","path":"repos/fixture/repository/pulls?state=all&head=fixture%3Ajobs%2FJ900&base=main&per_page=100&page=1"}
-{"method":"GET","path":"repos/fixture/repository/git/ref/heads/jobs/J900"}
-{"method":"GET","path":"repos/fixture/repository/git/ref/heads/main"}
-{"method":"POST","path":"repos/fixture/repository/pulls"}

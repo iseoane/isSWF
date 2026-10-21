@@ -1,7 +1,0 @@
-{
-  "verdict": "PASS",
-  "bindingsSha256": "5fec51ac9c5e987ba77eeedf1bfe40cb3867e0bb211f34f53c5b7bb3a5fd2990",
-  "reviewSha256": "a7f463c8e23e3cc4e44e4705c1d17648eea2767a68e968da0ad2d5716b297207",
-  "workerTotal": 1,
-  "retries": 0
-}

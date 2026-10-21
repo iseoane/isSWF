@@ -1,9 +1,0 @@
-{
-  "snapshot": "d4f2d5af93410dc00d83c75ae16b8934e9fc3b0227482e17b12f58a13d122c13",
-  "base": "7fd328f43505aaf27757d9fe33f7eee53939042d",
-  "files": [
-    ".agents/roles/worker.md",
-    ".audit/worker-58-build-brief.md"
-  ],
-  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
-}

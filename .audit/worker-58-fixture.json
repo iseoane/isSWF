@@ -1,7 +1,0 @@
-{
-  "root": "/tmp/isswf-worker58-YbnlR3",
-  "base": "7f77e40cabf2c35171073df29d9c3ae9e5fc3804",
-  "baselineExit": 1,
-  "baselineStderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n4 !== 10\n\n    at file:///tmp/isswf-worker58-YbnlR3/check.mjs:3:8\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 4,\n  expected: 10,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.1\n",
-  "allowedWriterPath": "sum.mjs"
-}

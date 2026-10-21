@@ -1,8 +1,0 @@
-{
-  "status": "PASS",
-  "root": "/tmp/isswf-recovery68-real-preserve-ZQu8fr",
-  "actualHarnessCollectsInvocationDigest": true,
-  "actualHarnessRefusesInvocationDrift": true,
-  "mockedRecords": true,
-  "providerPrompts": 0
-}

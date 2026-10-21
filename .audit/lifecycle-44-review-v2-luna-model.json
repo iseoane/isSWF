@@ -1,7 +1,0 @@
-{
-  "actor": "acd3a380c6e90a284",
-  "log": "/home/iseoane/.pi/agent/pstack/01a134d1-4f4f-76c1-a693-aff6225fb9a9/agents/2026-10-15T18-37-15-043Z_2ff9c87d-77bb-4643-9f5a-808bc6aa7076.jsonl",
-  "provider": "openai-codex",
-  "model": "gpt-6-luna",
-  "thinkingLevel": "high"
-}

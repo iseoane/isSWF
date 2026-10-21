@@ -1,9 +1,0 @@
-{
-  "agent_id": "ae8dac1d22b322631",
-  "log": "2026-10-14T03-59-24-872Z_73bf98b8-9551-4ba8-b38d-7ef2bf1656f9.jsonl",
-  "provider": "openai-codex",
-  "model": "gpt-6-luna",
-  "thinking_level": "high",
-  "evidence": "Parent read provider/model from assistant message metadata and thinking_level_change from this session's agent log; no private thinking inspected.",
-  "fallback": "none authorized"
-}

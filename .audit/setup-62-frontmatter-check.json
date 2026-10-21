@@ -1,7 +1,0 @@
-{
-  "validTwoFields": true,
-  "validOptionalTrue": true,
-  "validOptionalFalse": true,
-  "invalidOptionalValueRejected": true,
-  "scope": "Minimal existing core harness supported-field matcher, not general YAML validation."
-}

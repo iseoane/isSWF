@@ -1,6 +1,0 @@
-{
-  "exit": 1,
-  "stdout": "",
-  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\n[Error: ENOENT: no such file or directory, open '/tmp/isswf-markdown-proof-OypcaU/project/docs/durable-work.md'] {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '/tmp/isswf-markdown-proof-OypcaU/project/docs/durable-work.md'\n}\n\nNode.js v26.8.1\n",
-  "scope": "Observed existing core verifier; nonzero is FAIL, not passing proof."
-}

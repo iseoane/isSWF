@@ -1,9 +1,0 @@
-{
-  "snapshot": "1543f62110af36e05f845c0083625023a0f78ad0ba0ede125dcd29e11b987817",
-  "base": "7560d2ce12f6dd1e861e41896ccb4801a140498b",
-  "files": [
-    "docs/arranque-por-proyecto.md",
-    "docs/plan-v1.md"
-  ],
-  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
-}

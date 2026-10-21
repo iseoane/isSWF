@@ -116,7 +116,7 @@ Límite: la copia se tomó con el store abierto, sin instantánea atómica. El �
 
 El usuario propuso parar y rearrancar el servidor. Se envió `SIGTERM` al proceso, esperó su salida y se observó el directorio real: el proceso terminó pronto, pero `engram.db-wal` (27 896 552 B, mtime sin cambios) y `engram.db-shm` siguieron presentes, y la sonda volvió a devolver exit 2 con el mismo mensaje. Es decir, **la predicción basada en la copia no se cumplió**: retirar los sidecars en una copia hacía pasar la sonda, pero la parada de Engram no los retira.
 
-Consecuencia práctica: la condición 6 depende de que existan esos ficheros, no de que el store esté abierto en ese momento. Un store que Engram haya abierto en modo WAL y dejado con sidecars seguirá rechazando la sonda de forma estable. `compatibility` no puede ser la comprobación previa de este store. El [registro](../../.audit/engram-checkpoint-verify.json) conserva la secuencia completa, incluida la corrección.
+Consecuencia práctica: la condición 6 depende de que existan esos ficheros, no de que el store esté abierto en ese momento. Un store que Engram haya abierto en modo WAL y dejado con sidecars seguirá rechazando la sonda de forma estable. `compatibility` no puede ser la comprobación previa de este store. El [registro](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/engram-checkpoint-verify.json) conserva la secuencia completa, incluida la corrección.
 
 El servidor se relanzó desde `~/Work/agent-depot` con `ENGRAM_CLOUD_AUTOSYNC=1` y volvió a escuchar en `127.0.0.1:7437`. Su propio log informó `[autosync] ERROR: cloud token is not configured ... autosync disabled`, y `GET /sync/status` respondió `enabled=false` con `reason_code: blocked_unenrolled`. El cloud no está configurado; las líneas de `sync.log` corresponden a los hooks de exportación/importación de chunks en Git, no a tráfico de nube. El prefijo de cada línea es el **nombre de la máquina** (`sync.sh` registra `[$(hostname -s)]`), no un proyecto: `[omarchy] Push OK` significa que este equipo empujó su copia de chunks. Una lectura anterior de este informe lo interpretó como otro proyecto y era incorrecta. Los hooks que invocan `sync.sh` son la extensión de Pi y los hooks de Codex y Claude del usuario; su aviso `binario engram no encontrado en el PATH del hook` se analizó por separado.
 - Para el camino vivo, el canal autoritativo es el propio store en marcha: `GET /compatibility` del servidor devuelve `source: active`, `status: ready` y `capability: startup-verified-store-v1` (README L250-258).
@@ -125,7 +125,7 @@ El servidor se relanzó desde `~/Work/agent-depot` con `ENGRAM_CLOUD_AUTOSYNC=1`
 
 ### Huella
 
-Nada se escribió en `~/.engram`; sólo lecturas (`cp -a`) y ejecuciones de la sonda y de lecturas acotadas en copias bajo `/var/tmp`, borradas al terminar. El directorio real conserva tamaños y mtimes anteriores (engram.db 43 085 824 B, `-wal` 27 896 552 B, `-shm` 32 768 B). El resumen estructurado está en [`.audit/engram-probe-copy.json`](../../.audit/engram-probe-copy.json).
+Nada se escribió en `~/.engram`; sólo lecturas (`cp -a`) y ejecuciones de la sonda y de lecturas acotadas en copias bajo `/var/tmp`, borradas al terminar. El directorio real conserva tamaños y mtimes anteriores (engram.db 43 085 824 B, `-wal` 27 896 552 B, `-shm` 32 768 B). El resumen estructurado está en [`.audit/engram-probe-copy.json`](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/engram-probe-copy.json).
 
 ## Proyecto, alcance y sincronización
 
@@ -187,9 +187,9 @@ env -i PATH=/home/linuxbrew/.linuxbrew/bin:/usr/bin:/bin HOME="$TMP/home" \
 
 ## Verificación independiente posterior
 
-El padre ejecutó [verify-engram-scope.py](../../.audit/verify-engram-scope.py) con una base temporal, dos proyectos ficticios y marcadores de una sola palabra. La [salida conservada](../../.audit/engram-scope.json) registra ocho comprobaciones: directorio fresco sin autorización automática de apertura, apertura deliberada del fixture, recuperación en procesos nuevos, rechazo de memoria del otro proyecto y contexto acotado. No se usó `--all` ni se abrió el store real. Esto amplía la prueba de selectores, no certifica aislamiento frente a un caller que pueda elegir cualquier proyecto.
+El padre ejecutó [verify-engram-scope.py](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/verify-engram-scope.py) con una base temporal, dos proyectos ficticios y marcadores de una sola palabra. La [salida conservada](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/engram-scope.json) registra ocho comprobaciones: directorio fresco sin autorización automática de apertura, apertura deliberada del fixture, recuperación en procesos nuevos, rechazo de memoria del otro proyecto y contexto acotado. No se usó `--all` ni se abrió el store real. Esto amplía la prueba de selectores, no certifica aislamiento frente a un caller que pueda elegir cualquier proyecto.
 
-La [sonda del padre sobre el directorio real](../../.audit/engram-compatibility.json) devolvió exit2 y `unsafe or invalid fixture metadata`; no se continuó con operaciones de memoria. No se ha determinado la causa concreta en el store real ni se interpreta como corrupción. La integración normal sigue apagada.
+La [sonda del padre sobre el directorio real](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/engram-compatibility.json) devolvió exit2 y `unsafe or invalid fixture metadata`; no se continuó con operaciones de memoria. No se ha determinado la causa concreta en el store real ni se interpreta como corrupción. La integración normal sigue apagada.
 
 ## Límites
 

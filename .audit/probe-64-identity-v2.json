@@ -1,9 +1,0 @@
-{
-  "snapshot": "7da7450df25a22b41b5a85504142c879f54c1513df90fa042279415905c1de6d",
-  "base": "5c9a516fa967a9f7b6fcbaf774a315b59a6cff94",
-  "files": [
-    ".audit/probe-64-build-brief.md",
-    ".audit/probe-64.mjs"
-  ],
-  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
-}

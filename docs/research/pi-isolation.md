@@ -12,7 +12,7 @@ El resultado respalda seguir usando mecanismos existentes de Linux, en lugar de 
 
 ## Qué se ejecutó
 
-El [instrumento](probes/pi-isolation.py) y su [log final](probes/pi-isolation.log) conservan los casos. La fuente ejecutada tiene SHA-256 `afb6c8b6c729297664e3f2cc9645ae505f4b0a1c4ee4c19d780b6dd469a3f1e6`. El log final contiene 195 comprobaciones correctas. El revisor GPT 6.1 repitió `all` dos veces, con 195 comprobaciones correctas en cada ejecución, y reprodujo el rechazo de la mutación de scratch. El [dictamen técnico](../../.audit/isolation-technical-review.md) y los [logs independientes](../../.audit/isolation-independent-all-1.log) conservan esa evidencia. La [auditoría del rastro](../../.audit/isolation-trail-review.md), realizada con GPT 6, no encontró un PASS global sin prueba en los mensajes examinados. Se construyó en `/tmp/isswf-isolation-spike.v3JOF0`; las ejecuciones conservadas crean sus fixtures en directorios temporales.
+El [instrumento](probes/pi-isolation.py) y su [log final](probes/pi-isolation.log) conservan los casos. La fuente ejecutada tiene SHA-256 `afb6c8b6c729297664e3f2cc9645ae505f4b0a1c4ee4c19d780b6dd469a3f1e6`. El log final contiene 195 comprobaciones correctas. El revisor GPT 6.1 repitió `all` dos veces, con 195 comprobaciones correctas en cada ejecución, y reprodujo el rechazo de la mutación de scratch. El [dictamen técnico](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/isolation-technical-review.md) y los [logs independientes](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/isolation-independent-all-1.log) conservan esa evidencia. La [auditoría del rastro](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/isolation-trail-review.md), realizada con GPT 6, no encontró un PASS global sin prueba en los mensajes examinados. Se construyó en `/tmp/isswf-isolation-spike.v3JOF0`; las ejecuciones conservadas crean sus fixtures en directorios temporales.
 
 La raíz del sandbox contiene runtime montado readonly, `/proc` propio y espacios temporales. Se separan namespaces user, PID, red, IPC y UTS; se eliminan capacidades y entorno heredado. El launcher cierra descriptores salvo stdio deliberado. No se montan el home real ni archivos privados de autoridad.
 
@@ -53,7 +53,7 @@ Antes de aceptar el resultado se detectaron y corrigieron cuatro defectos del pr
 3. La ejecución conjunta incluía namespaces de ensayos anteriores. Seleccionaba un PID1 equivocado. Ahora la selección pertenece al árbol del bwrap actual; dos ejecuciones completas consecutivas comprobaron esa corrección.
 4. El valor de la credencial falsa se incluía como expectativa en argumentos del helper. Ahora el sandbox recibe rutas y `token: null`, no esos bytes.
 
-Estos fallos no se presentan como escapes de Bubblewrap ni como defectos de Pi. La evidencia y correcciones quedan registradas localmente en `.audit/isolation-findings.md`; no hay tracker remoto autorizado. El [control de mutación](../../.audit/isolation-control-check.py) permite repetir el rechazo del falso positivo.
+Estos fallos no se presentan como escapes de Bubblewrap ni como defectos de Pi. La evidencia y correcciones quedan registradas localmente en `.audit/isolation-findings.md`; no hay tracker remoto autorizado. El [control de mutación](https://github.com/iseoane/isSWF/blob/7678f6476501c410245d0056a1e1c5e262ff8c21/.audit/isolation-control-check.py) permite repetir el rechazo del falso positivo.
 
 ## Límites y siguiente decisión
 

@@ -1,1 +1,0 @@
-{"version":1,"attemptId":"admission-A001","taskSha256":"e7e730c4c751ef6204b15328b6fcbd1e6d3dc1181fbcbbcc313ecc63bae3fc1b","seq":3,"init":{"pid":596476,"startTicks":"20117645","state":"R","bootId":"7daa6db0-3e89-4966-84ee-edbeaaa2bae8","exe":"/usr/bin/bwrap","namespace":"pid:[4026532442]"}}

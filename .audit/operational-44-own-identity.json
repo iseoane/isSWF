@@ -1,9 +1,0 @@
-{
-  "snapshot": "985bb6558486c965f475f406affdedeb8827cf1b76e184f5ec6aca2d79ed1fe9",
-  "base": "7560d2ce12f6dd1e861e41896ccb4801a140498b",
-  "files": [
-    ".factory/jobs/J802/check.mjs",
-    "tools/isswf-job.mjs"
-  ],
-  "scope": "Owned regular-file review fixture only. Validates stored bytes and digest, not provenance, authenticity, behavior or sandbox."
-}
