@@ -33,12 +33,30 @@ Pi is the reference execution environment. A Claude Code plugin is also included
 
 ## Installation
 
-For now, use a **prepared local release folder**. These instructions do not assume that a package has been published to npm or a public marketplace. See [installation](docs/en/installation.md) if you need to prepare that folder.
+Download [1.1.1 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.1.1). The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
+
+Linux x64 is the validated target. The corrected runtime has passed a real Pi worker flow with the existing Pi SDK, protected checks and Linux isolation. Earlier prerelease `1.1.0` cannot load that SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. The Claude plugin is included, but its native delegation is not covered by the Pi worker test. Check the release's verification evidence and status before use.
+
+### Download and verify
+
+Run these commands from a directory where you want to keep the release. Keep the complete extracted package, not just its executable.
+
+```bash
+mkdir isswf-1.1.1
+cd isswf-1.1.1
+gh release download v1.1.1 --repo iseoane/isSWF \
+  --pattern 'isswf-1.1.1-bun-linux-x64.tgz' --pattern SHA256SUMS
+sha256sum --check --ignore-missing SHA256SUMS
+tar -xzf isswf-1.1.1-bun-linux-x64.tgz
+RELEASE="$(pwd)/package"
+```
+
+Continue in the same shell so that `RELEASE` names the absolute package path. Checksums detect damage; they are not publisher signatures. See [installation](docs/en/installation.md) for setup, updates and building from source.
 
 ### Pi
 
 ```bash
-pi install /path/to/isswf-release
+pi install "$RELEASE"
 ```
 
 This makes the package available globally. Add `--local` to install it for the current project instead.
@@ -46,7 +64,7 @@ This makes the package available globally. Add `--local` to install it for the c
 ### Claude Code
 
 ```bash
-claude plugin marketplace add /path/to/isswf-release
+claude plugin marketplace add "$RELEASE"
 claude plugin install isswf@isswf --scope user
 ```
 

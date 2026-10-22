@@ -33,7 +33,7 @@ export const main = name => context()?.tool === name;
 export const path = name => join(context().root, name);
 `);
     const imports = toolNames.map(name => `${JSON.stringify(name)}: () => import(${JSON.stringify('./tools/' + name + '.mjs')})`).join(',\n');
-    await writeFile(join(generated, 'entry.mjs'), `import { dirname, join, resolve, basename, isAbsolute } from 'node:path';
+    await writeFile(join(generated, 'entry.mjs'), `import { dirname, join, resolve, basename } from 'node:path';
 import { realpathSync, existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease } from './tools/release-source.mjs';
@@ -44,7 +44,7 @@ try {
   let [first, ...args] = process.argv.slice(2), tool = 'isswf';
   if (first === '__tool') {
     tool = args.shift();
-  } else if (first?.endsWith('.mjs') && isAbsolute(first)) {
+  } else if (first?.endsWith('.mjs')) {
     const script = resolve(first), name = basename(script, '.mjs');
     if (dirname(script) === join(root, 'tools') && Object.hasOwn(tools, name)) {
       tool = name;
@@ -70,7 +70,7 @@ try {
 `);
     const binary = 'bin/' + (target.includes('windows') ? 'isswf.exe' : 'isswf');
     await mkdir(join(staging, 'bin'));
-    command(compiler, ['build', '--compile', '--target=' + target, join(generated, 'entry.mjs'), '--outfile', join(staging, binary)]);
+    command(compiler, ['build', '--compile', '--compile-autoload-package-json', '--target=' + target, join(generated, 'entry.mjs'), '--outfile', join(staging, binary)]);
     const bytes = await readFile(join(staging, binary));
     return { binary, bytes, version, target, os: target.split('-')[1] === 'windows' ? 'win32' : target.split('-')[1], arch: target.split('-')[2] };
   } finally { await rm(generated, { recursive: true, force: true }); }

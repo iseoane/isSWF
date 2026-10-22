@@ -9,17 +9,17 @@ This guide describes the complete release package. The older Markdown-only mater
 From the development checkout, use a full committed revision:
 
 ```sh
-node tools/build-release.mjs --source /absolute/isSWF --revision FULL_COMMIT_SHA --output /absolute/releases/isswf-1.1.0 --runtime bun
+node tools/build-release.mjs --source /absolute/isSWF --revision FULL_COMMIT_SHA --output /absolute/releases/isswf-1.1.1 --runtime bun
 ```
 
-The builder defaults to `--runtime bun`. Building needs Node.js, Git, and a trusted Bun compiler on PATH. Bun 1.4.3 is the locally tested compiler; `--bun /absolute/bun` selects it explicitly. The installed core executable needs neither Node.js nor Bun on PATH. Host applications, project checks, SDKs, Git, and isolation tools retain their own prerequisites. The output must not exist and must be outside the source repository. The builder reads committed blobs, not dirty working files. The output includes the runtime, English shared instructions, Claude entry points, selected guides, templates, model defaults, and preserved historical methodology sources. New releases set `methodologySha` to their committed source revision, so new installed jobs consume the English profiles and references. Historical sources remain pinned to their original bytes for provenance; existing attempts and retained releases are not rewritten. It excludes Git history, project initiatives, tests, development dependencies, audit archives, and credentials.
+The builder defaults to `--runtime bun`. Building needs Node.js, Git, and a trusted Bun compiler on PATH. Bun 1.4.3 is the locally tested compiler; `--bun /absolute/bun` selects it explicitly. The installed core executable needs neither Node.js nor Bun on PATH. The compiler enables `--compile-autoload-package-json` so generated tasks can resolve the existing host SDK and its transitive dependencies. Host applications, project checks, SDKs, Git, and isolation tools retain their own prerequisites. The output must not exist and must be outside the source repository. The builder reads committed blobs, not dirty working files. The output includes the runtime, English shared instructions, Claude entry points, selected guides, templates, model defaults, and preserved historical methodology sources. New releases set `methodologySha` to their committed source revision, so new installed jobs consume the English profiles and references. Historical sources remain pinned to their original bytes for provenance; existing attempts and retained releases are not rewritten. It excludes Git history, project initiatives, tests, development dependencies, audit archives, and credentials.
 
 Each Bun release contains `bin/isswf` on Unix or `bin/isswf.exe` on Windows, bundled tool code, and agent-readable resources. Original `.mjs` files remain as verified provenance, dynamic helpers, and inputs for immutable task/lifecycle snapshots; they are not a second installed CLI to select instead of the executable. Generated tasks are interpreted by the embedded Bun engine. Development remains Node.js with `.mjs`. The release receipt records the source revision, file hashes including the executable, and Git blob identities for packaged source reads. It detects accidental damage; it is not a signature, permission grant, or proof that an untrusted publisher is safe.
 
 To produce a local npm tarball, run:
 
 ```sh
-npm pack /absolute/releases/isswf-1.1.0 --ignore-scripts --pack-destination /absolute/releases
+npm pack /absolute/releases/isswf-1.1.1 --ignore-scripts --pack-destination /absolute/releases
 ```
 
 No public npm package or remote marketplace is published by these commands. The package retains the name `isswf-pi-resources`; the executable is `isswf` when an npm installation exposes its bin. Pi and Claude users invoke the bundled executable directly without a second npm installation. The generated package manifest records its operating system, architecture, Bun version, and target. The same package version is used by the core and both integrations.
@@ -37,8 +37,8 @@ The examples below use a Bun release. On Windows, use `bin/isswf.exe` instead of
 Install the trusted built directory globally or for the current project:
 
 ```sh
-pi install /absolute/releases/isswf-1.1.0
-pi install /absolute/releases/isswf-1.1.0 --local
+pi install /absolute/releases/isswf-1.1.1
+pi install /absolute/releases/isswf-1.1.1 --local
 ```
 
 Choose one scope. Project scope changes `.pi/settings.json` and requires Pi project trust. Global scope makes the skills available across repositories but creates no project `.isswf`.
@@ -52,7 +52,7 @@ Invoke `/skill:isswf-setup` in the target repository. The skill resolves its bun
 The built release contains a local marketplace and plugin. Register and install it with Claude's own manager:
 
 ```sh
-claude plugin marketplace add /absolute/releases/isswf-1.1.0
+claude plugin marketplace add /absolute/releases/isswf-1.1.1
 claude plugin install isswf@isswf --scope user
 ```
 
@@ -61,7 +61,7 @@ Use `--scope project` instead of `user` for shared project settings, or `--scope
 For a one-session evaluation without installation:
 
 ```sh
-claude --plugin-dir /absolute/releases/isswf-1.1.0
+claude --plugin-dir /absolute/releases/isswf-1.1.1
 ```
 
 These commands do not configure Pi models as Claude models. Claude's native delegation still has the limitations in [host portability](host-portability.md).

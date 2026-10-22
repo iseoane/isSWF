@@ -39,6 +39,8 @@ node tools/build-release.mjs --source "$PWD" --revision FULL_COMMIT_SHA --output
 
 That folder is what the [installation commands](installation.md) use. Building it does not publish to npm, register a marketplace, or change another project's version. The SHA identifies the chosen source; installing the prepared folder does not create a new source revision.
 
+The compiler enables `--compile-autoload-package-json` so generated tasks can resolve the existing host SDK's package entry and transitive dependency exports. This does not bundle or install that SDK. The executable also resolves relative `.mjs` task paths from the working directory.
+
 Use `--target` to select a separate Linux, macOS, or Windows artifact. These are compile targets, not verified platform parity. The complete installed mutation and isolation workflow remains Linux-only.
 
 The [technical installation guide](../installation.md) covers tarballs and the exact package checks.
@@ -53,7 +55,7 @@ node tools/check-quality.mjs
 The portable check includes `node tooling/quality/check-docs.mjs`: it checks current guide mirrors, local links, section coverage, identical shell examples, and the archived originals' bytes and modes. It also rejects retired paths reintroduced into active documentation and archived audit procedures copied into current technical guides. It does not prove translation quality or execute the examples.
 
 
-When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires both the artifact and Linux sandbox checks. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk without changing the diagnostic evidence root policy. These fixtures do not execute Claude or real providers.
+When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` tasks, pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires both the artifact and Linux sandbox checks. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk without changing the diagnostic evidence root policy. These fixtures do not execute Claude or real providers.
 
 Some checks use the current files, while committed-source packaging checks use a Git revision. A passing run does not mean every uncommitted file has been packaged or every live model integration has been tested.
 

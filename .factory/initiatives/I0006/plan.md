@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Build a Bun executable package for Pi and Claude while preserving Node+mjs development and installed version/integrity/isolation contracts
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: Independent review pending; native evidence extension in progress. No release or merge before sufficient review and exact-head CI.
-- Next step: Review the complete final candidate using the native caller, then publish only the gated Linux x64 prerelease.
+- Blocker: None for the bounded prerelease unit; stable workflows are tracked separately in J003.
+- Next step: Retain exact prerelease evidence; do not claim stable workflow validation.
 
 ### Acceptance
 
@@ -26,15 +26,19 @@ This coordinator-owned plan records reported progress, not execution permission 
 - https://github.com/iseoane/isSWF/pull/82
 - https://github.com/iseoane/isSWF/actions/runs/39747142149
 - jobs/J001/brief-r1.md
+- 62c52118cb0cf94951997b9b99896dd17478a85d
+- https://github.com/iseoane/isSWF/actions/runs/39841389833
+- https://github.com/iseoane/isSWF/pull/82#issuecomment-6349955011
+- https://github.com/iseoane/isSWF/releases/tag/v1.1.0
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Objective: Admit complete coherent native-review evidence under explicit bounded grants without changing route, independence or cost controls
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: Final checks and exact-candidate native invocation pending
-- Next step: Commit and verify the bounded extension, then prepare and inspect one independent review package
+- Blocker: None for the bounded prerelease unit; stable workflows are tracked separately in J003.
+- Next step: Retain exact prerelease evidence; do not claim stable workflow validation.
 
 ### Acceptance
 
@@ -48,3 +52,27 @@ This coordinator-owned plan records reported progress, not execution permission 
 - jobs/J002/brief-r1.md
 - tooling/.local/bun-release-delivery/reviewer-capacity-tests.log
 - tooling/.local/bun-release-delivery/reviewer-preflight.json
+- 62c52118cb0cf94951997b9b99896dd17478a85d
+- https://github.com/iseoane/isSWF/actions/runs/39841389833
+- https://github.com/iseoane/isSWF/pull/82#issuecomment-6349955011
+- https://github.com/iseoane/isSWF/releases/tag/v1.1.0
+
+## J003
+
+- Status: blocked
+- Objective: Document actual release installation and verify real compiled-runtime workflows before stable promotion
+- Depends on: J001, J002
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Blocker: Published real worker terminal-fails during SDK loading before provider prompt; minimal compiled Bun reproduces external module resolution failure.
+- Next step: Fix and regression-test compiled SDK module resolution, then authorize a fresh bounded candidate attempt; preserve BUN-REAL-A001.
+
+### Acceptance
+
+- Both README languages use actual private GitHub assets, checksums and extracted package paths with current preview limitations.
+- Actual SDK and real provider-driven worker change pass protected checks, attributed boundary controls, scope and cessation gates.
+- Claude host/model validation remains separate; changed candidates require applicable exact-head CI and independent review before stable.
+
+### Evidence
+
+- jobs/J003/brief-r1.md
+- tooling/.local/bun-release-delivery/stable-validation-root.txt
