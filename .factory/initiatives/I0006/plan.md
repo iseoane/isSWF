@@ -59,12 +59,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J003
 
-- Status: blocked
+- Status: in-review
 - Objective: Document actual release installation and verify real compiled-runtime workflows before stable promotion
 - Depends on: J001, J002
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
-- Blocker: Published real worker terminal-fails during SDK loading before provider prompt; minimal compiled Bun reproduces external module resolution failure.
-- Next step: Fix and regression-test compiled SDK module resolution, then authorize a fresh bounded candidate attempt; preserve BUN-REAL-A001.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md) (pending until prepared)
+- Blocker: Final committed artifact validation, independent review and exact-head CI pending; do not promote based on fixture success alone.
+- Next step: Build the final1.1.1 candidate, repeat actual SDK/provider validation and native review, require exact-head CI, then publish only the verified Linux x64 release.
 
 ### Acceptance
 
@@ -75,4 +75,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - jobs/J003/brief-r1.md
+- jobs/J003/brief-r2.md
+- e457d0b54f910f2f20a5a7e66d3dfcc6dc3d1e6a
 - tooling/.local/bun-release-delivery/stable-validation-root.txt
