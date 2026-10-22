@@ -138,7 +138,7 @@ if (available.error || available.status !== 0) {
     await writeFile(retainedBinary, binaryBytes); await writeFile(retainedReceipt, receiptBytes); await chmod(retainedReceipt, 0o444);
     const sandbox = process.platform === 'linux' ? spawnSync('bwrap', ['--unshare-user', '--unshare-pid', '--unshare-net', '--ro-bind', '/usr', '/usr', '--symlink', 'usr/bin', '/bin', '--symlink', 'usr/lib', '/lib', '--symlink', 'usr/lib', '/lib64', '--proc', '/proc', '--dev', '/dev', '--', '/usr/bin/true'], { encoding: 'utf8', timeout: 10000 }) : null;
     const workerChecked = sandbox?.status === 0;
-    if (process.env.ISSWF_TEST_BUN_WORKER === '1') assert(workerChecked, 'Requested Linux Bubblewrap capability is unavailable');
+    if (process.env.ISSWF_TEST_BUN_WORKER === '1') assert(workerChecked, 'Requested Linux Bubblewrap capability is unavailable: ' + (sandbox?.error?.message || sandbox?.stderr || 'platform=' + process.platform));
     if (workerChecked) {
       await writeFile(join(project, 'brief.md'), 'Synthetic offline task only.\n');
       run('git', ['-C', project, 'add', '.']); run('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Pinned synthetic task']);
