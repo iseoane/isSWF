@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, cp, readFile, writeFile, readdir, rm, symlink, chmod } 
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import { verifyRelease, releaseInvocation } from '../tools/release-source.mjs';
 import { matchesBoundaryControls } from '../tools/pi-worker-task.mjs';
 import { sdkPackageManifest } from '../tools/sdk-package.mjs';
@@ -17,15 +18,24 @@ assert.equal(matchesBoundaryControls({ ...controls, factoryCreate: 'EACCES' }), 
 for (const key of Object.keys(controls)) assert.equal(matchesBoundaryControls({ ...controls, [key]: 'unexpected-success' }), false);
 assert.equal(matchesBoundaryControls({ ...controls, extra: true }), false);
 
+const metadataRoot = await mkdtemp(join(tmpdir(), 'isswf-sdk-metadata-'));
+try {
+  const packageRoot = join(metadataRoot, 'node_modules/import-only-sdk'); await mkdir(packageRoot, { recursive: true });
+  await writeFile(join(packageRoot, 'package.json'), JSON.stringify({ name: 'import-only-sdk', type: 'module', exports: { import: './index.mjs' } }));
+  await writeFile(join(packageRoot, 'index.mjs'), "throw Error('Metadata lookup must not execute the package entry');\n");
+  assert.equal(await sdkPackageManifest('import-only-sdk', join(metadataRoot, 'consumer.mjs')), join(packageRoot, 'package.json'));
+} finally { await rm(metadataRoot, { recursive: true, force: true }); }
+
 const compiler = process.env.ISSWF_TEST_BUN || 'bun';
 const available = spawnSync(compiler, ['--version'], { encoding: 'utf8' });
 if (available.error || available.status !== 0) {
   if (process.env.ISSWF_TEST_BUN) throw Error('Requested Bun compiler is unavailable');
   console.log('SKIP Bun artifact checks: compiler unavailable; denied-write semantics checked without compilation');
 } else {
-  const source = resolve(process.argv[2] || '.'), temp = await mkdtemp(join(tmpdir(), 'isswf-bun-release-'));
+  const temporaryBase = resolve(process.env.ISSWF_TEST_BUN_TMPDIR || tmpdir());
+  const source = resolve(process.argv[2] || '.'), temp = await mkdtemp(join(temporaryBase, 'isswf-bun-release-'));
   const fixture = join(temp, 'source'), project = join(temp, 'project spaces ñ'), store = join(temp, 'store');
-  const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', npm_config_cache: join(temp, 'npm-cache') };
+  const env = { ...process.env, TMPDIR: temporaryBase, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', npm_config_cache: join(temp, 'npm-cache') };
   const hash = bytes => createHash('sha256').update(bytes).digest('hex');
   function run(binary, args, ok = true, environment = env) {
     const result = spawnSync(binary, args, { cwd: temp, env: environment, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });
@@ -150,6 +160,12 @@ if (available.error || available.status !== 0) {
       await writeFile(join(sdk, 'node_modules/typebox/index.cjs'), 'exports.Type=new Proxy({}, {get:()=>()=>({})});\n');
       assert.equal(await sdkPackageManifest('typebox', join(sdk, 'index.cjs')), join(sdk, 'node_modules/typebox/package.json'));
       await assert.rejects(sdkPackageManifest('not-installed', join(sdk, 'index.cjs')), /Cannot find module/u);
+      const importOnly = join(sdk, 'node_modules/import-only-sdk'); await mkdir(importOnly);
+      await writeFile(join(importOnly, 'package.json'), JSON.stringify({ name: 'import-only-sdk', type: 'module', exports: { import: './index.mjs' } }));
+      await writeFile(join(importOnly, 'index.mjs'), "throw Error('Metadata lookup must not execute the package entry');\n");
+      const metadataProbe = join(temp, 'metadata-probe.mjs');
+      await writeFile(metadataProbe, `import {sdkPackageManifest} from ${JSON.stringify(pathToFileURL(join(installed, 'tools/sdk-package.mjs')).href)}; console.log(await sdkPackageManifest('import-only-sdk', ${JSON.stringify(join(sdk, 'index.cjs'))}));\n`);
+      assert.equal(run(executable, [metadataProbe], true, noRuntime).stdout.trim(), join(importOnly, 'package.json'));
       const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: executable, authPath: join(temp, 'absent-auth'), profile: { repo: installed, sha: revisionA, files: ['.agents/roles/worker.md', ...['bug-diagnosis', 'tdd', 'design-principles', 'execution-principles', 'verification-principles', 'code-quality', 'comments'].map(name => '.agents/roles/references/' + name + '.md')] }, brief: { repo: project, inputSha, path: 'brief.md' }, expectedMutablePaths: ['result.txt'], protectedCheckCommand: 'test -f result.txt', checks: [{ name: 'owned-mutation', command: "printf fixture > result.txt", expectedExitCode: 0 }] };
       const configPath = join(temp, 'config.json'), task = join(temp, 'task.mjs'); await writeFile(configPath, JSON.stringify(config));
       const prepared = JSON.parse(run(executable, ['__tool', 'pi-worker-task', 'prepare', '--config', configPath, '--output', task], true, noRuntime).stdout);
