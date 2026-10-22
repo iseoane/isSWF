@@ -29,15 +29,17 @@ git clone https://github.com/iseoane/isSWF.git
 cd isSWF
 ```
 
-Choose a commit that contains the complete release tools. The builder reads that commit, not uncommitted edits. If the installation work has not yet been committed in your checkout, do not expect the earlier commit to contain it.
+Keep source development on Node.js and `.mjs`. Install a trusted Bun compiler for release construction only. Bun 1.4.3 is the locally tested compiler. The builder defaults to Bun, while `--runtime node` retains the original development-fixture layout. Choose a commit that contains the complete release tools. The builder reads that commit, not uncommitted edits. If the installation work has not yet been committed in your checkout, do not expect the earlier commit to contain it.
 
 Use the full commit SHA in place of `FULL_COMMIT_SHA` and an absent output folder outside the source repository:
 
 ```bash
-node tools/build-release.mjs --source "$PWD" --revision FULL_COMMIT_SHA --output /path/to/isswf-release
+node tools/build-release.mjs --source "$PWD" --revision FULL_COMMIT_SHA --output /path/to/isswf-release --runtime bun
 ```
 
 That folder is what the [installation commands](installation.md) use. Building it does not publish to npm, register a marketplace, or change another project's version. The SHA identifies the chosen source; installing the prepared folder does not create a new source revision.
+
+Use `--target` to select a separate Linux, macOS, or Windows artifact. These are compile targets, not verified platform parity. The complete installed mutation and isolation workflow remains Linux-only.
 
 The [technical installation guide](../installation.md) covers tarballs and the exact package checks.
 
@@ -50,6 +52,8 @@ node tools/check-quality.mjs
 ```
 The portable check includes `node tooling/quality/check-docs.mjs`: it checks current guide mirrors, local links, section coverage, identical shell examples, and the archived originals' bytes and modes. It also rejects retired paths reintroduced into active documentation and archived audit procedures copied into current technical guides. It does not prove translation quality or execute the examples.
 
+
+When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires the artifact check. These fixtures do not execute Claude or real providers.
 
 Some checks use the current files, while committed-source packaging checks use a Git revision. A passing run does not mean every uncommitted file has been packaged or every live model integration has been tested.
 
@@ -66,7 +70,7 @@ node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/
 node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress
 ```
 
-ESLint performs lint and static checks; Knip reports unused files, dependencies, exports, and unresolved references within its configured scope. Neither is a proof that every dead-code path has been found. There is no separate compile or type-check step for these JavaScript modules.
+ESLint performs lint and static checks; Knip reports unused files, dependencies, exports, and unresolved references within its configured scope. Neither is a proof that every dead-code path has been found. Source checks have no separate compilation or type-check step. Constructing a standalone release adds the explicit Bun compilation step.
 
 These tools help find mistakes and unused code. They do not replace the checks needed for a particular feature or prove that a real agent run succeeded.
 

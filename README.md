@@ -54,7 +54,7 @@ Use `--scope project` for a project installation. See [installation](docs/en/ins
 
 ### Dependencies
 
-You need Node.js 24 or later, Git, and the host you choose. Running agent jobs also needs a supported model account and working authentication.
+Use a trusted executable release for your platform, Git, and the host you choose. The factory core includes Bun and needs no separate Node.js or Bun installation. Hosts, SDKs, and project checks retain their own prerequisites. Factory development still uses Node.js 24 or later and `.mjs`. Running agent jobs also needs a supported model account and working authentication.
 
 The complete installed workflow currently requires Linux. Isolated Pi workers additionally need bubblewrap. Python and SQLite are not requirements of the native workflow; Engram and Codegraph are optional.
 

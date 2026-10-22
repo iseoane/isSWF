@@ -21,11 +21,13 @@ El panel puede guardar notas locales si las evidencias mostradas siguen coincidi
 
 Aquí, `RELEASE` representa la ruta absoluta de un paquete ya preparado y de confianza. No es una dirección de descarga. No se presupone que exista una release pública.
 
+En Windows, utiliza `bin/isswf.exe`. Para una release Node heredada conservada, sigue su guía de instalación y su requisito de Node. Estos comandos no demuestran soporte nativo de mutaciones ni aislamiento fuera de Linux.
+
 ```bash
-node RELEASE/tools/isswf.mjs inspect --project /absolute/project
-node RELEASE/tools/isswf.mjs locate --project /absolute/project
-node RELEASE/tools/isswf.mjs exec --project /absolute/project -- isswf-status --initiative I0001
-node RELEASE/tools/isswf.mjs exec --project /absolute/project -- isswf-panel --port 0
+RELEASE/bin/isswf inspect --project /absolute/project
+RELEASE/bin/isswf locate --project /absolute/project
+RELEASE/bin/isswf exec --project /absolute/project -- isswf-status --initiative I0001
+RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 ```
 
 `inspect` muestra información de instalación y migración sin modificar el proyecto ni el almacén. `locate` verifica y localiza el runtime conservado que se ha seleccionado. `exec` utiliza el runtime fijado para ese proyecto, no necesariamente el paquete global más reciente. Si falta el código conservado o está dañado, la operación se bloquea.

@@ -54,7 +54,7 @@ Utiliza `--scope project` para una instalación por proyecto. La [guía de insta
 
 ### Dependencias
 
-Necesitas Node.js 24 o posterior, Git y el asistente que elijas. Para ejecutar encargos con agentes también hace falta una cuenta de modelos compatible y con la autenticación configurada.
+Utiliza una release ejecutable de confianza para tu plataforma, Git y el asistente que elijas. El núcleo de la factoría incluye Bun y no necesita instalar Node.js ni Bun por separado. Los hosts, SDK y comprobaciones del proyecto mantienen sus propios requisitos. El desarrollo de la factoría sigue usando Node.js 24 o posterior y `.mjs`. Para ejecutar encargos con agentes también hace falta una cuenta de modelos compatible y con la autenticación configurada.
 
 El flujo instalado completo requiere actualmente Linux. Los workers aislados de Pi necesitan además bubblewrap. Python y SQLite no son requisitos del flujo nativo; Engram y Codegraph son opcionales.
 

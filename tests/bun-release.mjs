@@ -1,0 +1,214 @@
+import assert from 'node:assert/strict';
+import { spawn, spawnSync } from 'node:child_process';
+import { mkdtemp, mkdir, cp, readFile, writeFile, readdir, rm, symlink, chmod } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { verifyRelease, releaseInvocation } from '../tools/release-source.mjs';
+import { matchesBoundaryControls } from '../tools/pi-worker-task.mjs';
+import { sdkPackageManifest } from '../tools/sdk-package.mjs';
+import { inspectWorkerCessation } from '../tools/native-recovery.mjs';
+
+const controls = { fakeEnvAbsent: true, outsideRead: 'ENOENT', outsideWrite: 'ENOENT', factoryWrite: 'EROFS', factoryCreate: 'EROFS', sdkWrite: 'EROFS', network: 'ECONNREFUSED' };
+assert(matchesBoundaryControls(controls));
+assert(matchesBoundaryControls({ ...controls, factoryWrite: 'EACCES' }));
+assert.equal(matchesBoundaryControls({ ...controls, sdkWrite: 'EACCES' }), false);
+assert.equal(matchesBoundaryControls({ ...controls, factoryCreate: 'EACCES' }), false);
+for (const key of Object.keys(controls)) assert.equal(matchesBoundaryControls({ ...controls, [key]: 'unexpected-success' }), false);
+assert.equal(matchesBoundaryControls({ ...controls, extra: true }), false);
+
+const compiler = process.env.ISSWF_TEST_BUN || 'bun';
+const available = spawnSync(compiler, ['--version'], { encoding: 'utf8' });
+if (available.error || available.status !== 0) {
+  if (process.env.ISSWF_TEST_BUN) throw Error('Requested Bun compiler is unavailable');
+  console.log('SKIP Bun artifact checks: compiler unavailable; denied-write semantics checked without compilation');
+} else {
+  const source = resolve(process.argv[2] || '.'), temp = await mkdtemp(join(tmpdir(), 'isswf-bun-release-'));
+  const fixture = join(temp, 'source'), project = join(temp, 'project spaces ñ'), store = join(temp, 'store');
+  const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', npm_config_cache: join(temp, 'npm-cache') };
+  const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+  function run(binary, args, ok = true, environment = env) {
+    const result = spawnSync(binary, args, { cwd: temp, env: environment, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });
+    assert.ifError(result.error);
+    if (ok) assert.equal(result.status, 0, `${binary} ${args.join(' ')}\n${result.stderr}\n${result.stdout}`);
+    else assert.notEqual(result.status, 0);
+    return result;
+  }
+  const git = (...args) => run('git', ['-C', fixture, ...args]).stdout.trim();
+  const commit = message => { git('add', '-A'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', message); return git('rev-parse', 'HEAD'); };
+  let passed = false;
+  try {
+    run('git', ['clone', '-q', '--shared', source, fixture]);
+    for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
+    const revisionA = commit('Bun release candidate A'), releaseA = join(temp, 'release-a');
+    const builder = join(source, 'tools/build-release.mjs');
+    run(process.execPath, [builder, '--source', fixture, '--revision', revisionA, '--output', releaseA, '--runtime', 'bun', '--bun', compiler]);
+    const receiptA = verifyRelease(releaseA), manifest = JSON.parse(await readFile(join(releaseA, 'package.json'), 'utf8'));
+    assert.equal(manifest.isswfRuntime.engine, 'bun');
+    assert.equal(manifest.version, JSON.parse(await readFile(join(releaseA, '.claude-plugin/plugin.json'), 'utf8')).version);
+    assert(receiptA.files[manifest.bin.isswf]);
+    assert.equal(receiptA.format, 2);
+    const variant = join(temp, 'synthetic-other-arch-metadata'); await cp(releaseA, variant, { recursive: true });
+    const variantReceipt = JSON.parse(await readFile(join(variant, '.isswf-release.json'), 'utf8'));
+    const variantManifest = structuredClone(manifest);
+    variantReceipt.runtime.arch = process.arch === 'x64' ? 'arm64' : 'x64';
+    variantReceipt.runtime.target = variantReceipt.runtime.target.replace(/(?:x64|arm64)$/u, variantReceipt.runtime.arch);
+    variantManifest.cpu = [variantReceipt.runtime.arch]; variantManifest.isswfRuntime.target = variantReceipt.runtime.target;
+    const variantBytes = Buffer.from(JSON.stringify(variantManifest, null, 2) + '\n');
+    await writeFile(join(variant, 'package.json'), variantBytes); variantReceipt.files['package.json'] = hash(variantBytes);
+    await chmod(join(variant, '.isswf-release.json'), 0o644); await writeFile(join(variant, '.isswf-release.json'), JSON.stringify(variantReceipt, null, 2) + '\n');
+    const variantIdentity = verifyRelease(variant);
+    assert.equal(variantIdentity.runtimeId, receiptA.runtimeId, 'Injected target metadata must not change portable source/engine identity');
+    assert.notEqual(variantIdentity.artifactId, receiptA.artifactId, 'Target receipt identities must stay distinct');
+    assert.throws(() => releaseInvocation(variant, 'isswf-status', []), /target/u, 'Injected foreign-arch metadata is not native execution evidence');
+    assert(!Object.keys(receiptA.files).some(path => /^(tests|tooling|\.audit)\//u.test(path)));
+    const executableA = join(releaseA, manifest.bin.isswf);
+    assert.equal(run(executableA, ['--version']).stdout.trim(), manifest.version);
+    const packing = JSON.parse(run('npm', ['pack', releaseA, '--ignore-scripts', '--json', '--pack-destination', temp]).stdout);
+    const packed = Array.isArray(packing) ? packing[0] : Object.values(packing)[0];
+    const consumer = join(temp, 'consumer');
+    run('npm', ['install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', join(temp, packed.filename)]);
+    const installed = join(consumer, 'node_modules/isswf-pi-resources');
+    assert.equal(verifyRelease(installed).runtimeId, receiptA.runtimeId);
+    const executable = join(installed, manifest.bin.isswf);
+    const restricted = join(temp, 'path'); await mkdir(restricted);
+    await symlink(run('which', ['git']).stdout.trim(), join(restricted, 'git'));
+    const noRuntime = { ...env, PATH: restricted };
+    await mkdir(project); run('git', ['init', '-q', project]);
+    const cli = (command, args = [], ok = true, binary = executable) => run(binary, [command, '--project', project, '--store', store, ...args], ok, noRuntime);
+    assert.equal(JSON.parse(cli('inspect').stdout).status, 'not-initialized');
+    assert.deepEqual(await readdir(project), ['.git']);
+    assert.equal(JSON.parse(cli('init', ['--tracking', 'local']).stdout).status, 'initialized');
+    const located = JSON.parse(cli('locate').stdout);
+    assert.equal(located.pin.revision, revisionA);
+    assert.equal(located.pin.runtimeFormat, 2);
+    assert.equal(located.runtimeRoot, join(store, 'releases', receiptA.runtimeId, `${process.platform}-${process.arch}`));
+    assert.equal((await readFile(located.runtimeRoot + '.sha256', 'utf8')).trim(), receiptA.artifactId);
+    assert.equal(JSON.parse(cli('exec', ['--', 'isswf-status', '--initiative', 'I0001']).stdout).status, 'absent');
+    const plan = join(project, '.isswf/initiatives/I0001'); await mkdir(plan, { recursive: true });
+    await writeFile(join(plan, 'plan.md'), '# I0001: Binary fixture\n\nType: research\n\n## J001\n\n- Status: pending\n- Objective: A fixture\n- Depends on: None\n- Brief: [brief-r1.md](jobs/J001/brief-r1.md)\n- Blocker: None\n- Next step: Read\n\n### Acceptance\n\n- One job\n\n### Evidence\n\n- Fixture\n');
+    const observed = JSON.parse(cli('exec', ['--', 'isswf-status', '--initiative', 'I0001']).stdout);
+    assert.equal(observed.status, 'observed'); assert.equal(observed.jobs.length, 1);
+    run(executable, ['__tool', 'not-a-tool'], false, noRuntime);
+    cli('inspect', ['--wrong', 'option'], false);
+    const child = spawn(executable, ['__tool', 'isswf-panel', '--project', project, '--port', '0'], { env: noRuntime, stdio: ['ignore', 'pipe', 'pipe'] });
+    try {
+      const origin = await new Promise((done, reject) => {
+        const timer = setTimeout(() => { child.kill('SIGKILL'); reject(Error('Panel startup timed out')); }, 15000);
+        let text = ''; child.stdout.on('data', chunk => { text += chunk; if (text.includes('\n')) { clearTimeout(timer); done(new URL(text.trim()).origin); } });
+        child.once('error', reject); child.once('exit', code => { clearTimeout(timer); reject(Error('Panel exited ' + code)); });
+      });
+      const response = await fetch(origin + '/api/status/I0001'); assert.equal(response.status, 200); assert.equal((await response.json()).jobs.length, 1);
+      assert.equal((await fetch(origin + '/api/status', { headers: { Origin: 'https://invalid.example' } })).status, 403);
+    } finally {
+      child.kill('SIGTERM'); await new Promise(done => { if (child.exitCode !== null) return done(); const timer = setTimeout(() => child.kill('SIGKILL'), 5000); child.once('exit', () => { clearTimeout(timer); done(); }); });
+    }
+    const marker = join(fixture, 'tools/isswf-status.mjs');
+    const original = await readFile(marker, 'utf8');
+    await writeFile(marker, original.replace('Reported plan progress and artifact snapshots only.', 'BINARY REVISION B. Reported plan progress and artifact snapshots only.'));
+    const revisionB = commit('Bun release candidate B'), releaseB = join(temp, 'release-b');
+    run(process.execPath, [builder, '--source', fixture, '--revision', revisionB, '--output', releaseB, '--runtime', 'bun', '--bun', compiler]);
+    const executableB = join(releaseB, manifest.bin.isswf);
+    const oldFromNew = JSON.parse(cli('exec', ['--', 'isswf-status', '--initiative', 'I0001'], true, executableB).stdout);
+    assert(!oldFromNew.limits.includes('BINARY REVISION B'), 'New launcher must execute the pinned older executable');
+    assert.equal(JSON.parse(cli('locate', [], true, executableB).stdout).pin.revision, revisionA);
+    const selected = releaseInvocation(located.runtimeRoot, 'isswf-status', []); assert.equal(selected.command, join(located.runtimeRoot, manifest.bin.isswf));
+    const originalPin = await readFile(join(project, '.isswf/install.json'));
+    const checkpointProject = () => { run('git', ['-C', project, 'add', '.']); run('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'Checkpoint binary migration fixture']); };
+    checkpointProject();
+    const preview = JSON.parse(cli('inspect', [], true, executableB).stdout);
+    cli('migrate', ['--id', 'M0001', '--expected', preview.expected, '--quiescent-ref', 'synthetic-fixture-no-external-writers'], true, executableB);
+    const newFromOld = JSON.parse(cli('exec', ['--', 'isswf-status', '--initiative', 'I0001']).stdout);
+    assert(newFromOld.limits.includes('BINARY REVISION B'), 'Older launcher must execute the explicitly migrated newer pin');
+    checkpointProject();
+    cli('rollback', ['--id', 'M0001', '--quiescent-ref', 'synthetic-fixture-no-external-writers'], true, executableB);
+    assert((await readFile(join(project, '.isswf/install.json'))).equals(originalPin));
+    const pin = await readFile(join(project, '.isswf/install.json'));
+    const retainedTool = join(located.runtimeRoot, 'tools/isswf-status.mjs');
+    const saved = await readFile(retainedTool); await writeFile(retainedTool, Buffer.concat([saved, Buffer.from('\n')]));
+    cli('exec', ['--', 'isswf-status', '--initiative', 'I0001'], false);
+    await writeFile(retainedTool, saved); assert((await readFile(join(project, '.isswf/install.json'))).equals(pin));
+    const retainedBinary = join(located.runtimeRoot, manifest.bin.isswf), retainedReceipt = join(located.runtimeRoot, '.isswf-release.json');
+    const binaryBytes = await readFile(retainedBinary), receiptBytes = await readFile(retainedReceipt);
+    const alteredBinary = Buffer.concat([binaryBytes, Buffer.from('injected-artifact-drift')]);
+    const alteredReceipt = JSON.parse(receiptBytes); alteredReceipt.files[manifest.bin.isswf] = hash(alteredBinary);
+    await writeFile(retainedBinary, alteredBinary); await chmod(retainedReceipt, 0o644); await writeFile(retainedReceipt, JSON.stringify(alteredReceipt, null, 2) + '\n');
+    assert.equal(verifyRelease(located.runtimeRoot).runtimeId, receiptA.runtimeId);
+    assert.match(cli('locate', [], false).stderr, /immutable local anchor/u, 'A self-consistent changed binary and receipt must not bypass the local artifact binding');
+    await writeFile(retainedBinary, binaryBytes); await writeFile(retainedReceipt, receiptBytes); await chmod(retainedReceipt, 0o444);
+    const sandbox = process.platform === 'linux' ? spawnSync('bwrap', ['--unshare-user', '--unshare-pid', '--unshare-net', '--ro-bind', '/usr', '/usr', '--symlink', 'usr/bin', '/bin', '--symlink', 'usr/lib', '/lib', '--symlink', 'usr/lib', '/lib64', '--proc', '/proc', '--dev', '/dev', '--', '/usr/bin/true'], { encoding: 'utf8', timeout: 10000 }) : null;
+    const workerChecked = sandbox?.status === 0;
+    if (process.env.ISSWF_TEST_BUN_WORKER === '1') assert(workerChecked, 'Requested Linux Bubblewrap capability is unavailable');
+    if (workerChecked) {
+      await writeFile(join(project, 'brief.md'), 'Synthetic offline task only.\n');
+      run('git', ['-C', project, 'add', '.']); run('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Pinned synthetic task']);
+      const inputSha = run('git', ['-C', project, 'rev-parse', 'HEAD']).stdout.trim();
+      const sdk = join(temp, 'sdk'); await mkdir(join(sdk, 'node_modules/typebox'), { recursive: true });
+      await writeFile(join(sdk, 'package.json'), JSON.stringify({ name: 'synthetic-sdk', main: 'index.cjs' }));
+      await writeFile(join(sdk, 'index.cjs'), "module.exports={ModelRuntime:{create:async()=>({hasConfiguredAuth:()=>true,getModel:(provider,id)=>({provider,id})})},SettingsManager:{inMemory:v=>v},SessionManager:{inMemory:()=>({})},createExtensionRuntime:()=>({}),createAgentSession:async o=>({session:{model:o.model,thinkingLevel:o.thinkingLevel,getCallableToolNames:()=>['sandbox_shell'],dispose:async()=>{}}})};\n");
+      await writeFile(join(sdk, 'node_modules/typebox/package.json'), JSON.stringify({ name: 'typebox', main: 'index.cjs' }));
+      await writeFile(join(sdk, 'node_modules/typebox/index.cjs'), 'exports.Type=new Proxy({}, {get:()=>()=>({})});\n');
+      assert.equal(await sdkPackageManifest('typebox', join(sdk, 'index.cjs')), join(sdk, 'node_modules/typebox/package.json'));
+      await assert.rejects(sdkPackageManifest('not-installed', join(sdk, 'index.cjs')), /Cannot find module/u);
+      const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: executable, authPath: join(temp, 'absent-auth'), profile: { repo: installed, sha: revisionA, files: ['.agents/roles/worker.md', ...['bug-diagnosis', 'tdd', 'design-principles', 'execution-principles', 'verification-principles', 'code-quality', 'comments'].map(name => '.agents/roles/references/' + name + '.md')] }, brief: { repo: project, inputSha, path: 'brief.md' }, expectedMutablePaths: ['result.txt'], protectedCheckCommand: 'test -f result.txt', checks: [{ name: 'owned-mutation', command: "printf fixture > result.txt", expectedExitCode: 0 }] };
+      const configPath = join(temp, 'config.json'), task = join(temp, 'task.mjs'); await writeFile(configPath, JSON.stringify(config));
+      const prepared = JSON.parse(run(executable, ['__tool', 'pi-worker-task', 'prepare', '--config', configPath, '--output', task], true, noRuntime).stdout);
+      assert.equal(prepared.briefSha256, hash(await readFile(join(project, 'brief.md'))));
+      const attempt = join(temp, 'attempt'), work = join(attempt, 'work'); await mkdir(work, { recursive: true });
+      const taskResult = JSON.parse(run(executable, [task, work], true, noRuntime).stdout);
+      assert.equal(taskResult.status, 'completed'); assert.equal(taskResult.boundaryCheckPassed, true); assert.equal(taskResult.protectedHashesPreserved, true); assert.equal(taskResult.providerPromptStarted, false);
+      const mutantDir = join(temp, 'mutant-attempt'), mutantWork = join(mutantDir, 'work');
+      await mkdir(mutantWork, { recursive: true });
+      const generated = await readFile(task, 'utf8');
+      const readonlyFactory = "args.push('--dir','/factory','--ro-bind',factoryRoot,'/factory');";
+      assert(generated.includes(readonlyFactory) && generated.includes("'--remount-ro','/',"));
+      const mutant = generated.replace(readonlyFactory, "args.push('--dir','/factory','--bind',factoryRoot,'/factory');").replace("'--remount-ro','/',", '').replace("const probe=await tool.execute('offline-boundary-call',{operation:'boundary_check'});", "const probe=await tool.execute('offline-boundary-call',{operation:'boundary_check'});process.stderr.write(JSON.stringify({probe})+'\\n');");
+      const mutantTask = join(mutantDir, 'task.mjs'); await writeFile(mutantTask, mutant);
+      const rejectedMutation = run(executable, [mutantTask, mutantWork], false, noRuntime);
+      assert.equal(JSON.parse(rejectedMutation.stdout).status, 'partial');
+      const probe = JSON.parse(rejectedMutation.stderr).probe;
+      const mutationControls = JSON.parse(probe.content[0].text.trim());
+      assert.equal(mutationControls.factoryCreate, 'unexpected-success', 'Removing read-only mounts must expose writable factory directory');
+      assert.equal(matchesBoundaryControls(mutationControls), false, 'EACCES for a 0444 file must not hide a writable factory mount');
+      const runs = join(temp, 'lifecycle-runs');
+      const launched = JSON.parse(run(executable, ['__tool', 'worker-lifecycle', 'launch', '--repo', project, '--input-sha', inputSha, '--brief', 'brief.md', '--target-base', inputSha, '--attempt-id', 'binary-fixture', '--runs-store', runs, '--grant-ref', 'explicit-synthetic-fixture-only', '--task-script', task, '--timeout-ms', '15000', '--output-bytes', '16000'], true, noRuntime).stdout);
+      const deadline = Date.now() + 20000;
+      let terminal;
+      while (Date.now() < deadline) {
+        try { terminal = JSON.parse(await readFile(join(launched.attemptDir, 'terminal.json'), 'utf8')); break; }
+        catch (error) { if (error.code !== 'ENOENT') throw error; }
+        await new Promise(done => setTimeout(done, 100));
+      }
+      assert.equal(terminal?.outcome, 'success', JSON.stringify(terminal));
+      const reconciled = JSON.parse(run(executable, ['__tool', 'worker-lifecycle', 'reconcile', '--runs-store', runs, '--attempt-id', 'binary-fixture'], true, noRuntime).stdout);
+      assert.equal(reconciled.state, 'terminal');
+      assert.equal(JSON.parse(reconciled.terminal.stdout).boundaryCheckPassed, true);
+      const dispatch = JSON.parse(await readFile(join(launched.attemptDir, 'dispatch.json'), 'utf8'));
+      const cessation = await inspectWorkerCessation({ attemptDir: launched.attemptDir, dispatch });
+      assert.equal(cessation.status, 'ceased', JSON.stringify(cessation));
+    }
+    const legacy = join(temp, 'legacy-release'), legacyProject = join(temp, 'legacy-project'), legacyStore = join(temp, 'legacy-store');
+    run(process.execPath, [builder, '--source', fixture, '--revision', revisionA, '--output', legacy, '--runtime', 'node']);
+    await mkdir(legacyProject); run('git', ['init', '-q', legacyProject]);
+    run(process.execPath, [join(legacy, 'tools/isswf.mjs'), 'init', '--project', legacyProject, '--store', legacyStore, '--tracking', 'local']);
+    const legacyArgs = ['exec', '--project', legacyProject, '--store', legacyStore, '--', 'isswf-status', '--initiative', 'I0001'];
+    assert.equal(JSON.parse(run(executable, legacyArgs).stdout).status, 'absent');
+    const legacyCli = (command, args = []) => run(executable, [command, '--project', legacyProject, '--store', legacyStore, ...args], true, noRuntime);
+    const checkpointLegacy = () => { run('git', ['-C', legacyProject, 'add', '.']); run('git', ['-C', legacyProject, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'Checkpoint engine migration']); };
+    const oldLegacyPin = await readFile(join(legacyProject, '.isswf/install.json'));
+    checkpointLegacy();
+    const legacyPreview = JSON.parse(legacyCli('inspect').stdout);
+    legacyCli('migrate', ['--id', 'ENGINE1', '--expected', legacyPreview.expected, '--quiescent-ref', 'synthetic-engine-transition-only']);
+    assert.equal(JSON.parse(run(executable, legacyArgs, true, noRuntime).stdout).status, 'absent');
+    assert.equal(JSON.parse(await readFile(join(legacyProject, '.isswf/install.json'), 'utf8')).runtimeFormat, 2);
+    checkpointLegacy(); legacyCli('rollback', ['--id', 'ENGINE1', '--quiescent-ref', 'synthetic-engine-transition-only']);
+    assert((await readFile(join(legacyProject, '.isswf/install.json'))).equals(oldLegacyPin));
+    assert.match(run(executable, legacyArgs, false, noRuntime).stderr, /node/u, 'Legacy Node pins require Node rather than silently changing their engine');
+    passed = true;
+    if (process.env.ISSWF_KEEP_BUN_RELEASE === '1') console.log(JSON.stringify({ fixture: temp, revisionA, revisionB, runtimeId: receiptA.runtimeId, artifactId: receiptA.artifactId, executableSha256: receiptA.files[manifest.bin.isswf], target: manifest.isswfRuntime.target, workerChecked }));
+    console.log('PASS Bun packed executable: standalone CLI/panel, exact pinned binary selection, migration/rollback, legacy Node refusal, integrity and denied-write semantics; Linux synthetic isolated task ' + (workerChecked ? 'PASS' : 'SKIP: Bubblewrap capability unavailable') + '; no live provider or host execution');
+  } finally {
+    if (passed && process.env.ISSWF_KEEP_BUN_RELEASE !== '1') await rm(temp, { recursive: true, force: true });
+    else console.error((passed ? 'Retained verified Bun fixture: ' : 'Retained failing Bun fixture: ') + temp);
+  }
+}

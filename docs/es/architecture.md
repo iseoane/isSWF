@@ -14,7 +14,7 @@ Pi descubre las skills declaradas en `package.json`. Las carpetas `skills/`, `ag
 
 | Área | Código |
 | --- | --- |
-| Preparar y verificar un paquete | `tools/build-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
+| Preparar y verificar un paquete | `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
 | Inicializar, seleccionar, actualizar y recuperar la instalación de un proyecto | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Preparar planes y recibir issues | `tools/isswf-plan.mjs`, `tools/isswf-intake.mjs` |
 | Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
@@ -24,11 +24,13 @@ Pi descubre las skills declaradas en `package.json`. Las carpetas `skills/`, `ag
 
 Estas herramientas tienen contratos distintos. No des por hecho que los comandos, modelos compatibles, recuperación o permisos de un rol se aplican a otro.
 
+El compilador de releases integra las entradas de herramientas en un ejecutable Bun y proporciona a cada módulo su identidad original y las rutas de la raíz del paquete. Los archivos fuente se conservan como procedencia verificada, helpers dinámicos y snapshots inmutables de tareas. El desarrollo fuente sigue ejecutándose con Node.js. `tools/sdk-package.mjs` resuelve metadatos de dependencias del SDK sin depender de una API exclusiva de Node.
+
 ## Registros del proyecto y datos privados
 
 Los repositorios nuevos utilizan `.isswf/`. Los existentes pueden seguir utilizando `.factory/` hasta una migración explícita. `tools/project-state.mjs` selecciona la carpeta de estado y rechaza que coexistan ambas de forma ambigua. No renombres referencias históricas para que parezcan registros nuevos.
 
-Los planes, briefs y revisiones describen el trabajo. La referencia de instalación selecciona su runtime. Los almacenes privados conservan los registros de ejecución y el código exacto de las versiones separados de los archivos compartidos del proyecto. Un estado guardado no demuestra que haya un proceso vivo.
+Los planes, briefs y revisiones describen el trabajo. La referencia de instalación selecciona su runtime. Los recibos Bun de formato 2 separan la identidad portable del código y motor del hash del artefacto nativo verificado localmente. Las identidades y almacenes de formato 1 siguen siendo válidos. Los almacenes privados conservan los registros de ejecución y el código exacto de las versiones separados de los archivos compartidos del proyecto. Un estado guardado no demuestra que haya un proceso vivo.
 
 En el repositorio de desarrollo, `.factory/models.json` y `.factory/templates/` también contienen valores iniciales que se distribuyen mediante listas explícitas de archivos. Sus iniciativas son registros del proyecto, no contenido del paquete. El código Python de `isswf/` y `examples/` pertenece a los prototipos anteriores de recepción de issues; el flujo nativo instalado no depende de SQLite.
 

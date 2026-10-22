@@ -43,7 +43,7 @@ try {
   for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
   const revisionA = commit('Fixture installable release A');
   const releaseA = join(temp, 'release-a');
-  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revisionA, '--output', releaseA]);
+  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revisionA, '--output', releaseA, '--runtime', 'node']);
   const receiptA = verifyRelease(releaseA);
   assert.equal(receiptA.revision, revisionA);
   assert.equal(receiptA.methodologySha, revisionA, 'New releases pin their current English methodology');
@@ -146,7 +146,7 @@ try {
   const pluginB = await readJSON(join(fixture, '.claude-plugin/plugin.json')); pluginB.version = '1.1.1'; await writeJSON(join(fixture, '.claude-plugin/plugin.json'), pluginB);
   const revisionB = commit('Fixture release B');
   const releaseB = join(temp, 'release-b');
-  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revisionB, '--output', releaseB]);
+  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revisionB, '--output', releaseB, '--runtime', 'node']);
   const receiptB = verifyRelease(releaseB);
   const beforeUpdate = await inventory(project), beforeStore = await inventory(store);
   const preview = JSON.parse(cli(releaseB, 'inspect').stdout);

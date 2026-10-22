@@ -29,8 +29,9 @@ function readReceipt(root) {
 }
 
 function validateReceipt(root, value) {
-  if (Object.keys(value).sort().join(',') !== 'files,format,methodologySha,revision,sources,version') throw new Error(`Release receipt fields are invalid: ${join(root, releaseReceiptName)}`);
-  if (value.format !== 1 || !versionPattern.test(value.version ?? '') || !shaPattern.test(value.revision ?? '') || !shaPattern.test(value.methodologySha ?? '')) throw new Error('Release receipt format/version/revision pins are invalid');
+  const fields = value.format === 2 ? 'files,format,methodologySha,revision,runtime,sources,version' : 'files,format,methodologySha,revision,sources,version';
+  if (Object.keys(value).sort().join(',') !== fields) throw new Error(`Release receipt fields are invalid: ${join(root, releaseReceiptName)}`);
+  if (![1, 2].includes(value.format) || !versionPattern.test(value.version ?? '') || !shaPattern.test(value.revision ?? '') || !shaPattern.test(value.methodologySha ?? '')) throw new Error('Release receipt format/version/revision pins are invalid');
   if (!plainObject(value.files) || Object.keys(value.files).some(path => !safeRelative(path) || !sha256Pattern.test(value.files[path] ?? ''))) throw new Error('Release receipt file inventory paths or digests are invalid');
   if (!plainObject(value.sources)) throw new Error('Release receipt sources are invalid');
   for (const [sha, entries] of Object.entries(value.sources)) {
@@ -43,6 +44,22 @@ function validateReceipt(root, value) {
     }
   }
   if (!Object.hasOwn(value.sources, value.revision) || !Object.hasOwn(value.sources, value.methodologySha)) throw new Error('Release receipt must pin current revision and historical methodology sources');
+  if (value.format === 2) {
+    const runtime = value.runtime;
+    if (!plainObject(runtime) || Object.keys(runtime).sort().join(',') !== 'arch,engine,executable,os,target,version' || runtime.engine !== 'bun' || !/^\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?$/u.test(runtime.version || '') || !['linux', 'darwin', 'win32'].includes(runtime.os) || !['x64', 'arm64'].includes(runtime.arch) || runtime.target !== `bun-${runtime.os === 'win32' ? 'windows' : runtime.os}-${runtime.arch}` || runtime.executable !== `bin/isswf${runtime.os === 'win32' ? '.exe' : ''}` || !value.files[runtime.executable]) throw Error('Release executable metadata is invalid');
+    if (value.sources[value.revision]['package.json']?.file !== `.isswf-sources/${value.revision}/package.json`) throw Error('Binary release must preserve its committed package manifest');
+  }
+}
+function canonical(value) {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (plainObject(value)) return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]));
+  return value;
+}
+function binaryRuntimeId(value) {
+  const files = { ...value.files };
+  delete files[value.runtime.executable];
+  files['package.json'] = value.sources[value.revision]['package.json'].sha256;
+  return sha256(JSON.stringify(canonical({ format: 2, version: value.version, revision: value.revision, methodologySha: value.methodologySha, files, sources: value.sources, engine: { name: value.runtime.engine, version: value.runtime.version } })));
 }
 
 // Exact inventory: the receipt itself, every receipt-listed file, and every
@@ -108,7 +125,25 @@ export function verifyRelease(root) {
       if (sha256(fileBytes) !== entry.sha256 || blobOid(fileBytes) !== entry.oid) throw new Error(`Release source payload mismatch: ${sha} ${path}`);
     }
   }
-  return { ...value, runtimeId: sha256(bytes) };
+  if (value.format === 2) {
+    const manifest = JSON.parse(contents.get('package.json').toString('utf8'));
+    const runtime = value.runtime;
+    if (manifest.bin?.isswf !== runtime.executable || manifest.version !== value.version || JSON.stringify(manifest.os) !== JSON.stringify([runtime.os]) || JSON.stringify(manifest.cpu) !== JSON.stringify([runtime.arch]) || manifest.isswfRuntime?.engine !== runtime.engine || manifest.isswfRuntime?.version !== runtime.version || manifest.isswfRuntime?.target !== runtime.target) throw Error('Executable manifest differs from release metadata');
+  }
+  return { ...value, runtimeId: value.format === 2 ? binaryRuntimeId(value) : sha256(bytes), artifactId: sha256(bytes) };
+}
+
+export function releaseInvocation(root, tool, args) {
+  const receipt = verifyRelease(root);
+  if (!receipt) throw Error('A verified installed release is required for tool execution');
+  const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  const binary = manifest.bin?.isswf;
+  if (binary === 'bin/isswf' || binary === 'bin/isswf.exe') {
+    if (manifest.isswfRuntime?.engine !== 'bun' || manifest.os?.length !== 1 || manifest.cpu?.length !== 1 || manifest.os[0] !== process.platform || manifest.cpu[0] !== process.arch || !receipt.files[binary]) throw Error('Retained executable target does not match this host');
+    return { command: join(root, binary), args: ['__tool', tool, ...args] };
+  }
+  if (binary !== 'tools/isswf.mjs') throw Error('Unsupported retained release executable');
+  return { command: process.versions.bun ? 'node' : process.execPath, args: [join(root, 'tools', tool + '.mjs'), ...args] };
 }
 
 // Returns null only when the root has no release receipt, so non-release Git
