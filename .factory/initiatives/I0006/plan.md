@@ -63,8 +63,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Objective: Document actual release installation and verify real compiled-runtime workflows before stable promotion
 - Depends on: J001, J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md) (pending until prepared)
-- Blocker: Final committed artifact validation, independent review and exact-head CI pending; do not promote based on fixture success alone.
-- Next step: Build the final1.1.1 candidate, repeat actual SDK/provider validation and native review, require exact-head CI, then publish only the verified Linux x64 release.
+- Blocker: Native review of656ce69 failed on premature README download availability; conditional instructions corrected. Fresh exact-candidate review, CI and artifact verification remain required.
+- Next step: Revalidate the corrected candidate and obtain a sufficient native verdict before publishing; preserve the prior failed verdict and published1.1.0.
 
 ### Acceptance
 
@@ -76,5 +76,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 - jobs/J003/brief-r1.md
 - jobs/J003/brief-r2.md
-- e457d0b54f910f2f20a5a7e66d3dfcc6dc3d1e6a
+- 656ce69310ee915b8ac2104dd21a11859fe9131a
+- https://github.com/iseoane/isSWF/actions/runs/39849518762
 - tooling/.local/bun-release-delivery/stable-validation-root.txt
