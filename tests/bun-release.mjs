@@ -136,7 +136,7 @@ if (available.error || available.status !== 0) {
     assert.equal(verifyRelease(located.runtimeRoot).runtimeId, receiptA.runtimeId);
     assert.match(cli('locate', [], false).stderr, /immutable local anchor/u, 'A self-consistent changed binary and receipt must not bypass the local artifact binding');
     await writeFile(retainedBinary, binaryBytes); await writeFile(retainedReceipt, receiptBytes); await chmod(retainedReceipt, 0o444);
-    const sandbox = process.platform === 'linux' ? spawnSync('bwrap', ['--unshare-user', '--unshare-pid', '--unshare-net', '--ro-bind', '/usr', '/usr', '--symlink', 'usr/bin', '/bin', '--symlink', 'usr/lib', '/lib', '--symlink', 'usr/lib', '/lib64', '--proc', '/proc', '--dev', '/dev', '--', '/usr/bin/true'], { encoding: 'utf8', timeout: 10000 }) : null;
+    const sandbox = process.platform === 'linux' ? spawnSync('bwrap', ['--unshare-user', '--unshare-pid', '--unshare-net', '--ro-bind', '/usr', '/usr', '--symlink', 'usr/bin', '/bin', '--symlink', 'usr/lib', '/lib', '--symlink', 'usr/lib64', '/lib64', '--proc', '/proc', '--dev', '/dev', '--', '/usr/bin/true'], { encoding: 'utf8', timeout: 10000 }) : null;
     const workerChecked = sandbox?.status === 0;
     if (process.env.ISSWF_TEST_BUN_WORKER === '1') assert(workerChecked, 'Requested Linux Bubblewrap capability is unavailable: ' + (sandbox?.error?.message || sandbox?.stderr || 'platform=' + process.platform));
     if (workerChecked) {

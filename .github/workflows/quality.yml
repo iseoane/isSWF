@@ -45,7 +45,7 @@ jobs:
       - name: Require Linux sandbox capability
         run: |
           bwrap --version
-          bwrap --unshare-user --unshare-pid --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/lib /lib --symlink usr/lib /lib64 --proc /proc --dev /dev -- /usr/bin/true
+          bwrap --unshare-user --unshare-pid --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --proc /proc --dev /dev -- /usr/bin/true
       - run: node tools/check-quality.mjs
         env:
           ISSWF_TEST_BUN: bun
