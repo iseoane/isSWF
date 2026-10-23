@@ -69,6 +69,21 @@ try {
   const installed = join(consumer, 'node_modules/isswf-pi-resources');
   assert.equal(verifyRelease(installed).runtimeId, receiptA.runtimeId, 'Packed npm package must retain exact inventory');
   for (const path of [
+    '.agents/skills/isswf-debug/SKILL.md',
+    'skills/isswf-debug/SKILL.md',
+    '.agents/skills/isswf-review/SKILL.md',
+    'skills/isswf-review/SKILL.md',
+    '.agents/skills/isswf-retrospective/SKILL.md',
+    'skills/isswf-retrospective/SKILL.md',
+    '.agents/skills/isswf-tdd/SKILL.md',
+    'skills/isswf-tdd/SKILL.md',
+    '.agents/roles/references/retrospective.md',
+    '.factory/templates/retrospective.md',
+    '.agents/skills/isswf-e2e/SKILL.md',
+    '.agents/skills/isswf-e2e/references/browser.md',
+    '.agents/skills/isswf-e2e/references/cli-and-api.md',
+    '.agents/skills/isswf-e2e/references/test-quality.md',
+    'skills/isswf-e2e/SKILL.md',
     '.agents/skills/isswf-writing/SKILL.md',
     '.agents/skills/isswf-writing/references/human-documents.md',
     '.agents/skills/isswf-writing/references/agent-documents.md',
@@ -134,7 +149,7 @@ try {
   const briefSha = run('git', ['-C', project, 'rev-parse', 'HEAD']).stdout.trim();
   await writeFile(join(project, 'brief.md'), 'DIRTY target brief must not be used.\n');
   const prepareConfig = join(temp, 'worker-prepare.json'), task = join(temp, 'prepared-worker.mjs');
-  const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: process.execPath, authPath: join(temp, 'not-read-auth.json'), profile: { repo: installed, sha: receiptA.methodologySha, files: ['.agents/roles/worker.md', ...['bug-diagnosis', 'tdd', 'design-principles', 'execution-principles', 'verification-principles', 'code-quality', 'comments'].map(name => '.agents/roles/references/' + name + '.md')] }, brief: { repo: project, inputSha: briefSha, path: 'brief.md' }, expectedMutablePaths: ['app.mjs'], protectedCheckCommand: 'node --check app.mjs', checks: [] };
+  const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: process.execPath, authPath: join(temp, 'not-read-auth.json'), profile: { repo: installed, sha: receiptA.methodologySha, files: ['.agents/roles/worker.md', ...['bug-diagnosis', 'tdd', 'design-principles', 'execution-principles', 'verification-principles', 'code-quality', 'comments'].map(name => '.agents/roles/references/' + name + '.md'), ...['debug', 'tdd'].map(name => '.agents/skills/isswf-' + name + '/SKILL.md'), ...['SKILL.md', 'references/browser.md', 'references/cli-and-api.md', 'references/test-quality.md'].map(name => '.agents/skills/isswf-e2e/' + name)] }, brief: { repo: project, inputSha: briefSha, path: 'brief.md' }, expectedMutablePaths: ['app.mjs'], protectedCheckCommand: 'node --check app.mjs', checks: [] };
   await writeJSON(prepareConfig, config);
   const prepared = JSON.parse(run(process.execPath, [join(installed, 'tools/pi-worker-task.mjs'), 'prepare', '--config', prepareConfig, '--output', task]).stdout);
   assert.equal(prepared.briefSha256, hash(Buffer.from('Committed target brief, not package provenance.\n')));

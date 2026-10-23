@@ -33,7 +33,12 @@ Classify what this assignment needs and briefly explain why:
 - If only the operator can supply a missing decision, ask for it and keep the blocker visible.
 - If the request may already be implemented, seek evidence before proposing another implementation.
 - Before dispatching review, apply [proportionate selection](../../roles/references/review.md#choose-sufficient-verification): mechanical, semantic, or combined. Record the risk, checks, and stopping condition in the existing brief. Sufficient mechanical verification does not require a model call by default; preserve explicit independence, security, and publication requirements.
-- Use design, TDD, external research, or additional review only when a concrete risk or uncertainty warrants it.
+- For an explicit E2E assignment or selected critical user journey, use [isswf-e2e](../isswf-e2e/SKILL.md) to create, run or maintain the suite with a suitable driver. This does not require E2E coverage for every task or grant tool installation/provider calls.
+- Use [isswf-debug](../isswf-debug/SKILL.md) for causal investigation, with the worker for a simple bug or the diagnostician when a separate diagnosis is justified.
+- Use [isswf-review](../isswf-review/SKILL.md) to prepare or perform scoped Standards/Spec assessment. Preserve the independence and supported-dispatch requirements below; a skill invocation does not create an independent reviewer.
+- Use [isswf-tdd](../isswf-tdd/SKILL.md) for explicitly requested TDD or a selected cheap, useful behavioral regression seam. Do not make TDD a universal stage.
+- Use [isswf-retrospective](../isswf-retrospective/SKILL.md) after completed features or bugs and at an explicit operator session close. Keep active work and policy unchanged; a chat ending alone is not session close.
+- Use design, external research, or additional review only when a concrete risk or uncertainty warrants it.
 
 Current code determines existing behavior. The approved brief and acceptance criteria determine desired behavior. Investigate differences before proposing changes; do not narrow the objective to match the code.
 

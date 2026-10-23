@@ -54,8 +54,8 @@ RELEASE="$(pwd)/package"
 For a reproducible installation, replace the download command above with an explicit version, for example:
 
 ```bash
-gh release download v1.3.1 --repo iseoane/isSWF \
-  --pattern 'isswf-1.3.1-bun-linux-x64.tgz' --pattern SHA256SUMS
+gh release download v1.3.2 --repo iseoane/isSWF \
+  --pattern 'isswf-1.3.2-bun-linux-x64.tgz' --pattern SHA256SUMS
 ```
 
 Continue in the same shell so that `RELEASE` names the absolute local package path, not a release selector. Downloading a newer release does not update existing project pins automatically. Checksums detect damage; they are not publisher signatures. See [installation](docs/en/installation.md) for setup, updates and building from source.

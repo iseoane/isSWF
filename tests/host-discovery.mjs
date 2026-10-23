@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 const source = resolve(process.argv[2] || '.');
 assert.ok(process.env.ISSWF_PLATFORM_ROOT, 'Set ISSWF_PLATFORM_ROOT to the platform-package test output');
 const root = resolve(process.env.ISSWF_PLATFORM_ROOT);
-const expected = ['isswf-coordinator', 'isswf-issue', 'isswf-pr', 'isswf-setup', 'isswf-understanding', 'isswf-writing'];
+const expected = ['isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-coordinator', 'isswf-e2e', 'isswf-issue', 'isswf-pr', 'isswf-setup', 'isswf-understanding', 'isswf-writing'].sort();
 const dependencies = join(source, 'tooling/host-tests/node_modules');
 const piRoot = join(dependencies, '@earendil-works/pi-coding-agent');
 const report = JSON.parse(await readFile(join(root, 'platform-report.json'), 'utf8'));

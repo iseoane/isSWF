@@ -17,6 +17,8 @@ If an essential input is missing, inspect what is available and report the gap. 
 
 ## Review
 
+Use [isswf-review](../skills/isswf-review/SKILL.md) from the supplied pinned methodology. In a text-only execution, its procedure applies to supplied evidence; it does not provide workspace tools or another delegation path.
+
 1. Confirm the base SHA and candidate identity. For a snapshot candidate, verify its digest against the retained snapshot package, then review exactly that package. Check that its diff and paths remain in scope. Do not require or invent a candidate commit.
 2. Check the selected mode against [sufficient verification](references/review.md#choose-sufficient-verification). Read only the sources and evidence needed for the scoped criteria and risks; unchanged payloads do not need semantic rereading merely because they are numerous.
 3. Assess supplied evidence and its actual candidate and observer. Re-run safe, pertinent checks when useful or explicitly required, not merely to repeat a sufficient result. Record actual commands and observations; do not claim checks you did not run.

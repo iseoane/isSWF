@@ -65,13 +65,13 @@ if (process.argv[3] === '--probe') {
   assert.deepEqual(await readFile(settingsPath), configured, 'Repeat must be byte-identical');
   const isolated = probe(project);
   assert.deepEqual(isolated.diagnostics, []);
-  assert.equal(isolated.skills.filter(skill => skill.name.startsWith('isswf-')).length, 7, 'All seven source skills, including source-only triage, remain available');
+  assert.equal(isolated.skills.filter(skill => skill.name.startsWith('isswf-')).length, 12, 'All twelve source skills, including source-only triage, remain available');
   const sourcePrefix = await realpath(join(project, '.agents/skills'));
   for (const skill of isolated.skills.filter(skill => skill.name.startsWith('isswf-'))) assert.ok(skill.path.startsWith(sourcePrefix));
   assert.ok(isolated.skills.some(skill => skill.name === 'unrelated-fixture'));
   for (const observed of [probe(neighbour), probe(project, true)]) {
     assert.deepEqual(observed.diagnostics, []);
-    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 6);
+    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 11);
     assert.ok(observed.skills.some(skill => skill.name === 'unrelated-fixture'));
   }
   assert.deepEqual(await readFile(join(home, 'pi/settings.json')), globalPi, 'User settings remain unchanged');
@@ -104,9 +104,9 @@ if (process.argv[3] === '--probe') {
   const inline = run(claude, ['--plugin-dir', project, 'plugin', 'details', 'isswf']);
   assert.match(inline, /Source: isswf@inline/u);
   assert.match(inline, /Description: isolated-source-fixture/u);
-  assert.match(inline, /Skills \(6\)/u);
+  assert.match(inline, /Skills \(11\)/u);
   assert.deepEqual(await readFile(join(home, 'claude/settings.json')), globalClaude);
-  const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'seven source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
+  const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'twelve source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
   await writeJSON(join(root, 'source-isolation-report.json'), result);
   console.log(JSON.stringify(result, null, 2));
 }

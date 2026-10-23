@@ -14,6 +14,11 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | `isswf-understanding` | Understand a topic or system, clarify an explanation, or learn through practice and feedback. |
 | `isswf-pr` | Prepare PR descriptions and authorized updates with evidence and a mandatory risk assessment. |
 | `isswf-issue` | Report independent bugs or propose features and improvements, with verified routing and mandatory `needs-triage`. |
+| `isswf-e2e` | Create, run or maintain executable tests of critical user journeys, with Playwright or another driver suitable for the real interface. |
+| `isswf-debug` | Reproduce defects, investigate causes and return a causal diagnosis or explicit uncertainty. |
+| `isswf-review` | Review an exact candidate against Standards and Spec with proportionate evidence. |
+| `isswf-retrospective` | Learn from completed features or bugs, or an explicit session close, through local improvement drafts. |
+| `isswf-tdd` | Use an observed red-green-refactor loop for explicitly requested TDD or a selected useful regression seam. |
 
 In Pi, invoke them with `/skill:`. In Claude Code, use `/isswf:`. There is also a source-only `isswf-triage` skill for the historical intake prototypes; it is not a normal entry point in the complete installed package.
 
@@ -24,6 +29,14 @@ The understanding skill selects reformulation, explanation, or practical learnin
 The PR skill works directly or through Delivery. It inspects the candidate, explains scope and verification limits, and assesses risk even for documentation-only changes. Delivery supplies its identities and evidence and reuses the same assessment. Use `/skill:isswf-pr` in Pi or `/isswf:isswf-pr` in Claude Code. Drafting does not authorize publication or merge.
 
 The issue skill distinguishes independent findings from errors in the current implementation. It routes a sanitized report to the project or factory repository, checks duplicates, and requires the existing `needs-triage` label before creation. Missing destination access, publication permission, or label support leaves a draft or explicit blocker. Use `/skill:isswf-issue` in Pi or `/isswf:isswf-issue` in Claude Code. Creating a report does not authorize implementation.
+
+The E2E skill inspects the target's existing harness and selects a small set of useful user journeys. It supports browser, CLI, terminal and API paths; Playwright is optional, not a dependency for every project. It creates runnable tests, fixtures, a journey map and local/CI commands rather than relying on an agent to perform the checks manually. Use `/skill:isswf-e2e` in Pi or `/isswf:isswf-e2e` in Claude Code. Dependency installation, real accounts, provider calls and publication still require their own permission. Unrun tests are draft coverage, not a verified suite.
+
+The debug, review, retrospective and TDD skills expose existing procedures without making them compulsory stages. The coordinator and applicable role profiles select them conditionally. Use `/skill:isswf-debug`, `/skill:isswf-review`, `/skill:isswf-retrospective` or `/skill:isswf-tdd` in Pi; Claude Code exposes the same names under `/isswf:`. Independent review still requires a separate authorized context. Retrospectives preserve active jobs and produce drafts, not policy changes or execution grants.
+
+Installed workers receive the pinned debug and TDD skills as read-only methodology alongside E2E when the release supplies them. Native diagnostic and review callers include their selected skill from the same methodology checkpoint as their role; historical pins keep their original resources. Text-only callers do not gain tools, global skills or parent integrations. These resources do not add a retrospective dispatcher or change host isolation guarantees.
+
+Skills expose independently requested tasks with an observable outcome. Role references supply conditional guidance inside those tasks, such as design principles, test quality and permissions. They remain references rather than becoming mandatory standalone workflows. If a guide later gains its own entry point, keep the detailed rules in one canonical resource instead of copying them into a second skill.
 
 ## People and agents
 

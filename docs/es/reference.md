@@ -14,6 +14,11 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-understanding` | Comprender un tema o sistema, aclarar una explicación o aprender mediante práctica y feedback. |
 | `isswf-pr` | Preparar descripciones de PR y actualizaciones autorizadas con evidencias y evaluación obligatoria del riesgo. |
 | `isswf-issue` | Reportar bugs independientes o proponer funcionalidades y mejoras, con destino verificado y `needs-triage` obligatorio. |
+| `isswf-e2e` | Crear, ejecutar o mantener pruebas ejecutables de recorridos críticos de usuario, con Playwright u otro controlador adecuado para la interfaz real. |
+| `isswf-debug` | Reproducir defectos, investigar causas y devolver un diagnóstico causal o incertidumbre explícita. |
+| `isswf-review` | Revisar un candidato exacto frente a Standards y Spec con evidencias proporcionadas al riesgo. |
+| `isswf-retrospective` | Aprender de funcionalidades o errores terminados, o de un cierre explícito de sesión, mediante borradores locales de mejora. |
+| `isswf-tdd` | Aplicar un ciclo observado de rojo-verde-refactorización cuando se solicita TDD o se selecciona una prueba de regresión útil. |
 
 En Pi se invocan con `/skill:`. En Claude Code, con `/isswf:`. También existe `isswf-triage` en el código fuente para los prototipos históricos de entrada de issues; no es una entrada habitual del paquete completo instalado.
 
@@ -24,6 +29,14 @@ La skill de comprensión elige entre reformular, explicar o aprender con prácti
 La skill de PR funciona directamente o desde Delivery. Inspecciona el candidato, explica el alcance y los límites de verificación, y evalúa el riesgo incluso en cambios solo de documentación. Delivery aporta sus identidades y evidencias y reutiliza la misma evaluación. Utiliza `/skill:isswf-pr` en Pi o `/isswf:isswf-pr` en Claude Code. Redactar no autoriza publicar ni fusionar.
 
 La skill de issues distingue los hallazgos independientes de los errores de la implementación actual. Dirige un reporte saneado al repositorio del proyecto o de la factoría, comprueba duplicados y exige la etiqueta existente `needs-triage` antes de crear la issue. La falta de acceso al destino, permiso de publicación o soporte de la etiqueta deja un borrador o un bloqueo explícito. Utiliza `/skill:isswf-issue` en Pi o `/isswf:isswf-issue` en Claude Code. Crear un reporte no autoriza implementarlo.
+
+La skill E2E inspecciona las herramientas de prueba existentes del proyecto y selecciona unos pocos recorridos de usuario útiles. Admite navegador, CLI, terminal y API; Playwright es opcional, no una dependencia para todos los proyectos. Crea pruebas ejecutables, fixtures, un mapa de recorridos y comandos locales y de CI, en vez de depender de que un agente haga las comprobaciones manualmente. Utiliza `/skill:isswf-e2e` en Pi o `/isswf:isswf-e2e` en Claude Code. Instalar dependencias, utilizar cuentas reales, llamar a proveedores o publicar sigue necesitando su propio permiso. Las pruebas sin ejecutar son cobertura propuesta, no una suite verificada.
+
+Las skills de depuración, revisión, retrospectiva y TDD dan acceso a los procedimientos existentes sin convertirlos en etapas obligatorias. El coordinador y los perfiles correspondientes las seleccionan según la tarea. Usa `/skill:isswf-debug`, `/skill:isswf-review`, `/skill:isswf-retrospective` o `/skill:isswf-tdd` en Pi; Claude Code ofrece los mismos nombres bajo `/isswf:`. La revisión independiente sigue requiriendo un contexto separado y autorizado. Las retrospectivas conservan los trabajos activos y generan borradores, no cambios de política ni permisos de ejecución.
+
+Los workers instalados reciben las skills fijadas de depuración y TDD como metodología de solo lectura junto con E2E cuando la versión las incluye. Los callers nativos de diagnóstico y revisión incluyen su skill desde el mismo checkpoint de metodología que su perfil; los pins históricos conservan sus recursos originales. Los callers de solo texto no reciben herramientas, skills globales ni integraciones del coordinador. Estos recursos no añaden un dispatcher de retrospectivas ni cambian las garantías de aislamiento del asistente.
+
+Las skills ofrecen tareas que se pueden solicitar por separado y tienen un resultado observable. Las referencias de los roles aportan orientación condicional dentro de esas tareas, como los principios de diseño, la calidad de las pruebas o los permisos. Se mantienen como referencias, en vez de convertirse en flujos independientes obligatorios. Si una guía incorpora más adelante una entrada propia, conserva sus reglas detalladas en un único recurso canónico, sin copiarlas a una segunda skill.
 
 ## Personas y agentes
 

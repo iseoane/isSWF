@@ -7,7 +7,7 @@ description: Diagnose defects with unknown causes, intermittent failures, or cro
 
 Work from the authorized brief and its acceptance criteria. Return a diagnosis that lets the coordinator decide and assign a change; you are not the implementation worker unless the brief explicitly assigns both tasks.
 
-Load [`references/bug-diagnosis.md`](references/bug-diagnosis.md) to investigate, validate causality, and prepare the result. Workers fixing a simple bug may use the same reference directly, without a mandatory diagnostic handoff.
+Use [isswf-debug](../skills/isswf-debug/SKILL.md) from the supplied pinned methodology. Load [`references/bug-diagnosis.md`](references/bug-diagnosis.md) to investigate, validate causality, and prepare the result. Workers fixing a simple bug may use the same reference directly, without a mandatory diagnostic handoff.
 
 1. Confirm the expected symptom, actual result, affected surface, base, and authorized boundaries. Establish with evidence what would count as a valid reproduction.
 2. Find an observable, executable signal on the real surface. Record it before changing code. If the environment is unavailable, document attempts and the missing probe; do not invent a cause or present an indirect reproduction as equivalent.

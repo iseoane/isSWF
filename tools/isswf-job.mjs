@@ -15,9 +15,14 @@ import { admission, claimSuccessor, validateSuccessorBinding } from './job-succe
 import { parsePlan } from './isswf-plan.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const methodologySha = verifyRelease(root)?.methodologySha ?? '37a56ebc902e94f21fc10666f33fceac44946af7';
+const installedRelease = verifyRelease(root);
+const methodologySha = installedRelease?.methodologySha ?? '37a56ebc902e94f21fc10666f33fceac44946af7';
 const runtimeFiles = ['tools/release-source.mjs', 'tools/project-state.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
-const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md'];
+const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', ...(installedRelease?.files['.agents/skills/isswf-e2e/SKILL.md'] ? ['.agents/skills/isswf-e2e/SKILL.md', '.agents/skills/isswf-e2e/references/browser.md', '.agents/skills/isswf-e2e/references/cli-and-api.md', '.agents/skills/isswf-e2e/references/test-quality.md'] : [])];
+for (const name of ['debug', 'tdd']) {
+  const path = `.agents/skills/isswf-${name}/SKILL.md`;
+  if (installedRelease?.files[path]) profileFiles.push(path);
+}
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
 const safeRelative = value => typeof value === 'string' && !value.includes('\\') && !value.includes('\0') && !value.startsWith('/') && value.split('/').every(part => part && part !== '.' && part !== '..');

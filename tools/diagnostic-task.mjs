@@ -78,6 +78,10 @@ export async function prepareDiagnosis({ project, store, inputSha, jobPath, gran
   assert(hash(models) === job.models.sha256 && equal(JSON.parse(decode(models)).roles?.diagnostician, route) && equal(grant.approvedRoute, route), 'fixed-diagnostician-route-required');
   assert(sha(job.methodologySha), 'own-methodology-checkpoint-required');
   const methods = profilePaths.map(path => ({ path, text: decode(blob(source, job.methodologySha, path)) }));
+  if (methods[0].text.includes('../skills/isswf-debug/SKILL.md')) {
+    const path = '.agents/skills/isswf-debug/SKILL.md';
+    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
+  }
   assert(Array.isArray(job.contextPaths) && job.contextPaths.length > 0 && job.contextPaths.length <= 20 && new Set(job.contextPaths).size === job.contextPaths.length, 'explicit-spec-grounding-context-required');
   validateProbes(job.probes);
   assert(grant.allowWorkspaceProbes === true && grant.targetMode === 'read-only' && grant.probeRunnerSha256 === hash(await readFile(join(source, 'tools/diagnostic-probes.mjs'))), 'explicit-bound-probe-grant-required');

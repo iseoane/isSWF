@@ -50,14 +50,14 @@ assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
 assert.doesNotMatch(docs, /A00[1-3]|2\.1\.299|bounded live validation/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
-assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue']);
+assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd']);
 assert.deepEqual(piManifest.bin, { isswf: 'tools/isswf.mjs' });
-for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue']) {
+for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd']) {
   assert.ok(piManifest.files.includes(`.agents/skills/${name}`));
   assert.ok(manifest.skills.includes(`./skills/${name}`));
   const body = await read(`.agents/skills/${name}/SKILL.md`);
   assert.equal(body.match(/^name: (.+)$/mu)?.[1], name);
-  assert.match(body, /^---\nname: [a-z-]+\ndescription: .+\n---\n/u);
+  assert.match(body, /^---\nname: [a-z0-9-]+\ndescription: .+\n---\n/u);
   for (const match of body.matchAll(/\[[^\]]*\]\((references\/[^)]+)\)/gu)) {
     assert.ok((await read(`.agents/skills/${name}/${match[1]}`)).length > 0);
   }
@@ -65,6 +65,31 @@ for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-i
   assert.ok(wrapper.includes('${CLAUDE_PLUGIN_ROOT}/.agents/skills/' + name + '/SKILL.md'));
   assert.ok(wrapper.length < 800, 'Utility wrappers must keep methodology in the shared skill');
 }
+for (const [name, role, reference] of [
+  ['debug', 'diagnostician', 'bug-diagnosis'],
+  ['review', 'reviewer', 'review'],
+  ['retrospective', 'retrospective', 'retrospective'],
+  ['tdd', 'worker', 'tdd'],
+]) {
+  const path = '../skills/isswf-' + name + '/SKILL.md';
+  assert.ok((await read('.agents/roles/' + role + '.md')).includes(path));
+  assert.ok(skill.includes('../isswf-' + name + '/SKILL.md'));
+  const body = await read('.agents/skills/isswf-' + name + '/SKILL.md');
+  assert.ok(body.includes('../../roles/references/' + reference + '.md'));
+  assert.match(body, /does not require factory activation/u);
+  assert.match(body, /Missing required evidence or capability/u);
+}
+const e2e = await read('.agents/skills/isswf-e2e/SKILL.md');
+assert.match(e2e, /does not require factory activation/u);
+for (const mode of ['Create or extend', 'Run', 'Maintain or audit']) assert.ok(e2e.includes(mode));
+for (const reference of ['browser.md', 'cli-and-api.md', 'test-quality.md']) assert.ok(e2e.includes('references/' + reference));
+assert.match(e2e, /Generated tests that were not executed are a draft/u);
+assert.match(e2e, /Installing a framework, browser binary or service needs a current installation\/network grant/u);
+assert.match(await read('.agents/skills/isswf-e2e/references/browser.md'), /Playwright is an option/u);
+assert.match(await read('.agents/skills/isswf-e2e/references/test-quality.md'), /without interactive instructions to an AI agent/u);
+assert.ok(skill.includes('../isswf-e2e/SKILL.md'));
+assert.ok((await read('.agents/roles/worker.md')).includes('../skills/isswf-e2e/SKILL.md'));
+assert.ok((await read('tools/isswf-job.mjs')).includes("installedRelease?.files['.agents/skills/isswf-e2e/SKILL.md']"));
 const delivery = await read('.agents/roles/delivery.md');
 assert.ok(delivery.includes('[isswf-pr](../skills/isswf-pr/SKILL.md)'), 'Delivery must use the shared PR skill');
 const deliveryReference = await read('.agents/roles/references/delivery.md');

@@ -105,6 +105,10 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   } else assert(grant.allowWorkspaceProbes !== true, 'review-probes-require-workspace');
   assert(sha(job.methodologySha), 'own-methodology-checkpoint-required');
   const methods = profilePaths.map(path => ({ path, text: decode(blob(source, job.methodologySha, path)) }));
+  if (methods[0].text.includes('../skills/isswf-review/SKILL.md')) {
+    const path = '.agents/skills/isswf-review/SKILL.md';
+    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
+  }
   assert(Array.isArray(job.contextPaths) && job.contextPaths.length > 0 && job.contextPaths.length <= maxContextFiles && new Set(job.contextPaths).size === job.contextPaths.length, 'explicit-standards-context-required');
   const diff = git(target, ['diff', '--binary', '--full-index', '--no-ext-diff', '--no-textconv', '--no-renames', job.targetBase, job.candidateSha, '--']);
   const changed = decode(git(target, ['diff', '--name-only', '-z', '--no-renames', job.targetBase, job.candidateSha, '--'])).split('\0').filter(Boolean);

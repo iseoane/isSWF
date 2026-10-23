@@ -60,6 +60,19 @@ const issuePayloadPaths = [
   ".agents/skills/isswf-issue/references/routing-and-publication.md",
   ".agents/skills/isswf-issue/references/report-content.md",
 ];
+const e2ePayloadPaths = [
+  ".agents/skills/isswf-e2e/SKILL.md",
+  ".agents/skills/isswf-e2e/references/browser.md",
+  ".agents/skills/isswf-e2e/references/cli-and-api.md",
+  ".agents/skills/isswf-e2e/references/test-quality.md",
+];
+const taskSkills = ["debug", "review", "retrospective", "tdd"];
+const taskPayloadPaths = {
+  debug: [".agents/skills/isswf-debug/SKILL.md"],
+  review: [".agents/skills/isswf-review/SKILL.md"],
+  retrospective: [".agents/skills/isswf-retrospective/SKILL.md", ".agents/roles/references/retrospective.md", ".factory/templates/retrospective.md"],
+  tdd: [".agents/skills/isswf-tdd/SKILL.md"],
+};
 const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
@@ -154,17 +167,23 @@ function validateManifest(bytes) {
   const hasUnderstanding = manifest?.pi?.skills?.includes("./.agents/skills/isswf-understanding");
   const hasPr = manifest?.pi?.skills?.includes("./.agents/skills/isswf-pr");
   const hasIssue = manifest?.pi?.skills?.includes("./.agents/skills/isswf-issue");
+  const hasE2e = manifest?.pi?.skills?.includes("./.agents/skills/isswf-e2e");
+  const selectedTaskSkills = taskSkills.filter(name => manifest?.pi?.skills?.includes(`./.agents/skills/isswf-${name}`));
   const skills = [...expectedSkills,
     ...(hasWriting ? ["./.agents/skills/isswf-writing"] : []),
     ...(hasUnderstanding ? ["./.agents/skills/isswf-understanding"] : []),
     ...(hasPr ? ["./.agents/skills/isswf-pr"] : []),
     ...(hasIssue ? ["./.agents/skills/isswf-issue"] : []),
+    ...(hasE2e ? ["./.agents/skills/isswf-e2e"] : []),
+    ...selectedTaskSkills.map(name => `./.agents/skills/isswf-${name}`),
   ];
   const files = releaseFiles.toSpliced(4, 0,
     ...(hasWriting ? [".agents/skills/isswf-writing"] : []),
     ...(hasUnderstanding ? [".agents/skills/isswf-understanding"] : []),
     ...(hasPr ? [".agents/skills/isswf-pr"] : []),
     ...(hasIssue ? [".agents/skills/isswf-issue"] : []),
+    ...(hasE2e ? [".agents/skills/isswf-e2e"] : []),
+    ...selectedTaskSkills.map(name => `.agents/skills/isswf-${name}`),
   );
   const legacy = Object.keys(manifest ?? {}).sort().join(",") === "description,name,pi,version";
   const released = Object.keys(manifest ?? {}).sort().join(",") === "bin,description,files,keywords,name,pi,version";
@@ -212,11 +231,14 @@ async function materialize({ source, revision, store }) {
   const hasUnderstanding = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-understanding");
   const hasPr = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-pr");
   const hasIssue = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-issue");
+  const hasE2e = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-e2e");
   const selectedPaths = [...payloadPaths,
     ...(hasWriting ? writingPayloadPaths : []),
     ...(hasUnderstanding ? understandingPayloadPaths : []),
     ...(hasPr ? prPayloadPaths : []),
     ...(hasIssue ? issuePayloadPaths : []),
+    ...(hasE2e ? e2ePayloadPaths : []),
+    ...taskSkills.filter(name => JSON.parse(manifestBytes).pi.skills.includes(`./.agents/skills/isswf-${name}`)).flatMap(name => taskPayloadPaths[name]),
   ];
   const payload = new Map();
   for (const path of selectedPaths) {
@@ -285,11 +307,14 @@ export async function verifyPackage(packageRoot, expectedRevision) {
   const hasUnderstanding = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-understanding");
   const hasPr = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-pr");
   const hasIssue = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-issue");
+  const hasE2e = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-e2e");
   const selectedPaths = [...payloadPaths,
     ...(hasWriting ? writingPayloadPaths : []),
     ...(hasUnderstanding ? understandingPayloadPaths : []),
     ...(hasPr ? prPayloadPaths : []),
     ...(hasIssue ? issuePayloadPaths : []),
+    ...(hasE2e ? e2ePayloadPaths : []),
+    ...taskSkills.filter(name => JSON.parse(manifestBytes).pi.skills.includes(`./.agents/skills/isswf-${name}`)).flatMap(name => taskPayloadPaths[name]),
   ];
   if (
     Object.keys(receipt).sort().join(",") !== "files,format,revision" ||
