@@ -1,6 +1,6 @@
 # isSWF
 
-English | [Español de España](README.es.md)
+English | [Español](README.es.md)
 
 A personal software factory for turning ideas, bugs, and issues into small, checked changes with AI agents.
 
@@ -33,25 +33,32 @@ Pi is the reference execution environment. A Claude Code plugin is also included
 
 ## Installation
 
-These instructions target [1.3.1 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.3.1), including repository-local selection of external Git worktree locations during setup. Verify the downloaded archive against the release checksums before installation. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
+Download the [latest stable release for Linux x64](https://github.com/iseoane/isSWF/releases/latest). Verify the downloaded archive against the release checksums before installation. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
 
 Linux x64 is the validated target. The Bun runtime has passed a real Pi worker flow with protected checks and Linux isolation. The Claude corrections have passed a bounded native coordinator/worker/read-only reviewer test with observed Sonnet model metadata and verified runtime/document input reads. These are separate host tests, not equivalent sandboxing or recovery guarantees. Earlier prerelease `1.1.0` cannot load the real Pi SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. Check the release's exact-candidate evidence and limitations before use.
 
 ### Download and verify
 
-Run these commands from a directory where you want to keep the release. Keep the complete extracted package, not just its executable.
+These commands select the latest stable release without a version tag. Use a new, empty download directory. Keep the complete extracted package, not just its executable.
 
 ```bash
-mkdir isswf-1.3.1
-cd isswf-1.3.1
-gh release download v1.3.1 --repo iseoane/isSWF \
-  --pattern 'isswf-1.3.1-bun-linux-x64.tgz' --pattern SHA256SUMS
+mkdir isswf-release
+cd isswf-release
+gh release download --repo iseoane/isSWF \
+  --pattern 'isswf-*-bun-linux-x64.tgz' --pattern SHA256SUMS
 sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf isswf-1.3.1-bun-linux-x64.tgz
+tar -xzf isswf-*-bun-linux-x64.tgz
 RELEASE="$(pwd)/package"
 ```
 
-Continue in the same shell so that `RELEASE` names the absolute package path. Checksums detect damage; they are not publisher signatures. See [installation](docs/en/installation.md) for setup, updates and building from source.
+For a reproducible installation, replace the download command above with an explicit version, for example:
+
+```bash
+gh release download v1.3.1 --repo iseoane/isSWF \
+  --pattern 'isswf-1.3.1-bun-linux-x64.tgz' --pattern SHA256SUMS
+```
+
+Continue in the same shell so that `RELEASE` names the absolute local package path, not a release selector. Downloading a newer release does not update existing project pins automatically. Checksums detect damage; they are not publisher signatures. See [installation](docs/en/installation.md) for setup, updates and building from source.
 
 ### Pi
 
