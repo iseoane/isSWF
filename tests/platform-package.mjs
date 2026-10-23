@@ -27,6 +27,7 @@ const built = verifyRelease(release);
 assert.equal(built.revision, revision);
 assert.equal(built.runtime.os, process.platform);
 assert.equal(built.runtime.arch, process.arch);
+assert.equal(Object.keys(built.files).some(path => path.startsWith('.claude/') || path.startsWith('.pi/') || path.startsWith('tooling/')), false, 'Source-only host policies and private configuration must not ship');
 const packed = JSON.parse(run(process.execPath, [npm, 'pack', release, '--ignore-scripts', '--json', '--pack-destination', root]));
 const entry = Array.isArray(packed) ? packed[0] : Object.values(packed)[0];
 const tarball = join(root, entry.filename);

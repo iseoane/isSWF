@@ -42,6 +42,10 @@ If analysis dependencies are missing, use `npm ci --prefix tooling/quality --ign
 
 For an existing initiative, inspect records with `node tools/isswf-status.mjs --project /absolute/project --initiative I0001`; open the foreground loopback panel with `node tools/isswf-panel.mjs --project /absolute/project --port 0` and stop it with Ctrl-C. Replace placeholders with actual paths and IDs. These commands do not dispatch models. Installed projects must use the pinned launcher described in `docs/en/operations.md`; source-checkout commands are not a version-selection shortcut.
 
+## Source-checkout host configuration
+
+Keep this development checkout separate from any installed release. Follow `docs/en/development.md` under “Keep this source checkout separate from an installed release” before preparing Pi's local package filters or testing Claude's source plugin. Preserve unrelated user/project settings. The tracked Claude policy and shared helper apply only to this source checkout; private Pi paths and personal Claude overrides must remain untracked. Do not infer isolation from instructions alone or change global host registration as a side effect.
+
 ## Documentation and language
 
 - Keep factory-owned instructions, profiles, references, tool messages and new agent instructions in English. Write approachable usage guides; keep execution details in their canonical resource instead of copying contracts across pages.

@@ -93,6 +93,22 @@ node tests/host-discovery.mjs .
 
 The artifact builder reads committed HEAD, while static source checks read the working tree. The tests require the pinned host dependencies and Bun; missing tools or missing skills fail rather than silently skip. Re-running needs a fresh output path. CI retains platform/discovery reports and Claude's observed skill inventory for 14 days. A configured matrix is not evidence that every platform passed; inspect the exact run before claiming support.
 
+## Keep this source checkout separate from an installed release
+
+This repository should use its source skills, not a second copy from your installed release. Its shared `.claude/settings.json` disables the distributed `isswf@isswf` plugin only here. Other projects and plugins retain their settings. To inspect the source plugin explicitly, run Claude with `--plugin-dir` pointing to this checkout. Personal `settings.local.json` overrides can still take precedence.
+
+Pi identifies a local package by its installation path, not its manifest name. A shared JSON rule cannot identify every possible release directory. The versioned helper below uses the locked Pi SDK's installed-package inventory to generate local filters for external packages named `isswf-pi-resources`. It does not resolve, download or install packages, or change user settings. It refuses custom package-manager commands and conflicting project choices instead of executing or overwriting them.
+
+```sh
+npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+node tooling/maintenance/source-host-isolation.mjs
+node tooling/maintenance/source-host-isolation.mjs --apply
+```
+
+The first helper invocation previews changes; `--apply` writes only `.pi/settings.json`. That file is ignored by Git because it contains machine-specific paths. The shared policy is the helper and Claude's project settings, not those paths. Existing unrelated settings and packages are preserved, and a repeated settled run changes no bytes. If there is no external installation, no Pi settings file is created. Re-run the helper after registering a release at a new location, before starting Pi in this checkout. Project trust is required for Pi's project filters; it is not granted automatically. Explicit temporary-package or personal overrides remain host-controlled. This is resource selection, not a security boundary or an installed runtime update.
+
+The platform matrix also runs `tests/source-host-isolation.mjs` with temporary source and neighbour repositories. It checks a positive collision control, source-only selection, unchanged neighbour/global settings, unrelated resources, invalid-setting refusal and explicit Claude source discovery. It retains `source-isolation-report.json`; a local Linux pass is not proof of a Windows or remote CI run.
+
 ## Documentation conventions
 
 Keep active factory instructions and operational resources in English. User-facing guides have matching English and Spanish-from-Spain versions; update both when changing their meaning or examples. Preserve user-authored records and historical evidence in their original language.

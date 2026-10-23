@@ -10,6 +10,10 @@ __pycache__/
 .env.*
 .codegraph/
 /.claude/worktrees/
+/.claude/settings.local.json
+/.pi/settings.json
+/.pi/.isswf-source-isolation.lock/
+/.pi/.isswf-source-isolation-*.json
 .audit/*.stderr
 node_modules/
 /tooling/.local/

@@ -93,6 +93,22 @@ node tests/host-discovery.mjs .
 
 El constructor del artefacto lee el HEAD confirmado, mientras que las comprobaciones estáticas del código leen el árbol de trabajo. Las pruebas requieren los asistentes fijados y Bun; si faltan herramientas o skills, fallan en vez de omitirse en silencio. Para repetirlas, utiliza una nueva ruta de salida. La CI conserva durante 14 días los informes de plataforma y descubrimiento y el inventario de skills observado en Claude. Configurar una matriz no demuestra que todas las plataformas hayan pasado; consulta la ejecución exacta antes de afirmar compatibilidad.
 
+## Separar este checkout del código fuente de una release instalada
+
+Este repositorio debe utilizar sus skills del código fuente, no otra copia de la release instalada. Su archivo compartido `.claude/settings.json` desactiva el plugin distribuido `isswf@isswf` solo aquí. Los demás proyectos y plugins conservan sus ajustes. Para inspeccionar explícitamente el plugin del código fuente, ejecuta Claude con `--plugin-dir` apuntando a este checkout. Los ajustes personales de `settings.local.json` pueden seguir teniendo prioridad.
+
+Pi identifica un paquete local por su ruta de instalación, no por el nombre de su manifiesto. Una regla JSON compartida no puede identificar todas las posibles carpetas de las releases. El siguiente helper versionado utiliza el inventario de paquetes instalados del SDK fijado de Pi para generar filtros locales para los paquetes externos llamados `isswf-pi-resources`. No resuelve, descarga ni instala paquetes, ni cambia los ajustes de usuario. Rechaza los comandos personalizados del gestor de paquetes y las decisiones de proyecto que entren en conflicto, en vez de ejecutarlos o sobrescribirlas.
+
+```sh
+npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+node tooling/maintenance/source-host-isolation.mjs
+node tooling/maintenance/source-host-isolation.mjs --apply
+```
+
+La primera invocación del helper muestra los cambios previstos; `--apply` escribe únicamente `.pi/settings.json`. Git ignora ese archivo porque contiene rutas específicas de cada máquina. La política compartida está en el helper y los ajustes de proyecto de Claude, no en esas rutas. Se conservan los ajustes y paquetes ajenos, y repetir una configuración ya aplicada no cambia ningún byte. Si no hay una instalación externa, no se crea un archivo de ajustes de Pi. Vuelve a ejecutar el helper después de registrar una release en una ubicación nueva, antes de iniciar Pi en este checkout. Los filtros de proyecto de Pi requieren que se confíe en el proyecto; esa confianza no se concede automáticamente. Los paquetes temporales y ajustes personales explícitos siguen bajo el control del asistente. Es selección de recursos, no una barrera de seguridad ni una actualización del runtime instalado.
+
+La matriz de plataformas también ejecuta `tests/source-host-isolation.mjs` con repositorios temporales de código fuente y un proyecto vecino. Comprueba un control positivo de colisiones, la selección del código fuente, que no cambien los ajustes globales ni los del vecino, los recursos ajenos, el rechazo de ajustes inválidos y el descubrimiento explícito del código fuente en Claude. Conserva `source-isolation-report.json`; que pase en Linux local no demuestra una ejecución en Windows ni en la CI remota.
+
 ## Convenciones de documentación
 
 Mantén en inglés las instrucciones activas de la factoría y sus recursos operativos. Las guías para usuarios tienen versiones equivalentes en inglés y español de España; actualiza ambas cuando cambien su significado o sus ejemplos. Conserva los registros del usuario y las evidencias históricas en su idioma original.

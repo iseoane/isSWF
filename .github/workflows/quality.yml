@@ -90,6 +90,10 @@ jobs:
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/host-discovery.mjs .
+      - name: Verify source-checkout isolation without changing user installations
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/source-host-isolation.mjs .
       - name: Retain platform and discovery evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -99,5 +103,6 @@ jobs:
             ${{ runner.temp }}/isswf-platform/platform-report.json
             ${{ runner.temp }}/isswf-platform/host-report.json
             ${{ runner.temp }}/isswf-platform/claude-inventory.txt
+            ${{ runner.temp }}/isswf-platform/source-isolation-report.json
           if-no-files-found: warn
           retention-days: 14
