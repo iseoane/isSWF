@@ -76,6 +76,14 @@ ESLint performs lint and static checks; Knip reports unused files, dependencies,
 
 These tools help find mistakes and unused code. They do not replace the checks needed for a particular feature or prove that a real agent run succeeded.
 
+The portable review-guidance check verifies four executable fixtures: two behavioral defects with passing but insufficient checks, and two valid changes. It checks the fixture ground truth, not a model's review quality. To retain an evaluation bundle, select an absent directory outside the repository:
+
+```sh
+node tests/review-guidance.mjs . /absolute/absent/review-fixtures
+```
+
+Keep `oracle.json` and `probes/` out of a blinded review package. Live comparisons require separately authorized native calls with the same candidate, context, model and effort. Report missed defects and false alarms, preserve inconclusive results, and do not infer general improvement from one small sample.
+
 ## Platform and host discovery checks
 
 The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate matrix defines native Linux and Windows checks for Bun construction, npm tarball installation, exact resource receipts, CLI version and read-only inspection, paths with spaces and Unicode, and external Git worktrees. Windows does not assert POSIX permission modes. These checks do not establish Windows mutation, recovery or worker isolation support.

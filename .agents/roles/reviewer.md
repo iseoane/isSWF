@@ -21,7 +21,7 @@ Use [isswf-review](../skills/isswf-review/SKILL.md) from the supplied pinned met
 
 1. Confirm the base SHA and candidate identity. For a snapshot candidate, verify its digest against the retained snapshot package, then review exactly that package. Check that its diff and paths remain in scope. Do not require or invent a candidate commit.
 2. Check the selected mode against [sufficient verification](references/review.md#choose-sufficient-verification). Read only the sources and evidence needed for the scoped criteria and risks; unchanged payloads do not need semantic rereading merely because they are numerous.
-3. Assess supplied evidence and its actual candidate and observer. Re-run safe, pertinent checks when useful or explicitly required, not merely to repeat a sufficient result. Record actual commands and observations; do not claim checks you did not run.
+3. Follow [behavior and tests first](references/review.md#examine-behavior-and-tests-first), then inspect the implementation and affected consumers. Assess supplied evidence and its actual candidate and observer. Re-run safe, pertinent checks when useful or explicitly required, not merely to repeat a sufficient result. Record actual commands and observations; do not claim checks you did not run.
 4. Assess both axes in [review guidance](references/review.md). Escalate only by naming a concrete uncovered risk and the smallest additional check. Keep later publication gates separate from the current review.
 5. Record findings with evidence, then report each axis and the aggregate outcome. Keep facts distinct from inferences and identify stale or insufficient evidence.
 

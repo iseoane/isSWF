@@ -76,6 +76,14 @@ ESLint realiza el lint y las comprobaciones estáticas; Knip informa de archivos
 
 Estas herramientas ayudan a encontrar errores y código sin utilizar. No sustituyen las comprobaciones necesarias para cada funcionalidad ni demuestran que una ejecución real de agentes haya terminado bien.
 
+La comprobación portable de la guía de revisión verifica cuatro fixtures ejecutables: dos defectos de comportamiento con pruebas que pasan pero resultan insuficientes, y dos cambios válidos. Comprueba los resultados esperados de las fixtures, no la calidad de revisión de un modelo. Para conservar un paquete de evaluación, elige una carpeta inexistente fuera del repositorio:
+
+```sh
+node tests/review-guidance.mjs . /absolute/absent/review-fixtures
+```
+
+Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las comparaciones reales requieren llamadas nativas autorizadas por separado con el mismo candidato, contexto, modelo y esfuerzo. Informa de los defectos omitidos y las falsas alarmas, conserva los resultados inconclusos y no deduzcas una mejora general a partir de una única muestra pequeña.
+
 ## Comprobaciones de plataforma y descubrimiento de skills
 
 El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. Una matriz independiente define comprobaciones nativas en Linux y Windows de compilación con Bun, instalación del tarball npm, inventarios exactos de recursos, versión e inspección de solo lectura de la CLI, rutas con espacios y Unicode, y worktrees externos de Git. En Windows no se comprueban los permisos POSIX. Estas pruebas no demuestran soporte de mutación, recuperación ni aislamiento de trabajadores en Windows.
