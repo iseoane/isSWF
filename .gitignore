@@ -9,6 +9,7 @@ __pycache__/
 .env
 .env.*
 .codegraph/
+/.claude/worktrees/
 .audit/*.stderr
 node_modules/
 /tooling/.local/

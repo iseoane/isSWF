@@ -120,6 +120,8 @@ After receiving a result, verify that it matches the exact candidate identity an
 
 A new call requires verifiable progress: a corrected finding, previously missing context, or relevant new evidence. For an inconclusive result caused by context or capabilities, reproduce the gap and repair preparation before repeating. If the same assumption fails again, challenge it and block only the affected step. While CI awaits resources, preserve its identity and advance only independent work; do not rerun CI or identical reviews to simulate progress.
 
+Before creating a Git worktree, follow [project worktree locations](../../roles/references/worktrees.md), including the repository-local `isswf.worktreeRoot` choice and the selected host's working-directory capability. Do not substitute a host-default checkout. This does not relocate native Pi task snapshots or relax standalone-repository requirements.
+
 Before creating a disposable workspace, check available disk space and set its budget. Keep at most one copy per active actor and reuse verified sources when safe. After terminal execution, preserve records and the exact necessary evidence; remove only clean copies reproducible from a retained candidate after verifying they are no longer in use. Partial changes, unique results, and authorizations are not disposable temporary data. If space is insufficient, block new copies rather than creating another full backup.
 
 ## 6. Report state with evidence

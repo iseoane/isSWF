@@ -33,7 +33,7 @@ Pi es el entorno de ejecución de referencia. También se incluye un plugin para
 
 ## Instalación
 
-Estas instrucciones corresponden a la [versión 1.2.0 para Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.2.0), que incluye las skills compartidas de redacción, comprensión, issues y PR. Verifica el archivo descargado con los checksums de la release antes de instalarlo. El repositorio es privado, por lo que GitHub CLI debe estar autenticado con una cuenta que tenga acceso. No se ha publicado ningún paquete en npm ni en un marketplace público.
+Estas instrucciones corresponden a la [versión 1.3.0 para Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.3.0), que permite elegir durante la configuración una ubicación externa para los worktrees de Git de cada repositorio. Verifica el archivo descargado con los checksums de la release antes de instalarlo. El repositorio es privado, por lo que GitHub CLI debe estar autenticado con una cuenta que tenga acceso. No se ha publicado ningún paquete en npm ni en un marketplace público.
 
 Linux x64 es el destino validado. El runtime Bun ha superado un flujo con un worker real de Pi, comprobaciones protegidas y aislamiento de Linux. Las correcciones de Claude han superado un ensayo nativo acotado con coordinador, worker y reviewer de solo lectura, con metadatos observados del modelo Sonnet y lecturas verificadas del runtime y los documentos de entrada. Son pruebas separadas de cada host, no garantías equivalentes de aislamiento o recuperación. La prerelease anterior, `1.1.0`, no puede cargar el SDK real de Pi y no debe utilizarse para encargos de agentes. La ejecución en Windows y macOS sigue sin validar. Comprueba las evidencias del candidato exacto y las limitaciones de la release antes de utilizarla.
 
@@ -42,12 +42,12 @@ Linux x64 es el destino validado. El runtime Bun ha superado un flujo con un wor
 Ejecuta estos comandos desde el directorio donde quieras conservar la versión. Mantén el paquete extraído completo, no solo su ejecutable.
 
 ```bash
-mkdir isswf-1.2.0
-cd isswf-1.2.0
-gh release download v1.2.0 --repo iseoane/isSWF \
-  --pattern 'isswf-1.2.0-bun-linux-x64.tgz' --pattern SHA256SUMS
+mkdir isswf-1.3.0
+cd isswf-1.3.0
+gh release download v1.3.0 --repo iseoane/isSWF \
+  --pattern 'isswf-1.3.0-bun-linux-x64.tgz' --pattern SHA256SUMS
 sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf isswf-1.2.0-bun-linux-x64.tgz
+tar -xzf isswf-1.3.0-bun-linux-x64.tgz
 RELEASE="$(pwd)/package"
 ```
 

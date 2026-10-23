@@ -12,6 +12,10 @@ Persist approved Claude-native choices in the selected state's `project-setup.md
 
 When preparing a Claude assignment, consult those recorded choices and the current host capabilities, then carry the approved model and effort into the child's required context. Setup selection is a preference, not assignment approval, proof of availability or permission to create an actor or incur costs. Existing assignment approvals and observed-model requirements above still apply.
 
+## External worktree assignments
+
+Before creating a worktree, follow [project worktree locations](../roles/references/worktrees.md). Read the repository-local `isswf.worktreeRoot`, prepare an exclusive external checkout with Git, and bind the native child to its exact absolute working directory. Do not use automatic host worktree isolation if it ignores that selection or creates another checkout under `.claude/worktrees/`. Missing native working-directory support blocks the affected dispatch rather than authorizing a fallback. Preserve the required context, actor grants and read-only reviewer tool restrictions below. This procedure does not imply Pi-equivalent isolation or add runtime enforcement.
+
 ## Required child context
 
 Before delegating any native role, the coordinator resolves the project pin using the original installed launcher outside the private store. Keep that launcher path separate from the pinned runtime root returned by `locate`. A retained runtime inside the store is a resource location, not a replacement launcher for a second `locate` call against that same store.
