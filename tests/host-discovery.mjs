@@ -51,7 +51,7 @@ if (process.argv[3] === '--pi-loader') {
     assert.equal(run(process.execPath, [piCli, '--version'], home), piManifest.version);
     const probe = [join(source, 'tests/host-discovery.mjs'), source, '--pi-loader'];
     assert.deepEqual(JSON.parse(run(process.execPath, [...probe, 'empty'], home)).skills, []);
-    run(process.execPath, [piCli, 'install', installed, ...(local ? ['--local'] : [])], home);
+    run(process.execPath, [piCli, 'install', installed, ...(local ? ['--local', '--approve'] : [])], home);
     const settings = JSON.parse(await readFile(join(home, local ? '.pi' : 'pi', 'settings.json'), 'utf8'));
     assert.equal(settings.packages.length, 1);
     const discovered = JSON.parse(run(process.execPath, probe, home));
