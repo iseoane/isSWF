@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFile,realpath,mkdir,open,link,unlink,rmdir} from 'node:fs/promises';
 import {resolve,join,relative,isAbsolute,dirname} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {createRequire,findPackageJSON} from 'node:module';
+import {createRequire} from 'node:module';
+import {sdkPackageManifest} from './sdk-package.mjs';
 import {spawnSync} from 'node:child_process';
 import {createHash,randomUUID} from 'node:crypto';
 import {prepareCapacity,acquireCapacity} from './execution-capacity.mjs';
@@ -73,7 +74,7 @@ export async function sdkResearchBackend(job,grant){
  const require=createRequire(import.meta.url),entry=require.resolve(job.sdkPath);
  const metadata=JSON.parse(await readFile(join(dirname(entry),'../package.json')));assert(metadata.name==='@earendil-works/pi-coding-agent'&&hash(await readFile(entry))===grant.sdkEntrySha256,'unapproved-sdk-entry');
  const authPath=await realpath(grant.authPath);for(const root of[grant.project,grant.targetRepo,grant.store,source])assert(!inside(root,authPath),'auth-path-must-be-host-owned');
- const sdk=await import(pathToFileURL(entry).href),auth=await import(pathToFileURL(join(dirname(entry),'core/auth-storage.js')).href),ai=await import(pathToFileURL(join(dirname(findPackageJSON('@earendil-works/pi-ai',pathToFileURL(entry))),'dist/models.js')).href);
+ const sdk=await import(pathToFileURL(entry).href),auth=await import(pathToFileURL(join(dirname(entry),'core/auth-storage.js')).href),ai=await import(pathToFileURL(join(dirname(await sdkPackageManifest('@earendil-works/pi-ai',entry)),'dist/models.js')).href);
  const runtime=await sdk.ModelRuntime.create({credentials:new auth.ReadOnlyAuthStorage(grant.authPath),modelsPath:null,allowModelNetwork:false,refreshOnCreate:true});
  return {
   async preflight(tuple){const slash=tuple.model.indexOf('/'),provider=tuple.model.slice(0,slash),id=tuple.model.slice(slash+1),model=runtime.getPhysicalModel(provider,id);assert(model&&ai.getSupportedThinkingLevels(model).includes(tuple.effort),'model-effort-incompatible');assert(runtime.hasConfiguredAuth(provider)===true,'auth-unconfigured');const billingEvidence=subscriptionEvidence(provider,runtime.isUsingSubscription(provider),grant);return {model,billingEvidence};},

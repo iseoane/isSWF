@@ -25,10 +25,10 @@ export function nativeWorkerInstructions(brief, files) {
 }
 const sha = value => createHash('sha256').update(value).digest('hex');
 export function matchesBoundaryControls(control) {
-  const expected = { fakeEnvAbsent: true, outsideRead: 'ENOENT', outsideWrite: 'ENOENT', factoryWrite: 'EROFS', sdkWrite: 'EROFS', network: 'ECONNREFUSED' };
+  const expected = { fakeEnvAbsent: [true], outsideRead: ['ENOENT'], outsideWrite: ['ENOENT'], factoryWrite: ['EROFS', 'EACCES'], factoryCreate: ['EROFS'], sdkWrite: ['EROFS'], network: ['ECONNREFUSED'] };
   return control !== null && typeof control === 'object' && !Array.isArray(control)
     && Object.keys(control).length === Object.keys(expected).length
-    && Object.entries(expected).every(([key, value]) => Object.hasOwn(control, key) && control[key] === value);
+    && Object.entries(expected).every(([key, values]) => Object.hasOwn(control, key) && values.includes(control[key]));
 }
 const safePath = (value, label) => {
   if (typeof value !== 'string' || !isAbsolute(value) || value.includes('\0')) throw new Error(`${label} must be absolute`);
@@ -137,7 +137,7 @@ const publishInvocation = async value => {
   return hash(bytes);
 };
 const bounded = async (command, timeout = 10000, modelCall) => {
-  const args = ['--unshare-user','--unshare-pid','--unshare-net','--unshare-ipc','--unshare-uts','--new-session','--die-with-parent','--cap-drop','ALL','--clearenv','--ro-bind','/usr','/usr','--symlink','usr/bin','/bin','--symlink','usr/lib','/lib','--symlink','usr/lib','/lib64','--proc','/proc','--dev','/dev','--tmpfs','/tmp','--dir','/tmp/home','--ro-bind',CONFIG.nodeBinary,'/runtime/node','--ro-bind',CONFIG.sdkPath,'/runtime/sdk','--bind',work,'/work'];
+  const args = ['--unshare-user','--unshare-pid','--unshare-net','--unshare-ipc','--unshare-uts','--new-session','--die-with-parent','--cap-drop','ALL','--clearenv','--ro-bind','/usr','/usr','--symlink','usr/bin','/bin','--symlink','usr/lib','/lib','--symlink','usr/lib64','/lib64','--proc','/proc','--dev','/dev','--tmpfs','/tmp','--dir','/tmp/home','--ro-bind',CONFIG.nodeBinary,'/runtime/node','--ro-bind',CONFIG.sdkPath,'/runtime/sdk','--bind',work,'/work'];
   args.push('--dir','/factory','--ro-bind',factoryRoot,'/factory');
   args.push('--chdir','/work','--remount-ro','/','--setenv','PATH','/runtime:/usr/bin:/bin','--setenv','HOME','/tmp/home','--setenv','LANG','C.UTF-8');
   return nativeRun(args, command, timeout, modelCall);
@@ -160,7 +160,9 @@ try {
   const outside=pathJoin(pathDirname(work),'outside-canary.txt'); await write(outside,'protected-canary-'+hash(String(Date.now()))+'\\n',{flag:'wx',mode:0o600});
   listener=net.createServer(socket=>socket.end('host-positive')); await new Promise((resolveListen,reject)=>{listener.once('error',reject);listener.listen(0,'127.0.0.1',resolveListen);});
   const port=listener.address().port;
-  const boundarySource='import fs from \'node:fs\';import net from \'node:net\';const outside='+JSON.stringify(outside)+',port='+port+';const r={fakeEnvAbsent:process.env.PI_WORKER_ENV_CANARY===undefined};for(const [k,f] of Object.entries({outsideRead:()=>fs.readFileSync(outside),outsideWrite:()=>fs.writeFileSync(outside,\'changed\'),factoryWrite:()=>fs.writeFileSync(\'/factory/.agents/roles/worker.md\',\'changed\'),sdkWrite:()=>fs.writeFileSync(\'/runtime/sdk/package.json\',\'changed\')})){try{f();r[k]=\'unexpected-success\'}catch(e){r[k]=e.code||e.name}}const s=net.connect(port,\'127.0.0.1\');s.setTimeout(800);s.on(\'connect\',()=>{r.network=\'connected\';s.destroy()});s.on(\'error\',e=>{r.network=e.code});setTimeout(()=>console.log(JSON.stringify(r)),900);';
+  const factoryWriteProbe=pathJoin(trustedRoot,'.isswf-boundary-create');
+  await write(factoryWriteProbe,'host-write-positive',{flag:'wx',mode:0o600}); await remove(factoryWriteProbe);
+  const boundarySource='import fs from \'node:fs\';import net from \'node:net\';const outside='+JSON.stringify(outside)+',port='+port+';const r={fakeEnvAbsent:process.env.PI_WORKER_ENV_CANARY===undefined};for(const [k,f] of Object.entries({outsideRead:()=>fs.readFileSync(outside),outsideWrite:()=>fs.writeFileSync(outside,\'changed\'),factoryWrite:()=>fs.writeFileSync(\'/factory/.agents/roles/worker.md\',\'changed\'),factoryCreate:()=>fs.writeFileSync(\'/factory/.isswf-boundary-create\',\'changed\',{flag:\'wx\'}),sdkWrite:()=>fs.writeFileSync(\'/runtime/sdk/package.json\',\'changed\')})){try{f();r[k]=\'unexpected-success\'}catch(e){r[k]=e.code||e.name}}const s=net.connect(port,\'127.0.0.1\');s.setTimeout(800);s.on(\'connect\',()=>{r.network=\'connected\';s.destroy()});s.on(\'error\',e=>{r.network=e.code});setTimeout(()=>console.log(JSON.stringify(r)),900);';
   const boundaryPath=pathJoin(trustedRoot,'boundary-check.mjs');
   await write(boundaryPath,boundarySource,{mode:0o444,flag:'wx'});
   const boundaryHash=hash(boundarySource), outsideHash=hash(await read(outside));

@@ -21,11 +21,13 @@ The panel can record local notes when the displayed evidence still matches. A no
 
 `RELEASE` below means the absolute directory of an already prepared, trusted package. It is not a download address. No public release is assumed.
 
+Use `bin/isswf.exe` on Windows. For a retained legacy Node release, follow that release's installation guide and Node prerequisite. These commands do not establish native mutation or isolation support outside Linux.
+
 ```bash
-node RELEASE/tools/isswf.mjs inspect --project /absolute/project
-node RELEASE/tools/isswf.mjs locate --project /absolute/project
-node RELEASE/tools/isswf.mjs exec --project /absolute/project -- isswf-status --initiative I0001
-node RELEASE/tools/isswf.mjs exec --project /absolute/project -- isswf-panel --port 0
+RELEASE/bin/isswf inspect --project /absolute/project
+RELEASE/bin/isswf locate --project /absolute/project
+RELEASE/bin/isswf exec --project /absolute/project -- isswf-status --initiative I0001
+RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 ```
 
 `inspect` shows installation and migration information without changing the project or store. `locate` verifies and locates the selected retained runtime. `exec` uses that project's pinned runtime, not automatically the newest globally installed package. Missing or damaged retained code blocks the operation.

@@ -25,7 +25,31 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24'
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: '1.4.3'
+      - name: Install Linux sandbox prerequisite
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends bubblewrap apparmor
+      - name: Allow Bubblewrap user namespaces on the ephemeral runner
+        run: |
+          sudo tee /etc/apparmor.d/isswf-ci-bwrap >/dev/null <<'PROFILE'
+          abi <abi/4.0>,
+          include <tunables/global>
+          profile bwrap /usr/bin/bwrap flags=(unconfined) {
+            userns,
+          }
+          PROFILE
+          sudo apparmor_parser -r /etc/apparmor.d/isswf-ci-bwrap
+      - name: Require Linux sandbox capability
+        run: |
+          bwrap --version
+          bwrap --unshare-user --unshare-pid --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --proc /proc --dev /dev -- /usr/bin/true
       - run: node tools/check-quality.mjs
+        env:
+          ISSWF_TEST_BUN: bun
+          ISSWF_TEST_BUN_WORKER: '1'
       - name: Install locked local analysis tools
         run: npm ci --prefix tooling/quality --ignore-scripts --no-audit --no-fund
       - name: Lint

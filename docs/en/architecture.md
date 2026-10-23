@@ -14,7 +14,7 @@ Pi discovers the skills declared in `package.json`. The `skills/`, `agents/`, an
 
 | Area | Source |
 | --- | --- |
-| Build and verify a package | `tools/build-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
+| Build and verify a package | `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
 | Initialise, select, update, and recover a project's installation | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Prepare plans and issue intake | `tools/isswf-plan.mjs`, `tools/isswf-intake.mjs` |
 | Read records and show the local panel | `tools/isswf-status.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
@@ -22,13 +22,15 @@ Pi discovers the skills declared in `package.json`. The `skills/`, `agents/`, an
 | Research, planning, diagnosis, and review | `tools/researcher-task.mjs`, `tools/planner-task.mjs`, `tools/diagnostic-task.mjs`, `tools/reviewer-task.mjs` |
 | Capacity, recovery, and external-effect records | `tools/execution-capacity.mjs`, `tools/native-recovery.mjs`, `tools/recovery-review.mjs`, `tools/job-successor.mjs`, `tools/external-effect-journal.mjs` |
 
+The release compiler bundles tool entrypoints into one Bun executable and supplies each module's original identity and package-root paths. Original source files remain verified provenance, dynamic helpers, and immutable task snapshots. Source development still runs on Node.js. `tools/sdk-package.mjs` resolves SDK dependency metadata without relying on a Node-only API.
+
 These callers have different contracts. Do not assume one role's command, model support, recovery, or permissions apply to another.
 
 ## Project records and private runtime data
 
 New target repositories use `.isswf/`. Existing repositories may use `.factory/` until an explicit migration. `tools/project-state.mjs` selects the state directory; it refuses ambiguous coexistence. Do not rename historical references to make old records look new.
 
-Plans, briefs, and review records describe the work. The installation pin selects its runtime. Private runtime stores retain execution records and exact released code separately from shared project files. A saved status is not proof of a live process.
+Plans, briefs, and review records describe the work. The installation pin selects its runtime. Bun receipt format 2 separates the portable source/engine identity from the locally anchored native artifact hash. Legacy format-1 identities and stores remain valid. Private runtime stores retain execution records and exact released code separately from shared project files. A saved status is not proof of a live process.
 
 The development repository's `.factory/models.json` and `.factory/templates/` are also source defaults distributed by explicit allowlists. Its initiatives are project records, not package contents. The `isswf/` Python code and `examples/` belong to earlier intake prototypes; the native installed flow does not depend on SQLite.
 

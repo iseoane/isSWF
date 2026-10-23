@@ -2,10 +2,10 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { cp, link, lstat, mkdir, open, readFile, readdir, realpath, rename, rm, unlink } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { verifyRelease } from './release-source.mjs';
+import { verifyRelease, releaseInvocation } from './release-source.mjs';
 import { stateDirectory } from './project-state.mjs';
 import { inspectStateMigration, moveState, recoverState } from './state-migration.mjs';
 
@@ -17,14 +17,14 @@ const runtimePattern = /^[a-f0-9]{64}$/u;
 const pinPath = '.isswf/install.json';
 const executableTools = ['isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-response', 'isswf-intake', 'project-quality', 'isswf-job', 'researcher-task', 'reviewer-task', 'planner-task', 'diagnostic-task'];
 function fail(message) { throw Error(message); }
-function inside(parent, child) { const part = relative(parent, child); return part === '' || (!part.startsWith('../') && part !== '..' && !isAbsolute(part)); }
+function inside(parent, child) { const part = relative(parent, child); return part === '' || (!part.startsWith('..' + sep) && part !== '..' && !isAbsolute(part)); }
 async function exists(path) { try { await lstat(path); return true; } catch (error) { if (error.code === 'ENOENT') return false; throw error; } }
 async function directory(path) { const stat = await lstat(path); if (!stat.isDirectory() || stat.isSymbolicLink()) fail(`Real directory required: ${path}`); }
 async function regular(path) { const stat = await lstat(path); if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 4 * 1024 * 1024) fail(`Bounded regular file required: ${path}`); return readFile(path); }
 async function json(path) { return JSON.parse((await regular(path)).toString('utf8')); }
 async function safeParents(root, path, create = false) {
   if (!inside(root, path)) fail('Path escapes owned root');
-  const parts = relative(root, dirname(path)).split('/').filter(Boolean);
+  const parts = relative(root, dirname(path)).split(sep).filter(Boolean);
   let current = root;
   for (const part of parts) {
     current = join(current, part);
@@ -68,33 +68,52 @@ async function storeRoot(path, project) {
   return canonical;
 }
 function release(root) { const value = verifyRelease(root); if (!value) fail('Use a built release, not the development checkout. See docs/installation.md'); return value; }
-function pinFor(value, previous = {}) { return { ...previous, format: 1, schemaVersion: 1, version: value.version, revision: value.revision, runtimeId: value.runtimeId }; }
+function pinFor(value, previous = {}) { return { ...previous, format: 1, schemaVersion: 1, version: value.version, revision: value.revision, runtimeId: value.runtimeId, runtimeFormat: value.format }; }
+function retainedPath(store, pin) {
+  const base = join(store, 'releases', pin.runtimeId);
+  return pin.runtimeFormat === 2 ? join(base, `${process.platform}-${process.arch}`) : base;
+}
+function artifactAnchor(root) { return root + '.sha256'; }
 async function readPin(project) {
   const path = join(project, pinPath);
   if (!await exists(path)) return null;
   const bytes = await regular(path), pin = JSON.parse(bytes.toString('utf8'));
-  if (pin.format !== 1 || pin.schemaVersion !== 1 || !runtimePattern.test(pin.runtimeId || '') || typeof pin.version !== 'string' || !/^[a-f0-9]{40}$/u.test(pin.revision || '')) fail('Unsupported or malformed project installation; no automatic schema conversion');
+  if (pin.format !== 1 || pin.schemaVersion !== 1 || (pin.runtimeFormat !== undefined && ![1, 2].includes(pin.runtimeFormat)) || !runtimePattern.test(pin.runtimeId || '') || typeof pin.version !== 'string' || !/^[a-f0-9]{40}$/u.test(pin.revision || '')) fail('Unsupported or malformed project installation; no automatic schema conversion');
   return { pin, bytes };
 }
 async function retained(store, pin) {
-  const root = join(store, 'releases', pin.runtimeId);
+  const root = retainedPath(store, pin);
   await safeParents(store, join(root, 'package.json'));
   await directory(root);
   const value = release(root);
-  if (value.runtimeId !== pin.runtimeId || value.revision !== pin.revision || value.version !== pin.version) fail('Retained runtime does not match project pin');
+  if (value.runtimeId !== pin.runtimeId || value.revision !== pin.revision || value.version !== pin.version || value.format !== (pin.runtimeFormat || 1)) fail('Retained runtime does not match project pin');
+  if (value.format === 2) {
+    if (value.runtime.os !== process.platform || value.runtime.arch !== process.arch) fail('Retained executable target does not match this host');
+    if ((await regular(artifactAnchor(root))).toString('utf8') !== value.artifactId + '\n') fail('Retained artifact receipt differs from its immutable local anchor');
+  }
   return root;
 }
 async function retain(store, from) {
-  const value = release(from), target = join(store, 'releases', value.runtimeId);
+  const value = release(from), target = retainedPath(store, pinFor(value));
+  if (value.format === 2 && (value.runtime.os !== process.platform || value.runtime.arch !== process.arch)) fail('Cannot retain an executable for another host');
   if (await exists(target)) { await retained(store, pinFor(value)); return target; }
   await mkdir(store, { recursive: true, mode: 0o700 });
   await directory(store);
-  await safeParents(store, join(store, 'releases', 'placeholder'), true);
-  const stage = join(store, 'releases', '.stage-' + randomUUID());
-  await cp(from, stage, { recursive: true, errorOnExist: true, force: false, filter: path => path === from || !relative(from, path).split('/').includes('node_modules') });
+  await safeParents(store, join(dirname(target), 'placeholder'), true);
+  const stage = join(dirname(target), '.stage-' + randomUUID());
+  await cp(from, stage, { recursive: true, errorOnExist: true, force: false, filter: path => path === from || !relative(from, path).split(sep).includes('node_modules') });
   try {
-    if (release(stage).runtimeId !== value.runtimeId) fail('Runtime changed during retention');
+    const staged = release(stage);
+    if (staged.runtimeId !== value.runtimeId || staged.artifactId !== value.artifactId) fail('Runtime changed during retention');
     if (await exists(target)) { await retained(store, pinFor(value)); await rm(stage, { recursive: true }); return target; }
+    if (value.format === 2) {
+      const anchor = artifactAnchor(target), bytes = Buffer.from(value.artifactId + '\n');
+      if (!await exists(anchor)) {
+        try { await writeExclusive(anchor, bytes); }
+        catch (error) { if (error.code !== 'EEXIST') throw error; }
+      }
+      if (!(await regular(anchor)).equals(bytes)) fail('A different artifact is already bound to this portable runtime and host');
+    }
     await rename(stage, target);
     await syncDirectory(dirname(target));
     return target;
@@ -343,9 +362,9 @@ async function execute(project, store, _opts, args) {
     await unlock(); throw error;
   }
   const withoutProject = tool === 'isswf-job' && forwarded[0] !== 'run';
-  const childArgs = [join(runtime, 'tools', tool + '.mjs'), ...forwarded, ...(withoutProject ? [] : ['--project', project])];
+  const invocation = releaseInvocation(runtime, tool, [...forwarded, ...(withoutProject ? [] : ['--project', project])]);
   const result = await new Promise((done, reject) => {
-    const child = spawn(process.execPath, childArgs, { stdio: 'inherit' });
+    const child = spawn(invocation.command, invocation.args, { stdio: 'inherit' });
     child.once('error', reject);
     child.once('exit', (code, signal) => done({ code, signal }));
   });

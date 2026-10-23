@@ -6,6 +6,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { fileURLToPath } from 'node:url';
 import { releaseReceiptName, verifyRelease } from './release-source.mjs';
 import { canonicalPath } from './factory-package.mjs';
+import { compileBunRelease, bunTargets } from './bun-release.mjs';
 
 const legacyMethodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -74,10 +75,14 @@ function parseArgs(argv) {
   const options = {};
   for (let index = 0; index < argv.length; index += 2) {
     const key = argv[index];
-    if (!['--source', '--revision', '--output'].includes(key) || !argv[index + 1] || argv[index + 1].startsWith('--') || Object.hasOwn(options, key)) fail(`Invalid or duplicate option: ${key ?? ''}`);
+    if (!['--source', '--revision', '--output', '--runtime', '--target', '--bun'].includes(key) || !argv[index + 1] || argv[index + 1].startsWith('--') || Object.hasOwn(options, key)) fail(`Invalid or duplicate option: ${key ?? ''}`);
     options[key] = argv[index + 1];
   }
   for (const key of ['--source', '--revision', '--output']) if (!options[key]) fail(`Missing required option: ${key}`);
+  const runtime = options['--runtime'] || 'bun';
+  if (!['node', 'bun'].includes(runtime)) fail('--runtime must be node or bun');
+  if (runtime === 'node' && (options['--target'] || options['--bun'])) fail('--target and --bun require --runtime bun');
+  if (runtime === 'bun' && !bunTargets.includes(options['--target'] || `bun-${process.platform === 'win32' ? 'windows' : process.platform}-${process.arch}`)) fail('Unsupported Bun target');
   return options;
 }
 function treeEntries(source, revision) {
@@ -114,7 +119,7 @@ function validateManifest(bytes) {
   ) fail('The committed package.json does not match the release package contract');
   return manifest;
 }
-async function build({ '--source': source, '--revision': revision, '--output': output }) {
+async function build({ '--source': source, '--revision': revision, '--output': output, '--runtime': runtime = 'bun', '--target': target = `bun-${process.platform === 'win32' ? 'windows' : process.platform}-${process.arch}`, '--bun': compiler = 'bun' }) {
   if (!isAbsolute(source) || !isAbsolute(output)) fail('--source and --output must be absolute paths');
   if (!shaPattern.test(revision)) fail('--revision must be a full lowercase Git SHA');
   const sourceRoot = await realpath(source);
@@ -152,7 +157,7 @@ async function build({ '--source': source, '--revision': revision, '--output': o
   for (const [path, entry] of historical) {
     sources[legacyMethodologySha][path] = { file: `.isswf-sources/${legacyMethodologySha}/${path}`, sha256: sha256(entry.bytes), oid: entry.oid };
   }
-  const receipt = `${JSON.stringify({ format: 1, version: manifest.version, revision, methodologySha, files: Object.fromEntries([...inventory].map(([path, entry]) => [path, sha256(entry.bytes)])), sources }, null, 2)}\n`;
+  let receipt, binaryRuntime;
   await mkdir(dirname(outputRoot), { recursive: true });
   const staging = join(dirname(outputRoot), `.${basename(outputRoot)}.stage-${process.pid}-${Date.now()}`);
   try {
@@ -167,6 +172,21 @@ async function build({ '--source': source, '--revision': revision, '--output': o
       await mkdir(dirname(target), { recursive: true });
       await writeFile(target, entry.bytes, { flag: 'wx', mode: 0o444 });
     }
+    if (runtime === 'bun') {
+      const compiled = await compileBunRelease({ inventory, staging, target, compiler });
+      const originalManifest = inventory.get('package.json');
+      const manifestSource = `.isswf-sources/${revision}/package.json`;
+      sources[revision]['package.json'] = { file: manifestSource, sha256: sha256(originalManifest.bytes), oid: originalManifest.oid };
+      await mkdir(dirname(join(staging, manifestSource)), { recursive: true });
+      await writeFile(join(staging, manifestSource), originalManifest.bytes, { flag: 'wx', mode: 0o444 });
+      binaryRuntime = { engine: 'bun', version: compiled.version, target: compiled.target, executable: compiled.binary, os: compiled.os, arch: compiled.arch };
+      inventory.set(compiled.binary, { bytes: compiled.bytes, mode: '100755' });
+      const binaryManifest = { ...manifest, bin: { isswf: compiled.binary }, files: [...manifest.files, 'bin'], os: [compiled.os], cpu: [compiled.arch], isswfRuntime: { engine: 'bun', version: compiled.version, target: compiled.target } };
+      const bytes = Buffer.from(JSON.stringify(binaryManifest, null, 2) + '\n');
+      inventory.set('package.json', { bytes, mode: '100644' });
+      await writeFile(join(staging, 'package.json'), bytes);
+    }
+    receipt = `${JSON.stringify({ format: runtime === 'bun' ? 2 : 1, version: manifest.version, revision, methodologySha, ...(binaryRuntime ? { runtime: binaryRuntime } : {}), files: Object.fromEntries([...inventory].map(([path, entry]) => [path, sha256(entry.bytes)])), sources }, null, 2)}\n`;
     await writeFile(join(staging, releaseReceiptName), receipt, { flag: 'wx', mode: 0o444 });
     const verified = verifyRelease(staging);
     if (verified.revision !== revision || verified.version !== manifest.version) fail('Staged release does not match the requested revision');
@@ -175,8 +195,8 @@ async function build({ '--source': source, '--revision': revision, '--output': o
     await rm(staging, { recursive: true, force: true });
     throw error;
   }
-  const runtimeId = sha256(Buffer.from(receipt));
-  console.log(JSON.stringify({ built: outputRoot, revision, version: manifest.version, runtimeId, files: inventory.size, embeddedSources: historical.size }));
+  const { runtimeId, artifactId } = verifyRelease(outputRoot);
+  console.log(JSON.stringify({ built: outputRoot, revision, version: manifest.version, runtimeId, artifactId, runtime, ...(runtime === 'bun' ? { target } : {}), files: inventory.size, embeddedSources: historical.size + (runtime === 'bun' ? 1 : 0) }));
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { await build(parseArgs(process.argv.slice(2))); }

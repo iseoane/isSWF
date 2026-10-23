@@ -33,12 +33,30 @@ Pi is the reference execution environment. A Claude Code plugin is also included
 
 ## Installation
 
-For now, use a **prepared local release folder**. These instructions do not assume that a package has been published to npm or a public marketplace. See [installation](docs/en/installation.md) if you need to prepare that folder.
+These instructions target [1.1.2 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.1.2), including the Claude context-handoff corrections. At this source checkpoint, publication and uploaded-asset verification are pending. Run the download commands only after that release is published and its verification evidence identifies the released candidate. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
+
+Linux x64 is the validated target. The Bun runtime has passed a real Pi worker flow with protected checks and Linux isolation. The Claude corrections have passed a bounded native coordinator/worker/read-only reviewer test with observed Sonnet model metadata and verified runtime/document input reads. These are separate host tests, not equivalent sandboxing or recovery guarantees. Earlier prerelease `1.1.0` cannot load the real Pi SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. Check the release's exact-candidate evidence and limitations before use.
+
+### Download and verify
+
+Run these commands from a directory where you want to keep the release. Keep the complete extracted package, not just its executable.
+
+```bash
+mkdir isswf-1.1.2
+cd isswf-1.1.2
+gh release download v1.1.2 --repo iseoane/isSWF \
+  --pattern 'isswf-1.1.2-bun-linux-x64.tgz' --pattern SHA256SUMS
+sha256sum --check --ignore-missing SHA256SUMS
+tar -xzf isswf-1.1.2-bun-linux-x64.tgz
+RELEASE="$(pwd)/package"
+```
+
+Continue in the same shell so that `RELEASE` names the absolute package path. Checksums detect damage; they are not publisher signatures. See [installation](docs/en/installation.md) for setup, updates and building from source.
 
 ### Pi
 
 ```bash
-pi install /path/to/isswf-release
+pi install "$RELEASE"
 ```
 
 This makes the package available globally. Add `--local` to install it for the current project instead.
@@ -46,7 +64,7 @@ This makes the package available globally. Add `--local` to install it for the c
 ### Claude Code
 
 ```bash
-claude plugin marketplace add /path/to/isswf-release
+claude plugin marketplace add "$RELEASE"
 claude plugin install isswf@isswf --scope user
 ```
 
@@ -54,7 +72,7 @@ Use `--scope project` for a project installation. See [installation](docs/en/ins
 
 ### Dependencies
 
-You need Node.js 24 or later, Git, and the host you choose. Running agent jobs also needs a supported model account and working authentication.
+Use a trusted executable release for your platform, Git, and the host you choose. The factory core includes Bun and needs no separate Node.js or Bun installation. Hosts, SDKs, and project checks retain their own prerequisites. Factory development still uses Node.js 24 or later and `.mjs`. Running agent jobs also needs a supported model account and working authentication.
 
 The complete installed workflow currently requires Linux. Isolated Pi workers additionally need bubblewrap. Python and SQLite are not requirements of the native workflow; Engram and Codegraph are optional.
 

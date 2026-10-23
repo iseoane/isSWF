@@ -1,0 +1,28 @@
+# I0006/J005: Publish verified Linux x64 release 1.1.2
+
+## Objective and authority
+
+The operator explicitly requested "Adelante con la 1.1.2" after the Claude context-handoff corrections were committed locally and tested. Prepare aligned package/core/plugin 1.1.2, validate the exact retained artifact, require exact-head CI and sufficient native independent source review, then publish a new stable GitHub Linux x64 release with verified assets. Preserve v1.1.0, v1.1.1, old runtime pins, every prior attempt and the untracked operator .claude/. No merge of main, npm publication, global host installation, cleanup, model fallback or additional API-cost authorization is included.
+
+The current grant covers the necessary bounded validation within the already selected host/model constraints. Allocate one actual Pi worker (canonical openai-codex/gpt-6-luna/high, 120-second outer deadline), one native Claude coordinator plus one foreground worker and one read-only reviewer (approved Sonnet/Team, requested medium effort, 18 parent turns, 240-second outer deadline), and one independent isSWF-native source reviewer (canonical Luna/high, one attempt, zero retries, 120-second deadline). No automatic replacement or replay. Confirm current SDK subscription and Claude first-party account/model metadata before calls. Stop on unknown identity, quota, unsupported capability, additional billing requirement, failed acceptance or inconclusive required review.
+
+## Candidate and scope
+
+Examined source starts at 1e33836, containing corrected resources from 95251d6 and their recorded evidence. Compare the complete release delta against published 9114a60d1a86c5599dc354adaa3facbe15fd9af0, not an invented narrow base. tools/build-release.mjs and tools/release-source.mjs remain the committed-source/receipt contract. The behavior change is the existing Claude host/coordinator/role context correction and its static regression. Align package.json and .claude-plugin/plugin.json; update actual target commands in README.md/README.es.md and docs/installation.md. README downloads remain explicitly conditional until publication and uploaded-asset verification, rather than asserting availability before release.
+
+The canonical Claude host guide supplies original launcher/store, resolved pinned root, receipt/version/revision/runtimeId/artifactId, complete checkpointed plan/brief paths, scoped writes, approved model/budget and dedicated evidence directory to both native children. Role wrappers retain explicit installed/source-checkout separation and read-only reviewer tools. This is methodology, not a new authorization service or OS sandbox.
+
+## Acceptance and verification
+
+- Full portable quality with Bun and actual Linux Bubblewrap mandatory, static analysis, bilingual documentation and diff checks pass. tests/host-portability.mjs remains a static instruction/manifest check, not live model proof.
+- Commit the retained candidate and build/pack/extract its actual Linux x64 artifact. Verify complete receipt/source inventory, aligned versions, standalone core without Node/Bun on PATH, and actual host resource loading. Preserve the complete package, not just the executable.
+- On that exact candidate, run the normal installed actual-SDK Pi worker path with current OAuth subscription. Verify protected checks, permitted file scope, model-attributed boundary checks and native cessation. Use isolated Git projects and private stores.
+- Execute one native Claude coordinator/worker/reviewer flow on the exact new artifact, using the original installed launcher outside its store. Audit actual model metadata, child assignment identity, pinned role/receipt/plan/brief reads before application work, read-only reviewer calls, candidate hash stability and original protected checks. Distinguish observed context access from model prose and label unobserved effort metadata. Earlier J004 evidence is prior fixture evidence, not exact new-artifact proof.
+- Preserve all actual failed/inconclusive results. No reviewer response or successful host exit is automatically acceptance. The source review must independently assess Standards and Spec on complete exact-candidate evidence using the native caller and a fresh concrete bounded grant. No advisory dispatcher replaces it.
+- CI passes on the exact release head. Before publishing, verify the absent tag is created at that exact SHA, inspect draft asset inventory and download/checksum/receipt-test the actual uploaded tarball. Publish stable only after those gates and read back tag, assets, release flags and URL. Leave main and the draft PR unmerged.
+
+## Evidence and limits
+
+Retain current release evidence outside the source tree, with the repository-local pointer tooling/.local/bun-release-delivery/release-1.1.2-root.txt. Never copy credentials into fixtures or public artifacts. Runtime provenance and cooperative artifact anchors are integrity checks under trusted publisher/store assumptions, not signatures or hostile-store protection.
+
+The prior corrected Claude fixture b2b2b437493ebaa3044b830bd5c7b2212a55fb77 passed the two missing-runtime/incorrect-plan-path regressions; both children read required pinned context before application work. A separate verbal worker acknowledgement was not observed, so no universal prompt-compliance claim is made. The new release must carry its own source/artifact identity and observations. A small arithmetic repair does not validate all factory features. Claude native delegation does not establish Pi-equivalent isolation, persistence or recovery. Non-Linux/ARM execution and signing remain outside this release's established support. No benchmark speedup is claimed.

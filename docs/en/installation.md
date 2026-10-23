@@ -8,7 +8,7 @@ Install isSWF once, then initialise each repository where you want to use it. A 
 
 You need:
 
-- Node.js 24 or later and Git.
+- Git and a trusted executable release for your operating system and architecture. The factory core needs no Node.js or Bun installation; Pi, Claude, SDKs, and project checks retain their own prerequisites.
 - An existing Git project.
 - Pi or Claude Code already installed.
 - A supported, authenticated model account before running agent jobs.
@@ -21,6 +21,8 @@ Engram and Codegraph are optional. The historical Python and SQLite prototypes a
 The complete package currently uses local distribution. This guide does not announce an npm release or a public plugin marketplace.
 
 Use a trusted release folder provided by the maintainer, or follow [build a local release](development.md#build-a-local-release). Cloning the repository alone does not prepare the complete installed package.
+
+The package supplies `bin/isswf`, or `bin/isswf.exe` on Windows, plus the resources for both hosts. Source files are retained for provenance and task snapshots. Native Linux x64 is verified; the complete installed mutation and worker workflow still requires Linux. Other target builds do not establish equivalent platform support.
 
 Replace `/path/to/isswf-release` in the commands below with that folder's absolute path.
 
@@ -70,7 +72,7 @@ Open the target repository and invoke the setup skill:
 
 State that you want to initialise this project. Choose local tracking or GitHub tracking when asked. GitHub tracking does not grant permission to publish, push, or merge.
 
-Setup creates `.isswf/` and records the project's selected factory version. It preserves existing model settings and setup decisions. Authentication and execution permissions still need to be valid for the work you later request.
+Setup creates `.isswf/` and records the project's selected factory version. New Bun pins identify the shared source and engine version, while each machine retains and verifies its own platform artifact. The pin does not embed a native binary hash that collaborators must change for another platform. It preserves existing model settings and setup decisions. Authentication and execution permissions still need to be valid for the work you later request.
 
 If the repository already uses `.factory/`, ask to inspect and migrate that existing state. Do not create a second factory directory beside it.
 

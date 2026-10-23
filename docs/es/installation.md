@@ -8,7 +8,7 @@ Instala isSWF una vez e inicializa cada repositorio donde quieras utilizarlo. Un
 
 Necesitas:
 
-- Node.js 24 o posterior y Git.
+- Git y una release ejecutable de confianza para tu sistema operativo y arquitectura. El núcleo de la factoría no necesita instalar Node.js ni Bun; Pi, Claude, los SDK y las comprobaciones del proyecto mantienen sus propios requisitos.
 - Un proyecto Git existente.
 - Pi o Claude Code ya instalado.
 - Una cuenta de modelos compatible y autenticada antes de ejecutar encargos con agentes.
@@ -21,6 +21,8 @@ Engram y Codegraph son opcionales. Los prototipos históricos de Python y SQLite
 El paquete completo se distribuye actualmente de forma local. Esta guía no anuncia una versión publicada en npm ni un marketplace público del plugin.
 
 Utiliza una carpeta de versión de confianza facilitada por quien mantiene el proyecto o sigue los pasos para [preparar una versión local](development.md#preparar-una-versión-local). Clonar el repositorio no prepara por sí solo el paquete instalado completo.
+
+El paquete incluye `bin/isswf`, o `bin/isswf.exe` en Windows, y los recursos de ambos hosts. Los archivos fuente se conservan para procedencia y snapshots de tareas. Se ha verificado Linux x64 nativo; el flujo instalado completo de mutaciones y workers sigue necesitando Linux. Construir otros destinos no demuestra compatibilidad equivalente.
 
 Sustituye `/path/to/isswf-release` en los comandos siguientes por la ruta absoluta de esa carpeta.
 
@@ -70,7 +72,7 @@ Abre el repositorio de destino e invoca la skill de configuración:
 
 Indica que quieres inicializar este proyecto. Elige seguimiento local o con GitHub cuando se te pregunte. Seleccionar GitHub no concede permiso para publicar, hacer push ni fusionar cambios.
 
-La configuración crea `.isswf/` y registra la versión de la factoría elegida para el proyecto. Conserva los ajustes de modelos y las decisiones de configuración existentes. La autenticación y los permisos de ejecución deberán seguir siendo válidos para el trabajo que solicites después.
+La configuración crea `.isswf/` y registra la versión de la factoría elegida para el proyecto. Las nuevas referencias Bun identifican el código y la versión del motor compartidos, mientras cada máquina conserva y verifica su artefacto de plataforma. La referencia no incluye un hash de binario nativo que los colaboradores deban cambiar al usar otra plataforma. Conserva los ajustes de modelos y las decisiones de configuración existentes. La autenticación y los permisos de ejecución deberán seguir siendo válidos para el trabajo que solicites después.
 
 Si el repositorio ya utiliza `.factory/`, pide inspeccionar y migrar ese estado existente. No crees una segunda carpeta de la factoría a su lado.
 

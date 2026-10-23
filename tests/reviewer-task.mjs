@@ -120,7 +120,7 @@ try {
   await json(grantFile, { ...largeGrant, inputBytes: 131072 });
   const largePrepared = await prepareReview(largeRequest);
   assert.equal(JSON.parse(largePrepared.prompt).context[0].text.length, 60000);
-  for (const inputBytes of [0, 131073, 1.5]) { await json(grantFile, { ...largeGrant, inputBytes }); await assert.rejects(prepareReview(largeRequest)); }
+  for (const inputBytes of [0, 1048577, 1.5]) { await json(grantFile, { ...largeGrant, inputBytes }); await assert.rejects(prepareReview(largeRequest)); }
   await json(join(project, 'review.json'), { ...job, evidenceMode: 'candidate-and-diff' }); const compactInput = commit();
   const compactGrant = { ...grant, inputSha: compactInput, jobSha256: hash(await readFile(join(project, 'review.json'))), evidenceMode: 'candidate-and-diff' };
   await json(grantFile, compactGrant);
@@ -131,6 +131,43 @@ try {
   assert.equal(compact.changes[0].candidate, 'export const answer = 2;\n');
   assert.match(compact.diff, /-export const answer = 1;\n\+export const answer = 2;/u);
   await json(grantFile, { ...compactGrant, evidenceMode: 'unknown' }); await assert.rejects(prepareReview(compactRequest));
+  const wideBase = git('rev-parse', 'HEAD'), widePaths = [], wideContents = new Map();
+  for (let index = 0; index < 22; index++) {
+    const path = `wide-${index}.mjs`, content = `// WIDE:${index} ${'x'.repeat(8192)}\n`;
+    widePaths.push(path); wideContents.set(path, content); await writeFile(join(project, path), content);
+  }
+  const wideCandidate = commit(), wideStore = join(root, 'wide-store'); await mkdir(wideStore);
+  const wideJob = { ...job, logicalJobRef: 'I0001/J011/wide-review', targetBase: wideBase, candidateSha: wideCandidate, contextPaths: ['standards.md'], evidenceMode: 'candidate-and-diff' };
+  await json(join(project, 'wide-review.json'), wideJob); let wideInput = commit();
+  let wideGrant = { ...grant, store: wideStore, logicalJobRef: wideJob.logicalJobRef, targetBase: wideBase, candidateSha: wideCandidate, inputSha: wideInput, jobPath: 'wide-review.json', jobSha256: hash(await readFile(join(project, 'wide-review.json'))), inputBytes: 1048576, evidenceMode: 'candidate-and-diff', deadlineMs: 10000 };
+  let wideRequest = { ...request, store: wideStore, inputSha: wideInput, jobPath: 'wide-review.json' };
+  await json(grantFile, wideGrant); await assert.rejects(prepareReview(wideRequest), /bounded-changed-files-required/u);
+  wideJob.contextPaths = widePaths.slice(0, 21); await json(join(project, 'wide-review.json'), wideJob); wideInput = commit();
+  wideGrant = { ...wideGrant, inputSha: wideInput, jobSha256: hash(await readFile(join(project, 'wide-review.json'))), maxChangedFiles: 32 };
+  wideRequest = { ...wideRequest, inputSha: wideInput };
+  await json(grantFile, wideGrant); await assert.rejects(prepareReview(wideRequest), /explicit-standards-context-required/u);
+  wideGrant.maxContextFiles = 24;
+  for (const limits of [{ inputBytes: 65536 }, { inputBytes: 1048577 }, { maxChangedFiles: 0 }, { maxChangedFiles: 65 }, { maxChangedFiles: 1.5 }, { maxContextFiles: 0 }, { maxContextFiles: 65 }]) {
+    await json(grantFile, { ...wideGrant, ...limits }); await assert.rejects(prepareReview(wideRequest)); assert.deepEqual(await readdir(wideStore), []);
+  }
+  await json(grantFile, wideGrant); const widePrepared = await prepareReview(wideRequest);
+  const wideBundle = JSON.parse(widePrepared.prompt);
+  assert.equal(wideBundle.changes.length, 22); assert.equal(wideBundle.context.length, 21);
+  for (const change of wideBundle.changes) assert.equal(change.candidate, wideContents.get(change.path), 'Every full candidate file must survive without truncation');
+  let wideFetches = 0;
+  const wideResult = await runReview(wideRequest, { mode: 'fixture', backend: {
+    async preflight(tuple) { assert.deepEqual(tuple, grant.approvedRoute[0]); return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic-fixture' } }; },
+    async fetch() { wideFetches++; return new Response('', { status: 200 }); },
+    stream(model, context, options) { assert.equal(context.messages[0].content, widePrepared.prompt); return { async result() { await options.fetch('https://synthetic.invalid'); return { provider: model.provider, model: model.id, stopReason: 'stop', content: [{ type: 'text', text: 'Synthetic large-bundle transport only, not an independent verdict.' }] }; } }; },
+  } });
+  assert.equal(wideResult.status, 'response-complete'); assert.equal(wideFetches, 1);
+  assert((await readFile(join(widePrepared.dir, 'evidence.json'))).length > 256000, 'Evidence persistence must support the explicitly granted larger bundle');
+  assert.equal((await readReview({ project, store: wideStore, logicalJobRef: wideJob.logicalJobRef })).status, 'recorded');
+  const wideBindingPath = join(widePrepared.dir, 'binding.json'), wideBindingBytes = await readFile(wideBindingPath), wideBinding = JSON.parse(wideBindingBytes);
+  await json(wideBindingPath, { ...wideBinding, budgets: { ...wideBinding.budgets, maxChangedFiles: 20 } });
+  assert.equal((await readReview({ project, store: wideStore, logicalJobRef: wideJob.logicalJobRef })).status, 'unknown', 'Readback must bind the exact declared evidence limits');
+  await writeFile(wideBindingPath, wideBindingBytes);
+  await assert.rejects(runReview(wideRequest, { mode: 'fixture', backend: {} })); assert.equal(wideFetches, 1, 'Larger grants must not permit replay');
   await json(grantFile, grant);
   const pool = join(root, 'shared-pool'); await mkdir(pool); await mkdir(join(pool, 'completed'));
   const policy = JSON.stringify({ version: 1, limit: 2, reference: 'Synthetic operator-owned scope' }) + '\n';
