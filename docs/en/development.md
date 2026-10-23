@@ -76,6 +76,23 @@ ESLint performs lint and static checks; Knip reports unused files, dependencies,
 
 These tools help find mistakes and unused code. They do not replace the checks needed for a particular feature or prove that a real agent run succeeded.
 
+## Platform and host discovery checks
+
+The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate matrix defines native Linux and Windows checks for Bun construction, npm tarball installation, exact resource receipts, CLI version and read-only inspection, paths with spaces and Unicode, and external Git worktrees. Windows does not assert POSIX permission modes. These checks do not establish Windows mutation, recovery or worker isolation support.
+
+The matrix installs development-only hosts from `tooling/host-tests/package-lock.json`, with lifecycle scripts disabled. Pi 1.4.0 installs the package in temporary user and project scopes; its real resource loader must discover all six skills from the installed artifact, with an empty pre-install control. Claude Code 2.1.299 installs the local marketplace/plugin and must report those skills through its native component inventory. The test invokes the platform-native binary supplied by Claude's optional dependency, without running its installer script. No prompt, agent session, login or provider credential is supplied. Temporary home/config directories and disabled telemetry limit incidental activity; they are not proof of network isolation. These are installation/discovery checks, not live task or delegation evaluations.
+
+To run the additional checks locally, select an absent output directory outside the repository. These examples use a Bash-compatible shell; on Windows supply an absolute Windows path for the output directory:
+
+```sh
+npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+export ISSWF_PLATFORM_ROOT="/absolute/absent/platform-output"
+npm exec --offline -- node tests/platform-package.mjs .
+node tests/host-discovery.mjs .
+```
+
+The artifact builder reads committed HEAD, while static source checks read the working tree. The tests require the pinned host dependencies and Bun; missing tools or missing skills fail rather than silently skip. Re-running needs a fresh output path. CI retains platform/discovery reports and Claude's observed skill inventory for 14 days. A configured matrix is not evidence that every platform passed; inspect the exact run before claiming support.
+
 ## Documentation conventions
 
 Keep active factory instructions and operational resources in English. User-facing guides have matching English and Spanish-from-Spain versions; update both when changing their meaning or examples. Preserve user-authored records and historical evidence in their original language.

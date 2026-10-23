@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, writeFile, rm, chmod, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 
 const source = resolve(process.argv[2] ?? '.');
 const root = await mkdtemp(join(tmpdir(), 'isswf-worktree-location-'));
 const project = join(root, 'project with spaces');
 const worktreeRoot = join(root, 'external worktrees');
-const env = { ...process.env, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_AUTHOR_NAME: 'Test', GIT_AUTHOR_EMAIL: 'test@example.invalid', GIT_COMMITTER_NAME: 'Test', GIT_COMMITTER_EMAIL: 'test@example.invalid' };
+const env = { ...process.env, GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_CONFIG_NOSYSTEM: '1', GIT_AUTHOR_NAME: 'Test', GIT_AUTHOR_EMAIL: 'test@example.invalid', GIT_COMMITTER_NAME: 'Test', GIT_COMMITTER_EMAIL: 'test@example.invalid' };
 function git(path, ...args) {
   const result = spawnSync('git', ['-C', path, ...args], { env, encoding: 'utf8', timeout: 10000 });
   assert.ifError(result.error);
@@ -26,8 +26,9 @@ try {
   const commands = [...reference.matchAll(/```sh\n([\s\S]*?)\n```/gu)].map(match => match[1]);
   assert.equal(commands.length, 2, 'Configuration and creation recipes must remain executable');
   const assignment = { ...env, PROJECT: project, WORKTREE_ROOT: worktreeRoot, WORKTREE_ID: 'worker-one', WORKTREE_BRANCH: 'worker-one', BASE_SHA: base };
+  const shell = process.env.ISSWF_TEST_SHELL || (process.platform === 'win32' ? resolve(git(project, '--exec-path'), '../../..', 'bin/bash.exe') : 'sh');
   function recipe(text) {
-    const result = spawnSync('sh', ['-eu', '-c', text], { env: assignment, encoding: 'utf8', timeout: 10000 });
+    const result = spawnSync(shell, ['-eu', '-c', text], { env: assignment, encoding: 'utf8', timeout: 10000 });
     assert.ifError(result.error);
     assert.equal(result.status, 0, result.stderr);
     return result.stdout.trim();
@@ -49,13 +50,13 @@ try {
   git(project, 'worktree', 'move', '--', checkout, moved);
   assert.equal(git(moved, 'status', '--porcelain'), before);
   assert.equal(await readFile(join(moved, 'private.txt'), 'utf8'), 'unique untracked work\n');
-  assert.equal((await stat(join(moved, 'private.txt'))).mode & 0o777, 0o700);
+  if (process.platform !== 'win32') assert.equal((await stat(join(moved, 'private.txt'))).mode & 0o777, 0o700);
   assert.equal(await readFile(join(moved, 'source.txt'), 'utf8'), 'unique dirty work\n');
   assert.equal(await readFile(join(project, 'source.txt'), 'utf8'), 'baseline\n');
-  const listed = git(project, 'worktree', 'list', '--porcelain');
-  assert.ok(listed.includes('worktree ' + moved));
-  assert.ok(!listed.includes('worktree ' + checkout + '\n'));
-  console.log('PASS documented native Git recipes: private local preference, idempotent selection, paths with spaces, external checkout and byte/mode-preserving dirty relocation. Not a host dispatch or automatic policy-enforcement test.');
+  const listed = git(project, 'worktree', 'list', '--porcelain').split(/\r?\n/u).filter(line => line.startsWith('worktree '));
+  assert.ok(listed.includes('worktree ' + moved.split(sep).join('/')));
+  assert.ok(!listed.includes('worktree ' + checkout.split(sep).join('/')));
+  console.log('PASS documented native Git recipes: private local preference, idempotent selection, paths with spaces, external checkout and byte-preserving dirty relocation' + (process.platform === 'win32' ? '; POSIX permission modes not asserted on Windows' : ' with POSIX modes preserved') + '. Not a host dispatch or automatic policy-enforcement test.');
 } finally {
   await rm(root, { recursive: true, force: true });
 }

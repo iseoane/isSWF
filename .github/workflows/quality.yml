@@ -3,7 +3,7 @@ name: Quality
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, 'ci/**']
 
 permissions:
   contents: read
@@ -56,3 +56,48 @@ jobs:
         run: node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs
       - name: Dead code
         run: node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress
+
+  platforms:
+    name: Package and host discovery (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'false'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: '1.4.3'
+      - name: Build and install native package; test CLI, resources and worktrees
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: npm exec --offline -- node tests/platform-package.mjs .
+      - name: Install locked host test dependencies without lifecycle scripts
+        run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+      - name: Install and discover skills with real Pi and Claude hosts, without models
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/host-discovery.mjs .
+      - name: Retain platform and discovery evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: platform-evidence-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/isswf-platform/platform-report.json
+            ${{ runner.temp }}/isswf-platform/host-report.json
+            ${{ runner.temp }}/isswf-platform/claude-inventory.txt
+          if-no-files-found: warn
+          retention-days: 14
