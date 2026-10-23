@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile, rm, chmod, stat } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm, chmod, stat, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const source = resolve(process.argv[2] ?? '.');
 const root = await mkdtemp(join(tmpdir(), 'isswf-worktree-location-'));
@@ -53,9 +53,10 @@ try {
   if (process.platform !== 'win32') assert.equal((await stat(join(moved, 'private.txt'))).mode & 0o777, 0o700);
   assert.equal(await readFile(join(moved, 'source.txt'), 'utf8'), 'unique dirty work\n');
   assert.equal(await readFile(join(project, 'source.txt'), 'utf8'), 'baseline\n');
-  const listed = git(project, 'worktree', 'list', '--porcelain').split(/\r?\n/u).filter(line => line.startsWith('worktree '));
-  assert.ok(listed.includes('worktree ' + moved.split(sep).join('/')));
-  assert.ok(!listed.includes('worktree ' + checkout.split(sep).join('/')));
+  const listed = git(project, 'worktree', 'list', '--porcelain', '-z').split('\0').filter(line => line.startsWith('worktree '));
+  const canonical = await Promise.all(listed.map(line => realpath(line.slice('worktree '.length))));
+  assert.deepEqual(canonical.sort(), [await realpath(project), await realpath(moved)].sort());
+  await assert.rejects(stat(checkout), { code: 'ENOENT' });
   console.log('PASS documented native Git recipes: private local preference, idempotent selection, paths with spaces, external checkout and byte-preserving dirty relocation' + (process.platform === 'win32' ? '; POSIX permission modes not asserted on Windows' : ' with POSIX modes preserved') + '. Not a host dispatch or automatic policy-enforcement test.');
 } finally {
   await rm(root, { recursive: true, force: true });
