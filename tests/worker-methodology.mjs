@@ -12,7 +12,7 @@ const files = {
 const prompt = nativeWorkerInstructions('Fix only the authorized file.', files);
 assert.match(prompt, /^# Native worker execution\n\nThis worker is already dispatched through the Pi SDK\./u);
 assert.match(prompt, /Its only callable tool is sandbox_shell\./u);
-assert.match(prompt, /No external skills, extensions, dispatcher, agent creation, or Pstack installation are required or authorized/u);
+assert.match(prompt, /No external skills, extensions, dispatcher, agent creation, or third-party installation are required or authorized/u);
 assert.match(prompt, /Methodology does not expand that grant\./u);
 assert.match(prompt, /# Trusted brief\n\nFix only the authorized file\./u);
 assert.match(prompt, /## Assignment contract\n\nHonor the brief\./u);

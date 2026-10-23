@@ -1,8 +1,8 @@
 {
   "name": "isswf",
   "description": "Local Claude Code entry points for shared isSWF factory methodology",
-  "version": "1.1.2",
-  "skills": ["./skills/isswf-coordinator", "./skills/isswf-setup"],
+  "version": "1.2.0",
+  "skills": ["./skills/isswf-coordinator", "./skills/isswf-setup", "./skills/isswf-writing", "./skills/isswf-understanding", "./skills/isswf-pr", "./skills/isswf-issue"],
   "agents": [
     "./agents/isswf-worker.md",
     "./agents/isswf-reviewer.md",

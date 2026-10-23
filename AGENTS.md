@@ -21,7 +21,7 @@
 | `tooling/.local/` | Git-ignored private fixtures, backups and local reproduction material. Never package it. |
 | `isswf/`, `examples/` | Historical Python/SQLite intake prototypes and examples, not the native installed flow. |
 | `docs/en/`, `docs/es/` | Current bilingual guides; start with `docs/en/index.md`. |
-| `docs/` root, `docs/history/` | Current English technical contracts; `docs/history/` physically archives retired plans, research and pre-cleanup guides with a hash/mode inventory. |
+| `docs/` root | Current English technical contracts. Retired documentation is available in Git history. |
 | `GLOSSARY.md`, `GLOSSARY.es.md` | Shared domain vocabulary, not specifications or a task backlog. |
 
 See `docs/en/architecture.md` for tool ownership. Consult the glossary before introducing or renaming product concepts; update both languages without renaming persisted keys incidentally.
@@ -46,7 +46,7 @@ For an existing initiative, inspect records with `node tools/isswf-status.mjs --
 
 - Keep factory-owned instructions, profiles, references, tool messages and new agent instructions in English. Write approachable usage guides; keep execution details in their canonical resource instead of copying contracts across pages.
 - `README.md` and every current user/development guide must have an equivalent Spain-Spanish mirror (`README.es.md` or `docs/es/<same-name>.md`). Update both in the same change, including examples, navigation and meaning. `node tooling/quality/check-docs.mjs` enforces structural coverage, local links and matching shell examples; review translation meaning separately.
-- Use `GLOSSARY.md` for canonical English terms and maintain `GLOSSARY.es.md`. Keep original-language historical evidence and checkpoint-pinned inputs unchanged; the history catalogue is bilingual, the evidence is not retroactively translated. `docs/history/archive.json` maps original to archived paths with byte/mode checks. Resolve existing pinned work at its original Git path and checkpoint, not at a relocated working-tree path. Detailed agent resources remain canonical English.
+- Use `GLOSSARY.md` for canonical English terms and maintain `GLOSSARY.es.md`. Keep original-language historical evidence and checkpoint-pinned inputs unchanged; retired documentation is retrieved from Git history. Resolve existing pinned work at its original Git path and checkpoint, not at a relocated working-tree path. Detailed agent resources remain canonical English.
 - Document actual behavior from code and checks. Keep proposals in `docs/en/future-actions.md` and its Spanish mirror; proposals grant no work. The project licence is MIT. Do not imply that a local package or version number is a published release.
 
 ## Execution and delegation

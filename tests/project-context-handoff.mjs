@@ -8,7 +8,10 @@ import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] ?? '.');
 const { preparePlanProposal } = await import(pathToFileURL(join(source, 'tools/planner-task.mjs')));
-const evidence = JSON.parse(await readFile(join(source, '.factory/initiatives/I0001/jobs/J007/context-verification.json'), 'utf8'));
+const selectedContext = {
+  project: 'fixture-own',
+  facts: [{ id: 1, fact: 'Selected advisory context is not execution authority.' }],
+};
 const root = await mkdtemp(join(tmpdir(), 'isswf-context-handoff-')), project = join(root, 'project'), store = join(root, 'store');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = (cwd, ...args) => { const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', timeout: 10000 }); assert.equal(result.status, 0, result.stderr); return result.stdout.trim(); };
@@ -18,7 +21,7 @@ try {
   await writeFile(join(project, 'primary.md'), 'Current primary source: CI succeeded; memory is not authority.\n');
   const base = commit();
   // The coordinator has already selected these facts. This exercises transport, not a semantic filter.
-  const selected = JSON.stringify({ project: evidence.selection.trustedProject, facts: evidence.selection.selectedFacts });
+  const selected = JSON.stringify(selectedContext);
   const brief = 'Explain the current primary source. No tools, adoption or remote actions.\nAdvisory selected facts:\n' + selected + '\n';
   await writeFile(join(project, 'brief.md'), brief);
   await writeFile(join(project, 'models.json'), await readFile(join(source, '.factory/models.json')));

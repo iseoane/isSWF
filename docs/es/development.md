@@ -14,7 +14,7 @@ Esta página es para modificar la propia factoría. Si quieres utilizarla en otr
 | `skills/`, `agents/`, `.claude-plugin/` | Archivos de integración con Claude Code. |
 | `tests/`, `tooling/` | Comprobaciones de desarrollo y herramientas de mantenimiento. |
 | `docs/en/`, `docs/es/` | Guías vigentes de uso y desarrollo con contenido equivalente. |
-| Raíz de `docs/` | Recursos técnicos estables en inglés; el material histórico se cataloga por separado. |
+| Raíz de `docs/` | Recursos técnicos estables en inglés. |
 
 El repositorio de desarrollo puede conservar sus propios registros en la carpeta heredada `.factory/`. Eso no es motivo para migrarlos como parte de un cambio de código o documentación que no tenga relación.
 
@@ -52,7 +52,7 @@ Utiliza Node.js 24 o posterior con npm y Git. Ejecuta las comprobaciones portabl
 ```bash
 node tools/check-quality.mjs
 ```
-La comprobación portable incluye `node tooling/quality/check-docs.mjs`: comprueba los espejos de las guías vigentes, los enlaces locales, la cobertura de secciones, que los ejemplos de shell sean idénticos y los bytes y permisos de los originales archivados. También rechaza que se reintroduzcan rutas retiradas en la documentación activa o procedimientos de auditoría archivados en las guías técnicas vigentes. No demuestra la calidad de la traducción ni ejecuta los ejemplos.
+La comprobación portable incluye `node tooling/quality/check-docs.mjs`: comprueba los espejos de las guías vigentes, los enlaces locales, la cobertura de secciones y que los ejemplos de shell sean idénticos. También rechaza procedimientos de auditoría obsoletos copiados en las guías técnicas vigentes. No demuestra la calidad de la traducción ni ejecuta los ejemplos.
 
 
 Cuando Bun está disponible, la comprobación portable también construye e instala un paquete Bun real en directorios temporales. Prueba las exportaciones de paquetes externos similares a un SDK y sus dependencias transitivas, las tareas `.mjs` con rutas absolutas y relativas, el traspaso al binario fijado y, cuando está disponible, Bubblewrap en Linux con un SDK simulado. Sin Bun, la prueba de artefacto indica SKIP. Asigna a `ISSWF_TEST_BUN` la ruta de un compilador para exigirla; `ISSWF_TEST_BUN_WORKER=1` exige además la comprobación del aislamiento. CI instala el compilador Bun fijado y exige las pruebas de artefacto y aislamiento Linux. En local, `ISSWF_TEST_BUN_TMPDIR` permite ubicar los datos de prueba binarios grandes en otro disco sin cambiar la política de la raíz de evidencias de diagnóstico. Estos datos de prueba no ejecutan Claude ni proveedores reales.
@@ -86,7 +86,7 @@ El README debe ser accesible. Deja las reglas exactas de ejecución, modelos y r
 
 Comprueba las herramientas, los manifiestos y las pruebas reales antes de documentar el comportamiento actual. El [mapa del código](architecture.md) ayuda a localizar al responsable. Distingue los objetivos aceptados de las pruebas de implementación y de las [propuestas futuras](future-actions.md).
 
-Las especificaciones anteriores, las notas de pilotos y las investigaciones se conservan en el [catálogo histórico](../history/README.es.md), fuera del recorrido de uso vigente. No reescribas registros fijados ni modificaciones previas del operador para adaptarlos a una guía nueva.
+La documentación retirada está disponible en el historial de Git.
 
 ## Antes de publicar
 

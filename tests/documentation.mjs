@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmod, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,28 +29,13 @@ try {
   await rm(mirror);
   check(/English\/Spanish mirrors/u);
   await writeFile(mirror, mirrorBytes);
-  const archive = JSON.parse(await readFile(join(root, 'docs/history/archive.json'), 'utf8'));
-  const entry = archive.entries.find(item => item.action === 'relocated');
-  assert.ok(entry);
-  const original = join(root, entry.archivePath);
-  const bytes = await readFile(original);
-  await writeFile(original, Buffer.concat([bytes, Buffer.from('\nchanged\n')]));
-  check(/Archived bytes changed/u);
-  await writeFile(original, bytes);
-  await chmod(original, entry.mode ^ 0o100);
-  check(/Archived mode changed/u);
-  await chmod(original, entry.mode);
-  const retired = join(root, entry.originalPath);
-  await writeFile(retired, bytes);
-  check(/Retired documentation restored/u);
-  await rm(retired);
   const technical = join(root, 'docs/host-portability.md');
   const guide = await readFile(technical);
   await writeFile(technical, Buffer.concat([guide, Buffer.from('\nRun `node .audit/verify-obsolete.mjs`.\n')]));
   check(/Historical procedure in current guide/u);
   await writeFile(technical, guide);
   check();
-  console.log('PASS documentation: current links and mirrors, exact archive bytes/modes, retired-path refusal and historical-procedure refusal; disposable mutations only, no examples executed');
+  console.log('PASS documentation: current links and mirrors, historical-procedure refusal; disposable mutations only, no examples executed');
 } finally {
   await rm(root, { recursive: true, force: true });
 }

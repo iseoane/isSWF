@@ -1,6 +1,6 @@
 {
   "name": "isswf-pi-resources",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "On-demand isSWF workflows for Pi and Claude Code with explicit project installation and migration.",
   "bin": {
     "isswf": "tools/isswf.mjs"
@@ -13,6 +13,10 @@
     ".agents/hosts",
     ".agents/skills/isswf-coordinator",
     ".agents/skills/isswf-setup",
+    ".agents/skills/isswf-writing",
+    ".agents/skills/isswf-understanding",
+    ".agents/skills/isswf-pr",
+    ".agents/skills/isswf-issue",
     ".claude-plugin",
     ".factory/models.json",
     ".factory/templates",
@@ -32,7 +36,11 @@
   "pi": {
     "skills": [
       "./.agents/skills/isswf-coordinator",
-      "./.agents/skills/isswf-setup"
+      "./.agents/skills/isswf-setup",
+      "./.agents/skills/isswf-writing",
+      "./.agents/skills/isswf-understanding",
+      "./.agents/skills/isswf-pr",
+      "./.agents/skills/isswf-issue"
     ]
   }
 }

@@ -68,6 +68,28 @@ try {
   run('npm', ['install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', tarball]);
   const installed = join(consumer, 'node_modules/isswf-pi-resources');
   assert.equal(verifyRelease(installed).runtimeId, receiptA.runtimeId, 'Packed npm package must retain exact inventory');
+  for (const path of [
+    '.agents/skills/isswf-writing/SKILL.md',
+    '.agents/skills/isswf-writing/references/human-documents.md',
+    '.agents/skills/isswf-writing/references/agent-documents.md',
+    'skills/isswf-writing/SKILL.md',
+    '.agents/skills/isswf-understanding/SKILL.md',
+    '.agents/skills/isswf-understanding/references/explanation.md',
+    '.agents/skills/isswf-understanding/references/learning.md',
+    'skills/isswf-understanding/SKILL.md',
+    '.agents/skills/isswf-pr/SKILL.md',
+    '.agents/skills/isswf-pr/references/risk-assessment.md',
+    '.agents/skills/isswf-pr/references/pr-description.md',
+    'skills/isswf-pr/SKILL.md',
+    '.agents/skills/isswf-issue/SKILL.md',
+    '.agents/skills/isswf-issue/references/routing-and-publication.md',
+    '.agents/skills/isswf-issue/references/report-content.md',
+    'skills/isswf-issue/SKILL.md',
+  ]) {
+    assert.ok(receiptA.files[path], `Utility resource missing from release: ${path}`);
+    assert.equal(await readFile(join(installed, path), 'utf8'), await readFile(join(source, path), 'utf8'));
+    assert.equal(readReleaseSource(installed, revisionA, path).toString(), await readFile(join(source, path), 'utf8'));
+  }
   if (process.env.ISSWF_TEST_PI) {
     const managerAgent = join(temp, 'pi-agent'), managerProject = join(temp, 'pi-project');
     await mkdir(managerProject); run('git', ['init', '-q', managerProject]);

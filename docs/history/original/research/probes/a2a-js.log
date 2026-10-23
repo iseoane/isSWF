@@ -1,7 +1,0 @@
-PASS: connected stream persists terminal state; another tenant cannot read it
-PASS: nonblocking SendMessage keeps draining and persists completion after returning
-OBSERVED: after the only stream consumer disconnects, executor finishes but GetTask retains WORKING
-OBSERVED: canceling a saved task with no live bus marks CANCELED without invoking executor cancellation
-PASS: creating a fresh in-memory store does not recover old tasks
-OBSERVED: sending the same new messageId twice creates two tasks and executions
-Scope: real pinned SDK handler/store with a controlled executor; no HTTP, Pi, model or process crash test

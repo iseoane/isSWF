@@ -40,6 +40,26 @@ const payloadPaths = [
   ".factory/models.json",
   "package.json",
 ];
+const writingPayloadPaths = [
+  ".agents/skills/isswf-writing/SKILL.md",
+  ".agents/skills/isswf-writing/references/human-documents.md",
+  ".agents/skills/isswf-writing/references/agent-documents.md",
+];
+const understandingPayloadPaths = [
+  ".agents/skills/isswf-understanding/SKILL.md",
+  ".agents/skills/isswf-understanding/references/explanation.md",
+  ".agents/skills/isswf-understanding/references/learning.md",
+];
+const prPayloadPaths = [
+  ".agents/skills/isswf-pr/SKILL.md",
+  ".agents/skills/isswf-pr/references/risk-assessment.md",
+  ".agents/skills/isswf-pr/references/pr-description.md",
+];
+const issuePayloadPaths = [
+  ".agents/skills/isswf-issue/SKILL.md",
+  ".agents/skills/isswf-issue/references/routing-and-publication.md",
+  ".agents/skills/isswf-issue/references/report-content.md",
+];
 const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
@@ -130,6 +150,22 @@ function validateManifest(bytes) {
   } catch {
     fail("The committed package.json is not valid JSON");
   }
+  const hasWriting = manifest?.pi?.skills?.includes("./.agents/skills/isswf-writing");
+  const hasUnderstanding = manifest?.pi?.skills?.includes("./.agents/skills/isswf-understanding");
+  const hasPr = manifest?.pi?.skills?.includes("./.agents/skills/isswf-pr");
+  const hasIssue = manifest?.pi?.skills?.includes("./.agents/skills/isswf-issue");
+  const skills = [...expectedSkills,
+    ...(hasWriting ? ["./.agents/skills/isswf-writing"] : []),
+    ...(hasUnderstanding ? ["./.agents/skills/isswf-understanding"] : []),
+    ...(hasPr ? ["./.agents/skills/isswf-pr"] : []),
+    ...(hasIssue ? ["./.agents/skills/isswf-issue"] : []),
+  ];
+  const files = releaseFiles.toSpliced(4, 0,
+    ...(hasWriting ? [".agents/skills/isswf-writing"] : []),
+    ...(hasUnderstanding ? [".agents/skills/isswf-understanding"] : []),
+    ...(hasPr ? [".agents/skills/isswf-pr"] : []),
+    ...(hasIssue ? [".agents/skills/isswf-issue"] : []),
+  );
   const legacy = Object.keys(manifest ?? {}).sort().join(",") === "description,name,pi,version";
   const released = Object.keys(manifest ?? {}).sort().join(",") === "bin,description,files,keywords,name,pi,version";
   if (
@@ -139,11 +175,11 @@ function validateManifest(bytes) {
     typeof manifest.description !== "string" ||
     !manifest.pi ||
     Object.keys(manifest.pi).sort().join(",") !== "skills" ||
-    JSON.stringify(manifest.pi.skills) !== JSON.stringify(expectedSkills) ||
+    JSON.stringify(manifest.pi.skills) !== JSON.stringify(skills) ||
     (released && (
       JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: "tools/isswf.mjs" }) ||
       JSON.stringify(manifest.keywords) !== JSON.stringify(["pi-package"]) ||
-      JSON.stringify(manifest.files) !== JSON.stringify(releaseFiles)
+      JSON.stringify(manifest.files) !== JSON.stringify(files)
     )) ||
     Object.hasOwn(manifest, "dependencies") ||
     Object.hasOwn(manifest, "devDependencies") ||
@@ -168,8 +204,22 @@ async function materialize({ source, revision, store }) {
     const [mode, type, object] = entry.slice(0, tab).split(" ");
     entries.set(entry.slice(tab + 1), { mode, type, object });
   }
+  const manifestEntry = entries.get("package.json");
+  if (!manifestEntry || manifestEntry.type !== "blob" || !["100644", "100755"].includes(manifestEntry.mode)) fail("Missing regular package.json");
+  const manifestBytes = runGit(sourceRoot, ["cat-file", "blob", manifestEntry.object], null);
+  validateManifest(manifestBytes);
+  const hasWriting = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-writing");
+  const hasUnderstanding = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-understanding");
+  const hasPr = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-pr");
+  const hasIssue = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-issue");
+  const selectedPaths = [...payloadPaths,
+    ...(hasWriting ? writingPayloadPaths : []),
+    ...(hasUnderstanding ? understandingPayloadPaths : []),
+    ...(hasPr ? prPayloadPaths : []),
+    ...(hasIssue ? issuePayloadPaths : []),
+  ];
   const payload = new Map();
-  for (const path of payloadPaths) {
+  for (const path of selectedPaths) {
     const entry = entries.get(path);
     if (!entry || entry.type !== "blob" || !["100644", "100755"].includes(entry.mode)) {
       fail(`Required path is missing or is not a regular committed file: ${path}`);
@@ -229,15 +279,27 @@ export async function verifyPackage(packageRoot, expectedRevision) {
   } catch {
     fail(`Missing or malformed package receipt: ${receiptPath}`);
   }
+  const manifestBytes = await readFile(join(root, "package.json"));
+  validateManifest(manifestBytes);
+  const hasWriting = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-writing");
+  const hasUnderstanding = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-understanding");
+  const hasPr = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-pr");
+  const hasIssue = JSON.parse(manifestBytes).pi.skills.includes("./.agents/skills/isswf-issue");
+  const selectedPaths = [...payloadPaths,
+    ...(hasWriting ? writingPayloadPaths : []),
+    ...(hasUnderstanding ? understandingPayloadPaths : []),
+    ...(hasPr ? prPayloadPaths : []),
+    ...(hasIssue ? issuePayloadPaths : []),
+  ];
   if (
     Object.keys(receipt).sort().join(",") !== "files,format,revision" ||
     receipt.format !== 1 ||
     receipt.revision !== expectedRevision ||
-    Object.keys(receipt.files ?? {}).sort().join("\n") !== [...payloadPaths].sort().join("\n")
+    Object.keys(receipt.files ?? {}).sort().join("\n") !== [...selectedPaths].sort().join("\n")
   ) {
     fail(`Package receipt does not match the expected payload: ${root}`);
   }
-  const expectedFiles = new Set([...payloadPaths, receiptName]);
+  const expectedFiles = new Set([...selectedPaths, receiptName]);
   async function visit(directory) {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);
@@ -250,7 +312,7 @@ export async function verifyPackage(packageRoot, expectedRevision) {
     }
   }
   await visit(root);
-  for (const path of payloadPaths) {
+  for (const path of selectedPaths) {
     const bytes = await readFile(join(root, path));
     if (digest(bytes) !== receipt.files[path]) fail(`Package payload hash mismatch: ${path}`);
   }

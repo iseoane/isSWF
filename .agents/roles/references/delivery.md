@@ -20,7 +20,7 @@ State work status explicitly, such as `in progress`, `partial`, `blocked`, `tech
 
 ## Copyable delivery summary
 
-Use `.factory/templates/delivery.md` for the local evidence record. For a remote issue or PR, write in English and use the concise publication format below; link retained evidence instead of copying the entire local record. Lead with a short visual account selected for the change. A table may relate user-visible change, reason, and evidence. A Mermaid diagram is useful only when it depicts the observed implementation or a meaningful real flow. For UI changes, use genuine before/after captures when available and safe to share. Never substitute a mock, expected state, or code-generated approximation for observed UI evidence.
+Use `.factory/templates/delivery.md` for the local evidence record. For a remote issue or PR, write in English. For PR text, use [isswf-pr](../../skills/isswf-pr/SKILL.md); link retained evidence instead of copying the entire local record. Lead with a short visual account selected for the change. A table may relate user-visible change, reason, and evidence. A Mermaid diagram is useful only when it depicts the observed implementation or a meaningful real flow. For UI changes, use genuine before/after captures when available and safe to share. Never substitute a mock, expected state, or code-generated approximation for observed UI evidence.
 
 For non-UI changes, use a compact table, small accurate flow, or prose. Omit decorative visuals. Do not require screenshots for non-UI work. Do not expand a large change into a field-by-field inventory; link exact paths and evidence instead.
 
@@ -34,13 +34,17 @@ The summary covers:
 - Independent review evidence for the exact candidate, including separate Standards and Spec outcomes when the reviewer reports them. Include open findings or state that required review is missing or inconclusive.
 - Technical closure and operator product acceptance as separate states. Record acceptance only when the operator's decision and evidence are available from the coordinator's canonical record.
 - Blockers, residual uncertainty, and next action.
-- Risk to affected users, components, or data; plausible failure; mitigation and evidence; reversibility; and recovery limits. Explain when code can be reverted but side effects cannot be automatically undone. Do not label risk `low` without the facts that support it.
+- The assessment produced using the canonical [PR risk guidance](../../skills/isswf-pr/references/risk-assessment.md), tied to this candidate. Reuse it for the local record and PR rather than performing a second assessment.
 
 A candidate can be presented for review while partial or blocked, but label it plainly. Do not call it ready for acceptance until technical closure criteria are met. Do not claim it was published, reviewed, accepted, merged, or deployed without direct evidence.
 
 ## Concise issue and PR text
 
-Write factory issues and PRs in English. An issue states the objective, scope and observable acceptance criteria. A PR explains **Why the change**, provides a compact **Change outline**, names material caveats under **Special things to note**, and includes **Risk Assessment** and **Testing** with checks actually run and their limits. Omit empty sections; put lengthy supporting evidence behind links or a collapsible block. Use a visual only when it helps explain the actual change.
+Write factory issues and PRs in English. An issue states the objective, scope and observable acceptance criteria.
+
+For a PR, read and follow [isswf-pr](../../skills/isswf-pr/SKILL.md). Supply the accepted objective and scope, exact base and candidate, observed checks and review, unresolved findings, existing risk evidence, and current permitted effects. The skill owns the PR description format and mandatory risk assessment. Preserve the identities and publication boundaries in this delivery procedure; do not maintain a second PR template or risk rubric here.
+
+Reuse the skill's assessment in the local evidence record. Missing evidence remains explicit and does not justify a low-risk label. A delivery assignment remains prepare-only unless the operator separately authorizes the remote action through the applicable workflow.
 
 Keep candidate identity, independent review and authorization evidence available in the linked local record. A concise body does not weaken these gates or turn a draft into acceptance.
 

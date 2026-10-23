@@ -10,8 +10,20 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | --- | --- |
 | `isswf-setup` | Prepare a project or inspect a proposed installation update. |
 | `isswf-coordinator` | Clarify an assignment, choose the next step, coordinate authorised work, and explain the result. |
+| `isswf-writing` | Create, revise, or review documents with the right approach for humans or agents, in any project. |
+| `isswf-understanding` | Understand a topic or system, clarify an explanation, or learn through practice and feedback. |
+| `isswf-pr` | Prepare PR descriptions and authorized updates with evidence and a mandatory risk assessment. |
+| `isswf-issue` | Report independent bugs or propose features and improvements, with verified routing and mandatory `needs-triage`. |
 
 In Pi, invoke them with `/skill:`. In Claude Code, use `/isswf:`. There is also a source-only `isswf-triage` skill for the historical intake prototypes; it is not a normal entry point in the complete installed package.
+
+The writing skill determines the audience from the request and document context. It asks you when the audience is unclear and follows the target project’s language and documentation conventions. Use `/skill:isswf-writing` in Pi or `/isswf:isswf-writing` in Claude Code. It does not require project activation.
+
+The understanding skill selects reformulation, explanation, or practical learning from your request. It adapts to your demonstrated knowledge and asks only when an ambiguity would change the response. Use `/skill:isswf-understanding` in Pi or `/isswf:isswf-understanding` in Claude Code. It works across subjects and projects without creating courses or progress records by default.
+
+The PR skill works directly or through Delivery. It inspects the candidate, explains scope and verification limits, and assesses risk even for documentation-only changes. Delivery supplies its identities and evidence and reuses the same assessment. Use `/skill:isswf-pr` in Pi or `/isswf:isswf-pr` in Claude Code. Drafting does not authorize publication or merge.
+
+The issue skill distinguishes independent findings from errors in the current implementation. It routes a sanitized report to the project or factory repository, checks duplicates, and requires the existing `needs-triage` label before creation. Missing destination access, publication permission, or label support leaves a draft or explicit blocker. Use `/skill:isswf-issue` in Pi or `/isswf:isswf-issue` in Claude Code. Creating a report does not authorize implementation.
 
 ## People and agents
 

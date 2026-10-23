@@ -22,4 +22,4 @@ Empieza por las guías vigentes de esta página. La implementación y sus prueba
 
 Los recursos técnicos del coordinador siguen en inglés y en sus rutas estables porque hay instrucciones y paquetes actuales que los referencian. Se enumeran en [consulta del trabajo](operations.md). No constituyen un flujo obligatorio para el usuario.
 
-El [catálogo histórico](../history/README.es.md) identifica especificaciones, planes, prototipos e investigaciones anteriores. Sus archivos se han trasladado físicamente al archivo histórico y conservan sus bytes, idioma original y datos registrados para mantener la trazabilidad; no son el manual vigente de instalación ni de uso.
+La documentación retirada está disponible en el historial de Git.

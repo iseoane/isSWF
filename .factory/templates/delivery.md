@@ -55,11 +55,7 @@
 
 ## Integration risk and recovery
 
-- Affected users, components, or data: `<specific blast radius>`.
-- Plausible failure: `<what could fail and impact>`.
-- Mitigation and evidence: `<what reduces risk and what was actually checked>`.
-- Reversibility: `<how to revert code; distinguish external or data effects>`.
-- Recovery limits and residual risk: `<what cannot be recovered or remains unverified>`.
+`<Insert or reference the candidate-specific assessment produced with .agents/skills/isswf-pr/references/risk-assessment.md. Keep its classification, reasoning, evidence limits, and residual risks available. Reuse this same assessment in PR text; this local record is not a separate risk rubric.>`
 
 ## Blockers and next action
 

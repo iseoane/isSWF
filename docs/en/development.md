@@ -14,7 +14,7 @@ This page is for changing the factory itself. To use it in another project, star
 | `skills/`, `agents/`, `.claude-plugin/` | Claude Code integration files. |
 | `tests/`, `tooling/` | Development checks and maintenance tools. |
 | `docs/en/`, `docs/es/` | Matching current user and development guides. |
-| `docs/` root | Stable English technical resources; historical material is catalogued separately. |
+| `docs/` root | Stable English technical resources. |
 
 The development repository may still keep its own records under the legacy `.factory/`. That is not a reason to migrate them as part of an unrelated code or documentation change.
 
@@ -52,7 +52,7 @@ Use Node.js 24 or later with npm and Git. Run the portable checks from the repos
 ```bash
 node tools/check-quality.mjs
 ```
-The portable check includes `node tooling/quality/check-docs.mjs`: it checks current guide mirrors, local links, section coverage, identical shell examples, and the archived originals' bytes and modes. It also rejects retired paths reintroduced into active documentation and archived audit procedures copied into current technical guides. It does not prove translation quality or execute the examples.
+The portable check includes `node tooling/quality/check-docs.mjs`: it checks current guide mirrors, local links, section coverage and identical shell examples. It also rejects obsolete audit procedures copied into current technical guides. It does not prove translation quality or execute the examples.
 
 
 When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` tasks, pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires both the artifact and Linux sandbox checks. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk without changing the diagnostic evidence root policy. These fixtures do not execute Claude or real providers.
@@ -86,7 +86,7 @@ Keep the README approachable. Put exact execution, model, and recovery rules in 
 
 Check actual tools, manifests, and tests before documenting current behaviour. Use [the source map](architecture.md) to find the owner. Keep accepted objectives distinct from implementation evidence and [future proposals](future-actions.md).
 
-Earlier specifications, pilot notes, and research are retained in the [history catalogue](../history/README.md), not the active usage path. Do not rewrite pinned records or existing operator edits to match a new guide.
+Retired documentation is available in Git history.
 
 ## Before publication
 

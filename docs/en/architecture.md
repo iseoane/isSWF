@@ -38,4 +38,4 @@ The development repository's `.factory/models.json` and `.factory/templates/` ar
 
 `tests/` contains the portable JavaScript checks and historical tests. `tooling/quality/` contains locked development-only static-analysis tools. `.github/workflows/quality.yml` runs the portable, lint, and unused-code checks. Private fixtures and backups belong under ignored `tooling/.local/`, not in the installed package.
 
-[Development](development.md) explains how to run these checks. [The glossary](../../GLOSSARY.md) defines the product's terms. Current guides live under `docs/en/` and `docs/es/`; the [history catalogue](../history/README.md) keeps earlier design material separate from current guidance.
+[Development](development.md) explains how to run these checks. [The glossary](../../GLOSSARY.md) defines the product's terms.

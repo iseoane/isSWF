@@ -22,4 +22,4 @@ Start with the current guides below. The implementation and its tests establish 
 
 The coordinator's English technical resources remain at their stable paths because current instructions and packages refer to them. They are listed in [operations](operations.md). They are not a compulsory user workflow.
 
-The [history catalogue](../history/README.md) identifies earlier specifications, plans, prototypes and research. Their files are physically archived with original bytes, language and recorded inputs for traceability; they are not the current installation or usage manual.
+Retired documentation is available in Git history.

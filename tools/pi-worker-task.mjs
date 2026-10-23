@@ -15,7 +15,7 @@ export function nativeWorkerInstructions(brief, files) {
   if (start === undefined || start < 0 || end === undefined || end <= start) throw new Error('pinned worker methodology sections missing');
   return [
     '# Native worker execution',
-    'This worker is already dispatched through the Pi SDK. Its only callable tool is sandbox_shell. No external skills, extensions, dispatcher, agent creation, or Pstack installation are required or authorized by this execution contract.',
+    'This worker is already dispatched through the Pi SDK. Its only callable tool is sandbox_shell. No external skills, extensions, dispatcher, agent creation, or third-party installation are required or authorized by this execution contract.',
     'The trusted brief governs objective, acceptance, scope and permissions. Methodology does not expand that grant. Coordinator-side dispatch instructions are not worker prerequisites.',
     'Read applicable own references through sandbox_shell under /factory, only when their trigger applies. Paths in the worker profile are relative to /factory/.agents/roles. Do not install or fetch missing resources; report a required missing reference as blocked.',
     '# Trusted brief', brief,

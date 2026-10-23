@@ -38,4 +38,4 @@ En el repositorio de desarrollo, `.factory/models.json` y `.factory/templates/` 
 
 `tests/` contiene las comprobaciones JavaScript portables y las pruebas históricas. `tooling/quality/` contiene las herramientas de análisis estático, con versiones fijadas y exclusivas del desarrollo. `.github/workflows/quality.yml` ejecuta las comprobaciones portables, el lint y la detección de código sin utilizar. Las pruebas temporales y copias privadas van en `tooling/.local/`, excluida de Git, no en el paquete instalado.
 
-[Desarrollo](development.md) explica cómo ejecutar las comprobaciones. [El glosario](../../GLOSSARY.es.md) define los términos del producto. Las guías vigentes están en `docs/en/` y `docs/es/`; el [catálogo histórico](../history/README.es.md) separa el diseño anterior de las instrucciones actuales.
+[Desarrollo](development.md) explica cómo ejecutar las comprobaciones. [El glosario](../../GLOSSARY.es.md) define los términos del producto.

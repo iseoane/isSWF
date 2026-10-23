@@ -7,7 +7,7 @@ const read = (file) => readFile(path.join(root, file), 'utf8');
 const manifest = JSON.parse(await read('.claude-plugin/plugin.json'));
 assert.equal(manifest.name, 'isswf');
 assert.ok(manifest.skills.includes('./skills/isswf-coordinator'));
-for (const file of ['skills/isswf-coordinator/SKILL.md', ...manifest.agents]) {
+for (const file of [...manifest.skills.map(skill => `${skill}/SKILL.md`), ...manifest.agents]) {
   assert.ok((await read(file)).length > 0, `missing manifest entry ${file}`);
 }
 for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-reviewer.md','reviewer'],['agents/isswf-researcher.md','researcher'],['agents/isswf-planner.md','planner']]) {
@@ -21,6 +21,7 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   assert.ok(body.length < 1200, `${file} should remain a thin wrapper`);
 }
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
+assert.ok(skill.includes('[isswf-issue](../isswf-issue/SKILL.md)'), 'Coordinator must route independent reports to the shared issue skill');
 assert.match(skill, /actually running in Claude Code/);
 assert.match(skill, /Pi remains the default/);
 const claudeSkill = await read('skills/isswf-coordinator/SKILL.md');
@@ -46,8 +47,30 @@ assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
 assert.doesNotMatch(docs, /A00[1-3]|2\.1\.299|bounded live validation/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
-assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup']);
+assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue']);
 assert.deepEqual(piManifest.bin, { isswf: 'tools/isswf.mjs' });
+for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue']) {
+  assert.ok(piManifest.files.includes(`.agents/skills/${name}`));
+  assert.ok(manifest.skills.includes(`./skills/${name}`));
+  const body = await read(`.agents/skills/${name}/SKILL.md`);
+  assert.equal(body.match(/^name: (.+)$/mu)?.[1], name);
+  assert.match(body, /^---\nname: [a-z-]+\ndescription: .+\n---\n/u);
+  for (const match of body.matchAll(/\[[^\]]*\]\((references\/[^)]+)\)/gu)) {
+    assert.ok((await read(`.agents/skills/${name}/${match[1]}`)).length > 0);
+  }
+  const wrapper = await read(`skills/${name}/SKILL.md`);
+  assert.ok(wrapper.includes('${CLAUDE_PLUGIN_ROOT}/.agents/skills/' + name + '/SKILL.md'));
+  assert.ok(wrapper.length < 800, 'Utility wrappers must keep methodology in the shared skill');
+}
+const delivery = await read('.agents/roles/delivery.md');
+assert.ok(delivery.includes('[isswf-pr](../skills/isswf-pr/SKILL.md)'), 'Delivery must use the shared PR skill');
+const deliveryReference = await read('.agents/roles/references/delivery.md');
+assert.ok(deliveryReference.includes('[isswf-pr](../../skills/isswf-pr/SKILL.md)'));
+assert.ok(deliveryReference.includes('../../skills/isswf-pr/references/risk-assessment.md'));
+const prDescription = await read('.agents/skills/isswf-pr/references/pr-description.md');
+assert.match(prDescription, /^## Risk assessment$/mu);
+assert.match(prDescription, /^## Testing$/mu);
+assert.ok((await read('.factory/templates/delivery.md')).includes('.agents/skills/isswf-pr/references/risk-assessment.md'));
 assert.ok(manifest.skills.includes('./skills/isswf-setup'));
 const setup = await read('.agents/skills/isswf-setup/SKILL.md');
 assert.match(setup, /## Discover before asking/);

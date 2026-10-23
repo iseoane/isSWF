@@ -6,7 +6,7 @@ This guide describes `tools/isswf-intake.mjs`, not the retired Python/SQLite int
 
 ## Prepare an issue natively
 
-From an authorized source checkout, the coordinator uses `tools/isswf-intake.mjs`; the Markdown resource package does not contain this executable. This path requires neither Pstack, Python, SQLite, a model, nor a worker. It receives a GitHub observation obtained through an authorized read, a trusted external prepare-only grant, and a coordinator-curated proposal. It does not query GitHub or interpret labels as permissions. A clear proposal keeps `questions: []`; a pending decision remains a question rather than an invented answer.
+From an authorized source checkout, the coordinator uses `tools/isswf-intake.mjs`; the Markdown resource package does not contain this executable. This path requires neither an external dispatcher, Python, SQLite, a model, nor a worker. It receives a GitHub observation obtained through an authorized read, a trusted external prepare-only grant, and a coordinator-curated proposal. It does not query GitHub or interpret labels as permissions. A clear proposal keeps `questions: []`; a pending decision remains a question rather than an invented answer.
 
 ```sh
 node tools/isswf-intake.mjs prepare --project /absolute/project --repository owner/repo --issue 21 --source /absolute/observation.json --grant /trusted/outside-project/prepare.json --proposal /absolute/proposal.json

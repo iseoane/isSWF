@@ -10,8 +10,20 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | --- | --- |
 | `isswf-setup` | Preparar un proyecto o inspeccionar una propuesta de actualización de la instalación. |
 | `isswf-coordinator` | Concretar un encargo, elegir el siguiente paso, coordinar trabajo autorizado y explicar el resultado. |
+| `isswf-writing` | Crear, revisar o mejorar documentos con el enfoque adecuado para humanos o agentes, en cualquier proyecto. |
+| `isswf-understanding` | Comprender un tema o sistema, aclarar una explicación o aprender mediante práctica y feedback. |
+| `isswf-pr` | Preparar descripciones de PR y actualizaciones autorizadas con evidencias y evaluación obligatoria del riesgo. |
+| `isswf-issue` | Reportar bugs independientes o proponer funcionalidades y mejoras, con destino verificado y `needs-triage` obligatorio. |
 
 En Pi se invocan con `/skill:`. En Claude Code, con `/isswf:`. También existe `isswf-triage` en el código fuente para los prototipos históricos de entrada de issues; no es una entrada habitual del paquete completo instalado.
+
+La skill de redacción determina la audiencia a partir de la petición y del contexto del documento. Te pregunta cuando la audiencia no está clara y sigue las convenciones de idioma y documentación del proyecto de destino. Utiliza `/skill:isswf-writing` en Pi o `/isswf:isswf-writing` en Claude Code. No requiere activar el proyecto.
+
+La skill de comprensión elige entre reformular, explicar o aprender con práctica según tu petición. Se adapta a los conocimientos que muestras y pregunta solo cuando una ambigüedad cambiaría la respuesta. Utiliza `/skill:isswf-understanding` en Pi o `/isswf:isswf-understanding` en Claude Code. Sirve para distintos temas y proyectos sin crear cursos ni registros de progreso por defecto.
+
+La skill de PR funciona directamente o desde Delivery. Inspecciona el candidato, explica el alcance y los límites de verificación, y evalúa el riesgo incluso en cambios solo de documentación. Delivery aporta sus identidades y evidencias y reutiliza la misma evaluación. Utiliza `/skill:isswf-pr` en Pi o `/isswf:isswf-pr` en Claude Code. Redactar no autoriza publicar ni fusionar.
+
+La skill de issues distingue los hallazgos independientes de los errores de la implementación actual. Dirige un reporte saneado al repositorio del proyecto o de la factoría, comprueba duplicados y exige la etiqueta existente `needs-triage` antes de crear la issue. La falta de acceso al destino, permiso de publicación o soporte de la etiqueta deja un borrador o un bloqueo explícito. Utiliza `/skill:isswf-issue` en Pi o `/isswf:isswf-issue` en Claude Code. Crear un reporte no autoriza implementarlo.
 
 ## Personas y agentes
 
