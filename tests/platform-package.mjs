@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join, resolve, isAbsolute, relative, sep } from 'node:path';
+import { existsSync } from 'node:fs';
+import { dirname, join, resolve, isAbsolute, relative, sep } from 'node:path';
 import { verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] || '.');
@@ -9,8 +10,8 @@ assert.ok(process.env.ISSWF_PLATFORM_ROOT, 'Set ISSWF_PLATFORM_ROOT to an absent
 const root = resolve(process.env.ISSWF_PLATFORM_ROOT);
 const outputRelative = relative(source, root);
 assert.ok(outputRelative === '..' || outputRelative.startsWith('..' + sep) || isAbsolute(outputRelative), 'Platform output must be outside the source checkout');
-const npm = process.env.npm_execpath;
-assert.ok(npm && isAbsolute(npm), 'Run through npm exec --offline -- node tests/platform-package.mjs');
+const npm = [process.env.npm_execpath, join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), resolve(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js')].find(path => path && isAbsolute(path) && existsSync(path));
+assert.ok(npm, 'A Node.js installation with npm CLI is required');
 const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null' };
 function run(binary, args, cwd = root, expectedStatus = 0) {
   const result = spawnSync(binary, args, { cwd, env, encoding: 'utf8', timeout: 180000, maxBuffer: 4 * 1024 * 1024 });

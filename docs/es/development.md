@@ -87,7 +87,7 @@ Para ejecutar las comprobaciones adicionales en local, elige una carpeta de sali
 ```sh
 npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
 export ISSWF_PLATFORM_ROOT="/absolute/absent/platform-output"
-npm exec --offline -- node tests/platform-package.mjs .
+node tests/platform-package.mjs .
 node tests/host-discovery.mjs .
 ```
 

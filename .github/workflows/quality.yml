@@ -83,7 +83,7 @@ jobs:
       - name: Build and install native package; test CLI, resources and worktrees
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
-        run: npm exec --offline -- node tests/platform-package.mjs .
+        run: node tests/platform-package.mjs .
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
       - name: Install and discover skills with real Pi and Claude hosts, without models
