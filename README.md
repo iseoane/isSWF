@@ -33,21 +33,21 @@ Pi is the reference execution environment. A Claude Code plugin is also included
 
 ## Installation
 
-These instructions target the published [1.1.1 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.1.1). Check its verification evidence and candidate identity before installation. The subsequent Claude context-handoff corrections in the development source are not included in that release. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
+These instructions target [1.1.2 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.1.2), including the Claude context-handoff corrections. At this source checkpoint, publication and uploaded-asset verification are pending. Run the download commands only after that release is published and its verification evidence identifies the released candidate. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
 
-Linux x64 is the validated target. The corrected runtime has passed a real Pi worker flow with the existing Pi SDK, protected checks and Linux isolation. Earlier prerelease `1.1.0` cannot load that SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. The Claude plugin is included, but its native delegation is not covered by the Pi worker test. Check the release's verification evidence and status before use.
+Linux x64 is the validated target. The Bun runtime has passed a real Pi worker flow with protected checks and Linux isolation. The Claude corrections have passed a bounded native coordinator/worker/read-only reviewer test with observed Sonnet model metadata and verified runtime/document input reads. These are separate host tests, not equivalent sandboxing or recovery guarantees. Earlier prerelease `1.1.0` cannot load the real Pi SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. Check the release's exact-candidate evidence and limitations before use.
 
 ### Download and verify
 
 Run these commands from a directory where you want to keep the release. Keep the complete extracted package, not just its executable.
 
 ```bash
-mkdir isswf-1.1.1
-cd isswf-1.1.1
-gh release download v1.1.1 --repo iseoane/isSWF \
-  --pattern 'isswf-1.1.1-bun-linux-x64.tgz' --pattern SHA256SUMS
+mkdir isswf-1.1.2
+cd isswf-1.1.2
+gh release download v1.1.2 --repo iseoane/isSWF \
+  --pattern 'isswf-1.1.2-bun-linux-x64.tgz' --pattern SHA256SUMS
 sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf isswf-1.1.1-bun-linux-x64.tgz
+tar -xzf isswf-1.1.2-bun-linux-x64.tgz
 RELEASE="$(pwd)/package"
 ```
 

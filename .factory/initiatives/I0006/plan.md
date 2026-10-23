@@ -104,3 +104,23 @@ This coordinator-owned plan records reported progress, not execution permission 
 - b2b2b437493ebaa3044b830bd5c7b2212a55fb77 (unpublished corrected-source fixture)
 - tooling/.local/bun-release-delivery/claude-handoff-live-root.txt
 - tooling/.local/bun-release-delivery/claude-handoff-fix-root.txt
+
+## J005
+
+- Status: in-review
+- Objective: Publish aligned Linux x64 release1.1.2 containing the verified Claude context-handoff corrections
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Blocker: Exact-candidate artifact/host validation, independent source review and CI required before publication.
+- Next step: Commit and verify the retained1.1.2 candidate, then publish only verified new assets without moving main or changing prior releases.
+
+### Acceptance
+
+- Package/core/plugin1.1.2 aligned and conditional bilingual download instructions accurate.
+- Exact artifact passes relevant mechanical/real Pi and Claude checks with complete handoff evidence and preserved scope.
+- Sufficient native independent Standards/Spec review and exact-head CI pass before tag/draft/assets verification and stable publication.
+
+### Evidence
+
+- jobs/J005/brief-r1.md
+- tooling/.local/bun-release-delivery/release-1.1.2-root.txt
