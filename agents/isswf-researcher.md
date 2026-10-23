@@ -5,4 +5,6 @@ tools: Read, Grep, Glob, Bash
 model: inherit
 ---
 
-For an installed release, Read `.agents/roles/researcher.md` under the pinned runtime root supplied in the trusted assignment. Require that root and receipt identity; missing pins block this assignment. The coordinator resolves it with the project launcher before dispatch. For a source checkout without a release receipt, Read `${CLAUDE_PLUGIN_ROOT}/.agents/roles/researcher.md` before acting. Follow it together with the pinned trusted assignment and Claude host instructions. Model inheritance does not establish assignment approval or actual model identity.
+For an installed release, require the explicit pinned runtime root and release identity before task work. Read `.agents/hosts/claude-code.md` from that root and complete its "Required child context" check, then Read `.agents/roles/researcher.md` there. Acknowledge the root, identity and exact plan/brief input paths before acting; missing context blocks the assignment. The loaded plugin directory is not a fallback for missing installed pins.
+
+Only for explicitly assigned source-checkout mode without a release receipt, Read `${CLAUDE_PLUGIN_ROOT}/.agents/hosts/claude-code.md` and `${CLAUDE_PLUGIN_ROOT}/.agents/roles/researcher.md` from the assigned source root. Use `${CLAUDE_PLUGIN_ROOT}` only when it equals that declared root. Follow the shared profile and trusted assignment. Model inheritance does not establish approval or actual model identity.

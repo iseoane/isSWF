@@ -33,7 +33,7 @@ Pi is the reference execution environment. A Claude Code plugin is also included
 
 ## Installation
 
-These instructions target [1.1.1 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.1.1). At this source checkpoint, publication and uploaded-asset verification are pending. Run the download commands only after that release is published and its verification evidence identifies the released candidate. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
+These instructions target the published [1.1.1 for Linux x64](https://github.com/iseoane/isSWF/releases/tag/v1.1.1). Check its verification evidence and candidate identity before installation. The subsequent Claude context-handoff corrections in the development source are not included in that release. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
 
 Linux x64 is the validated target. The corrected runtime has passed a real Pi worker flow with the existing Pi SDK, protected checks and Linux isolation. Earlier prerelease `1.1.0` cannot load that SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. The Claude plugin is included, but its native delegation is not covered by the Pi worker test. Check the release's verification evidence and status before use.
 

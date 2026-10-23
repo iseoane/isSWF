@@ -59,12 +59,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J003
 
-- Status: in-review
+- Status: completed
 - Objective: Document actual release installation and verify real compiled-runtime workflows before stable promotion
 - Depends on: J001, J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md) (pending until prepared)
-- Blocker: Native review of656ce69 failed on premature README download availability; conditional instructions corrected. Fresh exact-candidate review, CI and artifact verification remain required.
-- Next step: Revalidate the corrected candidate and obtain a sufficient native verdict before publishing; preserve the prior failed verdict and published1.1.0.
+- Blocker: None for the stable Linux x64 reference Pi scope; native Claude contract validation is J004.
+- Next step: Preserve exact release/tag/artifact evidence; do not infer native Claude parity.
 
 ### Acceptance
 
@@ -74,8 +74,29 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
-- jobs/J003/brief-r1.md
 - jobs/J003/brief-r2.md
-- 656ce69310ee915b8ac2104dd21a11859fe9131a
-- https://github.com/iseoane/isSWF/actions/runs/39849518762
-- tooling/.local/bun-release-delivery/stable-validation-root.txt
+- 9114a60d1a86c5599dc354adaa3facbe15fd9af0
+- https://github.com/iseoane/isSWF/actions/runs/39850271143
+- https://github.com/iseoane/isSWF/pull/82#issuecomment-6350824148
+- https://github.com/iseoane/isSWF/pull/82#issuecomment-6350856505
+- https://github.com/iseoane/isSWF/releases/tag/v1.1.1
+
+## J004
+
+- Status: blocked
+- Objective: Validate actual Claude Sonnet native coordinator, worker and readonly reviewer using published1.1.1
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Blocker: Functional repair/review passes, but child pinned-root/receipt and reviewer plan-context handoffs are incomplete. All approved native sessions consumed.
+- Next step: Prepare complete explicit native child context and repeat only under a fresh bounded operator grant; preserve all prior attempts.
+
+### Acceptance
+
+- Observe actual approved Claude model and plugin with exactly one native writer and readonly reviewer, not a Pi or advisory substitute.
+- Preserve exact candidate, original protected checks and nonmutable hashes; verify complete pinned-root/receipt and plan-path handoff.
+- Keep failures and host limitations visible; no unapproved actor retry, global install, permission bypass or Pi isolation/recovery equivalence claim.
+
+### Evidence
+
+- jobs/J004/brief-r1.md
+- tooling/.local/bun-release-delivery/claude-validation-assay-root.txt
