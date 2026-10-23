@@ -70,9 +70,11 @@ Open the target repository and invoke the setup skill:
 | Pi | `/skill:isswf-setup` |
 | Claude Code | `/isswf:isswf-setup` |
 
-State that you want to initialise this project. Choose local tracking or GitHub tracking when asked. GitHub tracking does not grant permission to publish, push, or merge.
+Ask to set up this project. Setup detects the repository root, existing configuration and selected runtime before asking questions. It identifies initial setup, existing setup, an available update or an interrupted operation; you do not need to supply paths or commit hashes that it can resolve locally. Migration and recovery still require an explicit request.
 
-Setup creates `.isswf/` and records the project's selected factory version. New Bun pins identify the shared source and engine version, while each machine retains and verifies its own platform artifact. The pin does not embed a native binary hash that collaborators must change for another platform. It preserves existing model settings and setup decisions. Authentication and execution permissions still need to be valid for the work you later request.
+Choose local tracking or GitHub tracking if no choice is recorded. Setup also shows the current host's model and supported effort options by role, alongside existing choices or factory defaults. Choose the proposed settings or request role-specific changes. Host-listed models may be unsupported by a particular isSWF executor; setup explains that restriction instead of silently substituting. Pi choices use the project's model configuration; Claude-native choices are recorded separately in the setup record. If discovery or persistence is unavailable in the selected runtime, model selection remains explicitly pending. Model selection does not call a provider or grant costs. GitHub tracking does not grant permission to publish, push, or merge.
+
+Setup creates `.isswf/` and records the project's selected factory version. New Bun pins identify the shared source and engine version, while each machine retains and verifies its own platform artifact. The pin does not embed a native binary hash that collaborators must change for another platform. It preserves existing model settings and setup decisions unless you explicitly approve changes. Authentication and execution permissions still need to be valid for the work you later request.
 
 If the repository already uses `.factory/`, ask to inspect and migrate that existing state. Do not create a second factory directory beside it.
 

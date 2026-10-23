@@ -4,6 +4,14 @@ Use this guide only when the coordinator is actually running in Claude Code. Sha
 
 Claude Code native subagents replace Pi SDK dispatch for work explicitly approved for this host. Before work, the coordinator must obtain explicit assignment approval for Claude and the inherited/selected model, then observe and record the actual model metadata. `model: inherit` is not evidence of model identity or authorization. Pi route configuration does not configure Claude, and a configured Pi model is not automatically Claude-compatible. If model or capability is unavailable, stop that dispatch; never silently substitute a model or fall back to the Pi SDK.
 
+## Setup model choices
+
+During explicit setup, discover the current Claude host's native model choices and supported efforts from its available capability interface or local documentation. Present existing choices and defaults before asking for a selection; if capability evidence is missing, keep the affected choice pending rather than guessing from Pi routes or another host's aliases. Do not make provider calls to populate the menu.
+
+Persist approved Claude-native choices in the selected state's `project-setup.md` under a `Claude Code model selection` heading, with a table of role, native model choice and requested effort, plus the capability evidence and pending limitations. This is a host-specific decision record, not a Pi route schema. Preserve unrelated setup content and existing Pi `models.json`. An inherited choice must be explicit and its actual identity remains unknown until observed.
+
+When preparing a Claude assignment, consult those recorded choices and the current host capabilities, then carry the approved model and effort into the child's required context. Setup selection is a preference, not assignment approval, proof of availability or permission to create an actor or incur costs. Existing assignment approvals and observed-model requirements above still apply.
+
 ## Required child context
 
 Before delegating any native role, the coordinator resolves the project pin using the original installed launcher outside the private store. Keep that launcher path separate from the pinned runtime root returned by `locate`. A retained runtime inside the store is a resource location, not a replacement launcher for a second `locate` call against that same store.

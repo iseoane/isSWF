@@ -68,7 +68,9 @@ These commands do not configure Pi models as Claude models. Claude's native dele
 
 ## Initialize a repository
 
-Use the setup skill or the equivalent bundled CLI. In the following examples, `RELEASE` means the absolute installed release directory, not the source checkout:
+The setup skill first discovers the current Git root, existing state, pin and interrupted operations. It resolves trusted source identity locally rather than requesting a manually entered path or SHA. It asks for unresolved tracking and model/effort choices, showing host capabilities separately from pinned-executor restrictions. Existing selections are preserved unless changes are approved. Missing discovery, unsupported executors or unavailable host-specific persistence leave the affected selection pending; model discovery does not make provider calls or prove account coverage. Migration and recovery are detected, never implicitly authorized by setup.
+
+Use the setup skill for that guided flow, or the bundled CLI for noninteractive inspection and initialization with defaults. The CLI does not implement the host model-selection interview. In the following examples, `RELEASE` means the absolute installed release directory, not the source checkout:
 
 ```sh
 RELEASE/bin/isswf inspect --project /absolute/project
