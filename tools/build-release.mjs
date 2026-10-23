@@ -139,7 +139,7 @@ async function build({ '--source': source, '--revision': revision, '--output': o
   if (!isAbsolute(source) || !isAbsolute(output)) fail('--source and --output must be absolute paths');
   if (!shaPattern.test(revision)) fail('--revision must be a full lowercase Git SHA');
   const sourceRoot = await realpath(source);
-  if (runGit(sourceRoot, ['rev-parse', '--show-toplevel']).toString().trim() !== sourceRoot) fail('Source must be a Git root');
+  if (await realpath(runGit(sourceRoot, ['rev-parse', '--show-toplevel']).toString().trim()) !== sourceRoot) fail('Source must be a Git root');
   if (runGit(sourceRoot, ['rev-parse', '--verify', `${revision}^{commit}`]).toString().trim() !== revision) fail('Git did not resolve the exact requested full revision');
   const outputRoot = await canonicalPath(output);
   try { await lstat(outputRoot); fail(`--output must be absent: ${outputRoot}`); }
