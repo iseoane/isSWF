@@ -83,12 +83,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J004
 
-- Status: blocked
-- Objective: Validate actual Claude Sonnet native coordinator, worker and readonly reviewer using published1.1.1
+- Status: completed
+- Objective: Validate native Claude repair/review and correct the reported runtime/document handoff defects in an isolated source fixture
 - Depends on: J003
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
-- Blocker: Functional repair/review passes, but child pinned-root/receipt and reviewer plan-context handoffs are incomplete. All approved native sessions consumed.
-- Next step: Prepare complete explicit native child context and repeat only under a fresh bounded operator grant; preserve all prior attempts.
+- Brief: [brief-r2.md](jobs/J004/brief-r2.md) (pending until prepared)
+- Blocker: None for the bounded handoff correction; publication and broader host guarantees are separate.
+- Next step: Retain actual trace/audit and prior failures; distribute source corrections only through a separately gated new release, without replacing published1.1.1.
 
 ### Acceptance
 
@@ -99,4 +99,8 @@ This coordinator-owned plan records reported progress, not execution permission 
 ### Evidence
 
 - jobs/J004/brief-r1.md
-- tooling/.local/bun-release-delivery/claude-validation-assay-root.txt
+- jobs/J004/brief-r2.md
+- 95251d6c40ce9fd3cfd77d0ddf1e4cde7b7179e5
+- b2b2b437493ebaa3044b830bd5c7b2212a55fb77 (unpublished corrected-source fixture)
+- tooling/.local/bun-release-delivery/claude-handoff-live-root.txt
+- tooling/.local/bun-release-delivery/claude-handoff-fix-root.txt
