@@ -1,6 +1,6 @@
 {
   "name": "isswf-pi-resources",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "On-demand isSWF workflows for Pi and Claude Code with explicit project installation and migration.",
   "bin": {
     "isswf": "tools/isswf.mjs"

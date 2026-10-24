@@ -138,7 +138,7 @@ Ordinary successor `read` and `reconcile` stay read-only. They validate the exac
 
 ## Reconcile an uncertain PR response
 
-The separate `isswf-job.mjs effect` command supplies a write-once PR journal. It is not part of ordinary `run`, `read`, or `reconcile`. Ordinary observation remains local and read-only. The coordinator host owns this journal; sandbox workers receive no GitHub authority. The delivery profile remains local-draft-only unless the operator grants a specific external action separately.
+The separate `isswf-job.mjs effect` command supplies a write-once PR journal. It is not part of ordinary `run`, `read`, or `reconcile`. Ordinary observation remains local and read-only. The coordinator host owns this journal; sandbox workers receive no GitHub authority. The delivery profile's helper scope remains local-draft-only unless its own assignment covers a specific external action. In the [feature-to-PR workflow](../.agents/roles/references/feature-delivery.md), the trusted current feature start already selects the coordinator's bounded branch/PR/CI actions. The coordinator materializes that authorization into the concrete external-effect grant required below without another operator approval for the same covered action. Neither the helper nor a sandbox worker gains publication authority from the coordinator's grant. Explicit local-only restrictions and all journal preconditions still apply; integration is a separate human decision.
 
 The committed job must add `logicalJobRef` and `externalEffect`:
 

@@ -54,8 +54,8 @@ RELEASE="$(pwd)/package"
 Para una instalación reproducible, sustituye el comando de descarga anterior por una versión explícita, por ejemplo:
 
 ```bash
-gh release download v1.3.2 --repo iseoane/isSWF \
-  --pattern 'isswf-1.3.2-bun-linux-x64.tgz' --pattern SHA256SUMS
+gh release download v1.4.0 --repo iseoane/isSWF \
+  --pattern 'isswf-1.4.0-bun-linux-x64.tgz' --pattern SHA256SUMS
 ```
 
 Continúa en la misma shell para que `RELEASE` indique la ruta absoluta local del paquete, no un selector de versión. Descargar una release nueva no actualiza automáticamente la versión fijada en los proyectos existentes. Los checksums detectan daños, pero no son firmas del editor. Consulta la [instalación](docs/es/installation.md) para la configuración inicial, las actualizaciones y la compilación desde el código fuente.

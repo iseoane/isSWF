@@ -57,7 +57,7 @@ Keep this development checkout separate from any installed release. Follow `docs
 
 - Coordinate through `.agents/skills/isswf-coordinator/SKILL.md`. Delegate through isSWF's own callers, not advisory agents. If native dispatch is unavailable or unauthorized, report that limit and continue only independently authorized local work; do not silently substitute another dispatcher.
 - Before dispatch or replacement, read `docs/model-routing.md` and `docs/local-worker-lifecycle.md`. Resolve the approved model route and effort from the pinned configuration; reconcile actor identity, actual process state and total budget. Unknown state blocks replacement. Parallel writers need exclusive workspaces and authorized shared capacity.
-- Continue reversible work within the current grant without routine reconfirmation. Ask only for missing product decisions or uncovered actions, costs or access. A remembered grant is not current permission; implementation does not imply publication, push, merge, deployment, installation or cleanup.
+- Continue reversible work within the current grant without routine reconfirmation. Ask only for missing product decisions or uncovered actions, costs or access. A remembered grant is not current permission; implementation alone does not imply publication, push, merge, deployment, installation or cleanup. For a trusted current feature-to-PR start, apply `.agents/roles/references/feature-delivery.md`: that request explicitly selects the bounded coordinator-owned commit, branch push, PR and CI scope, unless restricted. Materialize its concrete grants without asking again for the same covered actions. Integration, deployment, installation and cleanup remain separate.
 
 ## Keep the factory proportional
 
