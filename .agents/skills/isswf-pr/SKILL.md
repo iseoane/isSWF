@@ -9,7 +9,7 @@ Use this skill directly in any project or from its delivery workflow. Follow app
 
 ## 1. Resolve the action and candidate
 
-Distinguish drafting text, inspecting an existing PR, running checks, creating a PR, and updating a published PR. Use the request and current authorization to establish the repository, target, scope, and permitted effects. Ask only when an unresolved ambiguity or missing permission affects the next action. Continue independently authorized local preparation when publication is blocked.
+Distinguish drafting text, inspecting an existing PR, running checks, creating a PR, and updating a published PR. Use the request and current authorization to establish the repository, target, scope, and permitted effects. Ask only when an unresolved ambiguity or missing permission affects the next action. For a coordinator's [feature-to-PR assignment](../../roles/references/feature-delivery.md), the trusted current feature start selects covered PR publication/updates and exact-head CI under the configured scope and limits; do not require another publication confirmation. It does not select integration or override explicit local-only/prepare-only restrictions. A direct request to draft a PR remains drafting. Continue independently authorized local preparation when publication is blocked.
 
 Identify the actual base and head commits for a committed candidate. For a local uncommitted draft, identify the base and included tracked and untracked changes, label it uncommitted, and retain a reproducible snapshot when the project requires one. A branch name alone does not establish the inspected content. Preserve unrelated operator changes.
 
@@ -47,7 +47,7 @@ This step ends with a title and description supported by the inspected candidate
 
 Return copyable text by default. Save a local file when requested or required by the delivery workflow, using its existing destination. No persistent record is required for direct use.
 
-Create or update a remote PR only when that operation is covered by current authorization and the required prerequisites are met. Use the project's supported forge or host tool. Do not install tooling, push, rewrite history, change readiness, start monitoring, or merge implicitly. Honor the requested draft/readiness state and project gates; do not force every PR ready or draft.
+Create or update a remote PR only when that operation is covered by current authorization and the required prerequisites are met. Use the project's supported forge or host tool. Do not install tooling, push, rewrite history, change readiness, start monitoring, or merge implicitly. In a feature-to-PR assignment the coordinator performs explicitly covered branch push and CI observation as separate workflow actions, not as side effects of drafting. Honor the requested draft/readiness state and project gates; do not force every PR ready or draft.
 
 Before a remote write, confirm that the candidate still matches the assessment and checks. If it changed, repeat affected inspection, evidence checks, and risk assessment. After writing, read back the target, description, head, and state. Report a failure or uncertain outcome without claiming publication or retrying blindly.
 

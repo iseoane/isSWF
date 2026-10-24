@@ -2,7 +2,7 @@
 
 [Inicio](../../README.es.md) · [English](../en/getting-started.md)
 
-Empieza por un cambio pequeño en un repositorio que conozcas. No necesitas nombrar a todos los agentes ni diseñar tú todo el proceso.
+Empieza con un cambio pequeño en un repositorio que conozcas. No necesitas nombrar a cada agente ni diseñar todo el procedimiento.
 
 ## 1. Configura el proyecto
 
@@ -12,65 +12,60 @@ Completa la [instalación](installation.md), abre el repositorio de destino e in
 /skill:isswf-setup
 ```
 
-En Claude Code, utiliza `/isswf:isswf-setup`. Explica que quieres inicializar este repositorio. La configuración registra las decisiones del proyecto; no inicia la implementación.
+En Claude Code, utiliza `/isswf:isswf-setup`. La configuración resuelve el runtime, los modelos y esfuerzos, los límites de ejecución, la política de espacios de trabajo, las comprobaciones y el destino de entrega antes del trabajo normal en funcionalidades. Para entregar mediante GitHub registra el repositorio, la base y la política de ramas de funcionalidad. Si faltan decisiones o evidencias de capacidad necesarias, la configuración queda parcial, no se da por preparada. Los registros de configuración por sí solos no inician trabajo ni autorizan acciones futuras.
 
-## 2. Plantea un objetivo al coordinador
+## 2. Inicia una funcionalidad con el coordinador
 
-Para una primera prueba, pídele preparar el trabajo sin editar código:
+Por ejemplo:
 
 ```text
-/skill:isswf-coordinator Prepara una corrección para el filtro de búsqueda, que se reinicia al cambiar de página. Mantén el resto de su comportamiento. Muéstrame el alcance y las comprobaciones propuestas antes de cambiar código.
+/skill:isswf-coordinator Implementa un botón para borrar el filtro que restaure la lista sin filtrar existente. Conserva el comportamiento actual de la paginación.
 ```
 
 En Claude Code, sustituye el prefijo por `/isswf:isswf-coordinator` y conserva la petición.
 
-Una respuesta útil debe explicar:
+En un proyecto preparado, iniciar esa funcionalidad selecciona el recorrido acotado por defecto: definir el resultado, implementar, probar, obtener la revisión necesaria, corregir hallazgos, hacer commit en la rama de funcionalidad, subir esa rama, abrir o actualizar su PR, verificar la CI requerida y entregar la PR. No necesitas añadir esas operaciones a cada petición. El coordinador registra la autorización actual, el destino y los presupuestos finitos; iniciar la funcionalidad no autoriza integrarla en `main`, activar auto-merge, desplegar ni publicar una release.
 
-- Qué ha entendido el coordinador del problema.
-- Qué va a cambiar y qué dejará como está.
-- Qué decisión de producto necesita de ti, si falta alguna.
-- Cómo se comprobará el resultado y cuál es el siguiente paso.
+Si falta una decisión que solo tú puedes tomar, el trabajo afectado queda en `awaiting-human` con la pregunta concreta y la respuesta necesaria para continuar. Puede ocurrir durante la definición, antes de que exista una implementación o entrega. Investigar los hechos técnicos accesibles es tarea del coordinador, no un cuestionario inicial para ti.
 
-Debe investigar las incógnitas técnicas dentro de sus permisos, en lugar de pedirte que expliques código que puede leer.
+## 3. Indica cualquier límite más estrecho
 
-## 3. Autoriza el trabajo que necesitas
+Puedes modificar el recorrido por defecto, por ejemplo:
 
-Revisa el alcance propuesto y sus límites antes de aprobar la ejecución. Indica si se permiten commits, acciones en GitHub o llamadas adicionales a modelos; no des por hecho que preparar un plan las autoriza.
+> Prepara el alcance y las comprobaciones de esta funcionalidad. No edites código todavía.
 
-Por ejemplo, puedes autorizar una implementación local acotada y sus pruebas, sin incluir la publicación ni la fusión de cambios. Si el permiso vigente ya cubre un paso, el coordinador no debería pedirte que lo confirmes una y otra vez.
+O bien:
 
-## 4. Consulta el progreso
+> Implementa y prueba esta funcionalidad en local. No hagas commit, push ni crees una PR.
 
-Pregunta al coordinador:
+Conversar, diagnosticar, preparar planes y redactar una PR no equivale a iniciar una funcionalidad. Un bug u otro encargo utiliza el mismo recorrido hasta PR solo cuando lo seleccionas. Las restricciones existentes del proyecto y un modo explícitamente local siguen vigentes; elegir GitHub por sí solo nunca autoriza publicar. El coordinador no debe volver a preguntarte por pasos ya cubiertos por tu petición actual.
 
-> ¿Qué se ha comprobado, qué está bloqueado y qué necesita una decisión mía?
+## 4. Sigue el progreso sin dirigir cada fase
 
-La respuesta debe distinguir el progreso registrado de aquello que no pueda confirmar en ese momento. El panel local también puede mostrar planes, entregas y decisiones pendientes; hay que arrancarlo de forma explícita y no es una vista en directo de todos los agentes.
+El coordinador recoge los resultados de los workers y las revisiones y continúa con las acciones cubiertas sin esperar a tu siguiente mensaje. Cuando te interese, pregunta:
 
-## 5. Revisa el resultado
+> ¿Qué se ha comprobado, qué está bloqueado técnicamente y qué decisión me corresponde?
 
-Debes recibir un resumen del cambio, las comprobaciones realizadas, los límites que queden y la decisión que se te pide. Que una prueba pase o un proceso termine no equivale a tu aceptación.
+Una incidencia posterior, una comprobación fallida, la capacidad de ejecución ocupada o un estado de proceso desconocido pueden detener un paso afectado. El coordinador registra el motivo técnico real y avanza en trabajo independiente cuando es posible. Te pregunta solo por una decisión concreta o una acción no cubierta, no por un permiso genérico para continuar. Que caduque una credencial no demuestra que haya que repetir toda la configuración inicial.
 
-Si falta algo, pide un cambio concreto. Si cumple el objetivo acordado, indica que lo aceptas. Publicar o fusionar cambios sigue necesitando el permiso correspondiente.
+El panel local muestra planes, evidencias y decisiones registrados. No es telemetría de procesos en vivo, un planificador automático ni un modo de autorizar trabajo mediante una nota.
+
+## 5. Decide qué hacer con la PR entregada
+
+Debes recibir la URL real de la PR y sus referencias de cabeza y base, las comprobaciones y revisiones observadas, el riesgo, los límites y la siguiente decisión. Que exista una PR publicada no demuestra que haya pasado la CI requerida. Tras entregar la PR verificada, integrarla en `main` queda en `awaiting-human`; iniciar la funcionalidad no aprueba merge, auto-merge ni push directo a la rama de integración.
+
+Pide una corrección concreta si falta algo. La aceptación del producto y el permiso para integrarlo siguen siendo decisiones distintas. El coordinador conduce el procedimiento mientras su sesión y sus herramientas estén disponibles; las interrupciones se reconcilian mediante los mecanismos existentes, sin prometer un servicio de recuperación en segundo plano.
 
 ## Otras peticiones que puedes probar
 
-### Un cambio pequeño y claro
-
-> Prepara un cambio en el mensaje que aparece cuando no hay resultados. Mantén el diseño y el comportamiento. Muéstrame la pantalla afectada y cómo lo comprobarías.
-
-Una tarea pequeña no debería exigir automáticamente una entrevista larga ni un agente de planificación.
-
 ### Una funcionalidad que necesita decisiones
 
-> Quiero un visor de Markdown. Ayúdame a decidir qué archivos podrá abrir, qué formato debe admitir y qué hacer con el contenido inseguro antes de proponer el trabajo.
+> Quiero un visor de Markdown. Ayúdame a decidir qué archivos puede abrir y qué hacer con el contenido inseguro antes de proponer el trabajo.
 
-Aquí el coordinador debe aclarar las decisiones de producto e investigar las opciones técnicas cuando haga falta.
+Es trabajo de definición. Las decisiones de producto sin resolver te corresponden; las opciones técnicas deben investigarse dentro del alcance. La petición no publica una PR por sí sola.
 
-### Un error con una causa poco clara
+### Un bug cuya causa no está clara
 
-> Investiga por qué al guardar a veces se pierde la última edición. Busca una señal reproducible antes de proponer una corrección y dime si no consigues reproducirlo.
+> Investiga por qué al guardar a veces se pierde la última edición. Busca una señal reproducible antes de proponer una solución y avisa si no puedes reproducirlo.
 
-El diagnóstico puede ir por separado cuando la incertidumbre lo justifique. Los errores sencillos pueden quedarse con el worker que los corrige.
-
-La investigación, la planificación, TDD y las revisiones más profundas se eligen según la tarea. No son fases obligatorias para todas las peticiones. Consulta [cómo funciona la factoría](reference.md).
+El diagnóstico puede separarse cuando la incertidumbre lo justifica. Los bugs sencillos pueden quedarse con el worker. La investigación, la planificación, TDD, E2E y las revisiones más profundas se eligen según la tarea, no son fases obligatorias. Consulta [cómo funciona la factoría](reference.md).

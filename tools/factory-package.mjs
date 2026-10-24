@@ -18,6 +18,9 @@ import { stateDirectory } from "./project-state.mjs";
 
 const revisionPattern = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const receiptName = ".isswf-package-receipt.json";
+const coordinatorPath = ".agents/skills/isswf-coordinator/SKILL.md";
+const featureDeliveryPath = ".agents/roles/references/feature-delivery.md";
+const featureDeliveryLink = "../../roles/references/feature-delivery.md";
 const payloadPaths = [
   ".agents/skills/isswf-coordinator/SKILL.md",
   ".agents/skills/isswf-setup/SKILL.md",
@@ -243,6 +246,9 @@ async function materialize({ source, revision, store }) {
     ...(hasE2e ? e2ePayloadPaths : []),
     ...taskSkills.filter(name => JSON.parse(manifestBytes).pi.skills.includes(`./.agents/skills/isswf-${name}`)).flatMap(name => taskPayloadPaths[name]),
   ];
+  const coordinatorEntry = entries.get(coordinatorPath);
+  if (!coordinatorEntry || coordinatorEntry.type !== "blob" || !["100644", "100755"].includes(coordinatorEntry.mode)) fail("Missing regular coordinator skill");
+  if (runGit(sourceRoot, ["cat-file", "blob", coordinatorEntry.object]).includes(featureDeliveryLink)) selectedPaths.push(featureDeliveryPath);
   const payload = new Map();
   for (const path of selectedPaths) {
     const entry = entries.get(path);
@@ -319,6 +325,9 @@ export async function verifyPackage(packageRoot, expectedRevision) {
     ...(hasE2e ? e2ePayloadPaths : []),
     ...taskSkills.filter(name => JSON.parse(manifestBytes).pi.skills.includes(`./.agents/skills/isswf-${name}`)).flatMap(name => taskPayloadPaths[name]),
   ];
+  const coordinatorStat = await lstat(join(root, coordinatorPath));
+  if (!coordinatorStat.isFile() || coordinatorStat.isSymbolicLink()) fail("Missing regular coordinator skill");
+  if ((await readFile(join(root, coordinatorPath), "utf8")).includes(featureDeliveryLink)) selectedPaths.push(featureDeliveryPath);
   if (
     Object.keys(receipt).sort().join(",") !== "files,format,revision" ||
     receipt.format !== 1 ||

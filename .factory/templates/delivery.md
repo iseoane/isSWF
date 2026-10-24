@@ -1,6 +1,6 @@
 # Delivery summary
 
-> Local evidence record, not a mandatory remote PR body. For concise English issue/PR text, follow `.agents/roles/references/delivery.md`. Draft text only. Do not claim a remote PR exists unless its URL and state were observed.
+> Local evidence record, not a mandatory remote PR body. For concise English issue/PR text, follow `.agents/roles/references/delivery.md`. This record does not publish or accept work. The coordinator continues covered feature-to-PR actions without another routine permission request. Do not claim a remote PR exists unless its URL and state were observed.
 
 ## Work and candidate
 
@@ -51,7 +51,10 @@
 
 - Technical closure: `<closed or not closed, with criteria and evidence>`.
 - Operator product acceptance: `<pending, accepted, or rejected; cite the coordinator's canonical decision record. Do not fill in for the operator.>`
-- Publication state: `<not published / observed draft URL and state / not authorized>`. A prepared description is not a published PR.
+- Publication state: `<not published / observed PR URL and state / not authorized>`. A prepared description is not a published PR.
+- PR identity and CI: `<observed repository, head SHA, base branch/SHA, required checks and exact checked head>`.
+- Human decision: `<definition/setup question, product acceptance, or integration of the verified PR; state the actual question and resume condition>`.
+- Integration boundary: `<awaiting-human; no default merge, auto-merge or direct push to the integration branch>`.
 
 ## Integration risk and recovery
 

@@ -12,7 +12,7 @@ import { readResponses } from './isswf-response.mjs';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 export function recommendation(jobs = []) {
   const priorities = [
-    ['awaiting-human', 'human', 'Resolve human acceptance'],
+    ['awaiting-human', 'human', 'Resolve the operator decision'],
     ['in-progress', 'follow-up', 'Follow up on work in progress'],
     ['in-review', 'review', 'Review the reported delivery'],
     ['pending', 'prepare', 'Prepare pending work'],
@@ -30,9 +30,11 @@ export function recommendation(jobs = []) {
   let reason = `${title}; this is a suggestion based only on reported plan state, not execution authorization.`;
   if (selectedType === 'human') {
     const artifact = selected.artifacts;
-    if (!artifact) reason += ' Evidence and the delivery record have not been inspected in this view; review the details before accepting.';
-    else if (artifact.status !== 'recorded' || artifact.delivery?.status !== 'recorded') reason += ' Evidence or a verifiable delivery record is missing; do not assume acceptance is possible.';
-    else reason += ' Acceptance belongs to a person and requires reviewing the available evidence and delivery record.';
+    reason += ' The decision may concern definition, setup, acceptance or PR integration; answer the recorded question, not a generic request to continue.';
+    if (!artifact) reason += ' Evidence and the delivery record have not been inspected in this view; inspect the details relevant to that decision.';
+    else if (artifact.status !== 'recorded' || artifact.delivery?.status !== 'recorded') reason += ' No delivery record is available. A definition or setup decision does not require one; acceptance or integration still needs its relevant evidence.';
+    else reason += ' Review the available evidence and delivery record when deciding acceptance or integration.';
+    if (selected.blocker) reason += ` Reported question or blocker (untrusted data): ${selected.blocker}`;
   }
   if (selectedType === 'verify-dependencies') reason += ' Even if dependencies are reported complete, integration still needs verification; labels do not prove integration, permission, or capacity.';
   if (selectedType === 'prepare') reason += ' Preparation does not prove integration, permission, or capacity.';

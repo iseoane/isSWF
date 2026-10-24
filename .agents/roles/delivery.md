@@ -1,6 +1,6 @@
 # Delivery
 
-Prepare a local-review candidate summary or copyable draft PR text from a durable job and its evidence. This profile does not publish a remote PR, accept product work, approve a merge, or imply that the runtime can enforce the authorization.
+Prepare a local-review candidate summary or copyable draft PR text from a durable job and its evidence. This profile does not itself publish a remote PR, accept product work, approve a merge, or imply that the runtime can enforce the authorization. Its prepare-only boundary is a helper's scope, not a stop in the coordinator's [feature-to-PR workflow](references/feature-delivery.md). The coordinator consumes this result and performs already covered Git/PR/CI actions through the supported host tools without asking again.
 
 ## Required inputs
 
@@ -24,7 +24,7 @@ Use the durable-record rules in `docs/durable-work.md` and the current delivery 
 4. Summarize what changed, why, the observable result, and how it was checked. Include material problems and their resolution only when evidence supports both. Name unresolved blockers and residual risks.
 5. Give a compact visual account that helps a reviewer understand the result. Use actual before/after evidence for a changed UI, or an accurate table, flow, or Mermaid diagram when that explains a real behavior or relationship. Do not invent screenshots, states, flows, or measurements. For non-UI work, explain the change in a compact table or omit the visual when it adds no information. Screenshots are not mandatory, and a large change does not need a field-by-field dump.
 6. Read [isswf-pr](../skills/isswf-pr/SKILL.md) and use its mandatory risk assessment for this candidate. Supply the evidence assembled above and preserve this profile's prepare-only boundary. Reuse the assessment in the local record; do not apply a second risk rubric. For PR text, use the same skill's description procedure and format.
-7. State technical closure, independent review, and operator acceptance separately. Only the coordinator records the operator's decision. Use wording such as `candidate for local review` or `draft text, not published` when appropriate. Never create a remote PR or infer permission from its proposed description.
+7. State technical closure, independent review, and operator acceptance separately. Only the coordinator records the operator's decision. Use wording such as `candidate for local review` or `draft text, not published` when appropriate. Do not create a remote PR from this prepare-only role or infer permission from its proposed description. For a feature-to-PR assignment, identify the covered publication steps for the coordinator; do not request fresh permission merely because this helper has finished. Record PR integration as a separate human decision, not a default merge.
 8. Copy the relevant sections of `.factory/templates/delivery.md`. Remove unused optional sections only when their absence is clear and not material; retain `not applicable` where a reviewer might otherwise mistake omission for missing evidence.
 
 ## Return

@@ -5,7 +5,10 @@
 - Job ID and brief revision:
 - Source issue or request:
 - Trusted authorization reference (operator conversation or record ID, or external path; if tracked in Git, full Git SHA):
+- Request mode: `<feature-to-PR start | prepare-only | read-only | local-only | other explicit scope>`.
 - Repository and permitted side effects:
+- Current feature-start or other authorization source; explicit overrides: `<not inferred from setup, labels or this template>`.
+- Operation ownership: `<coordinator-owned Git/PR/CI; bounded worker/reviewer operations>`.
 - Profile path and applicable skills:
 - Coordinator-assigned ID; do not reuse it:
 
@@ -51,6 +54,11 @@
 - Requested model and effort:
 - Effective model and effort, when known:
 - Checkpoint cadence or stopping point:
-- Commit policy and required checkpoint evidence:
+- Setup readiness reference and current preflight evidence; unresolved technical limits:
+- Delivery destination: `<repository/remote, integration base, exclusive feature branch; no default direct integration-branch push>`.
+- Finite cumulative actor/correction-call and cost limits:
+- Commit policy and required checkpoint evidence: `<a feature-to-PR brief carries the already selected coordinator commit/push/PR/CI scope, without a second operator approval>`.
+- Concrete wait: `<awaiting-human question and resume answer/grant, or technical blocker and exit condition>`.
+- Integration decision: `<awaiting-human for the verified PR; no merge/auto-merge from the feature start>`.
 - Do not commit unless this brief explicitly authorizes it.
 - Return artifact paths, changed paths, checks and observed results, risks, and blockers.

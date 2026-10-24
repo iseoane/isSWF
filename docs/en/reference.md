@@ -49,6 +49,14 @@ The shared design reference also covers domain language, useful interfaces, resu
 
 Skills expose independently requested tasks with an observable outcome. Role references supply conditional guidance inside those tasks, such as design principles, test quality and permissions. They remain references rather than becoming mandatory standalone workflows. If a guide later gains its own entry point, keep the detailed rules in one canonical resource instead of copying them into a second skill.
 
+## Default feature delivery
+
+In a prepared project, a trusted request to start or implement a feature selects the coordinator-led path through implementation, checks, required review and corrections, feature-branch commit/push, PR creation or update, required exact-head CI and PR delivery. You do not need to authorize those same covered steps again at every phase. The current request supplies the bounded authority; setup policy, an issue label or a passing test alone does not. Prepare-only, read-only, local-only and explicit project restrictions override this default. Other assignment types use it only when selected.
+
+Setup resolves stable runtime/model, execution-budget, workspace, check and delivery choices before normal work. Later availability and integrity checks still apply. A human-only definition or setup decision becomes `awaiting-human` with a concrete question; a technical wait is recorded as a technical blocker rather than generic approval. The delivered verified PR also becomes `awaiting-human` for integration into `main` or the selected base. No merge, auto-merge, direct integration-branch push, deployment or release is included.
+
+The coordinator owns this continuity through existing tools; returning from a prepare-only helper is not a reason to wait for another prompt. This is not a new background service, automatic scheduler or promise of recovery while the session is closed. See [your first request](getting-started.md) and the [agent workflow contract](../../.agents/roles/references/feature-delivery.md).
+
 ## People and agents
 
 You decide the product goal and what is permitted. The coordinator owns the plan and selects help when useful:
@@ -60,6 +68,8 @@ You decide the product goal and what is permitted. The coordinator owns the plan
 | Planner | Proposes useful units of work and their dependencies. |
 | Diagnostician | Investigates a defect whose cause is unclear. |
 | Reviewer | Assesses the chosen change and its evidence independently when that judgment is required. |
+
+Setup configures the agent composition as well as models and effort. It records enabled or conditional roles, selection triggers, supported executors and tool boundaries, total and concurrent actor limits, correction/review budgets and independence requirements in the existing project setup record. Unsupported combinations remain pending rather than silently using another dispatcher. A settled composition is reused; each assignment still needs its concrete authorization.
 
 These are responsibilities, not a compulsory sequence or a promise that every host can launch every role. Clear work can take a short path. More uncertainty may require questions or investigation first.
 

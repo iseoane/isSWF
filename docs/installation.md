@@ -70,6 +70,8 @@ These commands do not configure Pi models as Claude models. Claude's native dele
 
 The setup skill first discovers the current Git root, existing state, pin and interrupted operations. It resolves trusted source identity locally rather than requesting a manually entered path or SHA. It asks for unresolved tracking and model/effort choices, showing host capabilities separately from pinned-executor restrictions. Existing selections are preserved unless changes are approved. Missing discovery, unsupported executors or unavailable host-specific persistence leave the affected selection pending; model discovery does not make provider calls or prove account coverage. Migration and recovery are detected, never implicitly authorized by setup.
 
+Setup also resolves the stable workspace, supported executor/isolation, finite execution/correction limits, protected checks and delivery destination for [normal feature-to-PR work](../.agents/roles/references/feature-delivery.md). Missing required choices or readiness evidence leave it partial; existing settled choices do not need a new interview for every feature. The current trusted feature start supplies its bounded assignment authorization, not the saved setup record. Current availability and ownership preflight still apply, and integration into the base remains a separate human decision.
+
 Use the setup skill for that guided flow, or the bundled CLI for noninteractive inspection and initialization with defaults. The CLI does not implement the host model-selection interview. In the following examples, `RELEASE` means the absolute installed release directory, not the source checkout:
 
 ```sh

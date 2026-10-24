@@ -10,7 +10,7 @@ During explicit setup, discover the current Claude host's native model choices a
 
 Persist approved Claude-native choices in the selected state's `project-setup.md` under a `Claude Code model selection` heading, with a table of role, native model choice and requested effort, plus the capability evidence and pending limitations. This is a host-specific decision record, not a Pi route schema. Preserve unrelated setup content and existing Pi `models.json`. An inherited choice must be explicit and its actual identity remains unknown until observed.
 
-When preparing a Claude assignment, consult those recorded choices and the current host capabilities, then carry the approved model and effort into the child's required context. Setup selection is a preference, not assignment approval, proof of availability or permission to create an actor or incur costs. Existing assignment approvals and observed-model requirements above still apply.
+When preparing a Claude assignment, consult those recorded choices and the current host capabilities, then carry the approved model and effort into the child's required context. Setup selection is a preference, not assignment approval, proof of availability or permission to create an actor or incur costs. A trusted current feature-to-PR start can supply the bounded assignment approval for the already selected supported host/model, actor/correction budget and delivery scope; record that approval rather than asking again merely because a phase changes. Existing observed-model, availability, child-context and cost requirements still apply. A changed or unsupported choice needs reconciliation, not a silent substitution.
 
 ## External worktree assignments
 

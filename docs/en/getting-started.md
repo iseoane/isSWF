@@ -12,65 +12,60 @@ Complete [installation](installation.md), open the target repository, and invoke
 /skill:isswf-setup
 ```
 
-In Claude Code, use `/isswf:isswf-setup` instead. Explain that you want to initialise this repository. The setup step records project choices; it does not start implementation.
+In Claude Code, use `/isswf:isswf-setup` instead. Setup resolves the runtime, model/effort and execution limits, workspace policy, checks and delivery destination before normal feature work. For GitHub delivery it records the repository, base and feature-branch policy. Missing required choices or capability evidence leave setup partial, not silently ready. Setup records alone do not start work or grant future actions.
 
-## 2. Give the coordinator a goal
+## 2. Start a feature through the coordinator
 
-For a first try, ask it to prepare work without editing code:
+For example:
 
 ```text
-/skill:isswf-coordinator Prepare a fix for the search filter resetting when I change pages. Keep the rest of its behaviour unchanged. Show me the proposed scope and checks before changing code.
+/skill:isswf-coordinator Implement a clear-filter button that restores the existing unfiltered list. Keep the current pagination behaviour unchanged.
 ```
 
 In Claude Code, replace the command prefix with `/isswf:isswf-coordinator` and keep the request.
 
-A useful response should explain:
+In a prepared project this feature start selects the bounded default path: define the outcome, implement, test, obtain required review, correct findings, commit on the feature branch, push that branch, open or update its PR, verify required CI and deliver the PR. You do not need to append those operations to every feature request. The coordinator records the current authorization, destination and finite budgets; the feature start does not authorize integration into `main`, auto-merge, deployment or release.
 
-- What the coordinator understands the problem to be.
-- What it will change and what it will leave alone.
-- Any product decision it needs from you.
-- How the result will be checked and what happens next.
+If a decision only you can make is missing, the affected work becomes `awaiting-human` with the specific question and the answer needed to resume. This can happen during definition, before any implementation or delivery exists. Technical facts that can be investigated are the coordinator's job, not an opening questionnaire for you.
 
-It should investigate technical unknowns within its permissions rather than asking you to explain code it can read.
+## 3. State any narrower boundary
 
-## 3. Authorise the work you actually want
+You can override the default, for example:
 
-Check the proposed scope and any limits before approving execution. State whether commits, GitHub actions, or additional model calls are allowed; do not assume they follow from preparing a plan.
+> Prepare the scope and checks for this feature. Do not edit code yet.
 
-For example, you can authorise a bounded local implementation and tests while keeping publication and merge outside scope. When its current permission already covers a step, the coordinator should not ask you to confirm that same step repeatedly.
+Or:
 
-## 4. Ask about progress
+> Implement and test this feature locally. Do not commit, push or create a PR.
 
-Use the coordinator to ask:
+Discussion, diagnosis, plan preparation and PR drafting are not feature starts. A bug or another assignment uses the same feature-to-PR path only when you select it. Existing project restrictions and an explicitly selected local-only mode remain in effect; GitHub tracking alone never grants publication. The coordinator should not ask again for steps already covered by your current request.
 
-> What has been checked, what is blocked, and what needs my decision?
+## 4. Follow progress without driving every phase
 
-The answer should separate recorded progress from anything it cannot currently confirm. The local panel can also show plans, deliveries, and pending decisions; it must be started explicitly and is not a live view of every agent.
+The coordinator consumes worker and review results and continues covered actions without waiting for your next prompt. Ask when useful:
 
-## 5. Review the result
+> What has been checked, what is technically blocked, and what decision needs me?
 
-Expect a summary of the change, the checks actually performed, remaining limits, and the decision requested from you. A passing test or finished process is not the same as your acceptance.
+A later outage, failed check, full execution capacity or unknown process state can still stop an affected step. The coordinator records the real technical reason and continues independent work when possible. It asks you only for a concrete decision or uncovered action, not generic permission to continue. An expired credential is not proof that initial setup should be repeated in full.
 
-If something is missing, request a concrete change. If it meets the agreed goal, say that you accept it. Publication or merge still needs the relevant permission.
+The local panel shows reported plans, evidence and decisions. It is not live process telemetry, an automatic scheduler or a way to authorize work by recording a note.
+
+## 5. Decide what to do with the delivered PR
+
+Expect the actual PR URL and head/base, observed checks and required review, risk, limitations and the next decision. A published PR alone is not proof that required CI passed. After the verified PR is delivered, integration into `main` is `awaiting-human`; the feature start does not approve merge, auto-merge or a direct push to the integration branch.
+
+Request a concrete correction if something is missing. Product acceptance and permission to integrate remain separate decisions. The coordinator drives the workflow while its session and tools are available; interruptions use existing reconciliation rather than a promised background recovery service.
 
 ## Other requests to try
 
-### A clear, small change
-
-> Prepare a change to the empty-state message. Keep the layout and behaviour unchanged. Show the affected screen and how you would check it.
-
-A small task should not automatically require a long interview or a planning agent.
-
 ### A feature that needs decisions
 
-> I want a Markdown viewer. Help me decide which files it can open, what formatting it should support, and what to do with unsafe content before proposing the work.
+> I want a Markdown viewer. Help me decide which files it can open and what to do with unsafe content before proposing the work.
 
-Here the coordinator should clarify product choices and investigate technical options when needed.
+This is definition work. Unresolved product decisions belong to you; technical options should be investigated within scope. It does not publish a PR by itself.
 
 ### A bug with an unclear cause
 
 > Investigate why saving sometimes loses the last edit. Find a repeatable signal before proposing a fix, and tell me if you cannot reproduce it.
 
-Diagnosis can be separate when the uncertainty warrants it. Simple bugs can stay with the worker that fixes them.
-
-Research, planning, TDD, and deeper review are selected for the task. They are not compulsory stages for every request. See [how the factory works](reference.md).
+Diagnosis can be separate when uncertainty warrants it. Simple bugs can stay with the worker. Research, planning, TDD, E2E and deeper review are selected for the task, not compulsory phases. See [how the factory works](reference.md).

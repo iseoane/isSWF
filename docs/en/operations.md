@@ -34,6 +34,8 @@ RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 
 ## Understand the result
 
+`awaiting-human` means a specific decision is needed, whether during definition, setup, acceptance or PR integration. The record should name the question and what answer allows work to resume; a definition question does not need a delivery first. `blocked` describes a technical condition needing resolution, not automatically a request for your approval. Notes in the panel do not apply either decision; the coordinator reconciles your actual instruction.
+
 A plan status describes recorded work, not a heartbeat or a fresh GitHub query. Missing or inconsistent evidence remains unknown. A completed worker does not prove independent review, operator acceptance, publication, or merge.
 
 Before retrying interrupted work, inspect the actual process identity and partial files. Do not free claims, change stores, or invent a new job ID to bypass an unresolved writer. Execution callers require their own exact inputs, model and budget checks, and current permission. The status command and this guide grant none of them.

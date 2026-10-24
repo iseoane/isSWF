@@ -86,6 +86,17 @@ for (const name of ['security', 'performance', 'observability']) {
   assert.match(body, /does not require factory activation/u);
   assert.match(body, /text-only/iu);
 }
+const featureFlow = await read('.agents/roles/references/feature-delivery.md');
+assert.ok(skill.includes('../../roles/references/feature-delivery.md'));
+for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-pr/SKILL.md', '.agents/roles/delivery.md', '.agents/roles/references/delivery.md']) assert.ok((await read(file)).includes('feature-delivery.md'), 'Workflow consumer must link to its canonical contract: ' + file);
+for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
+assert.match(featureFlow, /configuration.*not permission|not permission on their own/iu);
+assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /Establish readiness for normal feature delivery/u);
+assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /Initialization defaults alone do not establish this readiness/u);
+const multiAgentSetup = await read('.agents/skills/isswf-setup/SKILL.md');
+for (const pattern of [/Configure the multi-agent composition/u, /enabled or conditional/u, /maximum total actors and concurrent actors/u, /correction\/review round budget/u, /dependencies or independence requirements/u, /do not create another dispatcher/u, /existing `project-setup.md`/u, /Reuse a settled composition/u]) assert.match(multiAgentSetup, pattern);
+assert.match(await read('.factory/templates/job-brief.md'), /Current feature-start or other authorization source/u);
+assert.match(await read('.factory/templates/delivery.md'), /Integration boundary/u);
 const e2e = await read('.agents/skills/isswf-e2e/SKILL.md');
 assert.match(e2e, /does not require factory activation/u);
 for (const mode of ['Create or extend', 'Run', 'Maintain or audit']) assert.ok(e2e.includes(mode));

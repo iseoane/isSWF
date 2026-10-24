@@ -40,7 +40,7 @@ const checkpoint = () => { run('git', ['-C', project, 'add', '.']); run('git', [
 let keep = false;
 try {
   run('git', ['clone', '-q', '--shared', source, fixture]);
-  for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
+  for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
   const revisionA = commit('Fixture installable release A');
   const releaseA = join(temp, 'release-a');
   run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revisionA, '--output', releaseA, '--runtime', 'node']);
@@ -50,6 +50,17 @@ try {
   const legacyMethodology = '37a56ebc902e94f21fc10666f33fceac44946af7';
   assert.match(readReleaseSource(releaseA, revisionA, '.agents/roles/references/design-principles.md').toString(), /^# Design principles/u);
   assert.match(readReleaseSource(releaseA, legacyMethodology, '.agents/roles/references/design-principles.md').toString(), /^# Principios de diseño/u);
+  const markdownStore = join(temp, 'markdown-packages');
+  run(process.execPath, [join(source, 'tools/factory-package.mjs'), 'materialize', '--source', fixture, '--revision', revisionA, '--store', markdownStore]);
+  const { verifyPackage } = await import(pathToFileURL(join(source, 'tools/factory-package.mjs')));
+  const markdownRoot = join(markdownStore, revisionA), workflowPath = '.agents/roles/references/feature-delivery.md';
+  await verifyPackage(markdownRoot, revisionA);
+  const workflow = await readFile(join(source, workflowPath));
+  assert.deepEqual(await readFile(join(markdownRoot, workflowPath)), workflow, 'Materialized coordinator must receive its selected feature workflow');
+  await rm(join(markdownRoot, workflowPath));
+  await assert.rejects(verifyPackage(markdownRoot, revisionA), /ENOENT/u);
+  await writeFile(join(markdownRoot, workflowPath), workflow, { mode: 0o444 });
+  await verifyPackage(markdownRoot, revisionA);
   const rootManifest = await readJSON(join(releaseA, 'package.json'));
   assert.equal(rootManifest.version, (await readJSON(join(releaseA, '.claude-plugin/plugin.json'))).version);
   assert.equal(await readdir(releaseA).then(entries => entries.includes('.git')), false);
@@ -61,6 +72,10 @@ try {
   for (const [sha, entries] of Object.entries(receiptA.sources)) for (const path of Object.keys(entries)) assert.ok(readReleaseSource(releaseA, sha, path).length);
   assert.throws(() => readReleaseSource(releaseA, '0'.repeat(40), '.agents/roles/worker.md'), /missing/u);
   for (const module of ['planner-task', 'reviewer-task', 'diagnostic-task', 'researcher-task', 'pi-worker-task']) await import(pathToFileURL(join(releaseA, 'tools', module + '.mjs')));
+  for (const name of ['job-brief', 'delivery']) {
+    const path = '.factory/templates/' + name + '.md';
+    assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Current working-tree templates must be packaged, not silently taken from earlier HEAD');
+  }
   const packageFiles = await inventory(releaseA);
   const packed = JSON.parse(run('npm', ['pack', releaseA, '--ignore-scripts', '--json', '--pack-destination', temp]).stdout);
   const packedEntry = Array.isArray(packed) ? packed[0] : Object.values(packed)[0];
@@ -83,6 +98,7 @@ try {
     'skills/isswf-retrospective/SKILL.md',
     '.agents/skills/isswf-tdd/SKILL.md',
     'skills/isswf-tdd/SKILL.md',
+    '.agents/roles/references/feature-delivery.md',
     '.agents/roles/references/retrospective.md',
     '.factory/templates/retrospective.md',
     '.agents/skills/isswf-e2e/SKILL.md',

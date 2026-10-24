@@ -49,6 +49,14 @@ La referencia compartida de diseño también cubre el lenguaje del dominio, las 
 
 Las skills ofrecen tareas que se pueden solicitar por separado y tienen un resultado observable. Las referencias de los roles aportan orientación condicional dentro de esas tareas, como los principios de diseño, la calidad de las pruebas o los permisos. Se mantienen como referencias, en vez de convertirse en flujos independientes obligatorios. Si una guía incorpora más adelante una entrada propia, conserva sus reglas detalladas en un único recurso canónico, sin copiarlas a una segunda skill.
 
+## Entrega de funcionalidades por defecto
+
+En un proyecto preparado, una petición real del operador para iniciar o implementar una funcionalidad selecciona el recorrido dirigido por el coordinador: implementación, comprobaciones, revisión necesaria y correcciones, commit y push de la rama de funcionalidad, creación o actualización de la PR, CI requerida sobre su cabeza exacta y entrega de la PR. No necesitas autorizar de nuevo esos mismos pasos cubiertos en cada fase. La petición actual aporta la autorización acotada; la política de configuración, una etiqueta o una prueba que pasa no la conceden por sí solas. Las restricciones de solo preparación, solo lectura, trabajo local y las políticas explícitas del proyecto prevalecen. Otros tipos de encargo usan este recorrido solo cuando se selecciona.
+
+La configuración resuelve las elecciones estables de runtime y modelos, presupuestos de ejecución, espacios de trabajo, comprobaciones y destino antes del trabajo normal. Siguen siendo necesarias las comprobaciones posteriores de disponibilidad e integridad. Una decisión de definición o configuración que solo resuelve una persona queda en `awaiting-human` con una pregunta concreta; una espera técnica se registra como bloqueo técnico, no como aprobación genérica. La PR verificada y entregada también queda en `awaiting-human` para integrarla en `main` o la base seleccionada. No se incluyen merge, auto-merge, push directo a la rama de integración, despliegues ni releases.
+
+El coordinador mantiene esa continuidad mediante las herramientas existentes; que termine un ayudante limitado a preparar material no es motivo para esperar otro mensaje. No se añade un servicio en segundo plano, un planificador automático ni una promesa de recuperación con la sesión cerrada. Consulta [tu primera petición](getting-started.md) y el [contrato para agentes](../../.agents/roles/references/feature-delivery.md).
+
 ## Personas y agentes
 
 Tú decides el objetivo de producto y lo que está permitido. El coordinador mantiene el plan y elige apoyo cuando resulta útil:
@@ -60,6 +68,8 @@ Tú decides el objetivo de producto y lo que está permitido. El coordinador man
 | Planner | Propone unidades de trabajo útiles y sus dependencias. |
 | Diagnostician | Investiga un error cuya causa no está clara. |
 | Reviewer | Evalúa el cambio y sus evidencias de forma independiente cuando hace falta ese juicio. |
+
+Setup configura la composición de agentes además de los modelos y el esfuerzo. Registra los roles habilitados o condicionales, sus condiciones de selección, los ejecutores compatibles y límites de herramientas, los máximos de actores totales y simultáneos, los presupuestos de corrección y revisión y los requisitos de independencia en el registro de configuración existente del proyecto. Las combinaciones incompatibles quedan pendientes en vez de usar otro dispatcher sin avisar. La composición acordada se reutiliza; cada encargo sigue necesitando su autorización concreta.
 
 Son responsabilidades, no una secuencia obligatoria ni una promesa de que todos los entornos puedan ejecutar todos los roles. Un encargo claro puede seguir un camino corto. Si hay más incertidumbre, puede necesitar preguntas o investigación antes de empezar.
 
