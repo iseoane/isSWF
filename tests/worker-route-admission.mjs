@@ -25,7 +25,7 @@ const commit = message => { git('add', '-A'); git('commit', '-m', message); retu
 const readJSON = async path => JSON.parse(await readFile(path, 'utf8'));
 try {
   await mkdir(fixture, { recursive: true });
-  for (const path of ['.agents/skills/isswf-coordinator', '.agents/skills/isswf-setup', '.agents/skills/isswf-writing', '.agents/skills/isswf-understanding', '.agents/skills/isswf-pr', '.agents/skills/isswf-issue', '.agents/skills/isswf-e2e', '.agents/skills/isswf-debug', '.agents/skills/isswf-review', '.agents/skills/isswf-retrospective', '.agents/skills/isswf-tdd', '.agents/roles', 'docs/model-routing.md', 'docs/durable-work.md', '.factory/templates', '.factory/models.json', 'package.json']) {
+  for (const path of ['.agents/skills/isswf-coordinator', '.agents/skills/isswf-setup', '.agents/skills/isswf-writing', '.agents/skills/isswf-understanding', '.agents/skills/isswf-pr', '.agents/skills/isswf-issue', '.agents/skills/isswf-e2e', '.agents/skills/isswf-debug', '.agents/skills/isswf-review', '.agents/skills/isswf-retrospective', '.agents/skills/isswf-tdd', '.agents/skills/isswf-security', '.agents/skills/isswf-performance', '.agents/skills/isswf-observability', '.agents/roles', 'docs/model-routing.md', 'docs/durable-work.md', '.factory/templates', '.factory/models.json', 'package.json']) {
     await mkdir(dirname(join(fixture, path)), { recursive: true });
     await cp(join(source, path), join(fixture, path), { recursive: true });
   }

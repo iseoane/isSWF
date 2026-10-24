@@ -19,6 +19,9 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | `isswf-review` | Review an exact candidate against Standards and Spec with proportionate evidence. |
 | `isswf-retrospective` | Learn from completed features or bugs, or an explicit session close, through local improvement drafts. |
 | `isswf-tdd` | Use an observed red-green-refactor loop for explicitly requested TDD or a selected useful regression seam. |
+| `isswf-security` | Model threats, assess a bounded security surface or implement explicitly authorized hardening. |
+| `isswf-performance` | Diagnose measured slowness, evaluate a performance budget or optimize a demonstrated bottleneck. |
+| `isswf-observability` | Design, assess or implement focused logs, metrics, traces and alerts with privacy and cost limits. |
 
 In Pi, invoke them with `/skill:`. In Claude Code, use `/isswf:`. There is also a source-only `isswf-triage` skill for the historical intake prototypes; it is not a normal entry point in the complete installed package.
 
@@ -37,6 +40,12 @@ The debug, review, retrospective and TDD skills expose existing procedures witho
 Code review starts from the accepted behavior and relevant tests before tracing the implementation and affected consumers. It examines the resulting structure, prioritises evidence-backed findings by impact, and checks dependency changes at their installation boundary. A targeted fault-injection experiment is optional and requires an authorized disposable copy; it never modifies the reviewed candidate or gives a text-only reviewer tools. A coverage gap is distinct from a defect in the unchanged candidate.
 
 Installed workers receive the pinned debug and TDD skills as read-only methodology alongside E2E when the release supplies them. Native diagnostic and review callers include their selected skill from the same methodology checkpoint as their role; historical pins keep their original resources. Text-only callers do not gain tools, global skills or parent integrations. These resources do not add a retrospective dispatcher or change host isolation guarantees.
+
+Security, performance and observability are optional specialised workflows, not extra stages for every job. Use `/skill:isswf-security`, `/skill:isswf-performance` or `/skill:isswf-observability` in Pi, or the same names under `/isswf:` in Claude Code. Security starts with assets, trust boundaries and plausible abuse; it does not authorize exploitation or certify compliance. Performance requires a correctness-checked baseline and comparable measurements before a speedup claim. Observability starts from operational questions and bounds sensitive fields, metric cardinality, export and retention. It does not turn telemetry into proof of current process state.
+
+The applicable coordinator and role profiles select these resources conditionally. New installed workers receive them as pinned read-only methodology; text-only diagnostic/review callers receive selected resources from the same checkpoint as their role, and planners receive the selected design reference. Historical checkpoints retain their original resources. A supplied skill does not add tools, production access or provider permission.
+
+The shared design reference also covers domain language, useful interfaces, resulting complexity and significant decision records. It preserves each target's glossary and existing decision mechanism; it does not require a new architecture skill, an ADR for every choice or renamed persisted fields.
 
 Skills expose independently requested tasks with an observable outcome. Role references supply conditional guidance inside those tasks, such as design principles, test quality and permissions. They remain references rather than becoming mandatory standalone workflows. If a guide later gains its own entry point, keep the detailed rules in one canonical resource instead of copying them into a second skill.
 

@@ -50,9 +50,9 @@ assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
 assert.doesNotMatch(docs, /A00[1-3]|2\.1\.299|bounded live validation/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
-assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd']);
+assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability']);
 assert.deepEqual(piManifest.bin, { isswf: 'tools/isswf.mjs' });
-for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd']) {
+for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-security', 'isswf-performance', 'isswf-observability']) {
   assert.ok(piManifest.files.includes(`.agents/skills/${name}`));
   assert.ok(manifest.skills.includes(`./skills/${name}`));
   const body = await read(`.agents/skills/${name}/SKILL.md`);
@@ -78,6 +78,13 @@ for (const [name, role, reference] of [
   assert.ok(body.includes('../../roles/references/' + reference + '.md'));
   assert.match(body, /does not require factory activation/u);
   assert.match(body, /Missing required evidence or capability/u);
+}
+for (const name of ['security', 'performance', 'observability']) {
+  assert.ok(skill.includes('../isswf-' + name + '/SKILL.md'));
+  for (const role of ['worker', 'reviewer', 'diagnostician']) assert.ok((await read('.agents/roles/' + role + '.md')).includes('../skills/isswf-' + name + '/SKILL.md'));
+  const body = await read('.agents/skills/isswf-' + name + '/SKILL.md');
+  assert.match(body, /does not require factory activation/u);
+  assert.match(body, /text-only/iu);
 }
 const e2e = await read('.agents/skills/isswf-e2e/SKILL.md');
 assert.match(e2e, /does not require factory activation/u);

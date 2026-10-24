@@ -19,6 +19,9 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-review` | Revisar un candidato exacto frente a Standards y Spec con evidencias proporcionadas al riesgo. |
 | `isswf-retrospective` | Aprender de funcionalidades o errores terminados, o de un cierre explícito de sesión, mediante borradores locales de mejora. |
 | `isswf-tdd` | Aplicar un ciclo observado de rojo-verde-refactorización cuando se solicita TDD o se selecciona una prueba de regresión útil. |
+| `isswf-security` | Modelar amenazas, evaluar una superficie de seguridad acotada o implementar refuerzos autorizados explícitamente. |
+| `isswf-performance` | Diagnosticar lentitud medida, evaluar un presupuesto de rendimiento u optimizar un cuello de botella demostrado. |
+| `isswf-observability` | Diseñar, evaluar o implementar logs, métricas, trazas y alertas concretos con límites de privacidad y coste. |
 
 En Pi se invocan con `/skill:`. En Claude Code, con `/isswf:`. También existe `isswf-triage` en el código fuente para los prototipos históricos de entrada de issues; no es una entrada habitual del paquete completo instalado.
 
@@ -37,6 +40,12 @@ Las skills de depuración, revisión, retrospectiva y TDD dan acceso a los proce
 La revisión de código parte del comportamiento aceptado y de las pruebas pertinentes antes de seguir la implementación y sus consumidores. Examina la estructura resultante, prioriza los hallazgos respaldados por evidencias según su impacto y comprueba los cambios de dependencias en su ámbito de instalación. Un experimento puntual de inyección de fallos es opcional y requiere una copia desechable autorizada; nunca modifica el candidato revisado ni proporciona herramientas a un revisor de solo texto. Una carencia de cobertura es distinta de un defecto en el candidato sin modificar.
 
 Los workers instalados reciben las skills fijadas de depuración y TDD como metodología de solo lectura junto con E2E cuando la versión las incluye. Los callers nativos de diagnóstico y revisión incluyen su skill desde el mismo checkpoint de metodología que su perfil; los pins históricos conservan sus recursos originales. Los callers de solo texto no reciben herramientas, skills globales ni integraciones del coordinador. Estos recursos no añaden un dispatcher de retrospectivas ni cambian las garantías de aislamiento del asistente.
+
+Seguridad, rendimiento y observabilidad son procedimientos especializados opcionales, no etapas adicionales para todos los trabajos. Usa `/skill:isswf-security`, `/skill:isswf-performance` o `/skill:isswf-observability` en Pi, o los mismos nombres bajo `/isswf:` en Claude Code. Seguridad parte de los activos, las fronteras de confianza y los abusos plausibles; no autoriza ataques ni certifica cumplimiento normativo. Rendimiento requiere una línea base con resultados correctos y mediciones comparables antes de afirmar una aceleración. Observabilidad parte de preguntas operativas y limita los campos sensibles, la cardinalidad de métricas, la exportación y la retención. No convierte la telemetría en prueba del estado actual de un proceso.
+
+El coordinador y los perfiles correspondientes seleccionan estos recursos según la tarea. Los nuevos workers instalados los reciben como metodología fijada de solo lectura; los callers de diagnóstico y revisión de solo texto reciben los recursos seleccionados desde el mismo checkpoint que su perfil, y los planificadores reciben la referencia de diseño seleccionada. Los checkpoints históricos conservan sus recursos originales. Recibir una skill no añade herramientas, acceso a producción ni permiso para llamar a proveedores.
+
+La referencia compartida de diseño también cubre el lenguaje del dominio, las interfaces útiles, la complejidad resultante y los registros de decisiones significativas. Conserva el glosario y el mecanismo de decisiones de cada proyecto; no exige otra skill de arquitectura, un ADR para cada elección ni renombrar campos persistidos.
 
 Las skills ofrecen tareas que se pueden solicitar por separado y tienen un resultado observable. Las referencias de los roles aportan orientación condicional dentro de esas tareas, como los principios de diseño, la calidad de las pruebas o los permisos. Se mantienen como referencias, en vez de convertirse en flujos independientes obligatorios. Si una guía incorpora más adelante una entrada propia, conserva sus reglas detalladas en un único recurso canónico, sin copiarlas a una segunda skill.
 

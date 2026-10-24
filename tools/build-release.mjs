@@ -67,6 +67,12 @@ const fixedInventoryPaths = [
   '.agents/skills/isswf-retrospective/SKILL.md',
   'skills/isswf-tdd/SKILL.md',
   '.agents/skills/isswf-tdd/SKILL.md',
+  'skills/isswf-security/SKILL.md',
+  '.agents/skills/isswf-security/SKILL.md',
+  'skills/isswf-performance/SKILL.md',
+  '.agents/skills/isswf-performance/SKILL.md',
+  'skills/isswf-observability/SKILL.md',
+  '.agents/skills/isswf-observability/SKILL.md',
   'skills/isswf-e2e/SKILL.md',
   '.agents/skills/isswf-e2e/SKILL.md',
   '.agents/skills/isswf-e2e/references/browser.md',
@@ -88,7 +94,7 @@ function isInventoryPath(path) {
   if (path === 'tools/check-quality.mjs') return false;
   if (path.startsWith('tools/') && path.endsWith('.mjs') && !path.slice('tools/'.length).includes('/')) return true;
   if (path.startsWith('agents/') && path.endsWith('.md')) return true;
-  if (path.startsWith('skills/') || path.startsWith('.agents/skills/isswf-writing/') || path.startsWith('.agents/skills/isswf-understanding/') || path.startsWith('.agents/skills/isswf-pr/') || path.startsWith('.agents/skills/isswf-issue/') || path.startsWith('.agents/skills/isswf-e2e/') || path.startsWith('.agents/skills/isswf-debug/') || path.startsWith('.agents/skills/isswf-review/') || path.startsWith('.agents/skills/isswf-retrospective/') || path.startsWith('.agents/skills/isswf-tdd/')) return true;
+  if (path.startsWith('skills/') || path.startsWith('.agents/skills/isswf-writing/') || path.startsWith('.agents/skills/isswf-understanding/') || path.startsWith('.agents/skills/isswf-pr/') || path.startsWith('.agents/skills/isswf-issue/') || path.startsWith('.agents/skills/isswf-e2e/') || path.startsWith('.agents/skills/isswf-debug/') || path.startsWith('.agents/skills/isswf-review/') || path.startsWith('.agents/skills/isswf-retrospective/') || path.startsWith('.agents/skills/isswf-tdd/') || path.startsWith('.agents/skills/isswf-security/') || path.startsWith('.agents/skills/isswf-performance/') || path.startsWith('.agents/skills/isswf-observability/')) return true;
   if (path.startsWith('.agents/roles/')) return true;
   if (path.startsWith('.factory/templates/') && path.endsWith('.md')) return true;
   return false;
@@ -97,7 +103,7 @@ function isSourcePath(path) {
   if (path === '.factory/templates/retrospective.md') return true;
   if (path.startsWith('tools/') && path.endsWith('.mjs') && !path.slice('tools/'.length).includes('/')) return true;
   if (path.startsWith('.agents/roles/') || path.startsWith('agents/')) return true;
-  if (path.startsWith('skills/') || path.startsWith('.agents/skills/isswf-writing/') || path.startsWith('.agents/skills/isswf-understanding/') || path.startsWith('.agents/skills/isswf-pr/') || path.startsWith('.agents/skills/isswf-issue/') || path.startsWith('.agents/skills/isswf-e2e/') || path.startsWith('.agents/skills/isswf-debug/') || path.startsWith('.agents/skills/isswf-review/') || path.startsWith('.agents/skills/isswf-retrospective/') || path.startsWith('.agents/skills/isswf-tdd/')) return true;
+  if (path.startsWith('skills/') || path.startsWith('.agents/skills/isswf-writing/') || path.startsWith('.agents/skills/isswf-understanding/') || path.startsWith('.agents/skills/isswf-pr/') || path.startsWith('.agents/skills/isswf-issue/') || path.startsWith('.agents/skills/isswf-e2e/') || path.startsWith('.agents/skills/isswf-debug/') || path.startsWith('.agents/skills/isswf-review/') || path.startsWith('.agents/skills/isswf-retrospective/') || path.startsWith('.agents/skills/isswf-tdd/') || path.startsWith('.agents/skills/isswf-security/') || path.startsWith('.agents/skills/isswf-performance/') || path.startsWith('.agents/skills/isswf-observability/')) return true;
   if (['.agents/hosts/claude-code.md', '.agents/skills/isswf-coordinator/SKILL.md', '.agents/skills/isswf-setup/SKILL.md', 'docs/durable-work.md', 'docs/model-routing.md', 'docs/host-portability.md'].includes(path)) return true;
   return false;
 }
@@ -142,7 +148,7 @@ function validateManifest(bytes) {
     typeof manifest.description !== 'string' ||
     JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: 'tools/isswf.mjs' }) ||
     JSON.stringify(manifest.keywords) !== JSON.stringify(['pi-package']) ||
-    JSON.stringify(manifest.pi) !== JSON.stringify({ skills: ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd'] }) ||
+    JSON.stringify(manifest.pi) !== JSON.stringify({ skills: ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability'] }) ||
     Object.hasOwn(manifest, 'dependencies') ||
     Object.hasOwn(manifest, 'devDependencies') ||
     Object.hasOwn(manifest, 'scripts')

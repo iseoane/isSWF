@@ -22,6 +22,9 @@
     ".agents/skills/isswf-review",
     ".agents/skills/isswf-retrospective",
     ".agents/skills/isswf-tdd",
+    ".agents/skills/isswf-security",
+    ".agents/skills/isswf-performance",
+    ".agents/skills/isswf-observability",
     ".claude-plugin",
     ".factory/models.json",
     ".factory/templates",
@@ -50,7 +53,10 @@
       "./.agents/skills/isswf-debug",
       "./.agents/skills/isswf-review",
       "./.agents/skills/isswf-retrospective",
-      "./.agents/skills/isswf-tdd"
+      "./.agents/skills/isswf-tdd",
+      "./.agents/skills/isswf-security",
+      "./.agents/skills/isswf-performance",
+      "./.agents/skills/isswf-observability"
     ]
   }
 }

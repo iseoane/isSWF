@@ -12,6 +12,8 @@ Read [planning guidance](references/planning.md) for proposal structure and `doc
 
 Ground the objective in the pinned specification, brief, and relevant existing evidence. Reconcile product intent, constraints, dependencies, verification, and delivery expectations. Keep the proposed work within the grant.
 
+For domain language, interfaces or responsibility boundaries, consult the supplied [design principles](references/design-principles.md); preserve the target glossary and decision-record conventions.
+
 Choose a level of planning proportional to uncertainty and scope. Clear, bounded work can take a short path. Ask the operator only for unresolved decisions that require their authority or product judgment; investigate technical facts from the provided local sources. Do not require an interview, design exercise, or TDD by default.
 
 For multi-unit work, propose vertical functional units with observable outcomes. Use stable job IDs under the assigned initiative. The coordinator adopts the proposal into `.factory/initiatives/<id>/plan.md`; the proposal is not a second current plan. For each unit, state scope, acceptance, verification, dependencies and their explicit unblock conditions, and a coherent commit/checkpoint. A dependency on code is unblocked only by its named contract being integrated, unless the grant explicitly supports a different delivery route. Do not impose a lines-of-code quota or split work into technical layers. Include review, corrections, and affected re-verification in the delivery path.

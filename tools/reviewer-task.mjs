@@ -109,6 +109,14 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
     const path = '.agents/skills/isswf-review/SKILL.md';
     methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
   }
+  for (const name of ['security', 'performance', 'observability']) {
+    const path = `.agents/skills/isswf-${name}/SKILL.md`;
+    if (methods[0].text.includes(`../skills/isswf-${name}/SKILL.md`)) methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
+  }
+  if (methods[0].text.includes('references/design-principles.md')) {
+    const path = '.agents/roles/references/design-principles.md';
+    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
+  }
   assert(Array.isArray(job.contextPaths) && job.contextPaths.length > 0 && job.contextPaths.length <= maxContextFiles && new Set(job.contextPaths).size === job.contextPaths.length, 'explicit-standards-context-required');
   const diff = git(target, ['diff', '--binary', '--full-index', '--no-ext-diff', '--no-textconv', '--no-renames', job.targetBase, job.candidateSha, '--']);
   const changed = decode(git(target, ['diff', '--name-only', '-z', '--no-renames', job.targetBase, job.candidateSha, '--'])).split('\0').filter(Boolean);

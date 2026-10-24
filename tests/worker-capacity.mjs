@@ -20,7 +20,7 @@ try {
   const policy = JSON.stringify({ version: 1, limit: 2, reference: 'Synthetic operator-owned worker pool' });
   await writeFile(join(pool, 'policy.json'), policy);
   for (const slot of [0, 1]) await mkdir(join(pool, 'slot-' + slot));
-  for (const path of ['.agents/skills/isswf-coordinator', '.agents/skills/isswf-setup', '.agents/skills/isswf-writing', '.agents/skills/isswf-understanding', '.agents/skills/isswf-pr', '.agents/skills/isswf-issue', '.agents/skills/isswf-e2e', '.agents/skills/isswf-debug', '.agents/skills/isswf-review', '.agents/skills/isswf-retrospective', '.agents/skills/isswf-tdd', '.agents/roles', '.factory/templates', '.factory/models.json', 'docs/model-routing.md', 'docs/durable-work.md', 'package.json']) {
+  for (const path of ['.agents/skills/isswf-coordinator', '.agents/skills/isswf-setup', '.agents/skills/isswf-writing', '.agents/skills/isswf-understanding', '.agents/skills/isswf-pr', '.agents/skills/isswf-issue', '.agents/skills/isswf-e2e', '.agents/skills/isswf-debug', '.agents/skills/isswf-review', '.agents/skills/isswf-retrospective', '.agents/skills/isswf-tdd', '.agents/skills/isswf-security', '.agents/skills/isswf-performance', '.agents/skills/isswf-observability', '.agents/roles', '.factory/templates', '.factory/models.json', 'docs/model-routing.md', 'docs/durable-work.md', 'package.json']) {
     await mkdir(dirname(join(project, path)), { recursive: true }); await cp(join(source, path), join(project, path), { recursive: true });
   }
   await mkdir(join(project, 'tools'));

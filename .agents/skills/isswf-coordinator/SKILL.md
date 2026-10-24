@@ -38,6 +38,9 @@ Classify what this assignment needs and briefly explain why:
 - Use [isswf-review](../isswf-review/SKILL.md) to prepare or perform scoped Standards/Spec assessment. Preserve the independence and supported-dispatch requirements below; a skill invocation does not create an independent reviewer.
 - Use [isswf-tdd](../isswf-tdd/SKILL.md) for explicitly requested TDD or a selected cheap, useful behavioral regression seam. Do not make TDD a universal stage.
 - Use [isswf-retrospective](../isswf-retrospective/SKILL.md) after completed features or bugs and at an explicit operator session close. Keep active work and policy unchanged; a chat ending alone is not session close.
+- Use [isswf-security](../isswf-security/SKILL.md) for a scoped threat model, security assessment or authorized hardening when trust boundaries, access or sensitive data warrant it. The skill does not authorize active scans or certify security.
+- Use [isswf-performance](../isswf-performance/SKILL.md) for observed slowness, an explicit budget or a representative comparison. Require correctness and comparable measurements before accepting a speedup claim.
+- Use [isswf-observability](../isswf-observability/SKILL.md) for focused instrumentation questions, proposals or authorized changes. Bound privacy, cardinality, export and retention; telemetry does not establish worker liveness or lifecycle authority.
 - Use design, external research, or additional review only when a concrete risk or uncertainty warrants it.
 
 Current code determines existing behavior. The approved brief and acceptance criteria determine desired behavior. Investigate differences before proposing changes; do not narrow the objective to match the code.

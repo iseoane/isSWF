@@ -77,6 +77,10 @@ export async function preparePlanProposal({ project, store, inputSha, jobPath, g
   assert(hash(models) === job.models.sha256 && equal(JSON.parse(decode(models)).roles?.planner, route) && equal(grant.approvedRoute, route), 'fixed-planner-route-required');
   assert(sha(job.methodologySha), 'own-methodology-checkpoint-required');
   const methods = profilePaths.map(path => ({ path, text: decode(blob(source, job.methodologySha, path)) }));
+  if (methods[0].text.includes('references/design-principles.md')) {
+    const path = '.agents/roles/references/design-principles.md';
+    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
+  }
   assert(Array.isArray(job.contextPaths) && job.contextPaths.length > 0 && job.contextPaths.length <= 20 && new Set(job.contextPaths).size === job.contextPaths.length, 'explicit-spec-grounding-context-required');
   const context = job.contextPaths.map(path => ({ path, checkpoint: inputSha, text: decode(blob(project, inputSha, path)) }));
   const brief = decode(blob(project, inputSha, job.briefPath));

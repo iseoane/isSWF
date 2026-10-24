@@ -17,7 +17,7 @@ If an essential input is missing, inspect what is available and report the gap. 
 
 ## Review
 
-Use [isswf-review](../skills/isswf-review/SKILL.md) from the supplied pinned methodology. In a text-only execution, its procedure applies to supplied evidence; it does not provide workspace tools or another delegation path.
+Use [isswf-review](../skills/isswf-review/SKILL.md) from the supplied pinned methodology. In a text-only execution, its procedure applies to supplied evidence; it does not provide workspace tools or another delegation path. For scoped security, performance or telemetry risks, use supplied [isswf-security](../skills/isswf-security/SKILL.md), [isswf-performance](../skills/isswf-performance/SKILL.md) or [isswf-observability](../skills/isswf-observability/SKILL.md). For changed interfaces or domain models, consult [design principles](references/design-principles.md). These resources refine the assigned review, not its permissions or required scope.
 
 1. Confirm the base SHA and candidate identity. For a snapshot candidate, verify its digest against the retained snapshot package, then review exactly that package. Check that its diff and paths remain in scope. Do not require or invent a candidate commit.
 2. Check the selected mode against [sufficient verification](references/review.md#choose-sufficient-verification). Read only the sources and evidence needed for the scoped criteria and risks; unchanged payloads do not need semantic rereading merely because they are numerous.
