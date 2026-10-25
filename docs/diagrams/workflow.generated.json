@@ -1,0 +1,15 @@
+{
+  "sourceSha256": "d5ad09711794f287a6c3bb5763d3a61409c334f81efbabfc4e7426611a08b927",
+  "artifacts": {
+    "en": {
+      "specificationSha256": "904eada3e3fd6e93f1a74dbb04ac9e6f1e4596a83cf16139b3be9a109def036f",
+      "htmlSha256": "2904cfb37d42e0b84b7c3990b3f2d5fccb67412bf3bf4d21b52f36d0c4a08c0d",
+      "svgSha256": "b09979ac4e293e839504858b34b8f629e35b381c93067c5efaf41fd903b0e6db"
+    },
+    "es": {
+      "specificationSha256": "339611bb61974fd76dd654f0d4eb8de4ddb7e6e91bd60d18048eba8614f53af4",
+      "htmlSha256": "155fb4947aff0d40ddd508cbb8ac83ee7925e6b3d69ed79f4a6f3941fa7e031c",
+      "svgSha256": "4e91375060430e8c6268642455b48d00cf449ce8cc3cd08c9ff3ce2216545f5b"
+    }
+  }
+}

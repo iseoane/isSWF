@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="760" viewBox="0 0 1140 760" role="img" aria-labelledby="title description" xml:lang="en">
+<title id="title">How isSWF turns a request into a reviewed PR</title>
+<desc id="description">The coordinator selects help, verifies the result and delivers the PR. A human decides integration. Optional roles depend on the task. Checks and required review apply to the exact candidate. Merge needs explicit human approval.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#94a3b8"/></marker></defs>
+<rect width="1140" height="760" rx="16" fill="#0f172a"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="30" y="38" fill="#f8fafc" font-size="24" font-weight="700">How isSWF turns a request into a reviewed PR</text>
+<text x="30" y="64" fill="#cbd5e1" font-size="15">The coordinator selects help, verifies the result and delivers the PR. A human decides integration.</text>
+<text x="30" y="94" fill="#cbd5e1" font-size="15" font-weight="700">1. Define the work</text>
+<rect x="30" y="110" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="46" y="136" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR</text>
+<text x="46" y="165" fill="#f8fafc" font-size="19" font-weight="700">Triage and decisions</text>
+<text x="46" y="191" fill="#cbd5e1" font-size="14">Clarify scope and permissions</text>
+<text x="46" y="213" fill="#cbd5e1" font-size="14">Ask only for human decisions</text>
+<path d="M357 173H403" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="410" y="110" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="426" y="136" fill="#67e8f9" font-size="13" font-weight="700">RESEARCHER · DIAGNOSTICIAN</text>
+<text x="426" y="165" fill="#f8fafc" font-size="19" font-weight="700">Research or diagnosis</text>
+<text x="426" y="191" fill="#cbd5e1" font-size="14">Optional help for unknown facts</text>
+<text x="426" y="213" fill="#cbd5e1" font-size="14">Findings return to the coordinator</text>
+<path d="M737 173H783" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="790" y="110" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="806" y="136" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR · PLANNER</text>
+<text x="806" y="165" fill="#f8fafc" font-size="19" font-weight="700">Brief and plan</text>
+<text x="806" y="191" fill="#cbd5e1" font-size="14">Acceptance, limits and checks</text>
+<text x="806" y="213" fill="#cbd5e1" font-size="14">Planner proposes when needed</text>
+<path d="M950 244V270H15V383H28" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="30" y="304" fill="#cbd5e1" font-size="15" font-weight="700">2. Build and verify</text>
+<rect x="30" y="320" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="46" y="346" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR · WORKER</text>
+<text x="46" y="375" fill="#f8fafc" font-size="19" font-weight="700">Preflight and implementation</text>
+<text x="46" y="401" fill="#cbd5e1" font-size="14">Admit authorized work, then build</text>
+<text x="46" y="423" fill="#cbd5e1" font-size="14">Use relevant skills and references</text>
+<path d="M357 383H403" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="410" y="320" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="426" y="346" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR · REVIEWER</text>
+<text x="426" y="375" fill="#f8fafc" font-size="19" font-weight="700">Checks and corrections</text>
+<text x="426" y="401" fill="#cbd5e1" font-size="14">Independent review when required</text>
+<text x="426" y="423" fill="#cbd5e1" font-size="14">Correct and reverify affected work</text>
+<path d="M737 383H783" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="790" y="320" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="806" y="346" fill="#67e8f9" font-size="13" font-weight="700">DELIVERY · COORDINATOR</text>
+<text x="806" y="375" fill="#f8fafc" font-size="19" font-weight="700">Prepare delivery</text>
+<text x="806" y="401" fill="#cbd5e1" font-size="14">Evidence, PR draft and risk</text>
+<text x="806" y="423" fill="#cbd5e1" font-size="14">Preparation is not publication</text>
+<path d="M950 454V480H15V593H28" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="30" y="514" fill="#cbd5e1" font-size="15" font-weight="700">3. Deliver the PR and decide integration</text>
+<rect x="30" y="530" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="46" y="556" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR</text>
+<text x="46" y="585" fill="#f8fafc" font-size="19" font-weight="700">Commit, push and PR</text>
+<text x="46" y="611" fill="#cbd5e1" font-size="14">Publish only within the grant</text>
+<text x="46" y="633" fill="#cbd5e1" font-size="14">Local-only work stays local</text>
+<path d="M357 593H403" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="410" y="530" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
+<text x="426" y="556" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR · CI</text>
+<text x="426" y="585" fill="#f8fafc" font-size="19" font-weight="700">CI on the exact head</text>
+<text x="426" y="611" fill="#cbd5e1" font-size="14">Inspect required CI results</text>
+<text x="426" y="633" fill="#cbd5e1" font-size="14">Failures return to correction</text>
+<path d="M737 593H783" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="790" y="530" width="320" height="126" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="806" y="556" fill="#fbbf24" font-size="13" font-weight="700">HUMAN</text>
+<text x="806" y="585" fill="#f8fafc" font-size="19" font-weight="700">Human approval and merge</text>
+<text x="806" y="611" fill="#cbd5e1" font-size="14">Explicit approval for this candidate</text>
+<text x="806" y="633" fill="#cbd5e1" font-size="14">Retrospective proposes improvements</text>
+<text x="30" y="710" fill="#cbd5e1" font-size="14">Optional roles depend on the task. Checks and required review apply to the exact candidate. Merge needs explicit human approval.</text>
+</g></svg>

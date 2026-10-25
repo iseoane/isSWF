@@ -1,0 +1,2617 @@
+{
+  "workflow": {
+    "schema_version": 2,
+    "diagram_type": "workflow",
+    "meta": {
+      "title": {
+        "en": "isSWF · from triage to human-approved merge",
+        "es": "isSWF · del triage al merge aprobado por una persona"
+      },
+      "quality_profile": "showcase",
+      "repository": {
+        "url": "https://github.com/iseoane/isSWF.git",
+        "revision": "4b57aebbf323e36d2ca1e142379982942e4d758f"
+      },
+      "legend": {
+        "entries": {
+          "backend": {
+            "label": {
+              "en": "Agent / role",
+              "es": "Agente / rol"
+            }
+          },
+          "cloud": {
+            "label": {
+              "en": "Activity or tool",
+              "es": "Actividad o herramienta"
+            }
+          },
+          "database": {
+            "label": {
+              "en": "Reference or evidence",
+              "es": "Referencia o evidencia"
+            }
+          },
+          "messagebus": {
+            "label": {
+              "en": "Skill or connector",
+              "es": "Skill o conector"
+            }
+          },
+          "security": {
+            "label": {
+              "en": "Control / decision",
+              "es": "Control / decisión"
+            }
+          },
+          "external": {
+            "label": {
+              "en": "Person or external input",
+              "es": "Persona o entrada externa"
+            }
+          }
+        }
+      }
+    },
+    "lanes": [
+      {
+        "id": "entrada",
+        "label": {
+          "en": "01 · Coordinator · intake and triage",
+          "es": "01 · Coordinador · entrada y triage"
+        }
+      },
+      {
+        "id": "decision",
+        "label": {
+          "en": "02 · Triage branches and human decisions",
+          "es": "02 · Variantes de triage y decisión humana"
+        }
+      },
+      {
+        "id": "ref_coord",
+        "label": {
+          "en": "02R · COORDINATOR references · selected for the task",
+          "es": "02R · COORDINADOR consulta · principios según el trabajo"
+        }
+      },
+      {
+        "id": "grounding",
+        "label": {
+          "en": "03 · Research or diagnosis, when needed",
+          "es": "03 · Investigación o diagnóstico, si hacen falta"
+        }
+      },
+      {
+        "id": "ref_ground",
+        "label": {
+          "en": "03R · RESEARCHER / DIAGNOSTICIAN references · not more agents",
+          "es": "03R · RESEARCHER / DIAGNOSTICIAN consultan · no son nuevos agentes"
+        }
+      },
+      {
+        "id": "plan",
+        "label": {
+          "en": "04 · Coordinator and planner · define the work",
+          "es": "04 · Coordinador y planner · definición del trabajo"
+        }
+      },
+      {
+        "id": "ref_plan",
+        "label": {
+          "en": "04R · PLANNER and COORDINATOR references",
+          "es": "04R · PLANNER y COORDINADOR consultan"
+        }
+      },
+      {
+        "id": "preflight",
+        "label": {
+          "en": "05 · Coordinator · admission and execution limits",
+          "es": "05 · Coordinador · admisión y límites de ejecución"
+        }
+      },
+      {
+        "id": "implement",
+        "label": {
+          "en": "06 · Worker · functional unit and checks",
+          "es": "06 · Worker · unidad funcional y comprobaciones"
+        }
+      },
+      {
+        "id": "ref_worker",
+        "label": {
+          "en": "06R · WORKER references · comments and quality for code changes",
+          "es": "06R · WORKER consulta · comentarios y calidad en cambios de código"
+        }
+      },
+      {
+        "id": "verify",
+        "label": {
+          "en": "07 · Coordinator and reviewer · proportionate verification",
+          "es": "07 · Coordinador y reviewer · verificación proporcional"
+        }
+      },
+      {
+        "id": "ref_review",
+        "label": {
+          "en": "07R · REVIEWER references · criteria, risks and behavior",
+          "es": "07R · REVIEWER consulta · criterios, riesgos y comportamiento"
+        }
+      },
+      {
+        "id": "findings",
+        "label": {
+          "en": "08 · Coordinator · findings and corrections",
+          "es": "08 · Coordinador · hallazgos y correcciones"
+        }
+      },
+      {
+        "id": "delivery",
+        "label": {
+          "en": "09 · Delivery · prepare evidence",
+          "es": "09 · Delivery · preparación de evidencia"
+        }
+      },
+      {
+        "id": "ref_delivery",
+        "label": {
+          "en": "09R · DELIVERY and COORDINATOR references · one risk assessment",
+          "es": "09R · DELIVERY y COORDINADOR consultan · una evaluación de riesgo"
+        }
+      },
+      {
+        "id": "publish",
+        "label": {
+          "en": "10 · Coordinator · commit, push and PR",
+          "es": "10 · Coordinador · commit, push y PR"
+        }
+      },
+      {
+        "id": "ci",
+        "label": {
+          "en": "11 · Coordinator and CI provider · exact head",
+          "es": "11 · Coordinador y proveedor CI · head exacto"
+        }
+      },
+      {
+        "id": "human",
+        "label": {
+          "en": "12 · Human · integration decision",
+          "es": "12 · Humano · decisión de integración"
+        }
+      },
+      {
+        "id": "close",
+        "label": {
+          "en": "13 · Authorized integration and retrospective",
+          "es": "13 · Integración autorizada y retrospectiva"
+        }
+      },
+      {
+        "id": "ref_retro",
+        "label": {
+          "en": "13R · RETROSPECTIVE references · proposals return to triage",
+          "es": "13R · RETROSPECTIVE consulta · las propuestas vuelven a triage"
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "id": "request",
+        "lane": "entrada",
+        "col": 0,
+        "type": "external",
+        "label": {
+          "en": "Request or issue",
+          "es": "Petición o issue"
+        },
+        "sublabel": {
+          "en": "Local or authorized GitHub input",
+          "es": "Local o GitHub autorizado"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 15,
+            "end_line": 23
+          }
+        ]
+      },
+      {
+        "id": "triage",
+        "lane": "entrada",
+        "col": 2,
+        "type": "backend",
+        "label": {
+          "en": "COORDINATOR",
+          "es": "COORDINADOR"
+        },
+        "sublabel": {
+          "en": "Classifies and directs the work",
+          "es": "Clasifica y dirige el trabajo"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 33,
+            "end_line": 52
+          }
+        ],
+        "tag": {
+          "en": "AGENT · isswf-coordinator",
+          "es": "AGENTE · isswf-coordinator"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "intake",
+        "lane": "entrada",
+        "col": 4,
+        "type": "cloud",
+        "label": {
+          "en": "Prepare the brief",
+          "es": "Preparar el brief"
+        },
+        "sublabel": {
+          "en": "Issue or local request",
+          "es": "Issue o petición local"
+        },
+        "sources": [
+          {
+            "path": "docs/issue-intake.md",
+            "line": 5,
+            "end_line": 19
+          }
+        ],
+        "tag": {
+          "en": "isswf-intake.mjs",
+          "es": "isswf-intake.mjs"
+        }
+      },
+      {
+        "id": "resolved",
+        "lane": "decision",
+        "col": 0,
+        "type": "database",
+        "label": {
+          "en": "No implementation",
+          "es": "Sin implementación"
+        },
+        "sublabel": {
+          "en": "Duplicate or already present, with proof",
+          "es": "Duplicado o ya existente, con prueba"
+        },
+        "sources": [
+          {
+            "path": "docs/issue-intake.md",
+            "line": 27,
+            "end_line": 35
+          }
+        ]
+      },
+      {
+        "id": "ready",
+        "lane": "decision",
+        "col": 2,
+        "type": "security",
+        "label": {
+          "en": "Clear next step",
+          "es": "Siguiente paso claro"
+        },
+        "sublabel": {
+          "en": "ready-for-agent is not permission",
+          "es": "ready-for-agent no es permiso"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 149,
+            "end_line": 166
+          }
+        ]
+      },
+      {
+        "id": "question",
+        "lane": "decision",
+        "col": 4,
+        "type": "external",
+        "label": {
+          "en": "Pending human decision",
+          "es": "Decisión pendiente"
+        },
+        "sublabel": {
+          "en": "needs-info / ready-for-human",
+          "es": "needs-info / ready-for-human"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 15,
+            "end_line": 19
+          }
+        ],
+        "tag": {
+          "en": "awaiting-human",
+          "es": "awaiting-human"
+        }
+      },
+      {
+        "id": "research",
+        "lane": "grounding",
+        "col": 0,
+        "type": "backend",
+        "label": {
+          "en": "RESEARCHER",
+          "es": "RESEARCHER"
+        },
+        "sublabel": {
+          "en": "Researches and returns evidence",
+          "es": "Investiga y entrega evidencia"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/researcher.md",
+            "line": 1,
+            "end_line": 38
+          }
+        ],
+        "tag": {
+          "en": "AGENT · researcher.md · optional",
+          "es": "AGENTE · researcher.md · opcional"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "ground",
+        "lane": "grounding",
+        "col": 2,
+        "type": "cloud",
+        "label": {
+          "en": "Resolve uncertainty",
+          "es": "Resolver incertidumbre"
+        },
+        "sublabel": {
+          "en": "Investigate facts, do not invent them",
+          "es": "Investigar hechos, no inventarlos"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 33,
+            "end_line": 52
+          }
+        ],
+        "tag": {
+          "en": "OWNER · coordinator",
+          "es": "RESPONSABLE · coordinador"
+        }
+      },
+      {
+        "id": "diagnosis",
+        "lane": "grounding",
+        "col": 4,
+        "type": "backend",
+        "label": {
+          "en": "DIAGNOSTICIAN",
+          "es": "DIAGNOSTICIAN"
+        },
+        "sublabel": {
+          "en": "Diagnoses, does not implement by default",
+          "es": "Diagnostica; no implementa por defecto"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/diagnostician.md",
+            "line": 1,
+            "end_line": 22
+          }
+        ],
+        "tag": {
+          "en": "AGENT · diagnostician.md · optional",
+          "es": "AGENTE · diagnostician.md · opcional"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "proposal",
+        "lane": "plan",
+        "col": 0,
+        "type": "backend",
+        "label": {
+          "en": "PLANNER",
+          "es": "PLANNER"
+        },
+        "sublabel": {
+          "en": "Proposes, coordinator adopts the plan",
+          "es": "Propone; coordinador adopta el plan"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/planner.md",
+            "line": 1,
+            "end_line": 25
+          }
+        ],
+        "tag": {
+          "en": "AGENT · planner.md · optional",
+          "es": "AGENTE · planner.md · opcional"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "brief",
+        "lane": "plan",
+        "col": 2,
+        "type": "cloud",
+        "label": {
+          "en": "Canonical brief and plan",
+          "es": "Brief y plan canónicos"
+        },
+        "sublabel": {
+          "en": "Acceptance, limits, base and checkpoints",
+          "es": "Aceptación, límites, base y checkpoints"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 68,
+            "end_line": 84
+          }
+        ],
+        "tag": {
+          "en": "OWNER · coordinator",
+          "es": "RESPONSABLE · coordinador"
+        }
+      },
+      {
+        "id": "clear",
+        "lane": "plan",
+        "col": 4,
+        "type": "cloud",
+        "label": {
+          "en": "Short path",
+          "es": "Ruta corta"
+        },
+        "sublabel": {
+          "en": "No unnecessary interview or agents",
+          "es": "Sin entrevista ni agentes innecesarios"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 33,
+            "end_line": 52
+          }
+        ]
+      },
+      {
+        "id": "admit",
+        "lane": "preflight",
+        "col": 2,
+        "type": "security",
+        "label": {
+          "en": "Execution preflight",
+          "es": "Preflight de ejecución"
+        },
+        "sublabel": {
+          "en": "Grant, route, effort and capacity",
+          "es": "Grant, ruta, esfuerzo y capacidad"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 86,
+            "end_line": 110
+          }
+        ],
+        "tag": {
+          "en": "model-routing.md",
+          "es": "model-routing.md"
+        }
+      },
+      {
+        "id": "blocked",
+        "lane": "preflight",
+        "col": 4,
+        "type": "security",
+        "label": {
+          "en": "Technical blocker",
+          "es": "Bloqueo técnico"
+        },
+        "sublabel": {
+          "en": "Unknown state or missing resource",
+          "es": "Estado desconocido o recurso ausente"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 23,
+            "end_line": 33
+          }
+        ],
+        "tag": {
+          "en": "blocked ≠ awaiting-human",
+          "es": "blocked ≠ awaiting-human"
+        }
+      },
+      {
+        "id": "worker",
+        "lane": "implement",
+        "col": 2,
+        "type": "backend",
+        "label": {
+          "en": "WORKER",
+          "es": "WORKER"
+        },
+        "sublabel": {
+          "en": "Implements and tests the unit",
+          "es": "Implementa y prueba la unidad"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/worker.md",
+            "line": 1,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "AGENT · worker.md",
+          "es": "AGENTE · worker.md"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "tools",
+        "lane": "implement",
+        "col": 0,
+        "type": "messagebus",
+        "label": {
+          "en": "Skills selected by risk",
+          "es": "Skills según el riesgo"
+        },
+        "sublabel": {
+          "en": "debug · tdd · e2e · writing",
+          "es": "debug · tdd · e2e · writing"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 33,
+            "end_line": 52
+          }
+        ],
+        "tag": {
+          "en": "Not additional agents",
+          "es": "No son agentes adicionales"
+        },
+        "icon": "briefcase"
+      },
+      {
+        "id": "special",
+        "lane": "implement",
+        "col": 4,
+        "type": "messagebus",
+        "label": {
+          "en": "Optional specialization",
+          "es": "Especialización opcional"
+        },
+        "sublabel": {
+          "en": "security · performance · observability",
+          "es": "security · performance · observability"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/worker.md",
+            "line": 20,
+            "end_line": 25
+          }
+        ],
+        "tag": {
+          "en": "Only when relevant",
+          "es": "Solo si procede"
+        },
+        "icon": "briefcase"
+      },
+      {
+        "id": "checks",
+        "lane": "verify",
+        "col": 0,
+        "type": "cloud",
+        "label": {
+          "en": "Mechanical check",
+          "es": "Comprobación mecánica"
+        },
+        "sublabel": {
+          "en": "Sufficient when it covers the risk",
+          "es": "Suficiente si cubre el riesgo"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/review.md",
+            "line": 5,
+            "end_line": 21
+          }
+        ],
+        "tag": {
+          "en": "No model call by default",
+          "es": "Sin llamada por defecto"
+        }
+      },
+      {
+        "id": "mode",
+        "lane": "verify",
+        "col": 2,
+        "type": "security",
+        "label": {
+          "en": "Select verification",
+          "es": "Seleccionar verificación"
+        },
+        "sublabel": {
+          "en": "Mechanical, semantic or combined",
+          "es": "Mecánica, semántica o combinada"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/review.md",
+            "line": 5,
+            "end_line": 21
+          }
+        ]
+      },
+      {
+        "id": "reviewer",
+        "lane": "verify",
+        "col": 4,
+        "type": "backend",
+        "label": {
+          "en": "REVIEWER",
+          "es": "REVIEWER"
+        },
+        "sublabel": {
+          "en": "Independent judgment · Standards / Spec",
+          "es": "Juicio independiente · Standards / Spec"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/reviewer.md",
+            "line": 1,
+            "end_line": 34
+          }
+        ],
+        "tag": {
+          "en": "AGENT · reviewer.md · risk-based",
+          "es": "AGENTE · reviewer.md · según riesgo"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "correct",
+        "lane": "findings",
+        "col": 0,
+        "type": "cloud",
+        "label": {
+          "en": "Worker corrects",
+          "es": "Worker corrige"
+        },
+        "sublabel": {
+          "en": "Repeat affected checks and review",
+          "es": "Repetir checks y revisión afectada"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 35,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "OWNER · worker",
+          "es": "RESPONSABLE · worker"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "assess",
+        "lane": "findings",
+        "col": 2,
+        "type": "security",
+        "label": {
+          "en": "Coordinator assesses",
+          "es": "Coordinador evalúa"
+        },
+        "sublabel": {
+          "en": "Fix, dismiss or ask",
+          "es": "Corregir, descartar o preguntar"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 128,
+            "end_line": 138
+          }
+        ],
+        "tag": {
+          "en": "OWNER · coordinator",
+          "es": "RESPONSABLE · coordinador"
+        }
+      },
+      {
+        "id": "inconclusive",
+        "lane": "findings",
+        "col": 4,
+        "type": "security",
+        "label": {
+          "en": "Insufficient evidence",
+          "es": "Evidencia insuficiente"
+        },
+        "sublabel": {
+          "en": "Repair context or keep blocked",
+          "es": "Reparar contexto o dejar bloqueado"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/review.md",
+            "line": 75,
+            "end_line": 81
+          }
+        ]
+      },
+      {
+        "id": "draft",
+        "lane": "delivery",
+        "col": 2,
+        "type": "backend",
+        "label": {
+          "en": "DELIVERY",
+          "es": "DELIVERY"
+        },
+        "sublabel": {
+          "en": "Prepares evidence, does not publish",
+          "es": "Prepara evidencia; no publica"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/delivery.md",
+            "line": 1,
+            "end_line": 32
+          }
+        ],
+        "tag": {
+          "en": "AGENT · delivery.md · prepare-only",
+          "es": "AGENTE · delivery.md · prepare-only"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "risk",
+        "lane": "delivery",
+        "col": 4,
+        "type": "messagebus",
+        "label": {
+          "en": "PR description and risk",
+          "es": "Descripción y riesgo PR"
+        },
+        "sublabel": {
+          "en": "One assessment for the record and PR",
+          "es": "Una evaluación para registro y PR"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-pr/SKILL.md",
+            "line": 29,
+            "end_line": 43
+          }
+        ],
+        "tag": {
+          "en": "isswf-pr",
+          "es": "isswf-pr"
+        },
+        "icon": "briefcase"
+      },
+      {
+        "id": "local",
+        "lane": "publish",
+        "col": 0,
+        "type": "database",
+        "label": {
+          "en": "Local delivery",
+          "es": "Entrega local"
+        },
+        "sublabel": {
+          "en": "No publishing if excluded by the grant",
+          "es": "Sin publicación si el grant la excluye"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 5,
+            "end_line": 15
+          }
+        ]
+      },
+      {
+        "id": "commit",
+        "lane": "publish",
+        "col": 2,
+        "type": "cloud",
+        "label": {
+          "en": "Commit and branch push",
+          "es": "Commit y push de rama"
+        },
+        "sublabel": {
+          "en": "Coordinator, no force push",
+          "es": "Coordinador, sin force push"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 35,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "OWNER · coordinator",
+          "es": "RESPONSABLE · coordinador"
+        }
+      },
+      {
+        "id": "pr",
+        "lane": "publish",
+        "col": 4,
+        "type": "cloud",
+        "label": {
+          "en": "Publish or update PR",
+          "es": "Publicar o actualizar PR"
+        },
+        "sublabel": {
+          "en": "Read back URL, base and head",
+          "es": "Leer de vuelta URL, base y head"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 39,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "OWNER · coordinator",
+          "es": "RESPONSABLE · coordinador"
+        }
+      },
+      {
+        "id": "ci_fix",
+        "lane": "ci",
+        "col": 0,
+        "type": "cloud",
+        "label": {
+          "en": "Correct CI failure",
+          "es": "Corregir fallo CI"
+        },
+        "sublabel": {
+          "en": "Diagnose, change and reverify",
+          "es": "Diagnosticar, cambiar y reverificar"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 35,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "OWNER · coordinator",
+          "es": "RESPONSABLE · coordinador"
+        }
+      },
+      {
+        "id": "ci",
+        "lane": "ci",
+        "col": 2,
+        "type": "cloud",
+        "label": {
+          "en": "CI on the exact head",
+          "es": "CI del head exacto"
+        },
+        "sublabel": {
+          "en": "Required checks and observed state",
+          "es": "Checks requeridos y estado observado"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 39,
+            "end_line": 42
+          }
+        ]
+      },
+      {
+        "id": "ci_wait",
+        "lane": "ci",
+        "col": 4,
+        "type": "security",
+        "label": {
+          "en": "CI queued or unavailable",
+          "es": "CI en cola o inaccesible"
+        },
+        "sublabel": {
+          "en": "Keep identity, do not retry blindly",
+          "es": "Conservar identidad, no repetir a ciegas"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-coordinator/SKILL.md",
+            "line": 136,
+            "end_line": 138
+          }
+        ]
+      },
+      {
+        "id": "human_fix",
+        "lane": "human",
+        "col": 0,
+        "type": "external",
+        "label": {
+          "en": "Changes requested",
+          "es": "Cambios solicitados"
+        },
+        "sublabel": {
+          "en": "Coordinator reconciles scope",
+          "es": "Coordinador reconcilia el alcance"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 23,
+            "end_line": 33
+          }
+        ]
+      },
+      {
+        "id": "approval",
+        "lane": "human",
+        "col": 2,
+        "type": "external",
+        "label": {
+          "en": "HUMAN",
+          "es": "HUMANO"
+        },
+        "sublabel": {
+          "en": "Approves integration of this PR",
+          "es": "Aprueba la integración de esta PR"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 44,
+            "end_line": 50
+          }
+        ],
+        "tag": {
+          "en": "DECISION · not an agent",
+          "es": "DECISIÓN · no es un agente"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "hold",
+        "lane": "human",
+        "col": 4,
+        "type": "security",
+        "label": {
+          "en": "Reject or defer",
+          "es": "No aprobar / posponer"
+        },
+        "sublabel": {
+          "en": "No merge, auto-merge or integration",
+          "es": "No merge, auto-merge ni integración"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 44,
+            "end_line": 50
+          }
+        ]
+      },
+      {
+        "id": "merge",
+        "lane": "close",
+        "col": 2,
+        "type": "security",
+        "label": {
+          "en": "Authorized merge",
+          "es": "Merge autorizado"
+        },
+        "sublabel": {
+          "en": "Human or explicitly delegated action",
+          "es": "Humano o acción expresamente delegada"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 44,
+            "end_line": 50
+          }
+        ],
+        "tag": {
+          "en": "Explicit approval + current head",
+          "es": "Aprobación explícita + head vigente"
+        }
+      },
+      {
+        "id": "retro",
+        "lane": "close",
+        "col": 4,
+        "type": "backend",
+        "label": {
+          "en": "RETROSPECTIVE",
+          "es": "RETROSPECTIVE"
+        },
+        "sublabel": {
+          "en": "Analyzes and proposes improvements",
+          "es": "Analiza y propone mejoras"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/retrospective.md",
+            "line": 1,
+            "end_line": 12
+          }
+        ],
+        "tag": {
+          "en": "AGENT · retrospective.md",
+          "es": "AGENTE · retrospective.md"
+        },
+        "icon": "person"
+      },
+      {
+        "id": "return_correct",
+        "lane": "findings",
+        "col": 0,
+        "type": "messagebus",
+        "label": {
+          "en": "Return to 07",
+          "es": "Volver a 07"
+        },
+        "sublabel": {
+          "en": "Repeat affected checks and review",
+          "es": "Repetir checks y revisión afectada"
+        },
+        "yOffset": 110,
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 35,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "Return connector",
+          "es": "Conector de retorno"
+        }
+      },
+      {
+        "id": "return_ci_fix",
+        "lane": "ci",
+        "col": 0,
+        "type": "messagebus",
+        "label": {
+          "en": "Return to 08",
+          "es": "Volver a 08"
+        },
+        "sublabel": {
+          "en": "Worker corrects the CI failure",
+          "es": "Worker corrige el fallo de CI"
+        },
+        "yOffset": 110,
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 35,
+            "end_line": 42
+          }
+        ],
+        "tag": {
+          "en": "Return connector",
+          "es": "Conector de retorno"
+        }
+      },
+      {
+        "id": "return_human_fix",
+        "lane": "human",
+        "col": 0,
+        "type": "messagebus",
+        "label": {
+          "en": "Return to 08",
+          "es": "Volver a 08"
+        },
+        "sublabel": {
+          "en": "Scope reconciled, worker corrects",
+          "es": "Alcance reconciliado, worker corrige"
+        },
+        "yOffset": 110,
+        "sources": [
+          {
+            "path": ".agents/roles/references/feature-delivery.md",
+            "line": 23,
+            "end_line": 33
+          }
+        ],
+        "tag": {
+          "en": "Return connector",
+          "es": "Conector de retorno"
+        }
+      },
+      {
+        "id": "return_retro",
+        "lane": "close",
+        "col": 4,
+        "type": "messagebus",
+        "label": {
+          "en": "New triage · 01",
+          "es": "Nuevo triage · 01"
+        },
+        "sublabel": {
+          "en": "Proposal only, no execution permission",
+          "es": "Solo propuesta, sin permiso de ejecutar"
+        },
+        "yOffset": 110,
+        "sources": [
+          {
+            "path": ".agents/roles/retrospective.md",
+            "line": 1,
+            "end_line": 12
+          }
+        ],
+        "tag": {
+          "en": "Return connector",
+          "es": "Conector de retorno"
+        }
+      },
+      {
+        "id": "ref_coord_design_principles",
+        "lane": "ref_coord",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "design-principles.md",
+          "es": "design-principles.md"
+        },
+        "sublabel": {
+          "en": "Models, contracts and boundaries",
+          "es": "Modelos, contratos y límites"
+        },
+        "tag": {
+          "en": "REF · When design changes",
+          "es": "REF · Si cambia el diseño"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/design-principles.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_coord_execution_principles",
+        "lane": "ref_coord",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "execution-principles.md",
+          "es": "execution-principles.md"
+        },
+        "sublabel": {
+          "en": "Ownership, retries and concurrency",
+          "es": "Propiedad, reintentos y concurrencia"
+        },
+        "tag": {
+          "en": "REF · When execution changes",
+          "es": "REF · Si cambia la ejecución"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/execution-principles.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_coord_verification_principles",
+        "lane": "ref_coord",
+        "col": 4,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "verification-principles.md",
+          "es": "verification-principles.md"
+        },
+        "sublabel": {
+          "en": "Evidence that demonstrates the outcome",
+          "es": "Qué evidencia demuestra el resultado"
+        },
+        "tag": {
+          "en": "REF · When selecting verification",
+          "es": "REF · Al elegir verificación"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/verification-principles.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_ground_research",
+        "lane": "ref_ground",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "research.md",
+          "es": "research.md"
+        },
+        "sublabel": {
+          "en": "Researcher · sources and reading map",
+          "es": "Researcher · fuentes y mapa de lectura"
+        },
+        "tag": {
+          "en": "REF · Research guidance",
+          "es": "REF · Guía de investigación"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/research.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_ground_bug_diagnosis",
+        "lane": "ref_ground",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "bug-diagnosis.md",
+          "es": "bug-diagnosis.md"
+        },
+        "sublabel": {
+          "en": "Diagnostician · reproduction and cause",
+          "es": "Diagnostician · reproducción y causa"
+        },
+        "tag": {
+          "en": "REF · isswf-debug",
+          "es": "REF · isswf-debug"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/bug-diagnosis.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_ground_verification_principles",
+        "lane": "ref_ground",
+        "col": 4,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "verification-principles.md",
+          "es": "verification-principles.md"
+        },
+        "sublabel": {
+          "en": "Diagnosis · testable hypotheses",
+          "es": "Diagnóstico · hipótesis comprobables"
+        },
+        "tag": {
+          "en": "REF · Causal evidence",
+          "es": "REF · Evidencia causal"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/verification-principles.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_plan_planning",
+        "lane": "ref_plan",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "planning.md",
+          "es": "planning.md"
+        },
+        "sublabel": {
+          "en": "Planner · units, dependencies and checks",
+          "es": "Planner · unidades, dependencias y checks"
+        },
+        "tag": {
+          "en": "REF · Proposal, not an adopted plan",
+          "es": "REF · Propuesta, no plan adoptado"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/planning.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_plan_design_principles",
+        "lane": "ref_plan",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "design-principles.md",
+          "es": "design-principles.md"
+        },
+        "sublabel": {
+          "en": "Planner · models and responsibilities",
+          "es": "Planner · modelos y responsabilidades"
+        },
+        "tag": {
+          "en": "REF · When design is affected",
+          "es": "REF · Cuando afecta al diseño"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/design-principles.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_worker_comments",
+        "lane": "ref_worker",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "comments.md",
+          "es": "comments.md"
+        },
+        "sublabel": {
+          "en": "Explains reasons, not code narration",
+          "es": "Explica motivos, no narra el código"
+        },
+        "tag": {
+          "en": "REF · During editing",
+          "es": "REF · Durante la edición"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/comments.md",
+            "line": 1
+          }
+        ],
+        "yOffset": -65
+      },
+      {
+        "id": "ref_worker_code_quality",
+        "lane": "ref_worker",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "code-quality.md",
+          "es": "code-quality.md"
+        },
+        "sublabel": {
+          "en": "Quality of the change and its structure",
+          "es": "Calidad del cambio y de su estructura"
+        },
+        "tag": {
+          "en": "REF · At code close",
+          "es": "REF · Al cierre del código"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/code-quality.md",
+            "line": 1
+          }
+        ],
+        "yOffset": -65
+      },
+      {
+        "id": "ref_worker_design_principles",
+        "lane": "ref_worker",
+        "col": 4,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "design-principles.md",
+          "es": "design-principles.md"
+        },
+        "sublabel": {
+          "en": "Data, interfaces and boundaries",
+          "es": "Datos, interfaces y límites"
+        },
+        "tag": {
+          "en": "REF · When design changes",
+          "es": "REF · Si cambia el diseño"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/design-principles.md",
+            "line": 1
+          }
+        ],
+        "yOffset": -65
+      },
+      {
+        "id": "ref_worker_execution_principles",
+        "lane": "ref_worker",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "execution-principles.md",
+          "es": "execution-principles.md"
+        },
+        "sublabel": {
+          "en": "Retries, migrations and ownership",
+          "es": "Reintentos, migraciones y propiedad"
+        },
+        "tag": {
+          "en": "REF · When relevant",
+          "es": "REF · Si procede"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/execution-principles.md",
+            "line": 1
+          }
+        ],
+        "yOffset": 65
+      },
+      {
+        "id": "ref_worker_verification_principles",
+        "lane": "ref_worker",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "verification-principles.md",
+          "es": "verification-principles.md"
+        },
+        "sublabel": {
+          "en": "Evidence of actual behavior",
+          "es": "Evidencia del comportamiento real"
+        },
+        "tag": {
+          "en": "REF · As verification requires",
+          "es": "REF · Según la verificación"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/verification-principles.md",
+            "line": 1
+          }
+        ],
+        "yOffset": 65
+      },
+      {
+        "id": "ref_worker_tdd",
+        "lane": "ref_worker",
+        "col": 4,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "tdd.md",
+          "es": "tdd.md"
+        },
+        "sublabel": {
+          "en": "Red, green and refactor with a useful test",
+          "es": "Red, green y refactor con prueba útil"
+        },
+        "tag": {
+          "en": "REF · isswf-tdd · conditional",
+          "es": "REF · isswf-tdd · condicional"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/tdd.md",
+            "line": 1
+          }
+        ],
+        "yOffset": 65
+      },
+      {
+        "id": "ref_review_review",
+        "lane": "ref_review",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "review.md",
+          "es": "review.md"
+        },
+        "sublabel": {
+          "en": "Standards and Spec, stopping condition",
+          "es": "Standards y Spec, criterio de cierre"
+        },
+        "tag": {
+          "en": "REF · isswf-review",
+          "es": "REF · isswf-review"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/review.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_review_code_quality",
+        "lane": "ref_review",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "code-quality.md",
+          "es": "code-quality.md"
+        },
+        "sublabel": {
+          "en": "Structure, readability and correctness",
+          "es": "Estructura, legibilidad y corrección"
+        },
+        "tag": {
+          "en": "REF · Within Standards",
+          "es": "REF · Dentro de Standards"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/code-quality.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_review_comments",
+        "lane": "ref_review",
+        "col": 4,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "comments.md",
+          "es": "comments.md"
+        },
+        "sublabel": {
+          "en": "Reasons, constraints and contracts",
+          "es": "Motivos, restricciones y contratos"
+        },
+        "tag": {
+          "en": "REF · Within Standards",
+          "es": "REF · Dentro de Standards"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/comments.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_delivery_delivery",
+        "lane": "ref_delivery",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "delivery.md",
+          "es": "delivery.md"
+        },
+        "sublabel": {
+          "en": "Summary and separate states",
+          "es": "Resumen y estados separados"
+        },
+        "tag": {
+          "en": "REF · Base, candidate and evidence",
+          "es": "REF · Base, candidato y evidencias"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/delivery.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_delivery_risk_assessment",
+        "lane": "ref_delivery",
+        "col": 2,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "risk-assessment.md",
+          "es": "risk-assessment.md"
+        },
+        "sublabel": {
+          "en": "Risk of the exact candidate",
+          "es": "Riesgo del candidato exacto"
+        },
+        "tag": {
+          "en": "REF · isswf-pr",
+          "es": "REF · isswf-pr"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-pr/references/risk-assessment.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_delivery_pr_description",
+        "lane": "ref_delivery",
+        "col": 4,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "pr-description.md",
+          "es": "pr-description.md"
+        },
+        "sublabel": {
+          "en": "Description with risk and checks",
+          "es": "Descripción con riesgo y checks"
+        },
+        "tag": {
+          "en": "REF · isswf-pr",
+          "es": "REF · isswf-pr"
+        },
+        "sources": [
+          {
+            "path": ".agents/skills/isswf-pr/references/pr-description.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "ref_retro_retrospective",
+        "lane": "ref_retro",
+        "col": 0,
+        "type": "database",
+        "icon": "briefcase",
+        "label": {
+          "en": "retrospective.md",
+          "es": "retrospective.md"
+        },
+        "sublabel": {
+          "en": "Evidence and improvement proposals",
+          "es": "Evidencia y propuestas de mejora"
+        },
+        "tag": {
+          "en": "REF · isswf-retrospective",
+          "es": "REF · isswf-retrospective"
+        },
+        "sources": [
+          {
+            "path": ".agents/roles/references/retrospective.md",
+            "line": 1
+          }
+        ]
+      },
+      {
+        "id": "return_inconclusive",
+        "lane": "findings",
+        "col": 4,
+        "type": "messagebus",
+        "label": {
+          "en": "Return to 07",
+          "es": "Volver a 07"
+        },
+        "sublabel": {
+          "en": "Review with repaired context",
+          "es": "Revisar con el contexto reparado"
+        },
+        "tag": {
+          "en": "Return connector",
+          "es": "Conector de retorno"
+        },
+        "yOffset": 110,
+        "sources": [
+          {
+            "path": ".agents/roles/references/review.md",
+            "line": 75,
+            "end_line": 81
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "id": "request-triage",
+        "from": "request",
+        "to": "triage",
+        "variant": "default"
+      },
+      {
+        "id": "triage-intake",
+        "from": "triage",
+        "to": "intake",
+        "variant": "default",
+        "label": {
+          "en": "prepare",
+          "es": "preparar"
+        }
+      },
+      {
+        "id": "triage-resolved",
+        "from": "triage",
+        "to": "resolved",
+        "variant": "dashed",
+        "label": {
+          "en": "with evidence",
+          "es": "con evidencia"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "intake-ready",
+        "from": "intake",
+        "to": "ready",
+        "variant": "default",
+        "label": {
+          "en": "clear criteria",
+          "es": "criterios claros"
+        },
+        "fromSide": "left",
+        "toSide": "right"
+      },
+      {
+        "id": "intake-question",
+        "from": "intake",
+        "to": "question",
+        "variant": "security",
+        "label": {
+          "en": "decision missing",
+          "es": "falta decisión"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "question-triage",
+        "from": "question",
+        "to": "triage",
+        "variant": "security",
+        "label": {
+          "en": "answer recorded",
+          "es": "respuesta registrada"
+        },
+        "role": "return"
+      },
+      {
+        "id": "ready-ground",
+        "from": "ready",
+        "to": "ground",
+        "variant": "default",
+        "label": {
+          "en": "with current grant",
+          "es": "con grant vigente"
+        }
+      },
+      {
+        "id": "ground-research",
+        "from": "ground",
+        "to": "research",
+        "variant": "default",
+        "label": {
+          "en": "technical fact",
+          "es": "hecho técnico"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "ground-diagnosis",
+        "from": "ground",
+        "to": "diagnosis",
+        "variant": "default",
+        "label": {
+          "en": "complex bug",
+          "es": "bug complejo"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "research-ground",
+        "from": "research",
+        "to": "ground",
+        "variant": "default",
+        "label": {
+          "en": "report",
+          "es": "informe"
+        },
+        "role": "return"
+      },
+      {
+        "id": "diagnosis-ground",
+        "from": "diagnosis",
+        "to": "ground",
+        "variant": "default",
+        "label": {
+          "en": "causal evidence",
+          "es": "evidencia causal"
+        },
+        "role": "return"
+      },
+      {
+        "id": "ground-clear",
+        "from": "ground",
+        "to": "clear",
+        "variant": "default",
+        "label": {
+          "en": "facts resolved",
+          "es": "hechos resueltos"
+        }
+      },
+      {
+        "id": "clear-brief",
+        "from": "clear",
+        "to": "brief",
+        "variant": "default"
+      },
+      {
+        "id": "brief-proposal",
+        "from": "brief",
+        "to": "proposal",
+        "variant": "default",
+        "label": {
+          "en": "when needed",
+          "es": "si lo requiere"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "proposal-brief",
+        "from": "proposal",
+        "to": "brief",
+        "variant": "default",
+        "label": {
+          "en": "adopt proposal",
+          "es": "adoptar propuesta"
+        },
+        "role": "return"
+      },
+      {
+        "id": "brief-admit",
+        "from": "brief",
+        "to": "admit",
+        "variant": "default"
+      },
+      {
+        "id": "admit-blocked",
+        "from": "admit",
+        "to": "blocked",
+        "variant": "security",
+        "label": {
+          "en": "not admissible",
+          "es": "no admisible"
+        },
+        "role": "error"
+      },
+      {
+        "id": "blocked-admit",
+        "from": "blocked",
+        "to": "admit",
+        "variant": "security",
+        "label": {
+          "en": "reconcile first",
+          "es": "reconciliar primero"
+        },
+        "role": "return"
+      },
+      {
+        "id": "admit-worker",
+        "from": "admit",
+        "to": "worker",
+        "variant": "emphasis",
+        "label": {
+          "en": "admitted",
+          "es": "admitido"
+        }
+      },
+      {
+        "id": "tools-worker",
+        "from": "tools",
+        "to": "worker",
+        "variant": "dashed",
+        "label": {
+          "en": "contextual selection",
+          "es": "selección contextual"
+        }
+      },
+      {
+        "id": "special-worker",
+        "from": "special",
+        "to": "worker",
+        "variant": "dashed",
+        "label": {
+          "en": "concrete risk",
+          "es": "riesgo concreto"
+        }
+      },
+      {
+        "id": "worker-mode",
+        "from": "worker",
+        "to": "mode",
+        "variant": "default",
+        "label": {
+          "en": "retained candidate",
+          "es": "candidato retenido"
+        },
+        "toSide": "top"
+      },
+      {
+        "id": "mode-checks",
+        "from": "mode",
+        "to": "checks",
+        "variant": "default",
+        "label": {
+          "en": "mechanical",
+          "es": "mecánica"
+        }
+      },
+      {
+        "id": "mode-reviewer",
+        "from": "mode",
+        "to": "reviewer",
+        "variant": "default",
+        "label": {
+          "en": "judgment required",
+          "es": "juicio requerido"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "checks-assess",
+        "from": "checks",
+        "to": "assess",
+        "variant": "default",
+        "label": {
+          "en": "results",
+          "es": "resultados"
+        }
+      },
+      {
+        "id": "reviewer-assess",
+        "from": "reviewer",
+        "to": "assess",
+        "variant": "default",
+        "label": {
+          "en": "verdict",
+          "es": "veredicto"
+        }
+      },
+      {
+        "id": "assess-correct",
+        "from": "assess",
+        "to": "correct",
+        "variant": "security",
+        "label": {
+          "en": "defect",
+          "es": "defecto"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "correct-mode",
+        "from": "correct",
+        "to": "return_correct",
+        "variant": "default",
+        "label": {
+          "en": "",
+          "es": ""
+        },
+        "role": "return"
+      },
+      {
+        "id": "assess-inconclusive",
+        "from": "assess",
+        "to": "inconclusive",
+        "variant": "security",
+        "label": {
+          "en": "inconclusive",
+          "es": "inconcluso"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "inconclusive-mode",
+        "from": "inconclusive",
+        "to": "return_inconclusive",
+        "variant": "default",
+        "label": {
+          "en": "gap resolved",
+          "es": "gap resuelto"
+        },
+        "role": "return"
+      },
+      {
+        "id": "assess-draft",
+        "from": "assess",
+        "to": "draft",
+        "variant": "emphasis",
+        "label": {
+          "en": "criteria covered",
+          "es": "criterios cubiertos"
+        }
+      },
+      {
+        "id": "draft-risk",
+        "from": "draft",
+        "to": "risk",
+        "variant": "default",
+        "label": {
+          "en": "prepare",
+          "es": "preparar"
+        }
+      },
+      {
+        "id": "draft-local",
+        "from": "draft",
+        "to": "local",
+        "variant": "dashed",
+        "label": {
+          "en": "local-only",
+          "es": "local-only"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "risk-commit",
+        "from": "risk",
+        "to": "commit",
+        "variant": "default",
+        "label": {
+          "en": "publishing covered",
+          "es": "publicación cubierta"
+        }
+      },
+      {
+        "id": "commit-pr",
+        "from": "commit",
+        "to": "pr",
+        "variant": "default"
+      },
+      {
+        "id": "pr-ci",
+        "from": "pr",
+        "to": "ci",
+        "variant": "default"
+      },
+      {
+        "id": "ci-ci_fix",
+        "from": "ci",
+        "to": "ci_fix",
+        "variant": "security",
+        "label": {
+          "en": "fails",
+          "es": "falla"
+        },
+        "role": "error"
+      },
+      {
+        "id": "ci_fix-correct",
+        "from": "ci_fix",
+        "to": "return_ci_fix",
+        "variant": "default",
+        "label": {
+          "en": "",
+          "es": ""
+        },
+        "role": "return"
+      },
+      {
+        "id": "ci-ci_wait",
+        "from": "ci",
+        "to": "ci_wait",
+        "variant": "dashed",
+        "label": {
+          "en": "technical wait",
+          "es": "espera técnica"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "ci_wait-ci",
+        "from": "ci_wait",
+        "to": "ci",
+        "variant": "default",
+        "label": {
+          "en": "resource available",
+          "es": "recurso disponible"
+        },
+        "role": "return"
+      },
+      {
+        "id": "ci-approval",
+        "from": "ci",
+        "to": "approval",
+        "variant": "emphasis",
+        "label": {
+          "en": "valid CI and review",
+          "es": "CI y revisión válidos"
+        }
+      },
+      {
+        "id": "approval-human_fix",
+        "from": "approval",
+        "to": "human_fix",
+        "variant": "security",
+        "label": {
+          "en": "requests changes",
+          "es": "pide cambios"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "human_fix-correct",
+        "from": "human_fix",
+        "to": "return_human_fix",
+        "variant": "default",
+        "label": {
+          "en": "",
+          "es": ""
+        },
+        "role": "return"
+      },
+      {
+        "id": "approval-hold",
+        "from": "approval",
+        "to": "hold",
+        "variant": "security",
+        "label": {
+          "en": "rejects or waits",
+          "es": "rechaza o espera"
+        },
+        "role": "branch"
+      },
+      {
+        "id": "approval-merge",
+        "from": "approval",
+        "to": "merge",
+        "variant": "security",
+        "label": {
+          "en": "approves integration",
+          "es": "aprueba integración"
+        }
+      },
+      {
+        "id": "merge-retro",
+        "from": "merge",
+        "to": "retro",
+        "variant": "default",
+        "label": {
+          "en": "record outcome",
+          "es": "registrar resultado"
+        }
+      },
+      {
+        "id": "retro-triage",
+        "from": "retro",
+        "to": "return_retro",
+        "variant": "dashed",
+        "label": {
+          "en": "",
+          "es": ""
+        },
+        "role": "return"
+      }
+    ],
+    "cards": [
+      {
+        "dot": "cyan",
+        "title": {
+          "en": "How to read this workflow",
+          "es": "Cómo leer este único flujo"
+        },
+        "items": [
+          {
+            "en": "Person icons and AGENT badges identify roles. Coordinator activities are not new agents. R rows show each role's references, not extra steps or agents.",
+            "es": "Los bloques con icono de persona y etiqueta AGENTE identifican roles. Las actividades del coordinador no son agentes nuevos. Las filas R muestran los documentos que consulta cada rol, no pasos adicionales ni agentes."
+          },
+          {
+            "en": "This map describes the repository workflow, not an execution trace. The coordinator owns the conversation, plan and next-step decisions.",
+            "es": "Flujo metodológico actual del repositorio, no registro de una ejecución. El coordinador conserva la conversación, el plan y la decisión sobre el siguiente paso."
+          },
+          {
+            "en": "Roles are not a mandatory pipeline. Researcher, diagnostician, planner and reviewer are selected by uncertainty and risk. A skill or reference does not create an agent.",
+            "es": "Los roles no forman una cadena obligatoria. Researcher, diagnostician, planner y reviewer se activan según incertidumbre y riesgo. Un skill o una referencia no crea otro agente."
+          },
+          {
+            "en": "Return paths preserve identity and budgets. A changed candidate invalidates affected checks and review.",
+            "es": "Las flechas de retorno mantienen la identidad y el presupuesto. Un cambio de candidato invalida las comprobaciones y revisiones afectadas."
+          },
+          {
+            "en": "Return connectors continue at the numbered stage. They avoid arrows across the whole map and are not terminal states.",
+            "es": "Los conectores «Volver a» continúan en la etapa numerada. Evitan flechas de retorno que atraviesen todo el mapa; no son estados terminales."
+          }
+        ]
+      },
+      {
+        "dot": "amber",
+        "title": {
+          "en": "Current triage and compatibility",
+          "es": "Triage actual y compatibilidad"
+        },
+        "items": [
+          {
+            "en": "Local requests use a curated brief. Issues use isswf-intake.mjs prepare/read and, when applicable, reconcile or link-duplicate under their own authorization. Preparation does not execute work.",
+            "es": "La entrada local usa un brief curado. Una issue usa isswf-intake.mjs prepare/read y, si corresponde, reconcile o link-duplicate con autorización propia. Preparar no ejecuta."
+          },
+          {
+            "en": "needs-triage awaits assessment; needs-info identifies missing information; ready-for-agent describes a clear next step; ready-for-human names a human decision. They are not permissions or execution states.",
+            "es": "needs-triage espera evaluación; needs-info señala información pendiente; ready-for-agent describe un siguiente paso claro; ready-for-human nombra una decisión humana. No son permisos ni estados de ejecución."
+          },
+          {
+            "en": "isswf-triage belongs to retired prototypes and is not a step in the installed package. Do not mix its JSON or CLI with native intake.",
+            "es": "isswf-triage es un skill legado de los prototipos y no se usa como paso del paquete instalado. No mezclar su JSON ni su CLI con el intake nativo."
+          },
+          {
+            "en": "Duplicates require evidence and a link to the target. Already-present results require proof and do not automatically close or publish an issue.",
+            "es": "Un duplicado requiere evidencia y enlace al destino. Ya existente requiere prueba; no implica automáticamente cerrar o publicar una issue."
+          }
+        ]
+      },
+      {
+        "dot": "violet",
+        "title": {
+          "en": "Definition roles and references",
+          "es": "Roles y referencias de definición"
+        },
+        "items": [
+          {
+            "en": "Coordinator uses isswf-coordinator. Conditional references are design-principles.md, execution-principles.md and verification-principles.md. durable-work.md preserves identity and checkpoints.",
+            "es": "Coordinador · isswf-coordinator. Referencias condicionales design-principles.md, execution-principles.md y verification-principles.md. durable-work.md conserva identidad y checkpoints."
+          },
+          {
+            "en": "Researcher uses researcher.md and references/research.md to return facts and a reading map. Planner uses planner.md and references/planning.md to propose work. The coordinator adopts the plan.",
+            "es": "Researcher · researcher.md + references/research.md. Aporta hechos y mapa de lectura. Planner · planner.md + references/planning.md. Propone; el coordinador adopta el plan."
+          },
+          {
+            "en": "Diagnostician uses diagnostician.md, isswf-debug and references/bug-diagnosis.md for unknown causes. Simple bugs may go directly to the worker.",
+            "es": "Diagnostician · diagnostician.md + isswf-debug + references/bug-diagnosis.md. Investiga causas desconocidas. Un bug simple puede ir directamente al worker."
+          },
+          {
+            "en": "isswf-understanding helps explain concepts to the operator. isswf-writing guides documentation. Neither is a mandatory implementation stage.",
+            "es": "isswf-understanding sirve para aclarar conceptos al operador. isswf-writing guía documentación; no son fases obligatorias de implementación."
+          }
+        ]
+      },
+      {
+        "dot": "emerald",
+        "title": {
+          "en": "Implementation and review",
+          "es": "Implementación y revisión"
+        },
+        "items": [
+          {
+            "en": "Worker uses worker.md, references/code-quality.md at close and references/comments.md during editing. Design, execution and verification references apply when relevant.",
+            "es": "Worker · worker.md. references/code-quality.md al cierre y references/comments.md durante la edición. Diseño, ejecución y verificación se cargan cuando corresponden."
+          },
+          {
+            "en": "isswf-tdd and references/tdd.md apply when requested or when a useful cheap test exists. isswf-e2e applies to a selected critical journey or assigned suite.",
+            "es": "isswf-tdd + references/tdd.md solo si se pide o hay una prueba útil y barata. isswf-e2e se selecciona para un recorrido crítico o una suite asignada."
+          },
+          {
+            "en": "isswf-security, isswf-performance and isswf-observability refine implementation, diagnosis or review according to risk. They grant no scans, installation or additional access.",
+            "es": "isswf-security, isswf-performance e isswf-observability refinan implementación, diagnóstico o revisión según el riesgo. No autorizan escáneres, instalación o acceso adicional."
+          },
+          {
+            "en": "Reviewer uses reviewer.md, isswf-review and references/review.md. Standards and Spec are separate. Authors cannot independently review their own work. Missing or inconclusive required review blocks closure.",
+            "es": "Reviewer · reviewer.md + isswf-review + references/review.md. Standards y Spec separados. El autor no es su propio revisor independiente. Si la revisión requerida falta o no concluye, el cierre permanece bloqueado."
+          }
+        ]
+      },
+      {
+        "dot": "rose",
+        "title": {
+          "en": "Actual capability and recovery",
+          "es": "Capacidad real y recuperación"
+        },
+        "items": [
+          {
+            "en": "Markdown profiles do not prove executable capability. Every dispatch requires pinned inputs, a finite grant, available route and effort, exclusive workspace and budget.",
+            "es": "Los perfiles Markdown no prueban capacidad ejecutable. Cada dispatch exige inputs fijados, grant finito, ruta y esfuerzo disponibles, espacio exclusivo y presupuesto."
+          },
+          {
+            "en": "Consult docs/model-routing.md and docs/local-worker-lifecycle.md. On Pi, the worker uses isswf-job.mjs. researcher-task.mjs, planner-task.mjs, diagnostic-task.mjs and reviewer-task.mjs have separate contracts.",
+            "es": "Consultar docs/model-routing.md y docs/local-worker-lifecycle.md. En Pi, el worker usa isswf-job.mjs; researcher-task.mjs, planner-task.mjs, diagnostic-task.mjs y reviewer-task.mjs tienen contratos propios."
+          },
+          {
+            "en": "A configured role does not prove a caller can execute it. Missing capability is reported rather than bypassed with another dispatcher.",
+            "es": "La configuración de un rol no demuestra que un caller pueda ejecutarlo. Si falta capacidad, se informa del límite; no se sustituye por otro dispatcher."
+          },
+          {
+            "en": "Do not replace an active or unknown actor. Reconcile identity, process and partial work before a successor. Return to preflight only with sufficient evidence and authorization.",
+            "es": "Un actor activo o desconocido no se reemplaza. Reconciliar identidad, proceso y trabajo parcial antes de un sucesor. La rama de bloqueo vuelve a preflight únicamente con evidencia y autorización suficientes."
+          }
+        ]
+      },
+      {
+        "dot": "orange",
+        "title": {
+          "en": "Delivery is not publication or merge",
+          "es": "Delivery no equivale a publicación ni merge"
+        },
+        "items": [
+          {
+            "en": "Delivery uses delivery.md and references/delivery.md to prepare evidence and draft text. isswf-pr uses references/risk-assessment.md and references/pr-description.md. The coordinator performs covered publication.",
+            "es": "Delivery · delivery.md + references/delivery.md prepara evidencia y borrador. isswf-pr usa references/risk-assessment.md y references/pr-description.md. El coordinador realiza la publicación cubierta."
+          },
+          {
+            "en": "A current feature-to-PR start covers implementation, checks, bounded corrections, commit, feature-branch push, PR and CI. Investigating or drawing this map does not select that permission.",
+            "es": "Un inicio feature-to-PR vigente cubre implementación, checks, correcciones dentro del límite, commit, push de feature branch, PR y CI. Investigar o dibujar este mapa no selecciona ese permiso."
+          },
+          {
+            "en": "Merge requires explicit human approval of integration for the particular candidate. Stale approval, green checks or technical review cannot replace that decision.",
+            "es": "Para el merge de este mapa, la persona debe aprobar expresamente la integración del candidato particular. Una aprobación obsoleta, un check verde o una review técnica no sustituyen esa decisión."
+          },
+          {
+            "en": "Preserve exact-head checks and server protections before integration. A changed head requires affected verification and any necessary renewed decision. Release, deployment, installation and cleanup are outside this workflow.",
+            "es": "Antes de integrar hay que conservar checks del head exacto y protecciones del servidor. Si cambia el head, volver a la verificación y renovar la decisión que corresponda. Release, deploy, instalación y limpieza quedan fuera."
+          }
+        ]
+      },
+      {
+        "dot": "slate",
+        "title": {
+          "en": "Closure and independent findings",
+          "es": "Cierre y nuevos hallazgos"
+        },
+        "items": [
+          {
+            "en": "Retrospective uses retrospective.md, isswf-retrospective and references/retrospective.md after a completed feature or bug. It need not wait for merge if technical delivery is complete. It appears after integration here for readability.",
+            "es": "Retrospective · retrospective.md + isswf-retrospective + references/retrospective.md. Se realiza tras completar una feature o bug; no exige esperar al merge si la entrega técnica ya se completó. Se muestra tras la integración para facilitar la lectura."
+          },
+          {
+            "en": "Independent out-of-scope findings use isswf-issue with duplicate, privacy and destination checks. Publication requires its own grant and needs-triage. It does not authorize implementation.",
+            "es": "Un hallazgo independiente fuera del alcance usa isswf-issue con control de duplicados, privacidad y destino. Su publicación requiere grant propio y needs-triage; no autoriza implementación."
+          },
+          {
+            "en": "Preserve the plan, brief, candidate and evidence. Agent messages do not establish product acceptance, publication or merge.",
+            "es": "Conservar plan, brief, candidato y evidencias. No inferir aceptación de producto, publicación o merge a partir del mensaje de un agente."
+          }
+        ]
+      }
+    ]
+  },
+  "overview": {
+    "title": {
+      "en": "How isSWF turns a request into a reviewed PR",
+      "es": "Cómo convierte isSWF una petición en una PR revisada"
+    },
+    "description": {
+      "en": "The coordinator selects help, verifies the result and delivers the PR. A human decides integration.",
+      "es": "El coordinador elige el apoyo, verifica el resultado y entrega la PR. Una persona decide la integración."
+    },
+    "note": {
+      "en": "Optional roles depend on the task. Checks and required review apply to the exact candidate. Merge needs explicit human approval.",
+      "es": "Los roles opcionales dependen del encargo. Checks y revisión requerida se aplican al candidato exacto. El merge exige aprobación humana."
+    },
+    "rows": [
+      {
+        "label": {
+          "en": "Define the work",
+          "es": "Definir el trabajo"
+        },
+        "steps": [
+          {
+            "node": "triage",
+            "label": {
+              "en": "Triage and decisions",
+              "es": "Triage y decisiones"
+            },
+            "actor": {
+              "en": "COORDINATOR",
+              "es": "COORDINADOR"
+            },
+            "details": [
+              {
+                "en": "Clarify scope and permissions",
+                "es": "Concreta alcance y permisos"
+              },
+              {
+                "en": "Ask only for human decisions",
+                "es": "Pregunta por decisiones humanas"
+              }
+            ]
+          },
+          {
+            "node": "ground",
+            "label": {
+              "en": "Research or diagnosis",
+              "es": "Investigación o diagnóstico"
+            },
+            "actor": {
+              "en": "RESEARCHER · DIAGNOSTICIAN",
+              "es": "RESEARCHER · DIAGNOSTICIAN"
+            },
+            "details": [
+              {
+                "en": "Optional help for unknown facts",
+                "es": "Apoyo opcional ante incertidumbre"
+              },
+              {
+                "en": "Findings return to the coordinator",
+                "es": "Devuelven pruebas al coordinador"
+              }
+            ]
+          },
+          {
+            "node": "brief",
+            "label": {
+              "en": "Brief and plan",
+              "es": "Brief y plan"
+            },
+            "actor": {
+              "en": "COORDINATOR · PLANNER",
+              "es": "COORDINADOR · PLANNER"
+            },
+            "details": [
+              {
+                "en": "Acceptance, limits and checks",
+                "es": "Aceptación, límites y checks"
+              },
+              {
+                "en": "Planner proposes when needed",
+                "es": "Planner propone si hace falta"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": {
+          "en": "Build and verify",
+          "es": "Implementar y verificar"
+        },
+        "steps": [
+          {
+            "node": "worker",
+            "label": {
+              "en": "Preflight and implementation",
+              "es": "Preflight e implementación"
+            },
+            "actor": {
+              "en": "COORDINATOR · WORKER",
+              "es": "COORDINADOR · WORKER"
+            },
+            "details": [
+              {
+                "en": "Admit authorized work, then build",
+                "es": "Admite trabajo autorizado y ejecuta"
+              },
+              {
+                "en": "Use relevant skills and references",
+                "es": "Usa skills y referencias pertinentes"
+              }
+            ]
+          },
+          {
+            "node": "mode",
+            "label": {
+              "en": "Checks and corrections",
+              "es": "Checks y correcciones"
+            },
+            "actor": {
+              "en": "COORDINATOR · REVIEWER",
+              "es": "COORDINADOR · REVIEWER"
+            },
+            "details": [
+              {
+                "en": "Independent review when required",
+                "es": "Revisión independiente si se exige"
+              },
+              {
+                "en": "Correct and reverify affected work",
+                "es": "Corrige y repite la verificación"
+              }
+            ]
+          },
+          {
+            "node": "draft",
+            "label": {
+              "en": "Prepare delivery",
+              "es": "Preparar la entrega"
+            },
+            "actor": {
+              "en": "DELIVERY · COORDINATOR",
+              "es": "DELIVERY · COORDINADOR"
+            },
+            "details": [
+              {
+                "en": "Evidence, PR draft and risk",
+                "es": "Evidencia, borrador de PR y riesgo"
+              },
+              {
+                "en": "Preparation is not publication",
+                "es": "Preparar no equivale a publicar"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": {
+          "en": "Deliver the PR and decide integration",
+          "es": "Entregar la PR y decidir la integración"
+        },
+        "steps": [
+          {
+            "node": "pr",
+            "label": {
+              "en": "Commit, push and PR",
+              "es": "Commit, push y PR"
+            },
+            "actor": {
+              "en": "COORDINATOR",
+              "es": "COORDINADOR"
+            },
+            "details": [
+              {
+                "en": "Publish only within the grant",
+                "es": "Publica dentro de la autorización"
+              },
+              {
+                "en": "Local-only work stays local",
+                "es": "El trabajo local no se publica"
+              }
+            ]
+          },
+          {
+            "node": "ci",
+            "label": {
+              "en": "CI on the exact head",
+              "es": "CI del head exacto"
+            },
+            "actor": {
+              "en": "COORDINATOR · CI",
+              "es": "COORDINADOR · CI"
+            },
+            "details": [
+              {
+                "en": "Inspect required CI results",
+                "es": "Comprueba los resultados exigidos"
+              },
+              {
+                "en": "Failures return to correction",
+                "es": "Los fallos vuelven a corrección"
+              }
+            ]
+          },
+          {
+            "node": "approval",
+            "label": {
+              "en": "Human approval and merge",
+              "es": "Aprobación humana y merge"
+            },
+            "actor": {
+              "en": "HUMAN",
+              "es": "HUMANO"
+            },
+            "details": [
+              {
+                "en": "Explicit approval for this candidate",
+                "es": "Aprueba expresamente el candidato"
+              },
+              {
+                "en": "Retrospective proposes improvements",
+                "es": "La retrospectiva propone mejoras"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

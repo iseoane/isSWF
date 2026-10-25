@@ -123,6 +123,19 @@ Keep active factory instructions and operational resources in English. User-faci
 
 Keep the README approachable. Put exact execution, model, and recovery rules in their existing operational guides instead of repeating them across pages.
 
+### Maintain the workflow diagrams
+
+The README previews and complete interactive diagrams share [one bilingual source](../diagrams/workflow.json). Keep node IDs, branches, source citations, and translations together. When the workflow changes, pin its repository revision and citations to the commit that supports the new behavior. Exact role, skill, and file names remain unchanged between languages. The overview omits detailed branches and references; the HTML retains them.
+
+To regenerate both languages, use an existing Archify 3.2 CLI. Replace `/path/to/archify/bin/archify.mjs` with its installed path. This command uses a local browser for validation, writes the HTML and SVG files under `docs/en/` and `docs/es/`, and keeps local candidates and check receipts under `.archify/`. It does not install tools, enable GitHub Pages, or publish files.
+
+```sh
+node tooling/maintenance/workflow-diagrams.mjs /path/to/archify/bin/archify.mjs
+node tooling/maintenance/workflow-diagrams.mjs --check
+```
+
+The second command needs only Node.js. It checks translation fields, preview references, generated SVG bytes, and HTML hashes against the portable generated manifest. The portable quality suite also tests these checks against disposable missing-translation, stale-source, invalid-reference, duplicate-ID, and modified-artifact fixtures. It does not rerun browser validation or verify translation meaning. Inspect both preview images and review the translations after regeneration. Local Archify delivery receipts contain machine paths and are ignored; the portable manifest is retained with the diagrams.
+
 ## Source of truth and history
 
 Check actual tools, manifests, and tests before documenting current behaviour. Use [the source map](architecture.md) to find the owner. Keep accepted objectives distinct from implementation evidence and [future proposals](future-actions.md).

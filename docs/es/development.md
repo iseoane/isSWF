@@ -123,6 +123,19 @@ Mantén en inglés las instrucciones activas de la factoría y sus recursos oper
 
 El README debe ser accesible. Deja las reglas exactas de ejecución, modelos y recuperación en sus guías operativas existentes, en lugar de repetirlas en varias páginas.
 
+### Mantener los diagramas del flujo
+
+Las imágenes de los README y los diagramas interactivos completos comparten [una fuente bilingüe](../diagrams/workflow.json). Mantén juntos los identificadores de los nodos, las ramas, las citas de fuentes y las traducciones. Cuando cambie el flujo, fija la revisión del repositorio y las citas al commit que respalda el nuevo comportamiento. Los nombres exactos de roles, skills y archivos no cambian entre idiomas. El resumen omite las ramas detalladas y las referencias; el HTML las conserva.
+
+Para regenerar ambos idiomas, utiliza una CLI de Archify 3.2 ya instalada. Sustituye `/path/to/archify/bin/archify.mjs` por su ruta de instalación. El comando utiliza un navegador local para validar, escribe los HTML y SVG en `docs/en/` y `docs/es/`, y conserva los candidatos y comprobaciones locales en `.archify/`. No instala herramientas, activa GitHub Pages ni publica archivos.
+
+```sh
+node tooling/maintenance/workflow-diagrams.mjs /path/to/archify/bin/archify.mjs
+node tooling/maintenance/workflow-diagrams.mjs --check
+```
+
+El segundo comando solo necesita Node.js. Comprueba los campos de traducción, las referencias del resumen, los bytes de los SVG generados y los hashes de los HTML contra el manifiesto generado portable. La suite de calidad portable también prueba esas comprobaciones con fixtures desechables que omiten traducciones, dejan la fuente desactualizada, incluyen referencias inválidas o identificadores duplicados y modifican los artefactos. No repite la validación en navegador ni verifica el significado de las traducciones. Inspecciona ambas imágenes y revisa las traducciones después de regenerar. Los recibos locales de entrega de Archify contienen rutas de la máquina y se ignoran; el manifiesto portable se conserva con los diagramas.
+
 ## Fuente de la verdad e historial
 
 Comprueba las herramientas, los manifiestos y las pruebas reales antes de documentar el comportamiento actual. El [mapa del código](architecture.md) ayuda a localizar al responsable. Distingue los objetivos aceptados de las pruebas de implementación y de las [propuestas futuras](future-actions.md).

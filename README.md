@@ -31,6 +31,12 @@ It is a workflow you use when needed, not a service that runs your repositories 
 
 Pi is the reference execution environment. A Claude Code plugin is also included, with different execution and recovery capabilities.
 
+## Workflow at a glance
+
+![isSWF workflow. The coordinator handles triage, selects research or planning when needed, assigns implementation, verifies the result, and delivers a PR with CI. A human decides whether to merge.](docs/en/workflow.svg)
+
+[Explore the complete workflow](docs/en/workflow.html), including agents, skills, references, decision branches, and correction loops. GitHub shows the HTML as a file. Download it and open it in your browser, or open it directly from a local checkout. The overview omits those details; optional roles are not a mandatory pipeline.
+
 ## Installation
 
 Download the [latest stable release for Linux x64](https://github.com/iseoane/isSWF/releases/latest). Verify the downloaded archive against the release checksums before installation. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.

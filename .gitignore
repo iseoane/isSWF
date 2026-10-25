@@ -20,3 +20,6 @@ node_modules/
 /.audit/*
 !/.audit/README.md
 !/.audit/archive.json
+/.archify/
+/docs/en/workflow.delivery.json
+/docs/es/workflow.delivery.json

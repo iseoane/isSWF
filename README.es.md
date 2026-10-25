@@ -31,6 +31,12 @@ Es una forma de trabajar que utilizas cuando la necesitas, no un servicio que ge
 
 Pi es el entorno de ejecución de referencia. También se incluye un plugin para Claude Code, con capacidades distintas de ejecución y recuperación.
 
+## El flujo de un vistazo
+
+![Flujo de isSWF. El coordinador realiza el triage, elige investigación o planificación cuando hacen falta, asigna la implementación, verifica el resultado y entrega una PR con CI. Una persona decide el merge.](docs/es/workflow.svg)
+
+[Explora el flujo completo](docs/es/workflow.html), con agentes, skills, referencias, decisiones y bucles de corrección. GitHub muestra el HTML como un archivo. Descárgalo y ábrelo en el navegador, o ábrelo directamente desde un checkout local. La imagen resumida omite esos detalles; los roles opcionales no forman una cadena obligatoria.
+
 ## Instalación
 
 Descarga la [última release estable para Linux x64](https://github.com/iseoane/isSWF/releases/latest). Verifica el archivo descargado con los checksums de la release antes de instalarlo. El repositorio es privado, por lo que GitHub CLI debe estar autenticado con una cuenta que tenga acceso. No se ha publicado ningún paquete en npm ni en un marketplace público.
