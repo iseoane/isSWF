@@ -2,7 +2,7 @@
 
 English | [Español](README.es.md)
 
-A personal software factory for turning ideas, bugs, and issues into small, checked changes with AI agents.
+A software factory for turning ideas, bugs, and issues into small, checked changes with AI agents.
 
 ## Description
 
@@ -29,7 +29,7 @@ It is a workflow you use when needed, not a service that runs your repositories 
 - Maintainers who want to understand a proposed change and its checks before accepting it.
 - People exploring agent-assisted development who want explicit control over what agents may do.
 
-Pi is the reference execution environment. A Claude Code plugin is also included, with different execution and recovery capabilities.
+Pi is the reference execution environment. The Claude Code integration shares the methodology and uses native subagents. It does not guarantee the same isolation and recovery as the Pi executors. See [host support](docs/host-portability.md) for the boundaries of each integration.
 
 ## Workflow at a glance
 

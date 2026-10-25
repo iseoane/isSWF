@@ -2,7 +2,7 @@
 
 [English](README.md) | Español
 
-Una factoría de software personal para convertir ideas, errores e issues en cambios pequeños y comprobados con agentes de IA.
+Una factoría de software para convertir ideas, errores e issues en cambios pequeños y comprobados con agentes de IA.
 
 ## Descripción
 
@@ -29,7 +29,7 @@ Es una forma de trabajar que utilizas cuando la necesitas, no un servicio que ge
 - Responsables de proyectos que quieren entender un cambio y sus comprobaciones antes de aceptarlo.
 - Personas que están explorando el desarrollo con agentes y quieren controlar qué pueden hacer.
 
-Pi es el entorno de ejecución de referencia. También se incluye un plugin para Claude Code, con capacidades distintas de ejecución y recuperación.
+Pi es el entorno de ejecución de referencia. La integración con Claude Code comparte la metodología y utiliza subagentes nativos. No garantiza el mismo aislamiento y recuperación que los ejecutores de Pi. Consulta los límites de cada integración en [compatibilidad de los hosts](docs/host-portability.md).
 
 ## El flujo de un vistazo
 
