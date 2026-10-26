@@ -94,6 +94,8 @@ Three additional Windows-only suites exercise the native bounded-tool backend: `
 
 Four further Windows suites cover strict worker identity, trusted SDK process containment, the existing detached lifecycle entry and actual compiled recovery/capacity integration. They bind boot, exact creation time, executable, native argv and nonce rather than PID alone. The trusted SDK task is not the model tool sandbox: its commands still use LPAC. Recovery requires a root Job receipt confirming zero descendants; owner disappearance alone is insufficient. After owner loss, reconciliation stays read-only and may return `stopped-review-required` with `profileCleanupRequired`, never silently clean up or retry. Successful capacity is archived only after bound task/tool/profile completion; interrupted attempts keep their slot. A separate same-runtime supervisor avoids detached PowerShell console/stdio loss without changing the selected engine or requesting host-job breakaway.
 
+The native matrix also runs text-role caller contracts for reviewer, planner, diagnostician and researcher. These use injected transport/probe observations, not provider calls or actual Windows diagnostic isolation. Git roots are canonicalized, external scopes use native separators, and publication follows the shared directory-sync policy while regular-file flush failures remain fatal. The reviewer test injects such a failure before backend work and checks that the interrupted claim blocks replay. Positive fixture budgets allow native Git preparation time; explicit negative deadline controls remain separate.
+
 The matrix installs development-only hosts from `tooling/host-tests/package-lock.json`, with lifecycle scripts disabled. Pi 1.4.0 installs the package in temporary user and project scopes; its real resource loader must discover all fourteen skills from the installed artifact, with an empty pre-install control. Claude Code 2.1.299 installs the local marketplace/plugin and must report those skills through its native component inventory. The test invokes the platform-native binary supplied by Claude's optional dependency, without running its installer script. No prompt, agent session, login or provider credential is supplied. Temporary home/config directories and disabled telemetry limit incidental activity; they are not proof of network isolation. These are installation/discovery checks, not live task or delegation evaluations.
 
 To run the additional checks locally, select an absent output directory outside the repository. These examples use a Bash-compatible shell; on Windows supply an absolute Windows path for the output directory:
@@ -110,6 +112,7 @@ node tests/windows-worker-identity.mjs
 node tests/windows-worker-host.mjs
 node tests/windows-worker-lifecycle.mjs
 node tests/windows-worker-recovery.mjs
+node tests/windows-reviewer-task.mjs
 ```
 
 The artifact builder reads committed HEAD, while static source checks read the working tree. The tests require the pinned host dependencies and Bun; missing tools or missing skills fail rather than silently skip. Re-running needs a fresh output path. CI retains platform/discovery reports and Claude's observed skill inventory for 14 days. A configured matrix is not evidence that every platform passed; inspect the exact run before claiming support.

@@ -89,12 +89,24 @@ jobs:
           node tests/initiative-plan.mjs .
           node tests/worker-route-admission.mjs .
           node tests/host-portability.mjs .
+      - name: Verify native text-role publication and guarded synthetic transport
+        run: |
+          node tests/reviewer-task.mjs .
+          node tests/planner-task.mjs .
+          node tests/diagnostic-task.mjs .
+          node tests/researcher-session-affinity.mjs .
+          node tests/researcher-quota-fallback.mjs .
       - name: Verify initialization and process identity on the native platform
         run: node tests/init-platform.mjs .
       - name: Build and install native package; test CLI, resources and worktrees
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/platform-package.mjs .
+      - name: Verify compiled Windows supplied-evidence reviewer
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-reviewer-task.mjs
       - name: Verify native Windows LPAC command controls
         if: runner.os == 'Windows'
         env:

@@ -3,16 +3,17 @@ import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, realpath, mkdir, open, link, unlink, lstat, rmdir } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
 import { readReleaseSource } from './release-source.mjs';
 import { validateProbes, runDiagnosticProbes } from './diagnostic-probes.mjs';
 import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
+import { syncDirectory } from './platform-runtime.mjs';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('../') && !isAbsolute(part)); };
+const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('..' + sep) && !isAbsolute(part)); };
 const sha = value => typeof value === 'string' && /^[0-9a-f]{40}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
 const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !path.includes('\\') && !path.includes('\0') && path.split('/').every(part => part && part !== '.' && part !== '..');
@@ -43,12 +44,12 @@ async function publish(path, value) {
   const pending = path + '.pending', file = await open(pending, 'wx', 0o600);
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
   await link(pending, path); await unlink(pending);
-  const directory = await open(dirname(path), 'r'); try { await directory.sync(); } finally { await directory.close(); }
+  await syncDirectory(dirname(path));
 }
 async function roots(project, store) {
   assert(isAbsolute(project ?? '') && isAbsolute(store ?? ''), 'absolute-project-store-required');
   project = await realpath(project); store = await realpath(store);
-  assert(decode(git(project, ['rev-parse', '--show-toplevel'])).trim() === project, 'git-root-required');
+  assert(await realpath(decode(git(project, ['rev-parse', '--show-toplevel'])).trim()) === project, 'git-root-required');
   assert(!inside(project, store) && !inside(source, store) && !inside(store, project) && !inside(store, source), 'private-external-store-required');
   return { project, store };
 }
@@ -106,11 +107,11 @@ export async function runDiagnosis(request, { backend, mode = 'real', probeRunne
   assert(mode === 'real' || mode === 'fixture', 'explicit-mode-required');
   assert(mode === 'real' ? grant.allowProviderCalls === true && !backend && !probeRunner : grant.allowProviderCalls === false && backend, 'provider-grant-or-fixture-required');
   await mkdir(dir, { mode: 0o700 });
-  const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+  await syncDirectory(p.store);
   const reservation = await acquireCapacity(p.capacity, {role:'diagnostician',logicalJobRef:job.logicalJobRef,mode});
   if (!reservation) {
     await rmdir(dir);
-    const parent = await open(p.store,'r'); try { await parent.sync(); } finally { await parent.close(); }
+    await syncDirectory(p.store);
     return {version:1,status:'blocked',reason:'capacity',attemptsConsumed:0,fetches:0,capacity:p.capacity,executionAuthorized:false};
   }
   const deadlineAt = Date.now() + grant.deadlineMs;

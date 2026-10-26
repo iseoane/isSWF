@@ -1,5 +1,7 @@
 # Project setup
 
+Current status: partial. The original setup snapshot below is historical; the current Windows reconciliation at the end records later evidence and pending decisions without granting execution.
+
 ## Scope and provenance
 
 - Status: partial; tracking decision recorded, verification and checkpoint pending.
@@ -53,3 +55,34 @@ Evidence: `docs/en/development.md`, `tools/check-quality.mjs`, `tooling/quality/
 - Client-use gate: blocked pending required technical-isolation evidence and separately scoped execution authorization.
 - GitHub synchronization: pending any separately granted remote action; choosing tracking mode does not authorize synchronization.
 - Pending: Git checkpoint authorization, applicable project checks for future work, and execution-specific reconciliation/preflight. No model availability, subscription coverage, or effort compatibility is inferred from configuration.
+
+## Current Windows reconciliation
+
+- Observed target/source checkpoint: 2160dfdb11d6b7efff11da29ff27ecaba05371fb in the current trusted source checkout. This is source development, not an installed project or a request to migrate state. Keep the single existing `.factory/` root. Private host paths stay outside this shared record.
+- Current conversation covers local implementation, reversible synthetic tests, isolated dependency preparation and functional commits for Linux/Windows readiness. It does not grant live/provider calls, paid use, global host changes, push, PR, merge, publication or cleanup. Earlier setup-only restrictions above describe that historical request, not today's separate local grant.
+- Preserve GitHub tracking and the existing repository choice. Current delivery is local-only; no normal feature-to-PR publication authority is inferred from this readiness assignment. Preserve existing model routes and active immutable inputs.
+- Points1/2 have native compiled tool/lifecycle and read-only recovery evidence in I0009/J007. The exact committed point2 is2160dfd. Recovery can expose unconfirmed profile/ACL cleanup and retain capacity; it is not automatic cleanup or client acceptance.
+- Actual Pi1.4 SDK loads under selected compiled Bun, including the worker's Typebox dependency. Offline metadata recognizes all current configured tuples and supports their requested efforts. The probe created no SDK session, intercepted network fetches and observed zero. It is capability evidence, not quota, subscription coverage or provider integration.
+- Under the executor's minimal environment, the tested default SDK profile reports no configured authentication for the configured Codex/Go providers. The offline host catalogue lists an OpenAI route, which is not permission or adapter support to replace the fixed Codex worker route. Need the operator-selected opaque auth location or operator-managed authentication, never secret contents in this record/chat.
+- Text caller portability corrections and native injected contracts pass as a separate functional setup prerequisite; installed compiled reviewer transport/readback/replay controls also pass with a synthetic backend. Candidate3ae7710607cab775aff7bb8b94bdb64772c12ca8 has full Linux mandatory-isolation quality PASS. These are not live provider results. Injected diagnostic/review probes do not establish actual Windows read-only diagnostic isolation; those probe paths remain Linux-specific. Do not offer them as verified Windows capabilities.
+
+### Proposed minimal composition, not an execution grant
+
+| Role | Proposed use and boundary | Native entry | Proposed actor ceiling |
+| --- | --- | --- | --- |
+| Coordinator | Current host; owns decisions, not independent review | Existing coordinator profile | Existing session |
+| Worker | One exclusive workspace, provider through trusted SDK, LPAC model tools | `isswf-job.mjs` | One original attempt |
+| Reviewer | Independent supplied-evidence assessment; no model tools or Windows workspace probes | `reviewer-task.mjs` | One review |
+| Researcher | Conditional supplied-source research; disabled without separate role grant/auth evidence | `researcher-task.mjs` | Zero in minimal composition |
+| Planner | Conditional text proposal; disabled without separate role grant | `planner-task.mjs` | Zero in minimal composition |
+| Diagnostician | Conditional; actual Windows read-only probes not yet supported | `diagnostic-task.mjs` | Zero in minimal composition |
+| Additional review | Not automatically enabled or substituted for canonical reviewer | Explicit supported assignment required | Zero |
+
+Proposed minimal total: one worker plus one independent reviewer, serial concurrency1; no automatic replacement, retry or correction round. The worker's one SDK prompt may have multiple provider turns within its existing time/tool boundary; this is not a two-HTTP-request guarantee. No live actors are currently authorized. Route values remain only in `.factory/models.json`; the operator must approve retaining them and the composition/budgets before normal live use. Shared capacity must be materialized under a genuine assignment grant, not inferred from this table.
+
+### Outstanding setup decisions and exit condition
+
+- Select the existing host authentication/profile by opaque path, or authenticate outside this task; do not send tokens. Confirm the intended subscription/cost boundary. Account availability and coverage remain unknown until supported preflight; a catalogue entry is insufficient.
+- Approve retaining canonical routes and the proposed minimal composition/budgets, or supply changes. This is configuration selection, not permission to make live calls.
+- Repository-local worktree preference is absent. Approve the documented derived external default or another external location before creating worktrees. No local/global Git setting has been changed.
+- Keep `Client-use gate: blocked`. Setup becomes configured only for the actually supported, approved delivery boundary after missing choices, authentication evidence and remaining checks are resolved. The real public worker/provider journey, installation maintenance and independent final review remain separately scoped gates.
