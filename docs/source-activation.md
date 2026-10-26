@@ -50,7 +50,7 @@ node /absolute/path/to/project/.factory/tools/isswf-status.mjs \
   --project /absolute/path/to/project --initiative I0001
 ```
 
-The seven-file import closure supports plan, intake, status, panel and response operations, including the shared project-state resolver. Existing legacy targets retain `.factory`; explicitly initialized current targets use `.isswf`. It lives only under the selected state directory's `tools/` with a separate revision/hash receipt. No dependency, test, development tooling or audit archive is installed. Resource activation and `.pi/settings.json` are unchanged. Plan and intake writes still require their existing explicit external authority.
+The eight-file import closure supports plan, intake, status, panel and response operations, including the shared project-state resolver and platform primitives required by plan publication. Existing legacy targets retain `.factory`; explicitly initialized current targets use `.isswf`. It lives only under the selected state directory's `tools/` with a separate revision/hash receipt. No dependency, test, development tooling or audit archive is installed. Resource activation and `.pi/settings.json` are unchanged. Plan and intake writes still require their existing explicit external authority.
 
 An identical repeat verifies the exact receipt and committed bytes without rewriting. A conflicting version, tampered file, unexpected entry or symlink blocks. Publication uses a cooperative `<state>/.tools-install` claim and staged directory. Interrupted claims remain for explicit inspection; the installer does not repair or upgrade them automatically. The target directory is trusted and must not have concurrent hostile writers.
 

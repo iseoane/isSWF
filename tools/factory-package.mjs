@@ -79,7 +79,7 @@ const taskPayloadPaths = {
   performance: [".agents/skills/isswf-performance/SKILL.md"],
   observability: [".agents/skills/isswf-observability/SKILL.md"],
 };
-const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
+const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs", "platform-runtime.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
   "./.agents/skills/isswf-coordinator",

@@ -40,8 +40,8 @@ This coordinator-owned plan records local progress, not execution permission or 
 - Objective: Repair issue #83 by accepting canonical external plan grants on native Windows without weakening internal-path rejection on Linux
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Independent semantic assessment and exact-head CI pending; first-plan publication separately fails as issue #85
-- Next step: Review the retained boundary correction; do not expand implementation into #85 or claim complete Windows agent execution
+- Blocker: Independent semantic assessment and exact-head CI pending; correction retained in source commit 8ea8d2adc978aace0a17fc517b79d04a94ed2440
+- Next step: Review the committed boundary correction; #85's subsequently authorized local repair is tracked in J004, not a complete Windows agent-execution claim
 
 ### Acceptance
 
@@ -81,3 +81,33 @@ This coordinator-owned plan records local progress, not execution permission or 
 - Clean candidate native Windows/Linux host-portability and worker-route-admission: PASS
 - Linux release-package regression: PASS
 - Full-suite WSL run on retained candidate: FAIL with 60-second reviewer-task subprocess timeout; not a green suite
+- Later full Linux regression on native Linux filesystem: PASS on candidate 30e303fd928d639074d2505785f7d31052982ea9 containing J004; previous failure retained, no cause attribution
+
+## J004
+
+- Status: in-review
+- Objective: Repair issue #85 first-plan Windows publication using platform directory-sync policy and truthful interrupted-claim handling, then run regression
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: Independent assessment/CI and Windows Bun validation pending; broader native Windows regression reaches pre-existing symlink fixture privilege failures reported as #86
+- Next step: Review the retained #85 correction and regression evidence; obtain separate authorization before implementing #86; do not claim all-platform regression or isolated-agent readiness
+
+### Acceptance
+
+- Native Windows and Linux publish/repeat the first plan through the pinned launcher
+- Regular-file sync errors remain fatal and Linux directory flush remains mandatory
+- Pre/post-publication failures preserve claims and available bytes, report publication stage and block automatic retry/no-op success
+- Installed tools retain a complete import closure and native job pins include the new transitive platform primitive
+- Run regression after focal checks and report independent deficiencies without automatically correcting them
+
+### Evidence
+
+- https://github.com/iseoane/isSWF/issues/85
+- jobs/J004/brief-r1.md
+- tests/plan-publication.mjs: Windows RED before repair; Windows/Linux PASS afterward
+- Native Windows Node pinned init/first-plan/repeat, boundaries, checkout, host-static and worker-route checks: PASS
+- Full Linux node tools/check-quality.mjs: PASS on retained candidate 30e303fd928d639074d2505785f7d31052982ea9
+- Linux Bun packed executable regression: PASS; isolated synthetic worker SKIP because Bubblewrap unavailable
+- Native Windows factory-tools-install and initiative-plan: FAIL at unchanged directory-symlink fixture creation with EPERM; not application unsafe-path acceptance
+- https://github.com/iseoane/isSWF/issues/86
+- Source commit 8ea8d2adc978aace0a17fc517b79d04a94ed2440 preserves #83/#84; #85 changes remain local and uncommitted

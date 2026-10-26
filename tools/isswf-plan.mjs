@@ -5,6 +5,7 @@ import { lstat, readFile, realpath, mkdir, open, link, unlink, rename, rmdir } f
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
+import { syncDirectory } from './platform-runtime.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
@@ -102,22 +103,36 @@ export async function plan({ action, project, initiative, proposalPath, grantPat
   for (const parent of parents) await directory(parent, true);
   let old;
   try { old = await regular(path); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const lock = join(parents[2], '.plan-write');
+  try { await lstat(lock); throw Error('Existing plan write claim requires inspection; no automatic recovery'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
   if (old === markdown) return { status: 'reused', path, sha256: sha(old), executionAuthorized: false };
   if (action === 'prepare' && old !== undefined) throw Error('existing plan differs; explicit revise with expected SHA required');
   if (action === 'revise' && (old === undefined || !/^[a-f0-9]{64}$/u.test(expectedSha256 ?? '') || sha(old) !== expectedSha256)) throw Error('plan revision conflict');
   if (old !== undefined) await checkpoint(root, path, old);
-  const lock = join(parents[2], '.plan-write');
   await mkdir(lock, { mode: 0o700 });
-  if (old !== undefined) {
-    if (sha(await regular(path)) !== sha(old)) throw Error('plan revision conflict');
-    await checkpoint(root, path, old);
+  let published = false;
+  try {
+    if (old !== undefined) {
+      if (sha(await regular(path)) !== sha(old)) throw Error('plan revision conflict');
+      await checkpoint(root, path, old);
+    }
+    const pending = join(lock, randomUUID());
+    await synced(pending, markdown);
+    if (old === undefined) {
+      await link(pending, path);
+      published = true;
+      await unlink(pending);
+    } else {
+      await rename(pending, path);
+      published = true;
+    }
+    await syncDirectory(parents[2]);
+    await rmdir(lock);
+  } catch (error) {
+    error.message += `; failed ${published ? 'after' : 'before'} publication; retained plan write claim requires inspection, no automatic recovery`;
+    throw error;
   }
-  const pending = join(lock, randomUUID());
-  await synced(pending, markdown);
-  if (old === undefined) { await link(pending, path); await unlink(pending); }
-  else await rename(pending, path);
-  const handle = await open(parents[2], 'r'); try { await handle.sync(); } finally { await handle.close(); }
-  await rmdir(lock);
   return { status: action === 'prepare' ? 'prepared' : 'revised', path, sha256: sha(markdown), executionAuthorized: false };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -39,8 +39,8 @@ try {
   }
   await syncDirectory(temp);
   run('git', ['clone', '-q', '--shared', source, fixture]);
-  for (const file of ['isswf.mjs', 'platform-runtime.mjs']) await cp(join(source, 'tools', file), join(fixture, 'tools', file));
-  run('git', ['-C', fixture, 'add', 'tools/isswf.mjs', 'tools/platform-runtime.mjs']);
+  for (const file of ['isswf.mjs', 'platform-runtime.mjs', 'isswf-plan.mjs', 'factory-package.mjs', 'isswf-job.mjs']) await cp(join(source, 'tools', file), join(fixture, 'tools', file));
+  run('git', ['-C', fixture, 'add', 'tools/isswf.mjs', 'tools/platform-runtime.mjs', 'tools/isswf-plan.mjs', 'tools/factory-package.mjs', 'tools/isswf-job.mjs']);
   run('git', ['-C', fixture, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'Platform init candidate']);
   const revision = run('git', ['-C', fixture, 'rev-parse', 'HEAD']).stdout.trim();
   run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revision, '--output', release, '--runtime', 'node']);
@@ -59,6 +59,14 @@ try {
   assert.equal(transactions.length, 1);
   const record = JSON.parse(await readFile(join(project, '.isswf/local/transactions', transactions[0], 'record.json'), 'utf8'));
   assert.equal(await ceased(record.owner), true);
+  const proposal = join(temp, 'plan-proposal.json'), grant = join(temp, 'plan-grant.json');
+  await writeFile(proposal, JSON.stringify({ version: 1, initiative: 'I0042', title: 'First installed plan', type: 'maintenance', jobs: [{ id: 'J001', objective: 'Read a synthetic plan', status: 'pending', dependsOn: [], acceptance: ['No provider calls'], blocker: 'None', nextStep: 'Inspect', evidence: [] }] }));
+  await writeFile(grant, JSON.stringify({ version: 1, project: await realpath(project), initiative: 'I0042', reference: 'Synthetic plan-only grant', permissions: ['plan'] }));
+  const preparePlan = [join(release, 'tools/isswf.mjs'), 'exec', '--project', project, '--store', store, '--', 'isswf-plan', 'prepare', '--initiative', 'I0042', '--proposal', proposal, '--grant', grant];
+  assert.equal(JSON.parse(run(process.execPath, preparePlan).stdout).status, 'prepared');
+  assert.equal(JSON.parse(run(process.execPath, preparePlan).stdout).status, 'reused');
+  assert.deepEqual(await readdir(join(project, '.isswf/initiatives/I0042')), ['plan.md']);
+  assert.deepEqual(await readFile(join(project, '.isswf/install.json')), pin);
   // A file sync failure must still fail initialization, never become success.
   const preload = join(temp, 'sync-failure.mjs');
   await writeFile(preload, `import fs from 'node:fs/promises'; import {syncBuiltinESMExports} from 'node:module'; const original = fs.open; fs.open = async (...args) => { const handle = await original(...args); if (args[1] === 'wx') handle.sync = async () => { throw Object.assign(new Error('injected file sync failure'), {code:'EIO'}); }; return handle; }; syncBuiltinESMExports();`);
@@ -67,7 +75,7 @@ try {
   assert.match(failed.stderr, /injected file sync failure/u);
   await assert.rejects(readFile(join(second, '.isswf/install.json')), { code: 'ENOENT' });
   passed = true;
-  console.log(JSON.stringify({ status: 'PASS', platform: process.platform, revision, checks: ['live/ceased/malformed owner', 'directory sync policy', 'built Node release init and repeat', 'pin/model preservation', 'file sync failure propagates'], limits: 'No Bun compiler, provider, worker isolation or full migration/recovery journey is exercised.' }));
+  console.log(JSON.stringify({ status: 'PASS', platform: process.platform, revision, checks: ['live/ceased/malformed owner', 'directory sync policy', 'built Node release init and repeat', 'pinned first plan and repeat', 'pin/model preservation', 'file sync failure propagates'], limits: 'No Bun compiler, provider, worker isolation or full migration/recovery journey is exercised.' }));
 } finally {
   if (passed) await rm(temp, { recursive: true, force: true });
   else console.error(`Preserved failing platform fixture: ${temp}`);
