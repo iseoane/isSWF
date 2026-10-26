@@ -29,6 +29,8 @@ git clone https://github.com/iseoane/isSWF.git
 cd isSWF
 ```
 
+The repository's `.gitattributes` keeps text checkouts in LF on Windows and Linux, even with `core.autocrlf=true`; detected binary files are unchanged. This preserves exact runtime-to-Git byte checks and resource frontmatter. Do not normalize bytes inside integrity verification or disable its checks. Adding attributes does not rewrite an existing working copy: if an older checkout still has CRLF runtime files, preserve local work and use a fresh clone of the revision containing this policy. Do not force-reset a dirty checkout or change global Git settings to hide the mismatch.
+
 Keep source development on Node.js and `.mjs`. Install a trusted Bun compiler for release construction only. Bun 1.4.3 is the locally tested compiler. The builder defaults to Bun, while `--runtime node` retains the original development-fixture layout. Choose a commit that contains the complete release tools. The builder reads that commit, not uncommitted edits. If the installation work has not yet been committed in your checkout, do not expect the earlier commit to contain it.
 
 Use the full commit SHA in place of `FULL_COMMIT_SHA` and an absent output folder outside the source repository:
