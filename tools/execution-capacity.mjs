@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, lstat, realpath, readFile, open, rename } from 'node:fs/promises';
-import { isAbsolute, relative, join, dirname } from 'node:path';
+import { isAbsolute, relative, join, dirname, sep } from 'node:path';
+import { syncDirectory } from './platform-runtime.mjs';
 import { fileURLToPath } from 'node:url';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('../') && !isAbsolute(part)); };
-const sync = async path => { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } };
+const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('..' + sep) && !isAbsolute(part)); };
+const sync = syncDirectory;
 async function regular(path) {
   const stat = await lstat(path); assert(stat.isFile() && !stat.isSymbolicLink() && stat.size <= 4096, 'bounded-capacity-record-required');
   const bytes = await readFile(path); assert(bytes.length <= 4096, 'bounded-capacity-record-required'); return bytes;

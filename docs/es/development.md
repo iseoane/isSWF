@@ -43,7 +43,7 @@ Esa carpeta es la que utilizan los [comandos de instalación](installation.md). 
 
 El compilador activa `--compile-autoload-package-json` para que las tareas generadas puedan resolver la entrada del SDK existente del host y las exportaciones de sus dependencias transitivas. Esto no incorpora ni instala ese SDK. El ejecutable también resuelve las rutas relativas de tareas `.mjs` desde el directorio de trabajo.
 
-Usa `--target` para seleccionar un artefacto separado de Linux, macOS o Windows. Son destinos de compilación, no paridad de plataforma verificada. El flujo instalado completo de mutaciones y aislamiento sigue siendo exclusivo de Linux.
+Usa `--target` para seleccionar un artefacto separado de Linux, macOS o Windows. Son destinos de compilación, no paridad de plataforma verificada. Las comprobaciones nativas de herramientas y ciclo de vida en Windows se describen más abajo; la configuración completa, la migración y reversión de instalaciones y los recorridos con proveedores reales siguen teniendo verificaciones separadas.
 
 La [guía técnica de instalación](../installation.md), en inglés, explica cómo crear los paquetes y qué comprobaciones exactas se realizan.
 
@@ -92,6 +92,8 @@ El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. U
 
 Tres suites adicionales, exclusivas de Windows, comprueban el backend nativo de herramientas acotadas: `windows-tool-sandbox.mjs` comprueba el acceso LPAC, entorno, red, canarios del registro, subprocesos, timeout, salida limitada por bytes y cese de descendientes; `windows-sandbox-lifetime.mjs` comprueba el rechazo de alias, el arranque interrumpido y la pérdida del proceso propietario; `windows-worker-task.mjs` comprueba la tarea autónoma de un artefacto compilado e instalado real con un SDK sintético. Rechazan Node heredado y la sustitución implícita del motor. Ejecútalas después de `platform-package.mjs`, conservando `ISSWF_PLATFORM_ROOT`. No llaman a proveedores. Son controles de herramientas y tareas, no del flujo normal de admisión de trabajos, ciclo de vida y recuperación en Windows, configuración completa ni aceptación independiente de seguridad. La pérdida abrupta del propietario puede dejar sin confirmar la limpieza de perfiles y ACL; conserva sus registros de propiedad. La salida se limita en memoria, sin archivos de captura que puedan crecer sin límite; los ámbitos de escritura del sistema de archivos no tienen una cuota rígida de disco.
 
+Otras cuatro suites de Windows cubren la identidad estricta del trabajador, la contención del proceso SDK de confianza, la entrada existente del ciclo de vida desacoplado y la integración compilada real de recuperación y capacidad. Vinculan el arranque del sistema, el instante exacto de creación, el ejecutable, los argumentos nativos y el nonce, no solo el PID. La tarea SDK de confianza no es el sandbox de herramientas del modelo: sus comandos siguen usando LPAC. La recuperación exige un registro del Job raíz que confirme cero descendientes; no basta con que desaparezca el propietario. Tras perderlo, la reconciliación sigue siendo de solo lectura y puede devolver `stopped-review-required` con `profileCleanupRequired`, sin limpiar ni reintentar en silencio. La capacidad solo se archiva tras completar la tarea, las herramientas y los perfiles vinculados; los intentos interrumpidos conservan su plaza. Un supervisor separado con el mismo runtime evita la pérdida de consola y stdio de PowerShell desacoplado, sin cambiar el motor seleccionado ni solicitar salir de los Jobs impuestos por el host.
+
 La matriz instala asistentes exclusivos de desarrollo desde `tooling/host-tests/package-lock.json`, con los scripts de ciclo de vida desactivados. Pi 1.4.0 instala el paquete en los ámbitos temporales de usuario y proyecto; su cargador real de recursos debe descubrir las catorce skills del artefacto instalado, con un control vacío previo a la instalación. Claude Code 2.1.299 instala el marketplace y plugin locales y debe mostrar esas skills en su inventario nativo de componentes. La prueba invoca el binario nativo de la plataforma incluido en la dependencia opcional de Claude, sin ejecutar su script de instalación. No se proporciona ningún prompt, sesión de agente, inicio de sesión ni credencial de proveedor. Las carpetas temporales de usuario y configuración y la telemetría desactivada limitan la actividad incidental; no demuestran aislamiento de red. Son pruebas de instalación y descubrimiento, no evaluaciones de tareas o delegaciones reales.
 
 Para ejecutar las comprobaciones adicionales en local, elige una carpeta de salida inexistente fuera del repositorio. Estos ejemplos utilizan una shell compatible con Bash; en Windows, indica una ruta absoluta de Windows para la carpeta de salida:
@@ -104,6 +106,10 @@ node tests/host-discovery.mjs .
 node tests/windows-tool-sandbox.mjs
 node tests/windows-sandbox-lifetime.mjs
 node tests/windows-worker-task.mjs
+node tests/windows-worker-identity.mjs
+node tests/windows-worker-host.mjs
+node tests/windows-worker-lifecycle.mjs
+node tests/windows-worker-recovery.mjs
 ```
 
 El constructor del artefacto lee el HEAD confirmado, mientras que las comprobaciones estáticas del código leen el árbol de trabajo. Las pruebas requieren los asistentes fijados y Bun; si faltan herramientas o skills, fallan en vez de omitirse en silencio. Para repetirlas, utiliza una nueva ruta de salida. La CI conserva durante 14 días los informes de plataforma y descubrimiento y el inventario de skills observado en Claude. Configurar una matriz no demuestra que todas las plataformas hayan pasado; consulta la ejecución exacta antes de afirmar compatibilidad.

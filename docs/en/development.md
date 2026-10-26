@@ -43,7 +43,7 @@ That folder is what the [installation commands](installation.md) use. Building i
 
 The compiler enables `--compile-autoload-package-json` so generated tasks can resolve the existing host SDK's package entry and transitive dependency exports. This does not bundle or install that SDK. The executable also resolves relative `.mjs` task paths from the working directory.
 
-Use `--target` to select a separate Linux, macOS, or Windows artifact. These are compile targets, not verified platform parity. The complete installed mutation and isolation workflow remains Linux-only.
+Use `--target` to select a separate Linux, macOS, or Windows artifact. These are compile targets, not verified platform parity. Native Windows tool and lifecycle checks are described below; complete setup, installation migration/rollback and real-provider journeys remain separate verification gates.
 
 The [technical installation guide](../installation.md) covers tarballs and the exact package checks.
 
@@ -92,6 +92,8 @@ The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate
 
 Three additional Windows-only suites exercise the native bounded-tool backend: `windows-tool-sandbox.mjs` checks LPAC access, environment, network, registry canaries, subprocesses, timeout, byte-bounded output and descendant cessation; `windows-sandbox-lifetime.mjs` checks alias refusal, interrupted startup and owner loss; `windows-worker-task.mjs` checks an actual installed compiled artifact's self-contained task with a synthetic SDK. They refuse legacy Node or implicit engine substitution. Run them after `platform-package.mjs`, retaining `ISSWF_PLATFORM_ROOT`. No provider calls are made. These are tool/task controls, not normal Windows job admission, lifecycle/recovery, complete setup or independent security acceptance. Abrupt owner loss may leave profile/ACL cleanup unconfirmed; preserve its ownership records. Output is bounded in memory, not written to unbounded capture files; writable filesystem scopes have no hard disk quota.
 
+Four further Windows suites cover strict worker identity, trusted SDK process containment, the existing detached lifecycle entry and actual compiled recovery/capacity integration. They bind boot, exact creation time, executable, native argv and nonce rather than PID alone. The trusted SDK task is not the model tool sandbox: its commands still use LPAC. Recovery requires a root Job receipt confirming zero descendants; owner disappearance alone is insufficient. After owner loss, reconciliation stays read-only and may return `stopped-review-required` with `profileCleanupRequired`, never silently clean up or retry. Successful capacity is archived only after bound task/tool/profile completion; interrupted attempts keep their slot. A separate same-runtime supervisor avoids detached PowerShell console/stdio loss without changing the selected engine or requesting host-job breakaway.
+
 The matrix installs development-only hosts from `tooling/host-tests/package-lock.json`, with lifecycle scripts disabled. Pi 1.4.0 installs the package in temporary user and project scopes; its real resource loader must discover all fourteen skills from the installed artifact, with an empty pre-install control. Claude Code 2.1.299 installs the local marketplace/plugin and must report those skills through its native component inventory. The test invokes the platform-native binary supplied by Claude's optional dependency, without running its installer script. No prompt, agent session, login or provider credential is supplied. Temporary home/config directories and disabled telemetry limit incidental activity; they are not proof of network isolation. These are installation/discovery checks, not live task or delegation evaluations.
 
 To run the additional checks locally, select an absent output directory outside the repository. These examples use a Bash-compatible shell; on Windows supply an absolute Windows path for the output directory:
@@ -104,6 +106,10 @@ node tests/host-discovery.mjs .
 node tests/windows-tool-sandbox.mjs
 node tests/windows-sandbox-lifetime.mjs
 node tests/windows-worker-task.mjs
+node tests/windows-worker-identity.mjs
+node tests/windows-worker-host.mjs
+node tests/windows-worker-lifecycle.mjs
+node tests/windows-worker-recovery.mjs
 ```
 
 The artifact builder reads committed HEAD, while static source checks read the working tree. The tests require the pinned host dependencies and Bun; missing tools or missing skills fail rather than silently skip. Re-running needs a fresh output path. CI retains platform/discovery reports and Claude's observed skill inventory for 14 days. A configured matrix is not evidence that every platform passed; inspect the exact run before claiming support.

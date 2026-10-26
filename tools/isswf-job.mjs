@@ -17,7 +17,7 @@ import { parsePlan } from './isswf-plan.mjs';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const installedRelease = verifyRelease(root);
 const methodologySha = installedRelease?.methodologySha ?? '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/release-source.mjs', 'tools/project-state.mjs', 'tools/platform-runtime.mjs', 'tools/windows-tool-sandbox.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
+const runtimeFiles = ['tools/release-source.mjs', 'tools/project-state.mjs', 'tools/platform-runtime.mjs', 'tools/windows-tool-sandbox.mjs', 'tools/windows-worker-identity.mjs', 'tools/windows-worker-host.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', ...(installedRelease?.files['.agents/skills/isswf-e2e/SKILL.md'] ? ['.agents/skills/isswf-e2e/SKILL.md', '.agents/skills/isswf-e2e/references/browser.md', '.agents/skills/isswf-e2e/references/cli-and-api.md', '.agents/skills/isswf-e2e/references/test-quality.md'] : [])];
 for (const name of ['debug', 'tdd', 'security', 'performance', 'observability']) {
   const path = `.agents/skills/isswf-${name}/SKILL.md`;
@@ -272,7 +272,7 @@ async function run(args) {
   let capacityArgs=[];
   if(capacity) {
     const modules={};
-    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(ownSourceBlob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
+    for(const name of ['execution-capacity.mjs','native-recovery.mjs','platform-runtime.mjs','windows-worker-identity.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(ownSourceBlob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
     const path=join(prepared,'capacity.json');await writeFile(path,JSON.stringify({...capacity,modules})+'\n',{flag:'wx',mode:0o600});capacityArgs=['--capacity-file',path];
   }
   const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000', ...capacityArgs]));

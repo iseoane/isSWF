@@ -110,6 +110,20 @@ jobs:
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/windows-worker-task.mjs
+      - name: Verify native Windows worker identity
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-identity.mjs
+      - name: Verify native Windows trusted task containment
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-host.mjs
+      - name: Verify native Windows detached lifecycle
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-lifecycle.mjs
+      - name: Verify compiled Windows worker recovery and capacity
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-worker-recovery.mjs
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
       - name: Install and discover skills with real Pi and Claude hosts, without models

@@ -250,6 +250,10 @@ async function createWindowsToolRunnerImpl({ work, factoryRoot, nodeBinary, bina
   return runner;
 }
 
+export function windowsProcessApiSource() {
+  return WINDOWS_SANDBOX_PS.slice(WINDOWS_SANDBOX_PS.indexOf('using System;'), WINDOWS_SANDBOX_PS.indexOf(' public class Result')) + '\n}';
+}
+
 export async function createWindowsToolRunner(options) {
   return createWindowsToolRunnerImpl(options, WINDOWS_SANDBOX_PS);
 }

@@ -1,0 +1,81 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { verifyRelease } from '../tools/release-source.mjs';
+import { inspectWorkerCessation, inspectNativeRecovery, workspaceTree } from '../tools/native-recovery.mjs';
+import { windowsWorkerState } from '../tools/windows-worker-identity.mjs';
+
+if (process.platform !== 'win32') console.log('SKIP compiled native Windows worker recovery: not Windows');
+else {
+  assert(process.env.ISSWF_PLATFORM_ROOT, 'Run native platform-package first');
+  const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'))), release = report.installed;
+  const receipt = verifyRelease(release), binary = join(release, 'bin/isswf.exe');
+  const root = await mkdtemp(join(tmpdir(), 'isswf recovery ñ ')), repo = join(root, 'project'), sdk = join(root, 'sdk'), store = join(root, 'runs'); await mkdir(repo); await mkdir(sdk);
+  const command = (exe, args, ok = true) => { const result = spawnSync(exe, args, { encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024 }); assert.ifError(result.error); if (ok) assert.equal(result.status, 0, result.stderr + '\n' + result.stdout); else assert.notEqual(result.status, 0); return result; };
+  const git = (...args) => command('git', ['-C', repo, ...args]).stdout.trim();
+  git('init', '-q');
+  await writeFile(join(repo, 'brief.md'), 'Synthetic offline test: only result.txt may change. No model calls.\n');
+  await writeFile(join(repo, 'result.txt'), 'before\n');
+  await writeFile(join(repo, 'mutate.mjs'), "import fs from 'node:fs';fs.writeFileSync('result.txt','after\\n');\n");
+  await writeFile(join(repo, 'long.mjs'), "import fs from 'node:fs';fs.writeFileSync('result.txt','partial\\n');setInterval(()=>{},1000);\n");
+  await writeFile(join(repo, 'check.mjs'), "import fs from 'node:fs';if(fs.readFileSync('result.txt','utf8')!=='after\\n')process.exit(2);\n");
+  git('add', '.'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Pin synthetic inputs'); const sha = git('rev-parse', 'HEAD');
+  const baseline = await workspaceTree(repo); delete baseline['.git']; for (const key of Object.keys(baseline)) if (key.startsWith('.git/')) delete baseline[key];
+  await writeFile(join(sdk, 'package.json'), '{"main":"index.cjs"}');
+  await writeFile(join(sdk, 'index.cjs'), "module.exports={ModelRuntime:{create:async()=>({hasConfiguredAuth:()=>true,getModel:(provider,id)=>({provider,id})})},SettingsManager:{inMemory:v=>v},SessionManager:{inMemory:()=>({})},createExtensionRuntime:()=>({}),createAgentSession:async o=>{const p=o.resourceLoader.getSystemPrompt();if(!p.includes('Native Windows tools use cmd.exe')||!p.includes(o.cwd))throw Error('Missing native worker instructions');return {session:{model:o.model,thinkingLevel:o.thinkingLevel,getCallableToolNames:()=>['sandbox_shell'],dispose:async()=>{}}}}};\n");
+  await mkdir(join(sdk, 'node_modules/typebox'), { recursive: true }); await writeFile(join(sdk, 'node_modules/typebox/package.json'), '{"main":"index.cjs"}'); await writeFile(join(sdk, 'node_modules/typebox/index.cjs'), 'exports.Type=new Proxy({},{get:()=>()=>({})});\n');
+  const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+  const capacityModule = join(release, 'tools/execution-capacity.mjs');
+  const { prepareCapacity, acquireCapacity } = await import(pathToFileURL(capacityModule));
+  const pool = join(root, 'capacity'); await mkdir(pool); await mkdir(join(pool, 'completed'));
+  const policy = JSON.stringify({ version: 1, limit: 1, reference: 'Synthetic native lifecycle capacity' }); await writeFile(join(pool, 'policy.json'), policy);
+  const scope = await prepareCapacity({ pool, policySha256: hash(policy) }, [repo, release, store], hash(await readFile(capacityModule)));
+  let successReservation, interruptedReservation;
+  const waitFor = async fn => { for (let n = 0; n < 600; n++) { try { const value = await fn(); if (value) return value; } catch (error) { if (error.code !== 'ENOENT') throw error; } await new Promise(done => setTimeout(done, 100)); } throw Error('Recovery fixture timed out: ' + root); };
+  const launch = async (id, script) => {
+    const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: binary, authPath: join(root, 'nonexistent-auth'), profile: { repo: release, sha: receipt.methodologySha, files: ['.agents/roles/worker.md'] }, brief: { repo, inputSha: sha, path: 'brief.md' }, expectedMutablePaths: ['result.txt'], protectedCheckCommand: 'node check.mjs', checks: [{ name: 'mutation', command: 'node ' + script, expectedExitCode: 0 }] };
+    const configPath = join(root, id + '.json'), task = join(root, id + '.mjs'); await writeFile(configPath, JSON.stringify(config));
+    const prepared = JSON.parse(command(binary, ['__tool', 'pi-worker-task', 'prepare', '--config', configPath, '--output', task]).stdout);
+    let capacityArgs = [];
+    if (id === 'success' || id === 'interrupted') {
+      await mkdir(store, { recursive: true });
+      const owner = { attemptDir: join(store, id), attemptId: id, inputSha: sha, jobSha256: hash('synthetic-only-job'), runtimeSha: receipt.revision, targetBase: sha };
+      const reservation = await acquireCapacity(scope, { role: 'worker', logicalJobRef: 'I0009/J007/native-capacity-' + id, mode: 'fixture', worker: owner }); assert(reservation);
+      if (id === 'success') successReservation = reservation; else interruptedReservation = reservation;
+      await writeFile(join(store, id + '.job.json'), JSON.stringify({ version: 1, ...owner, mode: 'offline', logicalJobRef: reservation.info.logicalJobRef, capacity: reservation.info, taskSha256: prepared.taskSha256 }));
+      const modules = {};
+      for (const name of ['execution-capacity.mjs', 'native-recovery.mjs', 'platform-runtime.mjs', 'windows-worker-identity.mjs']) { const bytes = await readFile(join(release, 'tools', name)); modules[name] = { sha256: hash(bytes), base64: bytes.toString('base64') }; }
+      const file = join(root, 'capacity-dispatch.json'); await writeFile(file, JSON.stringify({ scope, info: reservation.info, grantSha256: '1'.repeat(64), modules })); capacityArgs = ['--capacity-file', file];
+    }
+    command(binary, ['__tool', 'worker-lifecycle', 'launch', '--repo', repo, '--input-sha', sha, '--brief', 'brief.md', '--target-base', sha, '--attempt-id', id, '--runs-store', store, '--grant-ref', 'synthetic-recovery-fixture', '--task-script', task, '--timeout-ms', '120000', '--output-bytes', '16000', ...capacityArgs]);
+    const attemptDir = join(store, id), dispatch = JSON.parse(await readFile(join(attemptDir, 'dispatch.json'))); return { attemptDir, dispatch };
+  };
+  const success = await launch('success', 'mutate.mjs');
+  const terminal = await waitFor(async () => JSON.parse(await readFile(join(success.attemptDir, 'terminal.json')))); assert.equal(terminal.outcome, 'success', JSON.stringify(terminal));
+  const capacity = await waitFor(async () => { try { const retained = JSON.parse(await readFile(join(success.attemptDir, 'capacity-retained.json'))); throw Error('Unexpected retained capacity: ' + JSON.stringify(retained)); } catch (error) { if (error.code !== 'ENOENT') throw error; } return JSON.parse(await readFile(join(success.attemptDir, 'capacity-completion.json'))); }); assert.equal(capacity.status, 'released');
+  const archived = JSON.parse(await readFile(join(pool, 'completed', successReservation.info.id, 'completion.json'))); assert.equal(archived.evidence.kind, 'verified-worker-task-and-tool-namespace-cessation');
+  const cessation = await inspectWorkerCessation(success); assert.equal(cessation.status, 'ceased', JSON.stringify(cessation)); assert.equal(cessation.namespacesCeased, 3);
+  const receiptPath = join(success.attemptDir, 'execution-job-finished.json'), original = await readFile(receiptPath); const changed = { ...JSON.parse(original), stopped: false }; await writeFile(receiptPath, JSON.stringify(changed)); assert.equal((await inspectWorkerCessation(success)).status, 'blocked'); await writeFile(receiptPath, original);
+  const interrupted = await launch('interrupted', 'long.mjs');
+  await waitFor(async () => (await readFile(join(interrupted.dispatch.workspace, 'result.txt'), 'utf8')) === 'partial\n');
+  const owner = JSON.parse(await readFile(join(interrupted.attemptDir, 'owner.json'))); assert.equal(windowsWorkerState(owner), 'live');
+  const kill = "$ErrorActionPreference='Stop';$p=[Diagnostics.Process]::GetProcessById(" + owner.pid + ");try{$null=$p.Handle;if($p.StartTime.ToUniversalTime().ToFileTimeUtc().ToString() -ne '" + owner.creationFileTime + "'){throw 'Owner changed'};$p.Kill();$p.WaitForExit()}finally{$p.Dispose()}";
+  command(join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(kill, 'utf16le').toString('base64')]);
+  await waitFor(async () => JSON.parse(await readFile(join(interrupted.attemptDir, 'execution-job-finished.json'))).stopped);
+  const observed = JSON.parse(command(binary, ['__tool', 'worker-lifecycle', 'reconcile', '--runs-store', store, '--attempt-id', 'interrupted']).stdout); assert.equal(observed.state, 'unknown', JSON.stringify(observed)); assert.equal(observed.executionChild.state, 'not-live');
+  const recovery = await inspectNativeRecovery({ ...interrupted, observation: observed, job: { expectedMutablePaths: ['result.txt'] }, baseline }); assert.equal(recovery.status, 'stopped-review-required', JSON.stringify(recovery)); assert.deepEqual(recovery.changedPaths, ['result.txt']); assert.equal(recovery.profileCleanupRequired, true); assert.equal(recovery.retry, 'never');
+  assert.equal((await inspectWorkerCessation(interrupted)).status, 'blocked');
+  const lease = JSON.parse(await readFile(join(pool, 'slot-0/lease.json'))); assert.equal(lease.id, interruptedReservation.info.id);
+  const recover = () => inspectNativeRecovery({ ...interrupted, observation: observed, job: { expectedMutablePaths: ['result.txt'] }, baseline });
+  const rootProof = join(interrupted.attemptDir, 'execution-job-finished.json'), rootBytes = await readFile(rootProof);
+  await writeFile(rootProof, '{}'); assert.equal((await recover()).status, 'blocked'); await writeFile(rootProof, rootBytes);
+  const commandStart = join(interrupted.attemptDir, 'native-tools/000002.started.json'), commandBytes = await readFile(commandStart);
+  await writeFile(commandStart, JSON.stringify({ ...JSON.parse(commandBytes), sdkOwnerCreationFileTime: '1'.repeat(18) })); assert.equal((await recover()).status, 'blocked'); await writeFile(commandStart, commandBytes);
+  assert.equal((await inspectNativeRecovery({ ...interrupted, observation: observed, job: { expectedMutablePaths: [] }, baseline })).status, 'blocked');
+  assert.deepEqual(await readFile(join(pool, 'slot-0/lease.json')), Buffer.from(JSON.stringify(lease) + '\n'));
+  console.log(JSON.stringify({ status: 'PASS', root, revision: receipt.revision, checks: ['actual compiled lifecycle and synthetic SDK LPAC task', 'strict successful task/tool cessation and actual automatic capacity archival', 'tampered root Job proof refused', 'exact owned supervisor loss', 'observed zero descendants after owner loss', 'read-only stopped-review-required with authorized partial bytes', 'incomplete profile cleanup visible', 'no failed-worker automatic capacity release', 'corrupt Job/partial startup and excess mutable scope refused'], limits: 'No real provider, profile cleanup operation, independent review or complete client readiness' }));
+}

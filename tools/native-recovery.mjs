@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
+import { windowsWorkerState, validWindowsWorkerIdentity } from './windows-worker-identity.mjs';
 
 async function processEvidence(pid) {
   const fs = await import('node:fs/promises');
@@ -21,11 +22,6 @@ async function createNativeToolRunner({ work, factoryRoot }) {
   const { spawn } = await import('node:child_process');
   const { createHash, randomBytes } = await import('node:crypto');
   const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-  if (process.platform === 'win32') {
-    if (!process.versions.bun || typeof createWindowsToolRunner !== 'function') throw Error('Native Windows tools require the selected compiled Bun backend');
-    const runner = await createWindowsToolRunner({ work, factoryRoot, nodeBinary: process.execPath, binarySha256: digest(await fs.readFile(process.execPath)) });
-    return (_args, command, timeout, modelCall) => runner(command, timeout, modelCall);
-  }
   const directory = dirname(work), records = join(directory, 'native-tools');
   const taskSha256 = digest(await fs.readFile(process.argv[1]));
   const attemptId = basename(directory);
@@ -35,9 +31,23 @@ async function createNativeToolRunner({ work, factoryRoot }) {
     try { await handle.writeFile(JSON.stringify(value) + '\n'); await handle.sync(); } finally { await handle.close(); }
     await fs.link(temp, path);
     await fs.unlink(temp);
+    if (process.platform === 'win32') return;
     const parent = await fs.open(dirname(path), 'r');
     try { await parent.sync(); } finally { await parent.close(); }
   };
+  if (process.platform === 'win32') {
+    if (!process.versions.bun || typeof createWindowsToolRunner !== 'function') throw Error('Native Windows tools require the selected compiled Bun backend');
+    const runner = await createWindowsToolRunner({ work, factoryRoot, nodeBinary: process.execPath, binarySha256: digest(await fs.readFile(process.execPath)) });
+    const toolPolicy = JSON.parse(await fs.readFile(join(records, 'policy.json'), 'utf8'));
+    let task = null;
+    try {
+      const record = JSON.parse(await fs.readFile(join(directory, 'execution-child.json'), 'utf8'));
+      if (record.version !== 1 || record.attemptId !== attemptId || record.taskSha256 !== taskSha256 || record.child?.platform !== 'win32' || record.child.pid !== process.pid || record.child.creationFileTime !== toolPolicy.parentFileTime) throw Error('Windows lifecycle/task identity mismatch');
+      task = record.child;
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    await atomic(join(directory, 'native-recovery.json'), { version: 1, policy: 'native-tools-lpac-job-v1', attemptId, taskSha256, task, toolPolicySha256: digest(await fs.readFile(join(records, 'policy.json'))) });
+    return (_args, command, timeout, modelCall) => runner(command, timeout, modelCall);
+  }
   await fs.mkdir(records);
   await atomic(join(directory, 'native-recovery.json'), {
     version: 1, policy: 'native-tools-pidns-v1', attemptId, taskSha256,
@@ -120,7 +130,7 @@ async function workspaceTree(directory) {
     for(const name of await fs.readdir(parent)) {
       const path=join(parent,name),relative=prefix+name,entry=await fs.lstat(path);
       if(entry.isDirectory()) { entries[relative]={kind:'directory'};await walk(path,relative+'/'); }
-      else if(entry.isFile()) entries[relative]={kind:'file',sha256:createHash('sha256').update(await fs.readFile(path)).digest('hex'),executable:Boolean(entry.mode & 0o111)};
+      else if(entry.isFile()) { if(process.platform==='win32'&&entry.nlink!==1)throw Error('Unsafe workspace hardlink'); entries[relative]={kind:'file',sha256:createHash('sha256').update(await fs.readFile(path)).digest('hex'),executable:Boolean(entry.mode & 0o111)}; }
       else if(entry.isSymbolicLink()) entries[relative]={kind:'symlink',target:await fs.readlink(path)};
       else throw Error('unsupported workspace entry');
     }
@@ -143,6 +153,55 @@ const load = async path => {
   return JSON.parse(new TextDecoder('utf-8', {fatal:true}).decode(bytes));
 };
 const blocked = reason => ({ status:'blocked', reason, reviewRequired:true, retry:'never' });
+async function inspectWindowsCessation(attemptDir, dispatch, child, policy, allowInterrupted) {
+  if (policy.version !== 1 || policy.policy !== 'native-tools-lpac-job-v1' || policy.attemptId !== dispatch.attemptId || policy.taskSha256 !== dispatch.taskSha256 || !validWindowsWorkerIdentity(child) || JSON.stringify(policy.task) !== JSON.stringify(child)) return blocked('Windows task policy identity mismatch');
+  if (windowsWorkerState(child) !== 'not-live') return blocked('Windows task cessation not confirmed');
+  for (const name of ['platform-runtime.mjs', 'windows-worker-identity.mjs', 'windows-worker-host.mjs', 'windows-tool-sandbox.mjs']) if (!/^[a-f0-9]{64}$/.test(dispatch.dependencies?.[name] || '') || digest(await readFile(join(attemptDir, name))) !== dispatch.dependencies[name]) return blocked('Windows lifecycle dependency changed');
+  if (digest(await readFile(join(attemptDir, 'worker-lifecycle.mjs'))) !== dispatch.lifecycleSourceSha256) return blocked('Windows lifecycle snapshot changed');
+  const owner = await load(join(attemptDir, 'owner.json'));
+  const started = await load(join(attemptDir, 'execution-job-started.json'));
+  const finished = await load(join(attemptDir, 'execution-job-finished.json'));
+  for (const record of [started, finished]) if (record.version !== 1 || record.attemptId !== dispatch.attemptId || record.taskSha256 !== dispatch.taskSha256) return blocked('Windows job binding mismatch');
+  if (!validWindowsWorkerIdentity(owner) || owner.nonce === undefined || owner.bootId !== child.bootId || started.ownerPid !== owner.pid || started.ownerCreationFileTime !== owner.creationFileTime || started.pid !== child.pid || started.creationFileTime !== child.creationFileTime || started.assignedBeforeResume !== true || started.dualJobLifetime !== true || finished.stopped !== true || !Number.isInteger(finished.exitCode) || typeof finished.timedOut !== 'boolean') return blocked('Windows job cessation evidence incomplete');
+  if (!allowInterrupted && (finished.exitCode !== 0 || finished.timedOut !== false)) return blocked('Windows root Job did not complete successfully');
+  if (allowInterrupted && windowsWorkerState(owner) !== 'not-live') return blocked('Windows lifecycle owner cessation not confirmed');
+  const records = join(attemptDir, 'native-tools');
+  if (digest(await readFile(join(records, 'policy.json'))) !== policy.toolPolicySha256) return blocked('Windows tool policy changed');
+  const tools = await load(join(records, 'policy.json'));
+  if (tools.version !== 1 || tools.policy !== policy.policy || tools.parentPid !== child.pid || tools.parentFileTime !== child.creationFileTime || tools.binarySha256 !== digest(await readFile(child.exe)) || tools.binarySha256 !== digest(await readFile(join(records, 'runtime/node.exe'))) || tools.launcherSha256 !== digest(await readFile(join(records, 'runtime/launcher.ps1')))) return blocked('Windows tool runtime/owner changed');
+  const names = (await readdir(records)).filter(name => !['runtime', 'scratch', 'helper-temp', 'policy.json'].includes(name)).sort();
+  const intents = names.filter(name => /^\d{6}\.intent\.json$/.test(name));
+  if (intents.length > 64 || names.some(name => !/^\d{6}\.(?:intent|profile-intent|profile-created|started|finished)\.json$/.test(name))) return blocked('Unknown Windows tool ledger entries');
+  let profileCleanupRequired = false;
+  for (let index = 0; index < intents.length; index++) {
+    const prefix = String(index + 1).padStart(6, '0');
+    if (intents[index] !== prefix + '.intent.json') return blocked('Windows tool sequence gap');
+    const intent = await load(join(records, intents[index]));
+    const { binding, ...body } = intent;
+    if (intent.version !== 1 || intent.seq !== index + 1 || !/^[a-f0-9]{32}$/.test(intent.nonce || '') || intent.binarySha256 !== tools.binarySha256 || binding !== digest(JSON.stringify(body))) return blocked('Windows intent binding mismatch');
+    const available = names.filter(name => name.startsWith(prefix + '.'));
+    for (const name of available.filter(name => name !== intents[index])) {
+      const record = await load(join(records, name));
+      if (record.version !== 1 || record.binding !== binding) return blocked('Windows tool receipt binding mismatch');
+    }
+    if (available.includes(prefix + '.started.json')) {
+      const command = await load(join(records, prefix + '.started.json'));
+      if (command.lpacRequested !== true || command.jobAssignedBeforeResume !== true || command.dualJobLifetime !== true || command.sdkOwnerPid !== child.pid || command.sdkOwnerCreationFileTime !== child.creationFileTime || !Number.isSafeInteger(command.pid) || command.pid <= 0 || !/^\d+$/.test(command.creationFileTime || '')) return blocked('Windows partial startup identity mismatch');
+    }
+    if (available.includes(prefix + '.profile-created.json') && !available.includes(prefix + '.profile-intent.json') || available.includes(prefix + '.started.json') && !available.includes(prefix + '.profile-created.json') || available.includes(prefix + '.finished.json') && !available.includes(prefix + '.started.json')) return blocked('Windows receipt order incomplete');
+    const complete = ['profile-intent', 'profile-created', 'started', 'finished'].every(suffix => available.includes(prefix + '.' + suffix + '.json'));
+    if (!complete && !allowInterrupted) return blocked('Incomplete Windows tool startup/completion');
+    if (!complete) { profileCleanupRequired = true; continue; }
+    const profile = await load(join(records, prefix + '.profile-intent.json'));
+    const created = await load(join(records, prefix + '.profile-created.json'));
+    const command = await load(join(records, prefix + '.started.json'));
+    const end = await load(join(records, prefix + '.finished.json'));
+    if (!/^isswf\.tool\.[a-f0-9]{32}$/.test(profile.moniker || '') || created.moniker !== profile.moniker || !/^S-1-15-2-(?:\d+-)*\d+$/.test(created.sid || '') || command.lpacRequested !== true || command.jobAssignedBeforeResume !== true || command.dualJobLifetime !== true || command.sdkOwnerPid !== child.pid || command.sdkOwnerCreationFileTime !== child.creationFileTime || !Number.isSafeInteger(command.pid) || command.pid <= 0 || !/^\d+$/.test(command.creationFileTime || '') || end.stopped !== true || end.profileDeleted !== true || !Number.isInteger(end.code)) return blocked('Invalid Windows tool completion');
+  }
+  if (names.some(name => Number(name.slice(0, 6)) > intents.length)) return blocked('Orphan Windows tool receipt');
+  return { status: 'ceased', taskSha256: dispatch.taskSha256, namespacesCeased: intents.length, task: child, ...(profileCleanupRequired ? { profileCleanupRequired: true } : {}) };
+}
+
 async function ceased(identity) {
   if (!identity || !Number.isSafeInteger(identity.pid) || identity.pid<=0 || typeof identity.startTicks!=='string' || !/^\d+$/.test(identity.startTicks) || typeof identity.bootId!=='string' || !/^[0-9a-f-]{36}$/.test(identity.bootId) || typeof identity.namespace!=='string' || !/^pid:\[\d+\]$/.test(identity.namespace) || typeof identity.exe!=='string' || !identity.exe.startsWith('/')) return false;
   if ((await readFile('/proc/sys/kernel/random/boot_id','utf8')).trim()!==identity.bootId) return false;
@@ -153,10 +212,11 @@ async function ceased(identity) {
   return fields[19]===identity.startTicks && fields[0]==='Z';
 }
 
-async function inspectCessation(attemptDir, dispatch, child) {
+async function inspectCessation(attemptDir, dispatch, child, allowInterrupted = false) {
   try {
     if (digest(await readFile(join(attemptDir,'task.mjs')))!==dispatch.taskSha256) return blocked('task snapshot changed');
     const policy=await load(join(attemptDir,'native-recovery.json'));
+    if(process.platform==='win32')return inspectWindowsCessation(attemptDir,dispatch,child,policy,allowInterrupted);
     if (policy.version!==1 || policy.policy!=='native-tools-pidns-v1' || policy.attemptId!==dispatch.attemptId || policy.taskSha256!==dispatch.taskSha256 || !child || ['pid','startTicks','bootId','exe'].some(key=>policy.task?.[key]!==child[key])) return blocked('native task policy identity mismatch');
     if (!await ceased(policy.task)) return blocked('native task cessation not confirmed');
     if (digest(await readFile('/usr/bin/bwrap'))!==policy.bwrapSha256) return blocked('native namespace runtime changed');
@@ -191,11 +251,11 @@ export async function inspectWorkerCessation({attemptDir, dispatch}) {
 export async function inspectNativeRecovery({ attemptDir, dispatch, observation, job, baseline }) {
   try {
     if (observation.state!=='unknown' || observation.executionChild?.state!=='not-live') return blocked('execution task cessation not confirmed');
-    const cessation=await inspectCessation(attemptDir,dispatch,observation.executionChild.identity);
+    const cessation=await inspectCessation(attemptDir,dispatch,observation.executionChild.identity,true);
     if(cessation.status!=='ceased')return cessation;
     const current=await workspaceTree(dispatch.workspace);
     const changed=Object.keys({...baseline,...current}).filter(path=>JSON.stringify(baseline[path])!==JSON.stringify(current[path])).sort();
     if(!Array.isArray(job.expectedMutablePaths) || changed.some(path=>!job.expectedMutablePaths.includes(path)) || Object.keys(baseline).some(path=>current[path]===undefined) || changed.some(path=>current[path]?.kind!=='file' || !/^[0-9a-f]{64}$/.test(current[path].sha256) || (baseline[path]?.kind==='file' && baseline[path].executable!==current[path].executable))) return blocked('partial tree exceeds committed mutable scope');
-    return { status:'stopped-review-required', reviewRequired:true, retry:'never', taskSha256:dispatch.taskSha256, targetBase:dispatch.targetBase, changedPaths:changed, candidateHashes:Object.fromEntries(changed.map(path=>[path,current[path].sha256])), namespacesCeased:cessation.namespacesCeased, protectedHashesPreserved:true, remoteEffects:'not-reconciled' };
+    return { status:'stopped-review-required', reviewRequired:true, retry:'never', taskSha256:dispatch.taskSha256, targetBase:dispatch.targetBase, changedPaths:changed, candidateHashes:Object.fromEntries(changed.map(path=>[path,current[path].sha256])), namespacesCeased:cessation.namespacesCeased, ...(cessation.profileCleanupRequired ? {profileCleanupRequired:true} : {}), protectedHashesPreserved:true, remoteEffects:'not-reconciled' };
   } catch { return blocked('missing, corrupt or unreadable native recovery evidence'); }
 }
