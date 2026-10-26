@@ -80,6 +80,8 @@ La configuración también ofrece una carpeta externa para los worktrees de Git 
 
 La configuración crea `.isswf/` y registra la versión de la factoría elegida para el proyecto. Las nuevas referencias Bun identifican el código y la versión del motor compartidos, mientras cada máquina conserva y verifica su artefacto de plataforma. La referencia no incluye un hash de binario nativo que los colaboradores deban cambiar al usar otra plataforma. Conserva los ajustes de modelos y las decisiones de configuración existentes salvo que apruebes cambios de forma explícita. La autenticación y los permisos de ejecución deberán seguir siendo válidos para el trabajo que solicites después.
 
+La inicialización del proyecto selecciona métodos de sistema de archivos e identidad de procesos específicos para Linux y Windows. Windows necesita Windows PowerShell y acceso a CIM para registrar la creación del proceso y el arranque del sistema; si no se puede obtener la identidad, la operación o recuperación queda bloqueada. Los archivos se sincronizan en ambos sistemas. Windows no sincroniza los directorios, por lo que no se promete una persistencia de sus entradas equivalente a Linux tras un corte eléctrico. Este soporte de inicialización no demuestra aislamiento de workers ni soporte completo de migración y recuperación en Windows.
+
 Si el repositorio ya utiliza `.factory/`, pide inspeccionar y migrar ese estado existente. No crees una segunda carpeta de la factoría a su lado.
 
 ## Actualizar sin cambiar todos los repositorios

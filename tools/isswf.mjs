@@ -7,6 +7,7 @@ import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyRelease, releaseInvocation } from './release-source.mjs';
 import { stateDirectory } from './project-state.mjs';
+import { syncDirectory, identity, ceased } from './platform-runtime.mjs';
 import { inspectStateMigration, moveState, recoverState } from './state-migration.mjs';
 
 const ownRoot = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -39,7 +40,6 @@ async function writeExclusive(path, bytes) {
   try { await link(temp, path); } finally { await unlink(temp); }
   await syncDirectory(dirname(path));
 }
-async function syncDirectory(path) { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } }
 async function atomic(path, bytes) {
   const temp = join(dirname(path), '.isswf-' + randomUUID());
   await writeExclusive(temp, bytes);
@@ -118,19 +118,6 @@ async function retain(store, from) {
     await syncDirectory(dirname(target));
     return target;
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
-}
-async function identity() {
-  if (process.platform !== 'linux') fail('Mutation recovery requires Linux process identity support');
-  const stat = await readFile(`/proc/${process.pid}/stat`, 'utf8');
-  return { pid: process.pid, startTicks: stat.slice(stat.lastIndexOf(')') + 2).split(/\s+/u)[19], bootId: (await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() };
-}
-async function ceased(owner) {
-  if (!Number.isSafeInteger(owner?.pid) || owner.pid <= 0 || !/^\d+$/u.test(owner.startTicks || '') || !/^[a-f0-9-]{36}$/u.test(owner.bootId || '')) return false;
-  try {
-    if ((await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() !== owner.bootId) return true;
-    const stat = await readFile(`/proc/${owner.pid}/stat`, 'utf8');
-    return stat.slice(stat.lastIndexOf(')') + 2).split(/\s+/u)[19] !== owner.startTicks;
-  } catch (error) { return error.code === 'ENOENT'; }
 }
 async function retireClaim(path) {
   const retired = join(dirname(path), '.retired-' + randomUUID());
