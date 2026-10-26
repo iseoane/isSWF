@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { verifyRelease } from '../tools/release-source.mjs';
 
-async function compiledReview({ root, release, methodologySha }) {
+async function compiledReview({ root, release, methodologySha, provider }) {
   const assert = (await import('node:assert/strict')).default;
   const { mkdir, readFile, writeFile } = await import('node:fs/promises');
   const { join } = await import('node:path');
@@ -22,27 +22,36 @@ async function compiledReview({ root, release, methodologySha }) {
   await writeFile(join(project, 'app.mjs'), 'export const value=1;\n'); const targetBase = commit();
   await writeFile(join(project, 'app.mjs'), 'export const value=2;\n'); const candidateSha = commit();
   await writeFile(join(project, 'brief.md'), 'Synthetic supplied-evidence transport only; no real provider or verdict.\n');
-  await writeFile(join(project, 'models.json'), await readFile(join(release, '.factory/models.json'))); const modelsSha = commit();
+  const models = JSON.parse(await readFile(join(release, '.factory/models.json'))); models.roles.reviewer = [{ model: provider + '/gpt-6-luna', effort: 'high' }];
+  await save(join(project, 'models.json'), models); const modelsSha = commit();
   const job = { version: 1, logicalJobRef: 'I0009/J007/compiled-review-fixture', implementerRef: 'synthetic-author', targetRepo: project, targetBase, candidateSha, methodologySha, briefPath: 'brief.md', contextPaths: ['app.mjs'], models: { sha: modelsSha, path: 'models.json', sha256: hash(await readFile(join(project, 'models.json'))) }, sdkPath: join(root, 'synthetic-not-loaded-sdk') };
   await save(join(project, 'review.json'), job); const inputSha = commit();
   const authPath = join(root, 'synthetic-auth.json'); await save(authPath, {});
   const grantFile = join(root, 'grant.json');
-  await save(grantFile, { version: 1, role: 'reviewer', project, store, inputSha, jobPath: 'review.json', jobSha256: hash(await readFile(join(project, 'review.json'))), logicalJobRef: job.logicalJobRef, targetRepo: project, targetBase, candidateSha, grantRef: 'Synthetic compiled artifact test only', implementerRef: job.implementerRef, reviewerRef: 'synthetic-independent-reviewer', callerSha256: hash(await readFile(join(release, 'tools/reviewer-task.mjs'))), backendSha256: hash(await readFile(join(release, 'tools/researcher-task.mjs'))), authPath, sdkEntrySha256: '0'.repeat(64), allowResultArtifact: true, allowProviderCalls: false, apiCostsAllowed: false, totalAttempts: 1, retryBudget: 0, deadlineMs: 10000, outputBytes: 2048, maxOutputTokens: 512, approvedRoute: [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }] });
+  await save(grantFile, { version: 1, role: 'reviewer', project, store, inputSha, jobPath: 'review.json', jobSha256: hash(await readFile(join(project, 'review.json'))), logicalJobRef: job.logicalJobRef, targetRepo: project, targetBase, candidateSha, grantRef: 'Synthetic compiled artifact test only', implementerRef: job.implementerRef, reviewerRef: 'synthetic-independent-reviewer', callerSha256: hash(await readFile(join(release, 'tools/reviewer-task.mjs'))), backendSha256: hash(await readFile(join(release, 'tools/researcher-task.mjs'))), authPath, sdkEntrySha256: '0'.repeat(64), allowResultArtifact: true, allowProviderCalls: false, apiCostsAllowed: false, totalAttempts: 1, retryBudget: 0, deadlineMs: 10000, outputBytes: 2048, maxOutputTokens: 512, approvedRoute: [{ model: provider + '/gpt-6-luna', effort: 'high' }] });
   let fetches = 0; globalThis.fetch = () => { throw Error('Real network prohibited'); };
-  const backend = { async preflight() { return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic' } }; }, async fetch() { fetches++; return new Response('', { status: 200 }); }, stream(model, context, options) { assert.equal(context.tools, undefined); assert.equal(JSON.parse(context.messages[0].content).candidateSha, candidateSha); return { async result() { await options.fetch('https://synthetic.invalid'); return { provider: model.provider, model: model.id, stopReason: 'stop', content: [{ type: 'text', text: 'Synthetic transport; not an independent product verdict.' }] }; } }; } };
+  const backend = { async preflight() { return { model: { provider, id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic' } }; }, async fetch() { fetches++; return new Response('', { status: 200 }); }, stream(model, context, options) { assert.equal(context.tools, undefined); assert.equal(JSON.parse(context.messages[0].content).candidateSha, candidateSha); return { async result() { await options.fetch('https://synthetic.invalid'); return { provider: model.provider, model: model.id, stopReason: 'stop', content: [{ type: 'text', text: 'Synthetic transport; not an independent product verdict.' }] }; } }; } };
   const request = { project, store, inputSha, jobPath: 'review.json', grantFile };
   const result = await runReview(request, { mode: 'fixture', backend }); assert.equal(result.status, 'response-complete', JSON.stringify(result)); assert.equal(fetches, 1);
   assert.equal((await readReview({ project, store, logicalJobRef: job.logicalJobRef })).status, 'recorded');
   await assert.rejects(runReview(request, { mode: 'fixture', backend })); assert.equal(fetches, 1);
-  console.log(JSON.stringify({ status: 'PASS', checks: ['actual installed compiled runtime', 'native canonical roots and external boundaries', 'pinned supplied-evidence reviewer', 'synthetic one-fetch transport', 'durable readback and replay refusal'], limits: 'No real SDK/provider, workspace probes or independent product verdict' }));
+  if (provider === 'openai') {
+    const wrongStore = join(root, 'wrong-provider'); await mkdir(wrongStore);
+    const wrongGrant = join(root, 'wrong-grant.json'); await save(wrongGrant, { ...JSON.parse(await readFile(grantFile)), store: wrongStore });
+    const wrong = await runReview({ ...request, store: wrongStore, grantFile: wrongGrant }, { mode: 'fixture', backend: { ...backend, async preflight() { return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic' } }; } } });
+    assert.equal(wrong.status, 'blocked'); assert.equal(wrong.attemptsConsumed, 0); assert.equal(wrong.fetches, 0); assert.equal(fetches, 1);
+  }
+  console.log(JSON.stringify({ status: 'PASS', provider, checks: ['actual installed compiled runtime', 'native canonical roots and external boundaries', 'pinned supplied-evidence reviewer', 'synthetic one-fetch transport', 'durable readback and replay refusal'], limits: 'No real SDK/provider, workspace probes or independent product verdict' }));
 }
 
 if (process.platform !== 'win32') console.log('SKIP compiled Windows reviewer: not Windows');
 else {
   assert(process.env.ISSWF_PLATFORM_ROOT, 'Run platform-package first');
   const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'))), release = report.installed, receipt = verifyRelease(release);
+  for (const provider of ['openai-codex', 'openai']) {
   const root = await mkdtemp(join(tmpdir(), 'isswf compiled review ñ ')), script = join(root, 'review.mjs');
-  await writeFile(script, '(' + compiledReview.toString() + ')(' + JSON.stringify({ root, release, methodologySha: receipt.methodologySha }) + ');\n');
+  await writeFile(script, '(' + compiledReview.toString() + ')(' + JSON.stringify({ root, release, methodologySha: receipt.methodologySha, provider }) + ');\n');
   const result = spawnSync(join(release, 'bin/isswf.exe'), [script], { encoding: 'utf8', timeout: 60000, maxBuffer: 1024 * 1024 }); assert.ifError(result.error); assert.equal(result.status, 0, result.stderr + '\n' + result.stdout);
   console.log(JSON.stringify({ root, revision: receipt.revision, result: JSON.parse(result.stdout.trim()) }));
+  }
 }

@@ -29,7 +29,7 @@ try {
     await mkdir(dirname(join(fixture, path)), { recursive: true });
     await cp(join(source, path), join(fixture, path), { recursive: true });
   }
-  const runtime = ['isswf-job.mjs', 'factory-package.mjs', 'pi-worker-task.mjs', 'worker-lifecycle.mjs', 'native-recovery.mjs', 'external-effect-journal.mjs', 'recovery-review.mjs', 'job-successor.mjs', 'isswf-plan.mjs', 'release-source.mjs', 'project-state.mjs', 'platform-runtime.mjs', 'windows-tool-sandbox.mjs', 'windows-worker-identity.mjs', 'windows-worker-host.mjs'];
+  const runtime = ['luna-high-route.mjs', 'isswf-job.mjs', 'factory-package.mjs', 'pi-worker-task.mjs', 'worker-lifecycle.mjs', 'native-recovery.mjs', 'external-effect-journal.mjs', 'recovery-review.mjs', 'job-successor.mjs', 'isswf-plan.mjs', 'release-source.mjs', 'project-state.mjs', 'platform-runtime.mjs', 'windows-tool-sandbox.mjs', 'windows-worker-identity.mjs', 'windows-worker-host.mjs'];
   await mkdir(join(fixture, 'tools'), { recursive: true });
   for (const name of runtime) await cp(join(source, 'tools', name), join(fixture, 'tools', name));
   git('init', '-q');
@@ -85,6 +85,9 @@ try {
   let pin = initial;
   let inputSha = await input(pin, 'canonical');
   await run('canonical', inputSha, 'job.sdkPath must be absolute');
+  pin = await setupConfigCommit([{ model: 'openai/gpt-6-luna', effort: 'high' }]);
+  inputSha = await input(pin, 'openai-oauth');
+  await run('openai-oauth', inputSha, 'job.sdkPath must be absolute');
 
   const cases = [
     ['wrong-model', [{ model: 'openai-codex/not-luna', effort: 'high' }]],

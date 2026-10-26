@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { lunaHighRoute } from './luna-high-route.mjs';
 import { readReleaseSource, verifyRelease } from './release-source.mjs';
 import { createHash } from 'node:crypto';
 import { readFile, link, unlink, open, rm, realpath, stat } from 'node:fs/promises';
@@ -61,6 +62,8 @@ async function prepare(args) {
   const output = safePath(args['--output'], '--output');
   const config = JSON.parse(await readFile(configPath, 'utf8'));
   if (config.version !== 1 || !['offline', 'real'].includes(config.mode)) throw new Error('config version/mode invalid');
+  const route = lunaHighRoute([config.route === undefined ? { model: 'openai-codex/gpt-6-luna', effort: 'high' } : config.route]);
+  if (!route) throw Error('only exact configured LunaHigh worker route supported; no fallback');
   if (process.platform === 'win32') {
     if (!process.versions.bun) throw new Error('Native Windows worker preparation requires the selected compiled Bun runtime; Node is unsupported');
     const selected = config.nodeBinary || process.execPath;
@@ -105,7 +108,7 @@ async function prepare(args) {
   if (typeof config.protectedCheckCommand !== 'string' || !config.protectedCheckCommand || config.protectedCheckCommand.length > 1000) throw new Error('protectedCheckCommand invalid');
   const checks = config.checks ?? [];
   if (!Array.isArray(checks) || checks.length > 10 || checks.some(check => !check || typeof check.name !== 'string' || !check.name || typeof check.command !== 'string' || !check.command || check.command.length > 8000 || !Number.isInteger(check.expectedExitCode) || check.expectedExitCode < 0 || check.expectedExitCode > 255)) throw new Error('checks invalid');
-  const body = { version: 1, mode: config.mode, sdkPath, nodeBinary, authPath, files, briefText, briefPath: brief.path, inputSha: brief.inputSha, briefSha256, expectedMutablePaths: config.expectedMutablePaths, protectedCheckCommand: config.protectedCheckCommand, checks };
+  const body = { version: 1, mode: config.mode, route, sdkPath, nodeBinary, authPath, files, briefText, briefPath: brief.path, inputSha: brief.inputSha, briefSha256, expectedMutablePaths: config.expectedMutablePaths, protectedCheckCommand: config.protectedCheckCommand, checks };
   const generated = `#!/usr/bin/env node\nconst CONFIG=${JSON.stringify(body)};\n${runtimeSource()}`;
   const temp = `${output}.${process.pid}.tmp`;
   const handle = await open(temp, 'wx', 0o600);
@@ -130,7 +133,7 @@ const remainingBudget = () => Math.max(0, 110000 - (Date.now() - processStartedA
 const work = process.argv[2];
 const resultPath = pathJoin(pathDirname(pathResolve(work)), 'pi-result.json');
 let factoryRoot = '';
-const safeResult = { version: 1, mode: CONFIG.mode, briefPath: CONFIG.briefPath, inputSha: CONFIG.inputSha, briefSha256: CONFIG.briefSha256, provider: 'openai-codex', model: 'gpt-6-luna', effort: 'high', providerPromptStarted: false, sdkInitialized: false, toolCalls: 0, acceptance: false, protectedHashesPreserved: false };
+const safeResult = { version: 1, mode: CONFIG.mode, briefPath: CONFIG.briefPath, inputSha: CONFIG.inputSha, briefSha256: CONFIG.briefSha256, provider: CONFIG.route.provider, model: CONFIG.route.model, effort: CONFIG.route.effort, providerPromptStarted: false, sdkInitialized: false, toolCalls: 0, acceptance: false, protectedHashesPreserved: false };
 const finish = async (ok, extra = {}) => {
   const result = { ...safeResult, ...extra, status: ok ? 'completed' : 'partial' };
   if (resultPath) { const temp = resultPath + '.' + process.pid + '.tmp'; await write(temp, JSON.stringify(result) + '\n', { mode: 0o600, flag: 'wx' }); await (await import('node:fs/promises')).rename(temp, resultPath); }
@@ -162,10 +165,11 @@ try {
   const sdk = requireSdk(CONFIG.sdkPath), Type = requireSdk('typebox').Type;
   runtimeRoot = await tempDir(pathJoin(process.platform === 'win32' ? systemTmpdir() : '/tmp', 'pi-worker-runtime-'));
   runtime = await sdk.ModelRuntime.create({ authPath: CONFIG.authPath, modelsPath: pathJoin(runtimeRoot,'models.json'), allowModelNetwork: false, refreshOnCreate: true });
-  if (runtime.hasConfiguredAuth('openai-codex') !== true) throw Error('standard host auth is not configured for openai-codex');
+  if (runtime.hasConfiguredAuth(CONFIG.route.provider) !== true) throw Error('standard host auth is not configured for selected provider');
+  if (CONFIG.mode === 'real' && runtime.isUsingSubscription?.(CONFIG.route.provider) !== true) throw Error('verified OAuth subscription required; API-key billing is not authorized');
   safeResult.sdkInitialized = true;
-  const model = runtime.getModel('openai-codex','gpt-6-luna');
-  if (!model || model.provider !== 'openai-codex' || model.id !== 'gpt-6-luna') throw Error('explicit model unavailable');
+  const model = runtime.getModel(CONFIG.route.provider,CONFIG.route.model);
+  if (!model || model.provider !== CONFIG.route.provider || model.id !== CONFIG.route.model) throw Error('explicit model unavailable');
   const schema = Type.Union([Type.Object({operation:Type.Literal('shell'),command:Type.String({minLength:1,maxLength:8000})}),Type.Object({operation:Type.Literal('boundary_check')})]);
   trustedRoot = await tempDir(pathJoin(process.platform === 'win32' ? systemTmpdir() : '/tmp', 'pi-worker-factory-'));
   factoryRoot = trustedRoot;
@@ -201,7 +205,7 @@ try {
   const settings=sdk.SettingsManager.inMemory({retry:{enabled:false,maxRetries:0},compaction:{enabled:false}});
   const {session: created}=await sdk.createAgentSession({cwd:work,agentDir:runtimeRoot,modelRuntime:runtime,model,thinkingLevel:'high',settingsManager:settings,sessionManager:sdk.SessionManager.inMemory(work),resourceLoader:loader,noTools:'all',tools:['sandbox_shell'],excludeTools:['mcp__*'],customTools:[tool]});
   session=created;
-  if(session.model?.provider!=='openai-codex'||session.model?.id!=='gpt-6-luna'||session.thinkingLevel!=='high'||JSON.stringify(session.getCallableToolNames())!==JSON.stringify(['sandbox_shell'])) throw Error('runtime route/tool validation failed');
+  if(session.model?.provider!==CONFIG.route.provider||session.model?.id!==CONFIG.route.model||session.thinkingLevel!=='high'||JSON.stringify(session.getCallableToolNames())!==JSON.stringify(['sandbox_shell'])) throw Error('runtime route/tool validation failed');
   if(CONFIG.mode==='offline') { const probe=await tool.execute('offline-boundary-call',{operation:'boundary_check'}); let controls={}; try{controls=JSON.parse(probe.content?.[0]?.text?.trim().split('\\n').at(-1)||'{}');}catch{} if(probe.isError||probe.details?.exitCode!==0||probe.details?.canaryHashPreserved!==true||!matchesBoundaryControls(controls,process.platform)||hash(await read(outside))!==outsideHash) throw Error('offline boundary bridge failed'); const beforeOffline=await tree(work), checks=[]; for(const item of CONFIG.checks){const run=await bounded(item.command,10000);checks.push({name:item.name,exitCode:run.code});if(run.code!==item.expectedExitCode)throw Error('offline control mismatch');} const check=await bounded(CONFIG.protectedCheckCommand,10000),afterOffline=await tree(work),changed=Object.keys({...beforeOffline,...afterOffline}).filter(name=>JSON.stringify(beforeOffline[name])!==JSON.stringify(afterOffline[name])),mutable=changed.filter(name=>CONFIG.expectedMutablePaths.includes(name)); const protectedHashesPreserved=changed.every(name=>CONFIG.expectedMutablePaths.includes(name))&&Object.keys(beforeOffline).every(name=>afterOffline[name]!==undefined); if(check.code!==0||mutable.length===0||changed.length!==mutable.length||!mutable.every(name=>afterOffline[name]?.kind==='file'&&/^[0-9a-f]{64}$/.test(afterOffline[name].sha256)&&(beforeOffline[name]?.kind!=='file'||beforeOffline[name].executable===afterOffline[name].executable))||!protectedHashesPreserved) throw Error('offline final-tree acceptance gate failed'); await finish(true,{sdkInitialized:true,providerPromptStarted:false,callableTools:['sandbox_shell'],toolBridgeReady:true,boundaryCheckPassed:true,boundaryControls:controls,hostTcpPositive:true,outsideHashPreserved:true,protectedHashesPreserved,fixtureCheckExitCode:check.code,offlineChecks:checks,mode:'offline'}); }
   else {
     failure='provider prompt';

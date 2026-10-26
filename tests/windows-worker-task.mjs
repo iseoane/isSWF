@@ -32,6 +32,20 @@ else {
   const result = JSON.parse(run(binary, [task, work]).split('\n').at(-1));
   assert.equal(result.status, 'completed', JSON.stringify(result)); assert.equal(result.providerPromptStarted, false); assert.equal(result.boundaryCheckPassed, true); assert.equal(result.protectedHashesPreserved, true); assert.equal(result.fixtureCheckExitCode, 0);
   assert.equal(await readFile(join(work, 'result.txt'), 'utf8'), 'after\n');
+  const oauthAttempt = join(root, 'openai-attempt'), oauthWork = join(oauthAttempt, 'work'); await mkdir(oauthWork, { recursive: true });
+  for (const name of ['mutate.mjs', 'check.mjs']) await writeFile(join(oauthWork, name), await readFile(join(work, name)));
+  await writeFile(join(oauthWork, 'result.txt'), 'before\n');
+  const oauthConfig = { ...config, route: { model: 'openai/gpt-6-luna', effort: 'high' } }, oauthPath = join(root, 'openai-config.json'), oauthTask = join(oauthAttempt, 'task.mjs');
+  await writeFile(oauthPath, JSON.stringify(oauthConfig)); run(binary, ['__tool', 'pi-worker-task', 'prepare', '--config', oauthPath, '--output', oauthTask]);
+  const oauthResult = JSON.parse(run(binary, [oauthTask, oauthWork]).split('\n').at(-1)); assert.equal(oauthResult.status, 'completed', JSON.stringify(oauthResult)); assert.equal(oauthResult.provider, 'openai'); assert.equal(oauthResult.providerPromptStarted, false); assert.equal(oauthResult.boundaryCheckPassed, true);
+  const marker = join(root, 'forbidden-session.txt'), originalSdk = await readFile(join(sdk, 'index.cjs'), 'utf8');
+  await writeFile(join(sdk, 'index.cjs'), originalSdk.replace('hasConfiguredAuth:()=>true', 'hasConfiguredAuth:()=>true,isUsingSubscription:()=>false') + '\nconst create=module.exports.createAgentSession;module.exports.createAgentSession=async o=>{require("node:fs").writeFileSync(' + JSON.stringify(marker) + ',"forbidden");return create(o)};\n');
+  const negative = join(root, 'no-subscription'), negativeWork = join(negative, 'work'); await mkdir(negativeWork, { recursive: true });
+  const auth = join(root, 'synthetic-auth.json'); await writeFile(auth, '{}');
+  const negativeConfig = join(root, 'no-subscription.json'), negativeTask = join(negative, 'task.mjs'); await writeFile(negativeConfig, JSON.stringify({ ...oauthConfig, mode: 'real', authPath: auth }));
+  run(binary, ['__tool', 'pi-worker-task', 'prepare', '--config', negativeConfig, '--output', negativeTask]);
+  const denied = spawnSync(binary, [negativeTask, negativeWork], { encoding: 'utf8', timeout: 30000 }); assert.ifError(denied.error); assert.notEqual(denied.status, 0);
+  const deniedResult = JSON.parse(denied.stdout.trim().split('\n').at(-1)); assert.equal(deniedResult.providerPromptStarted, false); assert.equal(deniedResult.sdkInitialized, false); await assert.rejects(readFile(marker), error => error.code === 'ENOENT');
   const legacyTask = join(root, 'legacy-task.mjs');
   const nodePrepare = spawnSync(process.execPath, [join(release, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', legacyTask], { encoding: 'utf8', timeout: 30000 });
   assert.ifError(nodePrepare.error); assert.notEqual(nodePrepare.status, 0); assert.match(nodePrepare.stderr, /selected compiled Bun runtime; Node is unsupported/u);
@@ -40,5 +54,5 @@ else {
   const substitution = spawnSync(binary, ['__tool', 'pi-worker-task', 'prepare', '--config', legacyConfig, '--output', legacyTask], { encoding: 'utf8', timeout: 30000 });
   assert.ifError(substitution.error); assert.notEqual(substitution.status, 0); assert.match(substitution.stderr, /no engine substitution/u);
   await assert.rejects(readFile(legacyTask), error => error.code === 'ENOENT');
-  console.log(JSON.stringify({ status: 'PASS', root, revision: receipt.revision, checks: ['actual compiled prepare and self-contained task', 'pinned Git brief and release methodology', 'synthetic SDK/session bridge', 'native LPAC boundary controls', 'only authorized file mutation and protected check', 'legacy Node and implicit engine substitution refused before task publication'], limits: 'Synthetic SDK only. Not normal lifecycle/admission/recovery, real provider or complete Windows readiness.' }));
+  console.log(JSON.stringify({ status: 'PASS', root, revision: receipt.revision, checks: ['actual compiled prepare and self-contained task', 'pinned Git brief and release methodology', 'synthetic SDK/session bridge', 'native LPAC boundary controls', 'only authorized file mutation and protected check', 'legacy Node and implicit engine substitution refused before task publication', 'explicit openai destination with real LPAC controls', 'non-subscription refused before session creation or prompt'], limits: 'Synthetic SDK only. Not normal lifecycle/admission/recovery, real provider or complete Windows readiness.' }));
 }

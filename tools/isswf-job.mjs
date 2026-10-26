@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { lunaHighRoute } from './luna-high-route.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat, readdir, open, link, unlink } from 'node:fs/promises';
@@ -17,7 +18,7 @@ import { parsePlan } from './isswf-plan.mjs';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const installedRelease = verifyRelease(root);
 const methodologySha = installedRelease?.methodologySha ?? '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/release-source.mjs', 'tools/project-state.mjs', 'tools/platform-runtime.mjs', 'tools/windows-tool-sandbox.mjs', 'tools/windows-worker-identity.mjs', 'tools/windows-worker-host.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
+const runtimeFiles = ['tools/luna-high-route.mjs', 'tools/release-source.mjs', 'tools/project-state.mjs', 'tools/platform-runtime.mjs', 'tools/windows-tool-sandbox.mjs', 'tools/windows-worker-identity.mjs', 'tools/windows-worker-host.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', ...(installedRelease?.files['.agents/skills/isswf-e2e/SKILL.md'] ? ['.agents/skills/isswf-e2e/SKILL.md', '.agents/skills/isswf-e2e/references/browser.md', '.agents/skills/isswf-e2e/references/cli-and-api.md', '.agents/skills/isswf-e2e/references/test-quality.md'] : [])];
 for (const name of ['debug', 'tdd', 'security', 'performance', 'observability']) {
   const path = `.agents/skills/isswf-${name}/SKILL.md`;
@@ -225,7 +226,7 @@ async function run(args) {
   if (digest(modelBytes) !== job.models.sha256) throw new Error('model config digest mismatch');
   const modelConfig = JSON.parse(modelBytes);
   const workerRoutes = modelConfig.roles?.worker;
-  if (modelConfig.schemaVersion !== 1 || !Array.isArray(workerRoutes) || workerRoutes.length !== 1 || workerRoutes[0]?.model !== 'openai-codex/gpt-6-luna' || workerRoutes[0]?.effort !== 'high' || Object.keys(workerRoutes[0]).sort().join(',') !== 'effort,model') throw new Error('only exact configured LunaHigh worker route supported; no fallback');
+  if (modelConfig.schemaVersion !== 1 || !lunaHighRoute(workerRoutes)) throw new Error('only exact configured LunaHigh worker route supported; no fallback');
   const briefBytes = blob(project, args['input-sha'], job.briefPath);
   for (const path of job.referencedInputs || []) if (digest(blob(project, args['input-sha'], path)) !== digest(blob(project, job.targetBase, path))) throw new Error(`referenced input differs from target base: ${path}`);
   const paths = await runtimePaths(job);
@@ -263,7 +264,7 @@ async function run(args) {
   }
   const prepared = await mkdtemp(join(store, '.prepare-'));
   const configPath = join(prepared, 'config.json'), taskPath = join(prepared, 'task.mjs');
-  const config = { version: 1, mode, ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };
+  const config = { version: 1, mode, route: workerRoutes[0], ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };
   await writeFile(configPath, JSON.stringify(config) + '\n', { mode: 0o600, flag: 'wx' });
   const preparedResult = JSON.parse(invoke(process.execPath, [join(root, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', taskPath]));
   if (preparedResult.inputSha !== args['input-sha'] || preparedResult.briefPath !== job.briefPath || preparedResult.briefSha256 !== digest(briefBytes) || preparedResult.taskSha256 !== digest(await readFile(taskPath))) throw new Error('prepared task/brief identity mismatch');

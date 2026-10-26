@@ -11,6 +11,7 @@ import { readReleaseSource } from './release-source.mjs';
 import { validateProbes, runDiagnosticProbes, evidenceDigest, sourceObjectsPath } from './diagnostic-probes.mjs';
 import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
 import { syncDirectory } from './platform-runtime.mjs';
+import { lunaHighRoute } from './luna-high-route.mjs';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -19,7 +20,6 @@ const sha = value => typeof value === 'string' && /^[0-9a-f]{40}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
 const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !path.includes('\\') && !path.includes('\0') && path.split('/').every(part => part && part !== '.' && part !== '..');
 const equal = isDeepStrictEqual;
-const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/reviewer.md', '.agents/roles/references/review.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', '.agents/roles/references/verification-principles.md'];
 function git(repo, args, deadlineAt = Infinity) {
   const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'review-operation-deadline');
@@ -86,7 +86,8 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   assert(sha(job.targetBase) && sha(job.candidateSha), 'committed-candidate-required');
   git(target, ['merge-base', '--is-ancestor', job.targetBase, job.candidateSha]);
   const models = blob(project, job.models.sha, job.models.path);
-  assert(hash(models) === job.models.sha256 && equal(JSON.parse(decode(models)).roles?.reviewer, route) && equal(grant.approvedRoute, route), 'fixed-reviewer-route-required');
+  const route = JSON.parse(decode(models)).roles?.reviewer, destination = lunaHighRoute(route);
+  assert(hash(models) === job.models.sha256 && destination && equal(grant.approvedRoute, route), 'fixed-reviewer-route-required');
   if (job.workspace !== undefined) {
     assert(job.workspace && ['probes,repo', 'evidence,probes,repo'].includes(Object.keys(job.workspace).sort().join(',')) && isAbsolute(job.workspace.repo ?? ''), 'explicit-review-workspace-required');
     validateProbes(job.workspace.probes);
@@ -144,11 +145,11 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   assert(Buffer.byteLength(prompt) + Buffer.byteLength(instructions) <= inputBytes, 'review-bundle-too-large');
   const effectiveInstructions = job.workspace ? instructions + '\nThe review runtime will execute only the explicit host-selected probes in an isolated read-only checkout pinned to the candidate, before any provider call. workspaceVerification contains actual runtime observations, not implementer summaries or commands you executed. Assess these observations and source independently. No additional tools or authenticated actor identity are implied.' : instructions;
   assert(Buffer.byteLength(prompt) + Buffer.byteLength(effectiveInstructions) <= inputBytes, 'review-bundle-too-large');
-  return { project, store, inputSha, jobPath, job, grant, grantSha256, capacity, inputBytes, limits, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
+  return { project, store, inputSha, jobPath, job, grant, grantSha256, capacity, route, destination, inputBytes, limits, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
 }
 export async function runReview(request, { backend, mode = 'real', probeRunner } = {}) {
   const startedAt = Date.now();
-  const p = await prepareReview(request), { job, grant, dir } = p;
+  const p = await prepareReview(request), { job, grant, dir, route, destination } = p;
   assert(mode === 'real' || mode === 'fixture', 'explicit-mode-required');
   assert(mode === 'real' ? grant.allowProviderCalls === true && !backend && !probeRunner : grant.allowProviderCalls === false && backend, 'provider-grant-or-fixture-required');
   assert(!probeRunner || job.workspace, 'probe-runner-requires-workspace');
@@ -192,7 +193,7 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
     const preflight = await Promise.race([backend.preflight(route[0]), timeout]);
     if (!preflight || expired) return await finish('blocked', 'preflight-deadline');
     const { model, billingEvidence } = preflight;
-    assert(model?.provider === 'openai-codex' && model.id === 'gpt-6-luna' && billingEvidence, 'preflight-route-cost-required');
+    assert(model?.provider === destination.provider && model.id === destination.model && billingEvidence, 'preflight-route-cost-required');
     await publish(join(dir, 'invocation.json'), { version: 1, tuple: route[0], priorAttempts: 0, sessionId, billingEvidence, reason: 'sdk-invocation-intent' });
     claimed = true;
     if (expired) return await finish('blocked', 'deadline-before-stream-intent-consumed');
