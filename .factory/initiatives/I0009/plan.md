@@ -169,12 +169,12 @@ The operator's current final objective is factory operation on both Linux and Wi
 
 ## J007
 
-- Status: pending
-- Objective: Ground native Windows worker execution and lifecycle/recovery support against the final cross-platform objective
+- Status: in-progress
+- Objective: Implement the native Windows bounded-tool isolation backend, then verify lifecycle/recovery and the remaining cross-platform readiness units in sequence
 - Depends on: J006
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
-- Blocker: Current executor/recorder remains Linux-specific; no equivalent Windows isolation boundary has been implemented or verified
-- Next step: Investigate a native Windows mechanism satisfying existing filesystem, credential, network and process-lifetime contracts; define a functional implementation unit before changes, without substituting WSL or weakening isolation
+- Brief: [brief-r2.md](jobs/J007/brief-r2.md)
+- Blocker: Native LPAC/Job Object prototype controls pass with compiled Bun, but the production tool bridge/records are not integrated; Node piped subprocesses hang in AppContainer
+- Next step: Integrate the Windows backend using the selected pinned Bun runtime, explicit readonly/writable scopes, startup-before-execution records and descendant controls; do not claim point 1 complete or commit it as solved before those checks pass
 
 ### Acceptance
 
@@ -189,3 +189,10 @@ The operator's current final objective is factory operation on both Linux and Wi
 - tools/native-recovery.mjs:8-14,40,62,143-157 pins /usr/bin/bwrap, /proc process/namespace identity and Linux recorder behavior
 - tools/worker-lifecycle.mjs:51-85,217,296-306 uses Linux-only /proc identity and cessation inspection
 - No native worker dispatched, substitute dispatcher selected or isolation equivalence inferred from successful Windows package tests
+- Operator subsequently authorizes sequential local implementation, verification and one commit per solved readiness point; live providers/global changes/publication remain separate
+- Native LPAC prototype: selected workspace write allowed; private outside file, AAP-only canary and runtime write refused; inherited synthetic secret absent; host TCP positive and LPAC network EACCES
+- Job Object assigned before suspended child resume; explicit job termination and zero-active-process polling precede profile cleanup
+- File-based Node subprocess succeeds, piped Node subprocess hangs; same piped probe succeeds with Bun 1.4.3, including denial of synthetic host registry canary
+- Compiled original binary fails restricted ancestor lstat; local Windows native-canonicalization correction in tools/bun-release.mjs verified with rebuilt actual compiled candidate ecac49edd8855cf15ef407ab6c075e4630030f8e under LPAC
+- Same candidate native Windows platform-package PASS; Linux whole quality invocation FAIL at its 60-second Bun subprocess budget, followed by explicit mandatory-isolation bun-release PASS; no full-current-suite green claim
+- Prototype and bootstrap observations do not establish integrated worker readiness, complete credential isolation, parent-death controls or independent security review

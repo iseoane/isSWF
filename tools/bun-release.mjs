@@ -39,7 +39,8 @@ import { pathToFileURL } from 'node:url';
 import { verifyRelease } from './tools/release-source.mjs';
 const tools = {${imports}};
 try {
-  const executable = realpathSync(process.execPath);
+  // LPAC can open the executable without permission to stat every ancestor directory.
+  const executable = process.platform === 'win32' ? realpathSync.native(process.execPath) : realpathSync(process.execPath);
   const root = dirname(dirname(executable));
   let [first, ...args] = process.argv.slice(2), tool = 'isswf';
   if (first === '__tool') {
