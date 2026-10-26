@@ -1,8 +1,10 @@
-# I0009: Windows initialization compatibility
+# I0009: Windows factory compatibility
 
 Type: bug
 
 This coordinator-owned plan records local progress, not execution permission or process liveness.
+
+The operator's current final objective is factory operation on both Linux and Windows. Initialization, packaging and host discovery are intermediate acceptance milestones, not a reduction of that objective. Existing Linux portable and isolated synthetic execution evidence does not prove all real-provider behavior. Windows native isolated execution, setup readiness and lifecycle/recovery remain explicit pending boundaries.
 
 ## J001
 
@@ -138,3 +140,52 @@ This coordinator-owned plan records local progress, not execution permission or 
 - Operator installed Debian Bubblewrap 0.12.0-1~deb13u1 interactively; /usr/bin/bwrap and namespace smoke verified; no runtime pin bypass or privilege escalation by the assistant
 - Direct factory-tools-install run from the older unnormalized working checkout fails exact LF/CRLF byte comparison before the alias check; preserved as checkout limitation, not represented as green
 - Local CI matrix wiring added after the retained runtime/test candidate; remote CI not run
+- Subsequently retained in source commit 23ab7c8d8f766cacda61986699006b8a677c1080 under explicit operator commit authorization; no push
+
+## J006
+
+- Status: in-review
+- Objective: Verify the native Windows compiled distribution and actual Pi/Claude installation/discovery with isolated dependencies and profiles
+- Depends on: J005
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: This milestone passes its mechanical checks; final factory acceptance still requires J007, complete setup and separately authorized real-provider verification
+- Next step: Consume the retained native Windows reports and investigate native worker/runtime support without treating skill discovery as execution
+
+### Acceptance
+
+- Prepare CI-pinned native Bun and locked host dependencies externally without modifying personal host registrations
+- Build and install the exact committed Windows artifact, retain exact receipt and test init/first-plan idempotence
+- Exercise real Pi package installation and Claude plugin inventory from isolated profiles
+- Verify source/installed resource separation and preserve earlier incomplete observations
+
+### Evidence
+
+- Exact source 23ab7c8d8f766cacda61986699006b8a677c1080; Bun 1.4.3; Pi 1.4.0; Claude 2.1.299
+- Native Windows platform-package: PASS; artifactId 6d276448edf6907584a4425302b6a5ff5cc4bee9214c1d97609d5577701ab3e3
+- Native Windows host-discovery: PASS; all 14 packaged skills in Pi user/project scopes and Claude plugin inventory
+- Native Windows source-host-isolation: PASS on separate invocation after original outer 300-second harness interruption; no remaining relevant processes before retry
+- Original interruption preserved, not a product-failure attribution; separate source-isolation result includes user settings and unrelated-resource preservation
+- Ignored driver tooling/.local/windows-install/native-host.mjs and retained external reports described in J006 brief; no model prompts or provider credentials
+
+## J007
+
+- Status: pending
+- Objective: Ground native Windows worker execution and lifecycle/recovery support against the final cross-platform objective
+- Depends on: J006
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
+- Blocker: Current executor/recorder remains Linux-specific; no equivalent Windows isolation boundary has been implemented or verified
+- Next step: Investigate a native Windows mechanism satisfying existing filesystem, credential, network and process-lifetime contracts; define a functional implementation unit before changes, without substituting WSL or weakening isolation
+
+### Acceptance
+
+- Preserve existing Linux implementation and regression coverage
+- Identify and test native Windows filesystem, credential/environment, network and descendant-process boundaries with positive and negative synthetic controls
+- Preserve immutable runtime/methodology pins, exclusive claims, process identity, uncertain-state refusal and recovery semantics
+- Keep setup partial until actual platform capability evidence exists; no model calls or host-global changes selected by the current test-dependency grant
+
+### Evidence
+
+- tools/pi-worker-task.mjs:140-142 generates Bubblewrap/Linux namespace arguments and Linux filesystem mounts
+- tools/native-recovery.mjs:8-14,40,62,143-157 pins /usr/bin/bwrap, /proc process/namespace identity and Linux recorder behavior
+- tools/worker-lifecycle.mjs:51-85,217,296-306 uses Linux-only /proc identity and cessation inspection
+- No native worker dispatched, substitute dispatcher selected or isolation equivalence inferred from successful Windows package tests
