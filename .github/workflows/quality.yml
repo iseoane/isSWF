@@ -95,6 +95,21 @@ jobs:
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/platform-package.mjs .
+      - name: Verify native Windows LPAC command controls
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-tool-sandbox.mjs
+      - name: Verify native Windows owner loss and startup refusal
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-sandbox-lifetime.mjs
+      - name: Verify compiled Windows worker task with a synthetic SDK
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-worker-task.mjs
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
       - name: Install and discover skills with real Pi and Claude hosts, without models

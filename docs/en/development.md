@@ -88,7 +88,9 @@ Keep `oracle.json` and `probes/` out of a blinded review package. Live compariso
 
 ## Platform and host discovery checks
 
-The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate matrix defines native Linux and Windows checks for Bun construction, npm tarball installation, exact resource receipts, CLI version and read-only inspection, initialization and first-plan publication/repeat, paths with spaces and Unicode, and external Git worktrees. Source checks also cover interrupted plan publication and retained-claim refusal. Windows does not assert POSIX permission modes. These checks do not establish full Windows migration/recovery or worker isolation support.
+The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate matrix defines native Linux and Windows checks for Bun construction, npm tarball installation, exact resource receipts, CLI version and read-only inspection, initialization and first-plan publication/repeat, paths with spaces and Unicode, and external Git worktrees. Source checks also cover interrupted plan publication and retained-claim refusal. Windows does not assert POSIX permission modes. These package checks do not establish full Windows migration/recovery or worker isolation support.
+
+Three additional Windows-only suites exercise the native bounded-tool backend: `windows-tool-sandbox.mjs` checks LPAC access, environment, network, registry canaries, subprocesses, timeout, byte-bounded output and descendant cessation; `windows-sandbox-lifetime.mjs` checks alias refusal, interrupted startup and owner loss; `windows-worker-task.mjs` checks an actual installed compiled artifact's self-contained task with a synthetic SDK. They refuse legacy Node or implicit engine substitution. Run them after `platform-package.mjs`, retaining `ISSWF_PLATFORM_ROOT`. No provider calls are made. These are tool/task controls, not normal Windows job admission, lifecycle/recovery, complete setup or independent security acceptance. Abrupt owner loss may leave profile/ACL cleanup unconfirmed; preserve its ownership records. Output is bounded in memory, not written to unbounded capture files; writable filesystem scopes have no hard disk quota.
 
 The matrix installs development-only hosts from `tooling/host-tests/package-lock.json`, with lifecycle scripts disabled. Pi 1.4.0 installs the package in temporary user and project scopes; its real resource loader must discover all fourteen skills from the installed artifact, with an empty pre-install control. Claude Code 2.1.299 installs the local marketplace/plugin and must report those skills through its native component inventory. The test invokes the platform-native binary supplied by Claude's optional dependency, without running its installer script. No prompt, agent session, login or provider credential is supplied. Temporary home/config directories and disabled telemetry limit incidental activity; they are not proof of network isolation. These are installation/discovery checks, not live task or delegation evaluations.
 
@@ -99,6 +101,9 @@ npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
 export ISSWF_PLATFORM_ROOT="/absolute/absent/platform-output"
 node tests/platform-package.mjs .
 node tests/host-discovery.mjs .
+node tests/windows-tool-sandbox.mjs
+node tests/windows-sandbox-lifetime.mjs
+node tests/windows-worker-task.mjs
 ```
 
 The artifact builder reads committed HEAD, while static source checks read the working tree. The tests require the pinned host dependencies and Bun; missing tools or missing skills fail rather than silently skip. Re-running needs a fresh output path. CI retains platform/discovery reports and Claude's observed skill inventory for 14 days. A configured matrix is not evidence that every platform passed; inspect the exact run before claiming support.

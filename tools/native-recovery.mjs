@@ -21,6 +21,11 @@ async function createNativeToolRunner({ work, factoryRoot }) {
   const { spawn } = await import('node:child_process');
   const { createHash, randomBytes } = await import('node:crypto');
   const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+  if (process.platform === 'win32') {
+    if (!process.versions.bun || typeof createWindowsToolRunner !== 'function') throw Error('Native Windows tools require the selected compiled Bun backend');
+    const runner = await createWindowsToolRunner({ work, factoryRoot, nodeBinary: process.execPath, binarySha256: digest(await fs.readFile(process.execPath)) });
+    return (_args, command, timeout, modelCall) => runner(command, timeout, modelCall);
+  }
   const directory = dirname(work), records = join(directory, 'native-tools');
   const taskSha256 = digest(await fs.readFile(process.argv[1]));
   const attemptId = basename(directory);
@@ -126,8 +131,8 @@ async function workspaceTree(directory) {
 
 export { workspaceTree };
 
-export function nativeRecorderSource() {
-  return [processEvidence,createNativeToolRunner,workspaceTree].map(fn=>fn.toString()).join('\n');
+export function nativeRecorderSource(platformSource = '') {
+  return platformSource + '\n' + [processEvidence,createNativeToolRunner,workspaceTree].map(fn=>fn.toString()).join('\n');
 }
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');

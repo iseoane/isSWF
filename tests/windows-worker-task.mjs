@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { verifyRelease } from '../tools/release-source.mjs';
+
+if (process.platform !== 'win32') console.log('SKIP Windows compiled worker task: not Windows');
+else {
+  assert(process.env.ISSWF_PLATFORM_ROOT, 'Run after native platform-package');
+  const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'), 'utf8'));
+  const release = report.installed, receipt = verifyRelease(release), binary = join(release, 'bin/isswf.exe');
+  const root = await mkdtemp(join(tmpdir(), 'isswf Windows task ñ ')), repo = join(root, 'inputs'), sdk = join(root, 'sdk'), attempt = join(root, 'attempt'), work = join(attempt, 'work');
+  for (const path of [repo, sdk, attempt, work]) await mkdir(path);
+  const run = (exe, args, timeout = 120000) => { const result = spawnSync(exe, args, { encoding: 'utf8', timeout, maxBuffer: 1024 * 1024 }); assert.ifError(result.error); assert.equal(result.status, 0, result.stderr + '\n' + result.stdout); return result.stdout.trim(); };
+  run('git', ['init', '-q', repo]);
+  await writeFile(join(repo, 'brief.md'), 'Change only result.txt in this synthetic offline fixture. No model calls.\n');
+  run('git', ['-C', repo, 'add', '.']); run('git', ['-C', repo, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Pin synthetic brief']);
+  const inputSha = run('git', ['-C', repo, 'rev-parse', 'HEAD']);
+  await writeFile(join(sdk, 'package.json'), JSON.stringify({ name: 'synthetic-sdk', main: 'index.cjs' }));
+  await writeFile(join(sdk, 'index.cjs'), "module.exports={ModelRuntime:{create:async()=>({hasConfiguredAuth:()=>true,getModel:(provider,id)=>({provider,id})})},SettingsManager:{inMemory:v=>v},SessionManager:{inMemory:()=>({})},createExtensionRuntime:()=>({}),createAgentSession:async o=>({session:{model:o.model,thinkingLevel:o.thinkingLevel,getCallableToolNames:()=>['sandbox_shell'],dispose:async()=>{}}})};\n");
+  await mkdir(join(sdk, 'node_modules/typebox'), { recursive: true });
+  await writeFile(join(sdk, 'node_modules/typebox/package.json'), '{"main":"index.cjs"}');
+  await writeFile(join(sdk, 'node_modules/typebox/index.cjs'), 'exports.Type=new Proxy({},{get:()=>()=>({})});\n');
+  await writeFile(join(work, 'result.txt'), 'before\n');
+  await writeFile(join(work, 'mutate.mjs'), "import fs from 'node:fs';fs.writeFileSync('result.txt','after\\n');\n");
+  await writeFile(join(work, 'check.mjs'), "import fs from 'node:fs';if(fs.readFileSync('result.txt','utf8')!=='after\\n')process.exit(2);\n");
+  const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: binary, authPath: join(root, 'nonexistent-auth'), profile: { repo: release, sha: receipt.methodologySha, files: ['.agents/roles/worker.md'] }, brief: { repo, inputSha, path: 'brief.md' }, expectedMutablePaths: ['result.txt'], protectedCheckCommand: 'node check.mjs', checks: [{ name: 'synthetic mutation', command: 'node mutate.mjs', expectedExitCode: 0 }] };
+  const configPath = join(root, 'config.json'), task = join(attempt, 'task.mjs'); await writeFile(configPath, JSON.stringify(config));
+  const prepared = JSON.parse(run(binary, ['__tool', 'pi-worker-task', 'prepare', '--config', configPath, '--output', task]));
+  assert.equal(prepared.inputSha, inputSha); assert.equal(prepared.providerPromptStarted, false);
+  const result = JSON.parse(run(binary, [task, work]).split('\n').at(-1));
+  assert.equal(result.status, 'completed', JSON.stringify(result)); assert.equal(result.providerPromptStarted, false); assert.equal(result.boundaryCheckPassed, true); assert.equal(result.protectedHashesPreserved, true); assert.equal(result.fixtureCheckExitCode, 0);
+  assert.equal(await readFile(join(work, 'result.txt'), 'utf8'), 'after\n');
+  const legacyTask = join(root, 'legacy-task.mjs');
+  const nodePrepare = spawnSync(process.execPath, [join(release, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', legacyTask], { encoding: 'utf8', timeout: 30000 });
+  assert.ifError(nodePrepare.error); assert.notEqual(nodePrepare.status, 0); assert.match(nodePrepare.stderr, /selected compiled Bun runtime; Node is unsupported/u);
+  await assert.rejects(readFile(legacyTask), error => error.code === 'ENOENT');
+  const legacyConfig = join(root, 'legacy-config.json'); await writeFile(legacyConfig, JSON.stringify({ ...config, nodeBinary: process.execPath }));
+  const substitution = spawnSync(binary, ['__tool', 'pi-worker-task', 'prepare', '--config', legacyConfig, '--output', legacyTask], { encoding: 'utf8', timeout: 30000 });
+  assert.ifError(substitution.error); assert.notEqual(substitution.status, 0); assert.match(substitution.stderr, /no engine substitution/u);
+  await assert.rejects(readFile(legacyTask), error => error.code === 'ENOENT');
+  console.log(JSON.stringify({ status: 'PASS', root, revision: receipt.revision, checks: ['actual compiled prepare and self-contained task', 'pinned Git brief and release methodology', 'synthetic SDK/session bridge', 'native LPAC boundary controls', 'only authorized file mutation and protected check', 'legacy Node and implicit engine substitution refused before task publication'], limits: 'Synthetic SDK only. Not normal lifecycle/admission/recovery, real provider or complete Windows readiness.' }));
+}

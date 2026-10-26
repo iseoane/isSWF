@@ -173,8 +173,8 @@ The operator's current final objective is factory operation on both Linux and Wi
 - Objective: Implement the native Windows bounded-tool isolation backend, then verify lifecycle/recovery and the remaining cross-platform readiness units in sequence
 - Depends on: J006
 - Brief: [brief-r2.md](jobs/J007/brief-r2.md)
-- Blocker: Native LPAC/Job Object prototype controls pass with compiled Bun, but the production tool bridge/records are not integrated; Node piped subprocesses hang in AppContainer
-- Next step: Integrate the Windows backend using the selected pinned Bun runtime, explicit readonly/writable scopes, startup-before-execution records and descendant controls; do not claim point 1 complete or commit it as solved before those checks pass
+- Blocker: Point 1 tool/task implementation passes its mechanical exit checks; normal Windows job lifecycle/recovery and capacity remain point 2. Independent security/semantic review and exact-head remote CI remain final acceptance gates. Writable scopes have no hard disk quota.
+- Next step: Commit the verified point 1 functional unit, then implement point 2 lifecycle/recovery without weakening claims, identity, capacity or uncertain-state refusal. Native worker-capacity-api currently fails before admission at capacity-scope-must-be-separate; inspect execution-capacity.mjs native separator handling first.
 
 ### Acceptance
 
@@ -195,4 +195,10 @@ The operator's current final objective is factory operation on both Linux and Wi
 - File-based Node subprocess succeeds, piped Node subprocess hangs; same piped probe succeeds with Bun 1.4.3, including denial of synthetic host registry canary
 - Compiled original binary fails restricted ancestor lstat; local Windows native-canonicalization correction in tools/bun-release.mjs verified with rebuilt actual compiled candidate ecac49edd8855cf15ef407ab6c075e4630030f8e under LPAC
 - Same candidate native Windows platform-package PASS; Linux whole quality invocation FAIL at its 60-second Bun subprocess budget, followed by explicit mandatory-isolation bun-release PASS; no full-current-suite green claim
-- Prototype and bootstrap observations do not establish integrated worker readiness, complete credential isolation, parent-death controls or independent security review
+- Historical prototype/bootstrap observations alone did not establish integrated worker readiness, complete credential isolation, parent-death controls or independent security review
+- Point 1 retained implementation candidate 8c39e97155fe499d6aed96bee2b47ac5bc0d0893: actual native Windows Bun package/npm installation PASS, artifactId 4b9f8fa3b395a3c8544c3abfeaf240aea14512622d0e7a4cc75e23baf1d54839; private fixture isswf-windows-integrated-wpmyij
+- Same candidate compiled self-contained task PASS with pinned brief/methodology, synthetic SDK/session, real LPAC boundary check, only authorized file mutation and protected check; Node preparation and implicit engine substitution refused before publication. No provider prompt or normal lifecycle launch
+- Same candidate native command controls PASS: allowed work/readonly read; denied outside, runtime/factory writes, inherited secret, private registry canary and network; host/public-registry positive controls; real piped subprocess, timeout, malformed UTF-8 byte bounds, detached descendants, normal Job cessation/profile cleanup
+- Same candidate native lifetime controls PASS: junction/hardlink refusal before startup, blocked retry, startup publication conflict without execution/overwrite, and active tool exit after SDK owner death confirmed using a pre-opened native process handle. Abrupt loss retains missing cleanup/completion as unknown, not success
+- Linux full portable quality with mandatory Bun/Bubblewrap synthetic task PASS at /tmp/isswf-windows-tools-8c39-quality-r2.log. First invocation timed out at outer 60-second release-package budget; original log retained. After process reconciliation, explicit release-package PASS in 34.456s and bun-release PASS in 39.263s preceded full PASS; timeout cause is not asserted
+- Native Windows clean methodology and route admission PASS; worker-capacity-api FAIL belongs to remaining lifecycle/capacity scope. ESLint/Knip and independent security review are not claimed by portable PASS; CI is configured, not remotely executed
