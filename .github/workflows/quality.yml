@@ -85,6 +85,8 @@ jobs:
           node tests/checkout-line-endings.mjs .
           node tests/plan-grant-boundary.mjs .
           node tests/plan-publication.mjs .
+          node tests/factory-tools-install.mjs .
+          node tests/initiative-plan.mjs .
           node tests/worker-route-admission.mjs .
           node tests/host-portability.mjs .
       - name: Verify initialization and process identity on the native platform

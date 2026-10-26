@@ -89,8 +89,8 @@ This coordinator-owned plan records local progress, not execution permission or 
 - Objective: Repair issue #85 first-plan Windows publication using platform directory-sync policy and truthful interrupted-claim handling, then run regression
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: Independent assessment/CI and Windows Bun validation pending; broader native Windows regression reaches pre-existing symlink fixture privilege failures reported as #86
-- Next step: Review the retained #85 correction and regression evidence; obtain separate authorization before implementing #86; do not claim all-platform regression or isolated-agent readiness
+- Blocker: Independent assessment/CI and Windows Bun validation pending; subsequent #86 repair and Bubblewrap verification are tracked in J005
+- Next step: Review #85 source commit 5a59fff5e09225851f9a88eba2823775ba5160dc; retain distinctions between Linux isolation, native Windows focal checks and complete agent readiness
 
 ### Acceptance
 
@@ -110,4 +110,31 @@ This coordinator-owned plan records local progress, not execution permission or 
 - Linux Bun packed executable regression: PASS; isolated synthetic worker SKIP because Bubblewrap unavailable
 - Native Windows factory-tools-install and initiative-plan: FAIL at unchanged directory-symlink fixture creation with EPERM; not application unsafe-path acceptance
 - https://github.com/iseoane/isSWF/issues/86
-- Source commit 8ea8d2adc978aace0a17fc517b79d04a94ed2440 preserves #83/#84; #85 changes remain local and uncommitted
+- Source commit 8ea8d2adc978aace0a17fc517b79d04a94ed2440 preserves #83/#84; #85 was subsequently committed as 5a59fff5e09225851f9a88eba2823775ba5160dc under explicit operator authorization, without push
+
+## J005
+
+- Status: in-review
+- Objective: Correct #86's Windows directory-alias fixtures and resolve the missing Linux Bubblewrap verification prerequisite
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: Independent review and exact-head remote CI pending; native Windows Bun and complete worker isolation remain outside verified results
+- Next step: Review the local fixture correction; preserve Linux sandbox PASS and native Windows targeted PASS as distinct evidence; no issue closure or push selected
+
+### Acceptance
+
+- Use Windows junction fixtures without elevation, while retaining actual Linux directory-symlink coverage
+- Assert directory aliases exist, application refusal occurs, and aliased target data is unchanged
+- Include both suites in the existing native Linux/Windows CI matrix
+- Verify canonical /usr/bin/bwrap and run actual previously skipped Linux sandbox checks without changing the runtime's executable identity controls
+
+### Evidence
+
+- https://github.com/iseoane/isSWF/issues/86
+- Native Windows pre-repair EPERM fixture failures retained with J004
+- Clean runtime/test candidate 4e8e88b03349fecbde345c96936edfead802a576: native Windows factory-tools-install and initiative-plan PASS
+- Same candidate on native Linux filesystem: full portable quality PASS with ISSWF_TEST_BUN_WORKER=1; Bun compiled synthetic isolated task PASS
+- Explicit node tests/diagnostic-probes.mjs . --sandbox: PASS including host positive control and actual namespace/network/read-only boundaries
+- Operator installed Debian Bubblewrap 0.12.0-1~deb13u1 interactively; /usr/bin/bwrap and namespace smoke verified; no runtime pin bypass or privilege escalation by the assistant
+- Direct factory-tools-install run from the older unnormalized working checkout fails exact LF/CRLF byte comparison before the alias check; preserved as checkout limitation, not represented as green
+- Local CI matrix wiring added after the retained runtime/test candidate; remote CI not run
