@@ -44,6 +44,12 @@ Port validation found that compiled releases and materialized Markdown packages 
 
 The native-filesystem Linux release suite passed independently in 63.9 seconds but exceeded the portable harness's 60-second bound. A diagnostic trace found the three serial installed-role fixture suites cost 25.7, 8.9 and 5.4 seconds; builds cost about 1.6 seconds. Run those independent fixture suites concurrently against the read-only installed artifact and wait for every child before teardown, keeping all assertions and their 45-second deadlines. Windows npm commands use the Node-installed npm CLI, as the existing platform fixture already does, instead of requiring an executable named npm. New exact-candidate results remain pending; do not claim the earlier failed broad checks passed.
 
+## Standalone technical verification
+
+Standalone draft PR #88 targets remote main and excludes the experimental runtime branch. Exact code candidate `63ccd188a678cf9645dcea0d7e8802ca53d09e28` passes all three jobs in Quality run `40569360184`: Portable checks (1m11s), Ubuntu package/host discovery (44s) and Windows package/host discovery (1m36s). The platform jobs run Pi foreground synthetic cases and Claude inventory against their actual compiled/npm-installed artifacts. Locked lint and dead-code checks pass in CI. Local native-filesystem Linux full quality passes in 151.1s; native Windows compiled platform/npm/receipt checks pass in 51.9s using the existing isolated Bun 1.4.3 compiler for that command only.
+
+The original failed runs are preserved, not relabelled. This record-only successor still requires exact-head CI. Independent semantic review remains pending, and live provider/Claude journeys, OS containment equivalence, publication of a release, state migration and merge remain unclaimed and unauthorized. The size exception is operator-approved; no new generic dispatcher or automatic recovery mechanism was introduced.
+
 ## Rollback
 
 Revert this unit's manifest/profile/instruction/default-flow changes together. Existing legacy tools and retained installations remain available; rollback does not delete or replay any attempt or alter global host settings.

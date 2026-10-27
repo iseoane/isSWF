@@ -8,9 +8,9 @@ The operator approves shared methodology with thin host integrations for native 
 
 ## J008
 
-- Status: in-progress
+- Status: in-review
 - Objective: Connect shared roles/configuration to Pi subagents and Claude native delegation, without a new execution framework
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: Affected exact-candidate checks and independent semantic acceptance pending
-- Next step: Port only this functional unit to actual remote main, diagnose failing checks and publish a standalone PR under the operator-approved size exception; keep PR #87 paused
+- Blocker: Independent semantic review pending; no new real-model call or merge is authorized
+- Next step: Review draft PR #88 independently against its exact candidate; technical CI is green at 63ccd188a678cf9645dcea0d7e8802ca53d09e28 and the record-only successor must pass its own CI. Keep PR #87 paused
