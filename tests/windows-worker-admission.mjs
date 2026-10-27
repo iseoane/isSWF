@@ -30,8 +30,22 @@ else {
   const args = ['exec', '--project', project, '--store', runtimeStore, '--', 'isswf-job', 'run', '--input-sha', inputSha, '--job', 'job.json', '--runs-store', store, '--attempt-id', 'offline-a001', '--grant-ref', 'synthetic-public-admission', '--mode', 'offline', '--capacity-grant', grantFile];
   const launched = JSON.parse(run(binary, args).stdout); assert.equal(launched.reviewRequired, true);
   const attempt = join(store, 'offline-a001'); let terminal;
-  for (let n = 0; n < 1200; n++) { try { terminal = JSON.parse(await readFile(join(attempt, 'capacity-completion.json'))); break; } catch (error) { if (error.code !== 'ENOENT') throw error; } await new Promise(done => setTimeout(done, 100)); }
-  assert.equal(terminal?.status, 'released', root);
+  for (let n = 0; n < 1200; n++) {
+    try { terminal = JSON.parse(await readFile(join(attempt, 'capacity-completion.json'))); break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    try { const observed = JSON.parse(await readFile(join(attempt, 'terminal.json'))); if (observed.outcome === 'failure') break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    try { await readFile(join(attempt, 'capacity-retained.json')); break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    await new Promise(done => setTimeout(done, 100));
+  }
+  const failureEvidence = async () => {
+    const evidence = { root };
+    for (const name of ['terminal.json', 'pi-result.json', 'capacity-retained.json', 'execution-job-finished.json']) {
+      try { evidence[name] = JSON.parse((await readFile(join(attempt, name), 'utf8')).slice(0, 24000)); } catch (error) { evidence[name] = error.code || error.message; }
+    }
+    const retained = JSON.stringify(evidence);
+    await writeFile(join(process.env.ISSWF_PLATFORM_ROOT, 'worker-admission-evidence.json'), retained + '\n');
+    return retained;
+  };
+  assert.equal(terminal?.status, 'released', terminal?.status === 'released' ? root : await failureEvidence());
   const result = JSON.parse(await readFile(join(attempt, 'pi-result.json'))); assert.equal(result.status, 'completed'); assert.equal(result.providerPromptStarted, false); assert.equal(result.provider, 'openai'); assert.equal(result.protectedHashesPreserved, true);
   const observation = JSON.parse(run(binary, ['exec', '--project', project, '--store', runtimeStore, '--', 'isswf-job', 'read', '--runs-store', store, '--attempt-id', 'offline-a001']).stdout); assert.equal(observation.state, 'terminal');
   run(binary, args, false); assert.equal(git('status', '--porcelain'), '');
