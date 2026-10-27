@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, readFile, writeFile , realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -19,5 +20,14 @@ else {
   assert.equal(await readFile(join(directory, 'workspace/result.txt'), 'utf8'), 'after'); assert.equal(await readFile(join(repo, 'result.txt'), 'utf8'), 'before');
   const observed = JSON.parse(invoke(process.execPath, [lifecycle, 'read', '--runs-store', store, '--attempt-id', 'positive']).stdout); assert.equal(observed.state, 'terminal');
   const original = await readFile(join(directory, 'dispatch.json')); invoke(process.execPath, [lifecycle, ...launch('positive')], false); assert.deepEqual(await readFile(join(directory, 'dispatch.json')), original);
+  const failed = join(root, 'failed-startup'); await mkdir(failed);
+  const failureDispatch = { version: 1, attemptId: 'failed-startup', lifecycleCopy: lifecycle, lifecycleSourceSha256: createHash('sha256').update(await readFile(lifecycle)).digest('hex'), taskSha256: 'a'.repeat(64), dependencies: { 'missing-runtime.mjs': 'b'.repeat(64) } };
+  await writeFile(join(failed, 'dispatch.json'), JSON.stringify(failureDispatch));
+  invoke(process.execPath, [lifecycle, 'host', '--attempt-dir', failed, '--nonce', 'c'.repeat(48)], false);
+  const failure = JSON.parse(await readFile(join(failed, 'host-failure.json')));
+  assert.equal(failure.attemptId, failureDispatch.attemptId); assert.equal(failure.taskSha256, failureDispatch.taskSha256); assert.equal(failure.code, 'ENOENT');
+  assert.equal(failure.reason, 'host startup incomplete'); assert.equal(Object.hasOwn(failure, 'stopped'), false);
+  await assert.rejects(readFile(join(failed, 'terminal.json')), { code: 'ENOENT' });
+  await assert.rejects(readFile(join(failed, 'capacity-completion.json')), { code: 'ENOENT' });
   console.log(JSON.stringify({ status: 'PASS', root, checks: ['actual detached lifecycle launch', 'pinned task and dependencies', 'native child startup and complete Job cessation', 'materialized workspace only', 'read-only observation', 'same-ID refusal preserves dispatch'], limits: 'Generic trusted task, not normal Pi job, tool recovery or capacity acceptance' }));
 }

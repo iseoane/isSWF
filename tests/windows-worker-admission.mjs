@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, writeFile , realpath } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, realpath, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { verifyRelease } from '../tools/release-source.mjs';
@@ -33,12 +33,13 @@ else {
   for (let n = 0; n < 1200; n++) {
     try { terminal = JSON.parse(await readFile(join(attempt, 'capacity-completion.json'))); break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { const observed = JSON.parse(await readFile(join(attempt, 'terminal.json'))); if (observed.outcome === 'failure') break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    try { await readFile(join(attempt, 'host-failure.json')); break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { await readFile(join(attempt, 'capacity-retained.json')); break; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     await new Promise(done => setTimeout(done, 100));
   }
   const failureEvidence = async () => {
-    const evidence = { root };
-    for (const name of ['terminal.json', 'pi-result.json', 'capacity-retained.json', 'execution-job-finished.json']) {
+    const evidence = { root, launched, files: await readdir(attempt) };
+    for (const name of ['host-failure.json', 'owner.json', 'terminal.json', 'pi-result.json', 'capacity-retained.json', 'windows-supervisor-result.json', 'execution-job-finished.json']) {
       try { evidence[name] = JSON.parse((await readFile(join(attempt, name), 'utf8')).slice(0, 24000)); } catch (error) { evidence[name] = error.code || error.message; }
     }
     const retained = JSON.stringify(evidence);

@@ -412,4 +412,18 @@ async function main() {
   }
   throw new Error('usage: worker-lifecycle.mjs launch|read|reconcile [explicit options]');
 }
-main().catch(error => { process.stderr.write(`${error.message}\n`); process.exitCode = 1; });
+main().catch(async error => {
+  // Startup can fail before owner/terminal publication. Preserve bounded failure
+  // evidence, never a cessation assertion or permission to release capacity.
+  try {
+    if (process.platform === 'win32' && process.argv[2] === 'host') {
+      const args = parseArgs(process.argv.slice(3)), directory = required(args, 'attempt-dir');
+      const dispatch = await parseJson(join(directory, 'dispatch.json'));
+      if (dispatch.lifecycleCopy === self && hash(await readFile(self)) === dispatch.lifecycleSourceSha256) {
+        const reasons = ['Windows worker process observation unavailable', 'Windows worker identity mismatch', 'pinned lifecycle executable hash mismatch', 'lifecycle dependency snapshot changed', 'trusted task snapshot hash mismatch'];
+        await atomicWriteOnce(join(directory, 'host-failure.json'), { version: 1, attemptId: dispatch.attemptId, taskSha256: dispatch.taskSha256, reason: reasons.includes(error.message) ? error.message : 'host startup incomplete', errorName: error.name === 'Error' ? 'Error' : 'Other', code: /^[A-Z_]{1,40}$/.test(error.code || '') ? error.code : null });
+      }
+    }
+  } catch { /* Missing or corrupt publication remains unknown, never clean. */ }
+  process.stderr.write(`${error.message}\n`); process.exitCode = 1;
+});
