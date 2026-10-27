@@ -169,6 +169,7 @@ function validateManifest(bytes) {
   } catch {
     fail("The committed package.json is not valid JSON");
   }
+  const hasSubagents = Object.hasOwn(manifest?.pi ?? {}, "subagents");
   const hasWriting = manifest?.pi?.skills?.includes("./.agents/skills/isswf-writing");
   const hasUnderstanding = manifest?.pi?.skills?.includes("./.agents/skills/isswf-understanding");
   const hasPr = manifest?.pi?.skills?.includes("./.agents/skills/isswf-pr");
@@ -199,8 +200,9 @@ function validateManifest(bytes) {
     !/^\d+\.\d+\.\d+$/u.test(manifest.version ?? "") ||
     typeof manifest.description !== "string" ||
     !manifest.pi ||
-    Object.keys(manifest.pi).sort().join(",") !== "skills" ||
+    Object.keys(manifest.pi).sort().join(",") !== (hasSubagents ? "skills,subagents" : "skills") ||
     JSON.stringify(manifest.pi.skills) !== JSON.stringify(skills) ||
+    (hasSubagents && JSON.stringify(manifest.pi.subagents) !== JSON.stringify({ agents: ["./.agents/hosts/pi/agents"] })) ||
     (released && (
       JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: "tools/isswf.mjs" }) ||
       JSON.stringify(manifest.keywords) !== JSON.stringify(["pi-package"]) ||
