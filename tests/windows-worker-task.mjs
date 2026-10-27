@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, readdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { verifyRelease } from '../tools/release-source.mjs';
@@ -32,6 +33,12 @@ else {
   const result = JSON.parse(run(binary, [task, work]).split('\n').at(-1));
   assert.equal(result.status, 'completed', JSON.stringify(result)); assert.equal(result.providerPromptStarted, false); assert.equal(result.boundaryCheckPassed, true); assert.equal(result.protectedHashesPreserved, true); assert.equal(result.fixtureCheckExitCode, 0);
   assert.equal(await readFile(join(work, 'result.txt'), 'utf8'), 'after\n');
+  const records = join(attempt, 'native-tools'), checkDigest = createHash('sha256').update(config.protectedCheckCommand, 'utf8').digest('hex');
+  const intents = await Promise.all((await readdir(records)).filter(name => name.endsWith('.intent.json')).map(async name => ({ name, value: JSON.parse(await readFile(join(records, name), 'utf8')) })));
+  const checkIntent = intents.find(({ value }) => value.commandSha256 === checkDigest); assert(checkIntent, 'Compiled embedded task must bind exact protected check command');
+  assert.equal(checkIntent.value.timeoutMs, 10000); assert.equal(checkIntent.value.modelCall, undefined, 'Offline postcheck is not a model-origin command');
+  const checkFinished = JSON.parse(await readFile(join(records, checkIntent.name.replace('.intent.json', '.finished.json')), 'utf8'));
+  assert.equal(checkFinished.binding, checkIntent.value.binding); assert.equal(checkFinished.code, 0); assert.equal(checkFinished.stopped, true);
   const oauthAttempt = join(root, 'openai-attempt'), oauthWork = join(oauthAttempt, 'work'); await mkdir(oauthWork, { recursive: true });
   for (const name of ['mutate.mjs', 'check.mjs']) await writeFile(join(oauthWork, name), await readFile(join(work, name)));
   await writeFile(join(oauthWork, 'result.txt'), 'before\n');

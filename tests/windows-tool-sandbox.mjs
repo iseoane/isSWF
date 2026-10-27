@@ -68,9 +68,23 @@ out.network=await new Promise(done=>{const s=net.connect(${port},'127.0.0.1');s.
     const descendant = await runner(command('descendant.mjs')); assert.equal(descendant.code, 0, descendant.output); assert.match(descendant.output, /descendant-started/u);
     const tick = await readFile(join(work, 'descendant.json'), 'utf8'); assert(JSON.parse(tick).pid > 0);
     await new Promise(done => setTimeout(done, 250)); assert.equal(await readFile(join(work, 'descendant.json'), 'utf8'), tick, 'Detached descendant must stop with command');
+    await writeFile(join(work, 'check.mjs'), "import fs from 'node:fs';if(fs.readFileSync('inline.txt','utf8')!=='inline-positive')process.exit(2);\n");
+    const checkCommand = 'node check.mjs';
+    const modelCall = { operation: 'shell', sdkCallSha256: 'a'.repeat(64), invocationSha256: 'b'.repeat(64) };
+    const checked = await runner(checkCommand, 5000, modelCall); assert.equal(checked.code, 0, checked.output);
+    const checkIntent = JSON.parse(await readFile(join(runner.paths.records, '000007.intent.json'), 'utf8'));
+    assert.equal(checkIntent.commandSha256, createHash('sha256').update(checkCommand, 'utf8').digest('hex'));
+    assert.equal(checkIntent.timeoutMs, 5000); assert.deepEqual(checkIntent.modelCall, modelCall);
+    assert(!JSON.stringify(checkIntent).includes(checkCommand), 'Do not retain raw command bodies');
     const finished = (await readdir(runner.paths.records)).filter(name => name.endsWith('.finished.json'));
-    assert.equal(finished.length, 6);
-    for (const name of finished) { const receipt = JSON.parse(await readFile(join(runner.paths.records, name), 'utf8')); assert.equal(receipt.stopped, true); assert.equal(receipt.profileDeleted, true); }
+    assert.equal(finished.length, 7);
+    for (const name of finished) {
+      const receipt = JSON.parse(await readFile(join(runner.paths.records, name), 'utf8'));
+      const { binding, ...intent } = JSON.parse(await readFile(join(runner.paths.records, name.replace('.finished.json', '.intent.json')), 'utf8'));
+      assert.match(intent.commandSha256, /^[0-9a-f]{64}$/u); assert(Number.isInteger(intent.timeoutMs));
+      assert.equal(binding, createHash('sha256').update(JSON.stringify(intent)).digest('hex'));
+      assert.equal(receipt.binding, binding); assert.equal(receipt.stopped, true); assert.equal(receipt.profileDeleted, true);
+    }
     console.log(JSON.stringify({ status: 'PASS', root, controls: control, checks: ['native compiled runtime', 'allowed work and readonly read', 'outside/readonly/env/network refusal', 'real piped subprocess', 'deadline and bounded-memory output including malformed UTF-8', 'public registry positive and private registry canary refusal', 'detached descendant cessation', 'Job cessation and profile cleanup'], limits: 'No SDK/provider, normal job lifecycle/recovery or parent-death test in this suite yet' }));
   } finally {
     delete process.env.ISSWF_TEST_SECRET; await new Promise(done => server.close(done));

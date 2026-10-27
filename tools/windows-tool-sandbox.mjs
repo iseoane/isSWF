@@ -212,7 +212,9 @@ async function createWindowsToolRunnerImpl({ work, factoryRoot, nodeBinary, bina
     if (++sequence > 64) throw Error('Native tool record budget exceeded');
     running = true; blocked = true;
     const prefix = String(sequence).padStart(6, '0');
-    const intent = { version: 1, seq: sequence, nonce: randomBytes(16).toString('hex'), binarySha256, ...(modelCall ? { modelCall } : {}) };
+    // Bind exact UTF-8 command bytes without retaining command bodies or output.
+    // A known command can be verified later; a digest cannot reconstruct unknown text.
+    const intent = { version: 1, seq: sequence, nonce: randomBytes(16).toString('hex'), binarySha256, commandSha256: digest(Buffer.from(command, 'utf8')), timeoutMs: timeout, ...(modelCall ? { modelCall } : {}) };
     const binding = digest(JSON.stringify(intent));
     try {
       await atomic(path.join(records, prefix + '.intent.json'), { ...intent, binding });
