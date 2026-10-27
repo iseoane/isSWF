@@ -90,6 +90,8 @@ Keep `oracle.json` and `probes/` out of a blinded review package. Live compariso
 
 The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate matrix defines native Linux and Windows checks for Bun construction, npm tarball installation, exact resource receipts, CLI version and read-only inspection, initialization and first-plan publication/repeat, paths with spaces and Unicode, and external Git worktrees. Source checks also cover interrupted plan publication and retained-claim refusal. Windows does not assert POSIX permission modes. These package checks do not establish full Windows migration/recovery or worker isolation support.
 
+The Windows-only `windows-state-migration.mjs` checks native directory publication, unchanged repeat, exact legacy bytes and paths, a single active state root, inventory guards and recovery drift/unknown refusal. Its recovery cessation predicate is injected, not a real killed-owner proof; mandatory regular-file flushes remain unchanged.
+
 Three additional Windows-only suites exercise the native bounded-tool backend: `windows-tool-sandbox.mjs` checks LPAC access, environment, network, registry canaries, subprocesses, timeout, byte-bounded output and descendant cessation; `windows-sandbox-lifetime.mjs` checks alias refusal, interrupted startup and owner loss; `windows-worker-task.mjs` checks an actual installed compiled artifact's self-contained task with a synthetic SDK. They refuse legacy Node or implicit engine substitution. Run them after `platform-package.mjs`, retaining `ISSWF_PLATFORM_ROOT`. No provider calls are made. These are tool/task controls, not normal Windows job admission, lifecycle/recovery, complete setup or independent security acceptance. Abrupt owner loss may leave profile/ACL cleanup unconfirmed; preserve its ownership records. Output is bounded in memory, not written to unbounded capture files; writable filesystem scopes have no hard disk quota.
 
 The selected compiled engine also accepts `-e`/`--eval` JavaScript with cwd-based `require` and forwarded arguments; `.mjs` execution remains supported. The sandbox's `node` alias uses that same pinned embedded Bun, not stock Node or an engine fallback. These are bounded runtime entry modes, not complete Node CLI compatibility. LPAC controls cover inline writes and outside-file refusal.
@@ -113,6 +115,7 @@ node tests/windows-tool-sandbox.mjs
 node tests/windows-sandbox-lifetime.mjs
 node tests/windows-worker-task.mjs
 node tests/windows-worker-admission.mjs
+node tests/windows-state-migration.mjs
 node tests/windows-worker-identity.mjs
 node tests/windows-worker-host.mjs
 node tests/windows-worker-lifecycle.mjs

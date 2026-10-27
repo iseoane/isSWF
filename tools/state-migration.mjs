@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { link, lstat, mkdir, open, readFile, readdir, rename, rm, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
+import { syncDirectory as sync } from './platform-runtime.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const validId = value => /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u.test(value || '');
@@ -13,7 +14,6 @@ async function publish(path, value) {
   try { await file.writeFile(JSON.stringify(value, null, 2) + '\n'); await file.sync(); } finally { await file.close(); }
   try { await link(temp, path); } finally { await unlink(temp); }
 }
-async function sync(path) { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } }
 async function tree(root) {
   await dir(root);
   const files = [];

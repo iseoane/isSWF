@@ -90,6 +90,8 @@ Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las com
 
 El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. Una matriz independiente define comprobaciones nativas en Linux y Windows de compilación con Bun, instalación del tarball npm, inventarios exactos de recursos, versión e inspección de solo lectura de la CLI, inicialización y publicación y repetición del primer plan, rutas con espacios y Unicode, y worktrees externos de Git. Las comprobaciones del código fuente también cubren la publicación interrumpida de planes y el rechazo cuando se conserva un bloqueo. En Windows no se comprueban los permisos POSIX. Estas pruebas del paquete no demuestran soporte completo de migración y recuperación ni aislamiento de trabajadores en Windows.
 
+La prueba exclusiva de Windows `windows-state-migration.mjs` comprueba la publicación nativa de directorios, la repetición sin cambios, los bytes y rutas heredados exactos, una única raíz de estado activa, las protecciones del inventario y el rechazo de recuperación ante cambios o un cese desconocido. El predicado de cese se inyecta en la prueba: no demuestra la muerte real del propietario; los vaciados obligatorios de archivos normales no cambian.
+
 Tres suites adicionales, exclusivas de Windows, comprueban el backend nativo de herramientas acotadas: `windows-tool-sandbox.mjs` comprueba el acceso LPAC, entorno, red, canarios del registro, subprocesos, timeout, salida limitada por bytes y cese de descendientes; `windows-sandbox-lifetime.mjs` comprueba el rechazo de alias, el arranque interrumpido y la pérdida del proceso propietario; `windows-worker-task.mjs` comprueba la tarea autónoma de un artefacto compilado e instalado real con un SDK sintético. Rechazan Node heredado y la sustitución implícita del motor. Ejecútalas después de `platform-package.mjs`, conservando `ISSWF_PLATFORM_ROOT`. No llaman a proveedores. Son controles de herramientas y tareas, no del flujo normal de admisión de trabajos, ciclo de vida y recuperación en Windows, configuración completa ni aceptación independiente de seguridad. La pérdida abrupta del propietario puede dejar sin confirmar la limpieza de perfiles y ACL; conserva sus registros de propiedad. La salida se limita en memoria, sin archivos de captura que puedan crecer sin límite; los ámbitos de escritura del sistema de archivos no tienen una cuota rígida de disco.
 
 El motor compilado seleccionado también acepta JavaScript con `-e`/`--eval`, `require` relativo al directorio de trabajo y argumentos reenviados; mantiene la ejecución de archivos `.mjs`. El alias `node` del sandbox usa ese mismo Bun integrado y fijado, no Node independiente ni un motor alternativo. Son modos de entrada acotados, no compatibilidad completa con la CLI de Node. Los controles LPAC cubren la escritura inline y el rechazo del acceso a archivos externos.
@@ -113,6 +115,7 @@ node tests/windows-tool-sandbox.mjs
 node tests/windows-sandbox-lifetime.mjs
 node tests/windows-worker-task.mjs
 node tests/windows-worker-admission.mjs
+node tests/windows-state-migration.mjs
 node tests/windows-worker-identity.mjs
 node tests/windows-worker-host.mjs
 node tests/windows-worker-lifecycle.mjs
