@@ -3,7 +3,7 @@ import { mock } from 'node:test';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, open } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, open , realpath } from 'node:fs/promises';
 import { fstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
@@ -12,7 +12,7 @@ import { verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { prepareReview, runReview, readReview } = await import(pathToFileURL(join(source, 'tools/reviewer-task.mjs')));
-const root = await mkdtemp(join(tmpdir(), 'isswf-review-test-')), project = join(root, 'project'), store = join(root, 'store');
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-review-test-'))), project = join(root, 'project'), store = join(root, 'store');
 const hash = b => createHash('sha256').update(b).digest('hex');
 const command = (binary, args) => spawnSync(binary, args, { encoding: 'utf8', timeout: 20000 });
 const git = (...args) => { const r = command('git', ['-C', project, ...args]); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
