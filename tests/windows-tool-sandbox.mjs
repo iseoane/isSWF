@@ -40,7 +40,7 @@ fs.writeFileSync('allowed.txt','changed');out.allowedWrite=true;
 for(const [key,fn] of Object.entries({outsideRead:()=>fs.readFileSync(${JSON.stringify(secret)}),outsideWrite:()=>fs.writeFileSync(${JSON.stringify(secret)},'bad'),factoryWrite:()=>fs.writeFileSync(${JSON.stringify(join(factory, 'readonly.txt'))},'bad'),runtimeWrite:()=>fs.writeFileSync(process.execPath,'bad')})){try{fn();out[key]='unexpected-success'}catch(e){out[key]=e.code}}
 const child=spawnSync(process.env.SystemRoot+'\\\\System32\\\\cmd.exe',['/d','/s','/c','echo subprocess-positive'],{encoding:'utf8',timeout:2000});out.subprocess={status:child.status,output:child.stdout?.trim(),error:child.error?.code};
 const reg=spawnSync(process.env.SystemRoot+'\\\\System32\\\\reg.exe',['query',${JSON.stringify(registry)},'/v','canary'],{encoding:'utf8',timeout:2000});out.registry={status:reg.status,secretAbsent:!reg.stdout?.includes(${JSON.stringify(registrySecret)}),error:reg.error?.code};
-const publicReg=spawnSync(process.env.SystemRoot+'\\\\System32\\\\reg.exe',['query','HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion','/v','ProductName'],{encoding:'utf8',timeout:2000});out.registryPublicPositive=publicReg.status;
+const publicReg=spawnSync(process.env.SystemRoot+'\\\\System32\\\\reg.exe',['query','HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion','/v','ProductName'],{encoding:'utf8',timeout:2000});out.registryPublicPositive=publicReg.status;out.registryPublicDetails={error:publicReg.error?.code,signal:publicReg.signal,stderr:publicReg.stderr?.slice(0,1000)};
 out.network=await new Promise(done=>{const s=net.connect(${port},'127.0.0.1');s.setTimeout(1000);s.once('connect',()=>{s.destroy();done('connected')});s.once('error',e=>done(e.code));s.once('timeout',()=>{s.destroy();done('timeout')})});console.log(JSON.stringify(out));
 `);
     await writeFile(join(factory, 'timeout.mjs'), "setInterval(()=>{},1000);\n");
@@ -53,7 +53,7 @@ out.network=await new Promise(done=>{const s=net.connect(${port},'127.0.0.1');s.
     const control = JSON.parse(probe.output.trim());
     assert.equal(control.secretAbsent, true); assert.equal(control.readonlyRead, 'pinned-readonly'); assert.equal(control.allowedWrite, true);
     for (const key of ['outsideRead', 'outsideWrite', 'factoryWrite', 'runtimeWrite']) assert(['EPERM', 'EACCES'].includes(control[key]), key + ': ' + control[key]);
-    assert.equal(control.registryPublicPositive, 0); assert.equal(control.registry.status, 1, JSON.stringify(control.registry)); assert.equal(control.registry.secretAbsent, true); assert.equal(control.registry.error, undefined);
+    assert.equal(control.registryPublicPositive, 0, JSON.stringify(control)); assert.equal(control.registry.status, 1, JSON.stringify(control.registry)); assert.equal(control.registry.secretAbsent, true); assert.equal(control.registry.error, undefined);
     assert.equal(control.network, 'EACCES'); assert.equal(control.subprocess.status, 0, JSON.stringify(control.subprocess)); assert.equal(control.subprocess.output, 'subprocess-positive');
     assert.equal(await readFile(secret, 'utf8'), 'synthetic-private-only'); assert.equal(await readFile(join(factory, 'readonly.txt'), 'utf8'), 'pinned-readonly');
     const inlineCode = "const fs=require('node:fs');fs.writeFileSync('inline.txt','inline-positive');try{fs.readFileSync(Buffer.from('" + Buffer.from(secret).toString('base64') + "','base64').toString());console.log('unexpected-success')}catch(e){console.log(e.code)}";
