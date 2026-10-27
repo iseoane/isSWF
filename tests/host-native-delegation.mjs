@@ -68,6 +68,8 @@ try{
  assert.match(JSON.stringify(successCalls.at(-1).body.messages),/after/);assert.equal(await readFile(join(work,'cwd-canary.txt'),'utf8'),'CWD_SENTINEL\n');
  report.cases.push({name:'configured model/medium overrides parent low, cwd read and result',status:'PASS',tools:['read','contact_supervisor'],note:'Package adds its supervisor communication tool; this is not a filesystem sandbox',requests:successCalls.length});
  phase='error';let failure;try{failure=await invoke('synthetic-error',new AbortController());}catch(e){failure={isError:true,message:e.message};}await writeFile(join(root,'error-result.json'),JSON.stringify(failure,null,2));assert.equal(failure.isError,true,JSON.stringify(failure));assert.match(JSON.stringify(failure),/SYNTHETIC_PROVIDER_FAILURE/);
+ assert.equal(calls.filter(c=>c.phase==='error').length,1,'Disabled retry must preserve a single visible provider failure');
+ for(const call of calls)assert.equal(call.body.model,modelId,'Never substitute another model');
  report.cases.push({name:'provider failure visible, no other model selected',status:'PASS',requests:calls.filter(c=>c.phase==='error').length});
  phase='cancel';const controller=new AbortController();activeAbort=()=>setTimeout(()=>controller.abort(),50);const started=Date.now();let cancelled;try{cancelled=await invoke('synthetic-cancel',controller);}catch(e){cancelled={isError:true,message:e.message};}activeAbort=undefined;assert(controller.signal.aborted);
  await writeFile(join(root,'cancel-result.json'),JSON.stringify(cancelled,null,2));assert.match(JSON.stringify(cancelled),/abort|cancel|stopped/i);report.cases.push({name:'foreground cancellation returns partial/aborted result',status:'PASS',elapsedMs:Date.now()-started});

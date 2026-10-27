@@ -47,6 +47,8 @@ for (const path of markdownFiles) {
 const docsResult = run(process.execPath, [join(source, 'tooling/quality/check-docs.mjs'), source]);
 const documentationResult = run(process.execPath, [join(source, 'tests/documentation.mjs'), source]);
 const workflowDiagramsResult = run(process.execPath, [join(source, 'tests/workflow-diagrams.mjs'), source]);
+const packageMetadataResult = run(process.execPath, [join(source, 'tests/package-metadata.mjs'), source]);
+console.log(packageMetadataResult);
 const revision = run('git', ['rev-parse', 'HEAD']);
 const store = await mkdtemp(join(tmpdir(), 'isswf-quality-package-'));
 try {
