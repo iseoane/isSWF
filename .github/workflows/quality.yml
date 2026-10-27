@@ -82,12 +82,14 @@ jobs:
           bun-version: '1.4.3'
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
-      - name: Verify host-native packaged roles without real models
-        run: node tests/host-native-delegation.mjs .
       - name: Build and install native package; test CLI, resources and worktrees
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/platform-package.mjs .
+      - name: Verify installed host-native roles without real models
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/host-native-delegation.mjs .
       - name: Install and discover skills with real Pi and Claude hosts, without models
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform

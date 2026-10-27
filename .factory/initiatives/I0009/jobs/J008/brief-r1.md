@@ -6,7 +6,7 @@ The operator approves reducing isSWF to shared methodology with thin host integr
 
 ## Grounding
 
-Baseline: 1c7e898ca1eb4e8e35c455aeadbb1f39832caed7. Package and plugin manifests, shared coordinator/setup/worker, host guides and role wrappers are the affected consumers. The published pi-subagents 0.83.0 manifest/discovery supports `pi.subagents.agents`; actual Pi 1.4.0 offline foreground trials passed on native Windows and Linux (Debian/WSL), using a loopback stub. Claude already has native agent definitions. No custom execution extension is needed for this unit.
+Current standalone delivery baseline: `d97d69868177bdb568affb64c726025478bf483a` (actual remote main). The earlier prototype baseline was `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`; its results below are retained prior evidence, not checks of the ported candidate. Package and plugin manifests, shared coordinator/setup/worker, host guides and role wrappers are the affected consumers. The published pi-subagents 0.83.0 manifest/discovery supports `pi.subagents.agents`; actual Pi 1.4.0 offline foreground trials passed on native Windows and Linux (Debian/WSL), using a loopback stub. Claude already has native agent definitions. No custom execution extension is needed for this unit.
 
 ## Scope and acceptance
 
@@ -35,6 +35,14 @@ Use focused metadata/instruction checks, an actual SDK plus local synthetic prov
 Candidate `9d0572abfe7d8a16c1ecaffb803f1e62b0f3133e` passed the final focused checks from fresh LF committed-source clones on native Windows and Linux. Both actual CLI metadata guards passed. The same inspected npm artifact contains four Pi and four Claude profiles and no private initiative/auth paths. Pi's actual SDK synthetic foreground cases and Claude's four-role plugin inventory passed on both systems. Windows root: `isswf native roles ñ 0vc9eG`; Linux root: `/tmp/isswf native roles ñ EnuVXK`. Artifact SRI: `sha512-k1l8d/ho6yZZgwgk2Br1qiLQh9UIl/rcu03EAOz5RKHquDkHNJ8nbKf2TtBfT+Ci3PopV2Y8GtRsrVHW2xv2CA==`. Reproduction pointers and exact limits are retained privately in `tooling/.local/windows-install/host-native-unit-results.json`. Final full ESLint, Knip, bilingual-doc checks and diff checks passed.
 
 This record does not change the failed broad checks above into PASS. No live model, independent semantic verdict, hosted CI, publication, installation migration or merge is claimed. The local functional unit is 648 changed lines before this record-only update; one coherent slicing pass found roles, shared default, host metadata, regressions and bilingual usage belong together. Publication requires reconciling the size exception/delivery strategy rather than silently expanding the paused runtime PR.
+
+## Approved standalone delivery and green-check work
+
+The operator explicitly approves the standalone PR and size exception, and asks to get the checks green. Keep PR #87 paused and unchanged. The isolated delivery branch contains only this unit over actual remote main, not the experimental native runtime. Current authority covers reversible fixes, tests, commits, branch push, PR creation and exact-head CI, but no real providers, new live actors, global changes, merge or release.
+
+Port validation found that compiled releases and materialized Markdown packages did not include the new Pi host resources even though source npm packing did. The exact optional resource allowlist now includes the host guide, four thin profiles and their shared planner/researcher resources, with byte checks for both package paths. CI delegation consumes the installed platform artifact rather than only source files.
+
+The native-filesystem Linux release suite passed independently in 63.9 seconds but exceeded the portable harness's 60-second bound. A diagnostic trace found the three serial installed-role fixture suites cost 25.7, 8.9 and 5.4 seconds; builds cost about 1.6 seconds. Run those independent fixture suites concurrently against the read-only installed artifact and wait for every child before teardown, keeping all assertions and their 45-second deadlines. Windows npm commands use the Node-installed npm CLI, as the existing platform fixture already does, instead of requiring an executable named npm. New exact-candidate results remain pending; do not claim the earlier failed broad checks passed.
 
 ## Rollback
 
