@@ -1,45 +1,40 @@
-# Claude Code host instructions
+# Claude Code host-native delegation
 
-Use this guide only when the coordinator is actually running in Claude Code. Shared objective, grounding, plan ownership, authorization and review contracts remain in `.agents/skills/isswf-coordinator/SKILL.md`; this guide replaces only Pi-specific dispatch mechanics.
-
-Claude Code native subagents replace Pi SDK dispatch for work explicitly approved for this host. Before work, the coordinator must obtain explicit assignment approval for Claude and the inherited/selected model, then observe and record the actual model metadata. `model: inherit` is not evidence of model identity or authorization. Pi route configuration does not configure Claude, and a configured Pi model is not automatically Claude-compatible. If model or capability is unavailable, stop that dispatch; never silently substitute a model or fall back to the Pi SDK.
+Use this guide only when actually running in Claude Code on native Windows or Linux. Shared methodology stays in `.agents/skills/` and `.agents/roles/`. Claude Code's native agent mechanism and the plugin's role definitions own delegation; Pi and its subagent extension are not a required dependency or fallback.
 
 ## Setup model choices
 
-During explicit setup, discover the current Claude host's native model choices and supported efforts from its available capability interface or local documentation. Present existing choices and defaults before asking for a selection; if capability evidence is missing, keep the affected choice pending rather than guessing from Pi routes or another host's aliases. Do not make provider calls to populate the menu.
+Discover the current host's supported native models and efforts without provider calls or reading credential contents. Reuse approved choices and record only missing decisions in the existing project's `project-setup.md` under `Claude Code model selection`. Pi provider IDs and `.factory/models.json` do not configure Claude. Setup selection is a preference, not assignment approval or evidence of subscription coverage.
 
-Persist approved Claude-native choices in the selected state's `project-setup.md` under a `Claude Code model selection` heading, with a table of role, native model choice and requested effort, plus the capability evidence and pending limitations. This is a host-specific decision record, not a Pi route schema. Preserve unrelated setup content and existing Pi `models.json`. An inherited choice must be explicit and its actual identity remains unknown until observed.
-
-When preparing a Claude assignment, consult those recorded choices and the current host capabilities, then carry the approved model and effort into the child's required context. Setup selection is a preference, not assignment approval, proof of availability or permission to create an actor or incur costs. A trusted current feature-to-PR start can supply the bounded assignment approval for the already selected supported host/model, actor/correction budget and delivery scope; record that approval rather than asking again merely because a phase changes. Existing observed-model, availability, child-context and cost requirements still apply. A changed or unsupported choice needs reconciliation, not a silent substitution.
-
-## External worktree assignments
-
-Before creating a worktree, follow [project worktree locations](../roles/references/worktrees.md). Read the repository-local `isswf.worktreeRoot`, prepare an exclusive external checkout with Git, and bind the native child to its exact absolute working directory. Do not use automatic host worktree isolation if it ignores that selection or creates another checkout under `.claude/worktrees/`. Missing native working-directory support blocks the affected dispatch rather than authorizing a fallback. Preserve the required context, actor grants and read-only reviewer tool restrictions below. This procedure does not imply Pi-equivalent isolation or add runtime enforcement.
+The shipped role profiles use `model: inherit` as an explicit configurable default, not proof of actual identity. Confirm approval for inheritance or choose a supported native model through Claude's documented configuration/delegation mechanism. Observe actual model metadata when available; label unknown effort or identity unknown. Never fabricate per-role effort support, silently substitute a model, or dispatch through Pi because Claude cannot satisfy a selection.
 
 ## Required child context
 
-Before delegating any native role, the coordinator resolves the project pin using the original installed launcher outside the private store. Keep that launcher path separate from the pinned runtime root returned by `locate`. A retained runtime inside the store is a resource location, not a replacement launcher for a second `locate` call against that same store.
-
-Include the following values in each child's trusted assignment, even when the parent already read them:
+Before delegating, provide:
 
 | Context | Required value |
 | --- | --- |
-| Project and scope | Absolute exclusive project root, full baseline commit, objective, sole mutable paths, protected checks and granted side effects. |
-| Installed launcher | Absolute original launcher path and explicitly selected private store. |
-| Pinned runtime root | Exact absolute root returned by the verified project lookup, not reconstructed from an ID or inferred from the loaded plugin. |
-| Release identity | Absolute `.isswf-release.json` path, `version`, `revision`, `runtimeId` and `artifactId` verified by the coordinator. The artifact ID is the SHA-256 of the exact receipt bytes. |
-| Document inputs | Absolute plan and brief paths, owning project, full document-input checkpoint and complete project-relative paths. Include every assigned input. If the approved assignment has no plan, state that explicitly instead of inventing one. |
-| Host and model | Approved Claude role/model, requested effort, observed model metadata when available, and remaining actor budget. Label unobserved metadata as unknown. |
-| Evidence directory | Explicitly authorized absolute directory for diffs, fingerprints and reports. Keep artifacts there rather than choosing an unrelated temporary path. |
+| Factory resources | Trusted absolute factory root and shared role path, resolved from the loaded plugin rather than guessed from the target. |
+| Task | Objective, acceptance, scope/exclusions, authorized side effects, checks and finite actor/correction budget. |
+| Checkout | Explicit absolute working directory and baseline; concurrent writers need exclusive checkouts. |
+| Review | Exact candidate/diff and retained untracked contents when applicable, plus relevant checks and their observer. |
+| Host and model | Approved native model/effort or explicit parent inheritance, with observed metadata or a stated limitation. |
+| Documents | Exact readable plan/brief paths when assigned; a small task may carry its full brief in the handoff. |
 
-For source-checkout assignments without a release receipt, explicitly declare source-checkout mode, the trusted factory root and its full source revision instead of inventing release IDs. Project document checkpoints remain separate.
+The child must acknowledge its working directory, scope and shared role before task work. Missing or unreadable required context blocks that assignment; return the missing input instead of guessing. The coordinator checks the handoff and result. A new host-native task needs no factory release receipt, project runtime pin, external grant file, compiled isSWF executable or capacity store.
 
-Resolve document paths from the project root before dispatch. An initiative plan such as `.isswf/initiatives/I0001/plan.md` is not inside `jobs/J001/`; provide that full path and the separate `.isswf/initiatives/I0001/jobs/J001/brief-r1.md` path. Preserve an existing `.factory/` prefix when that is the selected state. Supply checkpoint-matching readable inputs for read-only roles. A bare `plan.md` or `brief.md` is not a complete input reference. Check that each required input is present and matches its declared checkpoint before dispatch.
+## External worktree assignments
 
-The child must acknowledge the supplied root, identity and exact input paths before task work. For an installed release, first Read the host guide and receipt from that pinned root, compare the readable version/revision with the assignment, then Read its shared role profile and each required document at the exact supplied path. Use the coordinator's verified digest evidence; a read-only child must not claim it recomputed hashes. For source-checkout mode, Read the guide and role from the explicitly assigned source root. If required context is missing, mismatched or unreadable, stop before acting and return the missing field or exact path. The loaded plugin directory is not a fallback for missing installed pins. The coordinator checks the acknowledgement and subsequent file accesses before accepting the child's result; a successful repair alone does not close an incomplete handoff.
+For parallel writers or an explicitly requested worktree, follow `.agents/roles/references/worktrees.md`, including `isswf.worktreeRoot`. Sequential work may use the assigned checkout without creating another worktree. Missing native working-directory support blocks that dispatch; do not silently use another directory or host. A separate worktree prevents write collisions, not access to other files or the network.
 
 ## Native tools and review
 
-Delegate with Claude's native agent mechanism and the plugin role definitions. The coordinator retains responsibility for authorization, plan ownership, grounding, budget, evidence and acceptance. Native delegation does not provide equivalent Pi sandboxing, persistence or recovery. Tool declarations are not a security boundary; reviewer agents must have only Read, Grep and Glob, never Bash or other mutating tools. Bash is capable of mutation and is not a sandbox guarantee. Do not use permission bypasses, hooks or MCP to imply enforcement.
+Use the plugin's `isswf-worker`, `isswf-reviewer`, `isswf-researcher` and `isswf-planner` only when useful; there is no mandatory pipeline. The coordinator owns permissions, budgets, task state and acceptance. Do not create another dispatcher or enable automatic retry/review loops by default.
 
-An independent reviewer must judge the writer's exact retained candidate, including a stopped writer's partial candidate, not a substitute or later workspace. In addition to the required child context, provide the exact diff/snapshot identity and untracked contents, base, scope and original protected-check observations with their observer. Keep the writer stopped and those bytes fixed through review, then check the fingerprint again. The reviewer reads the supplied plan, brief and shared review reference from their explicit paths. Reviewer reports are evidence, not acceptance. Record missing context separately from the repair verdict; do not call full host validation passed while a required handoff check is missing.
+Reviewer agents have only Read, Grep and Glob. Bash can mutate files and is not a sandbox. Review the exact retained candidate, including a stopped writer's partial candidate, not a substitute or later workspace. Keep the writer stopped through review, distinguish supplied checks from reviewer observations and preserve findings. An unavailable independent reviewer leaves required independent judgment pending.
+
+A response is not verification or acceptance. Inspect the diff and relevant checks; report failure, cancellation and partial work honestly. Reconcile actual execution and remaining authority before replacement. Native delegation does not promise OS containment, process-tree cessation or Pi-equivalent sandboxing and recovery. Do not use permission bypasses, hooks or MCP to imply enforcement.
+
+## Existing legacy runtime assignments
+
+Explicitly retained legacy assignments keep their original launcher, runtime pin, release identity and checkpointed inputs under `docs/installation.md` and `docs/local-worker-lifecycle.md`. Read those guides from their retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.

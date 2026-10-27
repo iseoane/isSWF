@@ -1,12 +1,6 @@
 {
   "name": "isswf",
   "description": "Local Claude Code entry points for shared isSWF factory methodology",
-  "version": "1.4.0",
-  "skills": ["./skills/isswf-coordinator", "./skills/isswf-setup", "./skills/isswf-writing", "./skills/isswf-understanding", "./skills/isswf-pr", "./skills/isswf-issue", "./skills/isswf-e2e", "./skills/isswf-debug", "./skills/isswf-review", "./skills/isswf-retrospective", "./skills/isswf-tdd", "./skills/isswf-security", "./skills/isswf-performance", "./skills/isswf-observability"],
-  "agents": [
-    "./agents/isswf-worker.md",
-    "./agents/isswf-reviewer.md",
-    "./agents/isswf-researcher.md",
-    "./agents/isswf-planner.md"
-  ]
+  "version": "1.5.0",
+  "skills": ["./skills/isswf-coordinator", "./skills/isswf-setup", "./skills/isswf-writing", "./skills/isswf-understanding", "./skills/isswf-pr", "./skills/isswf-issue", "./skills/isswf-e2e", "./skills/isswf-debug", "./skills/isswf-review", "./skills/isswf-retrospective", "./skills/isswf-tdd", "./skills/isswf-security", "./skills/isswf-performance", "./skills/isswf-observability"]
 }

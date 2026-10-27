@@ -29,7 +29,7 @@ It is a workflow you use when needed, not a service that runs your repositories 
 - Maintainers who want to understand a proposed change and its checks before accepting it.
 - People exploring agent-assisted development who want explicit control over what agents may do.
 
-Pi is the reference execution environment. The Claude Code integration shares the methodology and uses native subagents. It does not guarantee the same isolation and recovery as the Pi executors. See [host support](docs/host-portability.md) for the boundaries of each integration.
+The development checkout's normal workflow shares methodology across Pi and Claude Code on native Windows and Linux. Pi delegates through the separately installed `pi-subagents` extension; Claude Code uses native agents. New host-native tasks do not require the factory's compiled executor or project runtime pin. See [host support](docs/host-portability.md) for configuration and verification limits. The retained compiled-release installation below is a separate legacy path; adopting the new workflow does not migrate or certify an existing installation.
 
 ## Workflow at a glance
 

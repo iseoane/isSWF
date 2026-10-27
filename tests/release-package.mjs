@@ -1,18 +1,26 @@
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
+import { execFile, spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { promisify } from 'node:util';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readReleaseSource, verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 const temp = await mkdtemp(join(tmpdir(), 'isswf-release-'));
 const fixture = join(temp, 'source'), store = join(temp, 'store'), project = join(temp, 'project');
+const npm = [process.env.npm_execpath, join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), resolve(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js')].find(path => path && isAbsolute(path) && existsSync(path));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', npm_config_cache: join(temp, 'npm-cache') };
 function run(binary, args, ok = true, cwd = temp) {
+  if (binary === 'npm' && process.platform === 'win32') {
+    assert.ok(npm, 'Node installation must provide npm CLI without a command shell');
+    args = [npm, ...args];
+    binary = process.execPath;
+  }
   const result = spawnSync(binary, args, { cwd, encoding: 'utf8', timeout: 45000, maxBuffer: 4 * 1024 * 1024, env });
   assert.ifError(result.error);
   if (ok) assert.equal(result.status, 0, `${binary} ${args.join(' ')}\n${result.stderr}\n${result.stdout}`);
@@ -62,6 +70,11 @@ try {
   await writeFile(join(markdownRoot, workflowPath), workflow, { mode: 0o444 });
   await verifyPackage(markdownRoot, revisionA);
   const rootManifest = await readJSON(join(releaseA, 'package.json'));
+  const nativePiResources = ['.agents/hosts/pi.md', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
+  for (const path of nativePiResources) {
+    assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Native Pi resources must survive committed-source construction');
+    assert.deepEqual(await readFile(join(markdownRoot, path)), await readFile(join(source, path)), 'Native Pi resources must survive Markdown materialization');
+  }
   assert.equal(rootManifest.version, (await readJSON(join(releaseA, '.claude-plugin/plugin.json'))).version);
   assert.equal(await readdir(releaseA).then(entries => entries.includes('.git')), false);
   assert.equal(Object.keys(receiptA.files).some(path => /^(?:tests|tooling|\.audit)\//u.test(path)), false);
@@ -142,7 +155,12 @@ try {
     await assert.rejects(readdir(join(managerProject, '.factory')), { code: 'ENOENT' });
     console.log('PASS real Pi manager global and project scopes in isolated temporary config; no project state initialized by package installation');
   }
-  for (const test of ['planner-task', 'reviewer-task', 'diagnostic-task']) run(process.execPath, [join(source, 'tests', test + '.mjs'), installed]);
+  // Each suite owns a different temporary project/store and only reads this artifact.
+  // Wait for ALL children before fixture teardown, including when one fails.
+  const roleResults = await Promise.allSettled(['planner-task', 'reviewer-task', 'diagnostic-task'].map(test =>
+    promisify(execFile)(process.execPath, [join(source, 'tests', test + '.mjs'), installed], { cwd: temp, env, timeout: 45000, maxBuffer: 4 * 1024 * 1024 })
+  ));
+  for (const result of roleResults) assert.equal(result.status, 'fulfilled', result.reason?.stack);
   assert.deepEqual(await inventory(releaseA), packageFiles, 'Packing does not modify release');
   await mkdir(project); run('git', ['init', '-q', project]);
   const beforeInspect = await inventory(project);

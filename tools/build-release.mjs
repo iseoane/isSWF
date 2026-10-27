@@ -5,7 +5,7 @@ import { lstat, mkdir, realpath, rename, rm, writeFile } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { releaseReceiptName, verifyRelease } from './release-source.mjs';
-import { canonicalPath } from './factory-package.mjs';
+import { canonicalPath, nativePiResources } from './factory-package.mjs';
 import { compileBunRelease, bunTargets } from './bun-release.mjs';
 
 const legacyMethodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
@@ -90,7 +90,7 @@ const fixedInventoryPaths = [
   '.factory/models.json',
 ];
 function isInventoryPath(path) {
-  if (fixedInventoryPaths.includes(path)) return true;
+  if (fixedInventoryPaths.includes(path) || nativePiResources.includes(path)) return true;
   if (path === 'tools/check-quality.mjs') return false;
   if (path.startsWith('tools/') && path.endsWith('.mjs') && !path.slice('tools/'.length).includes('/')) return true;
   if (path.startsWith('agents/') && path.endsWith('.md')) return true;
@@ -100,7 +100,7 @@ function isInventoryPath(path) {
   return false;
 }
 function isSourcePath(path) {
-  if (path === '.factory/templates/retrospective.md') return true;
+  if (path === '.factory/templates/retrospective.md' || nativePiResources.includes(path)) return true;
   if (path.startsWith('tools/') && path.endsWith('.mjs') && !path.slice('tools/'.length).includes('/')) return true;
   if (path.startsWith('.agents/roles/') || path.startsWith('agents/')) return true;
   if (path.startsWith('skills/') || path.startsWith('.agents/skills/isswf-writing/') || path.startsWith('.agents/skills/isswf-understanding/') || path.startsWith('.agents/skills/isswf-pr/') || path.startsWith('.agents/skills/isswf-issue/') || path.startsWith('.agents/skills/isswf-e2e/') || path.startsWith('.agents/skills/isswf-debug/') || path.startsWith('.agents/skills/isswf-review/') || path.startsWith('.agents/skills/isswf-retrospective/') || path.startsWith('.agents/skills/isswf-tdd/') || path.startsWith('.agents/skills/isswf-security/') || path.startsWith('.agents/skills/isswf-performance/') || path.startsWith('.agents/skills/isswf-observability/')) return true;
@@ -140,6 +140,7 @@ function validateManifest(bytes) {
   let manifest;
   try { manifest = JSON.parse(bytes.toString('utf8')); }
   catch { fail('The committed package.json is not valid JSON'); }
+  const nativeProfiles = Object.hasOwn(manifest?.pi ?? {}, 'subagents') ? { subagents: { agents: ['./.agents/hosts/pi/agents'] } } : {};
   if (
     !plainObject(manifest) ||
     Object.keys(manifest).sort().join(',') !== 'bin,description,files,keywords,name,pi,version' ||
@@ -148,7 +149,7 @@ function validateManifest(bytes) {
     typeof manifest.description !== 'string' ||
     JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: 'tools/isswf.mjs' }) ||
     JSON.stringify(manifest.keywords) !== JSON.stringify(['pi-package']) ||
-    JSON.stringify(manifest.pi) !== JSON.stringify({ skills: ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability'] }) ||
+    JSON.stringify(manifest.pi) !== JSON.stringify({ ...nativeProfiles, skills: ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability'] }) ||
     Object.hasOwn(manifest, 'dependencies') ||
     Object.hasOwn(manifest, 'devDependencies') ||
     Object.hasOwn(manifest, 'scripts')
@@ -176,7 +177,7 @@ async function build({ '--source': source, '--revision': revision, '--output': o
   if (!inventory.has('tools/isswf.mjs')) fail('The release bin target tools/isswf.mjs must be committed');
   const plugin = JSON.parse(inventory.get('.claude-plugin/plugin.json').bytes.toString('utf8'));
   if (plugin.version !== manifest.version) fail('Pi package, core and plugin must share one release version');
-  for (const path of fixedInventoryPaths) if (!inventory.has(path)) fail(`Required release path is missing: ${path}`);
+  for (const path of [...fixedInventoryPaths, ...(manifest.pi.subagents ? nativePiResources : [])]) if (!inventory.has(path)) fail(`Required release path is missing: ${path}`);
   runGit(sourceRoot, ['rev-parse', '--verify', `${legacyMethodologySha}^{commit}`]);
   const historicalEntries = treeEntries(sourceRoot, legacyMethodologySha);
   const historical = new Map();

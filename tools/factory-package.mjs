@@ -21,6 +21,14 @@ const receiptName = ".isswf-package-receipt.json";
 const coordinatorPath = ".agents/skills/isswf-coordinator/SKILL.md";
 const featureDeliveryPath = ".agents/roles/references/feature-delivery.md";
 const featureDeliveryLink = "../../roles/references/feature-delivery.md";
+export const nativePiResources = [
+  ".agents/hosts/pi.md",
+  ".agents/roles/planner.md",
+  ".agents/roles/researcher.md",
+  ".agents/roles/references/planning.md",
+  ".agents/roles/references/research.md",
+  ...["worker", "reviewer", "planner", "researcher"].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`),
+];
 const payloadPaths = [
   ".agents/skills/isswf-coordinator/SKILL.md",
   ".agents/skills/isswf-setup/SKILL.md",
@@ -169,6 +177,7 @@ function validateManifest(bytes) {
   } catch {
     fail("The committed package.json is not valid JSON");
   }
+  const hasSubagents = Object.hasOwn(manifest?.pi ?? {}, "subagents");
   const hasWriting = manifest?.pi?.skills?.includes("./.agents/skills/isswf-writing");
   const hasUnderstanding = manifest?.pi?.skills?.includes("./.agents/skills/isswf-understanding");
   const hasPr = manifest?.pi?.skills?.includes("./.agents/skills/isswf-pr");
@@ -199,8 +208,9 @@ function validateManifest(bytes) {
     !/^\d+\.\d+\.\d+$/u.test(manifest.version ?? "") ||
     typeof manifest.description !== "string" ||
     !manifest.pi ||
-    Object.keys(manifest.pi).sort().join(",") !== "skills" ||
+    Object.keys(manifest.pi).sort().join(",") !== (hasSubagents ? "skills,subagents" : "skills") ||
     JSON.stringify(manifest.pi.skills) !== JSON.stringify(skills) ||
+    (hasSubagents && JSON.stringify(manifest.pi.subagents) !== JSON.stringify({ agents: ["./.agents/hosts/pi/agents"] })) ||
     (released && (
       JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: "tools/isswf.mjs" }) ||
       JSON.stringify(manifest.keywords) !== JSON.stringify(["pi-package"]) ||
@@ -246,6 +256,7 @@ async function materialize({ source, revision, store }) {
     ...(hasE2e ? e2ePayloadPaths : []),
     ...taskSkills.filter(name => JSON.parse(manifestBytes).pi.skills.includes(`./.agents/skills/isswf-${name}`)).flatMap(name => taskPayloadPaths[name]),
   ];
+  if (JSON.parse(manifestBytes).pi.subagents) selectedPaths.push(...nativePiResources);
   const coordinatorEntry = entries.get(coordinatorPath);
   if (!coordinatorEntry || coordinatorEntry.type !== "blob" || !["100644", "100755"].includes(coordinatorEntry.mode)) fail("Missing regular coordinator skill");
   if (runGit(sourceRoot, ["cat-file", "blob", coordinatorEntry.object]).includes(featureDeliveryLink)) selectedPaths.push(featureDeliveryPath);
@@ -325,6 +336,7 @@ export async function verifyPackage(packageRoot, expectedRevision) {
     ...(hasE2e ? e2ePayloadPaths : []),
     ...taskSkills.filter(name => JSON.parse(manifestBytes).pi.skills.includes(`./.agents/skills/isswf-${name}`)).flatMap(name => taskPayloadPaths[name]),
   ];
+  if (JSON.parse(manifestBytes).pi.subagents) selectedPaths.push(...nativePiResources);
   const coordinatorStat = await lstat(join(root, coordinatorPath));
   if (!coordinatorStat.isFile() || coordinatorStat.isSymbolicLink()) fail("Missing regular coordinator skill");
   if ((await readFile(join(root, coordinatorPath), "utf8")).includes(featureDeliveryLink)) selectedPaths.push(featureDeliveryPath);

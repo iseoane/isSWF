@@ -86,6 +86,13 @@ Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las com
 
 ## Comprobaciones de plataforma y descubrimiento de skills
 
+La comprobación de integración con el host utiliza las dependencias fijadas, un perfil aislado y un proveedor simulado en loopback. Descubre los roles empaquetados y comprueba el modelo y el esfuerzo del worker y del reviewer, las herramientas, los cambios en el directorio asignado, los errores y la cancelación sin llamadas a modelos reales. No certifica la delegación real de Claude, la ejecución en segundo plano ni el aislamiento del sistema operativo.
+
+```bash
+npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+node tests/host-native-delegation.mjs .
+```
+
 El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. Una matriz independiente define comprobaciones nativas en Linux y Windows de compilación con Bun, instalación del tarball npm, inventarios exactos de recursos, versión e inspección de solo lectura de la CLI, rutas con espacios y Unicode, y worktrees externos de Git. En Windows no se comprueban los permisos POSIX. Estas pruebas no demuestran soporte de mutación, recuperación ni aislamiento de trabajadores en Windows.
 
 La matriz instala asistentes exclusivos de desarrollo desde `tooling/host-tests/package-lock.json`, con los scripts de ciclo de vida desactivados. Pi 1.4.0 instala el paquete en los ámbitos temporales de usuario y proyecto; su cargador real de recursos debe descubrir las catorce skills del artefacto instalado, con un control vacío previo a la instalación. Claude Code 2.1.299 instala el marketplace y plugin locales y debe mostrar esas skills en su inventario nativo de componentes. La prueba invoca el binario nativo de la plataforma incluido en la dependencia opcional de Claude, sin ejecutar su script de instalación. No se proporciona ningún prompt, sesión de agente, inicio de sesión ni credencial de proveedor. Las carpetas temporales de usuario y configuración y la telemetría desactivada limitan la actividad incidental; no demuestran aislamiento de red. Son pruebas de instalación y descubrimiento, no evaluaciones de tareas o delegaciones reales.

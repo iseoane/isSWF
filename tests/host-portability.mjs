@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const root = path.resolve(process.argv[2] ?? '.');
@@ -7,7 +7,9 @@ const read = (file) => readFile(path.join(root, file), 'utf8');
 const manifest = JSON.parse(await read('.claude-plugin/plugin.json'));
 assert.equal(manifest.name, 'isswf');
 assert.ok(manifest.skills.includes('./skills/isswf-coordinator'));
-for (const file of [...manifest.skills.map(skill => `${skill}/SKILL.md`), ...manifest.agents]) {
+assert.equal(manifest.agents, undefined, 'Use Claude default-directory discovery, not per-file manifest entries');
+assert.deepEqual((await readdir(path.join(root, 'agents'))).sort(), ['isswf-planner.md', 'isswf-researcher.md', 'isswf-reviewer.md', 'isswf-worker.md']);
+for (const file of manifest.skills.map(skill => `${skill}/SKILL.md`)) {
   assert.ok((await read(file)).length > 0, `missing manifest entry ${file}`);
 }
 for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-reviewer.md','reviewer'],['agents/isswf-researcher.md','researcher'],['agents/isswf-planner.md','planner']]) {
@@ -23,35 +25,49 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
 assert.ok(skill.includes('[isswf-issue](../isswf-issue/SKILL.md)'), 'Coordinator must route independent reports to the shared issue skill');
 assert.match(skill, /actually running in Claude Code/);
-assert.match(skill, /Pi remains the default/);
+assert.match(skill, /Windows and Linux, Pi and Claude Code are equal/);
+assert.match(skill, /No|Neither|Neither path requires/u);
 const claudeSkill = await read('skills/isswf-coordinator/SKILL.md');
 assert.match(claudeSkill, /Required child context/);
+assert.doesNotMatch(claudeSkill, /locate|runtimeId|artifactId/);
 const host = await read('.agents/hosts/claude-code.md');
 assert.match(host, /## Required child context/);
 assert.match(host, /## External worktree assignments/);
 assert.match(host, /isswf\.worktreeRoot/u);
 assert.match(host, /Missing native working-directory support blocks/u);
-for (const field of ['Installed launcher', 'Pinned runtime root', 'Release identity', 'Document inputs', 'Evidence directory']) assert.ok(host.includes(field), `missing Claude handoff field ${field}`);
-for (const field of ['version', 'revision', 'runtimeId', 'artifactId']) assert.ok(host.includes('`' + field + '`'), `missing release identity ${field}`);
-assert.match(host, /absolute.*plan.*brief|plan.*brief.*absolute/i);
-assert.match(host, /checkpoint/);
-assert.match(host, /before.*delegat/i);
-assert.match(host, /outside.*store/i);
+for (const field of ['Factory resources', 'Task', 'Checkout', 'Review', 'Host and model', 'Documents']) assert.ok(host.includes(field));
+assert.match(host, /no factory release receipt, project runtime pin/);
 assert.match(host, /acknowledge/);
-assert.match(host, /missing.*stop|stop.*missing/i);
+assert.match(host, /Missing.*blocks/);
 assert.match(host, /Bash.*not.*sandbox/i);
 assert.match(host, /exact retained candidate.*stopped writer|stopped writer.*partial candidate/i);
 assert.doesNotMatch(host, /bypassPermissions|permissionMode:|hooks:|mcpServers:/i);
+const piHost = await read('.agents/hosts/pi.md');
+assert.match(piHost, /pi-subagents.*0\.83\.0/);
+assert.match(piHost, /agentOverrides/);
+assert.match(piHost, /thinking/);
+assert.match(piHost, /async: false/);
+assert.match(piHost, /contact_supervisor/);
+assert.match(piHost, /does not install.*automatically/i);
 const docs = await read('docs/host-portability.md');
 assert.match(docs, /--plugin-dir/);
 assert.match(docs, /\/isswf:isswf-coordinator/);
 assert.match(docs, /static contract check, not proof of live delegation/i);
 assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
-assert.doesNotMatch(docs, /A00[1-3]|2\.1\.299|bounded live validation/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
 assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability']);
-assert.deepEqual(piManifest.bin, { isswf: 'tools/isswf.mjs' });
+assert.deepEqual(piManifest.bin, { isswf: 'tools/isswf.mjs' }, 'Retained legacy executable is not removed');
+assert.deepEqual(piManifest.pi.subagents, { agents: ['./.agents/hosts/pi/agents'] });
+for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
+  const body = await read('.agents/hosts/pi/agents/isswf-' + role + '.md');
+  assert.match(body, new RegExp('name: isswf-' + role));
+  assert.ok(body.includes('.agents/roles/' + role + '.md'));
+  assert.doesNotMatch(body, /^model:|^thinking:/mu, 'Host settings own model/effort');
+  assert.match(body, /Missing.*blocks/);
+  assert.ok(body.length < 1200);
+  if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
+}
 for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-security', 'isswf-performance', 'isswf-observability']) {
   assert.ok(piManifest.files.includes(`.agents/skills/${name}`));
   assert.ok(manifest.skills.includes(`./skills/${name}`));
@@ -154,4 +170,19 @@ assert.match(worker, /installed runtime must match the explicit project pin/);
 const preparer = await read('tools/pi-worker-task.mjs');
 assert.match(preparer, /profile must pin methodology files at the authorized baseline/);
 assert.match(preparer, /brief.path must name a committed regular-file blob/);
+// These are instruction-contract checks, not a live evaluation of agent adherence.
+for (const role of ['planner', 'researcher']) {
+  for (const file of [`.agents/roles/${role}.md`, `.agents/roles/references/${role === 'planner' ? 'planning' : 'research'}.md`]) {
+    const body = await read(file);
+    assert.match(body, /complete brief.*handoff/u, `${file}: an ordinary inline assignment must not require a committed brief`);
+    assert.match(body, /explicitly checkpoint-pinned document assignments/u, `${file}: scope the additional document gates explicitly`);
+    assert.match(body, /full Git SHA/u, `${file}: retain full-SHA protection for assigned document pins`);
+    assert.match(body, /readable checkpoint material/u, `${file}: read-only profiles need a coordinator-supplied pinned-input route`);
+    assert.match(body, /(?:missing|unavailable)[^.]*blocks?/iu, `${file}: missing required evidence must still block`);
+    assert.doesNotMatch(body, /(?:An actual|Require an actual) research-job brief path/u, `${file}: remove the unconditional legacy input gate`);
+    assert.doesNotMatch(body, /when the grant, durable brief path/u, `${file}: a durable brief is conditional, not a universal stop condition`);
+  }
+}
+assert.match(await read('.agents/roles/references/planning.md'), /write.*artifact only.*explicitly authorized/u, 'Read-only planners return through the authorized channel instead of requiring a file write');
+assert.match(await read('.agents/roles/references/research.md'), /never substitute.*latest/u, 'Unavailable pinned documents must not silently become current files');
 console.log('host-portability: static manifest and preserved contract checks ok; no Claude invocation');
