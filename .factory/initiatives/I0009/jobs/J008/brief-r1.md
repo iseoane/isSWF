@@ -1,0 +1,35 @@
+# J008: Connect shared roles to host-native delegation
+
+## Objective and authorization
+
+The operator approves reducing isSWF to shared methodology with thin host integrations, retaining native Windows/Linux and both Pi/Claude Code. After the isolated pi-subagents trial, the operator says to proceed. Implement and check this functional unit locally; do not install globally, migrate source state, remove evidence, merge or invoke real models. Existing feature-branch delivery authority does not imply integration or package publication.
+
+## Grounding
+
+Baseline: 1c7e898ca1eb4e8e35c455aeadbb1f39832caed7. Package and plugin manifests, shared coordinator/setup/worker, host guides and role wrappers are the affected consumers. The published pi-subagents 0.83.0 manifest/discovery supports `pi.subagents.agents`; actual Pi 1.4.0 offline foreground trials passed on native Windows and Linux (Debian/WSL), using a loopback stub. Claude already has native agent definitions. No custom execution extension is needed for this unit.
+
+## Scope and acceptance
+
+- Package Pi role definitions discoverable by pi-subagents, sharing methodology with existing Claude roles.
+- Select model/effort through host configuration, not the legacy Luna/high adapter. Missing capability blocks only that delegation; never substitute another host/model automatically.
+- Make host-native delegation the normal coordinator/setup path without requiring a project runtime pin, external grant file, compiled factory executable or capacity store. Keep explicit legacy assignments on their original guides and contracts.
+- Provide shared task scope, checkout, baseline/candidate, role resources, selected model/effort, budget and useful verification. Keep independent judgment separate from implementation; no mandatory role pipeline.
+- Preserve existing executables, runtime tests, historical pins/verdicts and reservations unchanged. Claim no OS containment or crash-recovery equivalence for native host sessions.
+- Verify package role discovery and offline worker/reviewer behavior against actual Pi/extension dependencies on Windows and Linux, plus Claude wrapper/inventory checks where available. Static Claude checks are not live acceptance. Keep unresolved tests/review visible.
+
+## Verification and stopping condition
+
+Use focused metadata/instruction checks, an actual SDK plus local synthetic provider harness, existing host portability and packaging checks, bilingual docs and locked static checks. No real provider calls. Record harness/limitations in this brief rather than creating another status store. Semantic assessment covers the changed default execution boundary; independent acceptance remains pending until a separately supported authorized context exists. Complete the unit only with observed affected checks, or name the specific remaining blocker.
+
+## Observed implementation and verification
+
+- Shared profiles and host-native coordinator/setup/default-delivery instructions are connected. Pi uses `pi.subagents.agents`; Claude uses default top-level `agents/` discovery. No new production dispatcher, supervisor, runtime route exception or global setting was added. Legacy executables and historical attempts are retained.
+- Development dependencies pin Pi 1.4.0, pi-subagents 0.83.0 and Claude Code 2.1.299. Actual isolated `npm ci --ignore-scripts --no-audit --no-fund` passed on Windows and Linux. No pre-existing locked dependency version changed.
+- An actual npm tarball from the staged LF source was inspected and installed in isolated consumers on both systems. Round2 tests passed: Pi discovers all four roles; a synthetic worker writes the assigned result at high effort, a synthetic reviewer reads it at medium effort, provider failure remains visible, and foreground cancellation returns. Claude's actual plugin inventory reports the four named native profiles. This is not real-provider or Claude delegation acceptance.
+- A discovery regression was reproduced: explicit per-file Claude manifest agent entries returned zero inventoried agents even for a minimal valid profile; default directory discovery returned the expected profile. Pi profiles were moved out of Claude's directory. Original unsuccessful artifact/probes remain retained; manifest validation alone did not prove discovery. `claude agents --json` lists sessions, not role profiles.
+- Evidence: external `isswf host-native candidate b9dU1W/round2` contains LF source, tarball, pack report and Windows consumer. Windows check root `isswf native roles ñ RB1Wg2`; Linux check root `/tmp/isswf native roles ñ 3CZ4mQ`, using native Linux Node in Debian WSL. No WSL result substitutes for native Windows; neither proves background trees, OS isolation or crash recovery.
+- Static host-portability and worker-methodology checks passed against the LF candidate. The original source working copy's CRLF-sensitive pre-existing frontmatter failure remains distinguished from that result. Bilingual docs, focused lint and diff checks passed after the final inventory fix. Independent semantic review, broader checks and committed-source verification are not yet claimed.
+
+## Rollback
+
+Revert this unit's manifest/profile/instruction/default-flow changes together. Existing legacy tools and retained installations remain available; rollback does not delete or replay any attempt or alter global host settings.

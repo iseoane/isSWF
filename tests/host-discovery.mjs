@@ -79,6 +79,11 @@ if (process.argv[3] === '--pi-loader') {
   assert.ok(skillLine, 'Claude must report its actual skill component inventory');
   assert.equal(Number(skillLine[1]), expected.length);
   assert.deepEqual(skillLine[2].split(',').map(name => name.trim()).sort(), expected);
+  const agentLine = inventory.match(/^\s*Agents \((\d+)\)\s+(.+)$/mu);
+  const expectedAgents = ['isswf-planner', 'isswf-researcher', 'isswf-reviewer', 'isswf-worker'];
+  assert.ok(agentLine, 'Claude must discover native role profiles from the actual artifact');
+  assert.equal(Number(agentLine[1]), expectedAgents.length);
+  assert.deepEqual(agentLine[2].split(',').map(name => name.trim()).sort(), expectedAgents);
   await writeFile(join(root, 'claude-inventory.txt'), inventory + '\n');
   const result = { status: 'PASS', platform: process.platform, arch: process.arch, revision: report.revision, version: report.version, pi: { version: piManifest.version, scopes: piResults }, claude: { version: claudeVersion, plugin: plugin.id, skills: expected }, limits: 'Actual host package installation and discovery only. No model prompts, sessions, authentication or provider credentials supplied. Disabling telemetry is not proof of operating-system network isolation. No live task/delegation or Windows worker/sandbox equivalence claimed.' };
   await writeFile(join(root, 'host-report.json'), JSON.stringify(result, null, 2) + '\n');

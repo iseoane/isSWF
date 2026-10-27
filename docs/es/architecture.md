@@ -8,9 +8,13 @@ Esta guía describe la estructura actual del código, no una arquitectura propue
 
 Las instrucciones compartidas están en `.agents/skills/` y `.agents/roles/`. Las referencias de los roles explican cómo investigar, implementar, comprobar y revisar trabajos. Se utilizan cuando corresponden, no como una secuencia obligatoria.
 
+El flujo normal de desarrollo utiliza la delegación del host en Windows y Linux: Pi con la extensión `pi-subagents`, instalada por separado, y Claude Code con agentes nativos. isSWF aporta la metodología, no un supervisor de procesos ni un aislamiento equivalente entre hosts. Los perfiles de Pi están en `.agents/hosts/pi/agents/`, declarados mediante `pi.subagents.agents` en `package.json`; los de Claude utilizan su directorio predeterminado `agents/`. Consulta la configuración y los límites de verificación observados en [compatibilidad de los hosts](../host-portability.md).
+
 Pi descubre las skills declaradas en `package.json`. Las carpetas `skills/`, `agents/` y `.claude-plugin/` adaptan las instrucciones compartidas a Claude Code. No deben mantener otra copia de la metodología. Un archivo de rol describe responsabilidades; no es un agente en ejecución ni un permiso para ejecutar.
 
 ## Herramientas ejecutables
+
+Estas herramientas se conservan para el flujo heredado con ejecutor compilado y sus registros históricos. No son requisitos de las tareas nuevas con delegación del host. Conservarlas no completa los objetivos antiguos de preparación ni migra los proyectos instalados.
 
 | Área | Código |
 | --- | --- |

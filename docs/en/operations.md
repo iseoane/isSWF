@@ -4,6 +4,12 @@
 
 Use the coordinator to understand the next step. The commands below inspect recorded work or open its local panel; they do not call a model. Replace example paths and initiative IDs with existing values. They do not initialise a repository or create a plan.
 
+## Normal host-native work
+
+New ordinary tasks use the host's delegation with shared isSWF roles: Pi with the separately installed `pi-subagents` extension, or Claude Code with native agents. See [host support](../host-portability.md) for the configuration example and boundaries. Configure model and effort in the selected host, not in the legacy executor's route file. A missing extension requires an installation decision, not a new supervisor.
+
+The coordinator supplies scope, working directory, budget and checks, then verifies the actual change. No compiled factory executable, project runtime pin, external grant file or capacity store is required for this path. Windows and Linux are both targets; report actual host/platform evidence separately. Do not reinterpret existing interrupted runtime jobs as new tasks to bypass claims. The inspection commands below remain available for recorded legacy work.
+
 ## From a source checkout
 
 Run from the isSWF repository root:

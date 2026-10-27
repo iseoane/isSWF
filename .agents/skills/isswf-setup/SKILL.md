@@ -8,6 +8,16 @@ disable-model-invocation: true
 
 Run only on an explicit operator request to set up, inspect, update, or recover a project. “Set up this project” selects the current checkout; inspect it before asking questions.
 
+## Normal host-native setup
+
+For new ordinary projects, inspect the current checkout, existing setup and actual host. Use [Pi](../../hosts/pi.md) or [Claude Code](../../hosts/claude-code.md) for native role/model/effort configuration and missing capability checks. Preserve existing choices and unrelated settings. Resolve only missing tracking, permissions, execution/correction budgets, worktree and delivery choices under [feature delivery](../../roles/references/feature-delivery.md). Keep roles conditional; no default mandatory pipeline.
+
+An explicit setup request permits recording approved decisions in the existing single state's `project-setup.md`; when a new record is needed, use `.isswf/`, never a second active state root. Host configuration changes and extension installation need their actual authorization. A normal setup does not require `isswf init`, a compiled factory executable, project runtime pin, external grant file or private capacity store. Do not rewrite legacy `.factory/models.json` to configure host-native agents. After the host's supported mapping and decisions are clear, return changed paths and pending capabilities; do not run the legacy procedures below.
+
+## Explicit legacy runtime setup only
+
+The remaining procedures apply only when the operator explicitly selects an existing legacy runtime installation or its maintenance. They do not override the normal host-native setup above, migrate projects automatically or grant execution.
+
 ## Discover before asking
 
 Resolve the target Git root from the current directory, including when invoked from a subdirectory. An explicitly supplied target takes precedence. Inspect Git HEAD, status/diff, remotes, the single existing `.isswf/` or `.factory/` state directory, setup/model files, installation pin and interrupted-operation records. Ask for a path only when no target can be resolved or multiple targets remain ambiguous. Report two state directories as a conflict, not a choice to guess.
