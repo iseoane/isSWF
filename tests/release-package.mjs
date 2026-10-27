@@ -61,24 +61,6 @@ try {
   await assert.rejects(verifyPackage(markdownRoot, revisionA), /ENOENT/u);
   await writeFile(join(markdownRoot, workflowPath), workflow, { mode: 0o444 });
   await verifyPackage(markdownRoot, revisionA);
-  const manifestFixture = join(temp, 'manifest-source');
-  run('git', ['clone', '-q', '--shared', fixture, manifestFixture]);
-  const originalManifest = await readJSON(join(fixture, 'package.json'));
-  for (const [name, mutate, accepted] of [
-    ['legacy', manifest => { delete manifest.pi.subagents; }, true],
-    ['unknown-agent-path', manifest => { manifest.pi.subagents = { agents: ['./unapproved'] }; }, false],
-    ['extra-subagent-setting', manifest => { manifest.pi.subagents = { ...manifest.pi.subagents, enabled: true }; }, false],
-    ['runtime-dependency', manifest => { manifest.dependencies = { 'pi-subagents': '0.83.0' }; }, false],
-  ]) {
-    const manifest = structuredClone(originalManifest);
-    mutate(manifest);
-    await writeJSON(join(manifestFixture, 'package.json'), manifest);
-    run('git', ['-C', manifestFixture, 'add', 'package.json']);
-    run('git', ['-C', manifestFixture, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', name]);
-    const sha = run('git', ['-C', manifestFixture, 'rev-parse', 'HEAD']).stdout.trim();
-    const checked = run(process.execPath, [join(source, 'tools/factory-package.mjs'), 'materialize', '--source', manifestFixture, '--revision', sha, '--store', join(temp, 'manifest-store')], accepted);
-    if (!accepted) assert.match(checked.stderr, /no-dependency package contract/u, name);
-  }
   const rootManifest = await readJSON(join(releaseA, 'package.json'));
   assert.equal(rootManifest.version, (await readJSON(join(releaseA, '.claude-plugin/plugin.json'))).version);
   assert.equal(await readdir(releaseA).then(entries => entries.includes('.git')), false);

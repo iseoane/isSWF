@@ -140,6 +140,7 @@ function validateManifest(bytes) {
   let manifest;
   try { manifest = JSON.parse(bytes.toString('utf8')); }
   catch { fail('The committed package.json is not valid JSON'); }
+  const nativeProfiles = Object.hasOwn(manifest?.pi ?? {}, 'subagents') ? { subagents: { agents: ['./.agents/hosts/pi/agents'] } } : {};
   if (
     !plainObject(manifest) ||
     Object.keys(manifest).sort().join(',') !== 'bin,description,files,keywords,name,pi,version' ||
@@ -148,7 +149,7 @@ function validateManifest(bytes) {
     typeof manifest.description !== 'string' ||
     JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: 'tools/isswf.mjs' }) ||
     JSON.stringify(manifest.keywords) !== JSON.stringify(['pi-package']) ||
-    JSON.stringify(manifest.pi) !== JSON.stringify({ skills: ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability'] }) ||
+    JSON.stringify(manifest.pi) !== JSON.stringify({ ...nativeProfiles, skills: ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability'] }) ||
     Object.hasOwn(manifest, 'dependencies') ||
     Object.hasOwn(manifest, 'devDependencies') ||
     Object.hasOwn(manifest, 'scripts')
