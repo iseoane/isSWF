@@ -8,9 +8,13 @@ This guide describes the current source layout, not a proposed architecture. Sta
 
 The shared instructions live in `.agents/skills/` and `.agents/roles/`. Role references explain how to investigate, implement, verify, and review work. They are used when relevant, not as a compulsory sequence.
 
+The normal development workflow uses host-owned delegation on Windows and Linux: Pi with the separately installed `pi-subagents` extension and Claude Code with native agents. isSWF supplies methodology, not a process supervisor or equivalent cross-host sandbox. Pi profiles live in `.agents/hosts/pi/agents/`, declared through `pi.subagents.agents` in `package.json`; Claude profiles use its default `agents/` directory. See [host support](../host-portability.md) for configuration and observed verification limits.
+
 Pi discovers the skills declared in `package.json`. The `skills/`, `agents/`, and `.claude-plugin/` directories adapt the shared instructions to Claude Code. They should not grow a separate copy of the methodology. A role file describes responsibilities; it is not a running agent or an execution permission.
 
 ## Executable tools
+
+These retained tools support the legacy compiled-executor workflow and historical records. They are not prerequisites for new host-native assignments. Keeping them does not complete old readiness objectives or migrate installed projects.
 
 | Area | Source |
 | --- | --- |

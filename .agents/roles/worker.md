@@ -1,6 +1,6 @@
 # Worker
 
-The coordinator assigns this profile and a trusted brief through an explicitly supported execution path. The normal native worker uses the Pi SDK, not an external dispatcher. Open the supplied methodology and brief before acting. The coordinator owns concurrency and any other agents.
+The coordinator assigns this profile and a trusted brief through the actual host's supported delegation mechanism. Pi uses its approved subagent extension; Claude Code uses native agents. The shared methodology does not own a separate execution platform. Open the supplied methodology and brief before acting. The coordinator owns concurrency and any other agents.
 
 ## Assignment contract
 
@@ -39,4 +39,4 @@ Report the exact checkout and baseline, changed paths, outcome against each acce
 
 ## Dispatch configuration
 
-Consult the canonical route values in `docs/model-routing.md` and `.factory/models.json`. The effective brief must identify this assignment's domain role, complete resolved route, selected destination, and actual requested/effective model and effort metadata when observed. The coordinator verifies current runtime availability and effort support before dispatch; do not silently substitute a model. A configured route does not prove that an execution path supports that role. Use only the runtime capability verified by the coordinator; missing capability blocks dispatch rather than requiring an external skill or extension.
+Use the actual host's role configuration and the coordinator's approved model and effort. Read the supplied Pi or Claude Code host guide when needed. Report requested and observed metadata separately; availability is not permission or subscription evidence. Never silently substitute a model or another host. Missing capability blocks this delegation rather than authorizing installation or another dispatcher. An explicitly assigned legacy runtime job still follows its pinned `docs/model-routing.md` and `.factory/models.json`; do not reinterpret or modify its selection.

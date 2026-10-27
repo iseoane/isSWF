@@ -88,6 +88,13 @@ Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las com
 
 ## Comprobaciones de plataforma y descubrimiento de skills
 
+La comprobación de integración con el host utiliza las dependencias fijadas, un perfil aislado y un proveedor simulado en loopback. Descubre los roles empaquetados y comprueba el modelo y el esfuerzo del worker y del reviewer, las herramientas, los cambios en el directorio asignado, los errores y la cancelación sin llamadas a modelos reales. No certifica la delegación real de Claude, la ejecución en segundo plano ni el aislamiento del sistema operativo.
+
+```bash
+npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+node tests/host-native-delegation.mjs .
+```
+
 El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. Una matriz independiente define comprobaciones nativas en Linux y Windows de compilación con Bun, instalación del tarball npm, inventarios exactos de recursos, versión e inspección de solo lectura de la CLI, inicialización y publicación y repetición del primer plan, rutas con espacios y Unicode, y worktrees externos de Git. Las comprobaciones del código fuente también cubren la publicación interrumpida de planes y el rechazo cuando se conserva un bloqueo. En Windows no se comprueban los permisos POSIX. Estas pruebas del paquete no demuestran soporte completo de migración y recuperación ni aislamiento de trabajadores en Windows.
 
 La prueba exclusiva de Windows `windows-state-migration.mjs` comprueba la publicación nativa de directorios, la repetición sin cambios, los bytes y rutas heredados exactos, una única raíz de estado activa, las protecciones del inventario y el rechazo de recuperación ante cambios o un cese desconocido. El predicado de cese se inyecta en la prueba: no demuestra la muerte real del propietario; los vaciados obligatorios de archivos normales no cambian.

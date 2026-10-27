@@ -4,7 +4,22 @@ Type: bug
 
 This coordinator-owned plan records local progress, not execution permission or process liveness.
 
-The operator's current final objective is factory operation on both Linux and Windows. Initialization, packaging and host discovery are intermediate acceptance milestones, not a reduction of that objective. Existing Linux portable and isolated synthetic execution evidence does not prove all real-provider behavior. Windows native isolated execution and lifecycle/read-only recovery now have mechanical verification below; complete setup, the public provider journey and final acceptance remain explicit pending boundaries.
+J001–J007 below preserve the historical full-executor Windows/Linux readiness objective and its unfinished evidence. The approved methodology-first boundary is recorded under Current scope decision; it supersedes expanding that executor as the normal product, not its historical outcomes. Existing Linux portable and isolated synthetic execution evidence does not prove all real-provider behavior. Windows native isolated execution and lifecycle/read-only recovery now have mechanical verification below; complete setup, the public provider journey and final acceptance remain explicit pending boundaries.
+
+## J008
+
+- Status: in-progress
+- Objective: Connect shared roles and host configuration to Pi subagents and Claude native delegation on Windows and Linux
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Blocker: Independent semantic acceptance and complete real-host journeys remain pending; real model calls are paused. Broader exact-candidate mechanical checks and delivery slicing are still to be reconciled.
+- Next step: Retain the implemented host-native unit with native Windows/Linux Pi synthetic and Claude inventory evidence; finish affected checks without resuming J007 or claiming four-cell live acceptance
+
+## Current scope decision
+
+The operator pauses J007's custom execution/isolation expansion and approves a methodology-first factory on native Windows and Linux, with Pi and Claude Code as equal current hosts. J007's trials, verdicts, failed reservations and runtime contracts remain historical evidence, not relabelled success or permission to bypass their guards. New ordinary assignments use host-owned delegation; future hosts should reuse the shared methodology without a new generic dispatcher framework. The unused additional live pair remains paused.
+
+J008 connects packaged roles and host configuration to the existing delegation mechanisms. Its offline checks do not establish real-provider acceptance or complete the historical J007 security/readiness objective.
 
 ## J001
 

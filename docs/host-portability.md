@@ -1,29 +1,44 @@
 # Host support: Pi and Claude Code
 
-Pi is the reference execution host. `package.json` declares its setup and coordinator skills. The complete prepared package includes the runtime selected through `tools/isswf.mjs`; source-checkout activation is a separate compatibility path. Neither installation nor skill discovery authorises dispatch.
+isSWF supplies shared methodology on native Windows and Linux. The host owns agent execution. Pi uses the separately installed `pi-subagents` extension; Claude Code uses native agents through the isSWF plugin. Neither installation, configuration nor skill discovery authorises a model call.
 
 ## Shared instructions and entry points
 
-Both integrations read the shared `.agents/skills/` and `.agents/roles/` resources. Claude's `skills/`, `agents/`, and `.claude-plugin/` files are thin wrappers, not an independently maintained methodology.
+Both integrations read `.agents/skills/` and `.agents/roles/`. `.agents/hosts/pi/agents/` exposes Pi role definitions through `package.json` → `pi.subagents.agents`. Claude's `skills/`, `agents/isswf-*.md` and `.claude-plugin/` remain thin wrappers. Claude discovers its four roles from the default top-level `agents/` directory; Pi profiles stay outside that directory. On pinned Claude 2.1.299, explicit per-file manifest agent entries produced an empty component inventory even for a minimal valid profile; default-directory discovery is verified separately. Do not copy the methodology or build another dispatcher for a new host.
 
-On an explicitly authorised, trusted checkout, Claude's documented session-only loading command is:
+For Pi, the normal integration uses Pi 1.4.0 and `pi-subagents` 0.83.0. Install the extension only with permission, using Pi's package manager and the selected scope. It is not automatically installed by isSWF. Role model/effort selections belong to the host's user or trusted-project settings, not the legacy executor's `.factory/models.json`:
+
+```json
+{
+  "subagents": {
+    "agentOverrides": {
+      "isswf-worker": { "model": "openai/gpt-6-luna", "thinking": "high" },
+      "isswf-reviewer": { "model": "openai/gpt-6.1-sol", "thinking": "medium" }
+    }
+  }
+}
+```
+
+This is a configuration example, not a universal default, availability claim or cost grant. Verify the selected host's current mapping before launch. The factory package must be loaded by Pi for its package agents to be discovered. Follow [.agents/hosts/pi.md](../.agents/hosts/pi.md) for the foreground delegation contract.
+
+For an explicitly authorised trusted checkout, Claude's session-only plugin loading command is:
 
 ```sh
 claude --plugin-dir /absolute/path/to/trusted/isswf-checkout
 ```
 
-The coordinator entry is `/isswf:isswf-coordinator`. Complete-package installation is described in [installation](installation.md). Documenting a command does not mean it has been run or that a release is publicly available.
+The coordinator entry is `/isswf:isswf-coordinator`. Follow [.agents/hosts/claude-code.md](../.agents/hosts/claude-code.md) for native model choices and the child handoff. Pi provider IDs do not configure Claude. There is no factory pin/receipt or compiled executable prerequisite for a new host-native task.
 
 ## Host boundaries
 
-Claude native delegation does not establish Pi-equivalent sandboxing, durable persistence, or recovery. Bash permissions are not a sandbox. Factory grant fields and tool declarations do not authenticate actors or enforce every host action.
+The coordinator supplies the objective, scope, working directory, shared resources, model/effort, finite budget, relevant checks and exact review candidate. Small tasks do not need committed job JSON. Parallel writers need exclusive workspaces; unknown execution blocks a replacement writer. Independent review, when required, stays separate from implementation. Do not enable nested agents, missions, schedules or correction loops merely because an extension offers them.
 
-Pi model routes do not configure Claude. Dispatch requires approval for the actual host and inherited or selected model, plus observed model metadata. An unavailable or unauthorised host blocks dispatch; it does not permit silent fallback to Pi or another model.
+Native host sessions and tool restrictions are not OS filesystem/network containment or durable crash recovery. Bash is not a sandbox; the Pi extension also adds a `contact_supervisor` communication tool to children. This path does not establish Pi-equivalent sandboxing to the retained LPAC/Bubblewrap executors. Missing models or capabilities are reported, never silently replaced. A response is not a passing check, acceptance, publication or merge.
 
-The caller must retain the exact candidate, establish that the writer stopped, and select the required independent review. Plugin loading or a successful model response proves none of these conditions and does not accept or publish the result.
+Explicitly selected legacy runtime jobs retain their original pins, grants, claims and [lifecycle](local-worker-lifecycle.md), [routing](model-routing.md) and [installation](installation.md) contracts. The host-native path does not migrate or complete them. Never erase an inconclusive verdict or use a new host to bypass an unresolved old writer.
 
 ## Verify the integration
 
-`node tests/host-portability.mjs .` checks manifests, shared-wrapper references and documented boundaries without invoking Claude. It is a static contract check, not proof of live delegation, model identity, sandboxing, recovery or client readiness.
+`node tests/host-portability.mjs .` is a static contract check, not proof of live delegation. Offline SDK tests with a loopback synthetic provider can check role discovery, model/effort, tools, results, failures and cancellation without consuming real model calls. The isolated package trial exercised Pi 1.4.0 plus pi-subagents 0.83.0 on native Windows and Linux (Debian/WSL), not Claude live delegation or all background features.
 
-Any live host test needs its own current authorisation, isolated scope, observed model identity and retained candidate. Earlier demonstrations and consumed grants do not replace those requirements. Historical reports are archived separately and are not part of the current usage procedure.
+The acceptance target includes Windows/Pi, Linux/Pi, Windows/Claude Code and Linux/Claude Code. Report each observed combination and limitation separately. A live test needs its own current authorization; earlier demonstrations, configured CI and consumed grants are not current execution evidence.

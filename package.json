@@ -42,6 +42,7 @@
     "docs/issue-intake.md"
   ],
   "pi": {
+    "subagents": { "agents": ["./.agents/hosts/pi/agents"] },
     "skills": [
       "./.agents/skills/isswf-coordinator",
       "./.agents/skills/isswf-setup",

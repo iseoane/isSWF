@@ -88,6 +88,13 @@ Keep `oracle.json` and `probes/` out of a blinded review package. Live compariso
 
 ## Platform and host discovery checks
 
+The host-native integration check uses the locked host dependencies, an isolated profile and a loopback synthetic provider. It discovers the packaged roles and checks worker/reviewer model and effort, tools, workspace effects, returned errors and cancellation without real model calls. It does not certify Claude live delegation, background execution or OS containment.
+
+```bash
+npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
+node tests/host-native-delegation.mjs .
+```
+
 The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate matrix defines native Linux and Windows checks for Bun construction, npm tarball installation, exact resource receipts, CLI version and read-only inspection, initialization and first-plan publication/repeat, paths with spaces and Unicode, and external Git worktrees. Source checks also cover interrupted plan publication and retained-claim refusal. Windows does not assert POSIX permission modes. These package checks do not establish full Windows migration/recovery or worker isolation support.
 
 The Windows-only `windows-state-migration.mjs` checks native directory publication, unchanged repeat, exact legacy bytes and paths, a single active state root, inventory guards and recovery drift/unknown refusal. Its recovery cessation predicate is injected, not a real killed-owner proof; mandatory regular-file flushes remain unchanged.

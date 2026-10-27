@@ -29,7 +29,7 @@ Es una forma de trabajar que utilizas cuando la necesitas, no un servicio que ge
 - Responsables de proyectos que quieren entender un cambio y sus comprobaciones antes de aceptarlo.
 - Personas que están explorando el desarrollo con agentes y quieren controlar qué pueden hacer.
 
-Pi es el entorno de ejecución de referencia. La integración con Claude Code comparte la metodología y utiliza subagentes nativos. No garantiza el mismo aislamiento y recuperación que los ejecutores de Pi. Consulta los límites de cada integración en [compatibilidad de los hosts](docs/host-portability.md).
+El flujo normal del checkout de desarrollo comparte la metodología entre Pi y Claude Code en Windows nativo y Linux. Pi delega mediante la extensión `pi-subagents`, instalada por separado; Claude Code utiliza agentes nativos. Las tareas nuevas por esta vía no necesitan el ejecutor compilado de la fábrica ni una versión de runtime fijada para el proyecto. Consulta la configuración y los límites de verificación en [compatibilidad de los hosts](docs/host-portability.md). La instalación compilada que se conserva más abajo es una vía heredada independiente; adoptar el nuevo flujo no migra ni certifica una instalación existente.
 
 ## El flujo de un vistazo
 

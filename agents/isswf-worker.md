@@ -1,10 +1,8 @@
 ---
 name: isswf-worker
-description: Follow the shared isSWF worker profile for an explicitly authorized Claude Code assignment.
-tools: Read, Grep, Glob, Bash
+description: Follow the shared isSWF worker profile for an authorized Claude Code assignment.
+tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 ---
 
-For an installed release, require the explicit pinned runtime root and release identity before task work. Read `.agents/hosts/claude-code.md` from that root and complete its "Required child context" check, then Read `.agents/roles/worker.md` there. Acknowledge the root, identity and exact plan/brief input paths before acting; missing context blocks the assignment. The loaded plugin directory is not a fallback for missing installed pins.
-
-Only for explicitly assigned source-checkout mode without a release receipt, Read `${CLAUDE_PLUGIN_ROOT}/.agents/hosts/claude-code.md` and `${CLAUDE_PLUGIN_ROOT}/.agents/roles/worker.md` from the assigned source root. Use `${CLAUDE_PLUGIN_ROOT}` only when it equals that declared root. Follow the shared profile and trusted assignment. Model inheritance does not establish approval or actual model identity.
+Before task work, Read `.agents/hosts/claude-code.md` and `.agents/roles/worker.md` from the absolute factory root supplied by the coordinator. Complete the host's "Required child context" check. Missing root, role or task scope blocks the assignment; report the missing input. `${CLAUDE_PLUGIN_ROOT}` may locate these files only when it is the declared factory root. Follow the shared methodology, not a second host-specific workflow. Model inheritance is a choice, not proof of authorization or observed identity.
