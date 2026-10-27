@@ -25,16 +25,20 @@ const commit = message => { git('add', '-A'); git('commit', '-m', message); retu
 const readJSON = async path => JSON.parse(await readFile(path, 'utf8'));
 try {
   await mkdir(fixture, { recursive: true });
-  for (const path of ['.agents/skills/isswf-coordinator', '.agents/skills/isswf-setup', '.agents/skills/isswf-writing', '.agents/skills/isswf-understanding', '.agents/skills/isswf-pr', '.agents/skills/isswf-issue', '.agents/skills/isswf-e2e', '.agents/skills/isswf-debug', '.agents/skills/isswf-review', '.agents/skills/isswf-retrospective', '.agents/skills/isswf-tdd', '.agents/skills/isswf-security', '.agents/skills/isswf-performance', '.agents/skills/isswf-observability', '.agents/roles', 'docs/model-routing.md', 'docs/durable-work.md', '.factory/templates', '.factory/models.json', 'package.json']) {
+  for (const path of ['.gitattributes', '.agents/skills/isswf-coordinator', '.agents/skills/isswf-setup', '.agents/skills/isswf-writing', '.agents/skills/isswf-understanding', '.agents/skills/isswf-pr', '.agents/skills/isswf-issue', '.agents/skills/isswf-e2e', '.agents/skills/isswf-debug', '.agents/skills/isswf-review', '.agents/skills/isswf-retrospective', '.agents/skills/isswf-tdd', '.agents/skills/isswf-security', '.agents/skills/isswf-performance', '.agents/skills/isswf-observability', '.agents/roles', 'docs/model-routing.md', 'docs/durable-work.md', '.factory/templates', '.factory/models.json', 'package.json']) {
     await mkdir(dirname(join(fixture, path)), { recursive: true });
     await cp(join(source, path), join(fixture, path), { recursive: true });
   }
-  const runtime = ['isswf-job.mjs', 'factory-package.mjs', 'pi-worker-task.mjs', 'worker-lifecycle.mjs', 'native-recovery.mjs', 'external-effect-journal.mjs', 'recovery-review.mjs', 'job-successor.mjs', 'isswf-plan.mjs', 'release-source.mjs', 'project-state.mjs'];
+  const runtime = ['luna-high-route.mjs', 'isswf-job.mjs', 'factory-package.mjs', 'pi-worker-task.mjs', 'worker-lifecycle.mjs', 'native-recovery.mjs', 'external-effect-journal.mjs', 'recovery-review.mjs', 'job-successor.mjs', 'isswf-plan.mjs', 'release-source.mjs', 'project-state.mjs', 'platform-runtime.mjs', 'windows-tool-sandbox.mjs', 'windows-worker-identity.mjs', 'windows-worker-host.mjs'];
   await mkdir(join(fixture, 'tools'), { recursive: true });
   for (const name of runtime) await cp(join(source, 'tools', name), join(fixture, 'tools', name));
   git('init', '-q');
   git('config', 'user.name', 'Regression Test'); git('config', 'user.email', 'test@example.invalid');
   const runtimeSha = commit('fixture runtime and factory resources');
+  // Materialize the repository checkout policy in this disposable fixture.
+  // This never normalizes bytes in the production runtime integrity check.
+  for (const name of runtime) await rm(join(fixture, 'tools', name));
+  git('checkout-index', '--all', '--force');
 
   await mkdir(join(fixture, '.pi'), { recursive: true });
   await writeFile(join(fixture, '.pi/settings.json'), '{"packages":[]}\n');
@@ -46,7 +50,7 @@ try {
     const configSha = commit('pinned worker model configuration');
     return { sha: configSha, bytes: await readFile(join(fixture, '.factory/models.json')) };
   };
-  const initial = await setupConfigCommit(config.roles.worker);
+  const initial = await setupConfigCommit([{ model: 'openai-codex/gpt-6-luna', effort: 'high' }]);
   const materialize = command(process.execPath, [join(fixture, 'tools/factory-package.mjs'), 'materialize', '--source', fixture, '--revision', runtimeSha, '--store', packageStore]);
   assert.equal(materialize.status, 0, materialize.stderr);
   const packagePath = join(packageStore, runtimeSha);
@@ -81,6 +85,9 @@ try {
   let pin = initial;
   let inputSha = await input(pin, 'canonical');
   await run('canonical', inputSha, 'job.sdkPath must be absolute');
+  pin = await setupConfigCommit([{ model: 'openai/gpt-6-luna', effort: 'high' }]);
+  inputSha = await input(pin, 'openai-oauth');
+  await run('openai-oauth', inputSha, 'job.sdkPath must be absolute');
 
   const cases = [
     ['wrong-model', [{ model: 'openai-codex/not-luna', effort: 'high' }]],
@@ -100,7 +107,7 @@ try {
     inputSha = await input(pin, id);
     await run(id, inputSha, 'only exact configured LunaHigh worker route supported; no fallback');
   }
-  console.log('PASS public worker route admission guard and canonical-route positive control');
+  console.log('PASS public worker route admission guard and both explicit destination controls');
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

@@ -4,21 +4,22 @@ import { isDeepStrictEqual } from 'node:util';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
 import { readReleaseSource } from './release-source.mjs';
 import { validateProbes, runDiagnosticProbes, evidenceDigest, sourceObjectsPath } from './diagnostic-probes.mjs';
 import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
+import { syncDirectory } from './platform-runtime.mjs';
+import { lunaHighRoute } from './luna-high-route.mjs';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('../') && !isAbsolute(part)); };
+const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('..' + sep) && !isAbsolute(part)); };
 const sha = value => typeof value === 'string' && /^[0-9a-f]{40}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
 const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !path.includes('\\') && !path.includes('\0') && path.split('/').every(part => part && part !== '.' && part !== '..');
 const equal = isDeepStrictEqual;
-const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/reviewer.md', '.agents/roles/references/review.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', '.agents/roles/references/verification-principles.md'];
 function git(repo, args, deadlineAt = Infinity) {
   const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'review-operation-deadline');
@@ -51,12 +52,12 @@ async function publish(path, value, maxBytes = 256000) {
   const pending = path + '.pending', file = await open(pending, 'wx', 0o600);
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
   await link(pending, path); await unlink(pending);
-  const directory = await open(dirname(path), 'r'); try { await directory.sync(); } finally { await directory.close(); }
+  await syncDirectory(dirname(path));
 }
 async function roots(project, store) {
   assert(isAbsolute(project ?? '') && isAbsolute(store ?? ''), 'absolute-project-store-required');
   project = await realpath(project); store = await realpath(store);
-  assert(decode(git(project, ['rev-parse', '--show-toplevel'])).trim() === project, 'git-root-required');
+  assert(await realpath(decode(git(project, ['rev-parse', '--show-toplevel'])).trim()) === project, 'git-root-required');
   assert(!inside(project, store) && !inside(source, store) && !inside(store, project) && !inside(store, source), 'private-external-store-required');
   return { project, store };
 }
@@ -85,7 +86,8 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   assert(sha(job.targetBase) && sha(job.candidateSha), 'committed-candidate-required');
   git(target, ['merge-base', '--is-ancestor', job.targetBase, job.candidateSha]);
   const models = blob(project, job.models.sha, job.models.path);
-  assert(hash(models) === job.models.sha256 && equal(JSON.parse(decode(models)).roles?.reviewer, route) && equal(grant.approvedRoute, route), 'fixed-reviewer-route-required');
+  const route = JSON.parse(decode(models)).roles?.reviewer, destination = lunaHighRoute(route);
+  assert(hash(models) === job.models.sha256 && destination && equal(grant.approvedRoute, route), 'fixed-reviewer-route-required');
   if (job.workspace !== undefined) {
     assert(job.workspace && ['probes,repo', 'evidence,probes,repo'].includes(Object.keys(job.workspace).sort().join(',')) && isAbsolute(job.workspace.repo ?? ''), 'explicit-review-workspace-required');
     validateProbes(job.workspace.probes);
@@ -143,20 +145,20 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
   assert(Buffer.byteLength(prompt) + Buffer.byteLength(instructions) <= inputBytes, 'review-bundle-too-large');
   const effectiveInstructions = job.workspace ? instructions + '\nThe review runtime will execute only the explicit host-selected probes in an isolated read-only checkout pinned to the candidate, before any provider call. workspaceVerification contains actual runtime observations, not implementer summaries or commands you executed. Assess these observations and source independently. No additional tools or authenticated actor identity are implied.' : instructions;
   assert(Buffer.byteLength(prompt) + Buffer.byteLength(effectiveInstructions) <= inputBytes, 'review-bundle-too-large');
-  return { project, store, inputSha, jobPath, job, grant, grantSha256, capacity, inputBytes, limits, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
+  return { project, store, inputSha, jobPath, job, grant, grantSha256, capacity, route, destination, inputBytes, limits, prompt, instructions: effectiveInstructions, bundleSha256: hash(prompt), methodologySha256: hash(effectiveInstructions), dir: join(store, hash(project + '\0reviewer\0' + job.logicalJobRef)) };
 }
 export async function runReview(request, { backend, mode = 'real', probeRunner } = {}) {
   const startedAt = Date.now();
-  const p = await prepareReview(request), { job, grant, dir } = p;
+  const p = await prepareReview(request), { job, grant, dir, route, destination } = p;
   assert(mode === 'real' || mode === 'fixture', 'explicit-mode-required');
   assert(mode === 'real' ? grant.allowProviderCalls === true && !backend && !probeRunner : grant.allowProviderCalls === false && backend, 'provider-grant-or-fixture-required');
   assert(!probeRunner || job.workspace, 'probe-runner-requires-workspace');
   await mkdir(dir, { mode: 0o700 });
-  const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+  await syncDirectory(p.store);
   const reservation = await acquireCapacity(p.capacity, { role: 'reviewer', logicalJobRef: job.logicalJobRef, mode });
   if (!reservation) {
     await rmdir(dir);
-    const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+    await syncDirectory(p.store);
     return { version: 1, status: 'blocked', reason: 'capacity', attemptsConsumed: 0, fetches: 0, capacity: p.capacity, executionAuthorized: false };
   }
   const deadlineAt = startedAt + grant.deadlineMs;
@@ -191,7 +193,7 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
     const preflight = await Promise.race([backend.preflight(route[0]), timeout]);
     if (!preflight || expired) return await finish('blocked', 'preflight-deadline');
     const { model, billingEvidence } = preflight;
-    assert(model?.provider === 'openai-codex' && model.id === 'gpt-6-luna' && billingEvidence, 'preflight-route-cost-required');
+    assert(model?.provider === destination.provider && model.id === destination.model && billingEvidence, 'preflight-route-cost-required');
     await publish(join(dir, 'invocation.json'), { version: 1, tuple: route[0], priorAttempts: 0, sessionId, billingEvidence, reason: 'sdk-invocation-intent' });
     claimed = true;
     if (expired) return await finish('blocked', 'deadline-before-stream-intent-consumed');

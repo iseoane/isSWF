@@ -3,15 +3,16 @@ import { mock } from 'node:test';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, open , realpath } from 'node:fs/promises';
+import { fstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { prepareReview, runReview, readReview } = await import(pathToFileURL(join(source, 'tools/reviewer-task.mjs')));
-const root = await mkdtemp(join(tmpdir(), 'isswf-review-test-')), project = join(root, 'project'), store = join(root, 'store');
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-review-test-'))), project = join(root, 'project'), store = join(root, 'store');
 const hash = b => createHash('sha256').update(b).digest('hex');
 const command = (binary, args) => spawnSync(binary, args, { encoding: 'utf8', timeout: 20000 });
 const git = (...args) => { const r = command('git', ['-C', project, ...args]); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
@@ -28,12 +29,13 @@ try {
   await writeFile(join(project, 'app.mjs'), 'export const answer = 2;\n');
   const candidate = commit();
   await writeFile(join(project, 'brief.md'), 'Review the change to answer 2; no tools or external actions.\n');
-  await writeFile(join(project, 'models.json'), await readFile(join(source, '.factory/models.json')));
+  const fixtureModels = JSON.parse(await readFile(join(source, '.factory/models.json'))); fixtureModels.roles.reviewer = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
+  await writeFile(join(project, 'models.json'), JSON.stringify(fixtureModels) + '\n');
   const job = { version: 1, logicalJobRef: 'I0001/J011/review', implementerRef: 'synthetic-implementer', targetRepo: project, targetBase: base, candidateSha: candidate, methodologySha: actual.stdout.trim(), briefPath: 'brief.md', contextPaths: ['standards.md', 'prior-evidence.md'], models: { sha: commit(), path: 'models.json', sha256: hash(await readFile(join(project, 'models.json'))) }, sdkPath: '/synthetic/not-loaded' };
   await json(join(project, 'review.json'), job); const inputSha = commit();
   const grantFile = join(root, 'grant.json'), fixtureAuth = join(root, 'fixture-auth.json');
   await json(fixtureAuth, {});
-  const grant = { version: 1, role: 'reviewer', project, store, inputSha, jobPath: 'review.json', jobSha256: hash(await readFile(join(project, 'review.json'))), logicalJobRef: job.logicalJobRef, targetRepo: project, targetBase: base, candidateSha: candidate, grantRef: 'Synthetic operator-only test grant', implementerRef: job.implementerRef, reviewerRef: 'synthetic-independent-reviewer', callerSha256: hash(await readFile(join(source, 'tools/reviewer-task.mjs'))), backendSha256: hash(await readFile(join(source, 'tools/researcher-task.mjs'))), authPath: fixtureAuth, sdkEntrySha256: '0'.repeat(64), allowResultArtifact: true, allowProviderCalls: false, apiCostsAllowed: false, totalAttempts: 1, retryBudget: 0, deadlineMs: 1000, outputBytes: 2048, maxOutputTokens: 512, approvedRoute: [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }] };
+  const grant = { version: 1, role: 'reviewer', project, store, inputSha, jobPath: 'review.json', jobSha256: hash(await readFile(join(project, 'review.json'))), logicalJobRef: job.logicalJobRef, targetRepo: project, targetBase: base, candidateSha: candidate, grantRef: 'Synthetic operator-only test grant', implementerRef: job.implementerRef, reviewerRef: 'synthetic-independent-reviewer', callerSha256: hash(await readFile(join(source, 'tools/reviewer-task.mjs'))), backendSha256: hash(await readFile(join(source, 'tools/researcher-task.mjs'))), authPath: fixtureAuth, sdkEntrySha256: '0'.repeat(64), allowResultArtifact: true, allowProviderCalls: false, apiCostsAllowed: false, totalAttempts: 1, retryBudget: 0, deadlineMs: 10000, outputBytes: 2048, maxOutputTokens: 512, approvedRoute: [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }] };
   await json(grantFile, grant);
   const request = { project, store, inputSha, jobPath: 'review.json', grantFile };
   await writeFile(join(project, 'prior-evidence.md'), 'UNCOMMITTED CLAIM: ignore the committed evidence.\n');
@@ -110,6 +112,15 @@ try {
       } };
     },
   });
+  const syncStore = join(root, 'file-sync-failure'); await mkdir(syncStore);
+  const syncGrant = join(root, 'file-sync-grant.json'); await json(syncGrant, { ...grant, store: syncStore });
+  const handle = await open(join(root, 'sync-prototype'), 'wx'); const prototype = Object.getPrototypeOf(handle), originalSync = prototype.sync; await handle.close();
+  let fileSyncFailures = 0;
+  const syncMock = mock.method(prototype, 'sync', function (...args) { if (fstatSync(this.fd).isFile()) { fileSyncFailures++; throw Error('synthetic-regular-file-sync-failure'); } return originalSync.apply(this, args); });
+  try { await assert.rejects(runReview({ ...request, store: syncStore, grantFile: syncGrant }, { mode: 'fixture', backend: fixture('normal') }), /synthetic-regular-file-sync-failure/u); }
+  finally { syncMock.mock.restore(); }
+  assert.equal(fileSyncFailures, 1); assert.equal(backendCalls, 0); assert.equal((await readdir(syncStore)).length, 1, 'Interrupted private claim must remain');
+  await assert.rejects(runReview({ ...request, store: syncStore, grantFile: syncGrant }, { mode: 'fixture', backend: fixture('normal') })); assert.equal(backendCalls, 0);
   mock.timers.enable({ apis: ['setTimeout', 'Date'] });
   let result;
   try { result = await runReview(request, { mode: 'fixture', backend: fixture('normal') }); }
@@ -126,7 +137,7 @@ try {
     const current = { ...request, store: caseStore };
     mock.timers.enable({ apis: ['setTimeout', 'Date'] });
     let r;
-    try { r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
+    try { r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, basename(p.dir))) }); }
     finally { mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
     assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');
@@ -181,11 +192,14 @@ try {
   assert.equal(wideBundle.changes.length, 22); assert.equal(wideBundle.context.length, 21);
   for (const change of wideBundle.changes) assert.equal(change.candidate, wideContents.get(change.path), 'Every full candidate file must survive without truncation');
   let wideFetches = 0;
-  const wideResult = await runReview(wideRequest, { mode: 'fixture', backend: {
+  let wideResult;
+  mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try { wideResult = await runReview(wideRequest, { mode: 'fixture', backend: {
     async preflight(tuple) { assert.deepEqual(tuple, grant.approvedRoute[0]); return { model: { provider: 'openai-codex', id: 'gpt-6-luna' }, billingEvidence: { source: 'synthetic-fixture' } }; },
     async fetch() { wideFetches++; return new Response('', { status: 200 }); },
     stream(model, context, options) { assert.equal(context.messages[0].content, widePrepared.prompt); return { async result() { await options.fetch('https://synthetic.invalid'); return { provider: model.provider, model: model.id, stopReason: 'stop', content: [{ type: 'text', text: 'Synthetic large-bundle transport only, not an independent verdict.' }] }; } }; },
   } });
+  } finally { mock.timers.reset(); }
   assert.equal(wideResult.status, 'response-complete'); assert.equal(wideFetches, 1);
   assert((await readFile(join(widePrepared.dir, 'evidence.json'))).length > 256000, 'Evidence persistence must support the explicitly granted larger bundle');
   assert.equal((await readReview({ project, store: wideStore, logicalJobRef: wideJob.logicalJobRef })).status, 'recorded');
@@ -231,7 +245,7 @@ try {
   assert.equal(reviewCapacityRecord.status, 'recorded'); assert.equal(plannerCapacityRecord.status, 'recorded');
   assert.equal(reviewCapacityRecord.binding.capacity.pool, plannerCapacityRecord.binding.capacity.pool);
   assert.equal(reviewCapacityRecord.binding.capacity.role, 'reviewer'); assert.equal(plannerCapacityRecord.binding.capacity.role, 'planner');
-  const successive = await runReview(scoped[2], { mode: 'fixture', backend: fixture('normal', join(scoped[2].store, p.dir.split('/').at(-1))) });
+  const successive = await runReview(scoped[2], { mode: 'fixture', backend: fixture('normal', join(scoped[2].store, basename(p.dir))) });
   assert.equal(successive.status, 'response-complete', 'a later panel entry can use a completed execution slot');
   assert.equal((await readdir(join(pool, 'completed'))).length, 3, 'completed reservations remain preserved');
   for (const id of await readdir(join(pool, 'completed'))) {
@@ -247,7 +261,7 @@ try {
   for (let index = 0; index < 2; index++) {
     const caseStore = join(root, 'uncertain-pool-' + index); await mkdir(caseStore);
     const caseGrant = join(root, 'uncertain-pool-' + index + '.json'); await json(caseGrant, { ...grant, store: caseStore, ...capacityGrant });
-    const result = await runReview({ ...request, store: caseStore, grantFile: caseGrant }, { mode: 'fixture', backend: fixture('http400', join(caseStore, p.dir.split('/').at(-1))) });
+    const result = await runReview({ ...request, store: caseStore, grantFile: caseGrant }, { mode: 'fixture', backend: fixture('http400', join(caseStore, basename(p.dir))) });
     assert.equal(result.status, 'blocked');
   }
   assert.equal((await readdir(pool)).filter(name => name.startsWith('slot-')).length, 2, 'uncertain provider outcomes retain capacity');
@@ -261,8 +275,8 @@ try {
   await writeFile(join(partialPool, 'policy.json'), policy);
   const partialStore = join(root, 'partial-allowed'); await mkdir(partialStore);
   const partialGrant = join(root, 'partial-grant.json'); await json(partialGrant, { ...grant, store: partialStore, ...capacityGrant, capacity: { ...capacity, pool: partialPool } });
-  const unrelated = await runReview({ ...request, store: partialStore, grantFile: partialGrant }, { mode: 'fixture', backend: fixture('normal', join(partialStore, p.dir.split('/').at(-1))) });
-  assert.equal(unrelated.status, 'response-complete'); assert.deepEqual(await readdir(join(partialPool, 'slot-0')), [], 'incomplete claims remain occupied without blocking the other slot');
+  const unrelated = await runReview({ ...request, store: partialStore, grantFile: partialGrant }, { mode: 'fixture', backend: fixture('normal', join(partialStore, basename(p.dir))) });
+  assert.equal(unrelated.status, 'response-complete', JSON.stringify(unrelated)); assert.deepEqual(await readdir(join(partialPool, 'slot-0')), [], 'incomplete claims remain occupied without blocking the other slot');
   const probeStore = join(root, 'workspace-review'); await mkdir(probeStore);
   const workspaceRepo = join(root, 'candidate-checkout');
   const clone = command('git', ['clone', '--quiet', '--no-hardlinks', project, workspaceRepo]); assert.equal(clone.status, 0, clone.stderr);
@@ -273,14 +287,14 @@ try {
   await json(grantFile, probeGrant); const probeRequest = { ...request, inputSha: probeInput, store: probeStore };
   let probesCalled = 0;
   const observations = [{ name: 'answer', command: workspace.probes[0].command, expectedExitCode: 0, exitCode: 0, expectationMatched: true, stdout: '2\n', stderr: '', targetBase: candidate }];
-  const probeResult = await runReview(probeRequest, { mode: 'fixture', backend: fixture('normal', join(probeStore, p.dir.split('/').at(-1))), probeRunner: async request => { probesCalled++; assert.equal(request.targetBase, candidate); assert.equal(request.targetRepo, workspaceRepo); return observations; } });
+  const probeResult = await runReview(probeRequest, { mode: 'fixture', backend: fixture('normal', join(probeStore, basename(p.dir))), probeRunner: async request => { probesCalled++; assert.equal(request.targetBase, candidate); assert.equal(request.targetRepo, workspaceRepo); return observations; } });
   assert.equal(probesCalled, 1, 'explicit workspace review must execute its authorized probe before the model');
   assert.equal(probeResult.status, 'response-complete');
   const probeRead = await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef });
   assert.equal(probeRead.status, 'recorded'); assert.equal(probeRead.binding.workspace.candidateSha, candidate);
-  const probeEvidence = JSON.parse(await readFile(join(probeStore, p.dir.split('/').at(-1), 'evidence.json')));
+  const probeEvidence = JSON.parse(await readFile(join(probeStore, basename(p.dir), 'evidence.json')));
   assert.deepEqual(JSON.parse(probeEvidence.prompt).workspaceVerification.results, observations);
-  const intentPath = join(probeStore, p.dir.split('/').at(-1), 'probe-intent.json');
+  const intentPath = join(probeStore, basename(p.dir), 'probe-intent.json');
   const originalIntent = await readFile(intentPath, 'utf8');
   const intentRecord = JSON.parse(originalIntent);
   for (const changed of [{ ...intentRecord, workspace: { ...workspace, probes: [{ ...workspace.probes[0], command: 'false' }] } }, { ...intentRecord, providerPromptStarted: true }]) {
@@ -301,7 +315,7 @@ try {
   if (process.env.ISSWF_REVIEW_SANDBOX === '1') {
     const realStore = join(root, 'actual-workspace'); await mkdir(realStore);
     await json(grantFile, { ...probeGrant, store: realStore, deadlineMs: 10000 });
-    const sandboxResult = await runReview({ ...probeRequest, store: realStore }, { mode: 'fixture', backend: fixture('normal', join(realStore, p.dir.split('/').at(-1))) });
+    const sandboxResult = await runReview({ ...probeRequest, store: realStore }, { mode: 'fixture', backend: fixture('normal', join(realStore, basename(p.dir))) });
     assert.equal(sandboxResult.status, 'response-complete', JSON.stringify(sandboxResult));
     const sandboxRead = await readReview({ project, store: realStore, logicalJobRef: job.logicalJobRef });
     assert.equal(sandboxRead.status, 'recorded'); assert.equal(sandboxRead.binding.workspace.results[0].stdout, '2\n');

@@ -67,14 +67,19 @@ const reviewGuidanceResult = run(process.execPath, [join(source, 'tests/review-g
 const originalEvidenceResult = run(process.execPath, [join(source, 'tests/reviewer-original-evidence.mjs'), source]);
 const contextHandoffResult = run(process.execPath, [join(source, 'tests/project-context-handoff.mjs'), source]);
  const reviewPanelCapacityResult = run(process.execPath, [join(source, 'tests/review-panel-capacity.mjs'), source]);
+const planGrantBoundaryResult = run(process.execPath, [join(source, 'tests/plan-grant-boundary.mjs'), source]);
+const checkoutLineEndingsResult = run(process.execPath, [join(source, 'tests/checkout-line-endings.mjs'), source]);
+const planPublicationResult = run(process.execPath, [join(source, 'tests/plan-publication.mjs'), source]);
 const planResult = run(process.execPath, [join(source, 'tests/initiative-plan.mjs'), source]);
 const dependencyPlanResult = run(process.execPath, [join(source, 'tests/initiative-dependencies.mjs'), source]);
 const inventoryResult = run(process.execPath, [join(source, 'tests/project-quality.mjs'), source]);
 const auditArchiveResult = run(process.execPath, [join(source, 'tests/audit-archive.mjs'), source]);
 const intakeResult = run(process.execPath, [join(source, 'tests/issue-intake.mjs'), source]);
 const methodologyResult = run(process.execPath, [join(source, 'tests/worker-methodology.mjs'), source]);
+const lunaRouteResult = run(process.execPath, [join(source, 'tests/luna-high-route.mjs')]);
 const hostPortabilityResult = run(process.execPath, [join(source, 'tests/host-portability.mjs'), source]);
 const worktreeLocationResult = run(process.execPath, [join(source, 'tests/worktree-location.mjs'), source]);
+const initPlatformResult = run(process.execPath, [join(source, 'tests/init-platform.mjs'), source]);
 const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source]);
 const bunReleaseResult = run(process.execPath, [join(source, 'tests/bun-release.mjs'), source]);
 const workerDependencyResult = run(process.execPath, [join(source, 'tests/worker-dependencies.mjs'), source]);
@@ -85,4 +90,4 @@ const successorLegacyResult = run(process.execPath, [join(source, 'tests/success
 const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
 const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
 const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', docsResult, documentationResult, workflowDiagramsResult, toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, reviewGuidanceResult, originalEvidenceResult, contextHandoffResult, reviewPanelCapacityResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, hostPortabilityResult, worktreeLocationResult, releasePackageResult, bunReleaseResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', successorModelResult, successorLegacyResult, routeResult, limits: 'ESLint and Knip run separately. Native model catalog, real SDK sessions, providers, Python and external-service behavior are not checked. When Bun is available, bunReleaseResult checks a real compiled artifact and Linux Bubblewrap with a synthetic SDK; otherwise that artifact check is explicitly skipped. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', docsResult, documentationResult, workflowDiagramsResult, toolsInstallResult, statusResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, reviewerResult, reviewGuidanceResult, originalEvidenceResult, contextHandoffResult, reviewPanelCapacityResult, planGrantBoundaryResult, checkoutLineEndingsResult, planPublicationResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, lunaRouteResult, hostPortabilityResult, worktreeLocationResult, initPlatformResult, releasePackageResult, bunReleaseResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', successorModelResult, successorLegacyResult, routeResult, limits: 'ESLint and Knip run separately. Native model catalog, real SDK sessions, providers, Python and external-service behavior are not checked. When Bun is available, bunReleaseResult checks a real compiled artifact and Linux Bubblewrap with a synthetic SDK; otherwise that artifact check is explicitly skipped. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));

@@ -68,7 +68,7 @@ jobs:
     env:
       GIT_CONFIG_COUNT: '1'
       GIT_CONFIG_KEY_0: core.autocrlf
-      GIT_CONFIG_VALUE_0: 'false'
+      GIT_CONFIG_VALUE_0: 'true'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -80,10 +80,70 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: '1.4.3'
+      - name: Verify checkout byte policy and external plan grant boundaries
+        run: |
+          node tests/checkout-line-endings.mjs .
+          node tests/plan-grant-boundary.mjs .
+          node tests/plan-publication.mjs .
+          node tests/factory-tools-install.mjs .
+          node tests/initiative-plan.mjs .
+          node tests/worker-route-admission.mjs .
+          node tests/host-portability.mjs .
+      - name: Verify initialization and process identity on the native platform
+        run: node tests/init-platform.mjs .
       - name: Build and install native package; test CLI, resources and worktrees
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/platform-package.mjs .
+      - name: Native Windows public worker admission
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-worker-admission.mjs
+      - name: Verify compiled Windows supplied-evidence reviewer
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-reviewer-task.mjs
+      - name: Verify native Windows LPAC command controls
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-tool-sandbox.mjs
+      - name: Verify native Windows owner loss and startup refusal
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-sandbox-lifetime.mjs
+      - name: Verify compiled Windows worker task with a synthetic SDK
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-worker-task.mjs
+      - name: Native Windows state migration and guarded recovery
+        if: runner.os == 'Windows'
+        run: node tests/windows-state-migration.mjs
+      - name: Verify native Windows worker identity
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-identity.mjs
+      - name: Verify native Windows trusted task containment
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-host.mjs
+      - name: Verify native Windows detached lifecycle
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-lifecycle.mjs
+      - name: Verify compiled Windows worker recovery and capacity
+        if: runner.os == 'Windows'
+        env:
+          ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
+        run: node tests/windows-worker-recovery.mjs
+      - name: Verify native text-role publication and guarded synthetic transport
+        run: |
+          node tests/reviewer-task.mjs .
+          node tests/planner-task.mjs .
+          node tests/diagnostic-task.mjs .
+          node tests/researcher-session-affinity.mjs .
+          node tests/researcher-quota-fallback.mjs .
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
       - name: Install and discover skills with real Pi and Claude hosts, without models
@@ -101,6 +161,7 @@ jobs:
           name: platform-evidence-${{ matrix.os }}
           path: |
             ${{ runner.temp }}/isswf-platform/platform-report.json
+            ${{ runner.temp }}/isswf-platform/worker-admission-evidence.json
             ${{ runner.temp }}/isswf-platform/host-report.json
             ${{ runner.temp }}/isswf-platform/claude-inventory.txt
             ${{ runner.temp }}/isswf-platform/source-isolation-report.json

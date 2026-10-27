@@ -29,6 +29,8 @@ git clone https://github.com/iseoane/isSWF.git
 cd isSWF
 ```
 
+El archivo `.gitattributes` del repositorio mantiene los archivos de texto con LF en Windows y Linux, incluso con `core.autocrlf=true`; los archivos detectados como binarios no cambian. Así se conservan las comprobaciones exactas entre los bytes del runtime y Git y las cabeceras de los recursos. No normalices los bytes durante la verificación de integridad ni desactives sus comprobaciones. Añadir los atributos no reescribe una copia de trabajo existente: si un checkout anterior conserva archivos del runtime con CRLF, guarda el trabajo local y utiliza un clon nuevo de la revisión que contiene esta política. No restablezcas por la fuerza un checkout con cambios ni modifiques la configuración global de Git para ocultar la discrepancia.
+
 Mantén el desarrollo fuente con Node.js y `.mjs`. Instala un compilador Bun de confianza solo para construir releases. Bun 1.4.3 es el compilador probado localmente. El generador usa Bun por defecto; `--runtime node` conserva el formato original para datos de prueba de desarrollo. Elige un commit que contenga las herramientas completas de distribución. El generador lee ese commit, no los cambios sin commit. Si el trabajo de instalación aún no está guardado en un commit de tu copia, no esperes encontrarlo en el commit anterior.
 
 Sustituye `FULL_COMMIT_SHA` por el SHA completo del commit y utiliza una carpeta de salida que no exista, fuera del repositorio fuente:
@@ -41,7 +43,7 @@ Esa carpeta es la que utilizan los [comandos de instalación](installation.md). 
 
 El compilador activa `--compile-autoload-package-json` para que las tareas generadas puedan resolver la entrada del SDK existente del host y las exportaciones de sus dependencias transitivas. Esto no incorpora ni instala ese SDK. El ejecutable también resuelve las rutas relativas de tareas `.mjs` desde el directorio de trabajo.
 
-Usa `--target` para seleccionar un artefacto separado de Linux, macOS o Windows. Son destinos de compilación, no paridad de plataforma verificada. El flujo instalado completo de mutaciones y aislamiento sigue siendo exclusivo de Linux.
+Usa `--target` para seleccionar un artefacto separado de Linux, macOS o Windows. Son destinos de compilación, no paridad de plataforma verificada. Las comprobaciones nativas de herramientas y ciclo de vida en Windows se describen más abajo; la configuración completa, la migración y reversión de instalaciones y los recorridos con proveedores reales siguen teniendo verificaciones separadas.
 
 La [guía técnica de instalación](../installation.md), en inglés, explica cómo crear los paquetes y qué comprobaciones exactas se realizan.
 
@@ -86,7 +88,21 @@ Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las com
 
 ## Comprobaciones de plataforma y descubrimiento de skills
 
-El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. Una matriz independiente define comprobaciones nativas en Linux y Windows de compilación con Bun, instalación del tarball npm, inventarios exactos de recursos, versión e inspección de solo lectura de la CLI, rutas con espacios y Unicode, y worktrees externos de Git. En Windows no se comprueban los permisos POSIX. Estas pruebas no demuestran soporte de mutación, recuperación ni aislamiento de trabajadores en Windows.
+El workflow Quality conserva el job completo de calidad de Linux y Bubblewrap. Una matriz independiente define comprobaciones nativas en Linux y Windows de compilación con Bun, instalación del tarball npm, inventarios exactos de recursos, versión e inspección de solo lectura de la CLI, inicialización y publicación y repetición del primer plan, rutas con espacios y Unicode, y worktrees externos de Git. Las comprobaciones del código fuente también cubren la publicación interrumpida de planes y el rechazo cuando se conserva un bloqueo. En Windows no se comprueban los permisos POSIX. Estas pruebas del paquete no demuestran soporte completo de migración y recuperación ni aislamiento de trabajadores en Windows.
+
+La prueba exclusiva de Windows `windows-state-migration.mjs` comprueba la publicación nativa de directorios, la repetición sin cambios, los bytes y rutas heredados exactos, una única raíz de estado activa, las protecciones del inventario y el rechazo de recuperación ante cambios o un cese desconocido. El predicado de cese se inyecta en la prueba: no demuestra la muerte real del propietario; los vaciados obligatorios de archivos normales no cambian.
+
+Para los subprocesos dentro de LPAC en Windows nativo, hereda el descriptor de entrada cerrado que proporciona el controlador y captura la salida con `stdio: ['inherit', 'pipe', 'pipe']`. Windows alojado puede denegar la apertura de nuevos descriptores de `NUL`. La entrada heredada no es un terminal del host. La salida sigue capturándose mediante las tuberías acotadas del controlador, sin ampliar las ACL de los directorios superiores.
+
+Tres suites adicionales, exclusivas de Windows, comprueban el backend nativo de herramientas acotadas: `windows-tool-sandbox.mjs` comprueba el acceso LPAC, entorno, red, canarios del registro, subprocesos, timeout, salida limitada por bytes y cese de descendientes; `windows-sandbox-lifetime.mjs` comprueba el rechazo de alias, el arranque interrumpido y la pérdida del proceso propietario; `windows-worker-task.mjs` comprueba la tarea autónoma de un artefacto compilado e instalado real con un SDK sintético. Rechazan Node heredado y la sustitución implícita del motor. Ejecútalas después de `platform-package.mjs`, conservando `ISSWF_PLATFORM_ROOT`. No llaman a proveedores. Son controles de herramientas y tareas, no del flujo normal de admisión de trabajos, ciclo de vida y recuperación en Windows, configuración completa ni aceptación independiente de seguridad. La pérdida abrupta del propietario puede dejar sin confirmar la limpieza de perfiles y ACL; conserva sus registros de propiedad. La salida se limita en memoria, sin archivos de captura que puedan crecer sin límite; los ámbitos de escritura del sistema de archivos no tienen una cuota rígida de disco.
+
+El motor compilado seleccionado también acepta JavaScript con `-e`/`--eval`, `require` relativo al directorio de trabajo y argumentos reenviados; mantiene la ejecución de archivos `.mjs`. El alias `node` del sandbox usa ese mismo Bun integrado y fijado, no Node independiente ni un motor alternativo. Son modos de entrada acotados, no compatibilidad completa con la CLI de Node. Los controles LPAC cubren la escritura inline y el rechazo del acceso a archivos externos.
+
+La prueba exclusiva de Windows `windows-worker-admission.mjs` comprueba además el lanzador instalado y fijado y el ejecutor público de workers con un almacén y una autorización externos, admisión exclusiva sincronizada, capacidad compartida, una tarea offline con SDK sintético y liberación de capacidad vinculada a las pruebas de cese. No llama a proveedores ni emite un dictamen independiente del producto.
+
+Otras cuatro suites de Windows cubren la identidad estricta del trabajador, la contención del proceso SDK de confianza, la entrada existente del ciclo de vida desacoplado y la integración compilada real de recuperación y capacidad. Vinculan el arranque del sistema, el instante exacto de creación, el ejecutable, los argumentos nativos y el nonce, no solo el PID. La tarea SDK de confianza no es el sandbox de herramientas del modelo: sus comandos siguen usando LPAC. La recuperación exige un registro del Job raíz que confirme cero descendientes; no basta con que desaparezca el propietario. Tras perderlo, la reconciliación sigue siendo de solo lectura y puede devolver `stopped-review-required` con `profileCleanupRequired`, sin limpiar ni reintentar en silencio. La capacidad solo se archiva tras completar la tarea, las herramientas y los perfiles vinculados; los intentos interrumpidos conservan su plaza. Un supervisor separado con el mismo runtime evita la pérdida de consola y stdio de PowerShell desacoplado, sin cambiar el motor seleccionado ni solicitar salir de los Jobs impuestos por el host.
+
+La matriz nativa también ejecuta los contratos de los llamadores de revisión, planificación, diagnóstico e investigación. Usan transporte y observaciones de sondeo inyectados, no llamadas a proveedores ni aislamiento diagnóstico real en Windows. Las raíces Git se canonizan, los ámbitos externos usan separadores nativos y la publicación sigue la política compartida de sincronización de directorios, manteniendo como fatales los fallos de sincronización de archivos normales. La prueba del revisor inyecta uno antes del trabajo del backend y comprueba que la reclamación interrumpida impide repetirlo. Los presupuestos positivos de las fixtures permiten el tiempo de preparación Git nativo; los controles negativos de plazo siguen separados.
 
 La matriz instala asistentes exclusivos de desarrollo desde `tooling/host-tests/package-lock.json`, con los scripts de ciclo de vida desactivados. Pi 1.4.0 instala el paquete en los ámbitos temporales de usuario y proyecto; su cargador real de recursos debe descubrir las catorce skills del artefacto instalado, con un control vacío previo a la instalación. Claude Code 2.1.299 instala el marketplace y plugin locales y debe mostrar esas skills en su inventario nativo de componentes. La prueba invoca el binario nativo de la plataforma incluido en la dependencia opcional de Claude, sin ejecutar su script de instalación. No se proporciona ningún prompt, sesión de agente, inicio de sesión ni credencial de proveedor. Las carpetas temporales de usuario y configuración y la telemetría desactivada limitan la actividad incidental; no demuestran aislamiento de red. Son pruebas de instalación y descubrimiento, no evaluaciones de tareas o delegaciones reales.
 
@@ -97,6 +113,16 @@ npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
 export ISSWF_PLATFORM_ROOT="/absolute/absent/platform-output"
 node tests/platform-package.mjs .
 node tests/host-discovery.mjs .
+node tests/windows-tool-sandbox.mjs
+node tests/windows-sandbox-lifetime.mjs
+node tests/windows-worker-task.mjs
+node tests/windows-worker-admission.mjs
+node tests/windows-state-migration.mjs
+node tests/windows-worker-identity.mjs
+node tests/windows-worker-host.mjs
+node tests/windows-worker-lifecycle.mjs
+node tests/windows-worker-recovery.mjs
+node tests/windows-reviewer-task.mjs
 ```
 
 El constructor del artefacto lee el HEAD confirmado, mientras que las comprobaciones estáticas del código leen el árbol de trabajo. Las pruebas requieren los asistentes fijados y Bun; si faltan herramientas o skills, fallan en vez de omitirse en silencio. Para repetirlas, utiliza una nueva ruta de salida. La CI conserva durante 14 días los informes de plataforma y descubrimiento y el inventario de skills observado en Claude. Configurar una matriz no demuestra que todas las plataformas hayan pasado; consulta la ejecución exacta antes de afirmar compatibilidad.

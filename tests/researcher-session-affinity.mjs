@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, readdir, rm , realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,7 +11,7 @@ import { prepareCapacity, acquireCapacity } from '../tools/execution-capacity.mj
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 const sdkPath = process.argv[3];
 if (sdkPath) assert(isAbsolute(sdkPath), 'optional SDK path must be absolute');
-const root = await mkdtemp(join(tmpdir(), 'isswf-session66-'));
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-session66-')));
 const project = join(root, 'project');
 const hash = b => createHash('sha256').update(b).digest('hex');
 function git(...args) {

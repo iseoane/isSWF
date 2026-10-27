@@ -80,6 +80,8 @@ Setup also offers an external directory for Git worktrees when no local choice e
 
 Setup creates `.isswf/` and records the project's selected factory version. New Bun pins identify the shared source and engine version, while each machine retains and verifies its own platform artifact. The pin does not embed a native binary hash that collaborators must change for another platform. It preserves existing model settings and setup decisions unless you explicitly approve changes. Authentication and execution permissions still need to be valid for the work you later request.
 
+Project initialization selects platform-specific filesystem and process-identity methods on Linux and Windows. Windows needs Windows PowerShell and CIM access to record process creation and system boot times; unavailable identity evidence blocks the operation or recovery. Files are flushed on both systems. Windows does not flush directory handles, so this does not promise Linux-equivalent directory-entry persistence after power loss. This initialization support does not establish Windows worker isolation or full migration/recovery support.
+
 If the repository already uses `.factory/`, ask to inspect and migrate that existing state. Do not create a second factory directory beside it.
 
 ## Update without changing every repository

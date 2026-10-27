@@ -3,15 +3,15 @@ import { mock } from 'node:test';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm , realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { preparePlanProposal, runPlanProposal, readPlanProposal } = await import(pathToFileURL(join(source, 'tools/planner-task.mjs')));
-const root = await mkdtemp(join(tmpdir(), 'isswf-planning-test-')), project = join(root, 'project'), store = join(root, 'store');
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-planning-test-'))), project = join(root, 'project'), store = join(root, 'store');
 const hash = b => createHash('sha256').update(b).digest('hex');
 const command = (binary, args) => spawnSync(binary, args, { encoding: 'utf8', timeout: 20000 });
 const git = (...args) => { const r = command('git', ['-C', project, ...args]); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
@@ -119,7 +119,7 @@ try {
     const current = { ...request, store: caseStore };
     mock.timers.enable({ apis: ['setTimeout', 'Date'] });
     let r;
-    try { r = await runPlanProposal(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
+    try { r = await runPlanProposal(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, basename(p.dir))) }); }
     finally { mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
     assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');

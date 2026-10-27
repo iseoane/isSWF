@@ -4,6 +4,8 @@ import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile, link, unlink, realpath, open, rm } from 'node:fs/promises';
 import { dirname, join, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { syncDirectory } from './platform-runtime.mjs';
+import { windowsWorkerProcess, windowsWorkerState, validWindowsWorkerIdentity } from './windows-worker-identity.mjs';
 
 const self = fileURLToPath(import.meta.url);
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -39,14 +41,55 @@ const atomicCreate = async (path, content) => {
   try {
     await link(temp, path);
     await unlink(temp);
-    const directory = await open(dirname(path), 'r');
-    try { await directory.sync(); } finally { await directory.close(); }
+    await syncDirectory(dirname(path));
   } catch (error) { await rm(temp, { force: true }); throw error; }
 };
 const atomicWriteOnce = async (path, value) => {
   await atomicCreate(path, `${JSON.stringify(value, null, 2)}\n`);
 };
 const parseJson = async path => JSON.parse(await readFile(path, 'utf8'));
+
+function windowsEnvironment(home) {
+  const values = { HOME: home, TEMP: home, TMP: home, LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8' };
+  for (const key of ['SystemRoot', 'LOCALAPPDATA', 'PATH']) if (process.env[key]) values[key] = process.env[key];
+  return values;
+}
+
+async function windowsHost(attemptDir, nonce, dispatch) {
+  if (hash(await readFile(dispatch.taskCopy)) !== dispatch.taskSha256) throw Error('trusted task snapshot hash mismatch');
+  const owner = { ...currentIdentity(nonce), startedAt: new Date().toISOString() };
+  await atomicWriteOnce(join(attemptDir, 'owner.json'), owner);
+  await mkdir(dispatch.workspace, { recursive: false });
+  await materialize(dispatch.repo, dispatch.targetBase, dispatch.workspace);
+  let result;
+  try {
+    const { runWindowsWorkerTask } = await import('./windows-worker-host.mjs');
+    result = await runWindowsWorkerTask({ binary: process.execPath, dispatch, attemptDir, environment: windowsEnvironment(join(attemptDir, 'host-temp')) });
+  } catch {
+    result = { exitCode: null, timedOut: false, stopped: false, stdout: '', stderr: '', error: 'Windows task controller incomplete; cessation unknown' };
+  }
+  const stdout = renderCapture(Buffer.from(result.stdout, 'base64'), result.stdoutTruncated === true, dispatch.outputBytes);
+  const stderr = renderCapture(Buffer.from(result.stderr, 'base64'), result.stderrTruncated === true, dispatch.outputBytes);
+  const terminal = {
+    version: 1, attemptId: dispatch.attemptId, finishedAt: new Date().toISOString(),
+    outcome: result.timedOut ? 'timeout' : result.exitCode === 0 && result.stopped ? 'success' : 'failure',
+    exitCode: result.exitCode, signal: null, error: result.error || null,
+    stdout: stdout.text, stderr: stderr.text, stdoutTruncated: stdout.truncated, stderrTruncated: stderr.truncated,
+    captureIncomplete: result.stopped !== true, descendants: result.stopped === true ? 'not-claimed' : 'uncertain',
+    windowsJobCessation: result.stopped === true, timedOut: result.timedOut, workspace: dispatch.workspace,
+  };
+  await atomicWriteOnce(join(attemptDir, 'terminal.json'), terminal);
+  if (dispatch.capacity) {
+    try {
+      for (const [name, sha] of Object.entries(dispatch.capacity.modules)) if (hash(await readFile(join(attemptDir, name))) !== sha) throw Error('capacity runtime snapshot changed');
+      const { completeWorkerCapacity } = await import('./execution-capacity.mjs');
+      await atomicWriteOnce(join(attemptDir, 'capacity-completion.json'), await completeWorkerCapacity({ scope: dispatch.capacity.scope, info: dispatch.capacity.info }));
+    } catch (error) {
+      const failureCode = /^[a-z-]{1,100}$/.test(error.message || '') ? error.message : /^[A-Z_]{1,40}$/.test(error.code || '') ? error.code : 'unconfirmed-completion';
+      await atomicWriteOnce(join(attemptDir, 'capacity-retained.json'), { version: 1, status: 'retained', id: dispatch.capacity.info.id, failureCode, reason: 'successful bound task/tool cessation not proven; no automatic release' });
+    }
+  }
+}
 
 function linuxStat(pid) {
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
@@ -78,8 +121,9 @@ function linuxIdentity(pid, nonce) {
 }
 import { readFileSync, realpathSync } from 'node:fs';
 
-const currentIdentity = nonce => linuxIdentity(process.pid, nonce);
+const currentIdentity = nonce => process.platform === 'win32' ? windowsWorkerProcess(process.pid, nonce).process : linuxIdentity(process.pid, nonce);
 const identityMatches = owner => {
+  if (process.platform === 'win32') return owner?.nonce !== undefined && windowsWorkerState(owner) === 'live';
   try {
     const actual = linuxIdentity(owner.pid, owner.nonce);
     return actual.bootId === owner.bootId && actual.startTicks === owner.startTicks && actual.exe === owner.exe;
@@ -135,33 +179,41 @@ async function launch(args) {
   const directory = join(runs, id);
   await mkdir(runs, { recursive: true });
   await mkdir(directory, { recursive: false });
+  if (process.platform === 'win32') await mkdir(join(directory, 'host-temp'));
   const taskCopy = join(directory, 'task.mjs');
   const lifecycleCopy = join(directory, 'worker-lifecycle.mjs');
   const lifecycleBytes = await readFile(self);
   await writeFile(taskCopy, scriptBytes, { mode: 0o600, flag: 'wx' });
   await writeFile(lifecycleCopy, lifecycleBytes, { mode: 0o600, flag: 'wx' });
+  const dependencies = {};
+  for (const name of ['platform-runtime.mjs', 'windows-worker-identity.mjs', 'windows-worker-host.mjs', 'windows-tool-sandbox.mjs']) {
+    const bytes = await readFile(join(dirname(self), name));
+    await writeFile(join(directory, name), bytes, { mode: 0o400, flag: 'wx' });
+    dependencies[name] = hash(bytes);
+  }
   const workspace = join(directory, 'workspace');
   const nonce = randomBytes(24).toString('hex');
   const dispatch = {
     version: 1, attemptId: id, createdAt: new Date().toISOString(), repo, inputSha,
     targetBase, briefPath, briefSha256: hash(brief), grantRef, taskSha256: hash(scriptBytes),
-    timeoutMs, outputBytes, workspace, taskCopy, lifecycleCopy, lifecycleSourceSha256: hash(lifecycleBytes),
+    timeoutMs, outputBytes, workspace, taskCopy, lifecycleCopy, lifecycleSourceSha256: hash(lifecycleBytes), dependencies,
   };
   if(args['capacity-file']) {
     const bytes=await readFile(required(args,'capacity-file'));if(bytes.length>128000)throw Error('bounded private capacity dispatch required');
     const capacity=JSON.parse(bytes);
     if(capacity.info?.role!=='worker' || capacity.info.worker?.attemptDir!==directory || capacity.info.worker.attemptId!==id || capacity.info.worker.inputSha!==inputSha || capacity.info.worker.targetBase!==targetBase)throw Error('worker capacity dispatch binding mismatch');
     const modules={};
-    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {
+    for(const name of ['execution-capacity.mjs','native-recovery.mjs','platform-runtime.mjs','windows-worker-identity.mjs']) {
       const record=capacity.modules?.[name];if(!record || typeof record.base64!=='string' || !/^[a-f0-9]{64}$/.test(record.sha256))throw Error('pinned capacity runtime snapshot required');
       const data=Buffer.from(record.base64,'base64');if(hash(data)!==record.sha256)throw Error('capacity runtime snapshot hash mismatch');
-      await writeFile(join(directory,name),data,{flag:'wx',mode:0o400});modules[name]=record.sha256;
+      if (Object.hasOwn(dependencies, name)) { if (dependencies[name] !== record.sha256) throw Error('capacity/runtime helper pin mismatch'); }
+      else await writeFile(join(directory,name),data,{flag:'wx',mode:0o400});modules[name]=record.sha256;
     }
     dispatch.capacity={scope:capacity.scope,info:capacity.info,grantSha256:capacity.grantSha256,modules};
   }
   await atomicWriteOnce(join(directory, 'dispatch.json'), dispatch);
   const child = spawn(process.execPath, [lifecycleCopy, 'host', '--attempt-dir', directory, '--nonce', nonce], {
-    detached: true, stdio: 'ignore', env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: process.env.HOME || '/tmp', LANG: process.env.LANG || 'C.UTF-8' },
+    detached: true, stdio: 'ignore', env: process.platform === 'win32' ? windowsEnvironment(join(directory, 'host-temp')) : { PATH: process.env.PATH || '/usr/bin:/bin', HOME: process.env.HOME || '/tmp', LANG: process.env.LANG || 'C.UTF-8' },
   });
   child.unref();
   process.stdout.write(`${JSON.stringify({ attemptId: id, attemptDir: directory, launchedPid: child.pid })}\n`);
@@ -170,6 +222,8 @@ async function launch(args) {
 async function host(attemptDir, nonce) {
   const dispatch = await parseJson(join(attemptDir, 'dispatch.json'));
   if (hash(await readFile(self)) !== dispatch.lifecycleSourceSha256) throw new Error('pinned lifecycle executable hash mismatch');
+  for (const [name, sha] of Object.entries(dispatch.dependencies || {})) if (hash(await readFile(join(attemptDir, name))) !== sha) throw Error('lifecycle dependency snapshot changed');
+  if (process.platform === 'win32') return windowsHost(attemptDir, nonce, dispatch);
   const copiedTask = await readFile(dispatch.taskCopy);
   if (hash(copiedTask) !== dispatch.taskSha256) throw new Error('trusted task snapshot hash mismatch');
   const owner = { ...currentIdentity(nonce), startedAt: new Date().toISOString() };
@@ -180,31 +234,7 @@ async function host(attemptDir, nonce) {
     const joined = Buffer.concat([previous, chunk]);
     return { bytes: joined.subarray(Math.max(0, joined.length - max)), truncated: joined.length > max };
   };
-  const textOutput = (bytes, rawTruncated, max) => {
-    const marker = '[...truncated...]\n';
-    const text = bytes.toString('utf8');
-    const omitted = rawTruncated || Buffer.byteLength(text) > max;
-    if (!omitted) return { text, truncated: false };
-
-    const available = max - Buffer.byteLength(marker);
-    let start = text.length;
-    let retainedBytes = 0;
-    while (start > 0) {
-      let codePointStart = start - 1;
-      const lastUnit = text.charCodeAt(codePointStart);
-      if (lastUnit >= 0xdc00 && lastUnit <= 0xdfff && codePointStart > 0) {
-        const previousUnit = text.charCodeAt(codePointStart - 1);
-        if (previousUnit >= 0xd800 && previousUnit <= 0xdbff) codePointStart -= 1;
-      }
-      const codePoint = text.codePointAt(codePointStart);
-      const codePointBytes = codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
-      if (retainedBytes + codePointBytes > available) break;
-      retainedBytes += codePointBytes;
-      start = codePointStart;
-    }
-    return { text: marker + text.slice(start), truncated: true };
-  };
-  await mkdir(dispatch.workspace, { recursive: false });
+  const textOutput = renderCapture;  await mkdir(dispatch.workspace, { recursive: false });
   await materialize(dispatch.repo, dispatch.targetBase, dispatch.workspace);
   const child = spawn(process.execPath, [dispatch.taskCopy, dispatch.workspace], {
     cwd: dispatch.workspace, detached: true, stdio: ['ignore', 'pipe', 'pipe'],
@@ -276,7 +306,7 @@ async function host(attemptDir, nonce) {
   await atomicWriteOnce(join(attemptDir, 'terminal.json'), terminal);
   if(dispatch.capacity) {
     try {
-      for(const name of ['execution-capacity.mjs','native-recovery.mjs'])if(hash(await readFile(join(attemptDir,name)))!==dispatch.capacity.modules[name])throw Error('capacity runtime snapshot changed');
+      for(const name of ['execution-capacity.mjs','native-recovery.mjs','platform-runtime.mjs','windows-worker-identity.mjs'])if(hash(await readFile(join(attemptDir,name)))!==dispatch.capacity.modules[name])throw Error('capacity runtime snapshot changed');
       const {completeWorkerCapacity}=await import(pathToFileURL(join(attemptDir,'execution-capacity.mjs')));
       const completed=await completeWorkerCapacity({scope:dispatch.capacity.scope,info:dispatch.capacity.info});
       await atomicWriteOnce(join(attemptDir,'capacity-completion.json'),completed);
@@ -286,11 +316,41 @@ async function host(attemptDir, nonce) {
   }
 }
 
+const renderCapture = (bytes, rawTruncated, max) => {
+    const marker = '[...truncated...]\n';
+    const text = bytes.toString('utf8');
+    const omitted = rawTruncated || Buffer.byteLength(text) > max;
+    if (!omitted) return { text, truncated: false };
+
+    const available = max - Buffer.byteLength(marker);
+    let start = text.length;
+    let retainedBytes = 0;
+    while (start > 0) {
+      let codePointStart = start - 1;
+      const lastUnit = text.charCodeAt(codePointStart);
+      if (lastUnit >= 0xdc00 && lastUnit <= 0xdfff && codePointStart > 0) {
+        const previousUnit = text.charCodeAt(codePointStart - 1);
+        if (previousUnit >= 0xd800 && previousUnit <= 0xdbff) codePointStart -= 1;
+      }
+      const codePoint = text.codePointAt(codePointStart);
+      const codePointBytes = codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
+      if (retainedBytes + codePointBytes > available) break;
+      retainedBytes += codePointBytes;
+      start = codePointStart;
+    }
+    return { text: marker + text.slice(start), truncated: true };
+  };
+
 async function observeExecutionChild(attemptDir, dispatch) {
   let record;
   try { record = await parseJson(join(attemptDir, 'execution-child.json')); }
   catch (error) { return { state: 'unknown', reason: error.code === 'ENOENT' ? 'child identity not published' : 'corrupt child identity' }; }
   const child = record?.child;
+  if (process.platform === 'win32') {
+    if (record?.version !== 1 || record.attemptId !== dispatch.attemptId || record.taskSha256 !== dispatch.taskSha256 || !validWindowsWorkerIdentity(child) || !Number.isFinite(Date.parse(child.spawnedAt))) return { state: 'unknown', reason: 'invalid Windows child identity' };
+    const state = windowsWorkerState(child);
+    return state === 'unknown' ? { state, reason: 'Windows child identity unavailable or mismatched' } : { state, identity: child, descendants: 'unproven' };
+  }
   if (record?.version !== 1 || record.attemptId !== dispatch.attemptId || record.taskSha256 !== dispatch.taskSha256 || !child || !Number.isInteger(child.pid) || child.pid <= 0 || child.pgid !== child.pid || typeof child.bootId !== 'string' || !/^[0-9a-f-]{36}$/.test(child.bootId) || typeof child.startTicks !== 'string' || !/^\d+$/.test(child.startTicks) || typeof child.exe !== 'string' || !isAbsolute(child.exe) || typeof child.spawnedAt !== 'string' || !Number.isFinite(Date.parse(child.spawnedAt))) return { state: 'unknown', reason: 'invalid child identity' };
   try {
     if (readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim() !== child.bootId) return { state: 'unknown', reason: 'child boot identity mismatched' };
@@ -352,4 +412,18 @@ async function main() {
   }
   throw new Error('usage: worker-lifecycle.mjs launch|read|reconcile [explicit options]');
 }
-main().catch(error => { process.stderr.write(`${error.message}\n`); process.exitCode = 1; });
+main().catch(async error => {
+  // Startup can fail before owner/terminal publication. Preserve bounded failure
+  // evidence, never a cessation assertion or permission to release capacity.
+  try {
+    if (process.platform === 'win32' && process.argv[2] === 'host') {
+      const args = parseArgs(process.argv.slice(3)), directory = required(args, 'attempt-dir');
+      const dispatch = await parseJson(join(directory, 'dispatch.json'));
+      if (dispatch.lifecycleCopy === self && hash(await readFile(self)) === dispatch.lifecycleSourceSha256) {
+        const reasons = ['Windows worker process observation unavailable', 'Windows worker identity mismatch', 'pinned lifecycle executable hash mismatch', 'lifecycle dependency snapshot changed', 'trusted task snapshot hash mismatch'];
+        await atomicWriteOnce(join(directory, 'host-failure.json'), { version: 1, attemptId: dispatch.attemptId, taskSha256: dispatch.taskSha256, reason: reasons.includes(error.message) ? error.message : 'host startup incomplete', errorName: error.name === 'Error' ? 'Error' : 'Other', code: /^[A-Z_]{1,40}$/.test(error.code || '') ? error.code : null });
+      }
+    }
+  } catch { /* Missing or corrupt publication remains unknown, never clean. */ }
+  process.stderr.write(`${error.message}\n`); process.exitCode = 1;
+});

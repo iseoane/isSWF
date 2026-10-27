@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import { lunaHighRoute } from './luna-high-route.mjs';
+import { syncDirectory } from './platform-runtime.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat, readdir, open, link, unlink } from 'node:fs/promises';
-import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:path';
+import { dirname, join, resolve, isAbsolute, basename, relative, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
@@ -17,7 +19,7 @@ import { parsePlan } from './isswf-plan.mjs';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const installedRelease = verifyRelease(root);
 const methodologySha = installedRelease?.methodologySha ?? '37a56ebc902e94f21fc10666f33fceac44946af7';
-const runtimeFiles = ['tools/release-source.mjs', 'tools/project-state.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
+const runtimeFiles = ['tools/luna-high-route.mjs', 'tools/release-source.mjs', 'tools/project-state.mjs', 'tools/platform-runtime.mjs', 'tools/windows-tool-sandbox.mjs', 'tools/windows-worker-identity.mjs', 'tools/windows-worker-host.mjs', 'tools/isswf-job.mjs', 'tools/factory-package.mjs', 'tools/pi-worker-task.mjs', 'tools/worker-lifecycle.mjs', 'tools/native-recovery.mjs', 'tools/external-effect-journal.mjs', 'tools/recovery-review.mjs', 'tools/job-successor.mjs', 'tools/isswf-plan.mjs'];
 const profileFiles = ['.agents/roles/worker.md', '.agents/roles/references/bug-diagnosis.md', '.agents/roles/references/tdd.md', '.agents/roles/references/design-principles.md', '.agents/roles/references/execution-principles.md', '.agents/roles/references/verification-principles.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', ...(installedRelease?.files['.agents/skills/isswf-e2e/SKILL.md'] ? ['.agents/skills/isswf-e2e/SKILL.md', '.agents/skills/isswf-e2e/references/browser.md', '.agents/skills/isswf-e2e/references/cli-and-api.md', '.agents/skills/isswf-e2e/references/test-quality.md'] : [])];
 for (const name of ['debug', 'tdd', 'security', 'performance', 'observability']) {
   const path = `.agents/skills/isswf-${name}/SKILL.md`;
@@ -79,7 +81,7 @@ async function canonicalStore(path, project, create = true) {
   const store = await canonicalPath(path);
   for (const tree of [project, root]) {
     const child = relative(tree, store), parent = relative(store, tree);
-    const inside = path => path === '' || (path !== '..' && !path.startsWith('../') && !isAbsolute(path));
+    const inside = path => path === '' || (path !== '..' && !path.startsWith('..' + sep) && !isAbsolute(path));
     if (inside(child) || inside(parent)) throw new Error('runs store must be outside project and source trees');
   }
   if (create) await mkdir(store, { recursive: true });
@@ -148,15 +150,14 @@ async function claimAdmission(store, record, checkOnly = false) {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const stat = await lstat(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('admission directory must be a real private directory');
-  const sync = async path => { const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } };
-  await sync(store);
+  await syncDirectory(store);
   const pending = join(directory, '.pending-' + randomUUID());
   const file = await open(pending, 'wx', 0o600);
   try { await file.writeFile(JSON.stringify(record) + '\n'); await file.sync(); } finally { await file.close(); }
   try {
     try { await link(pending, join(directory, record.key + '.json')); }
     catch (error) { if (error.code === 'EEXIST') throw Error('logical job admission already claimed; no automatic replacement'); throw error; }
-    await sync(directory);
+    await syncDirectory(directory);
   } finally { await unlink(pending); }
 }
 async function dependencyAdmission(args, project, job, jobBytes) {
@@ -225,7 +226,7 @@ async function run(args) {
   if (digest(modelBytes) !== job.models.sha256) throw new Error('model config digest mismatch');
   const modelConfig = JSON.parse(modelBytes);
   const workerRoutes = modelConfig.roles?.worker;
-  if (modelConfig.schemaVersion !== 1 || !Array.isArray(workerRoutes) || workerRoutes.length !== 1 || workerRoutes[0]?.model !== 'openai-codex/gpt-6-luna' || workerRoutes[0]?.effort !== 'high' || Object.keys(workerRoutes[0]).sort().join(',') !== 'effort,model') throw new Error('only exact configured LunaHigh worker route supported; no fallback');
+  if (modelConfig.schemaVersion !== 1 || !lunaHighRoute(workerRoutes)) throw new Error('only exact configured LunaHigh worker route supported; no fallback');
   const briefBytes = blob(project, args['input-sha'], job.briefPath);
   for (const path of job.referencedInputs || []) if (digest(blob(project, args['input-sha'], path)) !== digest(blob(project, job.targetBase, path))) throw new Error(`referenced input differs from target base: ${path}`);
   const paths = await runtimePaths(job);
@@ -263,7 +264,7 @@ async function run(args) {
   }
   const prepared = await mkdtemp(join(store, '.prepare-'));
   const configPath = join(prepared, 'config.json'), taskPath = join(prepared, 'task.mjs');
-  const config = { version: 1, mode, ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };
+  const config = { version: 1, mode, route: workerRoutes[0], ...paths, profile: { repo: root, sha: methodologySha, files: profileFiles }, brief: { repo: project, inputSha: args['input-sha'], path: job.briefPath }, expectedMutablePaths: job.expectedMutablePaths, protectedCheckCommand: job.protectedCheckCommand, checks: mode === 'offline' ? job.offlineChecks : [] };
   await writeFile(configPath, JSON.stringify(config) + '\n', { mode: 0o600, flag: 'wx' });
   const preparedResult = JSON.parse(invoke(process.execPath, [join(root, 'tools/pi-worker-task.mjs'), 'prepare', '--config', configPath, '--output', taskPath]));
   if (preparedResult.inputSha !== args['input-sha'] || preparedResult.briefPath !== job.briefPath || preparedResult.briefSha256 !== digest(briefBytes) || preparedResult.taskSha256 !== digest(await readFile(taskPath))) throw new Error('prepared task/brief identity mismatch');
@@ -272,7 +273,7 @@ async function run(args) {
   let capacityArgs=[];
   if(capacity) {
     const modules={};
-    for(const name of ['execution-capacity.mjs','native-recovery.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(ownSourceBlob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
+    for(const name of ['execution-capacity.mjs','native-recovery.mjs','platform-runtime.mjs','windows-worker-identity.mjs']) {const bytes=await readFile(join(root,'tools',name));if(digest(bytes)!==digest(ownSourceBlob(root,job.runtimeSha,'tools/'+name)))throw Error('capacity module changed before dispatch');modules[name]={sha256:digest(bytes),base64:bytes.toString('base64')};}
     const path=join(prepared,'capacity.json');await writeFile(path,JSON.stringify({...capacity,modules})+'\n',{flag:'wx',mode:0o600});capacityArgs=['--capacity-file',path];
   }
   const launched = JSON.parse(invoke(process.execPath, [join(root, 'tools/worker-lifecycle.mjs'), 'launch', '--repo', project, '--input-sha', args['input-sha'], '--brief', job.briefPath, '--target-base', job.targetBase, '--attempt-id', args['attempt-id'], '--runs-store', store, '--grant-ref', args['grant-ref'], '--task-script', taskPath, '--timeout-ms', '120000', '--output-bytes', '16000', ...capacityArgs]));
@@ -283,7 +284,7 @@ async function trustedJSON(path, project, label, store) {
   const canonical = await realpath(path);
   for (const tree of [project, root, store]) {
     const child = relative(await realpath(tree), canonical);
-    if (child === '' || (child !== '..' && !child.startsWith('../') && !isAbsolute(child))) throw Error('file must be outside untrusted project, runtime source and runs store');
+    if (child === '' || (child !== '..' && !child.startsWith('..' + sep) && !isAbsolute(child))) throw Error('file must be outside untrusted project, runtime source and runs store');
   }
   const stat = await lstat(canonical);
   if (!stat.isFile() || stat.size > 16000) throw Error('bounded regular approval file required');

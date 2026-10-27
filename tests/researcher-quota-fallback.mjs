@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, readdir, rm , realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,7 +10,7 @@ import { runResearch, sdkResearchBackend } from '../tools/researcher-task.mjs';
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 const sdkPath = process.argv[3];
 if (sdkPath) assert(isAbsolute(sdkPath));
-const root = await mkdtemp(join(tmpdir(), 'isswf-quota66-'));
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-quota66-')));
 const project = join(root, 'project'), hash = b => createHash('sha256').update(b).digest('hex');
 const text = '21 (facts.md).', canary = 'synthetic-private-error-message';
 const envelope = type => JSON.stringify({ type: 'error', error: { type, message: canary } });

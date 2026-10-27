@@ -1,0 +1,3 @@
+# Keep source/runtime and resource bytes identical to Git blobs on every host.
+# Auto-detected binary files remain byte-preserving; no global Git setting is needed.
+* text=auto eol=lf
