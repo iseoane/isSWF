@@ -22,7 +22,7 @@ export function nativeWorkerInstructions(brief, files, context = {}) {
     'This worker is already dispatched through the Pi SDK. Its only callable tool is sandbox_shell. No external skills, extensions, dispatcher, agent creation, or third-party installation are required or authorized by this execution contract.',
     'The trusted brief governs objective, acceptance, scope and permissions. Methodology does not expand that grant. Coordinator-side dispatch instructions are not worker prerequisites.',
     'Read applicable own references through sandbox_shell under ' + root + ', only when their trigger applies. Paths in the worker profile are relative to ' + root + '/.agents/roles. Do not install or fetch missing resources; report a required missing reference as blocked.',
-    ...(windows ? ['Native Windows tools use cmd.exe, not a POSIX shell. Workspace: ' + context.work + '. Use the supplied absolute Windows paths; /work, /factory and /usr are not mounts on this platform. Temporary storage is private to the tool controller.'] : []),
+    ...(windows ? ['Native Windows tools use cmd.exe, not a POSIX shell. Workspace: ' + context.work + '. Use the supplied absolute Windows paths; /work, /factory and /usr are not mounts on this platform. Temporary storage is private to the tool controller. The node command runs the selected embedded Bun engine, not an installed stock Node executable; it supports .mjs scripts and -e/--eval JavaScript with cwd-based require.'] : []),
     '# Trusted brief', brief,
     '# Pinned worker methodology', worker.slice(start, end).trim(),
     '# Available pinned files', ...Object.keys(files).map(path => windows ? root + '\\' + path.replaceAll('/', '\\') : `/factory/${path}`),

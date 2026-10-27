@@ -37,6 +37,7 @@ export const path = name => join(context().root, name);
 import { realpathSync, existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease } from './tools/release-source.mjs';
+import { createRequire } from 'node:module';
 const tools = {${imports}};
 try {
   // LPAC can open the executable without permission to stat every ancestor directory.
@@ -45,6 +46,14 @@ try {
   let [first, ...args] = process.argv.slice(2), tool = 'isswf';
   if (first === '__tool') {
     tool = args.shift();
+  } else if (first === '-e' || first === '--eval') {
+    if (args.length === 0) throw Error('Inline evaluation requires JavaScript source');
+    const [code, ...forwarded] = args;
+    process.argv = [executable, ...forwarded];
+    globalThis.require = createRequire(join(process.cwd(), '__isswf_inline__.cjs'));
+    await import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
+    tool = null;
+    first = null;
   } else if (first?.endsWith('.mjs')) {
     const script = resolve(first), name = basename(script, '.mjs');
     if (dirname(script) === join(root, 'tools') && Object.hasOwn(tools, name)) {

@@ -74,6 +74,10 @@ if (available.error || available.status !== 0) {
     assert(!Object.keys(receiptA.files).some(path => /^(tests|tooling|\.audit)\//u.test(path)));
     const executableA = join(releaseA, manifest.bin.isswf);
     assert.equal(run(executableA, ['--version']).stdout.trim(), manifest.version);
+    const inline = "if(typeof require('node:fs').readFileSync!=='function')throw Error('missing require');const value=await Promise.resolve(7);console.log(JSON.stringify({value,args:process.argv.slice(1)}));";
+    for (const flag of ['-e', '--eval']) assert.deepEqual(JSON.parse(run(executableA, [flag, inline, 'argument with spaces']).stdout), { value: 7, args: ['argument with spaces'] });
+    run(executableA, ['-e'], false);
+    run(executableA, ['--eval', "throw Error('synthetic-inline-failure')"], false);
     const externalSdk = join(temp, 'external-sdk'), externalDependency = join(externalSdk, 'node_modules/exported-dependency');
     await mkdir(externalDependency, { recursive: true });
     await writeFile(join(externalSdk, 'package.json'), JSON.stringify({ name: 'external-sdk', type: 'module', main: './entry.mjs', exports: { import: './entry.mjs', default: './entry.mjs' } }));
