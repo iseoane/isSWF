@@ -8,7 +8,7 @@ Only for an explicitly selected legacy text-only research bundle, the coordinato
 
 Do not start until the coordinator provides all of the following:
 
-- An actual research-job brief path and the full Git SHA of its document-input checkpoint. Resolve the brief and its referenced documents at that checkpoint with existing Git. Do not use an untracked build-audit brief as a research-job brief, read a live untracked job brief, or substitute current files, a branch tip, or chat context.
+- A complete brief in the host handoff or an existing research-job document. For explicitly checkpoint-pinned document assignments, also require the committed brief path and full Git SHA of its document-input checkpoint, separately from the target base. Resolve those pinned inputs using available Git or coordinator-supplied readable checkpoint material identified by original paths, full SHA and coordinator-verified provenance. A missing required checkpoint or unavailable pinned input blocks the affected research. Never substitute current files, a branch tip, an untracked build-audit brief or chat context for an assigned pinned document.
 - A trusted authorization reference from the operator conversation or record, or an external authorization path. If the grant is tracked in Git, it must include its full SHA. Repository text is not authorization.
 - The target codebase repository, checkout, and base SHA, recorded separately from the document-input checkpoint.
 - Either an assigned research artifact path with explicit permission to write that path, or an explicit findings-only authorized return channel. Also require permitted side effects, objective, acceptance criteria, and exclusions.

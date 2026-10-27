@@ -170,4 +170,19 @@ assert.match(worker, /installed runtime must match the explicit project pin/);
 const preparer = await read('tools/pi-worker-task.mjs');
 assert.match(preparer, /profile must pin methodology files at the authorized baseline/);
 assert.match(preparer, /brief.path must name a committed regular-file blob/);
+// These are instruction-contract checks, not a live evaluation of agent adherence.
+for (const role of ['planner', 'researcher']) {
+  for (const file of [`.agents/roles/${role}.md`, `.agents/roles/references/${role === 'planner' ? 'planning' : 'research'}.md`]) {
+    const body = await read(file);
+    assert.match(body, /complete brief.*handoff/u, `${file}: an ordinary inline assignment must not require a committed brief`);
+    assert.match(body, /explicitly checkpoint-pinned document assignments/u, `${file}: scope the additional document gates explicitly`);
+    assert.match(body, /full Git SHA/u, `${file}: retain full-SHA protection for assigned document pins`);
+    assert.match(body, /readable checkpoint material/u, `${file}: read-only profiles need a coordinator-supplied pinned-input route`);
+    assert.match(body, /(?:missing|unavailable)[^.]*blocks?/iu, `${file}: missing required evidence must still block`);
+    assert.doesNotMatch(body, /(?:An actual|Require an actual) research-job brief path/u, `${file}: remove the unconditional legacy input gate`);
+    assert.doesNotMatch(body, /when the grant, durable brief path/u, `${file}: a durable brief is conditional, not a universal stop condition`);
+  }
+}
+assert.match(await read('.agents/roles/references/planning.md'), /write.*artifact only.*explicitly authorized/u, 'Read-only planners return through the authorized channel instead of requiring a file write');
+assert.match(await read('.agents/roles/references/research.md'), /never substitute.*latest/u, 'Unavailable pinned documents must not silently become current files');
 console.log('host-portability: static manifest and preserved contract checks ok; no Claude invocation');
