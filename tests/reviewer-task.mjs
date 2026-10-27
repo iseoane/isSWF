@@ -29,7 +29,8 @@ try {
   await writeFile(join(project, 'app.mjs'), 'export const answer = 2;\n');
   const candidate = commit();
   await writeFile(join(project, 'brief.md'), 'Review the change to answer 2; no tools or external actions.\n');
-  await writeFile(join(project, 'models.json'), await readFile(join(source, '.factory/models.json')));
+  const fixtureModels = JSON.parse(await readFile(join(source, '.factory/models.json'))); fixtureModels.roles.reviewer = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
+  await writeFile(join(project, 'models.json'), JSON.stringify(fixtureModels) + '\n');
   const job = { version: 1, logicalJobRef: 'I0001/J011/review', implementerRef: 'synthetic-implementer', targetRepo: project, targetBase: base, candidateSha: candidate, methodologySha: actual.stdout.trim(), briefPath: 'brief.md', contextPaths: ['standards.md', 'prior-evidence.md'], models: { sha: commit(), path: 'models.json', sha256: hash(await readFile(join(project, 'models.json'))) }, sdkPath: '/synthetic/not-loaded' };
   await json(join(project, 'review.json'), job); const inputSha = commit();
   const grantFile = join(root, 'grant.json'), fixtureAuth = join(root, 'fixture-auth.json');

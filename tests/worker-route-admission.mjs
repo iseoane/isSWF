@@ -50,7 +50,7 @@ try {
     const configSha = commit('pinned worker model configuration');
     return { sha: configSha, bytes: await readFile(join(fixture, '.factory/models.json')) };
   };
-  const initial = await setupConfigCommit(config.roles.worker);
+  const initial = await setupConfigCommit([{ model: 'openai-codex/gpt-6-luna', effort: 'high' }]);
   const materialize = command(process.execPath, [join(fixture, 'tools/factory-package.mjs'), 'materialize', '--source', fixture, '--revision', runtimeSha, '--store', packageStore]);
   assert.equal(materialize.status, 0, materialize.stderr);
   const packagePath = join(packageStore, runtimeSha);
@@ -107,7 +107,7 @@ try {
     inputSha = await input(pin, id);
     await run(id, inputSha, 'only exact configured LunaHigh worker route supported; no fallback');
   }
-  console.log('PASS public worker route admission guard and canonical-route positive control');
+  console.log('PASS public worker route admission guard and both explicit destination controls');
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

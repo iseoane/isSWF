@@ -1,6 +1,6 @@
 # Project setup
 
-Current status: partial. The original setup snapshot below is historical; the current Windows reconciliation at the end records later evidence and pending decisions without granting execution.
+Current status: configured for the approved bounded native worker/reviewer trial; general client readiness remains partial. The original setup snapshot below is historical; the current Windows reconciliation at the end records later evidence and pending decisions without granting execution.
 
 ## Scope and provenance
 
@@ -83,9 +83,15 @@ Evidence: `docs/en/development.md`, `tools/check-quality.mjs`, `tooling/quality/
 
 Proposed minimal total: one worker plus one independent reviewer, serial concurrency1; no automatic replacement, retry or correction round. The worker's one SDK prompt may have multiple provider turns within its existing time/tool boundary; this is not a two-HTTP-request guarantee. No live actors are currently authorized. Effective route values remain in `.factory/models.json`; choosing the authenticated provider for the minimal roles and approving the composition/budgets remain explicit decisions before normal live use. Shared capacity must be materialized under a genuine assignment grant, not inferred from this table.
 
-### Outstanding setup decisions and exit condition
+### Historical outstanding setup decisions and exit condition
 
 - Host auth discovery and actual offline SDK/session integration are resolved for the existing authenticated provider. Do not ask the operator for credential files or secrets. Live access/quota still needs a separate finite test; SDK subscription metadata is not a live result or additional-cost authorization.
 - Approve an explicit project configuration selecting the already authenticated provider for the minimal worker/reviewer, with Luna/high unchanged, plus the proposed serial composition/budgets. Retaining legacy provider destinations would need their own auth evidence instead. No selection has been changed silently. Configuration selection alone does not grant live calls.
 - Repository-local worktree preference is absent. Approve the documented derived external default or another external location before creating worktrees. No local/global Git setting has been changed.
 - Keep `Client-use gate: blocked`. Setup becomes configured only for the actually supported, approved delivery boundary after missing choices, authentication evidence and remaining checks are resolved. The real public worker/provider journey, installation maintenance and independent final review remain separately scoped gates.
+
+### Operator-approved bounded boundary
+
+The operator now approves worker/reviewer on the existing authenticated provider with Luna/high unchanged, one original worker followed by one independent reviewer serially, maximum120seconds each, no retries/replacements/correction rounds, no paid API, push or publication. Only those two current .factory/models.json bindings change; historical inputs and inactive-role routes stay intact. Native snapshots use an external private store in a small standalone target, not a Git worktree; no worktree-root setting or global host configuration is changed. Shared execution capacity limit1 is required for both roles. Preserve exact candidates and uncertain outcomes; no cleanup authorization.
+
+The actual installed public caller additionally passes offline native admission after correcting external-path separators and directory publication, including durable claims, no replay and verified automatic capacity completion. Candidate96d5ef87126368725cf81aaa38525eb4af920521 artifact254e68c35c546394fd73f7f8a55689c44bae97b1b5952ce5b5902cd469f5038e, fixturecs1FsJ. Full Linux mandatory-isolation rerun and locked static/docs checks pass; preceding failing test fixtures remain historical. Point3 is configured for this narrow trial, not general feature-to-PR or client acceptance. The next point is actual provider-worker-reviewer execution under concrete external grants, counters worker0/1 reviewer0/1.

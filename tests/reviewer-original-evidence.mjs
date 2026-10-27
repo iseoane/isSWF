@@ -21,7 +21,8 @@ try {
   await writeFile(join(project, 'app'), 'after'); const candidate = commit();
   git(root, 'clone', '--quiet', '--no-hardlinks', project, checkout);
   await writeFile(join(project, 'brief'), 'Verify explicitly granted original evidence only. No provider calls, real credentials or hardware case.');
-  await writeFile(join(project, 'models.json'), await readFile(join(source, '.factory/models.json'))); const modelsSha = commit();
+  const fixtureModels = JSON.parse(await readFile(join(source, '.factory/models.json'))); fixtureModels.roles.reviewer = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
+  await writeFile(join(project, 'models.json'), JSON.stringify(fixtureModels) + '\n'); const modelsSha = commit();
   const auth = join(root, 'auth.json'); await json(auth, {});
   const original = join(root, 'original'); await mkdir(original); await writeFile(join(original, 'record'), 'original');
   const alternate = join(root, 'alternate'); await mkdir(alternate);

@@ -92,6 +92,8 @@ The Quality workflow keeps the full Linux quality and Bubblewrap job. A separate
 
 Three additional Windows-only suites exercise the native bounded-tool backend: `windows-tool-sandbox.mjs` checks LPAC access, environment, network, registry canaries, subprocesses, timeout, byte-bounded output and descendant cessation; `windows-sandbox-lifetime.mjs` checks alias refusal, interrupted startup and owner loss; `windows-worker-task.mjs` checks an actual installed compiled artifact's self-contained task with a synthetic SDK. They refuse legacy Node or implicit engine substitution. Run them after `platform-package.mjs`, retaining `ISSWF_PLATFORM_ROOT`. No provider calls are made. These are tool/task controls, not normal Windows job admission, lifecycle/recovery, complete setup or independent security acceptance. Abrupt owner loss may leave profile/ACL cleanup unconfirmed; preserve its ownership records. Output is bounded in memory, not written to unbounded capture files; writable filesystem scopes have no hard disk quota.
 
+The Windows-only `windows-worker-admission.mjs` additionally exercises the installed pinned launcher and public worker caller with an external runs store/grant, synced exclusive admission, shared capacity, synthetic offline SDK task and bound capacity completion. It makes no provider call or independent product verdict.
+
 Four further Windows suites cover strict worker identity, trusted SDK process containment, the existing detached lifecycle entry and actual compiled recovery/capacity integration. They bind boot, exact creation time, executable, native argv and nonce rather than PID alone. The trusted SDK task is not the model tool sandbox: its commands still use LPAC. Recovery requires a root Job receipt confirming zero descendants; owner disappearance alone is insufficient. After owner loss, reconciliation stays read-only and may return `stopped-review-required` with `profileCleanupRequired`, never silently clean up or retry. Successful capacity is archived only after bound task/tool/profile completion; interrupted attempts keep their slot. A separate same-runtime supervisor avoids detached PowerShell console/stdio loss without changing the selected engine or requesting host-job breakaway.
 
 The native matrix also runs text-role caller contracts for reviewer, planner, diagnostician and researcher. These use injected transport/probe observations, not provider calls or actual Windows diagnostic isolation. Git roots are canonicalized, external scopes use native separators, and publication follows the shared directory-sync policy while regular-file flush failures remain fatal. The reviewer test injects such a failure before backend work and checks that the interrupted claim blocks replay. Positive fixture budgets allow native Git preparation time; explicit negative deadline controls remain separate.
@@ -108,6 +110,7 @@ node tests/host-discovery.mjs .
 node tests/windows-tool-sandbox.mjs
 node tests/windows-sandbox-lifetime.mjs
 node tests/windows-worker-task.mjs
+node tests/windows-worker-admission.mjs
 node tests/windows-worker-identity.mjs
 node tests/windows-worker-host.mjs
 node tests/windows-worker-lifecycle.mjs

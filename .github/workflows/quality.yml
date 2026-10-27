@@ -122,6 +122,9 @@ jobs:
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform
         run: node tests/windows-worker-task.mjs
+      - name: Native Windows public worker admission
+        if: runner.os == 'Windows'
+        run: node tests/windows-worker-admission.mjs
       - name: Verify native Windows worker identity
         if: runner.os == 'Windows'
         run: node tests/windows-worker-identity.mjs

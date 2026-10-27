@@ -21,7 +21,8 @@ try {
   await writeFile(join(project, 'app.mjs'), 'export const answer = 1;\n');
   await writeFile(join(project, 'standards.md'), 'Synthetic capacity test only; no product review or acceptance.\n');
   await writeFile(join(project, 'brief.md'), 'Synthetic bounded panel; all returned review text is fixture data, not independent source review.\n');
-  await writeFile(join(project, 'models.json'), await readFile(join(source, '.factory/models.json'))); const base = commit();
+  const fixtureModels = JSON.parse(await readFile(join(source, '.factory/models.json'))); fixtureModels.roles.reviewer = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
+  await writeFile(join(project, 'models.json'), JSON.stringify(fixtureModels) + '\n'); const base = commit();
   await writeFile(join(project, 'app.mjs'), 'export const answer = 2;\n'); const candidate = commit(), modelSha = candidate;
   const sourceRevision = spawnSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim();
   const authPath = join(root, 'empty-auth.json'); await json(authPath, {});

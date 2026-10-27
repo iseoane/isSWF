@@ -169,12 +169,12 @@ The operator's current final objective is factory operation on both Linux and Wi
 
 ## J007
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Implement the native Windows bounded-tool isolation backend, then verify lifecycle/recovery and the remaining cross-platform readiness units in sequence
 - Depends on: J006
 - Brief: [brief-r2.md](jobs/J007/brief-r2.md)
-- Blocker: Points1/2 pass mechanical tool/task and lifecycle/read-only recovery checks. Point3 host auth is located and actual Pi SDK offline integration passes for the authenticated OpenAI provider; local compatibility supports an explicit same-model provider selection without alias/fallback. Project route selection, minimal composition/external workspace and finite live authority remain pending; defaults and historical pins are unchanged. Complete setup, provider journey, installation maintenance, independent review and remote CI remain gates; interrupted profile/ACL cleanup is unconfirmed and writable scopes lack hard disk quota.
-- Next step: Point1 committed as4af1f33 and point2 as2160dfd. Point3 technical text-caller prerequisites pass, but setup stays partial. Do not ask for auth files: actual host SDK/profile reuse is evidenced. Reconcile explicit authenticated-provider selection, minimal serial composition and external workspace; obtain a finite worker/reviewer provider grant before the real journey. Native Windows diagnostic workspace probes remain unsupported and must not be offered as verified capability. No provider, global configuration or publication authority is inferred.
+- Blocker: Points1/2 pass mechanical tool/task and lifecycle/read-only recovery checks. Point3 host auth is located and actual Pi SDK offline integration passes for the authenticated OpenAI provider; local compatibility supports an explicit same-model provider selection without alias/fallback. Operator now approves explicit worker/reviewer selection on the authenticated provider, serial total1each, max120s each, no retries/replacements/corrections, no paid API or publication; historical pins remain unchanged. Setup is configured for that narrow boundary, not general client readiness. Complete setup, provider journey, installation maintenance, independent review and remote CI remain gates; interrupted profile/ACL cleanup is unconfirmed and writable scopes lack hard disk quota.
+- Next step: Point1 committed as4af1f33 and point2 as2160dfd. Point3 technical text-caller prerequisites pass, but setup stays partial. Do not ask for auth files: actual host SDK/profile reuse is evidenced. Materialize the now-approved finite worker/reviewer external grants with capacity1 and exact pins; run the bounded real journey without retry. Installed public native admission now passes after separator/directory-sync repair. No Git worktree is required for standalone native snapshots. Native Windows diagnostic workspace probes remain unsupported and must not be offered as verified capability. No provider, global configuration or publication authority is inferred.
 
 ### Acceptance
 

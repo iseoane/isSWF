@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { lunaHighRoute } from './luna-high-route.mjs';
+import { syncDirectory } from './platform-runtime.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat, readdir, open, link, unlink } from 'node:fs/promises';
-import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:path';
+import { dirname, join, resolve, isAbsolute, basename, relative, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
@@ -80,7 +81,7 @@ async function canonicalStore(path, project, create = true) {
   const store = await canonicalPath(path);
   for (const tree of [project, root]) {
     const child = relative(tree, store), parent = relative(store, tree);
-    const inside = path => path === '' || (path !== '..' && !path.startsWith('../') && !isAbsolute(path));
+    const inside = path => path === '' || (path !== '..' && !path.startsWith('..' + sep) && !isAbsolute(path));
     if (inside(child) || inside(parent)) throw new Error('runs store must be outside project and source trees');
   }
   if (create) await mkdir(store, { recursive: true });
@@ -149,15 +150,14 @@ async function claimAdmission(store, record, checkOnly = false) {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const stat = await lstat(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('admission directory must be a real private directory');
-  const sync = async path => { const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } };
-  await sync(store);
+  await syncDirectory(store);
   const pending = join(directory, '.pending-' + randomUUID());
   const file = await open(pending, 'wx', 0o600);
   try { await file.writeFile(JSON.stringify(record) + '\n'); await file.sync(); } finally { await file.close(); }
   try {
     try { await link(pending, join(directory, record.key + '.json')); }
     catch (error) { if (error.code === 'EEXIST') throw Error('logical job admission already claimed; no automatic replacement'); throw error; }
-    await sync(directory);
+    await syncDirectory(directory);
   } finally { await unlink(pending); }
 }
 async function dependencyAdmission(args, project, job, jobBytes) {
@@ -284,7 +284,7 @@ async function trustedJSON(path, project, label, store) {
   const canonical = await realpath(path);
   for (const tree of [project, root, store]) {
     const child = relative(await realpath(tree), canonical);
-    if (child === '' || (child !== '..' && !child.startsWith('../') && !isAbsolute(child))) throw Error('file must be outside untrusted project, runtime source and runs store');
+    if (child === '' || (child !== '..' && !child.startsWith('..' + sep) && !isAbsolute(child))) throw Error('file must be outside untrusted project, runtime source and runs store');
   }
   const stat = await lstat(canonical);
   if (!stat.isFile() || stat.size > 16000) throw Error('bounded regular approval file required');
