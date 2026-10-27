@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, writeFile , realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { windowsWorkerProcess, windowsWorkerState } from '../tools/windows-worker-identity.mjs';
 
 if (process.platform !== 'win32') console.log('SKIP native Windows worker identity: not Windows');
 else {
-  const root = await mkdtemp(join(tmpdir(), 'isswf identity ñ ')), script = join(root, 'owned child.mjs');
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf identity ñ '))), script = join(root, 'owned child.mjs');
   await writeFile(script, 'console.log("ready");setInterval(()=>{},1000);\n');
   const nonce = randomBytes(24).toString('hex');
   const child = spawn(process.execPath, [script, '--nonce', nonce], { stdio: ['ignore', 'pipe', 'pipe'] });

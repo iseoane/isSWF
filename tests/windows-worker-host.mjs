@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile , realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -7,7 +7,7 @@ import { runWindowsWorkerTask } from '../tools/windows-worker-host.mjs';
 
 if (process.platform !== 'win32') console.log('SKIP native Windows trusted task host: not Windows');
 else {
-  const root = await mkdtemp(join(tmpdir(), 'isswf trusted host ñ '));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf trusted host ñ ')));
   const execute = async (id, source, timeoutMs = 3000) => {
     const attemptDir = join(root, id), workspace = join(attemptDir, 'workspace'), taskCopy = join(attemptDir, 'task.mjs'); await mkdir(attemptDir); await mkdir(workspace); await writeFile(taskCopy, source);
     const dispatch = { attemptId: id, workspace, taskCopy, taskSha256: createHash('sha256').update(source).digest('hex'), outputBytes: 1024, timeoutMs };

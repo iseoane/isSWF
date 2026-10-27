@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, writeFile, readdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, readdir , realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -11,7 +11,7 @@ else {
   assert(process.env.ISSWF_PLATFORM_ROOT, 'Run after native platform-package');
   const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'), 'utf8'));
   const release = report.installed, receipt = verifyRelease(release), binary = join(release, 'bin/isswf.exe');
-  const root = await mkdtemp(join(tmpdir(), 'isswf Windows task ñ ')), repo = join(root, 'inputs'), sdk = join(root, 'sdk'), attempt = join(root, 'attempt'), work = join(attempt, 'work');
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf Windows task ñ '))), repo = join(root, 'inputs'), sdk = join(root, 'sdk'), attempt = join(root, 'attempt'), work = join(attempt, 'work');
   for (const path of [repo, sdk, attempt, work]) await mkdir(path);
   const run = (exe, args, timeout = 120000) => { const result = spawnSync(exe, args, { encoding: 'utf8', timeout, maxBuffer: 1024 * 1024 }); assert.ifError(result.error); assert.equal(result.status, 0, result.stderr + '\n' + result.stdout); return result.stdout.trim(); };
   run('git', ['init', '-q', repo]);

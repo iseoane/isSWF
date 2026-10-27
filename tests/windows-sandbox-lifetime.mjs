@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile, readdir, symlink, link } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, readdir, symlink, link , realpath } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
@@ -15,7 +15,7 @@ else {
   }
   assert(binary, 'Supply the compiled Windows artifact'); binary = resolve(binary);
   const hash = createHash('sha256').update(await readFile(binary)).digest('hex');
-  const root = await mkdtemp(join(tmpdir(), 'isswf lifetime ñ ')), factory = join(root, 'factory'), secret = join(root, 'secret');
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf lifetime ñ '))), factory = join(root, 'factory'), secret = join(root, 'secret');
   await mkdir(factory); await writeFile(secret, 'synthetic-only');
   for (const kind of ['junction', 'hardlink']) {
     const attempt = join(root, kind), work = join(attempt, 'work'); await mkdir(attempt); await mkdir(work);

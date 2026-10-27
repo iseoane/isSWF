@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, readdir , realpath } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
@@ -17,7 +17,7 @@ if (process.platform !== 'win32') {
   }
   assert(binary, 'Supply the exact compiled Windows artifact via ISSWF_TEST_WINDOWS_BINARY or ISSWF_PLATFORM_ROOT');
   binary = resolve(binary);
-  const root = await mkdtemp(join(tmpdir(), 'isswf sandbox spaces ñ '));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf sandbox spaces ñ ')));
   const attempt = join(root, 'attempt'), work = join(attempt, 'work'), factory = join(root, 'factory');
   await mkdir(attempt); await mkdir(work); await mkdir(factory);
   const secret = join(root, 'host-secret.json'); await writeFile(secret, 'synthetic-private-only');

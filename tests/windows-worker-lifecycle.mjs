@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile , realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 if (process.platform !== 'win32') console.log('SKIP native Windows worker lifecycle: not Windows');
 else {
-  const root = await mkdtemp(join(tmpdir(), 'isswf lifecycle ñ ')), repo = join(root, 'project'), store = join(root, 'runs'); await mkdir(repo);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf lifecycle ñ '))), repo = join(root, 'project'), store = join(root, 'runs'); await mkdir(repo);
   const invoke = (binary, args, ok = true) => { const r = spawnSync(binary, args, { encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024 }); assert.ifError(r.error); if (ok) assert.equal(r.status, 0, r.stderr); else assert.notEqual(r.status, 0); return r; };
   const git = (...args) => invoke('git', ['-C', repo, ...args]).stdout.trim();
   git('init', '-q'); await writeFile(join(repo, 'brief.md'), 'Synthetic trusted task only, no provider.\n'); await writeFile(join(repo, 'result.txt'), 'before'); git('add', '.'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Pin fixture'); const sha = git('rev-parse', 'HEAD');

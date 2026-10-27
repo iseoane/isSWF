@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir , realpath } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -8,7 +8,7 @@ import { identity } from '../tools/platform-runtime.mjs';
 
 if (process.platform !== 'win32') console.log('SKIP native Windows state-directory publication: not Windows');
 else {
-  const root = await mkdtemp(join(tmpdir(), 'isswf Windows state ñ ')), project = join(root, 'project'), store = join(root, 'store');
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf Windows state ñ '))), project = join(root, 'project'), store = join(root, 'store');
   await mkdir(join(project, '.factory'), { recursive: true });
   const bytes = Buffer.from('# Historical bytes\r\nOriginal .factory/path remains literal\r\n');
   await writeFile(join(project, '.factory/record.md'), bytes);

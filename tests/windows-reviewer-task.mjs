@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile , realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { verifyRelease } from '../tools/release-source.mjs';
@@ -49,7 +49,7 @@ else {
   assert(process.env.ISSWF_PLATFORM_ROOT, 'Run platform-package first');
   const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'))), release = report.installed, receipt = verifyRelease(release);
   for (const provider of ['openai-codex', 'openai']) {
-  const root = await mkdtemp(join(tmpdir(), 'isswf compiled review ñ ')), script = join(root, 'review.mjs');
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf compiled review ñ '))), script = join(root, 'review.mjs');
   await writeFile(script, '(' + compiledReview.toString() + ')(' + JSON.stringify({ root, release, methodologySha: receipt.methodologySha, provider }) + ');\n');
   const result = spawnSync(join(release, 'bin/isswf.exe'), [script], { encoding: 'utf8', timeout: 60000, maxBuffer: 1024 * 1024 }); assert.ifError(result.error); assert.equal(result.status, 0, result.stderr + '\n' + result.stdout);
   console.log(JSON.stringify({ root, revision: receipt.revision, result: JSON.parse(result.stdout.trim()) }));

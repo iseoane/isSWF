@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile , realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { verifyRelease } from '../tools/release-source.mjs';
@@ -14,7 +14,7 @@ else {
   assert(process.env.ISSWF_PLATFORM_ROOT, 'Run native platform-package first');
   const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'))), release = report.installed;
   const receipt = verifyRelease(release), binary = join(release, 'bin/isswf.exe');
-  const root = await mkdtemp(join(tmpdir(), 'isswf recovery ñ ')), repo = join(root, 'project'), sdk = join(root, 'sdk'), store = join(root, 'runs'); await mkdir(repo); await mkdir(sdk);
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf recovery ñ '))), repo = join(root, 'project'), sdk = join(root, 'sdk'), store = join(root, 'runs'); await mkdir(repo); await mkdir(sdk);
   const command = (exe, args, ok = true) => { const result = spawnSync(exe, args, { encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024 }); assert.ifError(result.error); if (ok) assert.equal(result.status, 0, result.stderr + '\n' + result.stdout); else assert.notEqual(result.status, 0); return result; };
   const git = (...args) => command('git', ['-C', repo, ...args]).stdout.trim();
   git('init', '-q');

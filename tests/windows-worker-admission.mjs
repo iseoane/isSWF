@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile , realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { verifyRelease } from '../tools/release-source.mjs';
@@ -9,7 +9,7 @@ import { verifyRelease } from '../tools/release-source.mjs';
 if (process.platform !== 'win32') console.log('SKIP Windows installed public worker admission: not Windows');
 else {
   const report = JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT, 'platform-report.json'))), release = report.installed, receipt = verifyRelease(release), binary = join(release, 'bin/isswf.exe');
-  const root = await mkdtemp(join(tmpdir(), 'isswf admission ñ ')), project = join(root, 'project'), store = join(root, 'runs'), runtimeStore = join(root, 'runtimes'), pool = join(root, 'pool'), sdk = join(root, 'sdk');
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf admission ñ '))), project = join(root, 'project'), store = join(root, 'runs'), runtimeStore = join(root, 'runtimes'), pool = join(root, 'pool'), sdk = join(root, 'sdk');
   for (const path of [project, pool, join(pool, 'completed'), sdk]) await mkdir(path);
   const hash = bytes => createHash('sha256').update(bytes).digest('hex');
   const save = (path, value) => writeFile(path, JSON.stringify(value) + '\n');
