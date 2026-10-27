@@ -78,6 +78,14 @@ if (available.error || available.status !== 0) {
     for (const flag of ['-e', '--eval']) assert.deepEqual(JSON.parse(run(executableA, [flag, inline, 'argument with spaces']).stdout), { value: 7, args: ['argument with spaces'] });
     run(executableA, ['-e'], false);
     run(executableA, ['--eval', "throw Error('synthetic-inline-failure')"], false);
+    const engineOnly = join(temp, 'engine-only'); await mkdir(engineOnly);
+    const engine = join(engineOnly, process.platform === 'win32' ? 'node.exe' : 'node');
+    await cp(executableA, engine); await chmod(engine, 0o755);
+    assert.deepEqual(JSON.parse(run(engine, ['-e', inline, 'standalone']).stdout), { value: 7, args: ['standalone'] });
+    const engineScript = join(temp, 'engine-only.mjs'); await writeFile(engineScript, "console.log('standalone-script-positive');\n");
+    assert.equal(run(engine, [engineScript]).stdout.trim(), 'standalone-script-positive');
+    assert.match(run(engine, ['--version'], false).stderr, /verified release resources/u, 'Standalone engine must not become an unverified release CLI');
+    assert.match(run(engine, ['__tool', 'isswf-status'], false).stderr, /verified release resources/u);
     const externalSdk = join(temp, 'external-sdk'), externalDependency = join(externalSdk, 'node_modules/exported-dependency');
     await mkdir(externalDependency, { recursive: true });
     await writeFile(join(externalSdk, 'package.json'), JSON.stringify({ name: 'external-sdk', type: 'module', main: './entry.mjs', exports: { import: './entry.mjs', default: './entry.mjs' } }));

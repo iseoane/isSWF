@@ -40,9 +40,13 @@ import { verifyRelease } from './tools/release-source.mjs';
 import { createRequire } from 'node:module';
 const tools = {${imports}};
 try {
-  // LPAC can open the executable without permission to stat every ancestor directory.
-  const executable = process.platform === 'win32' ? realpathSync.native(process.execPath) : realpathSync(process.execPath);
-  const root = dirname(dirname(executable));
+  // Standalone engine entries need no release lookup. In LPAC the executable
+  // can run even when canonicalizing its ancestor path is denied.
+  let executable = process.execPath, root;
+  const locateRelease = () => {
+    executable = process.platform === 'win32' ? realpathSync.native(process.execPath) : realpathSync(process.execPath);
+    root = dirname(dirname(executable));
+  };
   let [first, ...args] = process.argv.slice(2), tool = 'isswf';
   if (first === '__tool') {
     tool = args.shift();
@@ -56,7 +60,8 @@ try {
     first = null;
   } else if (first?.endsWith('.mjs')) {
     const script = resolve(first), name = basename(script, '.mjs');
-    if (dirname(script) === join(root, 'tools') && Object.hasOwn(tools, name)) {
+    if (basename(dirname(script)) === 'tools' && Object.hasOwn(tools, name)) locateRelease();
+    if (root && dirname(script) === join(root, 'tools') && Object.hasOwn(tools, name)) {
       tool = name;
     } else {
       process.argv = [executable, script, ...args];
@@ -66,6 +71,7 @@ try {
     }
   } else args = process.argv.slice(2);
   if (tool !== null) {
+    if (!root) locateRelease();
     const receipt = verifyRelease(root);
     if (!receipt || !existsSync(join(root, 'bin', ${JSON.stringify(target.includes('windows') ? 'isswf.exe' : 'isswf')}))) throw Error('Executable requires its complete verified release resources');
     if (first === '--version') console.log(receipt.version);
