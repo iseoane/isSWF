@@ -2,6 +2,18 @@
 
 Use these two axes for every review. Project standards and the accepted brief take precedence over generic engineering preferences.
 
+## Required methodology
+
+For an assigned isSWF review, consume the canonical [isswf-review skill](../../skills/isswf-review/SKILL.md) and this guide before assessing the candidate, together with any additional methodology explicitly required by the brief or applicable project standards. Read the identified source paths, or use their full canonical contents supplied through a trusted handoff or verified native context. A role summary or a link is not the full procedure. Preserve assigned document checkpoints; never substitute latest material for a required pin.
+
+| Required procedure coverage | Completion condition |
+| --- | --- |
+| Consumed from identified sources or supplied in full | Continue the scoped review; this alone does not establish a passing verdict. |
+| Any required procedure skipped, unreadable or not supplied | Review is incomplete. Mark Standards as inconclusive unless a demonstrated violation already fails it; preserve supported findings on either axis. The aggregate cannot pass. |
+| Only an optional reference, tool or check is unavailable | Its absence does not invalidate otherwise sufficient scoped evidence. Name a concrete uncovered risk before escalating. |
+
+Limited budget or access does not waive required methodology or authorize another actor. Report the missing resource and stop the affected review; do not attach the omission as a harmless limitation to a complete pass. State which required resources were actually consumed, whether read or supplied in full, and which remain missing. Do not infer content loading from a configured skill name or invocation alone, or demand a transcript of every internal action.
+
 ## Choose sufficient verification
 
 Before dispatch, the coordinator records the review mode, concrete risks, checks and stopping condition in the existing brief. Choose the least costly mode that covers the acceptance criteria and affected behavior:
