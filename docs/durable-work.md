@@ -54,7 +54,7 @@ A saved status is the latest report with its time and evidence. It does not prov
 
 Git checkpoints make committed files referable and reviewable. They are not a full backup, atomic writes, process recovery, or exactly-once execution. Uncommitted work may be lost. Engram can retain learning, but it is not the work database or authority for active assignments.
 
-A worker returns its attempt artifact, changed paths, observed checks, candidate or checkpoint references, risks, and blockers. A reviewer returns its artifact against that exact candidate. A new candidate needs a new review. The coordinator reconciles the evidence and updates plan references; a report of `complete` alone does not satisfy a dependency or establish technical closure.
+A worker returns its attempt artifact, changed paths, observed checks, candidate or checkpoint references, risks, and blockers. A reviewer returns its artifact against that exact candidate. For a changed candidate, the coordinator records the delta, runs affected checks, and obtains affected independent judgment when risk or an explicit requirement calls for it, following [review guidance](../.agents/roles/references/review.md#choose-sufficient-verification). Reuse prior evidence only for unchanged applicable scope with sufficient recorded provenance and candidate identity; a changed identity alone does not require a fresh model call. Preserve prior adverse or inconclusive verdicts and record any new decision against the changed candidate. The coordinator reconciles the evidence and updates plan references; a report of `complete` alone does not satisfy a dependency or establish technical closure.
 
 ## Read an initiative status snapshot
 
