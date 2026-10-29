@@ -47,22 +47,25 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ## J018
 
 - Status: in-review
-- Objective: Deliver only the selected legacy caller root/containment and directory-sync slices.
+- Objective: Deliver only the selected caller root/containment, directory-sync and native Windows temporary-evidence eligibility slices.
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J018/brief-r3.md)
-- Blocker: Cut-2 independent review PASS; original cut-1 FAIL for insufficient coverage is explicitly operator-accepted, not relabelled PASS. Committed artifact inspection, publication and exact-head CI are pending at this commit checkpoint.
-- Next step: Complete the selected feature PR gates and request integration separately. Do not repair unrelated Windows fixture, capacity or diagnostic failures.
+- Brief: [brief-r4.md](jobs/J018/brief-r4.md)
+- Blocker: Cut-3 independent Standards/Spec/aggregate PASS on the retained functional snapshot; committed artifact inspection, publication and exact-head CI remain pending at this checkpoint. Existing Windows file-symlink EPERM is retained, not repaired or certified.
+- Next step: Complete the covered cut-3 feature PR gates and request its integration separately. Cuts 1/2 are already integrated through PR98; preserve their original review failures and accepted limits. No unrelated repair or broader Windows acceptance.
 
 ### Acceptance
 
 - Correct native root identity/containment and handle unsupported Windows directory synchronization without changing grants, pins, aliases, routing, claims or no-replay protections.
 - Keep file and supported-directory failures fatal; explicitly limit Windows durability. Preserve cut-1 coverage acceptance and use TDD for needed cases when affected code changes later.
+- Accept only canonical native Windows temporary children, not the temporary root or unrelated paths; preserve Linux eligibility, source-object exception and all evidence bounds/guards without new cases or modules.
 
 ### Evidence
 
 - Base `fcddfda5d2c520b11354bce0407cece17b37cda0`; root-only snapshot `16ef8e01035d40f553773692a20649515b9932948cbbdd159eded61aad364bf1`.
 - Combined snapshot `202670135b4bd40a630c21ae4e2d3191ce2b390ad337362185dd9627c8955074`: focused caller persistence/readback/no-replay/error cases pass on Windows/Linux; cut-2 Standards/Spec/aggregate PASS, no findings.
 - Full Linux quality and locked Windows static/docs checks pass. Existing full Windows caller fixtures still fail fetch-count assertions after passing directory sync; failures are retained, not repaired or hidden. No broad Windows acceptance is claimed.
+- Cuts 1/2 integrated as main `5f3f711d8567f9550db337ef167235e604480e75`; post-merge Quality run 40904303022 SUCCESS 3/3.
+- Cut-3 base is that integrated main; functional snapshot `39c65d6f860c2646938c05e9ffe282d8baa0cad22a628deec26c1c7053c218c2`, independent PASS/no findings, two approved native contexts completed in 132846/360000ms. Native Windows temporary-child digest/root refusal and Linux existing Bubblewrap fixture pass; full Windows diagnostic fixture retains file-symlink EPERM. Full working-tree Linux quality and locked Windows static/docs checks pass; committed-source and PR CI observations remain separate.
 
 ## J019
 

@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { lstat, realpath, readdir, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 export const sourceObjectsPath = resolve(dirname(fileURLToPath(import.meta.url)), '../.git/objects');
@@ -24,7 +25,12 @@ export function validateProbes(probes) {
 // Optional original evidence is operator-selected, not a model-selected host mount.
 export async function evidenceDigest(path, deadlineAt = Date.now() + 10000) {
   assert(Number.isFinite(deadlineAt), 'finite-evidence-deadline-required');
-  assert(typeof path === 'string' && (path === sourceObjectsPath || /^\/(?:var\/)?tmp\/[^/]+(?:\/[^/]+)*$/u.test(path)) && await realpath(path) === path, 'canonical-temporary-evidence-root-required');
+  assert(typeof path === 'string', 'canonical-temporary-evidence-root-required');
+  const canonicalPath = await realpath(path);
+  const canonicalTemporaryRoot = process.platform === 'win32' ? await realpath(tmpdir()) : null;
+  const relativeToTemporaryRoot = canonicalTemporaryRoot === null ? '' : relative(canonicalTemporaryRoot, path);
+  const windowsTemporaryChild = relativeToTemporaryRoot !== '' && relativeToTemporaryRoot !== '..' && !relativeToTemporaryRoot.startsWith('..' + sep) && !isAbsolute(relativeToTemporaryRoot);
+  assert((path === sourceObjectsPath || /^\/(?:var\/)?tmp\/[^/]+(?:\/[^/]+)*$/u.test(path) || (process.platform === 'win32' && windowsTemporaryChild)) && canonicalPath === path, 'canonical-temporary-evidence-root-required');
   const digest = createHash('sha256'); let entries = 0, bytes = 0;
   async function visit(current, relative) {
     assert(Date.now() < deadlineAt && ++entries <= 4096, 'evidence-bound-or-deadline');
