@@ -29,12 +29,12 @@ Type: maintenance
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve #92 with proportionate durable native work records.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: none
-- Next step: Publish PR and inspect exact-head CI before LOW-risk integration and authorized cleanup.
+- Next step: Continue J003. PR101 merged as 2f7bb3b6b465938065ee47b0733f8f3bb0a79606 after Quality40947168752 SUCCESS3/3 and independent PASS; delivered local/remote branches deleted, no dedicated worktree. Post-merge Quality40947530644 pending.
 
 ### Acceptance
 
@@ -46,10 +46,10 @@ Type: maintenance
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Objective: Resolve #94 with explicit selected-skill transport.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: none
 - Next step: Prepare brief against retained predecessor.
 
