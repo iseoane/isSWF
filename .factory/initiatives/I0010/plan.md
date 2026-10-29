@@ -29,12 +29,12 @@ Type: maintenance
 
 ## J002
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve #92 with proportionate durable native work records.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: none
-- Next step: Prepare brief and delegate bounded native record-lifecycle correction.
+- Next step: Publish PR and inspect exact-head CI before LOW-risk integration and authorized cleanup.
 
 ### Acceptance
 
@@ -42,7 +42,7 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #92 and published triage.
+- GitHub issue #92; jobs/J002/A001.md; jobs/J002/V001.md; jobs/J002/delivery.md; functional candidate c818805c06140892c5c57454f36c2c46e3c346f5. Independent Standards/Spec PASS; local #84 CRLF failures retained.
 
 ## J003
 
