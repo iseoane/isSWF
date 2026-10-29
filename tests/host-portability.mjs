@@ -65,6 +65,24 @@ assert.match(durableWork, /Preserve prior adverse or inconclusive verdicts/u);
 assert.match(skill, /Before the first native dispatch for new work/u);
 assert.match(skill, /Read-only planner\/researcher\/reviewer results may arrive in the handoff/u);
 assert.match(skill, /operator authority\/budget rules/u);
+// Static scenario coverage for evidence-triggered reclassification; this does not evaluate live coordinator behavior.
+const reclassification = skill.slice(skill.indexOf('After research or another material technical finding'), skill.indexOf('\n\n## 3. Ground'));
+for (const pattern of [
+  /compare the initial assumption with observed scope/u,
+  /affected views\/modules, shared state\/types\/contracts, dependencies, risks and test determinism/u,
+  /signals for judgment—not thresholds and not a requirement to plan/u,
+  /A small, clear change proceeds directly to the worker/u,
+  /within the current assignment, approved host\/model\/cost boundary and remaining actor\/correction budget/u,
+  /grants no additional costs, actors, installation, model substitution, retries or nested delegation/u,
+  /record the evidence, rationale and next step in the existing canonical plan or brief/u,
+  /Do not rewrite pinned inputs for an active writer/u,
+  /ask the operator only for the specific product or permission decision they alone can provide/u,
+]) assert.match(reclassification, pattern);
+// Walkthrough: small clear work stays direct; newly discovered multi-view/shared-contract scope triggers reconsideration;
+// an exhausted actor/cost grant bars an added read-only role; product meaning/permission alone becomes a narrow human blocker.
+assert.match(reclassification, /Multiple views\/modules, shared state or contracts/u);
+assert.match(reclassification, /remaining actor\/correction budget/u);
+assert.match(reclassification, /specific product or permission decision/u);
 assert.match(skill, /selected skill and required reference/u);
 assert.match(skill, /canonical absolute paths beneath the trusted factory root/u);
 assert.match(skill, /full canonical contents/u);
