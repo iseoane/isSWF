@@ -46,7 +46,7 @@ Type: maintenance
 
 ## J003
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve #94 with explicit selected-skill transport.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
@@ -59,14 +59,14 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #94; jobs/J003/A001.md; jobs/J003/V001.md; jobs/J003/delivery.md; functional candidate6a0f686545a2fffd19f5038fa952fc269aa91d4a, independent PASS/PASS; local #84 failure retained.
+- PR102 MERGED as 90968e51a84ef324c7af9a9646442f84c710a0f1, Quality40948695926 SUCCESS3/3, independent PASS, delivered branches deleted, no dedicated worktree; post-merge Quality40949027503 pending. GitHub issue #94; jobs/J003/A001.md; jobs/J003/V001.md; jobs/J003/delivery.md; functional candidate6a0f686545a2fffd19f5038fa952fc269aa91d4a, independent PASS/PASS; local #84 failure retained.
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Objective: Resolve #97 with selected worker-method evidence and reviewer assessment.
 - Depends on: J003
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: none
 - Next step: Prepare brief against retained predecessor.
 
