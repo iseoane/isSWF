@@ -21,7 +21,7 @@ try {
   await symlink(join(evidence, 'original'), join(evidence, 'alias')); await assert.rejects(evidenceDigest(evidence), /regular-evidence/u);
   await rm(join(evidence, 'alias')); await link(join(evidence, 'original'), join(evidence, 'hard-alias'));
   await assert.rejects(evidenceDigest(evidence), /single-link-evidence/u);
-  await assert.rejects(evidenceDigest('/tmp'), /canonical-temporary/u);
+  await assert.rejects(evidenceDigest(tmpdir()), /canonical-temporary/u);
   const bounded = join(deadlineRoot, 'bounded'); await mkdir(bounded); await writeFile(join(bounded, 'record'), 'bounded');
   let clockCalls = 0; const clock = mock.method(Date, 'now', () => clockCalls++ === 0 ? 0 : 20000);
   try { await assert.rejects(evidenceDigest(bounded), /evidence-bound-or-deadline/u); } finally { clock.mock.restore(); }
