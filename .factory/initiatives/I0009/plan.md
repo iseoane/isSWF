@@ -49,7 +49,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Status: in-review
 - Objective: Deliver only the selected legacy caller root/containment and directory-sync slices.
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J018/brief-r3.md), retaining [cut 1](jobs/J018/brief-r2.md).
+- Brief: [brief-r3.md](jobs/J018/brief-r3.md)
 - Blocker: Cut-2 independent review PASS; original cut-1 FAIL for insufficient coverage is explicitly operator-accepted, not relabelled PASS. Committed artifact inspection, publication and exact-head CI are pending at this commit checkpoint.
 - Next step: Complete the selected feature PR gates and request integration separately. Do not repair unrelated Windows fixture, capacity or diagnostic failures.
 
