@@ -6,7 +6,7 @@ This is the curated delivery view for J019, J020 and the separately selected J01
 
 ## Scope
 
-J019's five-file methodology correction is integrated through PR93. J020's six-file release-source follow-up is retained below at its own pre-publication checkpoint. J018 adds only the explicitly selected caller slices, starting with canonical roots and native containment. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. Other legacy maintenance and PR87 remain excluded and inactive.
+J019's five-file methodology correction is integrated through PR93. J020's six-file release-source follow-up is retained below at its own pre-publication checkpoint. J018 adds only two explicitly selected caller slices: canonical roots/native containment and caller-directory synchronization. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. Other legacy maintenance and PR87 remain excluded and inactive.
 
 J019 observations below supersede its retained pre-publication brief. J020 records describe its own pre-publication checkpoint; later source commit, PR and exact-head CI must be observed, not embedded as a self-referential SHA. Integration, release, installation and cleanup remain separate operator decisions.
 
@@ -47,21 +47,22 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ## J018
 
 - Status: in-review
-- Objective: Deliver only the selected native Windows legacy caller slices; this commit contains canonical roots and containment.
+- Objective: Deliver only the selected legacy caller root/containment and directory-sync slices.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J018/brief-r2.md)
-- Blocker: Root-only independent review remains FAIL for insufficient boundary-test coverage; the operator explicitly accepts that limitation. Publication and exact-head CI are pending at this commit checkpoint.
-- Next step: Preserve the exact root-only bytes and accepted limitation; do not turn this into a broad Windows repair loop or infer integration authority.
+- Brief: [brief-r3.md](jobs/J018/brief-r3.md), retaining [cut 1](jobs/J018/brief-r2.md).
+- Blocker: Cut-2 independent review PASS; original cut-1 FAIL for insufficient coverage is explicitly operator-accepted, not relabelled PASS. Committed artifact inspection, publication and exact-head CI are pending at this commit checkpoint.
+- Next step: Complete the selected feature PR gates and request integration separately. Do not repair unrelated Windows fixture, capacity or diagnostic failures.
 
 ### Acceptance
 
-- Correct native root identity and containment without changing grants, pins, aliases, model routing or no-replay protections.
-- Preserve the original adverse review and partial observations; future changes to affected code use TDD for cases needed then.
+- Correct native root identity/containment and handle unsupported Windows directory synchronization without changing grants, pins, aliases, routing, claims or no-replay protections.
+- Keep file and supported-directory failures fatal; explicitly limit Windows durability. Preserve cut-1 coverage acceptance and use TDD for needed cases when affected code changes later.
 
 ### Evidence
 
 - Base `fcddfda5d2c520b11354bce0407cece17b37cda0`; root-only snapshot `16ef8e01035d40f553773692a20649515b9932948cbbdd159eded61aad364bf1`.
-- Native Windows preparation and context handoff pass; complete caller execution still reaches a separate directory-sync failure. No broad Windows acceptance is claimed.
+- Combined snapshot `202670135b4bd40a630c21ae4e2d3191ce2b390ad337362185dd9627c8955074`: focused caller persistence/readback/no-replay/error cases pass on Windows/Linux; cut-2 Standards/Spec/aggregate PASS, no findings.
+- Full Linux quality and locked Windows static/docs checks pass. Existing full Windows caller fixtures still fail fetch-count assertions after passing directory sync; failures are retained, not repaired or hidden. No broad Windows acceptance is claimed.
 
 ## J019
 

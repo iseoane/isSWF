@@ -46,12 +46,22 @@ async function json(path, maxBytes = 256000) {
   const bytes = await readFile(path); assert(bytes.length <= maxBytes, 'bounded-json-required');
   return { value: JSON.parse(decode(bytes)), sha256: hash(bytes) };
 }
+async function syncDirectory(path) {
+  let directory;
+  try { directory = await open(path, 'r'); }
+  catch (error) { if (process.platform === 'win32' && error.code === 'EPERM') return false; throw error; }
+  try {
+    try { await directory.sync(); }
+    catch (error) { if (process.platform === 'win32' && error.code === 'EPERM') return false; throw error; }
+  } finally { await directory.close(); }
+  return true;
+}
 async function publish(path, value, maxBytes = 256000) {
   const bytes = JSON.stringify(value) + '\n'; assert(Buffer.byteLength(bytes) <= maxBytes, 'artifact-too-large');
   const pending = path + '.pending', file = await open(pending, 'wx', 0o600);
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
   await link(pending, path); await unlink(pending);
-  const directory = await open(dirname(path), 'r'); try { await directory.sync(); } finally { await directory.close(); }
+  await syncDirectory(dirname(path));
 }
 async function roots(project, store) {
   assert(isAbsolute(project ?? '') && isAbsolute(store ?? ''), 'absolute-project-store-required');
@@ -153,12 +163,12 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
   assert(mode === 'real' ? grant.allowProviderCalls === true && !backend && !probeRunner : grant.allowProviderCalls === false && backend, 'provider-grant-or-fixture-required');
   assert(!probeRunner || job.workspace, 'probe-runner-requires-workspace');
   await mkdir(dir, { mode: 0o700 });
-  const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+  await syncDirectory(p.store);
   const reservation = await acquireCapacity(p.capacity, { role: 'reviewer', logicalJobRef: job.logicalJobRef, mode });
   if (!reservation) {
     await rmdir(dir);
-    const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
-    return { version: 1, status: 'blocked', reason: 'capacity', attemptsConsumed: 0, fetches: 0, capacity: p.capacity, executionAuthorized: false };
+    await syncDirectory(p.store);
+    return { version: 1, status: 'blocked', reason: 'capacity', attemptsConsumed: 0, fetches: 0, capacity: p.capacity, executionAuthorized: false, limits: ['Windows directory synchronization may be unsupported; successful file synchronization does not claim power-loss durability'] };
   }
   const deadlineAt = startedAt + grant.deadlineMs;
   let workspaceVerification;
@@ -183,7 +193,7 @@ export async function runReview(request, { backend, mode = 'real', probeRunner }
   const timeout = new Promise(resolve => { timer = setTimeout(() => { expired = true; controller.abort(); resolve(null); }, Math.max(1, deadlineAt - Date.now())); });
   const finish = async (status, reason, report) => {
     if (status === 'response-complete') await reservation.complete();
-    const value = { version: 1, mode, status, reason, ...(reservation.info ? { capacity: reservation.info } : {}), attemptsConsumed: claimed ? 1 : 0, fetches, ...(httpStatus === undefined ? {} : { httpStatus }), ...(report === undefined ? {} : { report }), candidateSha: job.candidateSha, targetBase: job.targetBase, bundleSha256: p.bundleSha256, limits: [workspaceVerification ? 'only explicit host-selected read-only review-runtime probes executed; no model tools' : 'text-only supplied bundle; no workspace inspection or checks executed', 'actor identities are external operator attestations, not authenticated by this caller', 'response completion is not a passing verdict, merge permission or human acceptance', 'unknown invocation consumed; no automatic retry, fallback or recovery'] };
+    const value = { version: 1, mode, status, reason, ...(reservation.info ? { capacity: reservation.info } : {}), attemptsConsumed: claimed ? 1 : 0, fetches, ...(httpStatus === undefined ? {} : { httpStatus }), ...(report === undefined ? {} : { report }), candidateSha: job.candidateSha, targetBase: job.targetBase, bundleSha256: p.bundleSha256, limits: [workspaceVerification ? 'only explicit host-selected read-only review-runtime probes executed; no model tools' : 'text-only supplied bundle; no workspace inspection or checks executed', ...(process.platform === 'win32' ? ['Windows directory synchronization may be unsupported; successful file synchronization does not claim power-loss durability'] : []), 'actor identities are external operator attestations, not authenticated by this caller', 'response completion is not a passing verdict, merge permission or human acceptance', 'unknown invocation consumed; no automatic retry, fallback or recovery'] };
     await publish(join(dir, 'result.json'), value); return value;
   };
   try {
