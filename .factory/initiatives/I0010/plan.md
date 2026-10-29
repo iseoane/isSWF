@@ -8,7 +8,7 @@ Resolve GitHub issues #95, #92, #94, #97, #91, #90 and #89 in that order, with o
 
 ### J001
 - Objective: Resolve #95 by making changed-candidate re-verification proportionate and consistent.
-- Status: in-progress
+- Status: in-review
 - Depends on: none
 - Acceptance:
   - Canonical coordinator, review, reviewer and durable-work instructions agree on delta-based verification.
@@ -16,8 +16,8 @@ Resolve GitHub issues #95, #92, #94, #97, #91, #90 and #89 in that order, with o
   - Fresh evidence identifies the exact changed candidate; unchanged scope is not automatically re-audited.
   - Relevant static regressions and documentation checks pass, with failures and limitations visible.
 - Blocker: none
-- Next step: Delegate bounded implementation, inspect changes and obtain independent review.
-- Evidence: jobs/J001/brief-r1.md
+- Next step: Publish PR and inspect exact-head CI before authorized LOW-risk integration.
+- Evidence: jobs/J001/brief-r1.md; jobs/J001/A001.md; jobs/J001/V001.md; jobs/J001/delivery.md; functional candidate 15b41c62e2e9571039c8c30b9a8e76796d47fc28. Independent Standards/Spec PASS; native focused test retains existing #84 CRLF failure.
 
 ### J002
 - Objective: Resolve #92 with proportionate durable native work records.
