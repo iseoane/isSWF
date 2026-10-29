@@ -34,7 +34,7 @@ Type: maintenance
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: none
-- Next step: Continue J003. PR101 merged as 2f7bb3b6b465938065ee47b0733f8f3bb0a79606 after Quality40947168752 SUCCESS3/3 and independent PASS; delivered local/remote branches deleted, no dedicated worktree. Post-merge Quality40947530644 pending.
+- Next step: Continue J003. PR101 merged as 2f7bb3b6b465938065ee47b0733f8f3bb0a79606 after Quality40947168752 SUCCESS3/3 and independent PASS; delivered local/remote branches deleted, no dedicated worktree. Post-merge Quality40947530644 SUCCESS on exact integrated main.
 
 ### Acceptance
 
@@ -46,7 +46,7 @@ Type: maintenance
 
 ## J003
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve #94 with explicit selected-skill transport.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
@@ -59,7 +59,7 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #94 and published triage.
+- GitHub issue #94; jobs/J003/A001.md; jobs/J003/V001.md; jobs/J003/delivery.md; functional candidate6a0f686545a2fffd19f5038fa952fc269aa91d4a, independent PASS/PASS; local #84 failure retained.
 
 ## J004
 
