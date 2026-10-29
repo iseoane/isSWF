@@ -150,14 +150,22 @@ export function releaseInvocation(root, tool, args) {
 // checkouts keep their Git reads. With a receipt present, validation and the
 // pinned lookup are enforced and a missing or corrupt source always throws;
 // there is no fallback.
-export function readReleaseSource(root, sha, path) {
+export function readReleaseSources(root, sha, paths) {
   const target = resolve(root);
   if (readReceipt(target) === null) return null;
+  // One fresh whole-release verification per batch, not a persistent integrity cache.
   const release = verifyRelease(target);
-  if (!shaPattern.test(sha ?? '') || !safeRelative(path)) throw new Error('invalid release source pin/path');
-  const entry = release.sources[sha]?.[path];
-  if (!entry) throw new Error(`Pinned release source is missing: ${sha} ${path}`);
-  const bytes = readFileSync(join(target, entry.file));
-  if (sha256(bytes) !== entry.sha256 || blobOid(bytes) !== entry.oid) throw new Error(`Release source payload mismatch: ${sha} ${path}`);
-  return bytes;
+  if (!shaPattern.test(sha ?? '') || !Array.isArray(paths) || !paths.length || paths.some(path => !safeRelative(path))) throw new Error('invalid release source pin/path');
+  return Object.fromEntries(paths.map(path => {
+    const entry = Object.hasOwn(release.sources[sha] ?? {}, path) ? release.sources[sha][path] : null;
+    if (!entry) throw new Error(`Pinned release source is missing: ${sha} ${path}`);
+    const bytes = readFileSync(join(target, entry.file));
+    if (sha256(bytes) !== entry.sha256 || blobOid(bytes) !== entry.oid) throw new Error(`Release source payload mismatch: ${sha} ${path}`);
+    return [path, bytes];
+  }));
+}
+
+export function readReleaseSource(root, sha, path) {
+  const files = readReleaseSources(root, sha, [path]);
+  return files === null ? null : files[path];
 }

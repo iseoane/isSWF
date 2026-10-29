@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readReleaseSource, verifyRelease } from './release-source.mjs';
+import { readReleaseSources, verifyRelease } from './release-source.mjs';
 import { createHash } from 'node:crypto';
 import { readFile, link, unlink, open, rm, realpath, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
@@ -66,10 +66,12 @@ async function prepare(args) {
   const released = verifyRelease(repo);
   if (profile.sha !== (released?.methodologySha ?? BASELINE)) throw new Error('profile must pin methodology files at the authorized baseline');
   if (released === null) git(repo, ['cat-file', '-e', `${profile.sha}^{commit}`]);
-  const files = {};
   for (const path of profile.files) {
     if (typeof path !== 'string' || path.startsWith('/') || path.split('/').some(part => !part || part === '.' || part === '..')) throw new Error('unsafe profile file path');
-    if (released !== null) { files[path] = readReleaseSource(repo, profile.sha, path).toString('utf8'); continue; }
+  }
+  const files = {}, releasedFiles = released === null ? null : readReleaseSources(repo, profile.sha, profile.files);
+  for (const path of profile.files) {
+    if (released !== null) { files[path] = releasedFiles[path].toString('utf8'); continue; }
     const entry = git(repo, ['ls-tree', '-z', profile.sha, '--', path]).toString().split('\0').find(Boolean);
     if (!entry || !/^100644 blob /.test(entry)) throw new Error(`profile reference is not a committed regular file: ${path}`);
     const object = entry.slice(0, entry.indexOf('\t')).split(' ')[2];
