@@ -10,6 +10,7 @@
 - Plan path and revision, if used:
 - Profile path and revision, if available:
 - Skills and revisions, if available:
+- Method application report: `<for each selected method, state applied/not applied and identify observed evidence; distinguish reading/receipt from application. Cite observer, command/action and result, exact candidate/base and attempt or artifact path when applicable. If deviating, disclose the requirement, reason and consequence; disclosure does not waive a required method or its acceptance criterion. Do not reconstruct missing evidence or claim retrospective red-first proof. State explicitly when no method was selected>`.
 - Target codebase base (full Git SHA):
 - Trusted authorization reference (operator conversation or record ID, or external path; if tracked in Git, full Git SHA):
 - Exclusive checkout or worktree:

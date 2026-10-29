@@ -15,6 +15,7 @@
 
 - Verdict: pass, fail, or inconclusive:
 - Findings with path, location, severity, and evidence:
+- Selected-method evidence assessment: `<under Standards, assess each selected method's required evidence and any disclosed deviation against the brief; missing required evidence with no declared deviation is a supported finding or inconclusive, never silent pass. Disclosure alone does not waive the accepted requirement>`.
 - Checks run and observed results:
 
 ## Spec

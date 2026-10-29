@@ -23,6 +23,7 @@
 - Explicit exclusions:
 - Acceptance criteria:
 - Checks and expected evidence:
+- Selected methods and required evidence: `<list only methods selected for this job; resolve each canonical skill and required reference at the pinned checkpoint. For each method, state the observable evidence needed to assess application and its provenance, or state that no method is selected. Examples: TDD red result before implementation; debug reproduction and discriminating causal check; E2E journey/surface and sensitivity or boundary evidence required by that skill. Do not create universal TDD/E2E requirements or require blanket evidence for unselected methods>`.
 
 ## Independent review
 

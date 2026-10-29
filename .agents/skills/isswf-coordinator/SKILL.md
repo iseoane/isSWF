@@ -82,6 +82,7 @@ Write a concise brief containing:
 - Examined base and a reading map with paths, symbols, and current lines.
 - Dependencies, risks, and pending decisions.
 - Checks that would demonstrate the result.
+- For each selected method, the observable application evidence required by its canonical skill and applicable references, with observer and candidate/attempt provenance. For selected TDD, require the observed failing regression before implementation; for debug, the reproduction and discriminating causal check; for E2E, the selected journey/surface and that skill's required sensitivity or boundary checks. Require the worker to report evidence or explicitly disclose a deviation and its consequence; disclosure does not waive the accepted requirement. Do not impose evidence for methods not selected or fabricate missing red evidence retrospectively. Review application under Standards using [selected-method evidence](../../roles/references/review.md#selected-method-evidence), separately from Spec.
 - Implementation units, each with its outcome, scope, dependency, check, and commit point.
 
 Define each unit by a verifiable functional outcome. Group its code, tests, necessary documentation, and delivery evidence in the same unit and PR. Split only for an independently useful outcome, a real dependency, or a risk requiring separate ownership. Recovery commits are internal checkpoints, not new deliveries or reasons to review every commit separately. A later acceptance record may be its own unit when it documents an actual operator decision.

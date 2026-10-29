@@ -52,6 +52,10 @@ A text-only reviewer cannot execute this experiment. Assess supplied pinned obse
 
 Assess whether the change fits the project's engineering standards and its local context. Read the relevant standards and sources rather than applying a generic checklist. Consider behavior, boundaries, reuse, complexity, ownership, and documentation where the change makes them relevant. Reuse [code quality guidance](code-quality.md), [comment guidance](comments.md), and [verification principles](verification-principles.md); do not restate their full rubrics.
 
+### Selected-method evidence
+
+When the brief selects a method, assess its application under **Standards**, separately from **Spec**. The brief must state proportionate evidence requirements grounded in that method's canonical skill; skill selection or reading alone does not prove application. Attribute supplied evidence to its observer, command/action and result, exact candidate or attempt provenance where applicable. Assess any disclosed deviation against the accepted requirement and its stated consequence; disclosure is not a waiver and does not retrospectively satisfy evidence requirements. If required evidence is missing and no deviation is declared, do not silently pass: report a supported finding or mark the affected Standards assessment inconclusive, explaining what evidence is missing. Preserve adverse evidence. Do not impose evidence for unselected methods, blanket red-artifact requirements, universal TDD, mandatory E2E, or new review actors. Use the selected skill's requirements rather than inventing a second rubric.
+
 For code changes, use these technical dimensions within Standards when they apply to the diff and its risks:
 
 - **Correctness:** check that the behavior matches its contract, including relevant edge cases and failure paths.
