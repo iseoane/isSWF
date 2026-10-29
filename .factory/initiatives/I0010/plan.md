@@ -63,7 +63,7 @@ Type: maintenance
 
 ## J004
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve #97 with selected worker-method evidence and reviewer assessment.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
@@ -76,14 +76,14 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #97; jobs/J004/A001.md; jobs/J004/V001.md; jobs/J004/delivery.md; candidate556b42d0d53661063a0fa1dd4a4d9c328ce1e86b; independent PASS/PASS and Git-blob focused tests PASS; native #84 failures retained.
+- PR103 MERGED as03d9a996ea47c29fce3c1be57b44ac4bf76718c4, Quality40950599922 SUCCESS3/3, independent PASS, delivered branches deleted; post-merge Quality40950926641 pending. GitHub issue #97; jobs/J004/A001.md; jobs/J004/V001.md; jobs/J004/delivery.md; candidate556b42d0d53661063a0fa1dd4a4d9c328ce1e86b; independent PASS/PASS and Git-blob focused tests PASS; native #84 failures retained.
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Objective: Resolve #91 with evidence-triggered path reclassification.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: none
 - Next step: Prepare bounded brief.
 
