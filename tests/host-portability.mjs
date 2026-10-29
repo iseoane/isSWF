@@ -27,6 +27,22 @@ assert.ok(skill.includes('[isswf-issue](../isswf-issue/SKILL.md)'), 'Coordinator
 assert.match(skill, /actually running in Claude Code/);
 assert.match(skill, /Windows and Linux, Pi and Claude Code are equal/);
 assert.match(skill, /No|Neither|Neither path requires/u);
+// Static instruction-contract regression, not a live agent-adherence assertion.
+const reviewGuidance = await read('.agents/roles/references/review.md');
+assert.match(reviewGuidance, /## Required methodology/u);
+assert.match(reviewGuidance, /full canonical contents/u, 'Trusted full-content handoffs must remain valid');
+assert.match(reviewGuidance, /role summary or a link is not/u);
+assert.match(reviewGuidance, /Standards.*inconclusive/u, 'Unread required procedure cannot accompany a complete pass');
+assert.match(reviewGuidance, /budget.*does not waive/u);
+assert.match(reviewGuidance, /optional.*does not/u, 'Do not turn optional tools or references into mandatory gates');
+const reviewRole = await read('.agents/roles/reviewer.md');
+assert.match(reviewRole, /Before assessing the candidate/u);
+assert.ok(reviewRole.includes('references/review.md#required-methodology'));
+assert.match(reviewRole, /required resources.*consumed/u);
+const reviewSkill = await read('.agents/skills/isswf-review/SKILL.md');
+assert.ok(reviewSkill.includes('../../roles/references/review.md#required-methodology'));
+assert.match(skill, /check required methodology coverage/u);
+assert.match(skill, /Do not accept.*pass.*required procedure/u);
 const claudeSkill = await read('skills/isswf-coordinator/SKILL.md');
 assert.match(claudeSkill, /Required child context/);
 assert.doesNotMatch(claudeSkill, /locate|runtimeId|artifactId/);
