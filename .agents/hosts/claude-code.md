@@ -17,13 +17,14 @@ Before delegating, provide:
 | Context | Required value |
 | --- | --- |
 | Factory resources | Trusted absolute factory root and shared role path, resolved from the loaded plugin rather than guessed from the target. |
+| Selected methodology | Each selected skill and required reference as trusted-root-resolved absolute resource paths or full canonical contents; identify the exact pinned checkpoint/version. Include only what this assignment selects. |
 | Task | Objective, acceptance, scope/exclusions, authorized side effects, checks and finite actor/correction budget. |
 | Checkout | Explicit absolute working directory and baseline; concurrent writers need exclusive checkouts. |
 | Review | Exact candidate/diff and retained untracked contents when applicable, plus relevant checks and their observer. |
 | Host and model | Approved native model/effort or explicit parent inheritance, with observed metadata or a stated limitation. |
 | Documents | Exact readable plan/brief paths when assigned; a small task may carry its full brief in the handoff as a supplement to its minimal canonical plan and curated brief. |
 
-The child must acknowledge its working directory, scope and shared role before task work. Missing or unreadable required context blocks that assignment; return the missing input instead of guessing. The coordinator checks the handoff and result. A new host-native task needs no factory release receipt, project runtime pin, external grant file, compiled isSWF executable or capacity store.
+The child must acknowledge its working directory, scope and shared role before task work, then report which selected methodology and required references it actually consumed (read or received in full). Explicitly name missing or unreadable required resources; they block the affected assignment. Optional unused references do not block. Do not infer consumption from selection, configuration or tool availability, and do not require private reasoning transcripts. File-only children must receive usable paths or full contents; do not assume a Skill tool or inherited parent capabilities. Do not claim all present or future Claude children lack Skill support. Return missing input instead of guessing. The coordinator checks the handoff and result. A new host-native task needs no factory release receipt, project runtime pin, external grant file, compiled isSWF executable or capacity store.
 
 ## External worktree assignments
 
