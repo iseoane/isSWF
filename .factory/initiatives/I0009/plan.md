@@ -1,14 +1,14 @@
-# I0009: Native review completion
+# I0009: Native review completion and shared release maintenance
 
 Type: enhancement
 
-This is the curated native-only delivery view. The coordinator retains the full working plan, partial closures, maintenance patches and private evidence separately. This view does not recreate or resume the parked executor work in PR87 at checkpoint `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`.
+This is the curated delivery view for integrated J019 and the bounded J020 follow-up. The coordinator retains the full working plan, partial closures, unrelated maintenance patches and private evidence separately. This view does not recreate or resume the parked executor work in PR87 at checkpoint `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`.
 
 ## Scope
 
-Deliver only the five reviewed J009 functional files and the records needed to explain their verification and native acceptance. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. J018 legacy Windows maintenance and J020 shared packaging maintenance remain separately queued, not included or activated.
+J019's five-file methodology correction is already integrated through PR93. J020 now delivers only the six reviewed shared release-source/Bun paths identified in its brief. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. J018 legacy Windows maintenance and PR87 remain excluded and inactive.
 
-These records describe the pre-publication checkpoint. The subsequent actual source commit, PR and exact-head CI must be observed through the coordinator's retained delivery evidence; they are not fabricated here or embedded as a self-referential commit SHA. Integration, release, installation and cleanup remain separate operator decisions.
+J019 observations below supersede its retained pre-publication brief. J020 records describe its own pre-publication checkpoint; later source commit, PR and exact-head CI must be observed, not embedded as a self-referential SHA. Integration, release, installation and cleanup remain separate operator decisions.
 
 ## J008
 
@@ -34,7 +34,7 @@ These records describe the pre-publication checkpoint. The subsequent actual sou
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J009/brief-r3.md)
 - Blocker: None for the approved limited handoff; completed does not retroactively satisfy every original criterion.
-- Next step: Keep the five reviewed functional hashes exact; complete delivery through J019 only.
+- Next step: Preserve the original partial handoff; its correction has now been delivered through J019 without rewriting earlier criteria.
 
 ### Acceptance
 
@@ -46,12 +46,12 @@ These records describe the pre-publication checkpoint. The subsequent actual sou
 
 ## J019
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver the reviewed core-methodology completion gate with the remaining native acceptances.
 - Depends on: J009
 - Brief: [brief-r1.md](jobs/J019/brief-r1.md)
-- Blocker: Source commit, feature push, PR readback and required exact-head CI remain pending at this record's pre-publication checkpoint.
-- Next step: Coordinator performs the already authorized bounded commit/feature-PR/CI steps; after verified PR delivery, request the concrete integration decision without merging automatically.
+- Blocker: None at the approved integration endpoint. Source commit, PR and CI were verified, and the operator separately authorized integration.
+- Next step: Preserve the completed delivery. Do not repeat native acceptance/review or infer a new release, installation or cleanup grant.
 
 ### Acceptance
 
@@ -63,3 +63,25 @@ These records describe the pre-publication checkpoint. The subsequent actual sou
 - Pi Windows retained; new Claude Windows, Pi Linux and approved Claude Linux replacement journeys accepted for their scoped functional fixtures and required review procedure.
 - All nine J019 contexts consumed; cumulative 288.510 of 540 seconds. No further model call, retry or correction actor is authorized.
 - Isolated Linux full quality, actual compiled/offline-installed resource hashes, Windows ESLint/Knip and focused checks passed. Limits and previous failures are recorded in the brief; no blanket Windows or provider-reliability claim.
+- PR93 source `be765bec3c53f0a3503c6667dbe00a31cfe8fb6e` was integrated as `2c345866ade9d77a4c4f5724420a2929be9b046f` after required PR CI passed. Post-merge main Quality run `40835502786` passed all three jobs on that merge commit.
+
+## J020
+
+- Status: in-review
+- Objective: Batch fresh pinned release-source reads and overlap only independent Bun fixture branches without weakening integrity or deadlines.
+- Depends on: None
+- Brief: [brief-r2.md](jobs/J020/brief-r2.md)
+- Blocker: Independent source review is PASS; source commit, feature PR readback and required exact-head CI are pending at this checkpoint.
+- Next step: Coordinator performs the already authorized commit/feature-push/PR/CI steps. After verified PR delivery, request integration; do not merge automatically or activate J018.
+
+### Acceptance
+
+- Preserve fresh whole-inventory verification and selected-byte SHA-256/Git-oid/pin checks, fail-closed requests and singleton/null compatibility without a persistent cache.
+- Keep immutable concurrent inputs, exclusive mutable fixture outputs and settlement before cleanup; preserve all assertions and the 60000ms outer/120000ms helper limits.
+- Deliver the exact six reviewed functional files plus necessary curated records, not the mixed maintenance tree.
+
+### Evidence
+
+- Base `2c345866ade9d77a4c4f5724420a2929be9b046f`; functional snapshot `db5b33cfdb8104fdcf255387e9ef4943f6ee1d979c9b19cb38d3ca50e18ca71a`.
+- Independent native Pi Linux Standards/Spec/aggregate PASS, no findings; two Sol contexts consumed 150344 of 180000ms. No further actor or retry is authorized.
+- Windows batch/static/docs/diff and Linux batch/full quality plus actual candidate-artifact inspection passed. Future Windows compiled parity, committed-source packaging and exact-head CI remain explicit delivery gates.

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
+import { execFile, spawn, spawnSync } from 'node:child_process';
+import { promisify } from 'node:util';
 import { mkdtemp, mkdir, cp, readFile, writeFile, readdir, rm, symlink, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease, releaseInvocation } from '../tools/release-source.mjs';
@@ -44,9 +45,44 @@ if (available.error || available.status !== 0) {
     else assert.notEqual(result.status, 0);
     return result;
   }
+  const exec = promisify(execFile);
+  async function runAsync(binary, args, ok = true, environment = env) {
+    let result;
+    try { result = await exec(binary, args, { cwd: temp, env: environment, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 }); }
+    catch (error) {
+      if (ok || error.killed || error.signal || typeof error.code !== 'number') throw error;
+      return error;
+    }
+    assert(ok, `Unexpected success: ${binary} ${args.join(' ')}`);
+    return result;
+  }
+  const npmAsync = args => runAsync(process.platform === 'win32' ? process.execPath : 'npm', process.platform === 'win32' ? [join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), ...args] : args);
   const git = (...args) => run('git', ['-C', fixture, ...args]).stdout.trim();
   const commit = message => { git('add', '-A'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', message); return git('rev-parse', 'HEAD'); };
-  let passed = false;
+  async function verifyLegacy(builder, revisionA, executable, noRuntime) {
+    // Independent project/store; never shares mutable state with modern migration or worker checks.
+    const legacy = join(temp, 'legacy-release'), legacyProject = join(temp, 'legacy-project'), legacyStore = join(temp, 'legacy-store');
+    await runAsync(process.execPath, [builder, '--source', fixture, '--revision', revisionA, '--output', legacy, '--runtime', 'node']);
+    await mkdir(legacyProject); await runAsync('git', ['init', '-q', legacyProject]);
+    await runAsync(process.execPath, [join(legacy, 'tools/isswf.mjs'), 'init', '--project', legacyProject, '--store', legacyStore, '--tracking', 'local']);
+    const legacyArgs = ['exec', '--project', legacyProject, '--store', legacyStore, '--', 'isswf-status', '--initiative', 'I0001'];
+    assert.equal(JSON.parse((await runAsync(executable, legacyArgs)).stdout).status, 'absent');
+    const legacyCli = (command, args = []) => runAsync(executable, [command, '--project', legacyProject, '--store', legacyStore, ...args], true, noRuntime);
+    const checkpointLegacy = async () => {
+      await runAsync('git', ['-C', legacyProject, 'add', '.']);
+      await runAsync('git', ['-C', legacyProject, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'Checkpoint engine migration']);
+    };
+    const oldLegacyPin = await readFile(join(legacyProject, '.isswf/install.json'));
+    await checkpointLegacy();
+    const legacyPreview = JSON.parse((await legacyCli('inspect')).stdout);
+    await legacyCli('migrate', ['--id', 'ENGINE1', '--expected', legacyPreview.expected, '--quiescent-ref', 'synthetic-engine-transition-only']);
+    assert.equal(JSON.parse((await runAsync(executable, legacyArgs, true, noRuntime)).stdout).status, 'absent');
+    assert.equal(JSON.parse(await readFile(join(legacyProject, '.isswf/install.json'), 'utf8')).runtimeFormat, 2);
+    await checkpointLegacy(); await legacyCli('rollback', ['--id', 'ENGINE1', '--quiescent-ref', 'synthetic-engine-transition-only']);
+    assert((await readFile(join(legacyProject, '.isswf/install.json'))).equals(oldLegacyPin));
+    assert.match((await runAsync(executable, legacyArgs, false, noRuntime)).stderr, /node/u, 'Legacy Node pins require Node rather than silently changing their engine');
+  }
+  let passed = false, installation, newerBuild, legacyCheck;
   try {
     run('git', ['clone', '-q', '--shared', source, fixture]);
     for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
@@ -58,6 +94,19 @@ if (available.error || available.status !== 0) {
     assert.equal(manifest.version, JSON.parse(await readFile(join(releaseA, '.claude-plugin/plugin.json'), 'utf8')).version);
     assert(receiptA.files[manifest.bin.isswf]);
     assert.equal(receiptA.format, 2);
+    const marker = join(fixture, 'tools/isswf-status.mjs');
+    const original = await readFile(marker, 'utf8');
+    await writeFile(marker, original.replace('Reported plan progress and artifact snapshots only.', 'BINARY REVISION B. Reported plan progress and artifact snapshots only.'));
+    const revisionB = commit('Bun release candidate B'), releaseB = join(temp, 'release-b');
+    // Explicit immutable revision pins and exclusive output roots permit concurrent compilation.
+    newerBuild = Promise.allSettled([runAsync(process.execPath, [builder, '--source', fixture, '--revision', revisionB, '--output', releaseB, '--runtime', 'bun', '--bun', compiler])]);
+    const consumer = join(temp, 'consumer');
+    // Only the immutable release is shared; installation owns a separate consumer.
+    installation = Promise.allSettled([(async () => {
+      const packing = JSON.parse((await npmAsync(['pack', releaseA, '--ignore-scripts', '--json', '--pack-destination', temp])).stdout);
+      const packed = Array.isArray(packing) ? packing[0] : Object.values(packing)[0];
+      await npmAsync(['install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', join(temp, packed.filename)]);
+    })()]);
     const variant = join(temp, 'synthetic-other-arch-metadata'); await cp(releaseA, variant, { recursive: true });
     const variantReceipt = JSON.parse(await readFile(join(variant, '.isswf-release.json'), 'utf8'));
     const variantManifest = structuredClone(manifest);
@@ -89,16 +138,15 @@ if (sdk.value !== 42 || imported.value !== 42) throw Error('External SDK exports
 console.log('PASS external SDK exports and transitive dependency');\n`);
     assert.equal(run(executableA, [sdkProbe]).stdout.trim(), 'PASS external SDK exports and transitive dependency');
     assert.equal(run(executableA, ['external-sdk-probe.mjs']).stdout.trim(), 'PASS external SDK exports and transitive dependency');
-    const packing = JSON.parse(run('npm', ['pack', releaseA, '--ignore-scripts', '--json', '--pack-destination', temp]).stdout);
-    const packed = Array.isArray(packing) ? packing[0] : Object.values(packing)[0];
-    const consumer = join(temp, 'consumer');
-    run('npm', ['install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', join(temp, packed.filename)]);
+    const [installedResult] = await installation;
+    if (installedResult.status === 'rejected') throw installedResult.reason;
     const installed = join(consumer, 'node_modules/isswf-pi-resources');
     assert.equal(verifyRelease(installed).runtimeId, receiptA.runtimeId);
     const executable = join(installed, manifest.bin.isswf);
     const restricted = join(temp, 'path'); await mkdir(restricted);
     await symlink(run('which', ['git']).stdout.trim(), join(restricted, 'git'));
     const noRuntime = { ...env, PATH: restricted };
+    legacyCheck = Promise.allSettled([verifyLegacy(builder, revisionA, executable, noRuntime)]);
     await mkdir(project); run('git', ['init', '-q', project]);
     const cli = (command, args = [], ok = true, binary = executable) => run(binary, [command, '--project', project, '--store', store, ...args], ok, noRuntime);
     assert.equal(JSON.parse(cli('inspect').stdout).status, 'not-initialized');
@@ -128,11 +176,8 @@ console.log('PASS external SDK exports and transitive dependency');\n`);
     } finally {
       child.kill('SIGTERM'); await new Promise(done => { if (child.exitCode !== null) return done(); const timer = setTimeout(() => child.kill('SIGKILL'), 5000); child.once('exit', () => { clearTimeout(timer); done(); }); });
     }
-    const marker = join(fixture, 'tools/isswf-status.mjs');
-    const original = await readFile(marker, 'utf8');
-    await writeFile(marker, original.replace('Reported plan progress and artifact snapshots only.', 'BINARY REVISION B. Reported plan progress and artifact snapshots only.'));
-    const revisionB = commit('Bun release candidate B'), releaseB = join(temp, 'release-b');
-    run(process.execPath, [builder, '--source', fixture, '--revision', revisionB, '--output', releaseB, '--runtime', 'bun', '--bun', compiler]);
+    const [newerResult] = await newerBuild;
+    if (newerResult.status === 'rejected') throw newerResult.reason;
     const executableB = join(releaseB, manifest.bin.isswf);
     const oldFromNew = JSON.parse(cli('exec', ['--', 'isswf-status', '--initiative', 'I0001'], true, executableB).stdout);
     assert(!oldFromNew.limits.includes('BINARY REVISION B'), 'New launcher must execute the pinned older executable');
@@ -218,27 +263,13 @@ console.log('PASS external SDK exports and transitive dependency');\n`);
       const cessation = await inspectWorkerCessation({ attemptDir: launched.attemptDir, dispatch });
       assert.equal(cessation.status, 'ceased', JSON.stringify(cessation));
     }
-    const legacy = join(temp, 'legacy-release'), legacyProject = join(temp, 'legacy-project'), legacyStore = join(temp, 'legacy-store');
-    run(process.execPath, [builder, '--source', fixture, '--revision', revisionA, '--output', legacy, '--runtime', 'node']);
-    await mkdir(legacyProject); run('git', ['init', '-q', legacyProject]);
-    run(process.execPath, [join(legacy, 'tools/isswf.mjs'), 'init', '--project', legacyProject, '--store', legacyStore, '--tracking', 'local']);
-    const legacyArgs = ['exec', '--project', legacyProject, '--store', legacyStore, '--', 'isswf-status', '--initiative', 'I0001'];
-    assert.equal(JSON.parse(run(executable, legacyArgs).stdout).status, 'absent');
-    const legacyCli = (command, args = []) => run(executable, [command, '--project', legacyProject, '--store', legacyStore, ...args], true, noRuntime);
-    const checkpointLegacy = () => { run('git', ['-C', legacyProject, 'add', '.']); run('git', ['-C', legacyProject, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'Checkpoint engine migration']); };
-    const oldLegacyPin = await readFile(join(legacyProject, '.isswf/install.json'));
-    checkpointLegacy();
-    const legacyPreview = JSON.parse(legacyCli('inspect').stdout);
-    legacyCli('migrate', ['--id', 'ENGINE1', '--expected', legacyPreview.expected, '--quiescent-ref', 'synthetic-engine-transition-only']);
-    assert.equal(JSON.parse(run(executable, legacyArgs, true, noRuntime).stdout).status, 'absent');
-    assert.equal(JSON.parse(await readFile(join(legacyProject, '.isswf/install.json'), 'utf8')).runtimeFormat, 2);
-    checkpointLegacy(); legacyCli('rollback', ['--id', 'ENGINE1', '--quiescent-ref', 'synthetic-engine-transition-only']);
-    assert((await readFile(join(legacyProject, '.isswf/install.json'))).equals(oldLegacyPin));
-    assert.match(run(executable, legacyArgs, false, noRuntime).stderr, /node/u, 'Legacy Node pins require Node rather than silently changing their engine');
+    const [legacyResult] = await legacyCheck;
+    if (legacyResult.status === 'rejected') throw legacyResult.reason;
     passed = true;
     if (process.env.ISSWF_KEEP_BUN_RELEASE === '1') console.log(JSON.stringify({ fixture: temp, revisionA, revisionB, runtimeId: receiptA.runtimeId, artifactId: receiptA.artifactId, executableSha256: receiptA.files[manifest.bin.isswf], target: manifest.isswfRuntime.target, workerChecked }));
     console.log('PASS Bun packed executable: standalone CLI/panel, exact pinned binary selection, migration/rollback, legacy Node refusal, integrity and denied-write semantics; Linux synthetic isolated task ' + (workerChecked ? 'PASS' : 'SKIP: Bubblewrap capability unavailable') + '; no live provider or host execution');
   } finally {
+    await Promise.all([installation, newerBuild, legacyCheck].filter(Boolean));
     if (passed && process.env.ISSWF_KEEP_BUN_RELEASE !== '1') await rm(temp, { recursive: true, force: true });
     else console.error((passed ? 'Retained verified Bun fixture: ' : 'Retained failing Bun fixture: ') + temp);
   }

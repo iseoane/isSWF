@@ -16,6 +16,8 @@ The builder defaults to `--runtime bun`. Building needs Node.js, Git, and a trus
 
 Each Bun release contains `bin/isswf` on Unix or `bin/isswf.exe` on Windows, bundled tool code, and agent-readable resources. Original `.mjs` files remain as verified provenance, dynamic helpers, and inputs for immutable task/lifecycle snapshots; they are not a second installed CLI to select instead of the executable. Generated tasks are interpreted by the embedded Bun engine. Development remains Node.js with `.mjs`. The release receipt records the source revision, file hashes including the executable, and Git blob identities for packaged source reads. It detects accidental damage; it is not a signature, permission grant, or proof that an untrusted publisher is safe.
 
+Pinned source batches perform one fresh, complete release verification, then check each selected payload against its SHA-256 and Git blob identity. There is no persistent integrity cache: a later batch or singleton read verifies the release again, including unrelated inventory. Missing or corrupt released sources remain fatal rather than falling back to a checkout or latest revision.
+
 To produce a local npm tarball, run:
 
 ```sh
