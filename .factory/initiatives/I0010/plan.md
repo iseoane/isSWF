@@ -59,11 +59,11 @@ Type: maintenance
 
 ### Evidence
 
-- PR102 MERGED as 90968e51a84ef324c7af9a9646442f84c710a0f1, Quality40948695926 SUCCESS3/3, independent PASS, delivered branches deleted, no dedicated worktree; post-merge Quality40949027503 pending. GitHub issue #94; jobs/J003/A001.md; jobs/J003/V001.md; jobs/J003/delivery.md; functional candidate6a0f686545a2fffd19f5038fa952fc269aa91d4a, independent PASS/PASS; local #84 failure retained.
+- PR102 MERGED as 90968e51a84ef324c7af9a9646442f84c710a0f1, Quality40948695926 SUCCESS3/3, independent PASS, delivered branches deleted, no dedicated worktree; post-merge Quality40949027503 SUCCESS on exact integrated main. GitHub issue #94; jobs/J003/A001.md; jobs/J003/V001.md; jobs/J003/delivery.md; functional candidate6a0f686545a2fffd19f5038fa952fc269aa91d4a, independent PASS/PASS; local #84 failure retained.
 
 ## J004
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve #97 with selected worker-method evidence and reviewer assessment.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
@@ -76,7 +76,7 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #97 and published triage.
+- GitHub issue #97; jobs/J004/A001.md; jobs/J004/V001.md; jobs/J004/delivery.md; candidate556b42d0d53661063a0fa1dd4a4d9c328ce1e86b; independent PASS/PASS and Git-blob focused tests PASS; native #84 failures retained.
 
 ## J005
 
