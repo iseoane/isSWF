@@ -4,7 +4,28 @@ Use this guide when coordinating in Pi on native Windows or Linux. The factory o
 
 ## Prerequisite and configuration
 
-The normal integration uses `pi-subagents` 0.83.0 with Pi 1.4.0, the combination exercised by the offline integration trial. isSWF declares its agents through `package.json` → `pi.subagents.agents`. It does not install the extension automatically. If it is missing, report the missing package and ask before installation; continue independently authorized coordinator work.
+The normal integration requires `pi-subagents` 0.83.0 with Pi 1.4.0, the combination exercised by the offline integration trial. isSWF declares its agents through `package.json` → `pi.subagents.agents`; the profiles alone do not install or load the extension. isSWF does not install the extension automatically. Every project setup running in Pi must check this prerequisite and explain the installation below if it is missing. Missing delegation does not block independently authorized coordinator work.
+
+### Install and verify the prerequisite
+
+Inspect the actual host and configured packages without dispatching a model:
+
+```sh
+pi --version
+pi list
+```
+
+If the extension is missing, state that native isSWF delegation requires it and show this pinned installation command. Obtain installation authorization unless the current request already covers it:
+
+```sh
+pi install npm:pi-subagents@0.83.0
+```
+
+This command installs and registers a user package for all projects. Use `pi install --local npm:pi-subagents@0.83.0` instead only when the operator selects project-local installation. Preserve unrelated packages and role overrides; do not run an automatic dependency upgrade or audit fix.
+
+After installation, run `pi list` to confirm the package, then use `/reload` in the running Pi session or start a new session. Inspect `subagent` or `subagents_enable` capabilities and the effective role mapping without launching an agent. Package registration alone is not proof of a loaded extension. Keep native-delegation readiness partial if loading or role discovery cannot be verified; do not declare setup ready or launch a test model to hide the missing evidence.
+
+### Configure role selections
 
 Use the host's user or trusted-project settings, normally `.pi/settings.json`, for `subagents.agentOverrides.isswf-worker` and the other `isswf-` roles. Set `model` to the approved qualified provider/model and `thinking` to its supported effort. Preserve unrelated settings. The legacy `.factory/models.json` belongs to explicit legacy executor assignments, not this host-native path. Do not maintain a second live selection there.
 

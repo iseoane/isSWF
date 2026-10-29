@@ -1,55 +1,34 @@
 # Project setup
 
-## Scope and provenance
+Read this quick reference for ordinary assignments. Inspect effective host settings; do not reconstruct configuration from historical trials. This is a source checkout, not an installed release.
 
-- Status: partial; tracking decision recorded, verification and checkpoint pending.
-- Target root: `/home/iseoane/Work/isSWF`.
-- Observed target base: `bb5db6509ca6102b7f620ed0d2bca6757eda8d25`.
-- Authorized source checkout: `/home/iseoane/Work/isSWF`.
-- Authorized source checkpoint: `bb5db6509ca6102b7f620ed0d2bca6757eda8d25`.
-- Operator authorization: current setup conversation explicitly selects this project, approves this source/checkpoint, and chooses GitHub tracking.
-- This record is an uncommitted addition, not content pinned by the observed base.
+## Startup lookup
 
-## Tracking and preserved configuration
+| Need | Source of truth / action |
+| --- | --- |
+| Pi startup model and role selections | User `~/.pi/agent/settings.json`: `defaultProvider`, `defaultModel`, `defaultThinkingLevel`, `subagents.agentOverrides`; inspect any trusted project `.pi/settings.json` overrides. |
+| Claude startup model and role selections | User `~/.claude/settings.json` and native `~/.claude/agents/isswf-{worker,researcher,reviewer,planner}.md`; inspect trusted project overrides. |
+| Shared role methodology | `.agents/roles/`; use `.agents/hosts/pi.md` or `.agents/hosts/claude-code.md` for the selected host. Roles are conditional, not a mandatory pipeline. |
+| Worktree root | Read `git config --local --get isswf.worktreeRoot` in the canonical repository. Approved convention: sibling `<parent>/<repo>-worktrees/<feature>`, with a unique direct feature child. Validate the root and existing worktrees before authorized creation; bind the child's working directory explicitly. No global absolute root. |
+| Current objective, acceptance and budget | The selected initiative's canonical plan and current brief, or a bounded operator handoff. Prior grants and spent budgets do not restart. |
 
-- Tracking mode: `github`.
-- Repository: `iseoane/isSWF`, evidenced by origin `https://github.com/iseoane/isSWF.git`.
-- Canonical plans and jobs remain under `.factory/initiatives/<id>/`; existing historical `.factory/jobs/` paths remain unchanged.
-- Template source: `.factory/templates/` at the authorized source checkpoint.
-- Canonical model configuration: `.factory/models.json`; inspected values match the authorized source checkpoint. Preserve all existing routes and fields.
-- Routing semantics: `docs/model-routing.md` at the authorized source checkpoint. Durable records: `docs/durable-work.md` at that checkpoint. This record introduces no route overrides.
-- Existing legacy `.factory/` is retained. No `.isswf/` directory or release receipt was observed; no installation, initialization, migration, or runtime copy is performed.
+Legacy `.factory/models.json` applies only to explicitly selected legacy-executor assignments; do not copy native role defaults into it. Preserve explicit project choices and unrelated settings.
 
-## Authorization and delivery boundary
+## Project choices and boundaries
 
-- Granted: local inspection and creation of this target-owned setup decision record.
-- GitHub issue reads, issue/label creation or editing, branch pushes, PR creation, and merges: not granted. No remote calls performed.
-- Provider calls, additional actors, paid API use, dependency installation, execution of project scripts, publication, deployment, and cleanup: not granted by this setup.
-- No commit authorized or made; the setup checkpoint remains pending.
-- Deliver this local record and inspection results only. Future work requires its own applicable authorization.
+- Keep the single existing `.factory/` state root. Do not initialize `.isswf/`, migrate state or update an installed pin as a setup side effect.
+- Tracking: GitHub `iseoane/isSWF`, integration branch `main`; ordinary selected feature delivery follows `.agents/roles/references/feature-delivery.md`. This setup record alone grants no commit, push or PR.
+- **isSWF-only standing integration permission:** LOW-risk PRs may be merged through the normal protected PR path only after required review/checks and required CI pass on the exact current candidate, with expected-head protection. Uncertain risk, stale evidence, failed checks or open blockers prevent integration. MEDIUM/HIGH/undetermined risk needs a separate operator decision. Never downgrade risk to fit this permission; no direct-main push, admin bypass or auto-merge-queue grant. This exception does not apply to other projects.
+- Preserve subscription/cost limits, no Anthropic in Pi, finite assignment budgets and independent review when required. Saved configuration grants no provider calls, installation, release, deployment, privilege change or cleanup.
+- Preserve existing checkouts and historical attempts. This setup record does not authorize resetting, updating or removing another checkout.
 
-## Existing work and reconciliation
+## Readiness: verify only what the next assignment needs
 
-- Initial Git status: untracked `.claude/`; preserve it without modification.
-- No tracked diff was observed before this record was created.
-- Existing initiative plans I0001 through I0006 and historical job records are present. Nonterminal declared states include I0003/J001 in-review, I0005/J001 awaiting-human, and I0006/J005 in-review; saved statuses are not process evidence.
-- Active process state and private attempt stores were not inspected; no claim that existing attempts are stopped or live is made. Their pinned inputs, model configuration, and reports remain unchanged. Reconcile exact attempt identities, pinned inputs, and actual process state before any dispatch or replacement.
+- Pi: user-scoped `pi-subagents@0.83.0` installation and registration were verified. Loaded capabilities/role discovery remain unverified in this record. Follow `.agents/hosts/pi.md` for package checks, installation authorization, reload and zero-model discovery; registration is not loaded readiness.
+- Claude: configured native profiles are not proof of actual model/effort availability. Verify the effective selection before delegation; do not silently substitute or clamp.
+- Windows symbolic-link test: an accepted J018 verification limitation, not a general installation prerequisite. Do not change Windows permissions or add machinery just to run that case. The decision and reopening conditions belong to J018's existing delivery record, not startup configuration.
 
-## Intended checks and observed results
+## History: read only when investigating the relevant work
 
-Evidence: `docs/en/development.md`, `tools/check-quality.mjs`, `tooling/quality/package.json`, `tooling/quality/knip.json`, and `.github/workflows/quality.yml`.
-
-- Portable runtime tests: `node tools/check-quality.mjs`; identified, not run during setup.
-- Documentation checks: `node tooling/quality/check-docs.mjs`; identified, not run during setup.
-- Lint/static checks: `node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs`; identified, not run during setup.
-- Dead code/unresolved references: `node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress`; identified, not run during setup. Knip's duplicates category is not evidence of general duplicated-logic detection.
-- Build: no separate source compilation/type-check step for the JavaScript modules; standalone release construction requires Bun and committed-source packaging. No release build requested or run.
-- Duplicated logic: no dedicated detector identified in the inspected quality configuration. Recommendation: assess a bounded duplication check if recurring duplication justifies its feedback cost; no dependency installation authorized.
-- Setup verification: actual new-file diff inspected; `git diff --no-index --check /dev/null .factory/project-setup.md` passed without whitespace diagnostics. These checks do not establish runtime behavior or passing project checks.
-
-## Isolation and pending gates
-
-- Technical isolation: unverified; no sandbox or client execution tested.
-- Client-use gate: blocked pending required technical-isolation evidence and separately scoped execution authorization.
-- GitHub synchronization: pending any separately granted remote action; choosing tracking mode does not authorize synchronization.
-- Pending: Git checkpoint authorization, applicable project checks for future work, and execution-specific reconciliation/preflight. No model availability, subscription coverage, or effort compatibility is inferred from configuration.
+- The pre-simplification setup/trial record is retained in `.factory/initiatives/I0009/setup-history.md`, including the original source-checkpoint reference and later observations. Read it only for historical investigation, not current configuration or grants. J007's existing briefs own the related worker/reviewer trial evidence; failures and inconclusive results are unchanged.
+- J018 evidence and the accepted symbolic-link limitation belong to `.factory/initiatives/I0009/jobs/J018/delivery.md`. The canonical initiative plan still owns job status; recording the accepted limitation does not mark the broader job complete.
