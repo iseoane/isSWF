@@ -10,6 +10,8 @@ The shipped role profiles use `model: inherit` as an explicit configurable defau
 
 ## Required child context
 
+Before the first native dispatch for new work, resolve `docs/durable-work.md` from the trusted factory root and prepare the canonical plan and curated brief in the target's one active state directory, including for inline small tasks. For a pinned resumption, retain and read its full-SHA inputs. Follow the guide's `tools/project-state.mjs` choice; stop if both `.isswf` and `.factory` exist or the selected entry is unsafe. Complete and freeze coordinator-owned plan/brief records before dispatch while a worker writes. Do not stage worker/reviewer artifacts until their writer is stopped; post-hoc collision detection is not containment. These records do not imply liveness or authority. The source plan CLI is optional and requires its explicit guarded conditions; ordinary native Markdown creation needs no legacy executor, runtime pin, grant CLI or installed source tooling.
+
 Before delegating, provide:
 
 | Context | Required value |
@@ -19,7 +21,7 @@ Before delegating, provide:
 | Checkout | Explicit absolute working directory and baseline; concurrent writers need exclusive checkouts. |
 | Review | Exact candidate/diff and retained untracked contents when applicable, plus relevant checks and their observer. |
 | Host and model | Approved native model/effort or explicit parent inheritance, with observed metadata or a stated limitation. |
-| Documents | Exact readable plan/brief paths when assigned; a small task may carry its full brief in the handoff. |
+| Documents | Exact readable plan/brief paths when assigned; a small task may carry its full brief in the handoff as a supplement to its minimal canonical plan and curated brief. |
 
 The child must acknowledge its working directory, scope and shared role before task work. Missing or unreadable required context blocks that assignment; return the missing input instead of guessing. The coordinator checks the handoff and result. A new host-native task needs no factory release receipt, project runtime pin, external grant file, compiled isSWF executable or capacity store.
 
