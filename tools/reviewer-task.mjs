@@ -4,7 +4,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
 import { readReleaseSource } from './release-source.mjs';
@@ -13,7 +13,7 @@ import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('../') && !isAbsolute(part)); };
+const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('..' + sep) && !isAbsolute(part)); };
 const sha = value => typeof value === 'string' && /^[0-9a-f]{40}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
 const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !path.includes('\\') && !path.includes('\0') && path.split('/').every(part => part && part !== '.' && part !== '..');
@@ -56,7 +56,8 @@ async function publish(path, value, maxBytes = 256000) {
 async function roots(project, store) {
   assert(isAbsolute(project ?? '') && isAbsolute(store ?? ''), 'absolute-project-store-required');
   project = await realpath(project); store = await realpath(store);
-  assert(decode(git(project, ['rev-parse', '--show-toplevel'])).trim() === project, 'git-root-required');
+  const gitRoot = decode(git(project, ['rev-parse', '--show-toplevel'])).trim();
+  assert(await realpath(gitRoot) === project, 'git-root-required');
   assert(!inside(project, store) && !inside(source, store) && !inside(store, project) && !inside(store, source), 'private-external-store-required');
   return { project, store };
 }

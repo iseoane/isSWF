@@ -2,11 +2,11 @@
 
 Type: enhancement
 
-This is the curated delivery view for integrated J019 and the bounded J020 follow-up. The coordinator retains the full working plan, partial closures, unrelated maintenance patches and private evidence separately. This view does not recreate or resume the parked executor work in PR87 at checkpoint `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`.
+This is the curated delivery view for J019, J020 and the separately selected J018 caller-portability slices. The coordinator retains the full working plan, partial closures, unrelated maintenance patches and private evidence separately. This view does not recreate or resume the parked executor work in PR87 at checkpoint `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`.
 
 ## Scope
 
-J019's five-file methodology correction is already integrated through PR93. J020 now delivers only the six reviewed shared release-source/Bun paths identified in its brief. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. J018 legacy Windows maintenance and PR87 remain excluded and inactive.
+J019's five-file methodology correction is integrated through PR93. J020's six-file release-source follow-up is retained below at its own pre-publication checkpoint. J018 adds only the explicitly selected caller slices, starting with canonical roots and native containment. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. Other legacy maintenance and PR87 remain excluded and inactive.
 
 J019 observations below supersede its retained pre-publication brief. J020 records describe its own pre-publication checkpoint; later source commit, PR and exact-head CI must be observed, not embedded as a self-referential SHA. Integration, release, installation and cleanup remain separate operator decisions.
 
@@ -43,6 +43,25 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ### Evidence
 
 - Independent Standards/Spec/aggregate PASS on snapshot `a99c43a4f93b225392e20739ab3bc2eefb4c9e159a4621169cc966e1d4b120b7`; exact five functional bytes retained.
+
+## J018
+
+- Status: in-review
+- Objective: Deliver only the selected native Windows legacy caller slices; this commit contains canonical roots and containment.
+- Depends on: None
+- Brief: [brief-r2.md](jobs/J018/brief-r2.md)
+- Blocker: Root-only independent review remains FAIL for insufficient boundary-test coverage; the operator explicitly accepts that limitation. Publication and exact-head CI are pending at this commit checkpoint.
+- Next step: Preserve the exact root-only bytes and accepted limitation; do not turn this into a broad Windows repair loop or infer integration authority.
+
+### Acceptance
+
+- Correct native root identity and containment without changing grants, pins, aliases, model routing or no-replay protections.
+- Preserve the original adverse review and partial observations; future changes to affected code use TDD for cases needed then.
+
+### Evidence
+
+- Base `fcddfda5d2c520b11354bce0407cece17b37cda0`; root-only snapshot `16ef8e01035d40f553773692a20649515b9932948cbbdd159eded61aad364bf1`.
+- Native Windows preparation and context handoff pass; complete caller execution still reaches a separate directory-sync failure. No broad Windows acceptance is claimed.
 
 ## J019
 
