@@ -95,7 +95,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J021/brief-r1.md)
 - Blocker: Native baseline exposes #83 before either suite reaches directory-alias fixtures. Technical #86 validation is blocked; changing the selected scope to include prerequisites needs an operator decision.
-- Next step: Ask whether to deliver #83 and subsequently assess #85 before resuming #86. Do not import production repairs, weaken tests, launch another worker or publish a known failing PR without reconciliation.
+- Next step: Dependency reassessment recommends #84 -> #83 -> #85 -> #86; preserve previously selected LF/integrity policy and parked PR87. Strict plan-runtime chain is #83 -> #85 -> #86; #84 is cross-cutting byte-sensitive verification groundwork. Do not infer new implementation scope or actor budget from this assessment.
 
 ### Acceptance
 
