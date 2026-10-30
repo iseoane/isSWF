@@ -247,6 +247,24 @@ assert.match(setup, /host availability is not executor support/);
 assert.match(setup, /source-checkout mode must leave a missing config pending/);
 assert.match(setup, /Persist Claude-native role\/model\/effort decisions/);
 assert.doesNotMatch(setup, /full input checkpoint named in the trusted grant/);
+const entrySetup = setup.slice(setup.indexOf('### Setup-managed coordinator entry'), setup.indexOf('For every setup running in Pi'));
+for (const pattern of [/explicit setup request/u, /target repository root's `AGENTS\.md`/u, /coordinator\/coordinador/u, /actual host guide/u, /without activating a mandatory isSWF pipeline/u, /selected-state/u, /Engram or Codegraph/u, /project-scoped advisory/u, /preserve all bytes outside/iu, /If the file is absent, create it with just the section/u, /If it exists without either marker, append/u, /exact single marked section with the same resolved project references already exists/u, /byte-for-byte unchanged/u, /one of the paired markers is missing/u, /symlink\/non-regular file/u, /If `AGENTS\.md` is dirty, inspect the actual hunks/u, /unknown/iu, /missing required resource or capability is pending\/blocked/u, /second `CLAUDE\.md` bridge/u, /Missing tools are not a blocker/u]) assert.match(entrySetup, pattern);
+assert.match(entrySetup, /<!-- BEGIN isSWF coordinator entry -->[\s\S]*<!-- END isSWF coordinator entry -->/u);
+assert.match(entrySetup, /<factory-root>\/\.agents\/skills\/isswf-coordinator\/SKILL\.md/u);
+assert.match(entrySetup, /<selected-state>\/project-setup\.md/u);
+assert.ok(entrySetup.includes('/skill:isswf-coordinator'));
+assert.ok(entrySetup.includes('/isswf:isswf-coordinator'));
+assert.match(entrySetup, /a previous setup session need not still be loaded/u);
+assert.match(entrySetup, /actual readiness and pending capabilities/u);
+for (const path of ['docs/en/installation.md', 'docs/es/installation.md', 'docs/en/getting-started.md', 'docs/es/getting-started.md']) {
+  const guide = await read(path);
+  assert.match(guide, /AGENTS\.md/u, `${path}: setup entry point must be documented`);
+  assert.match(guide, /coordinator|coordinador/iu, `${path}: explicit coordinator trigger must be documented`);
+  assert.match(guide, /unrelated|ajenas?|ajeno/iu, `${path}: unrelated requests must remain outside the pipeline`);
+}
+assert.equal((setup.match(/`CLAUDE\.md` bridge/giu) ?? []).length, 1, 'Setup documents the no-duplicate bridge decision once');
+assert.doesNotMatch(setup, /automatic host hook/u);
+assert.doesNotMatch(setup, /install.*Engram|install.*Codegraph/iu);
 const claudeSetup = await read('skills/isswf-setup/SKILL.md');
 assert.match(claudeSetup, /\$\{CLAUDE_PLUGIN_ROOT\}\/\.agents\/skills\/isswf-setup\/SKILL\.md/);
 assert.match(host, /## Setup model choices/);

@@ -12,6 +12,28 @@ Run only on an explicit operator request to set up, inspect, update, or recover 
 
 For new ordinary projects, inspect the current checkout, existing setup and actual host. Use [Pi](../../hosts/pi.md) or [Claude Code](../../hosts/claude-code.md) for native role/model/effort configuration and missing capability checks. Preserve existing choices and unrelated settings. Resolve only missing tracking, permissions, execution/correction budgets, worktree and delivery choices under [feature delivery](../../roles/references/feature-delivery.md). Keep roles conditional; no default mandatory pipeline.
 
+### Setup-managed coordinator entry in the target `AGENTS.md`
+
+On an explicit setup request, prepare or reconcile one small isSWF entry section in the target repository root's `AGENTS.md`. This is a shared project instruction read by Pi and Claude Code; do not create a second `CLAUDE.md` bridge or change host invocation/configuration to provide this entry point. It is an instruction for discovery, not a host hook or permission grant.
+
+Use this reusable English section, resolving its relative references against the prepared target root and substituting the actual host and the one selected state record path (`.isswf/project-setup.md` or `.factory/project-setup.md`):
+
+```markdown
+<!-- BEGIN isSWF coordinator entry -->
+## isSWF coordinator
+
+This project uses isSWF; consult the setup record below for actual readiness and pending capabilities. When the operator explicitly addresses the coordinator/coordinador or asks to use an isSWF workflow, load the `isswf-coordinator` skill through the actual host's supported skill interface (Pi: `/skill:isswf-coordinator`; Claude Code: `/isswf:isswf-coordinator`) before acting. If that interface is unavailable, read `<factory-root>/.agents/skills/isswf-coordinator/SKILL.md` only when the selected trusted factory root is verifiable from loaded package provenance; a previous setup session need not still be loaded. Read the actual host guide `<factory-root>/.agents/hosts/<pi-or-claude-code>.md` through the coordinator's trusted resources. If neither supported invocation nor trusted resources are available, report the missing capability; do not guess a path, install or switch packages. Then follow that coordinator and select only applicable shared skills or roles. For other tasks, follow the request and applicable project instructions without activating a mandatory isSWF pipeline.
+
+Project setup decisions: `<selected-state>/project-setup.md`.
+
+Engram or Codegraph may provide optional, project-scoped advisory context when available and useful. Verify project identity, current source and pins; otherwise use Git and files. Never install, rebuild or reindex for this lookup, access unrelated projects, expose private content, or treat memory/index results as authority.
+<!-- END isSWF coordinator entry -->
+```
+
+Before writing, resolve the target Git root and inspect `AGENTS.md`, its Git status/diff, file type and path. Preserve all bytes outside an inserted section; do not normalize line endings or rewrite unrelated instructions. If the file is absent, create it with just the section. If it exists without either marker, append the section using the file's existing newline convention and preserve its bytes. If the exact single marked section with the same resolved project references already exists, leave it byte-for-byte unchanged. Refuse the conflicting write and report the exact safe next step if one of the paired markers is missing, markers are duplicated, malformed, repeated, inconsistent with the template, or if the target is a symlink/non-regular file or ownership is unknown. If `AGENTS.md` is dirty, inspect the actual hunks: proceed only when they are demonstrably disjoint from the append location or managed section; otherwise refuse and ask the operator to resolve the conflict or make a clean checkpoint. Do not delete, replace or repair ambiguous content. Report the actual changed path and readiness honestly: a missing required resource or capability is pending/blocked, never silently substituted or claimed ready. A dirty unrelated file or demonstrably non-overlapping content does not by itself block this bounded edit.
+
+For optional Engram or Codegraph use, follow the coordinator's canonical scoped lookup and verification guidance; do not copy its detailed memory/navigation policy into every target `AGENTS.md`. Missing tools are not a blocker when Git and files suffice.
+
 For every setup running in Pi, check `pi-subagents` before declaring native delegation ready. If it is missing, explain that it must be installed for native isSWF delegation and show the exact pinned command under [install and verify the prerequisite](../../hosts/pi.md#install-and-verify-the-prerequisite). Install only when the operator's current authorization covers it; otherwise leave that capability pending. Verify package registration, session loading and role discovery separately, without launching a model. Do not omit the requirement or its installation instructions because role defaults already exist.
 
 An explicit setup request permits recording approved decisions in the existing single state's `project-setup.md`; when a new record is needed, use `.isswf/`, never a second active state root. Host configuration changes and extension installation need their actual authorization. A normal setup does not require `isswf init`, a compiled factory executable, project runtime pin, external grant file or private capacity store. Do not rewrite legacy `.factory/models.json` to configure host-native agents. After the host's supported mapping and decisions are clear, return changed paths and pending capabilities; do not run the legacy procedures below.
