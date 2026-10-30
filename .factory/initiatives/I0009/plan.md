@@ -177,12 +177,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J025
 
-- Status: in-progress
+- Status: in-review
 - Objective: Deliver #83 external plan grant containment.
 - Depends on: J024
 - Brief: [brief-r2.md](jobs/J025/brief-r2.md)
-- Blocker: Fresh #83 implementation and native verification pending; #84 now integrated.
-- Next step: Execute prepared brief-r2 on mainb3045b4, preserving downstream #85 separately.
+- Blocker: Independent assessment, committed pinned journey and exact-head native CI pending.
+- Next step: Retain exact candidate, verify pinned first-plan and native boundary CI, obtain scoped review; preserve downstream #85 separately.
 
 ### Acceptance
 
@@ -193,6 +193,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J025/brief-r2.md
+- Worker c40a76a0 stopped with native separator guard and focused boundary regression; initial test fixture assertion corrected and retained. Focused Linux checks and coordinator full Linux quality/ESLint/Knip/diff PASS. No #85 changes or native Windows claim.
 
 ## J026
 

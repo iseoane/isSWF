@@ -2,7 +2,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { lstat, readFile, realpath, mkdir, open, link, unlink, rename, rmdir } from 'node:fs/promises';
-import { isAbsolute, join, relative, resolve } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
 
@@ -94,7 +94,7 @@ export async function plan({ action, project, initiative, proposalPath, grantPat
   }
   if (!isAbsolute(grantPath ?? '')) throw Error('external plan-only grant required');
   const external = await realpath(grantPath), rel = relative(root, external);
-  if (rel === '' || (!rel.startsWith('../') && rel !== '..' && !isAbsolute(rel))) throw Error('grant must be external');
+  if (rel === '' || (!rel.startsWith('..' + sep) && rel !== '..' && !isAbsolute(rel))) throw Error('grant must be external');
   const grant = JSON.parse(await regular(external));
   if (Object.keys(grant).sort().join(',') !== 'initiative,permissions,project,reference,version' || grant.version !== 1 || grant.project !== root || grant.initiative !== initiative || !text(grant.reference) || JSON.stringify(grant.permissions) !== '["plan"]') throw Error('matching trusted plan-only grant required');
   const markdown = render(JSON.parse(await regular(proposalPath)), initiative);

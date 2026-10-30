@@ -27,3 +27,9 @@ Focused commands: node tests/plan-grant-boundary.mjs ., node tests/initiative-pl
 ## Quality and stopping condition
 
 Locked lint/dead-code, portable tests/docs and actual committed package checks exist; no dependencies or compilation step needed for the JS edit. No new abstraction justified. Close only after sufficient independent judgment, exact-head native Windows/Linux focal CI and explicit distinction of downstream publication uncertainty. Missing native red, artifact or provider evidence stays visible; no blanket Windows execution/security certification.
+
+## Implementation before independent assessment
+
+Worker c40a76a0-1c50-410d-9e30-29c3f8033175 stopped with four scoped changes and no staging/commits. Reports required worker/bug-diagnosis/code-quality/comments resources and historical J002 consumed. The initial new-fixture snapshot assertion failed, was corrected, and the failed fixture retained privately; this was a test-harness mistake, not an invented native Windows red. Linux focused boundary/initiative-plan/route, syntax, affected lint and diff checks PASS. Native Windows, independent review and exact-head CI remain unverified.
+
+Coordinator inspected complete scoped changes/new test and ran full Linux portable quality, full locked ESLint, Knip and diff checks: PASS. No #85 publication code changed. The full-run artifact used documentary input0c40f1b, not the then-uncommitted fix; verify committed artifact separately. Pinned-launcher probe and exact-candidate review/CI remain delivery gates.
