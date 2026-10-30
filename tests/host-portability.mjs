@@ -262,7 +262,7 @@ for (const path of ['docs/en/installation.md', 'docs/es/installation.md', 'docs/
   assert.match(guide, /coordinator|coordinador/iu, `${path}: explicit coordinator trigger must be documented`);
   assert.match(guide, /unrelated|ajenas?|ajeno/iu, `${path}: unrelated requests must remain outside the pipeline`);
 }
-assert.equal((setup.match(/CLAUDE\.md bridge/giu) ?? []).length, 1, 'Setup documents the no-duplicate bridge decision once');
+assert.equal((setup.match(/`CLAUDE\.md` bridge/giu) ?? []).length, 1, 'Setup documents the no-duplicate bridge decision once');
 assert.doesNotMatch(setup, /automatic host hook/u);
 assert.doesNotMatch(setup, /install.*Engram|install.*Codegraph/iu);
 const claudeSetup = await read('skills/isswf-setup/SKILL.md');
