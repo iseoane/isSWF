@@ -171,6 +171,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J024/brief-r1.md
 - Worker da3884d3-6d7e-4bb0-b2e4-4309ec894ffe stopped after bounded seven-path implementation; focused tests PASS and no-policy disposable sensitivity FAIL as expected. Coordinator full Linux quality, ESLint, Knip and diff PASS; packaging in that run used input checkpoint2817481, not yet the implementation commit.
+- Round1 reviewer04ba20b7 on03e4c46 Standards/Spec/aggregate FAIL: Windows multiline step can mask early exit failure. V001.md preserves finding; coordinator split into separate single-command steps. Round2 delta review and exact-head native CI pending.
 
 ## J025
 
