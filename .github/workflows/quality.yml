@@ -86,6 +86,10 @@ jobs:
         run: node tests/plan-grant-boundary.mjs .
       - name: Verify plan publication durability
         run: node tests/plan-publication.mjs .
+      - name: Verify factory tool installation
+        run: node tests/factory-tools-install.mjs .
+      - name: Verify initiative plan boundaries
+        run: node tests/initiative-plan.mjs .
       - name: Verify worker-route admission
         run: node tests/worker-route-admission.mjs .
       - name: Verify static host portability

@@ -229,12 +229,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J021
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resume #86 directory-alias fixture delivery after prerequisites.
 - Depends on: J026
 - Brief: [brief-r3.md](jobs/J021/brief-r3.md)
-- Blocker: Prerequisites now integrated. Fresh bounded fixture implementation/review/native full-suite checks pending; historical stopped worker remains consumed.
-- Next step: Dispatch one newly allocated bounded worker on current main035d54c using brief-r3; retain historical count and independently verify full Windows/Linux suite outcomes before LOW-risk integration.
+- Blocker: Bounded fixture implementation and Linux checks pass; independent assessment and published-head complete native Windows/Linux suites pending. Historical stopped worker remains consumed.
+- Next step: Review retained stopped-worker candidate, publish scoped PR and verify both complete native suites/current-head CI before LOW-risk integration and safe branch cleanup.
 
 ### Acceptance
 
@@ -245,3 +245,4 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J021/brief-r3.md
+- Current workere9800226 stopped with only2tests+CI changed, full required methodology consumed; Linux before/after complete focal suitesPASS, not nativeWindows red. Coordinator fullLinuxquality/ESLint/Knip/diffPASS; artifactrun usedpreparationa710b4a, independent/nativehead gates pending.
