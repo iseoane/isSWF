@@ -88,6 +88,27 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Isolated Linux full quality, actual compiled/offline-installed resource hashes, Windows ESLint/Knip and focused checks passed. Limits and previous failures are recorded in the brief; no blanket Windows or provider-reliability claim.
 - PR93 source `be765bec3c53f0a3503c6667dbe00a31cfe8fb6e` was integrated as `2c345866ade9d77a4c4f5724420a2929be9b046f` after required PR CI passed. Post-merge main Quality run `40835502786` passed all three jobs on that merge commit.
 
+## J021
+
+- Status: in-progress
+- Objective: Deliver only the remaining #86 native directory-alias fixture repair from the parked PR87 as a bounded main-based PR.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J021/brief-r1.md)
+- Blocker: Native focused checks, independent review and exact-head feature PR CI pending.
+- Next step: One native worker ports only fixture/assertion/CI semantics; coordinator verifies, reviews and publishes without resuming PR87 or integrating main.
+
+### Acceptance
+
+- Windows junctions and Linux directory symlinks exercise actual refusal without elevation, skips or target writes.
+- Existing authority, tamper and integrity checks remain; both suites run in native CI.
+- Scoped independent review and exact-head required CI pass before verified PR delivery; no unrelated executor changes or automatic merge.
+
+### Evidence
+
+- Operator selected remaining #86 work in the current conversation; issue and current source inspected.
+- Historical implementation 23ab7c8d8f766cacda61986699006b8a677c1080 in parked PR87; fresh base 82a1338b35df578cbd749011b35278c17f995f61.
+- jobs/J021/brief-r1.md
+
 ## J020
 
 - Status: in-review
