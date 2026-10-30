@@ -97,12 +97,12 @@ Type: maintenance
 
 ## J006
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve #90 through a minimal setup-managed AGENTS.md entry point.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: none
-- Next step: Inspect setup implementation and actual shared host discovery contract.
+- Next step: Continue J007; post-merge Quality41014860194 SUCCESS on exact integrated main.
 
 ### Acceptance
 
@@ -110,16 +110,16 @@ Type: maintenance
 
 ### Evidence
 
-- jobs/J006/V001.md; jobs/J006/delivery.md; candidate8d0d123c9e03581582133cfd2ba6ae24b472827c, independent PASS LOW. GitHub issue #90; operator selected AGENTS.md as shared entry point and states Claude consumes it too.
+- PR105 MERGED asca7447437c3e4ea0d0aa9c224af01c3ae6bca947; initial CI41014347739 FAIL retained, Markdown regex correction mechanically assessed, final CI41014607111 SUCCESS3/3 and six native reports PASS; delivered local/remote branches deleted, no dedicated worktree. jobs/J006/V001.md; jobs/J006/delivery.md; candidate8d0d123c9e03581582133cfd2ba6ae24b472827c, independent PASS LOW. GitHub issue #90; operator selected AGENTS.md as shared entry point and states Claude consumes it too.
 
 ## J007
 
-- Status: pending
+- Status: completed
 - Objective: Resolve #89 by verifying and reconciling supported Claude parallel-writer capabilities.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: none
-- Next step: Verify current native interface and prepare decision if needed.
+- Next step: All seven functional units technically complete. Finish PR106 expected-head integration and authorized cleanup only after CI on this evidence-only final head; retain integration/post-merge receipts in PR106. No new hook/runtime or weaker binding; no further issue implementation selected.
 
 ### Acceptance
 
@@ -127,5 +127,5 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #89 and published triage.
+- GitHub issue #89 and published triage; jobs/J007/V001.md and jobs/J007/delivery.md; candidate80f1c4923836f7cbbb32794f74dc498462cda304 independent first review PASS/PASS LOW, docs/diff PASS; known #84 native CRLF failure retained. PR106 initial Quality41016378516 SUCCESS3/3; six native reports PASS, tested synthetic5db6406a93e50ddf828249f7de57ab31d248642b expected parents and tree44840860e4fa2687f0ac27bc141ed93d544045ce equal published9fdb05710e4509bf33d752c3d0e07bc69c709d60. Final evidence-only head still requires fresh CI before integration.
 
