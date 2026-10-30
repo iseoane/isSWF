@@ -31,3 +31,13 @@ Run focused publication, grant-boundary, Linux initiative-plan, worker-route, af
 ## Quality inventory and stopping condition
 
 Existing locked lint/dead-code and portable docs/tests/artifact checks are available; no installation required. JavaScript has no separate compile/typecheck; Bun artifact checks remain distinct. Do not create duplicate platform machinery. Source repair closes only with actual native focused checks, sufficient independent review and exact-head CI; whole-issue installed Windows acceptance retains the identified capability blocker until explicitly reconciled. LOW-risk integration permission does not waive any unsatisfied required criterion.
+
+## Implementation and selected-method evidence
+
+Worker8f421a4b-362b-4738-b6cd-4efd3773e48f stopped after the seven scoped paths; no staging/commits. Its final report was abbreviated, so the coordinator inspected only native tool-call/result evidence (not private reasoning) to verify resource consumption and observed checks. Required worker/bug-diagnosis/code-quality/comments/verification-principles/writing/human-documents/agent-documents, initiative plan and pinned historical J004 were read; initial wrong reference paths were resolved before implementation. Baseline actual Linux probe at inputc950550: first plan exit0, then an empty claim created, identical repeat still exit0/reused with claim present, retained fixture privately. This is concrete prior unsafe-repeat evidence, not native Windows fsync reproduction or retrospective TDD.
+
+Initial new empty-claim fixture lacked parent directories and failed ENOENT; worker corrected fixture setup and retained the failed directory privately. Subsequent publication test PASS including native prepare/repeat, empty/uncertain claims, fatal file flush, before/after link failures, Linux directory-open/sync failures, retained bytes and retry refusal. Boundary/initiative/route/docs/documentation/syntax/affected ESLint/diff PASS observed in worker tool results. Coordinator independently inspected all files and full Linux quality/locked ESLint/Knip/diff PASS; fullrun packaging used inputc950550, not uncommitted writer changes.
+
+## Explicit acceptance question
+
+Coordinator asked the operator: accept this bounded delivery with native source-writer Windows/Linux checks and actual pinned Linux launcher, leaving complete installed Windows launcher outside this unit? Current installed launcher mutation identity is Linux-only. Until the operator dispositions that requested pinned Windows criterion, complete issue acceptance/integration remains awaiting-human even if bounded source review and CI pass. Continue safe checks/review without importing legacy platform support or falsely certifying that journey.

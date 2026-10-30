@@ -200,12 +200,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J026
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
 - Brief: [brief-r2.md](jobs/J026/brief-r2.md)
-- Blocker: #83 resolved. Source-writer repair/verification pending; complete pinned Windows launcher acceptance remains blocked by current Linux-only mutation identity, distinct from writer durability.
-- Next step: Implement bounded local-module writer repair on4b824d5, verify native source path and pinnedLinux separately, retain unmet pinnedWindows criterion for explicit disposition before complete acceptance.
+- Blocker: Awaiting explicit acceptance-boundary decision: deliver native writer Windows/Linux plus pinnedLinux, excluding current Linux-only installed Windows launcher? Source implementation done; independent source review/native CI pending.
+- Next step: Continue bounded source review/CI and ask the recorded specific scope question; no complete acceptance or integration until that criterion is reconciled.
 
 ### Acceptance
 
@@ -216,6 +216,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J026/brief-r2.md
+- Stopped worker8f421a4b implemented local-module writer/claim/error-phase repair and7scoped files. Actual Linux baseline exposed identical reused success with an existing claim; new fault-injection checks PASS. Coordinator fullLinuxquality/ESLint/Knip/diffPASS. Final-source packaging/native CI/review pending; current pinnedWindows capability cannot be inferred.
 
 ## J021
 
