@@ -90,12 +90,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J021
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Deliver only the remaining #86 native directory-alias fixture repair from the parked PR87 as a bounded main-based PR.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J021/brief-r1.md)
-- Blocker: Native focused checks, independent review and exact-head feature PR CI pending.
-- Next step: One native worker ports only fixture/assertion/CI semantics; coordinator verifies, reviews and publishes without resuming PR87 or integrating main.
+- Blocker: Native baseline exposes #83 before either suite reaches directory-alias fixtures. Technical #86 validation is blocked; changing the selected scope to include prerequisites needs an operator decision.
+- Next step: Ask whether to deliver #83 and subsequently assess #85 before resuming #86. Do not import production repairs, weaken tests, launch another worker or publish a known failing PR without reconciliation.
 
 ### Acceptance
 
@@ -108,6 +108,9 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Operator selected remaining #86 work in the current conversation; issue and current source inspected.
 - Historical implementation 23ab7c8d8f766cacda61986699006b8a677c1080 in parked PR87; fresh base 82a1338b35df578cbd749011b35278c17f995f61.
 - jobs/J021/brief-r1.md
+- Worker be1a7e3b-27e2-494b-8679-e48bc3632e4f stopped blocked with no file changes: factory-tools-install baseline fails at plan preparation with grant must be external, including process-scoped autocrlf=false. All assigned methodology consumed per handoff; no fix or independent review claimed.
+- Coordinator independently ran initiative-plan with the same process-scoped checkout setting: FAIL at tests/initiative-plan.mjs:27, grant must be external. Current tools/isswf-plan.mjs:98 uses POSIX-only ../ containment; directory fsync remains in the later publication path but its failure was not freshly reproduced.
+- One worker budget consumed; reviewer unused. No runtime/test/CI changes, push, PR publication, issue closure or PR87 modification. See jobs/J021/brief-r1.md current blocker for resume decision.
 
 ## J020
 
