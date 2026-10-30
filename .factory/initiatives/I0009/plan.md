@@ -177,12 +177,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J025
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver #83 external plan grant containment.
 - Depends on: J024
 - Brief: [brief-r2.md](jobs/J025/brief-r2.md)
-- Blocker: Independent assessment, committed pinned journey and exact-head native CI pending.
-- Next step: Retain exact candidate, verify pinned first-plan and native boundary CI, obtain scoped review; preserve downstream #85 separately.
+- Blocker: None for verified bounded authority-stage delivery PR110; Windows plan publication remains J026.
+- Next step: Preserve review failures and completed PR110; continue J026 without claiming Windows publication acceptance.
 
 ### Acceptance
 
@@ -196,15 +196,16 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Worker c40a76a0 stopped with native separator guard and focused boundary regression; initial test fixture assertion corrected and retained. Focused Linux checks and coordinator full Linux quality/ESLint/Knip/diff PASS. No #85 changes or native Windows claim.
 - On00287f1 committed release-package and actual pinned Node first-plan/repeat PASS onLinux. Round1 cba4d4ff Standards/Spec/aggregate FAIL: new Git init fixture lacked a required bound. V001.md retained; coordinator added15000ms timeout and error/status checks. Round2 delta review/native exact-head CI pending.
 - Round2 reviewer775d8dbe on401784a15db622197a85965a95f4d4031ab2ef75 Standards/Spec/aggregate PASS LOW, no unresolved delta findings. V002.md retained; final record-only delta does not change reviewed functional bytes. Final artifact and native exact-head CI remain pending.
+- PR110 head97e1a9b4638b6c28458084dcd9c56d29a999aa24 actual committed package/pinnedLinux first-plan/repeat PASS; all3 exact-head Quality41069796193 jobs PASS including dedicated Windows boundary check. Normal expected-head merge4b824d58fde28b9029a8083d11f2ccc283f51050; no Windows first-plan/#85 certification.
 
 ## J026
 
-- Status: pending
+- Status: in-progress
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
-- Brief: [brief-r1.md](jobs/J026/brief-r1.md)
-- Blocker: First-plan Windows route blocked by #83.
-- Next step: After J025, assess the smallest current-main publication repair and distribution/import implications.
+- Brief: [brief-r2.md](jobs/J026/brief-r2.md)
+- Blocker: #83 resolved. Source-writer repair/verification pending; complete pinned Windows launcher acceptance remains blocked by current Linux-only mutation identity, distinct from writer durability.
+- Next step: Implement bounded local-module writer repair on4b824d5, verify native source path and pinnedLinux separately, retain unmet pinnedWindows criterion for explicit disposition before complete acceptance.
 
 ### Acceptance
 
@@ -214,7 +215,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ### Evidence
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
-- jobs/J026/brief-r1.md
+- jobs/J026/brief-r2.md
 
 ## J021
 
