@@ -229,12 +229,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J021
 
-- Status: in-review
+- Status: completed
 - Objective: Resume #86 directory-alias fixture delivery after prerequisites.
 - Depends on: J026
 - Brief: [brief-r3.md](jobs/J021/brief-r3.md)
-- Blocker: Bounded fixture implementation and Linux checks pass; independent assessment and published-head complete native Windows/Linux suites pending. Historical stopped worker remains consumed.
-- Next step: Review retained stopped-worker candidate, publish scoped PR and verify both complete native suites/current-head CI before LOW-risk integration and safe branch cleanup.
+- Blocker: None for verified PR112 integration; historical blocked attempt and first native CI failure remain retained.
+- Next step: Preserve completed ordered #84/#83/#85/#86 delivery and original failures. J023 read-only reviewer Git tooling remains pending and is not started by this completion; no release or installation follows.
 
 ### Acceptance
 
@@ -249,3 +249,5 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Independentreview08550349 at8efa0431aff6ac47d567fd34a1d6dcebef3c2052 Standards/Spec/aggregatePASS LOW nofindings, V001.md retained. Receipt-only follow-up preserves reviewed functional bytes; native exact-head complete suites remain mandatory.
 - PR112 head424db89 Windows Quality41117356428/124274935252 FAIL beforealias: fixture grant project spelling not matching canonical writer root; portable/Ubuntu PASS. Local aliasedTMPDIR reproduced same initiative grant refusal and earlier factory CLI alias failure. Coordinator canonicalized only disposable fixture roots; both fullsuites normal/aliasedLinux nowPASS. Round2 delta review and freshnativeCI pending, no production guard relaxation or claimed native success.
 - Round2 reviewerce544242 at264234083b51ff3d5a61f59949ac1ae398cbf2ed Standards/Spec/aggregate PASS LOW nofindings; V002.md preserves nativeCI requirement and unchanged negativealiases. Receipt-only follow-up does not change reviewed functional bytes; freshnativeCI stillpending.
+- PR112 finalhead73c196296bb149ee63652f8953a261ff150ef7ec fullLinuxquality/ESLint/KnipPASS and all3 Quality41118363573 jobsPASS. Inspected Windows124278378555 log: both complete focal suites emittedPASS, including finalalias/no-write assertions. Normal expected-head LOW-risk integration37c695dfce28e130153ec3b46487ec831c7e2cae verified; local+remote feature branch safely retired after ancestry/head checks, no secondary worktrees.
+- Ordered functional endpoints: PR109/#84 b3045b4264e65303c91c310c76acb6a7142241e6; PR110/#83 4b824d58fde28b9029a8083d11f2ccc283f51050; PR111/#85 035d54cee95dd57799509590ecfd43af18f385f6 with explicit MEDIUM approval; PR112/#86 37c695dfce28e130153ec3b46487ec831c7e2cae. No whole PR87 merge, release, installation or automatic remote issue closure.
