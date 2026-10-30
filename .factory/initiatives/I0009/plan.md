@@ -194,6 +194,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J025/brief-r2.md
 - Worker c40a76a0 stopped with native separator guard and focused boundary regression; initial test fixture assertion corrected and retained. Focused Linux checks and coordinator full Linux quality/ESLint/Knip/diff PASS. No #85 changes or native Windows claim.
+- On00287f1 committed release-package and actual pinned Node first-plan/repeat PASS onLinux. Round1 cba4d4ff Standards/Spec/aggregate FAIL: new Git init fixture lacked a required bound. V001.md retained; coordinator added15000ms timeout and error/status checks. Round2 delta review/native exact-head CI pending.
 
 ## J026
 
