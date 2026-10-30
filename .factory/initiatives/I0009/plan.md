@@ -200,12 +200,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J026
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
-- Brief: [brief-r2.md](jobs/J026/brief-r2.md)
-- Blocker: Awaiting acceptance-boundary decision (native writer Windows/Linux plus pinnedLinux; installed Windows launcher excluded) and explicit MEDIUM-risk integration authorization. Bounded source review and native CI PASS; no automatic merge.
-- Next step: Obtain explicit approval to integrate draft PR111 with MEDIUM risk and the bounded acceptance described in brief-r2; recheck actual current head/CI before any authorized merge. J021/#86 remains blocked until this prerequisite is delivered.
+- Brief: [brief-r3.md](jobs/J026/brief-r3.md)
+- Blocker: Operator rejected Linux-only exclusion. Complete init→pinned plan journey must pass on native Linux/Windows within PR111; minimal launcher identity/sync prerequisites and fresh review/CI pending. MEDIUM-risk merge remains separately unauthorized.
+- Next step: Resume the retained stopped J026 worker once on brief-r3 for scoped launcher/plan parity; preserve claims/pins/identity, verify native installed journey and Pi/Claude shared integration, then reassess risk and exact-head gates. No project-wide port or worker executor replay.
 
 ### Acceptance
 
@@ -215,10 +215,11 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ### Evidence
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
-- jobs/J026/brief-r2.md
+- jobs/J026/brief-r3.md
 - Stopped worker8f421a4b implemented local-module writer/claim/error-phase repair and7scoped files. Actual Linux baseline exposed identical reused success with an existing claim; new fault-injection checks PASS. Coordinator fullLinuxquality/ESLint/Knip/diffPASS. Final-source packaging/native CI/review pending; current pinnedWindows capability cannot be inferred.
 - Exactf9cf240 committed release-package and pinnedLinux firstplan/repeat PASS; independent reviewerb76ce871 bounded Standards/Spec/aggregate PASS, MEDIUM risk, complete acceptance UNMET. V001.md retained. Additional pinnedLinux injected-file-failure/retention/retry refusal PASS observed by coordinator after review; no source delta or third-party power-loss claim.
 - Draft PR111 head e96546aa524b30e6b2bbaa54c05cf0a3fa1a2bde: final committed release-package PASS; all3 Quality41071718220 jobs PASS, inspected Windows124117542413 dedicated publication-durability step success. Subsequent coordinator record-only receipt preserves functional bytes and independent review; actual current head CI must still be observed before integration.
+- Latest retained source+records head9012199 all3 Quality41072321467 jobs PASS. Operator subsequently rejected installed-Windows exclusion and explicitly limited parity correction to PR111; brief-r3 supersedes narrowing proposal. AGENTS.md records per-unit Linux/Windows and Pi/Claude scope, with static writing walkthrough and no broad rewrite. Prior source verdict remains bounded; expanded journey not yet verified.
 
 ## J021
 
