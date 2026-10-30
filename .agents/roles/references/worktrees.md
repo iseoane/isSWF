@@ -19,6 +19,10 @@ git -C "$PROJECT" config --local --get-all isswf.worktreeRoot
 
 The value stays in the common repository's local Git configuration, outside tracked files, and is shared by its linked worktrees. Do not copy the absolute path into tracked setup records, host settings, briefs intended for publication, or global Git configuration. The shared setup record may state that the local choice is configured and name this key, without the value. Choosing a root does not create it, move worktrees, authorize actors, or grant execution. Explicitly approved relocation is separate from selecting the root.
 
+## Bind the assigned checkout before dispatch
+
+A configured external root is a location choice, not proof that a host can bind a child to a prepared checkout. Before parallel dispatch, verify the actual host's supported child working-directory interface can select each approved checkout. If it cannot be verified, disclose parallel binding as unavailable or unverified in the selected setup record and plan sequential writers in the assigned checkout when parallelism is not required. If the assignment explicitly requires parallel writers, block that dispatch; do not silently serialize it. Instructions, isolation labels, host-managed worktrees and post-hoc path checks do not prove the required binding. This gap does not block unrelated authorized work. Do not install/configure hooks or change the approved root as a workaround.
+
 ## Create and delegate
 
 Before each creation, re-read and validate the local choice. Require an authorized assignment, full base SHA, fresh branch and worktree identity, exclusive ownership, available capacity and disk space. The destination must be a previously absent direct child of the approved root. Never use job text as a path or shell fragment. Do not reuse an occupied destination or remove it to retry.
@@ -29,7 +33,7 @@ After validating `PROJECT`, `WORKTREE_ROOT`, `WORKTREE_ID`, `WORKTREE_BRANCH` an
 git -C "$PROJECT" worktree add -b "$WORKTREE_BRANCH" -- "$WORKTREE_ROOT/$WORKTREE_ID" "$BASE_SHA"
 ```
 
-Verify the returned root, branch and HEAD with Git. Supply that exact absolute checkout to the child through the host's supported working-directory interface and required assignment context. In Claude Code, do not use automatic worktree isolation when it would create a second checkout under `.claude/worktrees/` or cannot select the prepared root. If the native caller cannot bind the child to the prepared checkout, block that dispatch and report the capability gap; do not silently use the main checkout, a different dispatcher, or a host default. Instructions alone do not enforce the child's working directory.
+Verify the returned root, branch and HEAD with Git. Supply that exact absolute checkout to the child through the host's supported working-directory interface and required assignment context. In Claude Code, do not use automatic worktree isolation when it would create a second checkout under `.claude/worktrees/` or cannot select the prepared root. If the native caller cannot bind the child to the prepared checkout, block that dispatch and report the capability gap; do not silently use the main checkout, a different dispatcher, or a host default. When parallel writers are not required, plan sequentially in the assigned checkout; when explicitly required, do not silently serialize. Instructions alone do not enforce the child's working directory.
 
 ## Relocate or retire existing work
 

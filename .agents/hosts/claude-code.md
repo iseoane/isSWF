@@ -8,6 +8,12 @@ Discover the current host's supported native models and efforts without provider
 
 The shipped role profiles use `model: inherit` as an explicit configurable default, not proof of actual identity. Confirm approval for inheritance or choose a supported native model through Claude's documented configuration/delegation mechanism. Observe actual model metadata when available; label unknown effort or identity unknown. Never fabricate per-role effort support, silently substitute a model, or dispatch through Pi because Claude cannot satisfy a selection.
 
+## Parallel-writer capability disclosure
+
+During explicit Claude Code setup, inspect the installed host/version and its documented native delegation interface for a supported way to bind each child to the approved prepared external checkout. Record the observed status and evidence in the existing selected-state `project-setup.md`; do not infer binding from `isswf.worktreeRoot`, a profile's isolation setting, or host-managed worktrees. Do not make a model call, install or configure hooks, or widen the approved root for this check. If the interface does not establish that binding, record parallel writers as unavailable or unverified and state the exact gap. The existing project can still be ready for sequential work in its assigned checkout and unrelated authorized work; do not mark parallel readiness as satisfied.
+
+For an assignment that explicitly requires parallel writers, block dispatch until an authorized, verified binding to each prepared checkout is available. Do not silently serialize an explicit concurrency requirement, use automatic worktree isolation when it cannot select the approved root, or claim that instructions and post-hoc verification enforce checkout binding. If parallelism is not required, plan sequential writers in the assigned checkout; missing parallel capability alone does not block that work. Preserve the approved external-root choice and current Pi binding. A future version-specific or hook-based mechanism requires its own evidence and authorization; this check does not install or configure it.
+
 ## Required child context
 
 Before the first native dispatch for new work, resolve `docs/durable-work.md` from the trusted factory root and prepare the canonical plan and curated brief in the target's one active state directory, including for inline small tasks. For a pinned resumption, retain and read its full-SHA inputs. Follow the guide's `tools/project-state.mjs` choice; stop if both `.isswf` and `.factory` exist or the selected entry is unsafe. Complete and freeze coordinator-owned plan/brief records before dispatch while a worker writes. Do not stage worker/reviewer artifacts until their writer is stopped; post-hoc collision detection is not containment. These records do not imply liveness or authority. The source plan CLI is optional and requires its explicit guarded conditions; ordinary native Markdown creation needs no legacy executor, runtime pin, grant CLI or installed source tooling.
@@ -28,7 +34,7 @@ The child must acknowledge its working directory, scope and shared role before t
 
 ## External worktree assignments
 
-For parallel writers or an explicitly requested worktree, follow `.agents/roles/references/worktrees.md`, including `isswf.worktreeRoot`. Sequential work may use the assigned checkout without creating another worktree. Missing native working-directory support blocks that dispatch; do not silently use another directory or host. A separate worktree prevents write collisions, not access to other files or the network.
+For parallel writers or an explicitly requested worktree, follow `.agents/roles/references/worktrees.md`, including `isswf.worktreeRoot`, and verify the host can bind each child to the approved prepared checkout. Sequential work may use the assigned checkout without creating another worktree. Missing binding blocks parallel dispatch (and any sequential dispatch that specifically requires a separate checkout); do not silently use another directory or host. If parallelism is an explicit requirement, do not serialize it; if it is not required, plan sequentially and continue other authorized work. A separate worktree prevents write collisions, not access to other files or the network.
 
 ## Native tools and review
 
