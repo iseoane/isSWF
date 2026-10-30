@@ -24,9 +24,9 @@ A selected feature-to-PR request follows the project's prepared delivery policy,
 
 ![isSWF workflow overview: coordinator, selected supporting roles, implementation, checks and delivery.](docs/en/workflow.svg)
 
-The [overview](docs/en/workflow.svg) is a quick summary. The diagrams retain legacy execution details and are navigation aids, not the authority for current native-host behavior; use the linked guides for the current contract. The [complete English workflow](docs/en/workflow.html) and [complete Spanish workflow](docs/es/workflow.html) open locally in a browser; GitHub's source view does not render these HTML files as a site.
+The [overview](docs/en/workflow.svg) is a quick summary. Open the complete workflow as a web page: [English](https://iseoane.github.io/isSWF/docs/en/workflow.html) · [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html). The diagrams retain legacy execution details and are navigation aids, not the authority for current native-host behavior; use the linked guides for the current contract. For offline viewing, download the [English HTML source](docs/en/workflow.html) or [Spanish HTML source](docs/es/workflow.html); GitHub displays these source files as code.
 
-GitHub Pages is configured to use GitHub Actions. After this workflow is available on `main`, open **Actions → Publish workflow diagrams → Run workflow**, select `main`, and run it when publication is authorized. There is no automatic deployment on push. Once the first deployment succeeds, the diagrams will be available at [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/); configuration alone does not make that address live. The staging step allowlists only the bilingual landing page and the two complete workflow diagrams. Until deployment succeeds, use the repository files or download them for local viewing.
+The site is published at [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/). Updates remain manual: open **Actions → Publish workflow diagrams → Run workflow**, select `main`, and run it when publication is authorized. There is no automatic deployment on push. The staging step allowlists only the bilingual landing page and the two complete workflow diagrams.
 
 ## Retained compiled release (legacy path)
 
