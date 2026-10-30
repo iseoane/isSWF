@@ -236,6 +236,24 @@ assert.ok((await read('.factory/templates/delivery.md')).includes('.agents/skill
 assert.ok(manifest.skills.includes('./skills/isswf-setup'));
 const setup = await read('.agents/skills/isswf-setup/SKILL.md');
 assert.match(setup, /## Discover before asking/);
+// Shipped setup instructions, not a live host/model or Windows filesystem trial.
+const preset = setup.slice(setup.indexOf('### Confirm portable factory defaults'), setup.indexOf('### Setup-managed coordinator entry'));
+for (const row of [
+  '| Coordinator | `opus` / `low` | `openai-codex/gpt-6.1-sol` / `low` |',
+  '| Planner | `opus` / `low` | `openai-codex/gpt-6.1-sol` / `low` |',
+  '| Worker | `sonnet` / `medium` | `openai-codex/gpt-6-luna` / `high` |',
+  '| Researcher | `haiku` / `high` | `openai-codex/gpt-6-luna` / `high` |',
+  '| Reviewer | `opus` / `medium` | `openai-codex/gpt-6.1-sol` / `medium` |',
+]) assert.ok(preset.includes(row), 'Complete confirmed factory role preset: ' + row);
+for (const pattern of [/Accept these defaults, keep the existing selections, or customize/u, /up to two review rounds per functional unit/u, /ceiling, not two mandatory reviews/u, /Beyond two rounds, stop/u, /does not reset spent actors/u, /never silently substitute, inherit or clamp/u, /Installation alone makes no settings changes or model calls/u, /\.pi\/settings\.json/u, /Do not change user-global defaults or legacy/u]) assert.match(preset, pattern);
+for (const hostPath of ['.agents/hosts/pi.md', '.agents/hosts/claude-code.md']) assert.match(await read(hostPath), /SKILL\.md#confirm-portable-factory-defaults/u);
+for (const native of [path.posix, path.win32]) {
+  const primary = native === path.posix ? '/projects/team repo' : 'C:\\projects\\team repo';
+  const expected = native === path.posix ? '/projects/team repo-worktrees' : 'C:\\projects\\team repo-worktrees';
+  assert.equal(native.resolve(native.dirname(primary), native.basename(primary) + '-worktrees'), expected);
+}
+assert.match(await read('.agents/roles/references/worktrees.md'), /resolve\(dirname\(primaryRoot\), basename\(primaryRoot\) \+ '-worktrees'\)/u);
+assert.doesNotMatch(await read('.agents/roles/references/worktrees.md'), /XDG_DATA_HOME/u);
 assert.match(setup, /### Select the local worktree location/u);
 assert.match(setup, /During explicit Claude Code setup, also inspect the installed host\/version/u);
 assert.match(setup, /Record parallel binding as supported only with evidence/u);

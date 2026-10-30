@@ -27,7 +27,7 @@ After installation, run `pi list` to confirm the package, then use `/reload` in 
 
 ### Configure role selections
 
-Use the host's user or trusted-project settings, normally `.pi/settings.json`, for `subagents.agentOverrides.isswf-worker` and the other `isswf-` roles. Set `model` to the approved qualified provider/model and `thinking` to its supported effort. Preserve unrelated settings. The legacy `.factory/models.json` belongs to explicit legacy executor assignments, not this host-native path. Do not maintain a second live selection there.
+During explicit setup, offer the [portable factory preset](../skills/isswf-setup/SKILL.md#confirm-portable-factory-defaults) and confirm acceptance or customization before applying it. Preserve approved existing choices unless replacement is explicitly requested. Use trusted-project `.pi/settings.json` for the coordinator startup defaults and `subagents.agentOverrides.isswf-worker` and the other `isswf-` roles; inspect user settings for precedence, but do not change them as a setup side effect. Set `model` to the approved qualified provider/model and `thinking` to its supported effort. Preserve unrelated settings. The legacy `.factory/models.json` belongs to explicit legacy executor assignments, not this host-native path. Do not maintain a second live selection there.
 
 Before launch, inspect current model/effort availability and the actual loaded agent mapping. Configuration is not permission or proof of subscription coverage. A missing or unsupported selection blocks that delegation; do not silently inherit, clamp, switch providers, or substitute a model. Explicit parent inheritance is allowed only when approved and its effective selection is known.
 

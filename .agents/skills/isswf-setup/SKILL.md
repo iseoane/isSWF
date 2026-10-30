@@ -12,6 +12,26 @@ Run only on an explicit operator request to set up, inspect, update, or recover 
 
 For new ordinary projects, inspect the current checkout, existing setup and actual host. Use [Pi](../../hosts/pi.md) or [Claude Code](../../hosts/claude-code.md) for native role/model/effort configuration and missing capability checks. Preserve existing choices and unrelated settings. Resolve only missing tracking, permissions, execution/correction budgets, worktree and delivery choices under [feature delivery](../../roles/references/feature-delivery.md). Keep roles conditional; no default mandatory pipeline.
 
+### Confirm portable factory defaults
+
+The installed factory ships this preset as setup instructions, not an install-time host mutation. On Linux and Windows, first inspect existing approved selections and effective host configuration. For unset choices, present the following defaults and ask once: **Accept these defaults, keep the existing selections, or customize specific values?** Show differences before replacing existing choices. Explicit acceptance in the current request, including a request to apply this preset, needs no second confirmation. Never overwrite an existing custom choice merely because a newer preset ships.
+
+| Role | Claude Code model / effort | Pi model / thinking |
+| --- | --- | --- |
+| Coordinator | `opus` / `low` | `openai-codex/gpt-6.1-sol` / `low` |
+| Planner | `opus` / `low` | `openai-codex/gpt-6.1-sol` / `low` |
+| Worker | `sonnet` / `medium` | `openai-codex/gpt-6-luna` / `high` |
+| Researcher | `haiku` / `high` | `openai-codex/gpt-6-luna` / `high` |
+| Reviewer | `opus` / `medium` | `openai-codex/gpt-6.1-sol` / `medium` |
+
+These are requested defaults, not proof of availability. Resolve exact model identity and supported effort through the actual host without model calls. Unavailable models, unsupported efforts or unverified persistence leave the affected role pending; report the specific gap and ask for a supported selection, never silently substitute, inherit or clamp. Keep conditional roles conditional; diagnosis uses the selected worker and debug methodology unless a separate supported assignment is approved.
+
+The default review allowance is **up to two review rounds per functional unit**, including the initial assessment and any affected-delta reassessment. This is a ceiling, not two mandatory reviews, an automatic correction loop or permission to rerun unchanged checks. Apply proportionate verification; corrections remain within accepted scope and assignment capacity. Beyond two rounds, stop for an explicit extension unless the operator already supplied one. Record an assignment-specific finite actor/time/cost budget before dispatch; this preset does not reset spent actors, authorize provider calls, cover paid usage or create unlimited workers/retries. Do not invent a timeout that the operator has not accepted.
+
+The default worktree layout is `../<repo>-worktrees/<feature>`, relative to the canonical primary repository, not a linked checkout or the current shell directory. Resolve native absolute paths on each machine through the [worktree procedure](../../roles/references/worktrees.md); keep the absolute root only in repository-local `isswf.worktreeRoot`. Confirmation configures the location, not creation, relocation or cleanup of existing checkouts.
+
+After acceptance, apply only the actual host's supported project-local configuration and record both hosts' approved preferences in the existing setup record when requested. For Pi, persist coordinator `defaultProvider`, `defaultModel` and `defaultThinkingLevel`, and `subagents.agentOverrides.isswf-{planner,worker,researcher,reviewer}` model/thinking in `.pi/settings.json`, preserving unrelated keys and source-package filters. Do not change user-global defaults or legacy `.factory/models.json`. Project trust and reload may be required; settings on disk are not live mapping evidence. For Claude Code, follow the [native configuration guide](../../hosts/claude-code.md); do not invent a per-role effort field or claim another host was configured from Pi. If a supported persistence mechanism is unavailable, record approved preferences and the pending application step honestly. Installation alone makes no settings changes or model calls.
+
 ### Setup-managed coordinator entry in the target `AGENTS.md`
 
 On an explicit setup request, prepare or reconcile one small isSWF entry section in the target repository root's `AGENTS.md`. This is a shared project instruction read by Pi and Claude Code; do not create a second `CLAUDE.md` bridge or change host invocation/configuration to provide this entry point. It is an instruction for discovery, not a host hook or permission grant.
