@@ -204,8 +204,8 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
 - Brief: [brief-r2.md](jobs/J026/brief-r2.md)
-- Blocker: Awaiting explicit acceptance-boundary decision: deliver native writer Windows/Linux plus pinnedLinux, excluding current Linux-only installed Windows launcher? Source implementation done; independent source review/native CI pending.
-- Next step: Continue bounded source review/CI and ask the recorded specific scope question; no complete acceptance or integration until that criterion is reconciled.
+- Blocker: Awaiting acceptance-boundary decision (native writer Windows/Linux plus pinnedLinux; installed Windows launcher excluded) and explicit MEDIUM-risk integration authorization. Bounded source review PASS; exact-head native CI pending.
+- Next step: Publish a draft and finish native exact-head CI, then obtain the recorded scope and MEDIUM-risk integration decisions; no complete acceptance or merge from LOW-only permission.
 
 ### Acceptance
 
@@ -217,6 +217,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J026/brief-r2.md
 - Stopped worker8f421a4b implemented local-module writer/claim/error-phase repair and7scoped files. Actual Linux baseline exposed identical reused success with an existing claim; new fault-injection checks PASS. Coordinator fullLinuxquality/ESLint/Knip/diffPASS. Final-source packaging/native CI/review pending; current pinnedWindows capability cannot be inferred.
+- Exactf9cf240 committed release-package and pinnedLinux firstplan/repeat PASS; independent reviewerb76ce871 bounded Standards/Spec/aggregate PASS, MEDIUM risk, complete acceptance UNMET. V001.md retained. Additional pinnedLinux injected-file-failure/retention/retry refusal PASS observed by coordinator after review; no source delta or third-party power-loss claim.
 
 ## J021
 

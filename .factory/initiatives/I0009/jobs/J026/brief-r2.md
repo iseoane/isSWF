@@ -41,3 +41,9 @@ Initial new empty-claim fixture lacked parent directories and failed ENOENT; wor
 ## Explicit acceptance question
 
 Coordinator asked the operator: accept this bounded delivery with native source-writer Windows/Linux checks and actual pinned Linux launcher, leaving complete installed Windows launcher outside this unit? Current installed launcher mutation identity is Linux-only. Until the operator dispositions that requested pinned Windows criterion, complete issue acceptance/integration remains awaiting-human even if bounded source review and CI pass. Continue safe checks/review without importing legacy platform support or falsely certifying that journey.
+
+## Independent bounded assessment and retained decision boundary
+
+Reviewerb76ce871 onf9cf2402ecdfbe296b688ae0b2b2fc55846313e2 returned Standards PASS, bounded-source Spec/aggregate PASS, no blocking source findings, risk MEDIUM due to stateful publication/interruption semantics. Complete85 acceptance remains UNMET pending native CI and explicit pinnedWindows boundary decision. V001.md preserves full attributed outcome; LOW-only integration grant does not cover this medium-risk candidate. Coordinator asks for both bounded acceptance and explicit medium-risk integration authorization after gates, not a risk downgrade.
+
+Coordinator observed exact committedf9cf240 release-package PASS; actual Node build/init/pinnedLinux firstplan prepared/repeat reused PASS. After review, additional exact-candidate pinnedLinux injected regular-file sync failure reached the writer through actual launcher: fatal before-publication diagnostic, pending bytes/claim retained, no plan.md; uninjected retry refused with byte-identical retained claim. This additional evidence is coordinator-observed, not independently rerun by reviewer, and is not real power-loss evidence. Follow-up changes only evidence records, not reviewed functional bytes.
