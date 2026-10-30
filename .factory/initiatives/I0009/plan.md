@@ -108,3 +108,25 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Base `2c345866ade9d77a4c4f5724420a2929be9b046f`; functional snapshot `db5b33cfdb8104fdcf255387e9ef4943f6ee1d979c9b19cb38d3ca50e18ca71a`.
 - Independent native Pi Linux Standards/Spec/aggregate PASS, no findings; two Sol contexts consumed 150344 of 180000ms. No further actor or retry is authorized.
 - Windows batch/static/docs/diff and Linux batch/full quality plus actual candidate-artifact inspection passed. Future Windows compiled parity, committed-source packaging and exact-head CI remain explicit delivery gates.
+
+## J022
+
+- Status: in-review
+- Objective: Ship confirmed portable host defaults and apply approved choices to this repository.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J022/brief-r1.md)
+- Blocker: Native subagent tools unavailable; required independent review and exact-head delivery checks remain pending.
+- Next step: Publish the bounded candidate as a draft PR, obtain independent semantic assessment when native tools are available, and inspect exact-head CI. Normal main integration is authorized only for LOW risk with all required gates satisfied.
+
+### Acceptance
+
+- Setup offers approved role/model/effort defaults, up to two review rounds and sibling worktrees on Linux/Windows; confirmation precedes configuration.
+- Preserve existing custom choices, unrelated settings and historical budgets; record this repository's approved extra-review exception separately.
+- Verify focused instruction contracts and paired guides; do not claim actual host/provider behavior from static checks.
+
+### Evidence
+
+- Current operator selected the complete preset and explicitly requested its application to this repository; later authorized LOW-risk PR integration after required gates.
+- Factory preset, native host guides, sibling worktree procedure, paired user guides and focused static contracts implemented; ignored project-local Pi settings and local Git preference applied without global changes or checkout creation.
+- Coordinator observed full Linux quality, focused host-portability/docs, ESLint, Knip and diff PASS; committed-candidate packaging, independent semantic assessment and exact-head CI remain separate pending gates.
+- jobs/J022/brief-r1.md

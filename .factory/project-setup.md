@@ -36,6 +36,29 @@ Legacy `.factory/models.json` applies only to explicitly selected legacy-executo
 - #89 capability disclosure is recorded above. No new native Claude external-checkout binding is implemented or claimed. No setup-driven changes to host settings, model choices, permissions, installed pins or worktree location were made.
 - After local instruction changes, run `/reload` in Pi to reload skills and context files. Reload has not been observed as part of this reconciliation; it is not an installation or proof of future agent adherence. The known #84 CRLF test failure remains unresolved and is not a new setup prerequisite.
 
+## Current Linux cross-machine reconciliation
+
+Inspected the current Linux source checkout at `82a1338b35df578cbd749011b35278c17f995f61` under the operator's explicit setup-reconciliation request. The existing GitHub destination, single `.factory/` state root, managed coordinator entry and delivery boundaries remain unchanged. Historical readiness above describes the original host, not automatic readiness on this machine.
+
+- Pi 1.4.0 and user-registered `pi-subagents@0.83.0` are present. After the reported reload, extension skills are visible, but neither `subagent` nor `subagents_enable` is exposed to this coordinator. Loaded role discovery and effective role mapping remain unverified; no model was launched or alternate dispatcher used.
+- Current user settings have no `subagents.agentOverrides`, and no project `.pi/settings.json` exists. The four shared Pi agent profiles declare methodology/tools but no model or effort. The current coordinator startup selection is not an approved role selection. Historical machine-local role overrides have not been transferred or recreated.
+- Offline model discovery lists OpenAI Codex candidates, including `gpt-6-luna` and `gpt-6.1-sol`; listing does not establish effort compatibility, subscription quota or execution permission. No credentials were read, host configuration changed or new provider selected.
+- A repository-local external worktree-root preference exists, but its directory is absent on this machine. Preserve the preference; validate or prepare an authorized workspace before using it. This does not block read-only preparation or sequential work in an exclusively owned checkout.
+- For the four selected Windows issues, preserve order #84 -> #83 -> #85 -> #86 and the consumed historical #86 worker. Its reviewer was unused; no finite new actor/correction budget or role mapping is inferred from this setup request. Current implementation/feature-PR authorization is separate from those unresolved delegation prerequisites.
+
+Readiness is **partial**: project methodology and delivery choices are retained; loaded native tools, effective approved role model/effort and finite assignment capacity remain unresolved. Do not repeat a full setup interview, rewrite legacy routing, reactivate the parked executor or infer that another machine's user configuration is shared through Git.
+
+## Approved portable preset for this repository
+
+The current operator explicitly accepts the factory preset in `.agents/skills/isswf-setup/SKILL.md`, section “Confirm portable factory defaults”, for both hosts and requests its application here. This supersedes the missing-selection observation in the Linux reconciliation above, without rewriting historical execution inputs or budgets.
+
+- Pi coordinator startup and the four `isswf-` role model/thinking overrides are persisted in ignored project-local `.pi/settings.json`. User-global settings are unchanged. The source-host isolation helper's project filters were applied and preserved so the installed resource package does not shadow source resources in this checkout. Offline discovery lists both requested Codex model IDs; live tool mapping and effective effort verification remain pending until the host exposes native delegation tools after reload.
+- Claude Code model selection: the complete portable preset is approved. It has not been applied to or verified in a running Claude host from this Pi session. Use the native host guide to persist/verify supported model and per-role effort; unsupported Haiku high or any other selection stays pending rather than silently clamped or replaced.
+- Worktree location: the operator explicitly replaced the old local choice with the factory sibling layout. Validated repository-local `isswf.worktreeRoot` is configured; no directory or checkout was created, moved or removed. Keep its absolute value out of shared records.
+- Review allowance: up to two rounds per functional unit by default, not two mandatory reviews. For this repository only, the operator permits additional rounds when the coordinator judges them necessary; record each reason and candidate. This is not a shipped unlimited-review default or a reset of prior consumed actors. Resolve the concrete finite call/time/cost boundary before dispatch; no automatic retries, model substitutions, paid API use or legacy executor resumption follows.
+
+Requested local Pi configuration is applied; live native-delegation readiness remains **partial**. Claude preferences are approved but application/capability checks remain pending on that host. Static factory instruction tests are not evidence that a real setup or model call ran on Windows or Claude.
+
 ## History: read only when investigating the relevant work
 
 - The pre-simplification setup/trial record is retained in `.factory/initiatives/I0009/setup-history.md`, including the original source-checkpoint reference and later observations. Read it only for historical investigation, not current configuration or grants. J007's existing briefs own the related worker/reviewer trial evidence; failures and inconclusive results are unchanged.
