@@ -1,0 +1,5 @@
+# J001 release delivery
+
+Source review1/2 V001 PASS/PASS LOW on f7c527f446368b4ed5ca36e37d4224ab7c3d195c; not artifact/publication acceptance. PR107 initial Quality41048488789: native Windows/Linux PASS, portable FAIL at tools/check-quality.mjs:37 because new skill optional license/metadata fields violate this repository's narrower frontmatter regex. This newly introduced formatting failure is not #84 and remains retained. Removed only those optional fields to match existing project schema; skill body/authority gates unchanged. Repository MIT still applies. This is a disclosed deviation from generic skill-creator metadata template in favor of actual project contract. Coordinator mechanically verified corrected frontmatter and unchanged body, requiring fresh exact-head CI; no second semantic review consumed for this metadata-only delta. Prior source judgment remains attributed to its original candidate.
+
+Actual release publication remains blocked until final exact-source CI and native archives/receipts/reports/checksums inspection. Existing local CRLF failure #84 is separate and unchanged. No release tag, draft, package publication or installed update yet.

@@ -2,10 +2,6 @@
 name: isswf-release
 description: "Trigger: release, publish a version, emitir una release. Prepare and verify this repository's GitHub release and native artifacts."
 disable-model-invocation: true
-license: MIT
-metadata:
-  author: iseoane
-  version: "1.0"
 ---
 
 # Release this repository
