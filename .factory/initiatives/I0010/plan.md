@@ -114,7 +114,7 @@ Type: maintenance
 
 ## J007
 
-- Status: ready
+- Status: in-review
 - Objective: Resolve #89 by verifying and reconciling supported Claude parallel-writer capabilities.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
@@ -127,5 +127,5 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #89 and published triage.
+- GitHub issue #89 and published triage; jobs/J007/V001.md and jobs/J007/delivery.md; candidate80f1c4923836f7cbbb32794f74dc498462cda304 independent first review PASS/PASS LOW, docs/diff PASS; known #84 native CRLF failure retained. Required exact-head CI pending.
 
