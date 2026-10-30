@@ -26,4 +26,4 @@ Static procedure implementation and independent review complete; publication/CI 
 
 ## Blockers and next action
 
-Publish, inspect CI, integrate/clean if gates hold; investigate #89 native parallel-writer capability next.
+PR105 published. Initial Quality41014347739 failed all three jobs at new bridge-count assertion (0 != 1): regex omitted Markdown backticks around CLAUDE.md. Mechanical correction b5091171b5f06fa9bcc1ac20b7c232eec03b37be changes only that expression; targeted corrected count/docs/diff PASS. Earlier semantic PASS remains attributed to its reviewed candidate, with this test-only delta assessed mechanically under the changed-candidate rule; no second actor consumed. Keep initial failure visible and require fresh CI on the final head before integration/cleanup. Investigate #89 next.
