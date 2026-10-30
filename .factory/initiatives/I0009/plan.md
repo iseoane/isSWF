@@ -177,12 +177,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J025
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver #83 external plan grant containment.
 - Depends on: J024
 - Brief: [brief-r2.md](jobs/J025/brief-r2.md)
-- Blocker: Independent assessment, committed pinned journey and exact-head native CI pending.
-- Next step: Retain exact candidate, verify pinned first-plan and native boundary CI, obtain scoped review; preserve downstream #85 separately.
+- Blocker: None for verified bounded authority-stage delivery PR110; Windows plan publication remains J026.
+- Next step: Preserve review failures and completed PR110; continue J026 without claiming Windows publication acceptance.
 
 ### Acceptance
 
@@ -196,15 +196,16 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Worker c40a76a0 stopped with native separator guard and focused boundary regression; initial test fixture assertion corrected and retained. Focused Linux checks and coordinator full Linux quality/ESLint/Knip/diff PASS. No #85 changes or native Windows claim.
 - On00287f1 committed release-package and actual pinned Node first-plan/repeat PASS onLinux. Round1 cba4d4ff Standards/Spec/aggregate FAIL: new Git init fixture lacked a required bound. V001.md retained; coordinator added15000ms timeout and error/status checks. Round2 delta review/native exact-head CI pending.
 - Round2 reviewer775d8dbe on401784a15db622197a85965a95f4d4031ab2ef75 Standards/Spec/aggregate PASS LOW, no unresolved delta findings. V002.md retained; final record-only delta does not change reviewed functional bytes. Final artifact and native exact-head CI remain pending.
+- PR110 head97e1a9b4638b6c28458084dcd9c56d29a999aa24 actual committed package/pinnedLinux first-plan/repeat PASS; all3 exact-head Quality41069796193 jobs PASS including dedicated Windows boundary check. Normal expected-head merge4b824d58fde28b9029a8083d11f2ccc283f51050; no Windows first-plan/#85 certification.
 
 ## J026
 
-- Status: pending
+- Status: awaiting-human
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
-- Brief: [brief-r1.md](jobs/J026/brief-r1.md)
-- Blocker: First-plan Windows route blocked by #83.
-- Next step: After J025, assess the smallest current-main publication repair and distribution/import implications.
+- Brief: [brief-r3.md](jobs/J026/brief-r3.md)
+- Blocker: Scoped Linux/Windows parity and independent corrected review PASS; explicit authorization to integrate MEDIUM-risk PR111 is pending. Final current-head CI must remain green; no LOW-only merge.
+- Next step: Publish retained review receipts, inspect final exact-head CI, and request explicit MEDIUM-risk PR111 integration approval. Preserve #86 dependency until actual integration; no further reviewer call needed for receipt-only delta.
 
 ### Acceptance
 
@@ -214,7 +215,16 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ### Evidence
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
-- jobs/J026/brief-r1.md
+- jobs/J026/brief-r3.md
+- Stopped worker8f421a4b implemented local-module writer/claim/error-phase repair and7scoped files. Actual Linux baseline exposed identical reused success with an existing claim; new fault-injection checks PASS. Coordinator fullLinuxquality/ESLint/Knip/diffPASS. Final-source packaging/native CI/review pending; current pinnedWindows capability cannot be inferred.
+- Exactf9cf240 committed release-package and pinnedLinux firstplan/repeat PASS; independent reviewerb76ce871 bounded Standards/Spec/aggregate PASS, MEDIUM risk, complete acceptance UNMET. V001.md retained. Additional pinnedLinux injected-file-failure/retention/retry refusal PASS observed by coordinator after review; no source delta or third-party power-loss claim.
+- Draft PR111 head e96546aa524b30e6b2bbaa54c05cf0a3fa1a2bde: final committed release-package PASS; all3 Quality41071718220 jobs PASS, inspected Windows124117542413 dedicated publication-durability step success. Subsequent coordinator record-only receipt preserves functional bytes and independent review; actual current head CI must still be observed before integration.
+- Latest retained source+records head9012199 all3 Quality41072321467 jobs PASS. Operator subsequently rejected installed-Windows exclusion and explicitly limited parity correction to PR111; brief-r3 supersedes narrowing proposal. AGENTS.md records per-unit Linux/Windows and Pi/Claude scope, with static writing walkthrough and no broad rewrite.
+- Same worker resumed once as9e8df97c and stopped with local bounded Windows PID/start/boot identity, conservative cessation, mandatory-file/platform-directory policy and native artifact plan journeys. Coordinator strengthened genuine Node vs Bun pin assertions and unknown-platform refusal; old3f artifact control FAIL as expected, candidate static/docs checks PASS. Exact new-artifact/nativeWindows/review gates remain pending.
+- Exact777560c Linux fullquality/ESLint/Knip and actual installedBun+genuineNode plan/claim/protectedbytes journeys PASS. Expanded reviewer611ccf8f Standards/Spec/aggregate FAIL MEDIUM: permissive Date.parse persisted Windows encoding can authorize uncertain recovery; V002.md retained. Coordinator corrected strict shared native timestamp validation and livePID malformed-encoding regression, selects justified round3 under operator exception. NativeWindows remains unverified until exact-head CI.
+- Corrected670519b actual Linux fullquality/ESLint/Knip plus installedBun and genuineNode journeys PASS. Additional reviewer1fe7cc3f failed before report with Codex usage limit; V003.md records inconclusive/no verdict, not a pass. No automatic actor/model retry.
+- PR111 heada3d1888 Quality41107860131 all3 PASS. Retrieved native Windows artifact/host reports at syntheticmerge98d341e; fetched merge tree exactly matches a3d1888. ActualBun/Node plan journeys and Pi/Claude discovery PASS, not live providers. Following explicit operator continuation, observed oldreview terminal failure and allocated one same-route resumed review under discretionary grant; no assumed quota or automatic loop.
+- Resumed reviewer33f72095 atb619114 Standards/Spec/aggregate PASS, MEDIUM risk, no blocking findings; V004.md retains exact installedLinux/Windows plan scope and affected safety assessment. V002FAIL/V003unavailable retained. Receipt-only follow-up leaves functional670519b unchanged; MEDIUM integration authorization still required. Prior source verdict remains bounded; expanded journey not yet verified.
 
 ## J021
 

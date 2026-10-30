@@ -39,7 +39,11 @@ async function writeExclusive(path, bytes) {
   try { await link(temp, path); } finally { await unlink(temp); }
   await syncDirectory(dirname(path));
 }
-async function syncDirectory(path) { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } }
+async function syncDirectory(path) {
+  // Windows rejects directory-handle sync; regular-file sync remains mandatory.
+  if (process.platform === 'win32') return;
+  const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); }
+}
 async function atomic(path, bytes) {
   const temp = join(dirname(path), '.isswf-' + randomUUID());
   await writeExclusive(temp, bytes);
@@ -119,12 +123,42 @@ async function retain(store, from) {
     return target;
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
 }
+// Validate CIM's UTC round-trip encoding without discarding its 100ns identity precision.
+function windowsTimestamp(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{7}Z$/u.test(value)) return false;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value.replace(/(\.\d{3})\d{4}Z$/u, '$1Z');
+}
+// A Windows PID is reusable; bind it to process creation and OS boot times.
+function windowsProcessIdentity(pid) {
+  if (!Number.isSafeInteger(pid) || pid <= 0) fail('Invalid Windows process identity PID');
+  const script = `$ErrorActionPreference = 'Stop'; $p = Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}'; $boot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o'); if ($null -eq $p) { @{bootId=$boot; process=$null} | ConvertTo-Json -Compress } else { @{bootId=$boot; process=@{pid=[int]$p.ProcessId; startTime=$p.CreationDate.ToUniversalTime().ToString('o')}} | ConvertTo-Json -Compress }`;
+  const executable = join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe');
+  const result = spawnSync(executable, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { encoding: 'utf8', timeout: 15000, maxBuffer: 16384, windowsHide: true });
+  if (result.error || result.status !== 0) fail('Windows process identity unavailable; recovery remains blocked');
+  const value = JSON.parse(result.stdout.replace(/^\uFEFF/u, '').trim());
+  if (!windowsTimestamp(value.bootId) || value.process !== null && (value.process?.pid !== pid || !windowsTimestamp(value.process.startTime))) fail('Invalid Windows process identity evidence');
+  return value;
+}
 async function identity() {
-  if (process.platform !== 'linux') fail('Mutation recovery requires Linux process identity support');
+  if (process.platform === 'win32') {
+    const value = windowsProcessIdentity(process.pid);
+    if (!value.process) fail('Current Windows process identity unavailable');
+    return { platform: 'win32', ...value.process, bootId: value.bootId };
+  }
+  if (process.platform !== 'linux') fail('Mutation recovery requires Linux or Windows process identity support');
   const stat = await readFile(`/proc/${process.pid}/stat`, 'utf8');
   return { pid: process.pid, startTicks: stat.slice(stat.lastIndexOf(')') + 2).split(/\s+/u)[19], bootId: (await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() };
 }
 async function ceased(owner) {
+  if (owner?.platform === 'win32') {
+    if (process.platform !== 'win32' || !Number.isSafeInteger(owner.pid) || owner.pid <= 0 || !windowsTimestamp(owner.startTime) || !windowsTimestamp(owner.bootId)) return false;
+    try {
+      const value = windowsProcessIdentity(owner.pid);
+      return value.bootId !== owner.bootId || value.process === null || value.process.startTime !== owner.startTime;
+    } catch { return false; }
+  }
+  if (process.platform !== 'linux' || owner?.platform !== undefined) return false;
   if (!Number.isSafeInteger(owner?.pid) || owner.pid <= 0 || !/^\d+$/u.test(owner.startTicks || '') || !/^[a-f0-9-]{36}$/u.test(owner.bootId || '')) return false;
   try {
     if ((await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() !== owner.bootId) return true;

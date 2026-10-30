@@ -84,6 +84,8 @@ jobs:
         run: node tests/checkout-line-endings.mjs .
       - name: Verify external plan grant boundaries
         run: node tests/plan-grant-boundary.mjs .
+      - name: Verify plan publication durability
+        run: node tests/plan-publication.mjs .
       - name: Verify worker-route admission
         run: node tests/worker-route-admission.mjs .
       - name: Verify static host portability
