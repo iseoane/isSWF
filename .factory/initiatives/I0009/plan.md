@@ -111,12 +111,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J022
 
-- Status: in-review
+- Status: completed
 - Objective: Ship confirmed portable host defaults and apply approved choices to this repository.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J022/brief-r1.md)
-- Blocker: Native subagent tools unavailable; required independent review and exact-head delivery checks remain pending.
-- Next step: Publish the bounded candidate as a draft PR, obtain independent semantic assessment when native tools are available, and inspect exact-head CI. Normal main integration is authorized only for LOW risk with all required gates satisfied.
+- Blocker: None for the verified PR108 integration; native subagent access is now verified.
+- Next step: Preserve completed PR108 and proceed to J024/#84; no release or global host update is implied.
 
 ### Acceptance
 
@@ -128,5 +128,105 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 - Current operator selected the complete preset and explicitly requested its application to this repository; later authorized LOW-risk PR integration after required gates.
 - Factory preset, native host guides, sibling worktree procedure, paired user guides and focused static contracts implemented; ignored project-local Pi settings and local Git preference applied without global changes or checkout creation.
-- Coordinator observed full Linux quality, focused host-portability/docs, ESLint, Knip and diff PASS; committed-candidate packaging, independent semantic assessment and exact-head CI remain separate pending gates.
+- Candidate990306075f5f1fc1ae93f5225d9b2355d80cc59a: committed release-package PASS; native reviewer de0995b8-5f04-4d50-83e4-65a49eb4c28b Standards/Spec/aggregate PASS, LOW risk, no findings; all3 exact-head CI jobs PASS run41064622295. PR108 integrated with expected-head guard as2ed2c692894c9ba05b85961899e57bad869a4434. Independent report: https://github.com/iseoane/isSWF/pull/108#issuecomment-6524315291.
 - jobs/J022/brief-r1.md
+
+## J023
+
+- Status: pending
+- Objective: Give isSWF reviewers narrowly scoped read-only Git evidence without a general shell.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J023/brief-r1.md)
+- Blocker: Tracking only; implementation design, host capability assessment and execution authorization remain pending.
+- Next step: Prepare a bounded native-host proposal after the currently selected Windows issue work; do not implement or publish from this tracking request.
+
+### Acceptance
+
+- Reviewers can obtain exact authorized diff, committed content, status and identities through validated operations.
+- No shell, arbitrary commands, executable Git helpers, writes, publication or repository/path escape; positive and negative tests preserve bytes.
+- Assess native Linux/Windows and Pi/Claude capabilities without claiming unsupported isolation or substituting another dispatcher.
+
+### Evidence
+
+- Operator explicitly requests a durable isSWF task rather than an agent todo.
+- PR108 reviewer requested coordinator-supplied diff because its read/search toolset had no Git execution capability; the completed review remains valid.
+- jobs/J023/brief-r1.md
+
+## J024
+
+- Status: in-review
+- Objective: Deliver #84 LF checkout integrity.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J024/brief-r1.md)
+- Blocker: Independent assessment and fresh exact-head Windows/Linux CI remain pending.
+- Next step: Review the stopped worker candidate, publish its scoped PR and inspect exact-head native CI before LOW-risk integration.
+
+### Acceptance
+
+- Use * text=auto eol=lf; verify fresh true/false autocrlf checkouts, binary preservation, exact blob bytes, no-SDK route guard and host-static checks without runtime normalization or user/global changes.
+- Bounded historical extraction only; required exact-candidate review/checks and exact-head CI before delivery. Normal main integration only if LOW risk and all gates pass.
+
+### Evidence
+
+- Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
+- jobs/J024/brief-r1.md
+- Worker da3884d3-6d7e-4bb0-b2e4-4309ec894ffe stopped after bounded seven-path implementation; focused tests PASS and no-policy disposable sensitivity FAIL as expected. Coordinator full Linux quality, ESLint, Knip and diff PASS; packaging in that run used input checkpoint2817481, not yet the implementation commit.
+- Round1 reviewer04ba20b7 on03e4c46 Standards/Spec/aggregate FAIL: Windows multiline step can mask early exit failure. V001.md preserves finding; coordinator split into separate single-command steps. Round2 delta review and exact-head native CI pending.
+- Round2 reviewer c7e8ab78 on c17e0c35fb6f2e2973c6e169c77762edf70097a0 Standards/Spec/aggregate PASS, LOW risk; V002.md preserves resolution without erasing V001. New record-only delta leaves reviewed functional bytes unchanged. Committed packaging and exact-head native CI remain delivery gates.
+
+## J025
+
+- Status: pending
+- Objective: Deliver #83 external plan grant containment.
+- Depends on: J024
+- Brief: [brief-r1.md](jobs/J025/brief-r1.md)
+- Blocker: Waiting for ordered #84 delivery; no hard runtime dependency on attributes.
+- Next step: After J024, reopen current plan writer and extract only the native external-grant guard/regression.
+
+### Acceptance
+
+- External sibling grants pass the authority stage; internal/root and canonical aliases into the project refuse on Windows/Linux, preserving authority and absence of writes.
+- Bounded historical extraction only; required exact-candidate review/checks and exact-head CI before delivery. Normal main integration only if LOW risk and all gates pass.
+
+### Evidence
+
+- Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
+- jobs/J025/brief-r1.md
+
+## J026
+
+- Status: pending
+- Objective: Deliver #85 durable native plan publication.
+- Depends on: J025
+- Brief: [brief-r1.md](jobs/J026/brief-r1.md)
+- Blocker: First-plan Windows route blocked by #83.
+- Next step: After J025, assess the smallest current-main publication repair and distribution/import implications.
+
+### Acceptance
+
+- Mandatory regular-file sync and Linux directory durability remain; Windows policy is explicit; pre/post-publication failures preserve claims/bytes and uncertain identical repeats refuse.
+- Bounded historical extraction only; required exact-candidate review/checks and exact-head CI before delivery. Normal main integration only if LOW risk and all gates pass.
+
+### Evidence
+
+- Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
+- jobs/J026/brief-r1.md
+
+## J021
+
+- Status: blocked
+- Objective: Resume #86 directory-alias fixture delivery after prerequisites.
+- Depends on: J026
+- Brief: [brief-r2.md](jobs/J021/brief-r2.md)
+- Blocker: Prior native worker stopped without edits before alias checks at #83; #85 also precedes full suite acceptance.
+- Next step: Resume only after J025/J026 and byte-stable checks, reconcile fresh worker capacity without resetting consumed history.
+
+### Acceptance
+
+- Windows junctions and Linux directory symlinks exercise intended refusal with lstat evidence and no target writes; both complete suites required in native CI; file symlinks excluded.
+- Bounded historical extraction only; required exact-candidate review/checks and exact-head CI before delivery. Normal main integration only if LOW risk and all gates pass.
+
+### Evidence
+
+- Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
+- jobs/J021/brief-r2.md
