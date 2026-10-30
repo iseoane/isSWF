@@ -154,12 +154,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J024
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver #84 LF checkout integrity.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J024/brief-r1.md)
-- Blocker: Independent assessment and fresh exact-head Windows/Linux CI remain pending.
-- Next step: Review the stopped worker candidate, publish its scoped PR and inspect exact-head native CI before LOW-risk integration.
+- Blocker: None for PR109 integrated endpoint.
+- Next step: Preserve round1 adverse evidence and completed LOW-risk integration; continue J025/#83.
 
 ### Acceptance
 
@@ -173,15 +173,16 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Worker da3884d3-6d7e-4bb0-b2e4-4309ec894ffe stopped after bounded seven-path implementation; focused tests PASS and no-policy disposable sensitivity FAIL as expected. Coordinator full Linux quality, ESLint, Knip and diff PASS; packaging in that run used input checkpoint2817481, not yet the implementation commit.
 - Round1 reviewer04ba20b7 on03e4c46 Standards/Spec/aggregate FAIL: Windows multiline step can mask early exit failure. V001.md preserves finding; coordinator split into separate single-command steps. Round2 delta review and exact-head native CI pending.
 - Round2 reviewer c7e8ab78 on c17e0c35fb6f2e2973c6e169c77762edf70097a0 Standards/Spec/aggregate PASS, LOW risk; V002.md preserves resolution without erasing V001. New record-only delta leaves reviewed functional bytes unchanged. Committed packaging and exact-head native CI remain delivery gates.
+- PR109 head091d038a2455e293352e56c933f37eae19ea9d09: committed release-package PASS, all3 exact-head Quality41067870179 jobs PASS; inspected Windows124103970576 separate byte/route/host steps success. Normal expected-head integration b3045b4264e65303c91c310c76acb6a7142241e6. Issue closure is separate; no release/VM/global config changes.
 
 ## J025
 
-- Status: pending
+- Status: in-review
 - Objective: Deliver #83 external plan grant containment.
 - Depends on: J024
-- Brief: [brief-r1.md](jobs/J025/brief-r1.md)
-- Blocker: Waiting for ordered #84 delivery; no hard runtime dependency on attributes.
-- Next step: After J024, reopen current plan writer and extract only the native external-grant guard/regression.
+- Brief: [brief-r2.md](jobs/J025/brief-r2.md)
+- Blocker: Independent assessment, committed pinned journey and exact-head native CI pending.
+- Next step: Retain exact candidate, verify pinned first-plan and native boundary CI, obtain scoped review; preserve downstream #85 separately.
 
 ### Acceptance
 
@@ -191,7 +192,10 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ### Evidence
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
-- jobs/J025/brief-r1.md
+- jobs/J025/brief-r2.md
+- Worker c40a76a0 stopped with native separator guard and focused boundary regression; initial test fixture assertion corrected and retained. Focused Linux checks and coordinator full Linux quality/ESLint/Knip/diff PASS. No #85 changes or native Windows claim.
+- On00287f1 committed release-package and actual pinned Node first-plan/repeat PASS onLinux. Round1 cba4d4ff Standards/Spec/aggregate FAIL: new Git init fixture lacked a required bound. V001.md retained; coordinator added15000ms timeout and error/status checks. Round2 delta review/native exact-head CI pending.
+- Round2 reviewer775d8dbe on401784a15db622197a85965a95f4d4031ab2ef75 Standards/Spec/aggregate PASS LOW, no unresolved delta findings. V002.md retained; final record-only delta does not change reviewed functional bytes. Final artifact and native exact-head CI remain pending.
 
 ## J026
 

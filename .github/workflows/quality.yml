@@ -82,6 +82,8 @@ jobs:
           bun-version: '1.4.3'
       - name: Verify checkout byte policy
         run: node tests/checkout-line-endings.mjs .
+      - name: Verify external plan grant boundaries
+        run: node tests/plan-grant-boundary.mjs .
       - name: Verify worker-route admission
         run: node tests/worker-route-admission.mjs .
       - name: Verify static host portability
