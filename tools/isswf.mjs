@@ -123,6 +123,12 @@ async function retain(store, from) {
     return target;
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
 }
+// Validate CIM's UTC round-trip encoding without discarding its 100ns identity precision.
+function windowsTimestamp(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{7}Z$/u.test(value)) return false;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value.replace(/(\.\d{3})\d{4}Z$/u, '$1Z');
+}
 // A Windows PID is reusable; bind it to process creation and OS boot times.
 function windowsProcessIdentity(pid) {
   if (!Number.isSafeInteger(pid) || pid <= 0) fail('Invalid Windows process identity PID');
@@ -131,8 +137,7 @@ function windowsProcessIdentity(pid) {
   const result = spawnSync(executable, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { encoding: 'utf8', timeout: 15000, maxBuffer: 16384, windowsHide: true });
   if (result.error || result.status !== 0) fail('Windows process identity unavailable; recovery remains blocked');
   const value = JSON.parse(result.stdout.replace(/^\uFEFF/u, '').trim());
-  const timestamp = input => typeof input === 'string' && /^\d{4}-\d\d-\d\dT/u.test(input) && Number.isFinite(Date.parse(input));
-  if (!timestamp(value.bootId) || value.process !== null && (value.process?.pid !== pid || !timestamp(value.process.startTime))) fail('Invalid Windows process identity evidence');
+  if (!windowsTimestamp(value.bootId) || value.process !== null && (value.process?.pid !== pid || !windowsTimestamp(value.process.startTime))) fail('Invalid Windows process identity evidence');
   return value;
 }
 async function identity() {
@@ -147,7 +152,7 @@ async function identity() {
 }
 async function ceased(owner) {
   if (owner?.platform === 'win32') {
-    if (process.platform !== 'win32' || !Number.isSafeInteger(owner.pid) || owner.pid <= 0 || typeof owner.startTime !== 'string' || !Number.isFinite(Date.parse(owner.startTime)) || typeof owner.bootId !== 'string' || !Number.isFinite(Date.parse(owner.bootId))) return false;
+    if (process.platform !== 'win32' || !Number.isSafeInteger(owner.pid) || owner.pid <= 0 || !windowsTimestamp(owner.startTime) || !windowsTimestamp(owner.bootId)) return false;
     try {
       const value = windowsProcessIdentity(owner.pid);
       return value.bootId !== owner.bootId || value.process === null || value.process.startTime !== owner.startTime;

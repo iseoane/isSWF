@@ -55,6 +55,14 @@ assert.equal(run('git', ['-C', project, 'status', '--porcelain']), '', 'Read-onl
 const proposal = join(root, 'plan-proposal.json'), grant = join(root, 'plan-grant.json');
 const plan = { version: 1, initiative: 'I0085', title: 'Native pinned plan journey', type: 'maintenance', jobs: [{ id: 'J001', objective: 'Verify the installed pinned planner', status: 'pending', dependsOn: [], acceptance: ['No unpinned plan execution'], blocker: 'None', nextStep: 'Inspect the prepared plan', evidence: [] }] };
 await writeFile(proposal, JSON.stringify(plan));
+let liveWindowsOwner;
+if (process.platform === 'win32') {
+  const powershell = join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe');
+  const script = `$ErrorActionPreference='Stop'; $p=Get-CimInstance Win32_Process -Filter 'ProcessId = ${process.pid}'; @{platform='win32';pid=[int]$p.ProcessId;startTime=$p.CreationDate.ToUniversalTime().ToString('o');bootId=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o')} | ConvertTo-Json -Compress`;
+  liveWindowsOwner = JSON.parse(run(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')]).replace(/^\uFEFF/u, ''));
+  assert.equal(liveWindowsOwner.pid, process.pid, 'Recovery refusal must exercise a genuinely live owner');
+  for (const value of [liveWindowsOwner.startTime, liveWindowsOwner.bootId]) assert.match(value, /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{7}Z$/u);
+}
 async function planJourney(name, launcher, nodeLauncher = false) {
   const target = join(root, name), targetStore = join(root, 'store spaces ñ');
   await mkdir(target);
@@ -102,14 +110,24 @@ async function planJourney(name, launcher, nodeLauncher = false) {
   for (const unknown of [
     { platform: 'win32', pid: 0, startTime: 'unknown', bootId: 'unknown' },
     { ...transaction.owner, platform: 'unsupported' },
+    ...(liveWindowsOwner ? [
+      liveWindowsOwner,
+      { ...liveWindowsOwner, bootId: '2020-01-01' },
+      { ...liveWindowsOwner, startTime: '2020-01-01' },
+      { ...liveWindowsOwner, bootId: liveWindowsOwner.bootId.replace(/(\.\d{3})\d{4}Z$/u, '$1Z') },
+      { ...liveWindowsOwner, startTime: liveWindowsOwner.startTime.replace('Z', '+00:00') },
+    ] : []),
   ]) {
     const ownerBytes = Buffer.from(JSON.stringify({ id: 'unknown-owner', owner: unknown, transaction: null }));
-    const recordBytes = Buffer.from(JSON.stringify({ format: 1, id: 'unknown-owner', owner: unknown, files: [{ path: '.isswf/install.json', before: null, after: 'YQ==' }] }));
+    const retainedPin = before.get('.isswf/install.json').toString('base64');
+    const recordBytes = Buffer.from(JSON.stringify({ format: 1, id: 'unknown-owner', owner: unknown, files: [{ path: '.isswf/install.json', before: retainedPin, after: retainedPin }] }));
     await writeFile(join(operation, 'owner.json'), ownerBytes);
     await writeFile(join(transactionPath, 'record.json'), recordBytes);
     assert.match(invoke(['recover', '--project', target, '--store', targetStore, '--id', 'unknown-owner'], 1), /Migration owner is live or uncertain; recovery refused/u);
     assert.deepEqual(await readFile(join(operation, 'owner.json')), ownerBytes);
     assert.deepEqual(await readFile(join(transactionPath, 'record.json')), recordBytes);
+    assert.equal(existsSync(join(transactionPath, 'recovered.json')), false, 'Uncertain identity must not authorize any recovery receipt');
+    assert.equal(await readFile(join(claim, 'pending'), 'utf8'), 'uncertain claim bytes');
     assert.deepEqual(await readFile(planPath), planBytes);
     for (const [path, bytes] of before) assert.deepEqual(await readFile(join(target, path)), bytes, `unknown recovery identity changed pinned setup byte: ${path}`);
   }
