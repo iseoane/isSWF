@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, realpath, rm, symlink, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const source = resolve(process.argv[2] || '.'), root = await mkdtemp(join(tmpdir(), 'isswf-plan-test-'));
+const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-plan-test-')));
 const project = join(root, 'project'), proposal = join(root, 'proposal.json'), grant = join(root, 'grant.json');
 await mkdir(project);
 assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);
@@ -58,9 +58,13 @@ try {
   assert.notEqual(run('revise', [...mutation, '--expected-sha256', JSON.parse(revised.stdout).sha256]).status, 0);
   input.jobs[0].dependsOn = []; authority.permissions = ['plan', 'execute']; await save();
   assert.notEqual(run('prepare', mutation).status, 0);
-  await mkdir(join(root, 'elsewhere')); await symlink(join(root, 'elsewhere'), join(project, '.factory/initiatives/I0043'));
+  await mkdir(join(root, 'elsewhere'));
+  const unsafeAlias = join(project, '.factory/initiatives/I0043');
+  await symlink(join(root, 'elsewhere'), unsafeAlias, process.platform === 'win32' ? 'junction' : 'dir');
+  assert.equal((await lstat(unsafeAlias)).isSymbolicLink(), true, 'The directory-alias negative fixture must exist');
   const unsafe = spawnSync(process.execPath, [join(source, 'tools/isswf-plan.mjs'), 'read', '--project', project, '--initiative', 'I0043'], { encoding: 'utf8' });
   assert.notEqual(unsafe.status, 0);
+  assert.match(unsafe.stderr, /regular directory required/u);
   assert.deepEqual(await readdir(join(root, 'elsewhere')), []);
   console.log('PASS: local multi-job plan, dependencies, readonly read, repeat, guarded revisions with exact prior Git checkpoint and no duplicate history files, missing authority, evidence and cycle guards');
 } finally { await rm(root, { recursive: true, force: true }); }
