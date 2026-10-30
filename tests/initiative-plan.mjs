@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink, lstat } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, realpath, rm, symlink, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const source = resolve(process.argv[2] || '.'), root = await mkdtemp(join(tmpdir(), 'isswf-plan-test-'));
+const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-plan-test-')));
 const project = join(root, 'project'), proposal = join(root, 'proposal.json'), grant = join(root, 'grant.json');
 await mkdir(project);
 assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);

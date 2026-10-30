@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,readFile,readdir,writeFile,symlink,lstat} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,readdir,realpath,writeFile,symlink,lstat} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-const source=resolve(process.argv[2]??'.'),root=await mkdtemp(join(tmpdir(),'isswf-tools-install-'));
+const source=resolve(process.argv[2]??'.'),root=await realpath(await mkdtemp(join(tmpdir(),'isswf-tools-install-')));
 const names=['isswf-plan.mjs','isswf-status.mjs','isswf-panel.mjs','isswf-response.mjs','isswf-intake.mjs','project-quality.mjs','project-state.mjs'];
 const run=(command,args,ok=true)=>{const result=spawnSync(command,args,{encoding:'utf8',timeout:15000});assert.equal(result.error,undefined,'expected executable must start');if(ok)assert.equal(result.status,0,result.stderr);else assert.notEqual(result.status,0);return result;};
 const fixture=join(root,'source'),project=join(root,'target');for(const path of [fixture,project]){await mkdir(path);run('git',['init','-q',path]);}await mkdir(join(fixture,'tools'));
