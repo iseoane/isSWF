@@ -119,7 +119,7 @@ assert.match(host, /## Parallel-writer capability disclosure/u);
 assert.match(host, /inspect the installed host\/version/u);
 assert.match(host, /record parallel writers as unavailable or unverified/u);
 assert.match(host, /sequential writers in the assigned checkout/u);
-assert.match(host, /do not silently serialize an explicit concurrency requirement/u);
+assert.match(host, /Do not silently serialize an explicit concurrency requirement/u);
 assert.match(host, /Do not make a model call/u);
 assert.match(host, /future version-specific or hook-based mechanism requires its own evidence and authorization/u);
 for (const field of ['Factory resources', 'Task', 'Checkout', 'Review', 'Host and model', 'Documents']) assert.ok(host.includes(field));
