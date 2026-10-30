@@ -114,12 +114,12 @@ Type: maintenance
 
 ## J007
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve #89 by verifying and reconciling supported Claude parallel-writer capabilities.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: none
-- Next step: Direct bounded worker for upfront capability disclosure and sequential planning; no new hook/runtime or weaker binding. Official current subagents docs expose parent cwd/worktree isolation, no supplied cwd; other version-specific mechanisms are not verified current prepared-child binding. Preserve external root and Pi behavior.
+- Next step: All seven functional units technically complete. Finish PR106 expected-head integration and authorized cleanup only after CI on this evidence-only final head; retain integration/post-merge receipts in PR106. No new hook/runtime or weaker binding; no further issue implementation selected.
 
 ### Acceptance
 
@@ -127,5 +127,5 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #89 and published triage; jobs/J007/V001.md and jobs/J007/delivery.md; candidate80f1c4923836f7cbbb32794f74dc498462cda304 independent first review PASS/PASS LOW, docs/diff PASS; known #84 native CRLF failure retained. Required exact-head CI pending.
+- GitHub issue #89 and published triage; jobs/J007/V001.md and jobs/J007/delivery.md; candidate80f1c4923836f7cbbb32794f74dc498462cda304 independent first review PASS/PASS LOW, docs/diff PASS; known #84 native CRLF failure retained. PR106 initial Quality41016378516 SUCCESS3/3; six native reports PASS, tested synthetic5db6406a93e50ddf828249f7de57ab31d248642b expected parents and tree44840860e4fa2687f0ac27bc141ed93d544045ce equal published9fdb05710e4509bf33d752c3d0e07bc69c709d60. Final evidence-only head still requires fresh CI before integration.
 
