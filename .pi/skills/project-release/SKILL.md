@@ -1,5 +1,5 @@
 ---
-name: isswf-release
+name: project-release
 description: "Trigger: release, publish a version, emitir una release. Prepare and verify this repository's GitHub release and native artifacts."
 disable-model-invocation: true
 ---
@@ -42,4 +42,4 @@ Return version, tag/source SHA, release URL/state, artifact identities/checksums
 ## References
 
 - [Release procedure and artifact checklist](references/procedure.md)
-- [Coordinator and durable ownership](../isswf-coordinator/SKILL.md)
+- [Coordinator and durable ownership](../../../.agents/skills/isswf-coordinator/SKILL.md)

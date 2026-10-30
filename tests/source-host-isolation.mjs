@@ -65,7 +65,7 @@ if (process.argv[3] === '--probe') {
   assert.deepEqual(await readFile(settingsPath), configured, 'Repeat must be byte-identical');
   const isolated = probe(project);
   assert.deepEqual(isolated.diagnostics, []);
-  assert.equal(isolated.skills.filter(skill => skill.name.startsWith('isswf-')).length, 16, 'All sixteen source skills, including source-only triage and release, remain available');
+  assert.equal(isolated.skills.filter(skill => skill.name.startsWith('isswf-')).length, 15, 'All fifteen factory source skills, including source-only triage, remain available');
   const sourcePrefix = await realpath(join(project, '.agents/skills'));
   for (const skill of isolated.skills.filter(skill => skill.name.startsWith('isswf-'))) assert.ok(skill.path.startsWith(sourcePrefix));
   assert.ok(isolated.skills.some(skill => skill.name === 'unrelated-fixture'));
@@ -106,7 +106,7 @@ if (process.argv[3] === '--probe') {
   assert.match(inline, /Description: isolated-source-fixture/u);
   assert.match(inline, /Skills \(14\)/u);
   assert.deepEqual(await readFile(join(home, 'claude/settings.json')), globalClaude);
-  const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'sixteen source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
+  const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'fifteen factory source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
   await writeJSON(join(root, 'source-isolation-report.json'), result);
   console.log(JSON.stringify(result, null, 2));
 }

@@ -1,6 +1,6 @@
 # isSWF release procedure
 
-This is a source-project procedure. Read [technical installation/build contracts](../../../../docs/installation.md), [development/publication checks](../../../../docs/en/development.md), [review guidance](../../../roles/references/review.md) and [durable records](../../../../docs/durable-work.md) before their corresponding operation. Use actual current code where these contracts describe historical paths. These references own runtime semantics; do not copy them into release notes.
+This is a source-project procedure. Read [technical installation/build contracts](../../../../docs/installation.md), [development/publication checks](../../../../docs/en/development.md), [review guidance](../../../../.agents/roles/references/review.md) and [durable records](../../../../docs/durable-work.md) before their corresponding operation. Use actual current code where these contracts describe historical paths. These references own runtime semantics; do not copy them into release notes.
 
 ## Resolve the candidate
 
