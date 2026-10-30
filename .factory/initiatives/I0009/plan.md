@@ -200,12 +200,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J026
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
 - Brief: [brief-r3.md](jobs/J026/brief-r3.md)
-- Blocker: Native Windows/Linux CI now PASS; independent corrected timestamp-delta judgment remains pending after quota failure. Exactly one operator-selected same-route review continuation is allocated; if still unavailable, stop. MEDIUM-risk merge remains separately unauthorized.
-- Next step: Resume failed-terminal review once with unchanged exact Sol6.1 medium and native parity receipts; no further call/fallback if quota persists. Keep draft PR111 and #86 blocked until required judgment and risk-appropriate integration decision.
+- Blocker: Scoped Linux/Windows parity and independent corrected review PASS; explicit authorization to integrate MEDIUM-risk PR111 is pending. Final current-head CI must remain green; no LOW-only merge.
+- Next step: Publish retained review receipts, inspect final exact-head CI, and request explicit MEDIUM-risk PR111 integration approval. Preserve #86 dependency until actual integration; no further reviewer call needed for receipt-only delta.
 
 ### Acceptance
 
@@ -223,7 +223,8 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Same worker resumed once as9e8df97c and stopped with local bounded Windows PID/start/boot identity, conservative cessation, mandatory-file/platform-directory policy and native artifact plan journeys. Coordinator strengthened genuine Node vs Bun pin assertions and unknown-platform refusal; old3f artifact control FAIL as expected, candidate static/docs checks PASS. Exact new-artifact/nativeWindows/review gates remain pending.
 - Exact777560c Linux fullquality/ESLint/Knip and actual installedBun+genuineNode plan/claim/protectedbytes journeys PASS. Expanded reviewer611ccf8f Standards/Spec/aggregate FAIL MEDIUM: permissive Date.parse persisted Windows encoding can authorize uncertain recovery; V002.md retained. Coordinator corrected strict shared native timestamp validation and livePID malformed-encoding regression, selects justified round3 under operator exception. NativeWindows remains unverified until exact-head CI.
 - Corrected670519b actual Linux fullquality/ESLint/Knip plus installedBun and genuineNode journeys PASS. Additional reviewer1fe7cc3f failed before report with Codex usage limit; V003.md records inconclusive/no verdict, not a pass. No automatic actor/model retry.
-- PR111 heada3d1888 Quality41107860131 all3 PASS. Retrieved native Windows artifact/host reports at syntheticmerge98d341e; fetched merge tree exactly matches a3d1888. ActualBun/Node plan journeys and Pi/Claude discovery PASS, not live providers. Following explicit operator continuation, observed oldreview terminal failure and allocated one same-route resumed review under discretionary grant; no assumed quota or automatic loop. Prior source verdict remains bounded; expanded journey not yet verified.
+- PR111 heada3d1888 Quality41107860131 all3 PASS. Retrieved native Windows artifact/host reports at syntheticmerge98d341e; fetched merge tree exactly matches a3d1888. ActualBun/Node plan journeys and Pi/Claude discovery PASS, not live providers. Following explicit operator continuation, observed oldreview terminal failure and allocated one same-route resumed review under discretionary grant; no assumed quota or automatic loop.
+- Resumed reviewer33f72095 atb619114 Standards/Spec/aggregate PASS, MEDIUM risk, no blocking findings; V004.md retains exact installedLinux/Windows plan scope and affected safety assessment. V002FAIL/V003unavailable retained. Receipt-only follow-up leaves functional670519b unchanged; MEDIUM integration authorization still required. Prior source verdict remains bounded; expanded journey not yet verified.
 
 ## J021
 
