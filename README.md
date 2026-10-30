@@ -8,7 +8,7 @@ isSWF helps you direct AI-assisted software work in small, reviewable assignment
 
 The current shared workflow supports native Windows and Linux with **Pi** or **Claude Code**. Pi delegates through the separately installed `pi-subagents` extension; Claude Code uses its native agents. These host-native tasks do not require the compiled legacy executor or a project runtime pin. Host configuration, capability limits and verification evidence are described in [host support](docs/host-portability.md).
 
-1. Install the integration for your host and initialize the target repository; see [installation](docs/en/installation.md).
+1. Prepare the trusted isSWF resources and native delegation through the [Pi host guide](.agents/hosts/pi.md) or [Claude Code host guide](.agents/hosts/claude-code.md), with [host support](docs/host-portability.md) for loading the integration. When using this development checkout, also follow [source-checkout separation](docs/en/development.md#keep-this-source-checkout-separate-from-an-installed-release). The compiled-release installation below is a separate legacy path.
 2. In the target repository, run `/skill:isswf-setup` in Pi or `/isswf:isswf-setup` in Claude Code.
 3. To start a task, explicitly address the isSWF coordinator. Ordinary requests do not activate an automatic pipeline.
 

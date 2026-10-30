@@ -4,7 +4,7 @@
 
 Update README.md and README.es.md to reflect current native isSWF; prepare GitHub Pages for browser-rendered workflow diagrams following operator acceptance. Initial authorization selected local implementation/checks and native bounded delegation only. The operator subsequently authorized commit/push and then explicitly directed a normal non-forced push to origin/main, without a PR. Include the earlier operator-requested AGENTS.md and .factory/project-setup.md reconciliation in this delivery. Pages source was enabled by the operator and read back as build_type workflow; no manual Pages deployment is authorized or selected. No installation, paid API, host config or unrelated fixes.
 
-Type: documentation
+Type: maintenance
 
 ## J001
 

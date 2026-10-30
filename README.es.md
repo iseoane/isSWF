@@ -8,7 +8,7 @@ isSWF te ayuda a dirigir el trabajo de desarrollo asistido por IA mediante encar
 
 El flujo compartido actual admite Windows y Linux nativos con **Pi** o **Claude Code**. Pi delega mediante la extensión `pi-subagents`, que se instala por separado; Claude Code utiliza sus agentes nativos. Estos encargos mediante hosts nativos no necesitan el ejecutor compilado heredado ni una versión de runtime fijada para el proyecto. Consulta [compatibilidad de los hosts](docs/host-portability.md) para conocer su configuración, límites de capacidad y evidencias de verificación.
 
-1. Instala la integración para tu host e inicializa el repositorio de destino; consulta la [instalación](docs/es/installation.md).
+1. Prepara los recursos de isSWF de confianza y la delegación nativa siguiendo la [guía de Pi](.agents/hosts/pi.md) o la [guía de Claude Code](.agents/hosts/claude-code.md); consulta [compatibilidad de los hosts](docs/host-portability.md) para cargar la integración. Si utilizas este checkout de desarrollo, sigue también la [separación del checkout de código fuente](docs/es/development.md#separar-este-checkout-del-código-fuente-de-una-release-instalada). La instalación compilada descrita más abajo es una vía heredada independiente.
 2. En el repositorio de destino, ejecuta `/skill:isswf-setup` en Pi o `/isswf:isswf-setup` en Claude Code.
 3. Para iniciar un encargo, dirígelo explícitamente al coordinador de isSWF. Las peticiones normales no activan un flujo automático.
 
