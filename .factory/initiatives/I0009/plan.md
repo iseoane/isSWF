@@ -200,12 +200,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J026
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Deliver #85 durable native plan publication.
 - Depends on: J025
 - Brief: [brief-r3.md](jobs/J026/brief-r3.md)
-- Blocker: Scoped Linux/Windows parity and independent corrected review PASS; explicit authorization to integrate MEDIUM-risk PR111 is pending. Final current-head CI must remain green; no LOW-only merge.
-- Next step: Publish retained review receipts, inspect final exact-head CI, and request explicit MEDIUM-risk PR111 integration approval. Preserve #86 dependency until actual integration; no further reviewer call needed for receipt-only delta.
+- Blocker: None for PR111 integrated endpoint; explicit operator MEDIUM approval was specific to this PR.
+- Next step: Preserve original failures/quota report and completed native parity evidence; continue prerequisite-resolved J021/#86.
 
 ### Acceptance
 
@@ -224,16 +224,17 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Exact777560c Linux fullquality/ESLint/Knip and actual installedBun+genuineNode plan/claim/protectedbytes journeys PASS. Expanded reviewer611ccf8f Standards/Spec/aggregate FAIL MEDIUM: permissive Date.parse persisted Windows encoding can authorize uncertain recovery; V002.md retained. Coordinator corrected strict shared native timestamp validation and livePID malformed-encoding regression, selects justified round3 under operator exception. NativeWindows remains unverified until exact-head CI.
 - Corrected670519b actual Linux fullquality/ESLint/Knip plus installedBun and genuineNode journeys PASS. Additional reviewer1fe7cc3f failed before report with Codex usage limit; V003.md records inconclusive/no verdict, not a pass. No automatic actor/model retry.
 - PR111 heada3d1888 Quality41107860131 all3 PASS. Retrieved native Windows artifact/host reports at syntheticmerge98d341e; fetched merge tree exactly matches a3d1888. ActualBun/Node plan journeys and Pi/Claude discovery PASS, not live providers. Following explicit operator continuation, observed oldreview terminal failure and allocated one same-route resumed review under discretionary grant; no assumed quota or automatic loop.
-- Resumed reviewer33f72095 atb619114 Standards/Spec/aggregate PASS, MEDIUM risk, no blocking findings; V004.md retains exact installedLinux/Windows plan scope and affected safety assessment. V002FAIL/V003unavailable retained. Receipt-only follow-up leaves functional670519b unchanged; MEDIUM integration authorization still required. Prior source verdict remains bounded; expanded journey not yet verified.
+- Resumed reviewer33f72095 atb619114 Standards/Spec/aggregate PASS, MEDIUM risk, no blocking findings; V004.md retains exact installedLinux/Windows plan scope and affected safety assessment. V002FAIL/V003unavailable retained. Receipt-only follow-up leaves functional670519b unchanged; MEDIUM integration authorization still required.
+- PR111 finalhead8c13980984275444c612a0d3201d160b23b7faac all3 Quality41108854202 jobs PASS. Operator explicitly approved MEDIUM integration; normal expected-head merge035d54cee95dd57799509590ecfd43af18f385f6 verified. Exact local/remote ancestry checked before safe merged branch deletion. No release or broad platform/executor certification. Prior source verdict remains bounded; expanded journey not yet verified.
 
 ## J021
 
-- Status: blocked
+- Status: in-progress
 - Objective: Resume #86 directory-alias fixture delivery after prerequisites.
 - Depends on: J026
-- Brief: [brief-r2.md](jobs/J021/brief-r2.md)
-- Blocker: Prior native worker stopped without edits before alias checks at #83; #85 also precedes full suite acceptance.
-- Next step: Resume only after J025/J026 and byte-stable checks, reconcile fresh worker capacity without resetting consumed history.
+- Brief: [brief-r3.md](jobs/J021/brief-r3.md)
+- Blocker: Prerequisites now integrated. Fresh bounded fixture implementation/review/native full-suite checks pending; historical stopped worker remains consumed.
+- Next step: Dispatch one newly allocated bounded worker on current main035d54c using brief-r3; retain historical count and independently verify full Windows/Linux suite outcomes before LOW-risk integration.
 
 ### Acceptance
 
@@ -243,4 +244,4 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 ### Evidence
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
-- jobs/J021/brief-r2.md
+- jobs/J021/brief-r3.md
