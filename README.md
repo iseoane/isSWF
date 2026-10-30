@@ -2,129 +2,45 @@
 
 English | [Español](README.es.md)
 
-A software factory for turning ideas, bugs, and issues into small, checked changes with AI agents.
+isSWF helps you direct AI-assisted software work in small, reviewable assignments. You stay in control: installing the integration does not start agents, and a feature workflow does not authorize merging or deployment.
 
-## Description
+## Start with a native host
 
-isSWF gives your coding assistant a way to organise work. A coordinator helps clarify what you want, chooses the right help, and keeps track of the result.
+The current shared workflow supports native Windows and Linux with **Pi** or **Claude Code**. Pi delegates through the separately installed `pi-subagents` extension; Claude Code uses its native agents. These host-native tasks do not require the compiled legacy executor or a project runtime pin. Host configuration, capability limits and verification evidence are described in [host support](docs/host-portability.md).
 
-You stay in control of decisions and permissions. The factory keeps plans, jobs, and evidence with each project, so you can see what changed, what was checked, and what still needs your attention.
+1. Install the integration for your host and initialize the target repository; see [installation](docs/en/installation.md).
+2. In the target repository, run `/skill:isswf-setup` in Pi or `/isswf:isswf-setup` in Claude Code.
+3. To start a task, explicitly address the isSWF coordinator. Ordinary requests do not activate an automatic pipeline.
 
-## Why this project?
+Setup prepares project-specific choices and the bounded coordinator entry in the root `AGENTS.md`. The entry is triggered by an explicit coordinator/isSWF request, not every coding request. Setup or installation alone does not grant future actions or prove a model is available. See [getting started](docs/en/getting-started.md).
 
-Working with agents can mean large unfinished changes, repeated explanations, and uncertainty about whether something really works.
+## How work is recorded and delivered
 
-isSWF aims to make that work easier to follow:
+Before native dispatch, the coordinator records a durable initiative plan and a curated job brief in the project's existing state directory (`.isswf` or historical `.factory`). Small tasks need no planner call or artifact bundle. Workers and reviewers return candidate-specific evidence; checks and review are selected proportionately rather than being mandatory roles for every task. Optional context tools such as Engram or Codegraph do not replace the project records.
 
-- Break a request into useful changes you can review.
-- Ask questions when a decision is missing, not at every step.
-- Choose research, planning, tests, and review according to the task.
-- Preserve the project's decisions and progress between conversations.
+A selected feature-to-PR request follows the project's prepared delivery policy, with bounded checks and review as applicable. Delivery of a PR is separate from the human decision to integrate it into the base branch. A request may set narrower local-only boundaries; GitHub tracking alone is not publication permission. See [durable work](docs/durable-work.md), [how the factory works](docs/en/reference.md), and [development checks](docs/en/development.md).
 
-It is a workflow you use when needed, not a service that runs your repositories unattended.
+## Workflow diagrams
 
-## Who is it for?
+![isSWF workflow overview: coordinator, selected supporting roles, implementation, checks and delivery.](docs/en/workflow.svg)
 
-- Developers already using Pi who want more organised work on an existing Git project.
-- Maintainers who want to understand a proposed change and its checks before accepting it.
-- People exploring agent-assisted development who want explicit control over what agents may do.
+The [overview](docs/en/workflow.svg) is a quick summary. The diagrams retain legacy execution details and are navigation aids, not the authority for current native-host behavior; use the linked guides for the current contract. The [complete English workflow](docs/en/workflow.html) and [complete Spanish workflow](docs/es/workflow.html) open locally in a browser; GitHub's source view does not render these HTML files as a site.
 
-The development checkout's normal workflow shares methodology across Pi and Claude Code on native Windows and Linux. Pi delegates through the separately installed `pi-subagents` extension; Claude Code uses native agents. New host-native tasks do not require the factory's compiled executor or project runtime pin. See [host support](docs/host-portability.md) for configuration and verification limits. The retained compiled-release installation below is a separate legacy path; adopting the new workflow does not migrate or certify an existing installation.
+GitHub Pages is configured to use GitHub Actions. After this workflow is available on `main`, open **Actions → Publish workflow diagrams → Run workflow**, select `main`, and run it when publication is authorized. There is no automatic deployment on push. Once the first deployment succeeds, the diagrams will be available at [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/); configuration alone does not make that address live. The staging step allowlists only the bilingual landing page and the two complete workflow diagrams. Until deployment succeeds, use the repository files or download them for local viewing.
 
-## Workflow at a glance
+## Retained compiled release (legacy path)
 
-![isSWF workflow. The coordinator handles triage, selects research or planning when needed, assigns implementation, verifies the result, and delivers a PR with CI. A human decides whether to merge.](docs/en/workflow.svg)
+The older compiled-executor installation is a separate path, not a prerequisite for new native-host tasks. Its documented release evidence targets Linux x64; it has different runtime, isolation and migration constraints and does not certify native Windows/macOS execution. Existing installations are not migrated by adopting the native workflow. Consult [installation and legacy-runtime limits](docs/en/installation.md) and the exact release evidence before selecting that path. The package manifest version is not evidence of a published release; do not infer a latest release or package-registry publication from it.
 
-[Explore the complete workflow](docs/en/workflow.html), including agents, skills, references, decision branches, and correction loops. GitHub shows the HTML as a file. Download it and open it in your browser, or open it directly from a local checkout. The overview omits those details; optional roles are not a mandatory pipeline.
+## More
 
-## Installation
-
-Download the [latest stable release for Linux x64](https://github.com/iseoane/isSWF/releases/latest). Verify the downloaded archive against the release checksums before installation. The repository is private, so GitHub CLI must be authenticated with an account that has access. No package has been published to npm or a public marketplace.
-
-Linux x64 is the validated target. The Bun runtime has passed a real Pi worker flow with protected checks and Linux isolation. The Claude corrections have passed a bounded native coordinator/worker/read-only reviewer test with observed Sonnet model metadata and verified runtime/document input reads. These are separate host tests, not equivalent sandboxing or recovery guarantees. Earlier prerelease `1.1.0` cannot load the real Pi SDK and must not be used for agent jobs. Windows and macOS execution remain unvalidated. Check the release's exact-candidate evidence and limitations before use.
-
-### Download and verify
-
-These commands select the latest stable release without a version tag. Use a new, empty download directory. Keep the complete extracted package, not just its executable.
-
-```bash
-mkdir isswf-release
-cd isswf-release
-gh release download --repo iseoane/isSWF \
-  --pattern 'isswf-*-bun-linux-x64.tgz' --pattern SHA256SUMS
-sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf isswf-*-bun-linux-x64.tgz
-RELEASE="$(pwd)/package"
-```
-
-For a reproducible installation, replace the download command above with an explicit version, for example:
-
-```bash
-gh release download v1.4.0 --repo iseoane/isSWF \
-  --pattern 'isswf-1.4.0-bun-linux-x64.tgz' --pattern SHA256SUMS
-```
-
-Continue in the same shell so that `RELEASE` names the absolute local package path, not a release selector. Downloading a newer release does not update existing project pins automatically. Checksums detect damage; they are not publisher signatures. See [installation](docs/en/installation.md) for setup, updates and building from source.
-
-### Pi
-
-```bash
-pi install "$RELEASE"
-```
-
-This makes the package available globally. Add `--local` to install it for the current project instead.
-
-### Claude Code
-
-```bash
-claude plugin marketplace add "$RELEASE"
-claude plugin install isswf@isswf --scope user
-```
-
-Use `--scope project` for a project installation. See [installation](docs/en/installation.md) for the differences between the two hosts.
-
-### Dependencies
-
-Use a trusted executable release for your platform, Git, and the host you choose. The factory core includes Bun and needs no separate Node.js or Bun installation. Hosts, SDKs, and project checks retain their own prerequisites. Factory development still uses Node.js 24 or later and `.mjs`. Running agent jobs also needs a supported model account and working authentication.
-
-The complete installed workflow currently requires Linux. Isolated Pi workers additionally need bubblewrap. Python and SQLite are not requirements of the native workflow; Engram and Codegraph are optional.
-
-Installing the package does not start agents or create factory state in every repository. You initialise each project explicitly.
-
-## Getting started
-
-Open your project in Pi and initialise it:
-
-```text
-/skill:isswf-setup
-```
-
-Then try a preparation-only request:
-
-```text
-/skill:isswf-coordinator Prepare a fix for the search filter resetting when I change pages. Keep the rest of its behaviour unchanged. Show me the proposed scope and checks before changing code.
-```
-
-The coordinator should explain the next step, ask about any missing product decision, and identify how the result will be checked. Authorised implementation can then use the appropriate agents and return a summary for your acceptance.
-
-In Claude Code, use `/isswf:isswf-setup` and `/isswf:isswf-coordinator` instead.
-
-The [getting-started guide](docs/en/getting-started.md) has examples for bugs, new features, and checking progress.
-
-## Details
-
-[All current documentation](docs/en/index.md), including the source map, local panel, and possible future actions.
-
-
-- [Installation and updates](docs/en/installation.md): choose a host, initialise a project, and update deliberately.
-- [Getting started](docs/en/getting-started.md): make your first request and understand the response.
-- [How the factory works](docs/en/reference.md): skills, agents, project records, and current limits.
-- [Development](docs/en/development.md): navigate the source and run the checks.
-
-## Contributing
-
-Start with a concrete problem or a small improvement. Describe the expected result and how you checked it. Read the [development guide](docs/en/development.md) before changing factory behaviour.
+- [Documentation index](docs/en/index.md)
+- [Installation and updates](docs/en/installation.md)
+- [First request](docs/en/getting-started.md)
+- [Host support](docs/host-portability.md)
+- [Glossary](GLOSSARY.md)
+- [Contributing](docs/en/development.md)
 
 ## License
 
-This project is licensed under the MIT License.
+MIT.

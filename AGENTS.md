@@ -79,3 +79,13 @@ Keep this development checkout separate from any installed release. Follow `docs
 - Select mechanical, semantic or combined verification using `.agents/roles/references/review.md`. When independent judgment is required, the author cannot supply it. Review the exact retained candidate; changes invalidate affected checks and verdicts. Keep failures and inconclusive results visible.
 - For checks, read `docs/en/development.md` under `Quality checks`; the portable entry is `node tools/check-quality.mjs`. Distinguish working-tree checks from committed-source packaging, static checks from live behavior, and injected fixtures from real providers or isolation. Inspect the actual artifact before claiming success.
 - Technical verification, operator acceptance, publication and merge are separate states. CI must pass on the exact head before an authorized merge. For issue/PR content, use `.agents/roles/references/delivery.md`; write issues, PRs and new agent instructions in English.
+
+<!-- BEGIN isSWF coordinator entry -->
+## isSWF coordinator
+
+This project uses isSWF; consult the setup record below for actual readiness and pending capabilities. When the operator explicitly addresses the coordinator/coordinador or asks to use an isSWF workflow, load the `isswf-coordinator` skill through the actual host's supported skill interface (Pi: `/skill:isswf-coordinator`; Claude Code: `/isswf:isswf-coordinator`) before acting. If that interface is unavailable, read `<factory-root>/.agents/skills/isswf-coordinator/SKILL.md` only when the selected trusted factory root is verifiable from loaded package provenance; a previous setup session need not still be loaded. Read the actual host guide `<factory-root>/.agents/hosts/<pi-or-claude-code>.md` through the coordinator's trusted resources. If neither supported invocation nor trusted resources are available, report the missing capability; do not guess a path, install or switch packages. Then follow that coordinator and select only applicable shared skills or roles. For other tasks, follow the request and applicable project instructions without activating a mandatory isSWF pipeline.
+
+Project setup decisions: `.factory/project-setup.md`.
+
+Engram or Codegraph may provide optional, project-scoped advisory context when available and useful. Verify project identity, current source and pins; otherwise use Git and files. Never install, rebuild or reindex for this lookup, access unrelated projects, expose private content, or treat memory/index results as authority.
+<!-- END isSWF coordinator entry -->

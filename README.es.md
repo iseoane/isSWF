@@ -2,129 +2,45 @@
 
 [English](README.md) | Español
 
-Una factoría de software para convertir ideas, errores e issues en cambios pequeños y comprobados con agentes de IA.
+isSWF te ayuda a dirigir el trabajo de desarrollo asistido por IA mediante encargos pequeños y revisables. Tú mantienes el control: instalar la integración no inicia agentes, y un flujo de funcionalidad no autoriza su merge ni su despliegue.
 
-## Descripción
+## Empieza con un host nativo
 
-isSWF proporciona a tu asistente de programación una forma de organizar el trabajo. Un coordinador te ayuda a concretar qué necesitas, elige el apoyo adecuado y lleva el seguimiento del resultado.
+El flujo compartido actual admite Windows y Linux nativos con **Pi** o **Claude Code**. Pi delega mediante la extensión `pi-subagents`, que se instala por separado; Claude Code utiliza sus agentes nativos. Estos encargos mediante hosts nativos no necesitan el ejecutor compilado heredado ni una versión de runtime fijada para el proyecto. Consulta [compatibilidad de los hosts](docs/host-portability.md) para conocer su configuración, límites de capacidad y evidencias de verificación.
 
-Tú mantienes el control de las decisiones y los permisos. La factoría conserva los planes, los encargos y las evidencias de cada proyecto para que puedas ver qué ha cambiado, qué se ha comprobado y qué necesita tu atención.
+1. Instala la integración para tu host e inicializa el repositorio de destino; consulta la [instalación](docs/es/installation.md).
+2. En el repositorio de destino, ejecuta `/skill:isswf-setup` en Pi o `/isswf:isswf-setup` en Claude Code.
+3. Para iniciar un encargo, dirígelo explícitamente al coordinador de isSWF. Las peticiones normales no activan un flujo automático.
 
-## ¿Por qué este proyecto?
+La configuración prepara las decisiones específicas del proyecto y la entrada acotada del coordinador en el `AGENTS.md` raíz. Esa entrada se activa con una petición explícita al coordinador/a isSWF, no con cualquier petición de programación. La instalación o la configuración por sí solas no autorizan acciones futuras ni demuestran que un modelo esté disponible. Consulta la [guía de primeros pasos](docs/es/getting-started.md).
 
-Trabajar con agentes puede acabar en cambios grandes sin terminar, explicaciones repetidas y dudas sobre si algo funciona de verdad.
+## Registro y entrega del trabajo
 
-isSWF busca que ese trabajo sea más fácil de seguir:
+Antes de delegar trabajo nativo, el coordinador registra un plan duradero de iniciativa y un brief de encargo con la información pertinente en el directorio de estado existente (`.isswf` o el histórico `.factory`). Las tareas pequeñas no necesitan invocar un planificador ni generar un paquete fijo de documentos. Workers y revisores devuelven evidencias asociadas al candidato concreto; las comprobaciones y revisiones se eligen de forma proporcional, no son roles obligatorios para cada tarea. Herramientas de contexto opcionales como Engram o Codegraph no sustituyen los registros del proyecto.
 
-- Dividir una petición en cambios útiles que puedas revisar.
-- Preguntar cuando falta una decisión, no a cada paso.
-- Elegir investigación, planificación, pruebas y revisión según la tarea.
-- Conservar las decisiones y el progreso del proyecto entre conversaciones.
+Una petición seleccionada de funcionalidad a PR sigue la política de entrega preparada para el proyecto, con comprobaciones y revisión acotadas cuando correspondan. Entregar una PR es una decisión distinta de integrarla en la rama base. La petición puede establecer límites más estrechos y locales; elegir seguimiento mediante GitHub no concede permiso para publicar. Consulta [trabajo duradero](docs/durable-work.md), [cómo funciona la factoría](docs/es/reference.md) y [comprobaciones de desarrollo](docs/es/development.md).
 
-Es una forma de trabajar que utilizas cuando la necesitas, no un servicio que gestione tus repositorios sin supervisión.
+## Diagramas del flujo
 
-## ¿A quién está dirigido?
+![Resumen del flujo de isSWF: coordinador, roles de apoyo seleccionados, implementación, comprobaciones y entrega.](docs/es/workflow.svg)
 
-- Desarrolladores que ya utilizan Pi y quieren organizar mejor el trabajo en un proyecto Git existente.
-- Responsables de proyectos que quieren entender un cambio y sus comprobaciones antes de aceptarlo.
-- Personas que están explorando el desarrollo con agentes y quieren controlar qué pueden hacer.
+El [resumen](docs/es/workflow.svg) ofrece una vista rápida. Los diagramas conservan detalles de ejecución heredados y sirven de orientación, no como contrato del comportamiento nativo actual; consulta las guías enlazadas para conocerlo. El [flujo completo en español](docs/es/workflow.html) y el [flujo completo en inglés](docs/en/workflow.html) se abren localmente en un navegador; la vista de código fuente de GitHub no renderiza estos HTML como un sitio.
 
-El flujo normal del checkout de desarrollo comparte la metodología entre Pi y Claude Code en Windows nativo y Linux. Pi delega mediante la extensión `pi-subagents`, instalada por separado; Claude Code utiliza agentes nativos. Las tareas nuevas por esta vía no necesitan el ejecutor compilado de la fábrica ni una versión de runtime fijada para el proyecto. Consulta la configuración y los límites de verificación en [compatibilidad de los hosts](docs/host-portability.md). La instalación compilada que se conserva más abajo es una vía heredada independiente; adoptar el nuevo flujo no migra ni certifica una instalación existente.
+GitHub Pages está configurado para usar GitHub Actions. Cuando este workflow esté disponible en `main`, abre **Actions → Publish workflow diagrams → Run workflow**, selecciona `main` y ejecútalo cuando la publicación esté autorizada. No hay despliegue automático al hacer push. Tras el primer despliegue correcto, los diagramas estarán disponibles en [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/); la configuración por sí sola no activa esa dirección. La fase de preparación solo incluye la página de inicio bilingüe y los dos diagramas completos. Hasta que el despliegue termine correctamente, usa los archivos del repositorio o descárgalos para abrirlos localmente.
 
-## El flujo de un vistazo
+## Release compilada conservada (vía heredada)
 
-![Flujo de isSWF. El coordinador realiza el triage, elige investigación o planificación cuando hacen falta, asigna la implementación, verifica el resultado y entrega una PR con CI. Una persona decide el merge.](docs/es/workflow.svg)
+La instalación antigua del ejecutor compilado es una vía independiente, no un requisito para las nuevas tareas con hosts nativos. La evidencia de releases documentada se limita a Linux x64; tiene restricciones distintas de runtime, aislamiento y migración, y no certifica la ejecución nativa en Windows/macOS. Adoptar el flujo nativo no migra instalaciones existentes. Antes de elegir esa vía, consulta la [instalación y los límites del runtime heredado](docs/es/installation.md) y las evidencias de la release concreta. La versión del manifiesto no demuestra que exista una release publicada; no deduzcas una última release ni publicación en un registro a partir de ella.
 
-[Explora el flujo completo](docs/es/workflow.html), con agentes, skills, referencias, decisiones y bucles de corrección. GitHub muestra el HTML como un archivo. Descárgalo y ábrelo en el navegador, o ábrelo directamente desde un checkout local. La imagen resumida omite esos detalles; los roles opcionales no forman una cadena obligatoria.
+## Más información
 
-## Instalación
-
-Descarga la [última release estable para Linux x64](https://github.com/iseoane/isSWF/releases/latest). Verifica el archivo descargado con los checksums de la release antes de instalarlo. El repositorio es privado, por lo que GitHub CLI debe estar autenticado con una cuenta que tenga acceso. No se ha publicado ningún paquete en npm ni en un marketplace público.
-
-Linux x64 es el destino validado. El runtime Bun ha superado un flujo con un worker real de Pi, comprobaciones protegidas y aislamiento de Linux. Las correcciones de Claude han superado un ensayo nativo acotado con coordinador, worker y reviewer de solo lectura, con metadatos observados del modelo Sonnet y lecturas verificadas del runtime y los documentos de entrada. Son pruebas separadas de cada host, no garantías equivalentes de aislamiento o recuperación. La prerelease anterior, `1.1.0`, no puede cargar el SDK real de Pi y no debe utilizarse para encargos de agentes. La ejecución en Windows y macOS sigue sin validar. Comprueba las evidencias del candidato exacto y las limitaciones de la release antes de utilizarla.
-
-### Descargar y verificar
-
-Estos comandos seleccionan la última release estable sin indicar un tag de versión. Utiliza un directorio de descarga nuevo y vacío. Mantén el paquete extraído completo, no solo su ejecutable.
-
-```bash
-mkdir isswf-release
-cd isswf-release
-gh release download --repo iseoane/isSWF \
-  --pattern 'isswf-*-bun-linux-x64.tgz' --pattern SHA256SUMS
-sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf isswf-*-bun-linux-x64.tgz
-RELEASE="$(pwd)/package"
-```
-
-Para una instalación reproducible, sustituye el comando de descarga anterior por una versión explícita, por ejemplo:
-
-```bash
-gh release download v1.4.0 --repo iseoane/isSWF \
-  --pattern 'isswf-1.4.0-bun-linux-x64.tgz' --pattern SHA256SUMS
-```
-
-Continúa en la misma shell para que `RELEASE` indique la ruta absoluta local del paquete, no un selector de versión. Descargar una release nueva no actualiza automáticamente la versión fijada en los proyectos existentes. Los checksums detectan daños, pero no son firmas del editor. Consulta la [instalación](docs/es/installation.md) para la configuración inicial, las actualizaciones y la compilación desde el código fuente.
-
-### Pi
-
-```bash
-pi install "$RELEASE"
-```
-
-Así el paquete estará disponible de forma global. Añade `--local` para instalarlo solo en el proyecto actual.
-
-### Claude Code
-
-```bash
-claude plugin marketplace add "$RELEASE"
-claude plugin install isswf@isswf --scope user
-```
-
-Utiliza `--scope project` para una instalación por proyecto. La [guía de instalación](docs/es/installation.md) explica las diferencias entre los dos entornos.
-
-### Dependencias
-
-Utiliza una release ejecutable de confianza para tu plataforma, Git y el asistente que elijas. El núcleo de la factoría incluye Bun y no necesita instalar Node.js ni Bun por separado. Los hosts, SDK y comprobaciones del proyecto mantienen sus propios requisitos. El desarrollo de la factoría sigue usando Node.js 24 o posterior y `.mjs`. Para ejecutar encargos con agentes también hace falta una cuenta de modelos compatible y con la autenticación configurada.
-
-El flujo instalado completo requiere actualmente Linux. Los workers aislados de Pi necesitan además bubblewrap. Python y SQLite no son requisitos del flujo nativo; Engram y Codegraph son opcionales.
-
-Instalar el paquete no arranca agentes ni crea el estado de la factoría en todos tus repositorios. Cada proyecto se inicializa de forma explícita.
-
-## Primeros pasos
-
-Abre tu proyecto en Pi e inicialízalo:
-
-```text
-/skill:isswf-setup
-```
-
-Después prueba una petición solo de preparación:
-
-```text
-/skill:isswf-coordinator Prepara una corrección para el filtro de búsqueda, que se reinicia al cambiar de página. Mantén el resto de su comportamiento. Muéstrame el alcance y las comprobaciones propuestas antes de cambiar código.
-```
-
-El coordinador debe explicar el siguiente paso, preguntar por las decisiones de producto que falten e indicar cómo se comprobará el resultado. Cuando la implementación esté autorizada, podrá utilizar los agentes adecuados y devolverte un resumen para que lo aceptes.
-
-En Claude Code, utiliza `/isswf:isswf-setup` e `/isswf:isswf-coordinator`.
-
-La [guía de primeros pasos](docs/es/getting-started.md) incluye ejemplos para corregir errores, añadir funcionalidades y consultar el progreso.
-
-## Detalles
-
-[Toda la documentación vigente](docs/es/index.md), incluido el mapa del código, el panel local y las posibles acciones futuras.
-
-
-- [Instalación y actualizaciones](docs/es/installation.md): elige un entorno, inicializa un proyecto y actualízalo de forma explícita.
-- [Primeros pasos](docs/es/getting-started.md): plantea tu primera petición y entiende la respuesta.
-- [Cómo funciona la factoría](docs/es/reference.md): skills, agentes, registros del proyecto y límites actuales.
-- [Desarrollo](docs/es/development.md): orientarte por el código y ejecutar las comprobaciones.
-
-## Colaborar
-
-Empieza por un problema concreto o una mejora pequeña. Explica el resultado esperado y cómo lo has comprobado. Lee la [guía de desarrollo](docs/es/development.md) antes de cambiar el comportamiento de la factoría.
+- [Índice de documentación](docs/es/index.md)
+- [Instalación y actualizaciones](docs/es/installation.md)
+- [Primeros pasos](docs/es/getting-started.md)
+- [Compatibilidad de los hosts](docs/host-portability.md)
+- [Glosario](GLOSSARY.es.md)
+- [Colaborar](docs/es/development.md)
 
 ## Licencia
 
-Este proyecto se distribuye bajo la licencia MIT.
+MIT.
