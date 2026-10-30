@@ -74,6 +74,10 @@ Keep this development checkout separate from any installed release. Follow `docs
 - New installations use `.isswf/`. Existing `.factory/` state remains valid until explicit migration; never create a second active state directory or rewrite historical checkpoint paths. Read `docs/installation.md` before setup, migration, rollback or recovery.
 - Keep Pi package, core and plugin on the same release version. Updating an installed package must not silently update a project's pin, model choices or active work. Preserve the previous runtime and recovery records.
 
+## Project-only release procedure
+
+For an explicit isSWF repository release request, read `.agents/skills/isswf-release/SKILL.md` and its release procedure. This source-only skill is not part of the distributed factory package. It records repeatable gates, not standing publication, installation or migration permission.
+
 ## Verification and delivery
 
 - Select mechanical, semantic or combined verification using `.agents/roles/references/review.md`. When independent judgment is required, the author cannot supply it. Review the exact retained candidate; changes invalidate affected checks and verdicts. Keep failures and inconclusive results visible.

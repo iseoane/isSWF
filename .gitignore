@@ -21,5 +21,8 @@ node_modules/
 !/.audit/README.md
 !/.audit/archive.json
 /.archify/
+/.atl/
 /docs/en/workflow.delivery.json
 /docs/es/workflow.delivery.json
+# Local AI runtime state
+.atl/
