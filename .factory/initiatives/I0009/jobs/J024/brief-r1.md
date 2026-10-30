@@ -29,3 +29,9 @@ Worker edits only .gitattributes, tests/checkout-line-endings.mjs, tests/worker-
 ## Quality inventory and closure
 
 Locked ESLint/Knip, full portable quality, paired documentation checks and actual committed packaging exist; dependencies available, not newly installed. No separate JS compile/typecheck; Bun artifact verification is separate from source checks. No duplicate machinery or new helper layer required. Before this candidate, existing Linux quality and preset exact-head CI passed, not evidence of this extraction. Closure requires fresh native Linux/Windows focused tests and exact-head required CI, sufficient independent review and coherent scoped PR. VM is available as an optional native diagnostic surface; do not access credentials or alter Windows services from worker.
+
+## Implementation evidence before independent review
+
+Native worker da3884d3-6d7e-4bb0-b2e4-4309ec894ffe returned stopped, partial only because delivery gates remain. It reports all required methodology consumed, no commits/staging/network or unrelated writes. Seven authorized paths changed. Focused checkout/worker-route/host-portability/docs/affected ESLint/syntax/diff checks PASS. No-policy sensitivity in a disposable copy failed as expected: runtime.mjs gained CR bytes with autocrlf=true; failed fixture retained privately. No native Windows evidence is claimed from those Linux runs.
+
+Coordinator inspected all changed/new files and observed full node tools/check-quality.mjs PASS, including new checkout regression, route guard, Bun/synthetic Bubblewrap; locked full ESLint and Knip PASS; diff PASS. That run's committed-source package revision was2817481915ec16f33076f7f6aa7c4757fed75c33; implementation artifact/CI verification remains a separate gate. No production validator changed. Prepare exact committed candidate and supplied full diff for read-only independent reviewer, then obtain native Windows/Linux exact-head CI before closure.

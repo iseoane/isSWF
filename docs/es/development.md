@@ -29,6 +29,8 @@ git clone https://github.com/iseoane/isSWF.git
 cd isSWF
 ```
 
+El archivo `.gitattributes` del repositorio mantiene los archivos de texto con LF en Windows y Linux, incluso con `core.autocrlf=true`; los archivos detectados como binarios no cambian. Así se conservan las comprobaciones exactas entre los bytes del runtime y Git y las cabeceras de los recursos. No normalices los bytes durante la verificación de integridad ni desactives sus comprobaciones. Añadir los atributos no reescribe una copia de trabajo existente: si un checkout anterior conserva archivos del runtime con CRLF, guarda el trabajo local y utiliza un clon nuevo de una revisión que contenga esta política. No restablezcas por la fuerza un checkout con cambios ni modifiques la configuración global de Git para ocultar la discrepancia.
+
 Mantén el desarrollo fuente con Node.js y `.mjs`. Instala un compilador Bun de confianza solo para construir releases. Bun 1.4.3 es el compilador probado localmente. El generador usa Bun por defecto; `--runtime node` conserva el formato original para datos de prueba de desarrollo. Elige un commit que contenga las herramientas completas de distribución. El generador lee ese commit, no los cambios sin commit. Si el trabajo de instalación aún no está guardado en un commit de tu copia, no esperes encontrarlo en el commit anterior.
 
 Sustituye `FULL_COMMIT_SHA` por el SHA completo del commit y utiliza una carpeta de salida que no exista, fuera del repositorio fuente:

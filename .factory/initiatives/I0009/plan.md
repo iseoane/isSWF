@@ -154,12 +154,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J024
 
-- Status: in-progress
+- Status: in-review
 - Objective: Deliver #84 LF checkout integrity.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J024/brief-r1.md)
-- Blocker: Implementation and fresh native checks pending.
-- Next step: Delegate the bounded LF policy extraction on main2ed2c69; close with independent review and exact-head Linux/Windows CI.
+- Blocker: Independent assessment and fresh exact-head Windows/Linux CI remain pending.
+- Next step: Review the stopped worker candidate, publish its scoped PR and inspect exact-head native CI before LOW-risk integration.
 
 ### Acceptance
 
@@ -170,6 +170,7 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 - Operator selected ordered issue delivery; all four live coordinator handoffs read, original historical decisions preserved.
 - jobs/J024/brief-r1.md
+- Worker da3884d3-6d7e-4bb0-b2e4-4309ec894ffe stopped after bounded seven-path implementation; focused tests PASS and no-policy disposable sensitivity FAIL as expected. Coordinator full Linux quality, ESLint, Knip and diff PASS; packaging in that run used input checkpoint2817481, not yet the implementation commit.
 
 ## J025
 
