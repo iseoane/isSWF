@@ -80,7 +80,7 @@ Type: maintenance
 
 ## J005
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve #91 with evidence-triggered path reclassification.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
@@ -93,14 +93,14 @@ Type: maintenance
 
 ### Evidence
 
-- GitHub issue #91; jobs/J005/V001.md; jobs/J005/delivery.md; candidateebf6d56df4bea01391a18fb4fc71f37fb100e412, independent PASS/PASS LOW; local #84 failure retained.
+- PR104 MERGED asfd88b7286852a4d2c0e2d41f89f735337632b217, Quality40951947772 SUCCESS3/3, independent PASS LOW, delivered branches deleted; post-merge Quality40952281584 pending. GitHub issue #91; jobs/J005/V001.md; jobs/J005/delivery.md; candidateebf6d56df4bea01391a18fb4fc71f37fb100e412, independent PASS/PASS LOW; local #84 failure retained.
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Objective: Resolve #90 through a minimal setup-managed AGENTS.md entry point.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: none
 - Next step: Inspect setup implementation and actual shared host discovery contract.
 
