@@ -4,11 +4,15 @@ This is the coordinator's workflow contract, not a new dispatcher or persistent 
 
 ## Select the current request
 
-A trusted operator request to start or implement a feature, or approval of a clearly presented feature-to-PR assignment, selects this default in a prepared project:
+A trusted operator request to start or implement a feature selects this default in a prepared project:
 
 **Define the outcome, implement, check, review as required, correct, commit, push the feature branch, create or update its PR, verify required CI, and deliver the PR for a human integration decision.**
 
-Do not require the operator to append commit, push and PR instructions to that feature start. Record the current request as the authorization source and translate its bounded scope into the effective brief and supported callers' actual grants. Configuration and this document supply the workflow meaning, not permission on their own. Preserve the assigned actor, model/effort, access and cumulative cost/attempt limits; a per-call grant does not reset the assignment's budget.
+Before each new dispatch, verify and record the current trusted start instruction and its bounded action scope. A design-option choice, brief approval, or approval that does not clearly say to start execution is preparation only; do not dispatch a new actor. Keep the job prepared, not started in its existing blocker/next-step fields, and state the exact missing start instruction. If approval is genuinely ambiguous, clarify whether to start and wait before dispatch. Preparation and approval do not become dispatch evidence merely by being recorded.
+
+An explicit start such as “implement this feature” selects the bounded workflow above; do not ask again for commit, push or PR permission already covered by that start. A continuation or correction within an already explicitly authorized assignment does not need a redundant start prompt; retain its original bounded grant and cumulative budgets. Explicit prepare-only, read-only, local-only or other narrower limits still prevail.
+
+Record the trusted current request as the authorization source and translate its bounded scope into the effective brief and supported callers' actual grants. Configuration and this document supply the workflow meaning, not permission on their own. Preserve the assigned actor, model/effort, access and cumulative cost/attempt limits; a per-call grant does not reset the assignment's budget. A record describes preparation until a dispatch tool reports that dispatch occurred; do not infer actor liveness or dispatch from text or plan status.
 
 Before dispatch, materialize finite totals in the brief: the default ceiling is **two independent review rounds per functional unit total, including the initial review**, and **one correction cycle total**. The first review's findings are bundled into that cycle; after correcting them, repeat only affected checks and the required independent review. This ceiling is not a requirement to perform two reviews when one is sufficient, and does not add actors, time, cost, permissions or retries. Explicit tighter grants take precedence, including zero; a combined multi-unit assignment may impose a lower cumulative ceiling. Record each actor/call and remaining budget before dispatch and on resume; never reset spent budget. A technical failure consumes the applicable call/attempt budget and blocks or waits for recovery within the remaining grant; it does not authorize a replacement actor or retry.
 
