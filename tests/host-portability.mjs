@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -328,4 +329,7 @@ for (const role of ['planner', 'researcher']) {
 }
 assert.match(await read('.agents/roles/references/planning.md'), /write.*artifact only.*explicitly authorized/u, 'Read-only planners return through the authorized channel instead of requiring a file write');
 assert.match(await read('.agents/roles/references/research.md'), /never substitute.*latest/u, 'Unavailable pinned documents must not silently become current files');
+const methodEvidence = spawnSync(process.execPath, [path.join(root, 'tests/worker-method-evidence.mjs'), root], { encoding: 'utf8', timeout: 10_000 });
+assert.ifError(methodEvidence.error);
+assert.equal(methodEvidence.status, 0, `method evidence contracts must pass on the native host: ${methodEvidence.stderr}`);
 console.log('host-portability: static manifest and preserved contract checks ok; no Claude invocation');

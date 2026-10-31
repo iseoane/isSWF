@@ -46,6 +46,9 @@ La versión concreta de una entrega sometida a verificación, revisión o acepta
 Un resultado observado y atribuible a un candidato o contexto concreto que respalda una afirmación.
 _Avoid_: PASS sin indicar qué se comprobó.
 
+**Commit RED**:
+Un commit que contiene solo una prueba de comportamiento cuyo fallo se debe a que falta el comportamiento solicitado; cuando el brief selecciona TDD, precede a un commit GREEN independiente con la corrección de producción.
+
 **Cierre técnico**:
 La condición de una entrega que cumple el encargo y las comprobaciones requeridas sin hallazgos bloqueantes abiertos.
 _Avoid_: terminado cuando todavía falta aceptación o integración.

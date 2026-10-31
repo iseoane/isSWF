@@ -56,6 +56,7 @@ node tools/check-quality.mjs
 ```
 The portable check includes `node tooling/quality/check-docs.mjs`: it checks current guide mirrors, local links, section coverage and identical shell examples. It also rejects obsolete audit procedures copied into current technical guides. It does not prove translation quality or execute the examples.
 
+When a brief selects TDD, each behavioral RED commit is test-only and intentionally fails; the following GREEN commit contains the passing change. If `git bisect` lands on a RED commit, use `git bisect skip` because that commit is expected to fail. A syntax or setup failure is not a valid RED result.
 
 When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` tasks, pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires both the artifact and Linux sandbox checks. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk without changing the diagnostic evidence root policy. These fixtures do not execute Claude or real providers.
 

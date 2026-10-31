@@ -10,7 +10,10 @@
 - Plan path and revision, if used:
 - Profile path and revision, if available:
 - Skills and revisions, if available:
-- Method application report: `<for each selected method, state applied/not applied and identify observed evidence; distinguish reading/receipt from application. Cite observer, command/action and result, exact candidate/base and attempt or artifact path when applicable. If deviating, disclose the requirement, reason and consequence; disclosure does not waive a required method or its acceptance criterion. Do not reconstruct missing evidence or claim retrospective red-first proof. State explicitly when no method was selected>`.
+- Method application report: `<for each selected method, state applied/not applied and identify observed evidence; distinguish reading/receipt from application. Cite observer, command/action and result, exact candidate/base and attempt or artifact path when applicable. For each selected TDD behavioral contract, name the test-only RED commit and subsequent GREEN commit, exact command, and failing assertion (path:line/message); reviewer/coordinator reruns the named command at both commits. A syntax/setup failure is not RED. If an honest RED is impossible, disclose the requirement, reason, and consequence; disclosure does not waive a required method or criterion. Do not claim a retrospective red-first cycle. State explicitly when no method was selected>`.
+- Retained substitute evidence, when sensitivity/mutation results substitute for missing RED: `<retain the harness and run log in committed tests/ evidence or ignored tooling/.local/<job>/; link both paths in this attempt/review record, name the archived commit and an unmutated baseline run, injected change and result. Retrospective evidence is not red-first proof>`.
+- Required-resource consumption: `<resource → consumed/missing → observed (host trace) or self-reported; a trace proves a read, not understanding or application. Name unreadable required resources explicitly>`.
+- Required-reference application map: `<for each required engineering reference, reference → concrete application in candidate (path/line or commit), or not applicable / deliberately not applied → reason. Do not list optional references merely to satisfy a checklist>`.
 - Target codebase base (full Git SHA):
 - Trusted authorization reference (operator conversation or record ID, or external path; if tracked in Git, full Git SHA):
 - Exclusive checkout or worktree:
@@ -35,6 +38,8 @@
 - Summary of work and unresolved decisions:
 - Changed paths:
 - Checks run and observed results:
+- Required red/green commit pairs and reviewer reproduction command/results (if TDD selected):
+- Deviations from required procedure and consequence:
 - Resulting artifact paths and checkpoint or commit references:
 - Risks, limits, and next action:
 
