@@ -60,10 +60,18 @@ try{
  await writeFile(join(profile,'models.json'),JSON.stringify(models));
  await writeFile(join(profile,'agents/isswf-trial-reviewer.md'),'---\nname: isswf-trial-reviewer\ndescription: Offline trial only\ntools: read\ninheritSkills: false\n---\nRead only the synthetic workspace. No delegation.\n');
  const config={packages:[{source:factoryRoot,extensions:[],skills:[],prompts:[]}],compaction:{enabled:false},retry:{enabled:false,maxRetries:0},subagents:{defaultExtensions:[],defaultThinking:'low',agentOverrides:{'isswf-reviewer':{model:provider+'/'+modelId,thinking:'medium'},'isswf-worker':{model:provider+'/'+modelId,thinking:'high',tools:['write']}},modelScope:{enforce:true,strict:true,allow:[provider+'/'+modelId]}}};
- await writeFile(join(profile,'settings.json'),JSON.stringify(config));
+ const userConfig={...config,subagents:{...config.subagents,agentOverrides:{'isswf-reviewer':{model:provider+'/user-only-unavailable',thinking:'low'},'isswf-worker':{model:provider+'/user-only-unavailable',thinking:'low',tools:['write']}}}};
+ const projectConfig={subagents:{agentOverrides:config.subagents.agentOverrides},fixtureUnrelated:{preserve:'project'}};
+ const userSettingsBytes=JSON.stringify(userConfig),projectSettingsBytes=JSON.stringify(projectConfig);
+ await mkdir(join(work,'.pi'));await mkdir(join(work,'.factory'));
+ const legacyBytes=JSON.stringify({schemaVersion:1,roles:{worker:[{model:provider+'/legacy-only-unavailable',effort:'low'}],reviewer:[{model:provider+'/legacy-only-unavailable',effort:'low'}]}});
+ await writeFile(join(work,'.factory/models.json'),legacyBytes);
+ await writeFile(join(profile,'settings.json'),userSettingsBytes);
+ await writeFile(join(work,'.pi/settings.json'),projectSettingsBytes);
  await writeFile(join(profile,'extensions/subagent/config.json'),JSON.stringify({asyncByDefault:false,forceTopLevelAsync:false,enableSlashCommands:false,scheduledRuns:{enabled:false},missions:{enabled:false}}));
  const require=createRequire(join(sdkRoot,'package.json')),sdk=require(sdkRoot);
  const settings=sdk.SettingsManager.create(work,profile),runtime=await sdk.ModelRuntime.create({authPath:join(profile,'auth.json'),modelsPath:join(profile,'models.json'),modelsStorePath:join(profile,'model-cache.json'),allowModelNetwork:false});
+ assert.deepEqual(settings.getSettings().subagents.agentOverrides,config.subagents.agentOverrides,'Project native overrides must win over conflicting user selections');
  const model=runtime.getModel(provider,modelId);assert(model,'synthetic model must be registered');report.piVersion=JSON.parse(await readFile(join(sdkRoot,'package.json'))).version;
  const loader=new sdk.DefaultResourceLoader({cwd:work,agentDir:profile,settingsManager:settings,noExtensions:true,noSkills:true,noPromptTemplates:true,noThemes:true,additionalExtensionPaths:[join(piSubagents,'bundle/index.js')],agentsFilesOverride:()=>({agentsFiles:[]})});
  await loader.reload();assert.deepEqual(loader.getExtensions().errors,[],JSON.stringify(loader.getExtensions().errors.map(error=>({path:error.extensionPath,message:String(error.error??error)}))));
@@ -87,6 +95,13 @@ try{
  const successCalls=calls.filter(c=>c.phase==='success');assert(successCalls.length>=2);for(const c of successCalls){assert.equal(c.body.model,modelId);assert.equal(c.body.reasoning_effort,'medium');assert.deepEqual(c.body.tools.map(t=>t.function.name).sort(),['contact_supervisor','find','grep','isswf_git_content','isswf_git_diff','isswf_git_identity','ls','read']);}
  assert.match(JSON.stringify(successCalls.at(-1).body.messages),/after/);assert.equal(await readFile(join(work,'cwd-canary.txt'),'utf8'),'CWD_SENTINEL\n');
  report.cases.push({name:'configured model/medium overrides parent low, cwd read and result',status:'PASS',tools:['contact_supervisor','find','grep','isswf_git_content','isswf_git_diff','isswf_git_identity','ls','read'],note:'Package adds its supervisor communication tool; this is not a filesystem sandbox',requests:successCalls.length});
+ const beforeUnknown=calls.length;let unknown;try{unknown=await invoke('synthetic-unknown-model',new AbortController(),{model:provider+'/unregistered'});}catch(e){unknown={isError:true,message:e.message};}
+ assert.equal(unknown.isError,true,JSON.stringify(unknown));assert.equal(calls.length,beforeUnknown,'Unknown model must refuse before any provider request, without user or legacy fallback');
+ report.cases.push({name:'unknown explicit model refuses without provider requests or user/legacy substitution',status:'PASS'});
+ assert.equal(await readFile(join(profile,'settings.json'),'utf8'),userSettingsBytes,'User settings and package filters must not be rewritten');
+ assert.equal(await readFile(join(work,'.pi/settings.json'),'utf8'),projectSettingsBytes,'Project model choices and unrelated fields must not be rewritten');
+ assert.equal(await readFile(join(work,'.factory/models.json'),'utf8'),legacyBytes,'Conflicting legacy routes must remain ignored and byte-preserved');
+ report.cases.push({name:'native project selections override user conflicts without consulting or modifying legacy routes or settings',status:'PASS'});
  phase='error';let failure;try{failure=await invoke('synthetic-error',new AbortController());}catch(e){failure={isError:true,message:e.message};}await writeFile(join(root,'error-result.json'),JSON.stringify(failure,null,2));assert.equal(failure.isError,true,JSON.stringify(failure));assert.match(JSON.stringify(failure),/SYNTHETIC_PROVIDER_FAILURE/);
  assert.equal(calls.filter(c=>c.phase==='error').length,1,'Disabled retry must preserve a single visible provider failure');
  for(const call of calls)assert.equal(call.body.model,modelId,'Never substitute another model');
