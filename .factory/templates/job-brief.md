@@ -59,7 +59,7 @@
 - Checkpoint cadence or stopping point:
 - Setup readiness reference and current preflight evidence; unresolved technical limits:
 - Delivery destination: `<repository/remote, integration base, exclusive feature branch; no default direct integration-branch push>`.
-- Finite cumulative actor/correction-call and cost limits:
+- Finite cumulative actor/correction-call and cost limits: `<materialize before dispatch; default ceiling per functional unit is two independent review rounds total including initial review, and one correction cycle total. Bundle first-review findings into the cycle; repeat affected checks and required review after correction. This is a ceiling, not a mandatory second review. Explicit tighter grants, including zero, and lower combined-assignment ceilings prevail. Name actor/model/effort, calls, time and cost; account spent budget on resume without reset. Technical failures consume applicable attempts; no automatic retry or substitution>`
 - Commit policy and required checkpoint evidence: `<a feature-to-PR brief carries the already selected coordinator commit/push/PR/CI scope, without a second operator approval>`.
 - Concrete wait: `<awaiting-human question and resume answer/grant, or technical blocker and exit condition>`.
 - Integration decision: `<awaiting-human for the verified PR; no merge/auto-merge from the feature start>`.
