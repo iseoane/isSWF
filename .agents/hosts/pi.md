@@ -46,6 +46,8 @@ Before the first native dispatch for new work, resolve `docs/durable-work.md` fr
 
 The first read-only Git evidence slice exposes only `isswf_git_identity` to the Pi reviewer. It requires an explicit fresh child launch binding; it does not infer repository or revisions from `cwd`, project files, task text, or ordinary environment variables. The tool accepts no arguments. Missing or malformed launch binding fails closed. Diff, committed content, and status operations are not provided by this tool.
 
+Use this tool only on a coordinator-approved repository with the author stopped and no untrusted concurrent writer. This is an operational prerequisite, not an OS-enforced condition: the tool runs with Pi's host permissions, cannot make the filesystem immutable, and does not promise race-proof containment or hard deadlines for blocking OS calls. The configuration/topology guards and no-write tests verify the narrow evidence boundary, not system isolation. If the required review involves a hostile or concurrently mutable repository, stop that affected step and separately select and verify protected immutable input; do not reactivate the parked isolated executor or weaken this boundary automatically.
+
 For an authorized review, the coordinator supplies `options.extensionBindings` on a **fresh** `subagent` launch. Use full exact commit IDs, canonical paths, and the trusted Git executable selected by the coordinator:
 
 ```js
