@@ -4,12 +4,12 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Resolve #126: Report missing native host prerequisites as explicit BLOCKED with nonzero exit and keep unexecuted changed tests inconclusive, without weakening real failure gates.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None for the bounded next step; unsupported capability remains an explicit limit.
-- Next step: One sequential native worker, relevant local checks, independent review, final-head PR CI and permitted integration.
+- Blocker: None for source-verified scope; PR/native CI and integration are separate gates.
+- Next step: Publish one final record head, verify exact-head native CI and integrate only within applicable risk/authority; retain final remote receipt on the PR.
 
 ### Acceptance
 
@@ -23,3 +23,7 @@ Type: enhancement
 
 - Current operator explicitly requests all remaining ordered issues121,126,127,125,128. This unit only: 126. Bounded native preparation/implementation/checks/feature commits/push/PR/CI in iseoane/isSWF; integration only under applicable LOW-risk protected expected-head authorization. No other unit, direct-main push, bypass, installation, release, deployment or cleanup.
 - Source base e9fde26615b806495abdc1dbea56f40ca69bed76; actual issue observation and affected files inspected.
+
+## Source verification
+
+Candidate f54621958055af4aa270c54de6578c087bff25cf; implementation and independent Standards/Spec review verified as retained in jobs/J001/delivery.md. TDD RED50f3d91102ae33af876fd777aa0cdc10d355aca0 replayed from its exact archive: exit1 vs expected2; GREENbea01c945eb375d950d8b9716436f37864231faf and corrected candidatef54621958055af4aa270c54de6578c087bff25cf injected regressions PASS. Coordinator full portable quality, locked ESLint/Knip, focal/docs/diff PASS on f546219; native Linux synthetic suite PASS using explicit already-installed pinned pi-subagents0.83.0 path (no install/provider call). Initial no-edit required-guide blocker, original missing-bundle BLOCKED and diagnostic packet/phrase failures are retained; compact equivalent review wording resolved packet compatibility without raising caps. No native Windows/live-model result claimed before final CI. Completed denotes source implementation/verification, not unobserved PR, CI or merge. Later results will be external PR receipts, not recursive record commits.
