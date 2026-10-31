@@ -10,6 +10,7 @@ const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
 export const planStates = Object.freeze(['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed']);
+const hasEvidence = values => values.some(item => item.trim() && item.trim() !== 'None.');
 async function regular(path) {
   const stat = await lstat(path);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 256000) throw Error('bounded regular file required');
@@ -70,8 +71,8 @@ export function parsePlan(markdown) {
     if (!brief || brief[2] !== job.id) throw Error('unsafe-brief-reference');
     const dependencies = job['Depends on'] === 'None' ? [] : job['Depends on'].split(', ');
     if (new Set(dependencies).size !== dependencies.length || dependencies.some(dep => !seen.has(dep) || dep === job.id)) throw Error('invalid-dependency');
-    const evidence = job.evidence.filter(item => item !== 'None.');
-    if (job.Status === 'completed' && !evidence.some(item => item.trim())) throw Error('completed jobs require evidence');
+    const evidence = job.evidence.filter(item => item.trim() !== 'None.');
+    if (job.Status === 'completed' && !hasEvidence(evidence)) throw Error('completed jobs require evidence');
     return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence, briefName: `brief-r${brief[1]}.md` };
   });
   validateDependencyGraph(parsed);
@@ -83,7 +84,7 @@ function render(value, initiative) {
   if (ids.size !== value.jobs.length || [...ids].some(job => !id(job))) throw Error('unique job IDs required');
   for (const job of value.jobs) {
     if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !planStates.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
-    if (job.status === 'completed' && !job.evidence.some(item => item !== 'None.' && item.trim())) throw Error('completed jobs require evidence');
+    if (job.status === 'completed' && !hasEvidence(job.evidence)) throw Error('completed jobs require evidence');
   }
   validateDependencyGraph(value.jobs.map(job => ({ id: job.id, dependencies: job.dependsOn })));
   const list = values => values.length ? values.map(item => `- ${item}`).join('\n') : '- None.';
