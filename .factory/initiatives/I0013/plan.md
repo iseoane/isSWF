@@ -4,12 +4,12 @@ Type: maintenance
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Establish one native editable model configuration authority per host, with unambiguous legacy-only models.json and preserved approved choices.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None; operator selected one authority per host, not a shared cross-host file.
-- Next step: One Luna/high author on adopted scope, coordinator checks and up to two Sol/medium independent reviews, then bounded PR and native CI; human integration separate.
+- Next step: Publish bounded feature PR and verify exact-head native CI; source review PASS, human MEDIUM integration approval remains separate.
 
 ### Acceptance
 
@@ -22,3 +22,4 @@ Type: maintenance
 - Current operator chose one native authority per host after read-only planner4754c6c9 identified real legacy consumers and unsupported cross-host assumptions.
 - Planning originated at I0009/J033 checkpoint370c0d3; original paths retained as historical provenance, this independent initiative owns implementation. One consumed planner allocation is inherited, not reset.
 - Baseline5cd5a95c49e7a9b735328979d752b37679f1548c; feature branch feat/model-config-single-source. Existing unrelated dirty records preserved.
+- Author dec6e908 partial result and resolved test-dependency gap retained A001. Reviewed functional candidate1a7d3b851ccb5242375d46c32210bad07a14d047; coordinator RED/GREEN replay, full quality/static and actual Pi SDK precedence/no-fallback/preservation controls PASS. V001 reviewer928d07b0 Standards/Spec/aggregate PASS, no blockers; one review unused. No native/live Claude effort claim; published CI pending.
