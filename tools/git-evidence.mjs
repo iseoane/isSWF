@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { lstat, readdir, realpath } from 'node:fs/promises';
+import { lstat, opendir, realpath } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -12,6 +12,14 @@ const failure = (reason, binding = null) => ({
   version: 1, status: 'error', operation: 'identity', reason,
   ...(binding ? { repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256: digest(binding) } : {}),
 });
+const wireBytes = value => Buffer.byteLength(JSON.stringify(value) + '\n');
+function boundedResult(value, limit = 512) {
+  if (wireBytes(value) <= limit) return value;
+  return {
+    ...failure('identity-output-limit'),
+    ...(value.bindingSha256 ? { bindingSha256: value.bindingSha256 } : {}),
+  };
+}
 
 export function validateBinding(value) {
   if (!ownKeys(value, ['version', 'repository', 'baseSha', 'candidateSha', 'gitExecutable', 'timeoutMs', 'outputBytes']) || value.version !== 1) throw Error('invalid-binding-shape');
@@ -20,7 +28,9 @@ export function validateBinding(value) {
   if (typeof value.gitExecutable !== 'string' || !isAbsolute(value.gitExecutable) || value.gitExecutable.includes('\0')) throw Error('absolute-git-executable-required');
   if (!Number.isSafeInteger(value.timeoutMs) || value.timeoutMs < 100 || value.timeoutMs > 10000) throw Error('invalid-time-bound');
   if (!Number.isSafeInteger(value.outputBytes) || value.outputBytes < 512 || value.outputBytes > 8192) throw Error('invalid-output-bound');
-  return Object.freeze({ version: 1, repository: value.repository, baseSha: value.baseSha, candidateSha: value.candidateSha, gitExecutable: value.gitExecutable, timeoutMs: value.timeoutMs, outputBytes: value.outputBytes });
+  const binding = { version: 1, repository: value.repository, baseSha: value.baseSha, candidateSha: value.candidateSha, gitExecutable: value.gitExecutable, timeoutMs: value.timeoutMs, outputBytes: value.outputBytes };
+  if (wireBytes(failure('x'.repeat(160), binding)) > binding.outputBytes) throw Error('binding-context-exceeds-output-bound');
+  return Object.freeze(binding);
 }
 
 function runGit(binding, args, deadline, maxBuffer = 8192) {
@@ -51,6 +61,8 @@ async function assertSupportedRepository(binding, deadline) {
   const objectDir = join(gitEntry, 'objects');
   const objectStat = await lstat(objectDir);
   if (!objectStat.isDirectory() || objectStat.isSymbolicLink() || await realpath(objectDir) !== objectDir) throw Error('unsupported-object-store-topology');
+  try { await lstat(join(gitEntry, 'commondir')); throw Error('common-git-storage-refused'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
   for (const path of [join(objectDir, 'info', 'alternates'), join(gitEntry, 'info', 'grafts')]) {
     try { await lstat(path); throw Error(path.endsWith('alternates') ? 'alternate-object-store-refused' : 'grafts-refused'); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -62,9 +74,10 @@ async function assertSupportedRepository(binding, deadline) {
   while (pending.length) {
     if (Date.now() >= deadline) throw Error('identity-timeout');
     const directory = pending.pop();
-    for (const name of await readdir(directory)) {
+    for await (const entry of await opendir(directory)) {
+      if (Date.now() >= deadline) throw Error('identity-timeout');
       if (++metadataEntries > 32768) throw Error('repository-metadata-limit');
-      const path = join(directory, name);
+      const path = join(directory, entry.name);
       const stat = await lstat(path);
       if (stat.isSymbolicLink() || !stat.isDirectory() && !stat.isFile()) {
         throw Error(path.startsWith(objectDir + sep) ? 'unsupported-object-store-topology' : 'unsupported-gitdir-topology');
@@ -79,7 +92,7 @@ async function assertSupportedRepository(binding, deadline) {
   const entries = config.toString('utf8').split('\0').filter(Boolean);
   for (const entry of entries) {
     const key = entry.slice(0, entry.indexOf('\n')).toLowerCase();
-    if (key.startsWith('include.') || ['core.fsmonitor', 'core.sshcommand', 'core.gitproxy', 'core.askpass', 'core.hookspath', 'core.alternaterefscommand'].includes(key) || key.startsWith('filter.') || key.startsWith('diff.') || key.startsWith('merge.')) throw Error('executable-or-external-git-configuration-refused');
+    if (key.startsWith('include.') || key.startsWith('includeif.') || ['core.fsmonitor', 'core.sshcommand', 'core.gitproxy', 'core.askpass', 'core.hookspath', 'core.alternaterefscommand'].includes(key) || key.startsWith('filter.') || key.startsWith('diff.') || key.startsWith('merge.')) throw Error('executable-or-external-git-configuration-refused');
   }
 }
 
@@ -106,10 +119,11 @@ export async function identity(input) {
       gitExecutable: binding.gitExecutable, gitVersion, bindingSha256,
       limits: { timeoutMs: binding.timeoutMs, outputBytes: binding.outputBytes },
     };
-    if (Buffer.byteLength(JSON.stringify(result)) > binding.outputBytes) throw Error('identity-output-limit');
-    return result;
+    return boundedResult(result, binding.outputBytes);
   } catch (error) {
-    return failure(typeof error?.message === 'string' ? error.message.slice(0, 160) : 'identity-refused', binding);
+    const result = failure(typeof error?.message === 'string' ? error.message.slice(0, 160) : 'identity-refused', binding);
+    if (!binding && ownKeys(input, ['version', 'repository', 'baseSha', 'candidateSha', 'gitExecutable', 'timeoutMs', 'outputBytes'])) result.bindingSha256 = digest(input);
+    return boundedResult(result, binding?.outputBytes ?? 512);
   }
 }
 
@@ -130,7 +144,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     process.stdout.write(JSON.stringify(result) + '\n');
     if (result.status !== 'ok') process.exitCode = 2;
   } catch (error) {
-    process.stdout.write(JSON.stringify(failure(error.message.slice(0, 160))) + '\n');
+    process.stdout.write(JSON.stringify(boundedResult(failure(error.message.slice(0, 160)))) + '\n');
     process.exitCode = 2;
   }
 }

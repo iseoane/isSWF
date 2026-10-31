@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -11,7 +11,7 @@ const gitPath = spawnSync(locator, ['git'], { encoding: 'utf8' }).stdout.trim().
 assert.ok(gitPath, 'Git executable must be locatable for this fixture');
 const git = await realpath(gitPath);
 const cli = join(source, 'tools/git-evidence.mjs');
-const root = await mkdtemp(join(tmpdir(), 'isswf-git-identity-'));
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-git-identity-')));
 function command(bin, args, cwd = root, expected = 0) {
   const result = spawnSync(bin, args, { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
@@ -49,6 +49,24 @@ try {
   assert.match(valid.output.bindingSha256, /^[0-9a-f]{64}$/u);
   assert.deepEqual(await fingerprint(protectedPaths), before, 'identity must preserve worktree, index, and local config bytes');
 
+  const externalCommon = join(root, 'external-common.git');
+  await cp(join(root, '.git'), externalCommon, { recursive: true });
+  const commonConfigBefore = await readFile(join(externalCommon, 'config'));
+  await writeFile(join(root, '.git/commondir'), externalCommon + '\n');
+  const common = invoke(binding);
+  assert.notEqual(common.status, 0, 'external common Git storage must be refused');
+  assert.equal(common.output.reason, 'common-git-storage-refused');
+  assert.deepEqual(await readFile(join(externalCommon, 'config')), commonConfigBefore);
+  await rm(join(root, '.git/commondir'));
+
+  const longBinding = { ...binding, repository: join(root, 'x'.repeat(1024)), outputBytes: 512 };
+  const longError = invoke(longBinding);
+  assert.notEqual(longError.status, 0);
+  assert.equal(longError.output.status, 'error');
+  assert.ok(Buffer.byteLength(JSON.stringify(longError.output) + '\n') <= longBinding.outputBytes, 'every error must fit its declared wire output bound');
+  assert.equal(longError.output.reason, 'binding-context-exceeds-output-bound');
+  assert.equal(longError.output.bindingSha256, createHash('sha256').update(JSON.stringify(longBinding)).digest('hex'), 'oversized-context refusal retains the binding digest without exposing long paths');
+
   for (const [name, bad] of [
     ['missing binding', null],
     ['extra binding field', { ...binding, argv: ['status'] }],
@@ -71,6 +89,15 @@ try {
   const included = join(root, 'included-config');
   await writeFile(included, `[core]\nfsmonitor = !touch ${helper}\n`);
   const config = await readFile(join(root, '.git/config'), 'utf8');
+  const condition = root.replaceAll('\\', '/');
+  await writeFile(join(root, '.git/config'), config + `[includeIf "gitdir:${condition}/.git/"]\npath = ${included.replaceAll('\\', '/')}\n`);
+  const conditionalBefore = await readFile(join(root, '.git/config'));
+  const conditional = invoke(binding);
+  assert.notEqual(conditional.status, 0, 'conditional external configuration must be refused');
+  assert.equal(conditional.output.reason, 'executable-or-external-git-configuration-refused');
+  assert.deepEqual(await readFile(join(root, '.git/config')), conditionalBefore);
+  assert.equal(await readFile(included, 'utf8'), `[core]\nfsmonitor = !touch ${helper}\n`);
+  await assert.rejects(lstat(helper), { code: 'ENOENT' });
   await writeFile(join(root, '.git/config'), config + `[include]\npath = ${included}\n`);
   const hostile = invoke(binding);
   assert.notEqual(hostile.status, 0);
@@ -97,7 +124,7 @@ try {
   assert.notEqual(linkedStore.status, 0, 'object database directory links must be refused');
   assert.equal(linkedStore.output.reason, 'unsupported-object-store-topology');
   assert.equal(await readFile(join(externalPack, 'sentinel'), 'utf8'), 'outside-object-store\n', 'outside object-store sentinel must remain unchanged');
-  console.log(JSON.stringify({ status: 'PASS', cases: ['bound exact identities and observed HEAD', 'malformed/extra args/revision expressions/root/bounds/missing objects fail closed', 'hostile include/helper config refused without execution', 'alternate object store refused', 'linked pack store refused without outside mutation', 'worktree/index/config bytes preserved on successful identity'], platform: process.platform, gitVersion: command(git, ['--version'], source) }));
+  console.log(JSON.stringify({ status: 'PASS', cases: ['bound exact identities and observed HEAD', 'external common Git storage refused', 'all error output bounded with binding digest', 'conditional external includes refused', 'malformed/extra args/revision expressions/root/bounds/missing objects fail closed', 'hostile include/helper config refused without execution', 'alternate object store refused', 'linked pack store refused without outside mutation', 'worktree/index/config bytes preserved on successful identity'], platform: process.platform, gitVersion: command(git, ['--version'], source) }));
 } finally {
   await rm(root, { recursive: true, force: true });
 }
