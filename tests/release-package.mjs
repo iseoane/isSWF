@@ -218,6 +218,9 @@ try {
     await assert.rejects(readdir(admissionStore), { code: 'ENOENT' });
   }
   const setupBytes = await readFile(join(project, '.isswf/project-setup.md'));
+  const generatedSetup = setupBytes.toString('utf8');
+  assert.match(generatedSetup, /legacy runtime model routes: \.isswf\/models\.json \(legacy assignments only\)/iu);
+  assert.match(generatedSetup, /Ordinary Pi\/Claude selections belong to host-native configuration/iu);
   const models = await readJSON(join(project, '.isswf/models.json'));
   models.operatorField = 'preserve'; await writeJSON(join(project, '.isswf/models.json'), models); checkpoint();
   const modelBytes = await readFile(join(project, '.isswf/models.json'));
