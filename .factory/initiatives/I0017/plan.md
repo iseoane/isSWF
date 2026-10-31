@@ -4,12 +4,12 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve #123 by distinguishing design/brief approval from an explicit instruction to start execution.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None; operator explicitly requests implementing the next issue, identified as #123.
-- Next step: One sequential native worker implements the bounded contract/test change; independent review and exact-head CI follow.
+- Next step: Independent review of stopped candidate3c4031e; then one final publication head and exact-head CI.
 
 ### Acceptance
 
