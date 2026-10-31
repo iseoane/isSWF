@@ -78,6 +78,8 @@ try {
   await writeFile(join(root, 'oracle.json'), JSON.stringify(oracle, null, 2) + '\n');
   const guidance = await readFile(join(source, '.agents/roles/references/review.md'), 'utf8');
   for (const heading of ['## Examine behavior and tests first', '### Targeted detection experiments', '### Changed dependencies']) assert.ok(guidance.includes(heading));
+assert.match(guidance, /changed required test.*not executed.*exact candidate.*inconclusive/u);
+assert.match(guidance, /`BLOCKED` is not a pass.*nonzero/u);
   console.log(JSON.stringify({ status: 'PASS', cases: cases.length, blockingPaths: oracle.blockingPaths, nonblockingPaths: oracle.nonblockingPaths, ...(output ? { fixtureRoot: root } : {}), limits: oracle.limits }));
 } finally {
   if (temporary) await rm(temporary, { recursive: true, force: true });

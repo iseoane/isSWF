@@ -89,7 +89,7 @@ Keep `oracle.json` and `probes/` out of a blinded review package. Live compariso
 
 ## Platform and host discovery checks
 
-The host-native integration check uses the locked host dependencies, an isolated profile and a loopback synthetic provider. It discovers the packaged roles and checks worker/reviewer model and effort, tools, workspace effects, returned errors and cancellation without real model calls. It does not certify Claude live delegation, background execution or OS containment.
+The host-native integration check uses the locked host dependencies, an isolated profile and a loopback synthetic provider. It discovers the packaged roles and checks worker/reviewer model and effort, tools, workspace effects, returned errors and cancellation without real model calls. Missing required host prerequisites are reported as structured `BLOCKED` with exit code 2; existing but broken dependencies remain failures. Pi-only mode does not require the unused Claude executable. The portable quality summary explicitly marks this separate required check `NOT_RUN`; the CI native-host check must pass and a `BLOCKED` result cannot pass its gate. It does not certify Claude live delegation, background execution or OS containment.
 
 ```bash
 npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
