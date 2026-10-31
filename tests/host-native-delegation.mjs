@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
 import { spawnSync } from 'node:child_process';
+import { statSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -10,6 +11,15 @@ import { fileURLToPath } from 'node:url';
 const source=resolve(process.argv[2]??'.'),dependencies=resolve(process.env.ISSWF_HOST_DEPS??join(source,'tooling/host-tests/node_modules')),piSubagents=resolve(process.env.ISSWF_PI_SUBAGENTS??join(dependencies,'pi-subagents'));
 if(process.argv[3]!=='--child'){
  const piOnly=process.env.ISSWF_PI_ONLY==='1';
+ const claude=join(dependencies,'@anthropic-ai',`claude-code-${process.platform}-${process.arch}`,process.platform==='win32'?'claude.exe':'claude');
+ const prerequisites=[['Pi SDK',join(dependencies,'@earendil-works/pi-coding-agent/package.json')],['pi-subagents@0.83.0 bundle',join(piSubagents,'bundle/index.js')],...(!piOnly?[['Claude Code executable',claude]]:[])];
+ const missing=[];
+ for(const [name,path] of prerequisites){
+  try{assert.ok(statSync(path).isFile(),`Invalid host prerequisite: ${name}`);}
+  catch(error){if(error.code!=='ENOENT')throw error;missing.push({name,path});}
+ }
+ if(missing.length){console.log(JSON.stringify({status:'BLOCKED',missing,exitCode:2}));process.exitCode=2;}
+ else{
  const artifact=process.env.ISSWF_PLATFORM_ROOT ? JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT,'platform-report.json'),'utf8')).installed : source;
  assert.equal(typeof artifact,'string','Platform report must identify its actual installed package');
  const root=await realpath(await mkdtemp(join(tmpdir(),'isswf native roles ñ ')));await mkdir(join(root,'temp'));
@@ -17,7 +27,6 @@ if(process.argv[3]!=='--child'){
  Object.assign(env,{ISSWF_HOST_DEPS:dependencies,ISSWF_PI_SUBAGENTS:piSubagents,HOME:join(root,'home'),USERPROFILE:join(root,'home'),APPDATA:join(root,'appdata'),LOCALAPPDATA:join(root,'localappdata'),TEMP:join(root,'temp'),TMP:join(root,'temp'),PI_CODING_AGENT_DIR:join(root,'profile'),PI_OFFLINE:'1',PI_SKIP_VERSION_CHECK:'1',PI_TELEMETRY:'0'});
  Object.assign(env, {CLAUDE_CONFIG_DIR:join(root,'claude-profile'),DISABLE_AUTOUPDATER:'1',DISABLE_TELEMETRY:'1',DISABLE_ERROR_REPORTING:'1',CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC:'1'});
  if(!piOnly){
-  const claude=join(dependencies,'@anthropic-ai',`claude-code-${process.platform}-${process.arch}`,process.platform==='win32'?'claude.exe':'claude');
   const inventory=spawnSync(claude,['--plugin-dir',artifact,'plugin','details','isswf'],{env,cwd:root,encoding:'utf8',timeout:30000,maxBuffer:200000});
   await writeFile(join(root,'claude-inventory.txt'),inventory.stdout+'\n'+inventory.stderr);
   assert.ifError(inventory.error);
@@ -30,6 +39,7 @@ if(process.argv[3]!=='--child'){
  const result=spawnSync(process.execPath,[fileURLToPath(import.meta.url),artifact,'--child',root],{env,cwd:root,encoding:'utf8',timeout:60000,maxBuffer:1024*1024});
  await writeFile(join(root,'host-output.log'),result.stdout+'\n'+result.stderr);assert.ifError(result.error);assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
  console.log(JSON.stringify({status:'PASS',platform:process.platform,root,artifact,hostCoverage:piOnly?'Pi SDK/subagent only':'Pi SDK/subagent plus Claude plugin inventory',limits:'Pi child invocation uses a loopback synthetic provider; no real models, live reviewer acceptance or OS sandbox claim'}));
+ }
 }else{
  const root=process.argv[4],sdkRoot=join(dependencies,'@earendil-works/pi-coding-agent'),profile=join(root,'profile'),work=join(root,'work'),provider='isswf-offline',modelId='trial-model',factoryRoot=source;
 const report={platform:process.platform,package:'pi-subagents@0.83.0',realProviderRequests:0,blockedExternalRequests:0,cases:[]},calls=[];

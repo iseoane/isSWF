@@ -89,7 +89,7 @@ Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las com
 
 ## Comprobaciones de plataforma y descubrimiento de skills
 
-La comprobación de integración con el host utiliza las dependencias fijadas, un perfil aislado y un proveedor simulado en loopback. Descubre los roles empaquetados y comprueba el modelo y el esfuerzo del worker y del reviewer, las herramientas, los cambios en el directorio asignado, los errores y la cancelación sin llamadas a modelos reales. No certifica la delegación real de Claude, la ejecución en segundo plano ni el aislamiento del sistema operativo.
+La comprobación de integración con el host utiliza las dependencias fijadas, un perfil aislado y un proveedor simulado en loopback. Descubre los roles empaquetados y comprueba el modelo y el esfuerzo del worker y del reviewer, las herramientas, los cambios en el directorio asignado, los errores y la cancelación sin llamadas a modelos reales. Los requisitos previos obligatorios ausentes del host se informan como `BLOCKED` estructurado con código de salida 2; las dependencias existentes pero defectuosas siguen siendo fallos. El modo solo Pi no requiere el ejecutable de Claude que no utiliza. El resumen portable de calidad marca explícitamente esta comprobación obligatoria y separada como `NOT_RUN`; la comprobación nativa del host en CI debe aprobarse y un resultado `BLOCKED` no puede aprobar su gate. No certifica la delegación real de Claude, la ejecución en segundo plano ni el aislamiento del sistema operativo.
 
 ```bash
 npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
