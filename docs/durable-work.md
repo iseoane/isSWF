@@ -84,4 +84,4 @@ The confirmation says recorded, not applied. The same status reader exposes note
 
 ## Model routing
 
-Use [`.factory/models.json`](../.factory/models.json) as the canonical source for configured role routes and [`model-routing.md`](model-routing.md) for manual preflight, precedence, availability, and transition rules. Neither document grants work or guarantees runtime support; pin the configuration path and full input Git SHA in each attempt.
+For explicitly selected legacy-executor assignments only, use the pinned legacy `models.json` as the route input and [`model-routing.md`](model-routing.md) for preflight, precedence, availability and transition rules. Current Pi and Claude model selections belong to each host's native configuration; do not copy them into legacy JSON or resolve a pinned legacy attempt against native defaults. Neither legacy document grants work or guarantees runtime support; pin the legacy config path and full input Git SHA in each legacy attempt.

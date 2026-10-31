@@ -23,7 +23,7 @@ node tools/factory-package.mjs materialize \
 
 The command reads committed Git blobs at that exact SHA. It does not inspect `HEAD`, resolve a branch or tag, fetch, or use the working tree. It resolves the source and the store's existing path components before checking that their canonical trees do not overlap. The resulting package directory is `/absolute/path/to/shared-iswf-store/<full-commit-sha>`. It contains the package manifest, exactly the selected regular resource files, and a receipt containing the revision and SHA-256 payload hashes. A repeat verifies the receipt and every payload hash before returning without rewriting. Missing blobs, non-regular selected entries, an invalid manifest, tampering, or a conflicting destination fail without replacing it.
 
-The package manifest exposes exactly the `isswf-coordinator` and `isswf-setup` skills. Their supporting role instructions, references, durable-work and routing guides, three templates, and canonical `.factory/models.json` are included. Other skills, extensions, prompts, themes, audit material, Python code, and project files are not exported. Model routing remains versioned resource data; it is never copied into project settings.
+The package manifest exposes exactly the `isswf-coordinator` and `isswf-setup` skills. Their supporting role instructions, references, durable-work and legacy-routing guides, and three templates are included. The packaged `.factory/models.json` is route data for explicitly selected legacy-executor assignments only. Other skills, extensions, prompts, themes, audit material, Python code, and project files are not exported. This retained payload does not configure current Pi or Claude choices and is never copied into host settings.
 
 ## Activate in one project
 
