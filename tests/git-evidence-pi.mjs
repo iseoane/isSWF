@@ -27,7 +27,9 @@ try {
   await Promise.all([mkdir(workspace), mkdir(profile)]);
   command(git, ['init', '-q'], workspace);
   await writeFile(join(workspace, 'tracked.txt'), 'bound Pi identity\n');
-  command(git, ['add', 'tracked.txt'], workspace);
+  await writeFile(join(workspace, 'binary.dat'), Buffer.from([0, 255, 10]));
+  await writeFile(join(workspace, 'exact.txt'), Buffer.from([0xef, 0xbb, 0xbf, 0x62, 0x61, 0x73, 0x65, 0x0d, 0x0a]));
+  command(git, ['add', '-A'], workspace);
   command(git, ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'candidate'], workspace);
   const head = command(git, ['rev-parse', 'HEAD'], workspace);
   await writeFile(join(workspace, 'tracked.txt'), 'review this committed change\n');
@@ -36,7 +38,8 @@ try {
   const candidate = command(git, ['rev-parse', 'HEAD'], workspace);
   const binding = { version: 1, repository: workspace, baseSha: head, candidateSha: candidate, gitExecutable: git, timeoutMs: 5000, outputBytes: 4096 };
   const diffBinding = { ...binding, outputBytes: 22000 };
-  process.env.PI_SUBAGENT_EXTENSION_BINDINGS = JSON.stringify({ 'isswf.git-evidence/1': binding, 'isswf.git-evidence.diff/1': diffBinding });
+  const contentBinding = { ...binding, outputBytes: 8192, paths: ['tracked.txt', 'binary.dat', 'exact.txt'] };
+  process.env.PI_SUBAGENT_EXTENSION_BINDINGS = JSON.stringify({ 'isswf.git-evidence/1': binding, 'isswf.git-evidence.diff/1': diffBinding, 'isswf.git-evidence.content/1': contentBinding });
 
   const settings = sdk.SettingsManager.create(workspace, profile);
   const runtime = await sdk.ModelRuntime.create({ authPath: join(profile, 'auth.json'), modelsPath: join(profile, 'models.json'), modelsStorePath: join(profile, 'model-cache.json'), allowModelNetwork: false });
@@ -59,6 +62,9 @@ try {
   const tool = loaded?.tools.get('isswf_git_identity')?.definition;
   assert.ok(tool, 'Pi SDK must register the child-only identity tool');
   assert.deepEqual(Object.keys(tool.parameters.properties ?? {}), [], 'Model schema exposes no binding arguments');
+  const contentTool = loaded?.tools.get('isswf_git_content')?.definition;
+  assert.ok(contentTool, 'Pi SDK must register the committed content tool');
+  assert.deepEqual(Object.keys(contentTool.parameters.properties ?? {}).sort(), ['path', 'slot'], 'content model schema exposes only bound selection');
   const diffTool = loaded?.tools.get('isswf_git_diff')?.definition;
   assert.ok(diffTool, 'Pi SDK must register the child-only committed diff tool');
   assert.deepEqual(Object.keys(diffTool.parameters.properties ?? {}), [], 'Diff model schema exposes no binding arguments');
@@ -77,7 +83,27 @@ try {
   assert.match(decodedPatch, /\+review this committed change\n/u);
   assert.equal(patchResult.content[1]?.text, decodedPatch, 'reviewer receives the exact valid UTF-8 patch without decoding code execution');
   assert.equal(patchResult.details.patchIntegrity, 'verified', 'native consumer validates decoded byte length and digest');
+  const contentResult = await contentTool.execute('content-test', { slot: 'candidate', path: 'tracked.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-test', undefined));
+  const contentEvidence = JSON.parse(contentResult.content[0].text);
+  assert.equal(contentEvidence.status, 'ok');
+  assert.equal(contentEvidence.contentIntegrity, 'verified');
+  assert.equal(contentEvidence.contentTextEncoding, 'utf8');
+  assert.equal(contentResult.content[1].text, 'review this committed change\n');
+  const exactResult = await contentTool.execute('content-exact-utf8', { slot: 'candidate', path: 'exact.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-exact-utf8', undefined));
+  assert.equal(exactResult.content[1].text, '\uFEFFbase\r\n', 'fatal UTF-8 view preserves BOM and CRLF');
   process.env.PI_SUBAGENT_EXTENSION_BINDINGS = JSON.stringify({});
+  const absentContent = await contentTool.execute('content-absent', { slot: 'base', path: 'tracked.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-absent', undefined));
+  assert.equal(JSON.parse(absentContent.content[0].text).status, 'ok', 'the base slot returns exact committed base content');
+  assert.equal(JSON.parse(absentContent.content[0].text).commitSha, head);
+  const binaryResult = await contentTool.execute('content-binary', { slot: 'base', path: 'binary.dat' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-binary', undefined));
+  const binaryEvidence = JSON.parse(binaryResult.content[0].text);
+  assert.equal(binaryEvidence.contentTextEncoding, 'unavailable-non-utf8');
+  assert.equal(binaryEvidence.content, 'AP8K');
+  assert.equal(binaryResult.content.length, 1, 'invalid UTF-8 remains base64-only');
+  const refusedPath = await contentTool.execute('content-not-allowed', { slot: 'candidate', path: 'unlisted.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-not-allowed', undefined));
+  assert.equal(refusedPath.isError, true);
+  assert.equal(JSON.parse(refusedPath.content[0].text).reason, 'content-path-not-allowed');
+  await assert.rejects(() => contentTool.execute('content-extra-args', { slot: 'candidate', path: 'tracked.txt', repository: workspace }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-extra-args', undefined)), /allowlisted path/u);
   const capturedResult = await diffTool.execute('diff-captured-binding', {}, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('diff-captured-binding', undefined));
   assert.equal(JSON.parse(capturedResult.content[0].text).bindingSha256, patchEvidence.bindingSha256, 'later ambient environment changes cannot replace the startup-captured binding');
   await assert.rejects(() => diffTool.execute('diff-extra-args', { repository: workspace }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('diff-extra-args', undefined)), /accepts no arguments/u);
@@ -104,10 +130,13 @@ try {
   const unavailable = missingExtension?.tools.get('isswf_git_identity')?.definition;
   assert.ok(unavailable, JSON.stringify({ errors: missingExtensionResult.errors.map(error => String(error.error ?? error)), paths: missingExtensionResult.extensions.map(extension => extension.path) }));
   await assert.rejects(() => unavailable.execute('missing-binding', {}, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('missing-binding', undefined)), /binding is missing/u);
+  const unavailableContent = missingExtension?.tools.get('isswf_git_content')?.definition;
+  assert.ok(unavailableContent, 'content remains registered but unavailable without its trusted binding');
+  await assert.rejects(() => unavailableContent.execute('missing-content-binding', { slot: 'candidate', path: 'tracked.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('missing-content-binding', undefined)), /binding is missing/u);
   const unavailableDiff = missingExtension?.tools.get('isswf_git_diff')?.definition;
   assert.ok(unavailableDiff, 'diff remains registered but unavailable without its trusted binding');
   await assert.rejects(() => unavailableDiff.execute('missing-diff-binding', {}, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('missing-diff-binding', undefined)), /binding is missing/u);
-  console.log(JSON.stringify({ status: 'PASS', platform: process.platform, piVersion: JSON.parse(await readFile(join(sdkRoot, 'package.json'), 'utf8')).version, checks: ['real Pi SDK loads extension and registers argument-free identity and diff tools', 'startup-captured namespaced bindings return exact identity and byte-encoded nonempty patch with verified readable UTF-8 view despite later environment changes', 'extra model tool arguments rejected', 'missing identity and diff bindings fail closed'] }));
+  console.log(JSON.stringify({ status: 'PASS', platform: process.platform, piVersion: JSON.parse(await readFile(join(sdkRoot, 'package.json'), 'utf8')).version, checks: ['real Pi SDK loads extension and registers identity, diff and bounded path/slot content tools', 'startup-captured namespaced bindings return exact identity, patch and committed content with verified readable UTF-8 view', 'extra model tool arguments rejected', 'missing identity, diff and content bindings fail closed'] }));
 } finally {
   if (session) {
     await session.extensionRunner.emit({ type: 'session_shutdown', reason: 'quit' });
