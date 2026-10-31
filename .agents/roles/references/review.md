@@ -4,7 +4,7 @@ Use these two axes for every review. Project standards and the accepted brief ta
 
 ## Required methodology
 
-For an assigned isSWF review, consume the canonical [isswf-review skill](../../skills/isswf-review/SKILL.md) and this guide before assessing the candidate, together with any additional methodology explicitly required by the brief or applicable project standards. Read the identified source paths, or use their full canonical contents supplied through a trusted handoff or verified native context. A role summary or a link is not the full procedure. Preserve assigned document checkpoints; never substitute latest material for a required pin.
+Before reviewing, consume the canonical [isswf-review skill](../../skills/isswf-review/SKILL.md), this guide and brief/project-required methodology. Read identified sources or trusted full canonical contents, not summaries or links alone. Preserve document checkpoints; never substitute latest material for a required pin.
 
 | Required procedure coverage | Completion condition |
 | --- | --- |
