@@ -102,6 +102,10 @@ jobs:
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
       - name: Verify native Pi bound identity, diff and content invokers
         run: node tests/git-evidence-pi.mjs .
+      - name: Verify stdio MCP evidence server for the Claude reviewer
+        run: node tests/git-evidence-mcp.mjs .
+      - name: Verify pinned Claude lists exactly the bound evidence tools in the reviewer context, without models
+        run: node tests/claude-reviewer-tools.mjs .
       - name: Build and install native package; test CLI, resources and worktrees
         env:
           ISSWF_PLATFORM_ROOT: ${{ runner.temp }}/isswf-platform

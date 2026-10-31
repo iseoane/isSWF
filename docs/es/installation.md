@@ -90,6 +90,12 @@ El revisor nativo de Pi dispone de `isswf_git_identity`, `isswf_git_diff` e `iss
 
 Usa estas herramientas solo en un repositorio aprobado por el coordinador, con el autor detenido y sin escritores no fiables que lo modifiquen. Deshabilitan el diff externo y la conversión de texto, y obtienen los atributos Git del commit candidato vinculado en vez de los atributos modificados del árbol de trabajo. Es un límite operativo de solo lectura, no un aislamiento impuesto por el sistema operativo: no garantiza protección frente a cambios concurrentes del sistema de archivos ni límites estrictos para llamadas bloqueantes al sistema. Un repositorio hostil o modificable de forma concurrente necesita una entrada protegida y verificada por separado; superar estas pruebas no demuestra aislamiento. La [guía del host Pi](../../.agents/hosts/pi.md#bound-identity-committed-diff-and-file-content-for-pi-reviewers) recoge este límite.
 
+## Evidencia Git vinculada para revisiones de Claude Code
+
+El revisor de Claude Code dispone de las herramientas `identity`, `diff` y `content`, que solo leen los commits base y candidato que indique el coordinador. El coordinador lanza cada revisión como un proceso `claude -p --agent isswf:isswf-reviewer` propio y le entrega la vinculación en la variable de entorno `ISSWF_GIT_EVIDENCE_BINDINGS`. Una revisión iniciada dentro de una sesión de Claude existente no tiene vinculación y todas sus llamadas fallan. No exportes la variable en tu shell: todas las sesiones de Claude que arranquen desde ese shell quedarían vinculadas al mismo candidato.
+
+Claude Code corta la salida MCP larga, así que el servidor nunca devuelve evidencia parcial. Rechaza resultados de más de 98.304 bytes y entrega el diff en fragmentos numerados, cada uno con el tamaño total del parche y su SHA-256. El parche está completo solo cuando los fragmentos concatenados coinciden con ese resumen. Igual que las herramientas de Pi, es un límite operativo de solo lectura, no un sandbox del sistema operativo. La [guía de host de Claude Code](../../.agents/hosts/claude-code.md#bound-identity-committed-diff-and-file-content-for-claude-reviewers) incluye el comando de lanzamiento y los límites.
+
 ## Actualizar sin cambiar todos los repositorios
 
 Primero actualiza el paquete o el plugin mediante el gestor de tu asistente. Para versiones locales, sustituye el registro anterior por la nueva carpeta de versión preparada. Una versión fijada no cambia hasta que selecciones otra.
