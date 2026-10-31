@@ -1,0 +1,3 @@
+# J023: Claude route correction 1 after V009
+
+Fix V009 findings 1, 3, 4, 5 and verify finding 6 packaging. Finding 2: original RED for eb3aea3/950aa22 is not retained (worker stopped before reporting); recorded as deviation; consequence mitigated by observed RED for each new fix and by a mutation sensitivity pass over the new MCP/shared-verifier contracts, as done for content (brief-r16). Author: one Claude `isswf-worker` `sonnet`/`medium`, same branch, explicit-file commits, Bash writes allowed (brief-r19), no push. Review round 2: separate `claude -p` reviewer with fresh binding for the new candidate.
