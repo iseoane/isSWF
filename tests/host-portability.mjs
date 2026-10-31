@@ -138,7 +138,9 @@ assert.match(host, /unknown.*do not represent it as permission or as a guarantee
 assert.match(host, /“gave no verdict”/u);
 assert.match(host, /stop the affected mutation immediately/u);
 assert.match(host, /Preserve the exact diagnostic and any partial work/u);
-assert.match(host, /do not retry.*Bash\/PowerShell or another tool\/actor/u);
+assert.match(host, /Respect host-tool and assignment instructions not to retry/u);
+assert.match(host, /do not automatically retry.*Bash\/PowerShell or another tool\/actor/u);
+assert.match(skill, /For a Claude writer, apply that guide's writer permission preflight before dispatch/u);
 assert.match(host, /verifies the actor has stopped.*remaining budget/u);
 assert.match(host, /resumes only after supported permission\/technical resolution under current explicit authority/u);
 assert.match(host, /Apply the writer permission preflight above before writer dispatch/u);
