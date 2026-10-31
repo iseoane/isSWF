@@ -8,39 +8,45 @@ import { fileURLToPath } from 'node:url';
 const sha = value => typeof value === 'string' && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(value);
 const ownKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === [...keys].sort().join(',');
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
-const failure = (reason, binding = null) => ({
-  version: 1, status: 'error', operation: 'identity', reason,
+const failure = (reason, binding = null, operation = 'identity') => ({
+  version: 1, status: 'error', operation, reason,
   ...(binding ? { repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256: digest(binding) } : {}),
 });
 const wireBytes = value => Buffer.byteLength(JSON.stringify(value) + '\n');
 function boundedResult(value, limit = 512) {
   if (wireBytes(value) <= limit) return value;
+  const operation = value.operation ?? 'identity';
   return {
-    ...failure('identity-output-limit'),
+    version: 1, status: 'error', operation, reason: `${operation}-output-limit`,
     ...(value.bindingSha256 ? { bindingSha256: value.bindingSha256 } : {}),
   };
 }
 
-export function validateBinding(value) {
+function validateGitBinding(value, maxOutputBytes) {
   if (!ownKeys(value, ['version', 'repository', 'baseSha', 'candidateSha', 'gitExecutable', 'timeoutMs', 'outputBytes']) || value.version !== 1) throw Error('invalid-binding-shape');
   if (typeof value.repository !== 'string' || !isAbsolute(value.repository) || value.repository.includes('\0')) throw Error('invalid-repository-binding');
   if (!sha(value.baseSha) || !sha(value.candidateSha) || value.baseSha.length !== value.candidateSha.length) throw Error('full-commit-identities-required');
   if (typeof value.gitExecutable !== 'string' || !isAbsolute(value.gitExecutable) || value.gitExecutable.includes('\0')) throw Error('absolute-git-executable-required');
   if (!Number.isSafeInteger(value.timeoutMs) || value.timeoutMs < 100 || value.timeoutMs > 10000) throw Error('invalid-time-bound');
-  if (!Number.isSafeInteger(value.outputBytes) || value.outputBytes < 512 || value.outputBytes > 8192) throw Error('invalid-output-bound');
-  const binding = { version: 1, repository: value.repository, baseSha: value.baseSha, candidateSha: value.candidateSha, gitExecutable: value.gitExecutable, timeoutMs: value.timeoutMs, outputBytes: value.outputBytes };
-  if (wireBytes(failure('x'.repeat(160), binding)) > binding.outputBytes) throw Error('binding-context-exceeds-output-bound');
-  return Object.freeze(binding);
+  if (!Number.isSafeInteger(value.outputBytes) || value.outputBytes < 512 || value.outputBytes > maxOutputBytes) throw Error('invalid-output-bound');
+  return Object.freeze({ version: 1, repository: value.repository, baseSha: value.baseSha, candidateSha: value.candidateSha, gitExecutable: value.gitExecutable, timeoutMs: value.timeoutMs, outputBytes: value.outputBytes });
 }
 
-function runGit(binding, args, deadline, maxBuffer = 8192) {
+export function validateBinding(value) {
+  const binding = validateGitBinding(value, 8192);
+  if (wireBytes(failure('x'.repeat(160), binding)) > binding.outputBytes) throw Error('binding-context-exceeds-output-bound');
+  return binding;
+}
+
+function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
   const remaining = deadline - Date.now();
   if (remaining <= 0) throw Error('identity-timeout');
   const env = {
     PATH: dirname(binding.gitExecutable), HOME: process.platform === 'win32' ? 'C:\\\\' : '/nonexistent',
     GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null',
     GIT_NO_REPLACE_OBJECTS: '1', GIT_NO_LAZY_FETCH: '1', GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0',
-    GIT_ATTR_NOSYSTEM: '1', GIT_GRAFT_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null', LC_ALL: 'C',
+    GIT_ATTR_NOSYSTEM: '1', GIT_GRAFT_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null',
+    GIT_PAGER: 'cat', PAGER: 'cat', LC_ALL: 'C', ...extraEnv,
   };
   const result = spawnSync(binding.gitExecutable, ['-C', binding.repository, ...args], {
     shell: false, windowsHide: true, env, encoding: 'buffer', timeout: Math.min(binding.timeoutMs, remaining), maxBuffer,
@@ -92,7 +98,51 @@ async function assertSupportedRepository(binding, deadline) {
   const entries = config.toString('utf8').split('\0').filter(Boolean);
   for (const entry of entries) {
     const key = entry.slice(0, entry.indexOf('\n')).toLowerCase();
-    if (key.startsWith('include.') || key.startsWith('includeif.') || ['core.fsmonitor', 'core.sshcommand', 'core.gitproxy', 'core.askpass', 'core.hookspath', 'core.alternaterefscommand'].includes(key) || key.startsWith('filter.') || key.startsWith('diff.') || key.startsWith('merge.')) throw Error('executable-or-external-git-configuration-refused');
+    if (key.startsWith('include.') || key.startsWith('includeif.') || ['core.fsmonitor', 'core.sshcommand', 'core.gitproxy', 'core.askpass', 'core.hookspath', 'core.alternaterefscommand', 'core.attributesfile'].includes(key) || key.startsWith('filter.') || key.startsWith('diff.') || key.startsWith('merge.')) throw Error('executable-or-external-git-configuration-refused');
+  }
+}
+
+export function validateDiffBinding(value) {
+  try { return validateGitBinding(value, 192000); }
+  catch (error) {
+    if (error.message === 'invalid-output-bound') throw Error('invalid-diff-output-bound');
+    throw error;
+  }
+}
+
+export async function diff(input) {
+  let binding;
+  try {
+    binding = validateDiffBinding(input);
+    const bindingSha256 = digest(binding);
+    const deadline = Date.now() + binding.timeoutMs;
+    await assertSupportedRepository(binding, deadline);
+    try { await lstat(join(binding.repository, '.git', 'info', 'attributes')); throw Error('local-attributes-refused'); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    const expectedFormat = binding.baseSha.length === 64 ? 'sha256' : 'sha1';
+    const objectFormat = runGit(binding, ['rev-parse', '--show-object-format'], deadline).toString('ascii').trim();
+    if (objectFormat !== expectedFormat) throw Error('commit-format-mismatch');
+    for (const [name, expected] of [['base', binding.baseSha], ['candidate', binding.candidateSha]]) {
+      const resolved = runGit(binding, ['rev-parse', '--verify', `${expected}^{commit}`], deadline).toString('ascii').trim();
+      if (resolved !== expected) throw Error(`${name}-commit-identity-mismatch`);
+    }
+    const env = { GIT_INDEX_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null' };
+    const patch = runGit(binding, ['--no-pager', `--attr-source=${binding.candidateSha}`, '-c', `core.attributesFile=${process.platform === 'win32' ? 'NUL' : '/dev/null'}`, 'diff', '--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', binding.baseSha, binding.candidateSha], deadline, binding.outputBytes + 1, env);
+    if (patch.length > binding.outputBytes) throw Error('diff-output-limit');
+    const result = {
+      version: 1, status: 'ok', operation: 'diff', repository: binding.repository,
+      baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256,
+      patchEncoding: 'base64', patchBytes: patch.length,
+      patchSha256: createHash('sha256').update(patch).digest('hex'), patch: patch.toString('base64'),
+      limits: { timeoutMs: binding.timeoutMs, patchBytes: binding.outputBytes },
+    };
+    if (wireBytes(result) > 262144) throw Error('diff-response-limit');
+    return result;
+  } catch (error) {
+    const reason = error?.message === 'git-output-limit' ? 'diff-output-limit' : typeof error?.message === 'string' ? error.message.slice(0, 160) : 'diff-refused';
+    const result = failure(reason, binding, 'diff');
+    if (!binding && ownKeys(input, ['version', 'repository', 'baseSha', 'candidateSha', 'gitExecutable', 'timeoutMs', 'outputBytes'])) result.bindingSha256 = digest(input);
+    return boundedResult(result, binding ? 262144 : 512);
   }
 }
 
@@ -129,7 +179,8 @@ export async function identity(input) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    if (process.argv.length !== 3 || process.argv[2] !== 'identity') throw Error('identity-operation-required');
+    if (process.argv.length !== 3 || !['identity', 'diff'].includes(process.argv[2])) throw Error('supported-operation-required');
+    const operation = process.argv[2];
     const chunks = [];
     let size = 0;
     for await (const chunk of process.stdin) {
@@ -140,11 +191,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     let binding;
     try { binding = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { throw Error('invalid-binding-json'); }
-    const result = await identity(binding);
+    const result = operation === 'identity' ? await identity(binding) : await diff(binding);
     process.stdout.write(JSON.stringify(result) + '\n');
     if (result.status !== 'ok') process.exitCode = 2;
   } catch (error) {
-    process.stdout.write(JSON.stringify(boundedResult(failure(error.message.slice(0, 160)))) + '\n');
+    process.stdout.write(JSON.stringify(boundedResult(failure(error.message.slice(0, 160), null, process.argv[2] === 'diff' ? 'diff' : 'identity'))) + '\n');
     process.exitCode = 2;
   }
 }

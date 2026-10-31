@@ -42,9 +42,9 @@ Before the first native dispatch for new work, resolve `docs/durable-work.md` fr
 5. Observe the returned status and actual effects. Errors, cancellation and incomplete output are not success. Inspect partial work before any replacement; unknown execution blocks another writer, not unrelated safe work. Respect remaining total actors, concurrent actors, costs and correction budgets. An optional extension recovery behavior does not grant an additional attempt.
 6. Check the result using the shared role and review guidance. Require the child to identify selected methodology actually read or supplied in full and any missing/unreadable required resource; selection alone is not consumption. Missing required methodology blocks the affected assignment, while optional unused references remain optional. A required independent review uses a separate context and the exact stopped writer's candidate. Return the candidate, relevant checks, findings and limitations, not only a model's completion message.
 
-## Bound identity evidence for Pi reviewers
+## Bound identity and committed diff evidence for Pi reviewers
 
-The first read-only Git evidence slice exposes only `isswf_git_identity` to the Pi reviewer. It requires an explicit fresh child launch binding; it does not infer repository or revisions from `cwd`, project files, task text, or ordinary environment variables. The tool accepts no arguments. Missing or malformed launch binding fails closed. Diff, committed content, and status operations are not provided by this tool.
+The child-only extension exposes argument-free `isswf_git_identity` and `isswf_git_diff` tools. Each requires a separate explicit fresh child launch binding; neither infers repository or revisions from `cwd`, project files, task text, or ordinary environment variables. Missing or malformed bindings fail closed. The diff tool returns the exact Git patch as base64 bytes with an explicit byte count and SHA-256; successful empty diffs return empty base64 data and the empty-byte digest. The namespaced `isswf.git-evidence.diff/1` launch contract explicitly allows a raw patch cap up to 192,000 bytes, and the complete encoded response has a separate 256 KiB cap. If patch bytes plus bound metadata exceed either cap, the CLI returns an explicit error, never a truncated patch. The native invoker also verifies canonical base64, decoded length and SHA-256 and provides an exact readable patch block when the bytes are valid UTF-8. Invalid UTF-8 is explicitly left base64-only, never replaced or normalized. Its full result, including that view, is capped at 512 KiB. This slice does not provide committed file contents or status.
 
 Use this tool only on a coordinator-approved repository with the author stopped and no untrusted concurrent writer. This is an operational prerequisite, not an OS-enforced condition: the tool runs with Pi's host permissions, cannot make the filesystem immutable, and does not promise race-proof containment or hard deadlines for blocking OS calls. The configuration/topology guards and no-write tests verify the narrow evidence boundary, not system isolation. If the required review involves a hostile or concurrently mutable repository, stop that affected step and separately select and verify protected immutable input; do not reactivate the parked isolated executor or weaken this boundary automatically.
 
@@ -53,7 +53,7 @@ For an authorized review, the coordinator supplies `options.extensionBindings` o
 ```js
 subagent({
   agent: "isswf-reviewer",
-  task: "Invoke isswf_git_identity first and use its returned identity evidence in this assessment. Then review the exact supplied candidate.",
+  task: "Invoke isswf_git_identity and isswf_git_diff first. Decode and use the returned exact patch bytes for the base-to-candidate review; report both tool results. Then review the exact supplied candidate.",
   cwd: "/canonical/repository/root",
   async: false,
   options: {
@@ -66,13 +66,22 @@ subagent({
         gitExecutable: "/canonical/path/to/git",
         timeoutMs: 5000,
         outputBytes: 4096
+      },
+      "isswf.git-evidence.diff/1": {
+        version: 1,
+        repository: "/canonical/repository/root",
+        baseSha: "<full-commit-sha>",
+        candidateSha: "<full-commit-sha>",
+        gitExecutable: "/canonical/path/to/git",
+        timeoutMs: 5000,
+        outputBytes: 131072
       }
     }
   }
 });
 ```
 
-The loaded `pi-subagents` contract passes this namespace through `PI_SUBAGENT_EXTENSION_BINDINGS` during child extension startup. The child-only extension captures and validates it once before any later environment restoration. Do not resume a retained child for this evidence step: `extensionBindings` is launch-only and retained resumes reject it. A coordinator-supplied identity result or synthetic fixture does not prove that the reviewer invoked the tool.
+The loaded `pi-subagents` contract passes these namespaces through `PI_SUBAGENT_EXTENSION_BINDINGS` during child extension startup. The child-only extension captures and validates each once before any later environment restoration. The reviewer must call `isswf_git_diff`, check the returned bound identities, `patchBytes`, `patchSha256` and native integrity-verification result, and use the exact returned patch block. The invoker performs byte decoding and digest verification; do not attribute those computations to a reviewer that has no execution tool. Keep base64-only/non-UTF-8 limits explicit. Do not resume a retained child for this evidence step: `extensionBindings` is launch-only and retained resumes reject it. A coordinator-supplied result or synthetic fixture does not prove that the reviewer invoked the tool.
 
 ## Boundaries
 

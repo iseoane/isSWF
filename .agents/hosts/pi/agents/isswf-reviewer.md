@@ -1,7 +1,7 @@
 ---
 name: isswf-reviewer
 description: Follow the shared isSWF reviewer profile for an authorized Pi assignment.
-tools: read, grep, find, ls, isswf_git_identity
+tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff
 subagentOnlyExtensions: ../../../../tools/git-evidence-pi-extension.mjs
 ---
 
