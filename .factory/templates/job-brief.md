@@ -5,9 +5,9 @@
 - Job ID and brief revision:
 - Source issue or request:
 - Trusted authorization reference (operator conversation or record ID, or external path; if tracked in Git, full Git SHA):
-- Request mode: `<feature-to-PR start | prepare-only | read-only | local-only | other explicit scope>`.
+- Request mode: `<feature-to-PR start | prepare-only | read-only | local-only | other explicit scope>`. A new dispatch requires a trusted explicit start and bounded action scope; record actual dispatch only after the host tool reports it. Do not infer actor liveness or dispatch from this brief or plan status.
 - Repository and permitted side effects:
-- Current feature-start or other authorization source; explicit overrides: `<not inferred from setup, labels or this template>`.
+- Current explicit start or other authorization source; bounded action scope and explicit overrides: `<a design choice or brief approval alone is preparation, not start authority; do not infer permission from setup, labels or this template>`. If start is absent/ambiguous, record the exact missing instruction in the plan's existing blocker/next step and keep the job prepared, not started.
 - Operation ownership: `<coordinator-owned Git/PR/CI; bounded worker/reviewer operations>`.
 - Profile path and applicable skills:
 - Coordinator-assigned ID; do not reuse it:

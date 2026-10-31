@@ -208,16 +208,32 @@ for (const name of ['security', 'performance', 'observability']) {
   assert.match(body, /text-only/iu);
 }
 const featureFlow = await read('.agents/roles/references/feature-delivery.md');
+const briefBudgets = await read('.factory/templates/job-brief.md');
 assert.ok(skill.includes('../../roles/references/feature-delivery.md'));
 for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-pr/SKILL.md', '.agents/roles/delivery.md', '.agents/roles/references/delivery.md']) assert.ok((await read(file)).includes('feature-delivery.md'), 'Workflow consumer must link to its canonical contract: ' + file);
 for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
+for (const contract of [featureFlow, skill]) assert.doesNotMatch(contract, /or approval of a clearly presented feature-to-PR assignment/u);
+assert.match(featureFlow, /design-option choice, brief approval.*preparation only; do not dispatch a new actor/u);
+assert.match(featureFlow, /current trusted start instruction and its bounded action scope/u);
+assert.match(featureFlow, /If approval is genuinely ambiguous, clarify whether to start and wait before dispatch/u);
+assert.match(featureFlow, /continuation or correction.*does not need a redundant start prompt/u);
+assert.match(featureFlow, /dispatch tool reports that dispatch occurred/u);
+assert.match(featureFlow, /explicit start such as “implement this feature”/u);
+assert.match(featureFlow, /Explicit prepare-only, read-only, local-only or other narrower limits still prevail/u);
+assert.match(await read('.agents/skills/isswf-coordinator/SKILL.md'), /Choosing a design option, approving a brief, or ambiguous approval alone does not authorize dispatch/u);
+assert.match(await read('.agents/skills/isswf-coordinator/SKILL.md'), /Continue or correct within an already explicit assignment.*without redundant start prompts/u);
+assert.match(briefBudgets, /design choice or brief approval alone is preparation, not start authority/u);
+assert.match(briefBudgets, /actual dispatch only after the host tool reports it/u);
+const durableDispatchGuidance = await read('docs/durable-work.md');
+assert.match(durableDispatchGuidance, /prepared brief, option choice or brief approval does not authorize a new dispatch/u);
+assert.match(durableDispatchGuidance, /Status is not dispatch evidence/u);
+// Static scenario walkthrough: choice/brief approval => no new dispatch; explicit start => bounded workflow; ambiguous approval => ask and wait; allowed correction => continue under original grant.
 assert.match(featureFlow, /configuration.*not permission|not permission on their own/iu);
 assert.match(featureFlow, /two independent review rounds per functional unit total, including the initial review/u);
 assert.match(featureFlow, /one correction cycle total/u);
 assert.match(featureFlow, /first review's findings are bundled/u);
 assert.match(featureFlow, /without routine operator reconfirmation/u);
 assert.match(featureFlow, /Explicit tighter grants take precedence, including zero/u);
-const briefBudgets = await read('.factory/templates/job-brief.md');
 assert.match(briefBudgets, /two independent review rounds total including initial review/u);
 assert.match(briefBudgets, /one correction cycle total/u);
 assert.match(briefBudgets, /account spent budget on resume without reset/u);
@@ -225,7 +241,7 @@ assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /Establish readi
 assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /Initialization defaults alone do not establish this readiness/u);
 const multiAgentSetup = await read('.agents/skills/isswf-setup/SKILL.md');
 for (const pattern of [/Configure the multi-agent composition/u, /enabled or conditional/u, /maximum total actors and concurrent actors/u, /correction\/review round budget/u, /dependencies or independence requirements/u, /do not create another dispatcher/u, /existing `project-setup.md`/u, /Reuse a settled composition/u]) assert.match(multiAgentSetup, pattern);
-assert.match(await read('.factory/templates/job-brief.md'), /Current feature-start or other authorization source/u);
+assert.match(await read('.factory/templates/job-brief.md'), /Current explicit start or other authorization source/u);
 assert.match(await read('.factory/templates/delivery.md'), /Integration boundary/u);
 assert.match(await read('AGENTS.md'), /trusted current feature-to-PR start/u);
 assert.match(skill, /implementation alone/u);
