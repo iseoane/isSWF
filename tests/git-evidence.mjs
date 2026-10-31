@@ -87,7 +87,9 @@ try {
 
   const helper = join(root, 'helper-ran');
   const included = join(root, 'included-config');
-  await writeFile(included, `[core]\nfsmonitor = !touch ${helper}\n`);
+  const includedConfig = `[core]\nfsmonitor = !touch ${helper.replaceAll('\\', '/')}\n`;
+  await writeFile(included, includedConfig);
+  command(git, ['config', '--file', included, '--no-includes', '--list']);
   const config = await readFile(join(root, '.git/config'), 'utf8');
   const condition = root.replaceAll('\\', '/');
   await writeFile(join(root, '.git/config'), config + `[includeIf "gitdir:${condition}/.git/"]\npath = ${included.replaceAll('\\', '/')}\n`);
@@ -96,7 +98,7 @@ try {
   assert.notEqual(conditional.status, 0, 'conditional external configuration must be refused');
   assert.equal(conditional.output.reason, 'executable-or-external-git-configuration-refused');
   assert.deepEqual(await readFile(join(root, '.git/config')), conditionalBefore);
-  assert.equal(await readFile(included, 'utf8'), `[core]\nfsmonitor = !touch ${helper}\n`);
+  assert.equal(await readFile(included, 'utf8'), includedConfig);
   await assert.rejects(lstat(helper), { code: 'ENOENT' });
   await writeFile(join(root, '.git/config'), config + `[include]\npath = ${included.replaceAll('\\', '/')}\n`);
   const hostile = invoke(binding);
