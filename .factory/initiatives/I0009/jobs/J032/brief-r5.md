@@ -1,0 +1,11 @@
+# J032: Real Pi local-flow acceptance probe
+
+After integrated PR118 and successful post-merge checks, operator explicitly requests a real-agent test and adds an independent reviewer personally using J023 for a complete bounded standard local flow. No other jobs or publication.
+
+One sequential isswf-worker `openai-codex/gpt-6-luna` high, followed by one independent isswf-reviewer `openai-codex/gpt-6.1-sol` medium. Current role/model discovery verified, fleet empty. No nested agents, extra actors/retries, installations or configuration edits. Coordinator prepared one isolated Git fixture at `/tmp/isswf-j032-live-c05Gv1` (<20 MB budget, ample /tmp space observed), not a linked worktree or production repo. Existing author/review budgets stay consumed; this new explicit probe has exactly these two calls.
+
+Fixture baseline/document checkpoint `315be8d27e538f8927515052a62fe4cfae8ca744` includes its .isswf/initiatives/I0009/plan.md and jobs/J032/brief-r1.md, with full behavior, required resources, TDD evidence and reviewer criteria. This is the same J032 acceptance test, not a new product assignment. Factory root `/home/iseoane/Work/isSWF` functional resource tree matches approved/integrated main5cd5a95 (source HEAD9c03712 has same tree). Retain baseline and commits; no cleanup.
+
+Worker repairs intentionally defective `canPublish` with built-in Node tests and test-only RED then GREEN commits; coordinator replays both and inspects narrow session read-call metadata. Reviewer fresh launch receives exact fixture repository/base/candidate and explicit identity/diff/content bindings, path allowlist publish.mjs and publish.test.mjs. Required personal J023 tool use and actual returned evidence consumption must be observed, not self-report only. Missing binding/capability blocks affected review. Coordinator owns records and freezes them during author writes.
+
+Pass requires actual task behavior, honest consumption/application reporting, retained RED/GREEN independently reproduced and independent Standards/Spec verdict using observed bound tools. No provider simulation: these two authorized model calls use existing Pi authentication. Still not a general adherence certificate, native Windows live test, Claude live test or OS isolation. Stop at J032 evidence/result; no other jobs, push, PR, merge or install.

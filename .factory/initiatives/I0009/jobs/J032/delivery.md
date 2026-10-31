@@ -30,4 +30,14 @@ Source implementation and independent review verified. Publication/CI pending at
 
 ## Blockers and next action
 
-Publish bounded branch/PR, verify exact published head native Linux/Windows CI, then request the specific MEDIUM integration decision. No merge, release or cleanup authorized by this delivery.
+Superseding observation: PR118 OPEN at https://github.com/iseoane/isSWF/pull/118, head `9c03712885cab5b17ff66cca55d12f39b138371e`, base `135d0fbc97d3b9421a3945f365b3ca8b3451e8c2`. Receipt-only publication commit preserves reviewed functional bytes. Coordinator reran full quality on publication head PASS. Quality run41225580075 SUCCESS3/3: portable124608919797, Ubuntu124608920058, Windows124608920086; inspected native static-host, package and discovery steps PASS. CI checkout is synthetic merge `f8acf1210a9c8f072d73eaa5c7b486a53c562278`, parents exact base/head, tree `ee08cbb351727bd86efa2b809c08e9e00927e71c` equal head tree. Not a literal-head build or live-agent adherence test. Technical delivery gates met; awaiting operator MEDIUM integration approval using merge commit, not squash. This final local receipt/plan remains uncommitted to preserve verified head. No merge, release or cleanup authorized by this delivery.
+
+
+## Approved integration and post-merge checks
+
+Operator explicitly approved integration and tests, with no progression to other jobs. Normal protected PR merge with expected head9c03712 completed as main `5cd5a95c49e7a9b735328979d752b37679f1548c`, parents135d0fb/9c03712 and unchanged approved treeee08cbb351727bd86efa2b809c08e9e00927e71c. Both RED commits remain ancestors. GitHub PR MERGED/main ref observed. Post-merge Quality41228315775 SUCCESS3/3 on exact merge commit: Windows124617029304, Ubuntu124617029414, portable124617029466. Exact merge archive local method-evidence, worker-methodology, host-portability and docs checks PASS (merged-focused.log retained ignored). These are static/synthetic checks, not a live-agent adherence certification. No extra model call, install, cleanup or next job. Local final records preserve evidence without direct-main push.
+
+
+## Real Pi worker/reviewer probe
+
+Current operator subsequently authorized one real worker and independent reviewer using J023, scoped to existing J032 only. Brief-r5 and A002/V003 retain fixture baseline315be8d, RED5ea65f8 and GREEN991c2dd. Coordinator reproduced expected behavioral RED and three passing GREEN tests;324 additional input pairs passed. Author required reads were observed in Pi trace; application independently assessed. Real reviewer personally invoked identity, diff and both candidate contents, all exact-bound/status ok/native integrity verified; coordinator rechecked returned bytes/digests. V003 Standards/Spec/aggregate PASS, no findings. Complete fixture Git history is retained in ignored tooling/.local/j032/live-fixture.bundle with verified bundle; summaries/logs retained alongside, no copied transcript. This demonstrates one real local Pi flow, not general reliability or Windows/Claude live parity. No other job, publication, install or cleanup.

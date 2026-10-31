@@ -2,13 +2,17 @@
 
 Type: enhancement
 
-This is the curated delivery view for J019, J020 and the separately selected J018 caller-portability slices. The coordinator retains the full working plan, partial closures, unrelated maintenance patches and private evidence separately. This view does not recreate or resume the parked executor work in PR87 at checkpoint `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`.
+This canonical plan retains the curated delivery view and remaining native-work planning in J027–J031. Historical partial closures, unrelated maintenance patches and private evidence remain preserved separately. This plan does not recreate or resume the parked executor work in PR87 at checkpoint `1c7e898ca1eb4e8e35c455aeadbb1f39832caed7`.
 
 ## Scope
 
-J019's five-file methodology correction is integrated through PR93. J020's six-file release-source follow-up is retained below at its own pre-publication checkpoint. J018 adds only two explicitly selected caller slices: canonical roots/native containment and caller-directory synchronization. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. Other legacy maintenance and PR87 remain excluded and inactive.
+Latest request selects review followed by J023 feature start, with actual native reviewer CLI use mandatory; J023 brief-r3 supersedes earlier planning-only/frozen-brief language for that unit only. Other units remain prepare-only and receive no new actors or remote grants. Earlier planning grants below retain their historical provenance, not a prohibition on the current J023 start.
 
-J019 observations below supersede its retained pre-publication brief. J020 records describe its own pre-publication checkpoint; later source commit, PR and exact-head CI must be observed, not embedded as a self-referential SHA. Integration, release, installation and cleanup remain separate operator decisions.
+Current operator-selected order for pending work: **J023 → J032 → remaining J028–J031**, retaining their actual internal dependencies. J032 adds observable methodology application, not another Git CLI. This is a scheduling dependency, not a claim that the code technically requires that order. J027 reconciliation is already completed and is not replayed. No new actor, implementation, installation or remote action is authorized by this planning addition.
+
+J019's five-file methodology correction is integrated through PR93. J020's six-file release-source follow-up is retained below at its own pre-publication checkpoint. J018 adds only two explicitly selected caller slices: canonical roots/native containment and caller-directory synchronization. Ordinary assignments retain shared methodology and native Pi/Claude execution, without a new dispatcher, mandatory role pipeline or legacy runtime prerequisites. Other legacy maintenance and PR87 remain excluded from execution and inactive; J027 separately records the explicitly requested read-only PR87 reconciliation.
+
+J019 observations supersede its retained pre-publication brief. J018/J020 historical pre-publication evidence remains intact; current status below reconciles integrated PR98/99/96 using retained delivery and local ancestry, without claiming fresh remote CI. Current operator decisions keep native Pi/Claude, park the custom isolated executor, require interoperability and rescue only independently needed current-main improvements. J027 reuses reconciliation; J028–J031 own residual portability, state recovery, interoperability and conditional PR87 closure. Historical J027 planning grant authorized records and exactly one Sol 6.1 LOW planner only, without implementation, other actors, installations, publication or remote closure; that allocation is consumed. Its earlier J023 freeze is superseded only by the latest J023 feature start above. Unique work/backups stay preserved and J023's product scope remains the read-only Git CLI.
 
 ## J008
 
@@ -46,12 +50,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J018
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver only the selected caller root/containment, directory-sync and native Windows temporary-evidence eligibility slices.
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J018/brief-r4.md)
-- Blocker: Cut-3 independent Standards/Spec/aggregate PASS on the retained functional snapshot; committed artifact inspection, publication and exact-head CI remain pending at this checkpoint. Existing Windows file-symlink EPERM is retained, not repaired or certified.
-- Next step: Complete the covered cut-3 feature PR gates and request its integration separately. Cuts 1/2 are already integrated through PR98; preserve their original review failures and accepted limits. No unrelated repair or broader Windows acceptance.
+- Blocker: None for the selected three delivered cuts; broader historical legacy acceptance and Windows file-symlink EPERM remain unaccepted, not repaired or certified.
+- Next step: Preserve PR98/99 integrated delivery and prior adverse/limited outcomes; do not repeat delivered work. J028 separately assesses whether residual legacy portability has current value.
 
 ### Acceptance
 
@@ -66,6 +70,8 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Full Linux quality and locked Windows static/docs checks pass. Existing full Windows caller fixtures still fail fetch-count assertions after passing directory sync; failures are retained, not repaired or hidden. No broad Windows acceptance is claimed.
 - Cuts 1/2 integrated as main `5f3f711d8567f9550db337ef167235e604480e75`; post-merge Quality run 40904303022 SUCCESS 3/3.
 - Cut-3 base is that integrated main; functional snapshot `39c65d6f860c2646938c05e9ffe282d8baa0cad22a628deec26c1c7053c218c2`, independent PASS/no findings, two approved native contexts completed in 132846/360000ms. Native Windows temporary-child digest/root refusal and Linux existing Bubblewrap fixture pass; full Windows diagnostic fixture retains file-symlink EPERM. Full working-tree Linux quality and locked Windows static/docs checks pass; committed-source and PR CI observations remain separate.
+
+- Superseding reconciliation: existing J018 delivery records PR98 integration5f3f711 and PR99 integrationa828b43569ef3b5ba0b2fbd6d9964b3a4c7f4fd5 with retained post-merge CI. Local Git confirms both ancestors of examined main d5ba7f2; selected cuts completed, not broad legacy acceptance or newly refreshed CI.
 
 ## J019
 
@@ -90,12 +96,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J020
 
-- Status: in-review
+- Status: completed
 - Objective: Batch fresh pinned release-source reads and overlap only independent Bun fixture branches without weakening integrity or deadlines.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J020/brief-r2.md)
-- Blocker: Independent source review is PASS; source commit, feature PR readback and required exact-head CI are pending at this checkpoint.
-- Next step: Coordinator performs the already authorized commit/feature-push/PR/CI steps. After verified PR delivery, request integration; do not merge automatically or activate J018.
+- Blocker: None for delivered PR96 integration; the retained brief describes its earlier pre-publication evidence, not a current action queue.
+- Next step: Preserve delivered batching and bounded-fixture outcome; do not repeat implementation/publication or revive its spent actor budget.
 
 ### Acceptance
 
@@ -108,6 +114,8 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Base `2c345866ade9d77a4c4f5724420a2929be9b046f`; functional snapshot `db5b33cfdb8104fdcf255387e9ef4943f6ee1d979c9b19cb38d3ca50e18ca71a`.
 - Independent native Pi Linux Standards/Spec/aggregate PASS, no findings; two Sol contexts consumed 150344 of 180000ms. No further actor or retry is authorized.
 - Windows batch/static/docs/diff and Linux batch/full quality plus actual candidate-artifact inspection passed. Future Windows compiled parity, committed-source packaging and exact-head CI remain explicit delivery gates.
+
+- Superseding reconciliation: J027 analysis and local Git identify PR96 integrationfcddfda5d2c520b11354bce0407cece17b37cda0, ancestor of examined main d5ba7f2. Delivered outcome is not pending publication; original brief/failures and evidence limits remain, no fresh remote CI claim.
 
 ## J022
 
@@ -133,12 +141,12 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J023
 
-- Status: in-review
+- Status: completed
 - Objective: Give isSWF reviewers narrowly scoped read-only Git evidence without a general shell.
 - Depends on: None
-- Brief: [brief-r11.md](jobs/J023/brief-r11.md)
-- Blocker: Identity integrated; corrected diff fd0b999 independently PASS with actual complete reviewer patch consumption. Exact-head PR/native Windows CI pending; V004 FAIL retained. Claude/content/status remain open.
-- Next step: Publish bounded diff feature/J023 evidence, verify exact-head native CI and applicable integration grant; no further diff author/review calls, new isolation/binary/workflow or full-J023 closure.
+- Brief: [brief-r21.md](jobs/J023/brief-r21.md) (reduced scope; Claude route per brief-r19/r20).
+- Blocker: None. Status operation removed and actual tool use made optional by operator decision (brief-r21); Pi actual use not observed and not required.
+- Next step: None under J023. Next per operator order: J032.
 
 ### Acceptance
 
@@ -148,6 +156,9 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Assess native Linux/Windows and Pi/Claude capabilities without claiming unsupported isolation or substituting another dispatcher.
 
 ### Evidence
+
+- Content: PR116 integration a88f4710194706748a3533ca1a761087ef0d9316, exact-head and post-merge CI PASS; reviews V006 FAIL, V007 INCONCLUSIVE, V008 PASS.
+- Claude route: PR117 integration 135d0fbc97d3b9421a3945f365b3ca8b3451e8c2, exact-head b8f5e63 CI PASS incl. native Windows MCP/loading/host-native-delegation, post-merge run 41217934417 PASS; reviews V009 FAIL (with observed Claude actual use), V010 PASS.
 
 - Operator explicitly requests a durable isSWF task rather than an agent todo.
 - PR108 reviewer requested coordinator-supplied diff because its read/search toolset had no Git execution capability; the completed review remains valid.
@@ -160,6 +171,31 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Current operator requests review then J023 feature start with actual reviewer use; brief-r3 adds that mandatory acceptance. Later explicitly selects TDD and focused E2E per vertical slice; initial code predates that instruction, coordinator linked-pack refusal correction has observed behavioral RED then GREEN, described in brief-r6. One new independent planning-review actor consumed; CLI-use acceptance remains future and no implementation success is claimed.
 - V001.md retains reviewer37ebd326 StandardsINCONCLUSIVE/SpecPASS/aggregateINCONCLUSIVE solely digest execution, no semantic blocker; coordinator subsequently verified exact snapshot334381ed346832f60309e5c6669f7ede9f76c8a5884fa33b68bbb2b8f25d77c8 hashes/modes/diff/digest PASS. No new independent verdict claimed. Loaded host guide confirms extension tool registration is needed for Pi narrow invocation; Claude equivalent unverified. Original scope decision recorded in brief-r3, subsequently resolved by explicit operator approval in brief-r4. First identity slice allocation: one LunaHIGH writer max30min plus up to2 SolMEDIUM reviews max15min each, no automatic retry or live Claude actor inferred.
 - Worker394d41dd completed blocked with zero edits/tests, consuming1/1 writer calls. Coordinator no-model native Claude2.1.299 probe confirms task-specific strict stdio loading and exact identity tool in filtered reviewer context; host-control calls are not reviewer use. Details/receipt in brief-r4; that historical continuation gate is superseded by current explicit operator Pi-first approval in brief-r5: one same-worker continuation only, two existing independent review ceilings unchanged.
+
+## J032
+
+- Status: completed
+- Objective: Make assignment, consumption and demonstrated application of roles, skills and references observable without equating self-report with proof.
+- Depends on: J023
+- Brief: [brief-r4.md](jobs/J032/brief-r4.md)
+- Blocker: None for integrated scope; one bounded real Pi worker/reviewer flow now verified, not a general reliability or live Windows/Claude certificate.
+- Next step: Stop after J032 integration and verification as explicitly requested; do not start other jobs.
+
+### Acceptance
+
+- Distinguish resources assigned, actually read or supplied in full, application evidenced and independent assessment; unknowns and required omissions prevent unsupported completion.
+- Use reference → concrete application → evidence → deviation/limit with exact observer/candidate provenance. Assess selected methods and engineering references proportionately under Standards separately from Spec; no hidden-reasoning demand or mandatory all-role pipeline.
+- Verify ordinary, conditional and missing-resource/false-self-report cases across supported native Pi/Claude Linux/Windows handoffs. Shared static checks do not establish live adherence; future live calls need finite authorization.
+- Reuse coordinator/review gates and existing brief/attempt/review records; each functional slice includes tests/docs and affected review, not a duplicate compliance store or dispatcher.
+
+### Evidence
+
+- Current operator explicitly requests this unit after J023 and before the rest of pending I0009. Coordinator-owned registration, not a new planner response; previous single planner call remains consumed.
+- Historical preparation: jobs/J032/brief-r1.md; no implementation or agent evaluation at registration. J023 existing briefs and section remain unchanged.
+- Operator explicitly approved PR118 integration and post-merge tests, prohibiting progression to other jobs. Normal expected-head merge preserved both RED/GREEN pairs as ancestors of main5cd5a95c49e7a9b735328979d752b37679f1548c; tree exactly matches approved head. Post-merge Quality41228315775 SUCCESS3/3 on literal merge commit (portable, Ubuntu, Windows); exact archived merge focused method/worker/host/docs checks PASS. No new live agent/model call or other job started.
+- Subsequent explicitly authorized real Pi acceptance probe brief-r5: author de844319 behavioral RED5ea65f8/GREEN991c2dd independently replayed; reviewer614bd65e personally invoked J023 identity/diff/two contents, all observed status ok/integrity verified; V003 Standards/Spec/aggregate PASS. Required reads coordinator-observed, application independently assessed. Fixture bundle/logs retained ignored tooling/.local/j032; A002/V003 retain evidence. No other jobs/publication/install/cleanup.
+- Current execution brief-r4 input a0a0955; Luna/high author completed, coordinator corrected V001 F1; V002 Sol/medium Standards/Spec/aggregate PASS on 3d84856. Both RED/GREEN pairs retained. Full local quality/static checks PASS; publication-head local quality PASS.
+- PR118 OPEN https://github.com/iseoane/isSWF/pull/118 head9c03712885cab5b17ff66cca55d12f39b138371e base135d0fbc97d3b9421a3945f365b3ca8b3451e8c2; Quality41225580075 SUCCESS3/3 (portable, native Ubuntu/Windows). CI tested synthetic merge f8acf1210a9c8f072d73eaa5c7b486a53c562278 with tree ee08cbb351727bd86efa2b809c08e9e00927e71c exactly equal head tree, not literal-head execution. See A001, V001/V002 and delivery.md; human integration pending.
 
 ## J024
 
@@ -260,3 +296,127 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 - Round2 reviewerce544242 at264234083b51ff3d5a61f59949ac1ae398cbf2ed Standards/Spec/aggregate PASS LOW nofindings; V002.md preserves nativeCI requirement and unchanged negativealiases. Receipt-only follow-up does not change reviewed functional bytes; freshnativeCI stillpending.
 - PR112 finalhead73c196296bb149ee63652f8953a261ff150ef7ec fullLinuxquality/ESLint/KnipPASS and all3 Quality41118363573 jobsPASS. Inspected Windows124278378555 log: both complete focal suites emittedPASS, including finalalias/no-write assertions. Normal expected-head LOW-risk integration37c695dfce28e130153ec3b46487ec831c7e2cae verified; local+remote feature branch safely retired after ancestry/head checks, no secondary worktrees.
 - Ordered functional endpoints: PR109/#84 b3045b4264e65303c91c310c76acb6a7142241e6; PR110/#83 4b824d58fde28b9029a8083d11f2ccc283f51050; PR111/#85 035d54cee95dd57799509590ecfd43af18f385f6 with explicit MEDIUM approval; PR112/#86 37c695dfce28e130153ec3b46487ec831c7e2cae. No whole PR87 merge, release, installation or automatic remote issue closure.
+
+## J027
+
+- Status: completed
+- Objective: Reconcile parked PR87 with current main and identify bounded remaining work without resuming execution.
+- Depends on: None
+- Brief: [brief-r2.md](jobs/J027/brief-r2.md)
+- Blocker: None for recorded source/disposition reconciliation; durable preservation and downstream runtime acceptance belong to J031 and owning units, not this analysis closure.
+- Next step: Use the adopted ledger in brief-r2 and separate J028–J031 units; preserve historical failures, parked executor and J023 unchanged. No implementation or remote closure.
+
+### Acceptance
+
+- Ground all classifications in current main, exact parked/preservation heads, affected consumers and pinned historical evidence.
+- Preserve old failures/grants/claims and distinguish actual last CI failure from cause hypotheses and current acceptance.
+- Keep Linux/Windows and Pi/Claude scope explicit; no merge, installation or legacy reactivation. The current request adds only one read-only planner call to prepare remaining units.
+
+### Evidence
+
+- Operator explicitly requests analysis of what remains pending in PR87 after the four issue repairs.
+- jobs/J027/brief-r1.md
+- Coordinator inspected exact main d5ba7f2 / PR1c7e898 / backuped39581, pinned J007 and ten-suite/caller/launcher boundaries, last exact-head Windows failure40519161741/122241153691 and later merged PRs. Results in r1 distinguish delivered vs genuine residual portability/engine/evidence and unsafe stale-helper reuse. That analysis used no runtime/model/VM test, implementation, commit, push or remote edit.
+- Current operator selects native execution, parked custom isolation, interoperability and conditional preservation-before-closure. One new native planner mission8d03ec37-5827-43b1-9a91-b8fc3ea1fd2b completed on requested/configured Sol6.1LOW; 1/1 calls consumed, no retries/other actors. Budget reconciliation and coordinator-adopted ledger in brief-r2; planner returned handoff only.
+- Coordinator zero-model host discovery identifies an existing claude-code external-CLI candidate; its actual OpusMEDIUM/cwd/reviewer contract remains unverified, recorded in J030 rather than inventing a dispatcher. J023 briefs and plan section remain unchanged.
+
+## J028
+
+- Status: pending
+- Objective: Rescue only confirmed independently useful residual portability from PR87 on current main.
+- Depends on: J027, J032
+- Brief: [brief-r1.md](jobs/J028/brief-r1.md)
+- Blocker: No independent supported native consumer established for legacy capacity/diagnostic/researcher residuals; do not treat them as native workflow prerequisites.
+- Next step: Apply the consumer-selection checkpoint, then deliver only justified complete caller journeys or record explicit legacy-only parking. No implementation selected now.
+
+### Acceptance
+
+- Each selected repair names a real current consumer and bounded failure; unsupported/engine-only scope stays parked.
+- Complete prepare/publication/readback/refusal slices preserve root/authority/pin/claim/no-replay and finite-capacity contracts, with tests/docs in the same commit.
+- Verify selected native Linux/Windows paths and explicit Pi/Claude applicability; legacy injected transport does not prove Windows diagnostic execution. Integrated shared contracts precede dependent caller work.
+
+### Evidence
+
+- Planner mission8d03ec37-5827-43b1-9a91-b8fc3ea1fd2b inspected current legacy consumers and proposed conditional extraction, not a new executor or provider route.
+- jobs/J028/brief-r1.md; no implementation/test/review actor allocated or runtime acceptance claimed.
+
+## J029
+
+- Status: pending
+- Objective: Preserve state through native migration and actual interrupted-owner public recovery.
+- Depends on: J027, J032
+- Brief: [brief-r1.md](jobs/J029/brief-r1.md)
+- Blocker: Current directory publication needs native policy assessment; actual owner-loss public migration recovery is unproved. No implementation or interruption test selected now.
+- Next step: Select a future normal installed migration slice, followed after its integrated contract by real interrupted-owner recovery; no J028 or parked-engine dependency.
+
+### Acceptance
+
+- Public inspect/move/repeat preserves exact bytes, applicable modes, pins/models and historical references with exactly one active root; drift/dual-root/unsafe/active cases refuse.
+- Actual process interruption and owner cessation exercise installed recover-state before/after rename and claim-before-journal boundaries; live/unknown/malformed/drifted cases retain claims and bytes.
+- Verify genuine native Linux/Windows installed paths with both host resource contexts; preserve strict current identity and explicit Windows durability limits. Independent data-loss/recovery judgment and affected rechecks accompany future slices.
+
+### Evidence
+
+- Planner/current source map: tools/state-migration.mjs inspectStateMigration/moveState/recoverState and tools/isswf.mjs public owner/dispatch paths; historical injected ceased predicates are not real loss evidence.
+- jobs/J029/brief-r1.md; shared state behavior is independent of the parked worker engine and does not imply native-agent crash recovery.
+
+## J030
+
+- Status: blocked
+- Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
+- Depends on: J027, J032
+- Brief: [brief-r1.md](jobs/J030/brief-r1.md)
+- Blocker: Existing external-CLI candidate is discoverable, but native reviewer/model/effort/cwd/cost contract and reverse route are not verified.
+- Next step: Verify supported-route readiness without inventing a dispatcher; future directional live reviews and maintained both-OS journeys require their own finite scope/budget.
+
+### Acceptance
+
+- Native Pi→Claude Opus MEDIUM and reverse direction each bind exact candidate, cwd, shared read-only review methodology, effective selection and returned independent judgment; no direct Anthropic API use in Pi.
+- Native Linux/Windows direction-specific checks, errors/cancellation limits and scoped update/reload/remove preserve project state, pins/models, unrelated settings and unique work.
+- Missing route/effort capability stays blocked; no silent substitution, new isolation engine or J023 duplication. Directional contracts integrate before dependent journeys.
+
+### Evidence
+
+- Planner found no verified bridge in factory guides/manifests; coordinator discovery adds existing builtin claude-code read-only external-CLI route candidate, async-only with unsupported Pi model overrides unless runner implements them.
+- jobs/J030/brief-r1.md; no Claude actor, provider experiment, install or host configuration change occurred.
+
+## J031
+
+- Status: blocked
+- Objective: Close PR87 only after reconciled dispositions and verified preservation of unique work.
+- Depends on: J027, J028, J029, J030, J032
+- Brief: [brief-r1.md](jobs/J031/brief-r1.md)
+- Blocker: Durable retrievable backup/evidence retention and downstream final dispositions remain unverified; current request excludes remote closure.
+- Next step: Establish preserved closure readiness and accepted dispositions, then obtain separately authorized fresh-head remote closure/readback. Do not delete refs, worktrees or evidence.
+
+### Acceptance
+
+- Every unique residual maps to delivered/integrated selected work, explicitly accepted parking or visible unresolved blocker; required outcomes cannot silently be declared completed.
+- Verify retained refs/archives/content identities/owners, including unique uncommitted evidence. Existing commit objects do not establish durable backup or cessation; unknown legacy claims stay untouched.
+- Independent preservation/provenance judgment and bounded Linux/Windows/Pi/Claude claims precede any future remote action; actual PR head/state are refreshed then, preserving historical failures and inconclusive verdicts.
+
+### Evidence
+
+- PR87 head1c7e898 and preservation objected39581 resolve locally; named local backup branch not returned, remote/cross-machine retention not verified. Last OPEN/DRAFT/CI observation belongs to J027 r1, not this planning.
+- jobs/J031/brief-r1.md; conditional closure planned only, no publication, remote closure or cleanup authorized/performed.
+
+
+## J033
+
+- Status: blocked
+- Objective: Establish one authoritative editable model configuration for current isSWF work without divergent sources or silent changes to approved selections.
+- Depends on: None
+- Brief: [brief-r2.md](jobs/J033/brief-r2.md)
+- Blocker: Historical planning registration superseded by independent I0013/J001; do not execute or use this entry as a second implementation plan.
+- Next step: Follow ../I0013/plan.md and its J001 brief; operator selected one native authority per host. Original J033 checkpoint paths and spent planner allocation preserved.
+
+### Acceptance
+
+- One explicit editable authority; no independently editable divergent mirrors; preserve current approved choices and unrelated host settings.
+- Supported Pi/Claude Linux/Windows mechanisms with honest capability limits, deterministic conflict/missing/legacy controls and no automatic migration/install.
+- Combined independent review and native CI; future UI and other pending jobs excluded.
+
+### Evidence
+
+- Current operator explicitly requests resolving model configuration after rejecting multiple divergent sources; coordinator inspected native setup boundaries, host guides and installer/default consumers.
+- jobs/J033/brief-r1.md records scope, initial reassessment, reading map and finite actors; no implementation or model call at registration.
