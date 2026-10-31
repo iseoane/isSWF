@@ -30,6 +30,9 @@ try {
   ]) assert.throws(() => parsePlan(malformed), /invalid-plan-type/u);
   const completed = markdown.replace('- Status: pending', '- Status: completed');
   assert.throws(() => parsePlan(completed), /completed jobs require evidence/u);
+  for (const marker of [' None.', 'None. ', '   ']) {
+    assert.throws(() => parsePlan(completed.replace('- None.\n', '- ' + marker + '\n')), /completed jobs require evidence/u);
+  }
   const withEvidence = completed.replace('- None.\n', '- reviewed candidate details\n');
   assert.equal(parsePlan(withEvidence)[0].evidence[0], 'reviewed candidate details');
   assert.deepEqual(parsePlan(markdown)[0].evidence, [], 'pending jobs may retain empty evidence');
