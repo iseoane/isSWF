@@ -161,7 +161,10 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
   assert.doesNotMatch(body, /^model:|^thinking:/mu, 'Host settings own model/effort');
   assert.match(body, /Missing.*blocks/);
   assert.ok(body.length < 1200);
-  if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
+  if (role === 'reviewer') {
+    assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity$/mu);
+    assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
+  } else if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
 }
 for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-security', 'isswf-performance', 'isswf-observability']) {
   assert.ok(piManifest.files.includes(`.agents/skills/${name}`));

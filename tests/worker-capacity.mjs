@@ -24,7 +24,7 @@ try {
     await mkdir(dirname(join(project, path)), { recursive: true }); await cp(join(source, path), join(project, path), { recursive: true });
   }
   await mkdir(join(project, 'tools'));
-  for (const name of ['isswf-job', 'factory-package', 'pi-worker-task', 'worker-lifecycle', 'native-recovery', 'external-effect-journal', 'recovery-review', 'job-successor', 'execution-capacity', 'isswf-plan', 'release-source', 'project-state']) await cp(join(source, 'tools', name + '.mjs'), join(project, 'tools', name + '.mjs'));
+  for (const name of ['isswf-job', 'factory-package', 'git-evidence', 'git-evidence-pi-extension', 'pi-worker-task', 'worker-lifecycle', 'native-recovery', 'external-effect-journal', 'recovery-review', 'job-successor', 'execution-capacity', 'isswf-plan', 'release-source', 'project-state']) await cp(join(source, 'tools', name + '.mjs'), join(project, 'tools', name + '.mjs'));
   await writeFile(join(project, 'result.txt'), 'unchanged\n');
   git('init', '-q'); git('config', 'user.name', 'Capacity fixture'); git('config', 'user.email', 'fixture@invalid');
   git('add', '.'); git('commit', '-qm', 'Pin fixture runtime'); const runtimeSha = git('rev-parse', 'HEAD');
