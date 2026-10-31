@@ -27,6 +27,13 @@ assert.match(review, /claimed, not visible/u, 'Review template must distinguish 
 assert.match(review, /not applicable accepted/u, 'Review template must preserve the justified not-applicable outcome');
 assert.match(worker, /test.*alone.*before.*production|failing test alone/iu, 'Worker procedure must commit behavioral RED before production changes');
 assert.match(worker, /exact focused command.*failing assertion/iu, 'Worker must make the RED commit independently reproducible');
+for (const [owner, body] of [['worker role', worker], ['review guidance', reviewer], ['attempt template', attempt], ['review template', review]]) {
+  assert.match(body, /substitute evidence/iu, `${owner} must cover substitute evidence for missing RED`);
+  assert.match(body, /harness and run log/iu, `${owner} must retain the substitute harness and run log`);
+  assert.match(body, /tests\/.*tooling\/\.local\//iu, `${owner} must name durable substitute-evidence locations`);
+  assert.match(body, /archived commit.*unmutated baseline/iu, `${owner} must bind substitute evidence to its archived commit and unmutated baseline`);
+  assert.match(body, /attempt\/review record/iu, `${owner} must link retained substitute artifacts from the attempt/review record`);
+}
 assert.match(tdd, /git bisect skip/iu, 'TDD procedure must explain retained red commits in bisect');
 assert.match(reviewer, /not red.*not green|RED.*GREEN/iu, 'Review procedure must provide a manual red/green reproduction when no checker is built');
 assert.match(reviewer, /claimed, not visible/u, 'Review outcomes must reject a self-report as evidence of application');
