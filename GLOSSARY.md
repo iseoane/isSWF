@@ -46,6 +46,9 @@ The exact version of a delivery being checked, reviewed, or accepted.
 An observed result attributable to a specific candidate or context that supports a claim.
 _Avoid_: PASS without stating what was checked.
 
+**RED commit**:
+A test-only commit whose focused behavioral test fails because the requested behavior is missing; it precedes the separate GREEN production-fix commit when a brief selects TDD.
+
 **Technical closure**:
 The condition of a delivery that meets its assignment and required checks without open blocking findings.
 _Avoid_: done when acceptance or integration is still missing.
