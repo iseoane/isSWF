@@ -40,6 +40,12 @@ Pi/Linux source/method/actual-use gates met for identity only; native CI/artifac
 
 **MEDIUM**, same assessment for PR: Pi review evidence acquisition, native profiles and packaging are affected. Wrong binding/topology/config/output handling could return misleading commit evidence, read outside intended Git storage, execute inherited helpers or block valid review. Strict fixed binding, direct no-shell Git, fresh restricted env, common/alternate/link/include refusal and output limits plus adversarial tests/independent correction review mitigate observed classes. Concurrent filesystem mutation and blocking OS operations remain assumptions, not eliminated by cooperative deadlines; Windows behavior unverified here. Errors, binding digests, regression checks and native CI support detection. Reverting source can withdraw the tool but cannot undo past reads or already published artifacts; live rollback not tested. No sensitive-data exposure was observed. Do not downgrade for green tests or merge automatically.
 
+## PR publication and first native CI observation
+
+Draft PR https://github.com/iseoane/isSWF/pull/114 observed OPEN, base main at d5ba7f2, first head `a529429a05c191468e1b3fd54e6814a108e78cb5`. This receipt-only head preserves functional ef90593 exactly. Only J023 records/selected plan section were committed; unrelated prepare-only J027–J032 records and plan delta remain local.
+
+Run41179535701: portable and Ubuntu package/host jobs PASS; Windows124473918762 FAIL at tests/git-evidence.mjs:104 before intended unconditional include-refusal assertion. Actual result git-identity-command-failed: raw Windows backslashes produced invalid Git config syntax. Coordinator corrected only the fixture include path to forward slashes, preserving the configuration-refused assertion and production bytes. Conditional include and prior Windows controls had reached/passed before this failure. No Windows/full-native acceptance claimed; fresh head CI pending. V003 reviewed production bytes remain unchanged; bounded test-data delta is mechanically assessed, not a third independent verdict or model call.
+
 ## Blockers and next action
 
-Publish bounded source/J023 evidence only, observe exact-head native CI and report unresolved failures honestly. Preserve unrelated local planning. Request MEDIUM integration only after covered gates; do not merge or close J023 prematurely.
+Verify corrected fixture locally and on fresh exact-head native CI. Keep PR draft while required check fails. Preserve unrelated local planning. Request MEDIUM integration only after covered gates; do not merge or close J023 prematurely.

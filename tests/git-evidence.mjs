@@ -98,7 +98,7 @@ try {
   assert.deepEqual(await readFile(join(root, '.git/config')), conditionalBefore);
   assert.equal(await readFile(included, 'utf8'), `[core]\nfsmonitor = !touch ${helper}\n`);
   await assert.rejects(lstat(helper), { code: 'ENOENT' });
-  await writeFile(join(root, '.git/config'), config + `[include]\npath = ${included}\n`);
+  await writeFile(join(root, '.git/config'), config + `[include]\npath = ${included.replaceAll('\\', '/')}\n`);
   const hostile = invoke(binding);
   assert.notEqual(hostile.status, 0);
   assert.match(hostile.output.reason, /configuration-refused/u);
