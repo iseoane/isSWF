@@ -75,7 +75,7 @@ try {
     assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Native Pi resources must survive committed-source construction');
     assert.deepEqual(await readFile(join(markdownRoot, path)), await readFile(join(source, path)), 'Native Pi resources must survive Markdown materialization');
   }
-  // The Claude evidence server and everything it launches or imports ship with the release regardless of pi.subagents.
+  // The Claude evidence server and everything it launches or imports ship with the release (build-release includes every top-level tools/*.mjs; this fixture keeps pi.subagents).
   const plugin = await readJSON(join(releaseA, '.claude-plugin/plugin.json'));
   const serverPath = plugin.mcpServers.isswf_git_evidence.args[0].replace('${CLAUDE_PLUGIN_ROOT}', releaseA);
   assert.equal(serverPath, join(releaseA, 'tools/git-evidence-mcp.mjs'));
