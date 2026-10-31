@@ -296,7 +296,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const sha = bytes => createHash('sha256').update(bytes).digest('hex');
   const [, , operation, slot, path] = process.argv;
   const bytes = Buffer.from('original\\n');
-  const evidence = operation === 'diff'
+  const evidence = operation === 'identity'
+    ? { version: 1, status: 'ok', operation, repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, observedHeadSha: binding.candidateSha, gitExecutable: binding.gitExecutable, gitVersion: 'git version fixture', bindingSha256: sha(input), limits: {} }
+    : operation === 'diff'
     ? { version: 1, status: 'ok', operation, repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256: sha(input), patchEncoding: 'base64', patchBytes: bytes.length, patchSha256: sha(bytes), patch: bytes.toString('base64'), limits: {} }
     : { version: 1, status: 'ok', operation, repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, commitSha: slot === 'base' ? binding.baseSha : binding.candidateSha, path, bindingSha256: sha(input), contentEncoding: 'base64', contentBytes: bytes.length, contentSha256: sha(bytes), content: bytes.toString('base64'), limits: {} };
   const digestKey = operation === 'diff' ? 'patchSha256' : 'contentSha256';
@@ -308,6 +310,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (mode === 'wrong-commit') evidence.commitSha = binding.baseSha;
   if (mode === 'wrong-path') evidence.path = 'other.txt';
   if (mode === 'wrong-binding') evidence.bindingSha256 = '0'.repeat(64);
+  if (mode === 'wrong-repository') evidence.repository = '/elsewhere';
+  if (mode === 'wrong-base') evidence.baseSha = binding.candidateSha;
+  if (mode === 'wrong-candidate') evidence.candidateSha = binding.baseSha;
+  if (mode === 'wrong-git') evidence.gitExecutable = '/other/git';
+  if (mode === 'error-wrong-binding') Object.assign(evidence, { status: 'error', reason: 'fixture-refusal', bindingSha256: '0'.repeat(64) });
   if (mode === 'wrong-operation') evidence.operation = operation === 'diff' ? 'content' : 'diff';
   if (mode === 'not-json') { process.stdout.write('not json\\n'); process.exit(0); }
   process.stdout.write(JSON.stringify(evidence) + '\\n');
@@ -322,16 +329,22 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       assert.equal(control.isError, undefined, 'a consistent substituted CLI result is accepted');
       assert.equal(control.content[1].text, 'original\n');
       assert.equal((await client.call('diff', {})).content[1].text, 'original\n');
+      const identityControl = await client.call('identity', {});
+      assert.equal(identityControl.isError, undefined, 'a consistent substituted identity result is accepted');
+      assert.equal(JSON.parse(identityControl.content[0].text).repository, workspace);
       const cases = [
         ['bad-sha', 'content', /integrity check failed/u], ['bad-length', 'content', /integrity check failed/u], ['non-canonical-base64', 'content', /integrity check failed|invalid/u],
         ['wrong-commit', 'content', /mismatched bound provenance/u], ['wrong-path', 'content', /mismatched bound provenance/u], ['wrong-binding', 'content', /mismatched bound provenance/u],
         ['wrong-operation', 'content', /invalid result/u], ['not-json', 'content', /invalid bounded output/u],
         ['bad-sha', 'diff', /integrity check failed/u], ['bad-length', 'diff', /integrity check failed/u], ['non-canonical-base64', 'diff', /integrity check failed/u],
         ['wrong-operation', 'diff', /invalid result/u], ['not-json', 'diff', /invalid bounded output/u],
+        ...['wrong-repository', 'wrong-base', 'wrong-candidate', 'wrong-binding'].flatMap(mode => ['identity', 'diff', 'content'].map(name => [mode, name, /mismatched bound provenance/u])),
+        ['wrong-git', 'identity', /mismatched bound provenance/u],
+        ['error-wrong-binding', 'identity', /mismatched bound provenance/u], ['error-wrong-binding', 'diff', /mismatched bound provenance/u],
       ];
       for (const [mode, name, pattern] of cases) {
         await setMode(mode);
-        const result = await client.call(name, name === 'diff' ? {} : { slot: 'candidate', path: 'tracked.txt' });
+        const result = await client.call(name, name === 'diff' || name === 'identity' ? {} : { slot: 'candidate', path: 'tracked.txt' });
         assert.equal(result.isError, true, `${mode} ${name}`);
         assert.match(textOf(result).join(' '), pattern, `${mode} ${name}`);
         assert.equal(result.content.length, 1, `${mode} ${name}: no evidence text is passed through`);
@@ -384,6 +397,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     assert.notEqual(stopped, 'hung', 'oversized input stops the server');
     assert.notEqual(stopped.code, 0);
     assert.equal(oversized.unsolicited[0].error.code, -32600);
+    // A complete newline-terminated frame beyond the bound is refused before it is handled, not answered.
+    const padded = new Client(server, bindings);
+    await padded.start();
+    padded.child.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 902, method: 'tools/list', params: { pad: 'x'.repeat(70000) } }) + '\n');
+    const refused = await Promise.race([padded.exit, new Promise(done => setTimeout(() => done('hung'), 3000))]);
+    padded.child.kill('SIGKILL');
+    assert.notEqual(refused, 'hung', 'an oversized complete frame stops the server');
+    assert.notEqual(refused.code, 0);
+    assert.deepEqual(padded.unsolicited.map(message => message.error?.code), [-32600], 'only the size error is sent');
+    assert.equal(padded.unsolicited.some(message => message.result), false, 'the oversized request is never answered');
     // Malformed JSON gets a parse error and the server keeps serving.
     const malformed = new Client(server, bindings);
     try {

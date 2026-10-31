@@ -11,7 +11,8 @@ const bindings = Object.fromEntries(['identity', 'diff', 'content'].map(operatio
 delete process.env.ISSWF_GIT_EVIDENCE_BINDINGS;
 
 const maxFrameBytes = 65536;
-// Claude Code truncates MCP text beyond roughly 100,000 characters; refuse whole instead of risking partial evidence.
+// Claude Code truncates MCP text beyond MAX_MCP_OUTPUT_TOKENS (default 25,000 tokens), which the coordinator raises for the
+// review process. This server refuses any result above this bound whole; it cannot see or enforce the host's limit.
 const displayBoundBytes = 98304;
 const diffChunkBytes = 24576;
 const protocolVersions = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
@@ -28,7 +29,7 @@ function callTool(name, args) {
     checkArguments(name, args, { chunked: true });
     const captured = bindings[name];
     if (!captured.binding) throw Error(`${unavailable[name]}: ${captured.error}`);
-    const result = invokeEvidence({ cli, operation: name, binding: captured.binding, chunkBytes: diffChunkBytes, ...args });
+    const result = invokeEvidence({ ...args, cli, operation: name, binding: captured.binding, chunkBytes: diffChunkBytes });
     if (result.content.reduce((sum, block) => sum + Buffer.byteLength(block.text), 0) > displayBoundBytes) throw Error('Result exceeds the display bound for this host; no partial evidence is returned. Use a smaller bound or chunk.');
     return { content: result.content, ...(result.isError ? { isError: true } : {}) };
   } catch (error) {
@@ -60,17 +61,19 @@ function handle(line) {
 }
 
 let buffer = Buffer.alloc(0);
+const refuseOversized = () => {
+  fail(null, -32600, 'Frame exceeds the size bound');
+  process.exitCode = 1;
+  process.stdin.destroy();
+};
 process.stdin.on('data', chunk => {
   buffer = Buffer.concat([buffer, chunk]);
   let index;
   while ((index = buffer.indexOf(10)) >= 0) {
+    if (index > maxFrameBytes) return refuseOversized();
     const line = buffer.subarray(0, index).toString('utf8').replace(/\r$/u, '').trim();
     buffer = buffer.subarray(index + 1);
     if (line) handle(line);
   }
-  if (buffer.length > maxFrameBytes) {
-    fail(null, -32600, 'Frame exceeds the size bound');
-    process.exitCode = 1;
-    process.stdin.destroy();
-  }
+  if (buffer.length > maxFrameBytes) refuseOversized();
 });

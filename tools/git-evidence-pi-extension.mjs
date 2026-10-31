@@ -12,7 +12,7 @@ export default function (pi) {
     checkArguments(operation, params);
     const captured = bindings[operation];
     if (!captured.binding) throw Error(`${unavailable}: ${captured.error}`);
-    return invokeEvidence({ cli, operation, binding: captured.binding, ...params });
+    return invokeEvidence({ ...params, cli, operation, binding: captured.binding });
   };
 
   pi.registerTool({
