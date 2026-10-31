@@ -4,12 +4,12 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve #124 with pre-dispatch writer permission checks and fail-closed handling of classifier no-verdict.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None for bounded source instructions; no live Claude permission behavior is claimed.
-- Next step: One native Pi worker edits existing host/checklist/static-test seams; full local checks before independent review, then final-head PR CI.
+- Next step: Independent combined review of stopped candidate932ad4b after full local quality on50f2f9 and affected checks; then final-head PR CI.
 
 ### Acceptance
 
