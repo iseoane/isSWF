@@ -42,6 +42,36 @@ Before the first native dispatch for new work, resolve `docs/durable-work.md` fr
 5. Observe the returned status and actual effects. Errors, cancellation and incomplete output are not success. Inspect partial work before any replacement; unknown execution blocks another writer, not unrelated safe work. Respect remaining total actors, concurrent actors, costs and correction budgets. An optional extension recovery behavior does not grant an additional attempt.
 6. Check the result using the shared role and review guidance. Require the child to identify selected methodology actually read or supplied in full and any missing/unreadable required resource; selection alone is not consumption. Missing required methodology blocks the affected assignment, while optional unused references remain optional. A required independent review uses a separate context and the exact stopped writer's candidate. Return the candidate, relevant checks, findings and limitations, not only a model's completion message.
 
+## Bound identity evidence for Pi reviewers
+
+The first read-only Git evidence slice exposes only `isswf_git_identity` to the Pi reviewer. It requires an explicit fresh child launch binding; it does not infer repository or revisions from `cwd`, project files, task text, or ordinary environment variables. The tool accepts no arguments. Missing or malformed launch binding fails closed. Diff, committed content, and status operations are not provided by this tool.
+
+For an authorized review, the coordinator supplies `options.extensionBindings` on a **fresh** `subagent` launch. Use full exact commit IDs, canonical paths, and the trusted Git executable selected by the coordinator:
+
+```js
+subagent({
+  agent: "isswf-reviewer",
+  task: "Invoke isswf_git_identity first and use its returned identity evidence in this assessment. Then review the exact supplied candidate.",
+  cwd: "/canonical/repository/root",
+  async: false,
+  options: {
+    extensionBindings: {
+      "isswf.git-evidence/1": {
+        version: 1,
+        repository: "/canonical/repository/root",
+        baseSha: "<full-commit-sha>",
+        candidateSha: "<full-commit-sha>",
+        gitExecutable: "/canonical/path/to/git",
+        timeoutMs: 5000,
+        outputBytes: 4096
+      }
+    }
+  }
+});
+```
+
+The loaded `pi-subagents` contract passes this namespace through `PI_SUBAGENT_EXTENSION_BINDINGS` during child extension startup. The child-only extension captures and validates it once before any later environment restoration. Do not resume a retained child for this evidence step: `extensionBindings` is launch-only and retained resumes reject it. A coordinator-supplied identity result or synthetic fixture does not prove that the reviewer invoked the tool.
+
 ## Boundaries
 
 Use only the extension's verified capabilities. Do not claim OS filesystem/network containment, descendant-process cessation or durable crash recovery from a foreground session, tool list or separate context window. These are not the guarantees of the retained LPAC/Bubblewrap executors. Host settings and extensions execute trusted code; do not load project resources without the host's trust decision or copy credentials between profiles.

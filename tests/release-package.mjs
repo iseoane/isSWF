@@ -70,7 +70,7 @@ try {
   await writeFile(join(markdownRoot, workflowPath), workflow, { mode: 0o444 });
   await verifyPackage(markdownRoot, revisionA);
   const rootManifest = await readJSON(join(releaseA, 'package.json'));
-  const nativePiResources = ['.agents/hosts/pi.md', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
+  const nativePiResources = ['.agents/hosts/pi.md', 'tools/git-evidence.mjs', 'tools/git-evidence-pi-extension.mjs', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
   for (const path of nativePiResources) {
     assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Native Pi resources must survive committed-source construction');
     assert.deepEqual(await readFile(join(markdownRoot, path)), await readFile(join(source, path)), 'Native Pi resources must survive Markdown materialization');

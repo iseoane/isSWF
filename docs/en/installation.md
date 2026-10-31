@@ -84,6 +84,10 @@ Setup creates `.isswf/` and records the project's selected factory version. New 
 
 If the repository already uses `.factory/`, ask to inspect and migrate that existing state. Do not create a second factory directory beside it.
 
+## Bound identity evidence for Pi reviews
+
+The first read-only Git evidence slice adds one argument-free tool, `isswf_git_identity`, to the native Pi reviewer. The coordinator must launch a fresh reviewer with an explicit `options.extensionBindings` namespace containing the canonical repository, full base and candidate commit IDs, trusted Git executable, and finite limits. The tool refuses missing or malformed bindings; it does not choose context from the task, project files, or working directory. Pi retained resumes do not accept a new binding, so use a fresh launch. This slice returns identity and observed `HEAD` only; diff, content, status, Windows parity, Claude invocation, and actual reviewer use remain separate acceptance gates. See the [Pi host guide](../../.agents/hosts/pi.md#bound-identity-evidence-for-pi-reviewers) for the coordinator launch shape.
+
 ## Update without changing every repository
 
 First update the package or plugin using your host's manager. For local releases, replace the old registration with the new prepared release folder. A fixed version stays fixed until you select another one.
