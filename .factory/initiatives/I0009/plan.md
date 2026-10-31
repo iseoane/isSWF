@@ -133,16 +133,17 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 ## J023
 
-- Status: pending
+- Status: in-review
 - Objective: Give isSWF reviewers narrowly scoped read-only Git evidence without a general shell.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J023/brief-r1.md)
-- Blocker: Tracking only; implementation design, host capability assessment and execution authorization remain pending.
-- Next step: Prepare a bounded native-host proposal after the currently selected Windows issue work; do not implement or publish from this tracking request.
+- Brief: [brief-r7.md](jobs/J023/brief-r7.md)
+- Blocker: Corrected Pi/Linux identity ef90593 independently PASS with actual reviewer CLI use; native Windows/exact-head CI and scoped PR delivery pending. Claude and later operations remain unverified; V002 FAIL retained.
+- Next step: Publish only the bounded identity feature and its J023 receipts, verify exact-head native CI, then request MEDIUM integration separately. Preserve other prepare-only planning records locally; no full-J023 closure or additional model call.
 
 ### Acceptance
 
 - Reviewers can obtain exact authorized diff, committed content, status and identities through validated operations.
+- Native reviewer actually invokes the delivered CLI on the exact bound candidate and uses its output in review; preserve invocation/artifact/result provenance. Author tests, supplied diff or self-report alone do not satisfy this requirement.
 - No shell, arbitrary commands, executable Git helpers, writes, publication or repository/path escape; positive and negative tests preserve bytes.
 - Assess native Linux/Windows and Pi/Claude capabilities without claiming unsupported isolation or substituting another dispatcher.
 
@@ -150,7 +151,13 @@ J019 observations below supersede its retained pre-publication brief. J020 recor
 
 - Operator explicitly requests a durable isSWF task rather than an agent todo.
 - PR108 reviewer requested coordinator-supplied diff because its read/search toolset had no Git execution capability; the completed review remains valid.
-- jobs/J023/brief-r1.md
+- Current operator explicitly resumes planning with one planner, vertical slices and read-only Git CLI, without implementation. Native planner mission8a4170de-6caf-4652-84c1-f7861bae5518 completed; coordinator adopted its handoff into brief-r2, not a planner-authored repository file.
+- Proposal: bound identity, exact diff, committed content and working-tree/index status, each with integrated dependencies, tests/docs, commit point, independent security judgment and Linux/Windows plus Pi/Claude acceptance. Current profiles/manifests establish no supported narrow CLI bridge; no runtime checks or parity claimed.
+- jobs/J023/brief-r2.md
+- Corrected functional ef9059337b3216b9f1f1a5b93d4e10aae2c57afb: full Linux quality/artifact/CLI/SDK/native-synthetic/docs/ESLint/Knip PASS; V003 independent Standards/Spec/aggregate PASS, MEDIUM, actual isswf_git_identity invocation matched exact candidate. V002 source FAIL and all initial fixture/check failures retained; both author calls and both implementation review contexts consumed.
+- Current operator requests review then J023 feature start with actual reviewer use; brief-r3 adds that mandatory acceptance. Later explicitly selects TDD and focused E2E per vertical slice; initial code predates that instruction, coordinator linked-pack refusal correction has observed behavioral RED then GREEN, described in brief-r6. One new independent planning-review actor consumed; CLI-use acceptance remains future and no implementation success is claimed.
+- V001.md retains reviewer37ebd326 StandardsINCONCLUSIVE/SpecPASS/aggregateINCONCLUSIVE solely digest execution, no semantic blocker; coordinator subsequently verified exact snapshot334381ed346832f60309e5c6669f7ede9f76c8a5884fa33b68bbb2b8f25d77c8 hashes/modes/diff/digest PASS. No new independent verdict claimed. Loaded host guide confirms extension tool registration is needed for Pi narrow invocation; Claude equivalent unverified. Original scope decision recorded in brief-r3, subsequently resolved by explicit operator approval in brief-r4. First identity slice allocation: one LunaHIGH writer max30min plus up to2 SolMEDIUM reviews max15min each, no automatic retry or live Claude actor inferred.
+- Worker394d41dd completed blocked with zero edits/tests, consuming1/1 writer calls. Coordinator no-model native Claude2.1.299 probe confirms task-specific strict stdio loading and exact identity tool in filtered reviewer context; host-control calls are not reviewer use. Details/receipt in brief-r4; that historical continuation gate is superseded by current explicit operator Pi-first approval in brief-r5: one same-worker continuation only, two existing independent review ceilings unchanged.
 
 ## J024
 
