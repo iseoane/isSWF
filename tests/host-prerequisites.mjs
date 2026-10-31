@@ -1,41 +1,50 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const source = resolve(process.argv[2] ?? '..');
+const source = resolve(process.argv[2] ?? '.');
 const temp = await mkdtemp(join(tmpdir(), 'isswf-host-prerequisites-'));
-const missingBundle = join(temp, 'absent-pi-subagents');
-const deps = resolve(source, 'tooling/host-tests/node_modules');
-const minimalDeps = join(temp, 'minimal-dependencies');
-const run = (piOnly, hostDeps, piSubagents) => spawnSync(process.execPath, [join(source, 'tests/host-native-delegation.mjs'), source], {
-  cwd: source, encoding: 'utf8', timeout: 20000, env: { ...process.env, ISSWF_HOST_DEPS: hostDeps, ISSWF_PI_SUBAGENTS: piSubagents, ISSWF_PI_ONLY: piOnly ? '1' : '0' },
+const deps = join(temp, 'dependencies'), sdk = join(deps, '@earendil-works/pi-coding-agent');
+const bundleRoot = join(deps, 'pi-subagents'), bundle = join(bundleRoot, 'bundle/index.js');
+const run = (piOnly, hostDeps = deps, piSubagents = bundleRoot) => spawnSync(process.execPath, [join(source, 'tests/host-native-delegation.mjs'), source], {
+  cwd: source, encoding: 'utf8', timeout: 20000,
+  env: { ...process.env, ISSWF_HOST_DEPS: hostDeps, ISSWF_PI_SUBAGENTS: piSubagents, ISSWF_PI_ONLY: piOnly ? '1' : '0' },
 });
+const blocked = (result, names) => {
+  assert.ifError(result.error);
+  assert.equal(result.status, 2, result.stdout + result.stderr);
+  const report = JSON.parse(result.stdout.trim());
+  assert.equal(report.status, 'BLOCKED');
+  assert.deepEqual(report.missing.map(({ name }) => name), names);
+  assert.equal(report.root, undefined, 'No fixture root was created before readiness');
+  assert.equal(result.stderr, '');
+};
 try {
-  await mkdir(join(minimalDeps, '@earendil-works'), { recursive: true });
-  await symlink(resolve(deps, '@earendil-works/pi-coding-agent'), join(minimalDeps, '@earendil-works/pi-coding-agent'), 'junction');
-  const fakeBundle = join(minimalDeps, 'pi-subagents/bundle/index.js');
-  await mkdir(join(minimalDeps, 'pi-subagents/bundle'), { recursive: true });
-  await writeFile(fakeBundle, 'throw new Error("broken test bundle");\n');
-  const absentBundle = run(true, deps, missingBundle);
-  assert.equal(absentBundle.status, 2, absentBundle.stdout + absentBundle.stderr);
-  const blocked = JSON.parse(absentBundle.stdout.trim());
-  assert.equal(blocked.status, 'BLOCKED');
-  assert.deepEqual(blocked.missing.map(({ name }) => name), ['pi-subagents@0.83.0 bundle']);
-  assert.doesNotMatch(absentBundle.stderr, /Error/u);
+  await mkdir(sdk, { recursive: true });
+  await writeFile(join(sdk, 'package.json'), JSON.stringify({ main: 'index.cjs' }));
+  await writeFile(join(sdk, 'index.cjs'), 'throw new Error("BROKEN_EXISTING_SDK");\n');
+  await mkdir(join(bundleRoot, 'bundle'), { recursive: true });
+  await writeFile(bundle, '// Present fixture bundle; not a real host integration.\n');
+  blocked(run(true, deps, join(temp, 'absent-bundle')), ['pi-subagents@0.83.0 bundle']);
+  blocked(run(true, join(temp, 'absent-sdk'), bundleRoot), ['Pi SDK']);
+  blocked(run(false), ['Claude Code executable']);
 
-  const unusedClaude = run(true, minimalDeps, join(minimalDeps, 'pi-subagents'));
-  assert.notEqual(unusedClaude.status, 2, unusedClaude.stdout + unusedClaude.stderr + 'Pi-only must not require Claude');
-  assert.notEqual(unusedClaude.status, 0, unusedClaude.stdout + unusedClaude.stderr);
-  assert.match(unusedClaude.stdout + unusedClaude.stderr, /broken test bundle/u, 'present but broken bundle must remain a real failure');
+  const broken = run(true);
+  assert.ifError(broken.error);
+  assert.equal(broken.status, 1, broken.stdout + broken.stderr);
+  assert.match(broken.stdout + broken.stderr, /BROKEN_EXISTING_SDK/u);
+  assert.doesNotMatch(broken.stdout, /"status":"BLOCKED"/u, 'Pi-only exempts unused Claude; existing dependency failures remain failures');
 
-  const absentClaude = run(false, minimalDeps, join(minimalDeps, 'pi-subagents'));
-  assert.equal(absentClaude.status, 2, absentClaude.stdout + absentClaude.stderr);
-  const claudeBlocked = JSON.parse(absentClaude.stdout.trim());
-  assert.equal(claudeBlocked.status, 'BLOCKED');
-  assert.deepEqual(claudeBlocked.missing.map(({ name }) => name), ['Claude Code executable']);
-  console.log(JSON.stringify({ status: 'PASS', cases: ['missing bundle is blocked before fixtures', 'Pi-only exempts Claude', 'missing required Claude executable is blocked'] }));
+  await rm(bundle);
+  await mkdir(bundle);
+  const invalid = run(true);
+  assert.ifError(invalid.error);
+  assert.equal(invalid.status, 1, invalid.stdout + invalid.stderr);
+  assert.match(invalid.stderr, /Invalid host prerequisite/u);
+  assert.doesNotMatch(invalid.stdout, /"status":"BLOCKED"/u);
+  console.log(JSON.stringify({ status: 'PASS', scope: 'injected dependency fixtures only; no real host execution', cases: ['missing bundle', 'missing SDK', 'missing required Claude', 'Pi-only optional Claude', 'broken present SDK stays failure', 'invalid present bundle stays failure'] }));
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

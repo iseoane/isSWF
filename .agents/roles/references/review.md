@@ -38,7 +38,7 @@ Identify a committed candidate by its commit SHA. A review may run before commit
 
 After confirming the objective, candidate and review mode, read the applicable acceptance criteria and relevant tests before the implementation. Map each changed behavior to the observable result and failure path the tests protect. For documentation or deterministic transformations, use the relevant contract and preservation checks instead of inventing a test requirement.
 
-Then trace the implementation and affected consumers. A passing test is evidence only for the assertions and conditions it exercises. Identify a concrete missed failure rather than asking for more coverage in the abstract. For a changed required test that was not executed on the exact candidate, mark the affected verification inconclusive unless sufficient exact-candidate execution evidence from supported CI or the coordinator is supplied. An unavailable optional check alone is not a universal blocker. A required check that reports `BLOCKED` is not a pass and must keep its required CI gate nonzero.
+Trace affected consumers and exercised assertions. A changed required test not executed on the exact candidate needs sufficient CI/coordinator evidence or inconclusive verification. Optional gaps alone do not block; required `BLOCKED` is not a pass and stays nonzero.
 
 ### Targeted detection experiments
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -13,7 +13,11 @@ if(process.argv[3]!=='--child'){
  const piOnly=process.env.ISSWF_PI_ONLY==='1';
  const claude=join(dependencies,'@anthropic-ai',`claude-code-${process.platform}-${process.arch}`,process.platform==='win32'?'claude.exe':'claude');
  const prerequisites=[['Pi SDK',join(dependencies,'@earendil-works/pi-coding-agent/package.json')],['pi-subagents@0.83.0 bundle',join(piSubagents,'bundle/index.js')],...(!piOnly?[['Claude Code executable',claude]]:[])];
- const missing=prerequisites.filter(([,path])=>!existsSync(path)).map(([name,path])=>({name,path}));
+ const missing=[];
+ for(const [name,path] of prerequisites){
+  try{assert.ok(statSync(path).isFile(),`Invalid host prerequisite: ${name}`);}
+  catch(error){if(error.code!=='ENOENT')throw error;missing.push({name,path});}
+ }
  if(missing.length){console.log(JSON.stringify({status:'BLOCKED',missing,exitCode:2}));process.exitCode=2;}
  else{
  const artifact=process.env.ISSWF_PLATFORM_ROOT ? JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT,'platform-report.json'),'utf8')).installed : source;
