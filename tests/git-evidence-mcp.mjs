@@ -36,6 +36,9 @@ class Client {
     this.stderr = '';
     this.exit = new Promise(done => this.child.once('close', (code, signal) => done({ code, signal })));
     this.child.stdin.on('error', () => {});
+    // Decode across pipe reads: a multi-byte character split between two reads must not turn into replacement characters.
+    this.child.stdout.setEncoding('utf8');
+    this.child.stderr.setEncoding('utf8');
     this.child.stderr.on('data', chunk => { this.stderr += chunk; });
     this.child.stdout.on('data', chunk => {
       this.stdout += chunk;
@@ -209,6 +212,7 @@ try {
     await withClient(bindings, async client => {
       const refused = await client.call('content', { slot: 'candidate', path: 'unlisted.txt' });
       assert.equal(refused.isError, true);
+      assert.match(refused.content[0].text, /^\{"version":1,"status":"error"/u, 'the CLI refusal itself is returned');
       assert.equal(JSON.parse(refused.content[0].text).reason, 'content-path-not-allowed');
     });
     const wrongRoot = { ...bindings, 'isswf.git-evidence/1': { ...bindings['isswf.git-evidence/1'], repository: root } };
@@ -394,6 +398,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     await oversized.start();
     oversized.child.stdin.write('x'.repeat(70000));
     const stopped = await Promise.race([oversized.exit, new Promise(done => setTimeout(() => done('hung'), 5000))]);
+    oversized.child.kill('SIGKILL');
     assert.notEqual(stopped, 'hung', 'oversized input stops the server');
     assert.notEqual(stopped.code, 0);
     assert.equal(oversized.unsolicited[0].error.code, -32600);
@@ -461,6 +466,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         assert.equal(bytes.length, meta.chunkBytes);
         assert.equal(sha256(bytes), meta.chunkSha256);
         assert.ok(bytes.length <= 24576);
+        assert.equal(result.content.length, 2, `chunk ${number} keeps its readable view only when its boundary is a character boundary`);
         assert.equal(result.content[1].text, bytes.toString('utf8'), 'chunk boundaries never split a UTF-8 character');
         const total = result.content.reduce((sum, block) => sum + Buffer.byteLength(block.text), 0);
         assert.ok(total < 98304, `chunk ${number} is ${total} bytes`);
