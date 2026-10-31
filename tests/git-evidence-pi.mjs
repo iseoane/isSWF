@@ -15,8 +15,10 @@ const profile = join(root, 'profile');
 const gitPath = spawnSync(process.platform === 'win32' ? 'where.exe' : 'which', ['git'], { encoding: 'utf8' }).stdout.trim().split(/\r?\n/u)[0];
 assert.ok(gitPath, 'Git executable must be locatable');
 const git = await realpath(gitPath);
+// Fixture commits must keep CRLF/BOM bytes even when CI sets core.autocrlf=true.
+const noEolConversion = ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', '-c', 'core.safecrlf=false'];
 const command = (bin, args, cwd) => {
-  const result = spawnSync(bin, args, { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+  const result = spawnSync(bin, [...noEolConversion, ...args], { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, 0, `${bin} ${args.join(' ')}\n${result.stderr}\n${result.stdout}`);
   return result.stdout.trim();
@@ -29,6 +31,8 @@ try {
   await writeFile(join(workspace, 'tracked.txt'), 'bound Pi identity\n');
   await writeFile(join(workspace, 'binary.dat'), Buffer.from([0, 255, 10]));
   await writeFile(join(workspace, 'exact.txt'), Buffer.from([0xef, 0xbb, 0xbf, 0x62, 0x61, 0x73, 0x65, 0x0d, 0x0a]));
+  const nearLimit = 'x'.repeat(63) + '\n';
+  await writeFile(join(workspace, 'near-limit.txt'), nearLimit.repeat(1024));
   command(git, ['add', '-A'], workspace);
   command(git, ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'candidate'], workspace);
   const head = command(git, ['rev-parse', 'HEAD'], workspace);
@@ -38,7 +42,7 @@ try {
   const candidate = command(git, ['rev-parse', 'HEAD'], workspace);
   const binding = { version: 1, repository: workspace, baseSha: head, candidateSha: candidate, gitExecutable: git, timeoutMs: 5000, outputBytes: 4096 };
   const diffBinding = { ...binding, outputBytes: 22000 };
-  const contentBinding = { ...binding, outputBytes: 8192, paths: ['tracked.txt', 'binary.dat', 'exact.txt'] };
+  const contentBinding = { ...binding, outputBytes: 65536, paths: ['tracked.txt', 'binary.dat', 'exact.txt', 'near-limit.txt'] };
   process.env.PI_SUBAGENT_EXTENSION_BINDINGS = JSON.stringify({ 'isswf.git-evidence/1': binding, 'isswf.git-evidence.diff/1': diffBinding, 'isswf.git-evidence.content/1': contentBinding });
 
   const settings = sdk.SettingsManager.create(workspace, profile);
@@ -91,10 +95,15 @@ try {
   assert.equal(contentResult.content[1].text, 'review this committed change\n');
   const exactResult = await contentTool.execute('content-exact-utf8', { slot: 'candidate', path: 'exact.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-exact-utf8', undefined));
   assert.equal(exactResult.content[1].text, '\uFEFFbase\r\n', 'fatal UTF-8 view preserves BOM and CRLF');
+  const nearLimitResult = await contentTool.execute('content-near-limit', { slot: 'candidate', path: 'near-limit.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-near-limit', undefined));
+  assert.equal(nearLimitResult.isError, undefined, 'a 65,536-byte UTF-8 blob fits the documented raw limit');
+  assert.equal(nearLimitResult.details.contentBytes, 65536);
+  assert.equal(nearLimitResult.details.contentIntegrity, 'verified');
+  assert.equal(nearLimitResult.content[1].text, nearLimit.repeat(1024), 'the exact near-limit text view is returned without truncation');
   process.env.PI_SUBAGENT_EXTENSION_BINDINGS = JSON.stringify({});
-  const absentContent = await contentTool.execute('content-absent', { slot: 'base', path: 'tracked.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-absent', undefined));
-  assert.equal(JSON.parse(absentContent.content[0].text).status, 'ok', 'the base slot returns exact committed base content');
-  assert.equal(JSON.parse(absentContent.content[0].text).commitSha, head);
+  const baseContent = await contentTool.execute('content-absent', { slot: 'base', path: 'tracked.txt' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-absent', undefined));
+  assert.equal(JSON.parse(baseContent.content[0].text).status, 'ok', 'the base slot returns exact committed base content');
+  assert.equal(JSON.parse(baseContent.content[0].text).commitSha, head);
   const binaryResult = await contentTool.execute('content-binary', { slot: 'base', path: 'binary.dat' }, new AbortController().signal, () => {}, session.extensionRunner.createToolContext('content-binary', undefined));
   const binaryEvidence = JSON.parse(binaryResult.content[0].text);
   assert.equal(binaryEvidence.contentTextEncoding, 'unavailable-non-utf8');

@@ -71,7 +71,7 @@ export default function (pi) {
       const result = spawnSync(process.execPath, [cli, 'content', params.slot, params.path], {
         input: JSON.stringify(binding), encoding: 'utf8', shell: false, windowsHide: true,
         timeout: binding.timeoutMs + 2000, maxBuffer: 100000,
-        env: { PATH: dirname(process.execPath), HOME: process.platform === 'win32' ? 'C:\\\\' : '/nonexistent', LC_ALL: 'C' },
+        env: { PATH: dirname(process.execPath), HOME: process.platform === 'win32' ? 'C:\\' : '/nonexistent', LC_ALL: 'C' },
         stdio: ['pipe', 'pipe', 'ignore'],
       });
       if (result.error) throw Error(result.error.code === 'ETIMEDOUT' ? 'Content CLI timed out.' : 'Content CLI could not be started.');
@@ -85,7 +85,7 @@ export default function (pi) {
         if (evidence.repository !== binding.repository || evidence.baseSha !== binding.baseSha || evidence.candidateSha !== binding.candidateSha || evidence.commitSha !== commitSha || evidence.path !== params.path || evidence.bindingSha256 !== bindingSha256) throw Error('Content CLI returned mismatched bound provenance.');
       }
       const serialized = JSON.stringify(evidence);
-      if (Buffer.byteLength(serialized + '\\n') > 98304) throw Error('Content CLI returned output beyond its response bound.');
+      if (Buffer.byteLength(serialized + '\n') > 98304) throw Error('Content CLI returned output beyond its response bound.');
       const content = [{ type: 'text', text: serialized }];
       const details = { ...evidence };
       if (evidence.status === 'ok') {
@@ -94,16 +94,18 @@ export default function (pi) {
         if (bytes.toString('base64') !== evidence.content || bytes.length !== evidence.contentBytes || bytes.length > binding.outputBytes || createHash('sha256').update(bytes).digest('hex') !== evidence.contentSha256) throw Error('Committed content integrity check failed.');
         details.contentIntegrity = 'verified';
         try {
+          const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
           details.contentTextEncoding = 'utf8';
-          content.push({ type: 'text', text: new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes) });
+          content.push({ type: 'text', text });
         } catch {
-          delete details.contentTextEncoding;
           details.contentTextEncoding = 'unavailable-non-utf8';
         }
         content[0].text = JSON.stringify(details);
+        // The model-visible text already carries the base64; repeating it in details would double the result size.
+        delete details.content;
       }
       const output = { content, details, ...(result.status === 0 && evidence.status !== 'error' ? {} : { isError: true }) };
-      if (Buffer.byteLength(JSON.stringify(output) + '\\n') > 196608) throw Error('Content tool result exceeds its bounded display envelope.');
+      if (Buffer.byteLength(JSON.stringify(output) + '\n') > 196608) throw Error('Content tool result exceeds its bounded display envelope.');
       return output;
     },
   });

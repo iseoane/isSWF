@@ -11,4 +11,4 @@
 
 The initial identity implementation predates the operator's TDD selection. This diff change has a prospective behavioral red-green record in the assignment evidence; it does not retroactively make identity red-first. Earlier identity fixture and review failures remain documented in the historical J023 records.
 
-The CLI and Pi tests use temporary fixture repositories/profiles and clean only their owned temporary roots. Actual acceptance still requires a fresh native Pi reviewer to invoke `isswf_git_diff` against the exact candidate with the explicit trusted bindings shown in `.agents/hosts/pi.md`, and to use the decoded patch. Coordinator output and these fixtures do not satisfy that gate.
+The CLI and Pi tests use temporary fixture repositories/profiles and clean only their owned temporary roots. Actual acceptance still requires a fresh native Pi reviewer to invoke `isswf_git_diff` and, for exact file evidence, `isswf_git_content` against the exact candidate with the explicit trusted bindings shown in `.agents/hosts/pi.md`, and to use the decoded patch and content. Coordinator output and these fixtures do not satisfy that gate.

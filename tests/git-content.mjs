@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -12,8 +12,10 @@ assert.ok(gitPath);
 const git = await realpath(gitPath);
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-git-content-')));
 const cli = join(source, 'tools/git-evidence.mjs');
+// Fixture commits must keep CRLF/BOM bytes even when CI sets core.autocrlf=true.
+const noEolConversion = ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', '-c', 'core.safecrlf=false'];
 function gitRun(args, expected = 0) {
-  const result = spawnSync(git, args, { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+  const result = spawnSync(git, [...noEolConversion, ...args], { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, expected, `${args.join(' ')}\n${result.stderr}`);
   return result.stdout.trim();
@@ -57,6 +59,9 @@ try {
   const bytes = Buffer.from([0xef, 0xbb, 0xbf, 0x41, 0x0d, 0x0a, 0xff, 0x00]);
   await writeFile(join(root, 'known file.txt'), bytes);
   await writeFile(join(root, 'empty.bin'), Buffer.alloc(0));
+  await mkdir(join(root, 'dir'));
+  const nestedBytes = Buffer.from('nested\r\n');
+  await writeFile(join(root, 'dir', 'f.txt'), nestedBytes);
   await writeFile(join(root, 'large.bin'), Buffer.alloc(2048).fill(0x61));
   const unicodeBytes = Buffer.from([0, 0xfe, 0x80, 10]);
   await writeFile(join(root, 'naïve ñ.bin'), unicodeBytes);
@@ -74,7 +79,7 @@ try {
   gitRun(['update-index', '--add', '--cacheinfo', `160000,${baseSha},submodule-entry`]);
   gitRun(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'unsupported entry fixtures']);
   candidateSha = gitRun(['rev-parse', 'HEAD']);
-  const binding = { version: 1, repository: root, baseSha, candidateSha, gitExecutable: git, timeoutMs: 5000, outputBytes: 8192, paths: ['known file.txt', 'empty.bin', 'large.bin', 'naïve ñ.bin', 'added.txt', 'absent.txt', 'link-entry', 'submodule-entry'] };
+  const binding = { version: 1, repository: root, baseSha, candidateSha, gitExecutable: git, timeoutMs: 5000, outputBytes: 8192, paths: ['known file.txt', 'empty.bin', 'large.bin', 'naïve ñ.bin', 'added.txt', 'absent.txt', 'dir/f.txt', 'dir', 'link-entry', 'submodule-entry'] };
   const protectedFiles = ['known file.txt', 'large.bin', 'naïve ñ.bin', 'added.txt', '.git/index', '.git/config'];
   const before = await Promise.all(protectedFiles.map(path => readFile(join(root, path))));
 
@@ -103,6 +108,14 @@ try {
   const added = invoke(binding, ['content', 'candidate', 'added.txt']);
   assert.equal(added.status, 0);
   assert.deepEqual(Buffer.from(added.output.content, 'base64'), Buffer.from('added\r\n'));
+  const nested = invoke(binding, ['content', 'base', 'dir/f.txt']);
+  assert.equal(nested.status, 0);
+  assert.equal(nested.output.path, 'dir/f.txt');
+  assert.deepEqual(Buffer.from(nested.output.content, 'base64'), nestedBytes, 'a nested committed path returns exact bytes');
+  const directory = invoke(binding, ['content', 'base', 'dir']);
+  assert.notEqual(directory.status, 0);
+  assert.equal(directory.output.reason, 'content-entry-type-refused', 'a tree entry is not a regular blob');
+  assert.equal(Object.hasOwn(directory.output, 'content'), false);
   const oversized = invoke({ ...binding, outputBytes: 1024 }, ['content', 'base', 'large.bin']);
   assert.notEqual(oversized.status, 0);
   assert.equal(oversized.output.reason, 'content-output-limit');
