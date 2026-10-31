@@ -110,6 +110,65 @@ export function validateDiffBinding(value) {
   }
 }
 
+const contentPath = value => {
+  if (typeof value !== 'string' || !value || Buffer.byteLength(value, 'utf8') > 1024 || value.includes('\0') || value.includes('\\') || value.startsWith('/') || /^[A-Za-z]:/u.test(value) || value.startsWith('\\') || value.startsWith(':(') || value.startsWith(':/') || value.startsWith('!') || value.startsWith('^') || /[*?\[\]]/u.test(value)) return false;
+  const parts = value.split('/');
+  return parts.every(part => part && part !== '.' && part !== '..');
+};
+
+export function validateContentBinding(value) {
+  if (!ownKeys(value, ['version', 'repository', 'baseSha', 'candidateSha', 'gitExecutable', 'timeoutMs', 'outputBytes', 'paths']) || value.version !== 1) throw Error('invalid-content-binding-shape');
+  const binding = validateGitBinding({ version: value.version, repository: value.repository, baseSha: value.baseSha, candidateSha: value.candidateSha, gitExecutable: value.gitExecutable, timeoutMs: value.timeoutMs, outputBytes: value.outputBytes }, 65536);
+  if (!Array.isArray(value.paths) || value.paths.length < 1 || value.paths.length > 64 || !value.paths.every(contentPath) || new Set(value.paths).size !== value.paths.length || value.paths.reduce((size, path) => size + Buffer.byteLength(path, 'utf8'), 0) > 8192) throw Error('invalid-content-path-allowlist');
+  if (wireBytes(failure('x'.repeat(160), binding, 'content')) > binding.outputBytes) throw Error('binding-context-exceeds-output-bound');
+  return Object.freeze({ ...binding, paths: Object.freeze([...value.paths]) });
+}
+
+export async function content(input, slot, path) {
+  let binding;
+  try {
+    binding = validateContentBinding(input);
+    if (!['base', 'candidate'].includes(slot)) throw Error('invalid-content-slot');
+    if (!contentPath(path)) throw Error('invalid-content-path');
+    if (!binding.paths.includes(path)) throw Error('content-path-not-allowed');
+    const deadline = Date.now() + binding.timeoutMs;
+    await assertSupportedRepository(binding, deadline);
+    const expectedFormat = binding.baseSha.length === 64 ? 'sha256' : 'sha1';
+    const objectFormat = runGit(binding, ['rev-parse', '--show-object-format'], deadline).toString('ascii').trim();
+    if (objectFormat !== expectedFormat) throw Error('commit-format-mismatch');
+    const commitSha = slot === 'base' ? binding.baseSha : binding.candidateSha;
+    const resolved = runGit(binding, ['rev-parse', '--verify', `${commitSha}^{commit}`], deadline).toString('ascii').trim();
+    if (resolved !== commitSha) throw Error('content-commit-identity-mismatch');
+    const treeEntry = runGit(binding, ['ls-tree', '-z', '--full-tree', commitSha, '--', `:(literal)${path}`], deadline, 8192);
+    if (!treeEntry.length) {
+      const absent = { version: 1, status: 'absent', operation: 'content', repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, commitSha, path, bindingSha256: digest(binding) };
+      if (wireBytes(absent) > 98304) throw Error('content-response-limit');
+      return absent;
+    }
+    const record = treeEntry.subarray(0, treeEntry.length - 1).toString('utf8');
+    const tab = record.indexOf('\t');
+    if (tab < 0 || Buffer.from(record.slice(tab + 1), 'utf8').compare(Buffer.from(path, 'utf8')) !== 0) throw Error('invalid-tree-entry');
+    const [mode, type, object] = record.slice(0, tab).split(' ');
+    if (!['100644', '100755'].includes(mode) || type !== 'blob' || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(object)) throw Error('content-entry-type-refused');
+    const bytes = runGit(binding, ['cat-file', 'blob', object], deadline, binding.outputBytes + 1);
+    if (bytes.length > binding.outputBytes) throw Error('content-output-limit');
+    const result = {
+      version: 1, status: 'ok', operation: 'content', repository: binding.repository,
+      baseSha: binding.baseSha, candidateSha: binding.candidateSha, commitSha, path,
+      bindingSha256: digest(binding), contentEncoding: 'base64', contentBytes: bytes.length,
+      contentSha256: createHash('sha256').update(bytes).digest('hex'), content: bytes.toString('base64'),
+      limits: { timeoutMs: binding.timeoutMs, contentBytes: binding.outputBytes },
+    };
+    if (wireBytes(result) > 98304) throw Error('content-response-limit');
+    return result;
+  } catch (error) {
+    const reason = error?.message === 'git-output-limit' ? 'content-output-limit' : typeof error?.message === 'string' ? error.message.slice(0, 160) : 'content-refused';
+    const result = failure(reason, binding, 'content');
+    if (!binding && ownKeys(input, ['version', 'repository', 'baseSha', 'candidateSha', 'gitExecutable', 'timeoutMs', 'outputBytes', 'paths'])) result.bindingSha256 = digest(input);
+    return boundedResult(result, binding?.outputBytes ?? 512);
+  }
+}
+
 export async function diff(input) {
   let binding;
   try {
@@ -179,8 +238,8 @@ export async function identity(input) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    if (process.argv.length !== 3 || !['identity', 'diff'].includes(process.argv[2])) throw Error('supported-operation-required');
     const operation = process.argv[2];
+    if (!['identity', 'diff', 'content'].includes(operation) || (operation === 'content' ? process.argv.length !== 5 : process.argv.length !== 3)) throw Error('supported-operation-required');
     const chunks = [];
     let size = 0;
     // The operation timeout is unavailable until JSON/EOF arrives, so input has its own fixed deadline.
@@ -197,11 +256,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     let binding;
     try { binding = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { throw Error('invalid-binding-json'); }
-    const result = operation === 'identity' ? await identity(binding) : await diff(binding);
+    const result = operation === 'identity' ? await identity(binding) : operation === 'diff' ? await diff(binding) : await content(binding, process.argv[3], process.argv[4]);
     process.stdout.write(JSON.stringify(result) + '\n');
-    if (result.status !== 'ok') process.exitCode = 2;
+    if (result.status === 'error') process.exitCode = 2;
   } catch (error) {
-    process.stdout.write(JSON.stringify(boundedResult(failure(error.message.slice(0, 160), null, process.argv[2] === 'diff' ? 'diff' : 'identity'))) + '\n');
+    process.stdout.write(JSON.stringify(boundedResult(failure(error.message.slice(0, 160), null, process.argv[2] === 'diff' ? 'diff' : process.argv[2] === 'content' ? 'content' : 'identity'))) + '\n');
     process.exitCode = 2;
   }
 }
