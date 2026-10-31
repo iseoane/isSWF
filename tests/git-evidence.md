@@ -12,3 +12,24 @@
 The initial identity implementation predates the operator's TDD selection. This diff change has a prospective behavioral red-green record in the assignment evidence; it does not retroactively make identity red-first. Earlier identity fixture and review failures remain documented in the historical J023 records.
 
 The CLI and Pi tests use temporary fixture repositories/profiles and clean only their owned temporary roots. Actual acceptance still requires a fresh native Pi reviewer to invoke `isswf_git_diff` and, for exact file evidence, `isswf_git_content` against the exact candidate with the explicit trusted bindings shown in `.agents/hosts/pi.md`, and to use the decoded patch and content. Coordinator output and these fixtures do not satisfy that gate.
+
+## Content unit sensitivity evidence (retrospective, not prospective TDD RED)
+
+The content unit's original prospective red result was not retained and cannot be recovered; this section does not recreate it. Instead, one fault at a time was injected into a disposable copy of production code outside the repository (`git archive 1031f6c`, with the tests from this change), and both content suites were run from the copy: `node tests/git-content.mjs .` (CLI) and `node tests/git-evidence-pi.mjs .` (Pi SDK invoker). `tools/` in this repository is unchanged from `1031f6c`. Mutation harness and copies were kept only in the author's scratch directory, so this table is the retained record.
+
+| Mutant (production fault) | Killing assertion |
+| --- | --- |
+| Read the working-tree file instead of the committed blob | `git-content.mjs:90` exact bytes/digest of the base blob |
+| Treat an absent path as present-empty | `git-content.mjs:105` "a missing tree path is distinct from empty content and refusal" |
+| Treat a present empty blob as absent | `git-content.mjs:100` "present empty blob is not absence" |
+| Accept symlink entries (mode `120000`) | `git-content.mjs:134` symlink entry must be refused |
+| Skip the allowlist check | `git-content.mjs:157` unlisted path refused; `git-evidence-pi.mjs:117` unlisted path `isError` |
+| Skip `..` handling in path syntax | `git-content.mjs:154` request refused by path syntax (`invalid-content-path`), not only by the allowlist |
+| Skip request path-syntax refusal | `git-content.mjs:154`, same assertion |
+| Ignore the base/candidate slot | `git-content.mjs:90`; `git-evidence-pi.mjs:108` mismatched provenance |
+| Drop the invoker SHA-256 / byte-length / path / commit verification | `git-evidence-pi.mjs` substituted-CLI cases: `bad-sha`, `bad-length`, `wrong-path`, `wrong-commit`, `wrong-binding` must each be rejected |
+| Remove the exact-bound size check (blob one byte over the bound) | `git-content.mjs:129` "a blob one byte over the bound is refused" |
+| Truncate oversize content instead of refusing | `git-content.mjs:122` oversized blob must be refused with no content |
+| Remove the native display envelope check | `git-evidence-pi.mjs:106` escape-heavy 65,536-byte text must be rejected |
+
+Initially surviving mutants were real gaps and are now covered by added tests: request path syntax masked by the allowlist, the one-byte-over-bound edge (the process buffer limit hid the explicit length check), and the whole invoker verification path (no test fed it tampered evidence). Equivalent-looking defenses are tested for their own reason code. These runs show the retained assertions discriminate these faults on Linux; they are not prospective TDD evidence, not a native Windows run and not an exhaustive mutation score.

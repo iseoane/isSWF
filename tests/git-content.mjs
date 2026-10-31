@@ -63,6 +63,8 @@ try {
   const nestedBytes = Buffer.from('nested\r\n');
   await writeFile(join(root, 'dir', 'f.txt'), nestedBytes);
   await writeFile(join(root, 'large.bin'), Buffer.alloc(2048).fill(0x61));
+  await writeFile(join(root, 'limit.bin'), Buffer.alloc(1024).fill(0x62));
+  await writeFile(join(root, 'over-by-one.bin'), Buffer.alloc(1025).fill(0x63));
   const unicodeBytes = Buffer.from([0, 0xfe, 0x80, 10]);
   await writeFile(join(root, 'naïve ñ.bin'), unicodeBytes);
   gitRun(['add', '-A']);
@@ -79,7 +81,7 @@ try {
   gitRun(['update-index', '--add', '--cacheinfo', `160000,${baseSha},submodule-entry`]);
   gitRun(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'unsupported entry fixtures']);
   candidateSha = gitRun(['rev-parse', 'HEAD']);
-  const binding = { version: 1, repository: root, baseSha, candidateSha, gitExecutable: git, timeoutMs: 5000, outputBytes: 8192, paths: ['known file.txt', 'empty.bin', 'large.bin', 'naïve ñ.bin', 'added.txt', 'absent.txt', 'dir/f.txt', 'dir', 'link-entry', 'submodule-entry'] };
+  const binding = { version: 1, repository: root, baseSha, candidateSha, gitExecutable: git, timeoutMs: 5000, outputBytes: 8192, paths: ['known file.txt', 'empty.bin', 'large.bin', 'naïve ñ.bin', 'added.txt', 'absent.txt', 'dir/f.txt', 'dir', 'limit.bin', 'over-by-one.bin', 'link-entry', 'submodule-entry'] };
   const protectedFiles = ['known file.txt', 'large.bin', 'naïve ñ.bin', 'added.txt', '.git/index', '.git/config'];
   const before = await Promise.all(protectedFiles.map(path => readFile(join(root, path))));
 
@@ -120,10 +122,18 @@ try {
   assert.notEqual(oversized.status, 0);
   assert.equal(oversized.output.reason, 'content-output-limit');
   assert.equal(Object.hasOwn(oversized.output, 'content'), false, 'oversized blobs are never partially returned');
+  const atLimit = invoke({ ...binding, outputBytes: 1024 }, ['content', 'base', 'limit.bin']);
+  assert.equal(atLimit.status, 0, 'a blob exactly at the output bound is returned');
+  assert.equal(atLimit.output.contentBytes, 1024);
+  const overByOne = invoke({ ...binding, outputBytes: 1024 }, ['content', 'base', 'over-by-one.bin']);
+  assert.notEqual(overByOne.status, 0);
+  assert.equal(overByOne.output.reason, 'content-output-limit', 'a blob one byte over the bound is refused');
+  assert.equal(Object.hasOwn(overByOne.output, 'content'), false);
   for (const path of ['link-entry', 'submodule-entry']) {
     const unsupported = invoke(binding, ['content', 'candidate', path]);
     assert.notEqual(unsupported.status, 0);
     assert.equal(unsupported.output.reason, 'content-entry-type-refused', `${path} is not a regular blob`);
+    assert.equal(Object.hasOwn(unsupported.output, 'content'), false, `${path} refusal carries no content`);
   }
   const originalConfig = await readFile(join(root, '.git/config'));
   await writeFile(join(root, '.git/config'), `${originalConfig}[core]\nfsmonitor = !touch ${join(root, 'helper-ran').replaceAll('\\', '/')}\n`);
@@ -141,6 +151,7 @@ try {
     assert.notEqual(refused.status, 0, `${path} must be refused`);
     assert.equal(refused.output.status, 'error');
     assert.equal(refused.output.operation, 'content');
+    assert.equal(refused.output.reason, 'invalid-content-path', `${path} is refused by path syntax, not by the allowlist`);
   }
   const notAllowed = invoke(binding, ['content', 'base', 'unknown.txt']);
   assert.notEqual(notAllowed.status, 0);

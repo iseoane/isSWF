@@ -100,7 +100,7 @@ jobs:
         run: node tests/git-content.mjs .
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
-      - name: Verify native Pi bound identity and diff invokers
+      - name: Verify native Pi bound identity, diff and content invokers
         run: node tests/git-evidence-pi.mjs .
       - name: Build and install native package; test CLI, resources and worktrees
         env:
