@@ -4,12 +4,12 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve #122 with explicit finite correction and review budgets and automatic in-budget correction.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None for preparation; independent review and exact-head CI remain required.
-- Next step: Native worker implements the bounded instruction/test unit, then returns its report.
+- Next step: Independent combined review of exact functional candidate f9f7979, then covered feature PR/CI.
 
 ### Acceptance
 
@@ -22,12 +22,12 @@ Type: enhancement
 
 ## J002
 
-- Status: pending
+- Status: in-review
 - Objective: Resolve #129 with a bounded follow-up checkpoint for later delivery receipts, preserving tested-source and publication identities.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None for preparation; independent review and exact-head CI remain required.
-- Next step: Same sequential worker implements a separate functional commit after J001, then returns both outcomes.
+- Next step: Independent combined review of exact functional candidate f9f7979, then covered feature PR/CI.
 
 ### Acceptance
 
@@ -37,3 +37,7 @@ Type: enhancement
 ### Evidence
 
 - #129 triage and current durable-work/feature-delivery contracts inspected at the starting source.
+
+## Current verification receipt
+
+Both units implemented in separate functional commits 65e9a924809f0693cf55eb3fc25214299ba881cd and f9f79799c8268967caa737682d95489394ad2085. Native worker completed with full report; no commit-boundary stop. Coordinator focused host/methodology/docs/full portable quality/ESLint/Knip/diff PASS on f9f7979; static/synthetic checks, not live adherence or native Windows proof. Combined independent review and exact-head CI pending; one author consumed, two reviews and one corrective continuation remain. A001 records author/application evidence.
