@@ -8,6 +8,7 @@ const manifest = JSON.parse(await read('.claude-plugin/plugin.json'));
 assert.equal(manifest.name, 'isswf');
 assert.ok(manifest.skills.includes('./skills/isswf-coordinator'));
 assert.equal(manifest.agents, undefined, 'Use Claude default-directory discovery, not per-file manifest entries');
+assert.deepEqual(manifest.mcpServers, { isswf_git_evidence: { command: 'node', args: ['${CLAUDE_PLUGIN_ROOT}/tools/git-evidence-mcp.mjs'], env: { ISSWF_GIT_EVIDENCE_BINDINGS: '${ISSWF_GIT_EVIDENCE_BINDINGS}' } } }, 'Plugin registers only the bound evidence server; its binding comes from the launching process environment');
 assert.deepEqual((await readdir(path.join(root, 'agents'))).sort(), ['isswf-planner.md', 'isswf-researcher.md', 'isswf-reviewer.md', 'isswf-worker.md']);
 for (const file of manifest.skills.map(skill => `${skill}/SKILL.md`)) {
   assert.ok((await read(file)).length > 0, `missing manifest entry ${file}`);
@@ -19,7 +20,7 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   assert.match(body, /Required child context/);
   assert.match(body, /before.*work/i);
   assert.match(body, /missing.*block|block.*missing/i);
-  if (role === 'reviewer') assert.match(body, /^tools: Read, Grep, Glob$/m, 'Claude reviewer must remain read-only');
+  if (role === 'reviewer') assert.match(body, /^tools: Read, Grep, Glob, mcp__plugin_isswf_isswf_git_evidence__identity, mcp__plugin_isswf_isswf_git_evidence__diff, mcp__plugin_isswf_isswf_git_evidence__content$/m, 'Claude reviewer has only read tools and the three bound evidence tools');
   assert.ok(body.length < 1200, `${file} should remain a thin wrapper`);
 }
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
@@ -162,7 +163,7 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
   assert.match(body, /Missing.*blocks/);
   assert.ok(body.length < 1200);
   if (role === 'reviewer') {
-    assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff$/mu);
+    assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff, isswf_git_content$/mu);
     assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
   } else if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
 }

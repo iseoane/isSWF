@@ -25,6 +25,8 @@ export const nativePiResources = [
   ".agents/hosts/pi.md",
   "tools/git-evidence.mjs",
   "tools/git-evidence-pi-extension.mjs",
+  "tools/git-evidence-invoke.mjs",
+  "tools/git-evidence-mcp.mjs",
   ".agents/roles/planner.md",
   ".agents/roles/researcher.md",
   ".agents/roles/references/planning.md",

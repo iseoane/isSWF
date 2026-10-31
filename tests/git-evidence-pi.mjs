@@ -129,6 +129,7 @@ try {
   process.env.PI_SUBAGENT_EXTENSION_BINDINGS = JSON.stringify({});
   const unboundExtension = join(root, 'unbound-extension.mjs');
   await copyFile(join(source, 'tools/git-evidence-pi-extension.mjs'), unboundExtension);
+  await copyFile(join(source, 'tools/git-evidence-invoke.mjs'), join(root, 'git-evidence-invoke.mjs'));
   await copyFile(join(source, 'tools/git-evidence.mjs'), join(root, 'git-evidence.mjs'));
   const missingLoader = new sdk.DefaultResourceLoader({
     cwd: workspace, agentDir: profile, settingsManager: settings,

@@ -33,3 +33,25 @@ The content unit's original prospective red result was not retained and cannot b
 | Remove the native display envelope check | `git-evidence-pi.mjs:106` escape-heavy 65,536-byte text must be rejected |
 
 Initially surviving mutants were real gaps and are now covered by added tests: request path syntax masked by the allowlist, the one-byte-over-bound edge (the process buffer limit hid the explicit length check), and the whole invoker verification path (no test fed it tampered evidence). Equivalent-looking defenses are tested for their own reason code. These runs show the retained assertions discriminate these faults on Linux; they are not prospective TDD evidence, not a native Windows run and not an exhaustive mutation score.
+
+## Claude route sensitivity evidence (retrospective)
+
+The original prospective red results for the Claude MCP server and shared invoker (commits `eb3aea3` and `950aa22`) were not retained and cannot be recovered; this section does not recreate them. The later corrections (provenance for every operation, oversized-frame refusal) have observed red results from their own fixes. Retrospectively, one fault at a time was injected into a disposable copy of production code outside the repository (`git archive` of the committed candidate, with its tests) and `node tests/git-evidence-mcp.mjs <copy>` was run from each copy. The harness and run log were kept only in the author's scratch directory, so this table is the retained record. Every kill is a test failure with a behavioral assertion message, not a crash or timeout.
+
+| Mutant (production fault) | Killing check (in `tests/git-evidence-mcp.mjs`) |
+| --- | --- |
+| Unset, literal-placeholder or malformed binding yields a usable binding | "missing, literal-placeholder, malformed or invalid bindings fail closed per tool" |
+| Extra tool arguments allowed | "extra, missing or mistyped arguments and unknown tools are rejected without running the CLI" |
+| Skip the diff chunk range check | Same check (the out-of-range tool error must say "out of range"; the fault surfaces as a TypeError message) and the large-diff check |
+| Drop the full-patch SHA-256 from chunks | "a small diff is one verified chunk ..." and the large-diff check |
+| Truncate instead of refusing a result over the display bound | The large-diff check: oversized content must be refused whole |
+| Skip provenance for diff, identity or content | "a substituted CLI with tampered or inconsistent output is rejected by the shared verifier" (`wrong-repository`, `wrong-commit`) |
+| Skip the identity Git executable field | Same check, `wrong-git` identity case |
+| Accept contradicting provenance in a refusal | Same check, `error-wrong-binding` cases |
+| Require full provenance even in a refusal | "CLI refusals surface as tool errors with their explicit reason" |
+| Skip base64, length and SHA-256 verification | Same tamper check, `bad-length` and related cases |
+| Chunk boundaries may split a UTF-8 character | The large-diff check (a chunk must keep its readable view) |
+| Process an oversized newline-terminated frame | "stalled, partial and oversized stdin ..." |
+| Skip the trailing partial-frame size bound | Same check, "oversized input stops the server" |
+
+One mutant survives and is equivalent: putting the model's arguments after the trusted fields at the MCP call site changes nothing observable, because the argument check already rejects every key the schema does not promise. The spread order is defense in depth, not a tested behavior. Two earlier-found test problems were fixed: the MCP test client decoded raw pipe reads piecewise, which made the large-diff check fail intermittently under parallel load (4 of 6 concurrent runs failed before the fix, 0 of 8 after), and an oversized-input child was not stopped when its assertion failed. These runs show Linux behavior only; they are not prospective TDD evidence, not a native Windows run and not an exhaustive mutation score.

@@ -70,12 +70,17 @@ try {
   await writeFile(join(markdownRoot, workflowPath), workflow, { mode: 0o444 });
   await verifyPackage(markdownRoot, revisionA);
   const rootManifest = await readJSON(join(releaseA, 'package.json'));
-  const nativePiResources = ['.agents/hosts/pi.md', 'tools/git-evidence.mjs', 'tools/git-evidence-pi-extension.mjs', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
+  const nativePiResources = ['.agents/hosts/pi.md', 'tools/git-evidence.mjs', 'tools/git-evidence-pi-extension.mjs', 'tools/git-evidence-invoke.mjs', 'tools/git-evidence-mcp.mjs', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
   for (const path of nativePiResources) {
     assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Native Pi resources must survive committed-source construction');
     assert.deepEqual(await readFile(join(markdownRoot, path)), await readFile(join(source, path)), 'Native Pi resources must survive Markdown materialization');
   }
-  assert.equal(rootManifest.version, (await readJSON(join(releaseA, '.claude-plugin/plugin.json'))).version);
+  // The Claude evidence server and everything it launches or imports ship with the release (build-release includes every top-level tools/*.mjs; this fixture keeps pi.subagents).
+  const plugin = await readJSON(join(releaseA, '.claude-plugin/plugin.json'));
+  const serverPath = plugin.mcpServers.isswf_git_evidence.args[0].replace('${CLAUDE_PLUGIN_ROOT}', releaseA);
+  assert.equal(serverPath, join(releaseA, 'tools/git-evidence-mcp.mjs'));
+  for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.deepEqual(await readFile(join(releaseA, 'tools', name)), await readFile(join(source, 'tools', name)), `${name} ships in the release`);
+  assert.equal(rootManifest.version, plugin.version);
   assert.equal(await readdir(releaseA).then(entries => entries.includes('.git')), false);
   assert.equal(Object.keys(receiptA.files).some(path => /^(?:tests|tooling|\.audit)\//u.test(path)), false);
   assert.equal(Object.keys(receiptA.files).some(path => path.startsWith('.factory/initiatives')), false);
@@ -96,6 +101,7 @@ try {
   run('npm', ['install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', tarball]);
   const installed = join(consumer, 'node_modules/isswf-pi-resources');
   assert.equal(verifyRelease(installed).runtimeId, receiptA.runtimeId, 'Packed npm package must retain exact inventory');
+  for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.ok(existsSync(join(installed, 'tools', name)), `${name} ships in the installed npm package`);
   for (const path of [
     '.agents/skills/isswf-security/SKILL.md',
     'skills/isswf-security/SKILL.md',

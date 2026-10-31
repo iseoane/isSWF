@@ -1,7 +1,7 @@
 ---
 name: isswf-reviewer
 description: Follow the shared isSWF reviewer profile for an authorized Claude Code assignment.
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, mcp__plugin_isswf_isswf_git_evidence__identity, mcp__plugin_isswf_isswf_git_evidence__diff, mcp__plugin_isswf_isswf_git_evidence__content
 model: inherit
 ---
 
