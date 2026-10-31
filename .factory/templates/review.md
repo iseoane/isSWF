@@ -16,6 +16,7 @@
 - Verdict: pass, fail, or inconclusive:
 - Findings with path, location, severity, and evidence:
 - Selected-method evidence assessment: `<under Standards, assess each selected method's required evidence and any disclosed deviation against the brief; missing required evidence with no declared deviation is a supported finding or inconclusive, never silent pass. Disclosure alone does not waive the accepted requirement. For selected TDD, verify each named test-only RED commit fails at the asserted behavioral result and its following GREEN commit passes; record exact command, assertion and provenance, or “not re-run” with the actual CI/coordinator evidence relied upon>`.
+- Retained substitute evidence assessment, when used for missing RED: `<verify the harness and run log are retained in committed tests/ evidence or ignored tooling/.local/<job>/; check both artifact paths in the attempt/review record, archived commit and an unmutated baseline run, injected change and result. Record personal verification or attribute supplied observations; missing retention is not satisfied by scratch-only evidence>`.
 - Required-resource consumption: `<resource → observed (host trace) or self-reported; do not treat self-report as observed>`.
 - Reference-application outcomes: `<for each required engineering reference, record exactly one: “observed in candidate” (cite application), “claimed, not visible” (cite claim and inspect diff; only a concrete violation is a finding), or “not applicable accepted” (reason)>`.
 - Checks run and observed results:
