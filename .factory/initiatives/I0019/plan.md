@@ -4,12 +4,12 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Resolve #121: Record supported host mechanism, alternatives, value and expected cost before host-integration writer dispatch, and re-plan after bounded material brief churn.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None for the bounded next step; unsupported capability remains an explicit limit.
-- Next step: One sequential native worker, relevant local checks, independent review, final-head PR CI and permitted integration.
+- Blocker: None for source-verified scope; PR/native CI and integration are separate gates.
+- Next step: Publish one final record head, verify exact-head native CI and integrate only within applicable risk/authority; retain final remote receipt on the PR.
 
 ### Acceptance
 
@@ -23,3 +23,7 @@ Type: enhancement
 
 - Current operator explicitly requests all remaining ordered issues121,126,127,125,128. This unit only: 121. Bounded native preparation/implementation/checks/feature commits/push/PR/CI in iseoane/isSWF; integration only under applicable LOW-risk protected expected-head authorization. No other unit, direct-main push, bypass, installation, release, deployment or cleanup.
 - Source base ca61a7eb74ec54d74bd0a4dcc04753fcc2a78411; actual issue observation and affected files inspected.
+
+## Source verification
+
+Candidate 412d745198458afb5d02b344aebe088b50b7ff00; implementation and independent Standards/Spec review verified as retained in jobs/J001/delivery.md. Coordinator full portable quality, locked ESLint, Knip and diff checks PASS on source candidate412d745198458afb5d02b344aebe088b50b7ff00; author focal host/syntax checks PASS. Writing/static scenarios selected, not behavioral TDD or live host proof. Completed denotes source implementation/verification, not unobserved PR, CI or merge. Later results will be external PR receipts, not recursive record commits.
