@@ -57,6 +57,10 @@ try {
   assert.equal(inspect().status, 'unknown'); assert.equal(inspect().freshness, 'not-verified');
   await writeFile(planPath, original.replace('- Status: in-progress', '- Status: invented'));
   assert.equal(inspect().status, 'unknown');
+  await writeFile(planPath, original.replace('Type: enhancement\n', ''));
+  const malformedBytes = await tree(project);
+  assert.equal(inspect().status, 'unknown', 'missing canonical plan type remains explicitly unknown');
+  assert.deepEqual(await tree(project), malformedBytes, 'status reads never rewrite malformed plan bytes');
   await writeFile(planPath, original.replace('## J002', '## J001')); assert.equal(inspect().status, 'unknown');
   await rm(planPath); await symlink(grant, planPath); assert.equal(inspect().status, 'unknown');
   console.log('PASS: actual plan and artifacts summarized without writes; absent/malformed/unsafe records visible; reported progress never becomes liveness or acceptance');

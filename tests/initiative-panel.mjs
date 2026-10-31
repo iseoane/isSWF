@@ -114,6 +114,12 @@ try {
   assert.equal(responses.records[0].note, 'Please change <script>not-code</script>');
   assert.deepEqual(await readFile(join(project, '.factory/initiatives/I0001/plan.md')), planBefore);
   assert.match((await get(panel.url, '/i/I0001')).body, /Please change &lt;script&gt;not-code&lt;\/script&gt;/u);
+  const malformedPlan = Buffer.from(planBefore.toString().replace('Type: enhancement\n', ''));
+  await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), malformedPlan);
+  assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).status, 'unknown');
+  assert.match((await get(panel.url, '/i/I0001')).body, /Plan unavailable/u);
+  assert.deepEqual(await readFile(join(project, '.factory/initiatives/I0001/plan.md')), malformedPlan, 'panel reads never repair malformed plan bytes');
+  await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planBefore);
   const raceId = '1'.repeat(32), raced = await Promise.all([post({ responseId: raceId }), post({ responseId: raceId })]);
   assert.deepEqual(raced.map(r=>r.code).sort(), [201,409]);
   const responseDir = join(job, 'responses'), originalRecord = await readFile(join(responseDir, form.responseId + '.json'));
