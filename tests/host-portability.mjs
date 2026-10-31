@@ -212,6 +212,7 @@ const briefBudgets = await read('.factory/templates/job-brief.md');
 assert.ok(skill.includes('../../roles/references/feature-delivery.md'));
 for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-pr/SKILL.md', '.agents/roles/delivery.md', '.agents/roles/references/delivery.md']) assert.ok((await read(file)).includes('feature-delivery.md'), 'Workflow consumer must link to its canonical contract: ' + file);
 for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
+for (const contract of [featureFlow, skill]) assert.doesNotMatch(contract, /or approval of a clearly presented feature-to-PR assignment/u);
 assert.match(featureFlow, /design-option choice, brief approval.*preparation only; do not dispatch a new actor/u);
 assert.match(featureFlow, /current trusted start instruction and its bounded action scope/u);
 assert.match(featureFlow, /If approval is genuinely ambiguous, clarify whether to start and wait before dispatch/u);
