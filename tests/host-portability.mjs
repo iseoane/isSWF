@@ -162,7 +162,7 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
   assert.match(body, /Missing.*blocks/);
   assert.ok(body.length < 1200);
   if (role === 'reviewer') {
-    assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity$/mu);
+    assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff$/mu);
     assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
   } else if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
 }
