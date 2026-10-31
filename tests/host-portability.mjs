@@ -84,12 +84,26 @@ for (const pattern of [
   /record the evidence, rationale and next step in the existing canonical plan or brief/u,
   /Do not rewrite pinned inputs for an active writer/u,
   /ask the operator only for the specific product or permission decision they alone can provide/u,
+  /before accepting a fourth material scope or acceptance revision/u,
+  /Typos, formatting, receipts and evidence.*not material revisions/u,
+  /Do not reset or enlarge any actor, time, call or cost budget/u,
+  /not a new mandatory planner dispatch or routine approval gate/u,
+  /supported mechanism and version.*each affected host\/OS/u,
+  /Unknown support is not feasibility/u,
+  /expected benefit against model\/check\/CI cost/u,
+  /do not silently build adapters or narrow accepted scope/u,
 ]) assert.match(reclassification, pattern);
-// Walkthrough: small clear work stays direct; newly discovered multi-view/shared-contract scope triggers reconsideration;
-// an exhausted actor/cost grant bars an added read-only role; product meaning/permission alone becomes a narrow human blocker.
+// Static walkthrough: ordinary clear work remains direct; integration feasibility is recorded before its writer;
+// absent or costly support blocks/recommends a bounded alternative; material changes stop before revision four,
+// while cosmetic/evidence edits do not count and no budget or routine gate is added.
 assert.match(reclassification, /Multiple views\/modules, shared state or contracts/u);
 assert.match(reclassification, /remaining actor\/correction budget/u);
 assert.match(reclassification, /specific product or permission decision/u);
+assert.match(reclassification, /supported mechanism and version.*each affected host\/OS/u);
+assert.match(reclassification, /minimum viable alternative or narrowed outcome/u);
+assert.match(reclassification, /before accepting a fourth material scope or acceptance revision/u);
+assert.match(reclassification, /Typos, formatting, receipts and evidence.*not material revisions/u);
+assert.match(reclassification, /Do not reset or enlarge any actor, time, call or cost budget/u);
 assert.match(skill, /selected skill and required reference/u);
 assert.match(skill, /canonical absolute paths beneath the trusted factory root/u);
 assert.match(skill, /full canonical contents/u);
