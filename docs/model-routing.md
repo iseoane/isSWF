@@ -1,6 +1,6 @@
 # Model routing
 
-The selected project state directory's `models.json` is the configured route source. `.factory/models.json` contains this source checkout's defaults; new initialised projects use `.isswf/models.json`. The coordinator applies the general rules below. The text-only researcher caller implements the bounded path described at the end; this guide and route membership are not authorization grants.
+This guide defines routing only for explicitly selected retained legacy-executor assignments. Its `models.json` route source is not a current Pi or Claude model-selection authority: each host's supported native configuration owns current selections (see [Pi](../.agents/hosts/pi.md) and [Claude Code](../.agents/hosts/claude-code.md)). `.factory/models.json` remains a packaged legacy payload; initialized legacy projects retain their existing state-directory copy and callers. Do not copy native choices into it or use it as fallback. The coordinator applies the legacy rules below. The text-only legacy researcher caller implements the bounded path at the end; this guide and route membership are not authorization grants.
 
 ## Own methodology pins in installed releases
 

@@ -276,7 +276,7 @@ function trackingRecord(mode, repository) {
   if (!['local', 'github'].includes(mode)) fail('init requires --tracking local|github');
   if (mode === 'github' && !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u.test(repository || '')) fail('GitHub tracking requires explicit --repository owner/repo');
   if (mode === 'local' && repository) fail('Local tracking has no GitHub repository');
-  return `# Project setup\n\nTracking: ${mode}\n${repository ? `Repository: ${repository}\n` : ''}\nRemote permissions: none. Tracking selection grants no remote actions.\n\nModel routes: .isswf/models.json. Availability and effort support remain pending verification.\nChecks and delivery boundary: pending project-specific assessment.\nTechnical isolation: not verified. Client-use gate: blocked.\n\nInitialization installs resources only. It does not grant execution, provider calls, push, merge, or deployment.\n`;
+  return `# Project setup\n\nTracking: ${mode}\n${repository ? `Repository: ${repository}\n` : ''}\nRemote permissions: none. Tracking selection grants no remote actions.\n\nLegacy runtime model routes: .isswf/models.json (legacy assignments only). Ordinary Pi/Claude selections belong to host-native configuration. Availability and effort support remain pending verification.\nChecks and delivery boundary: pending project-specific assessment.\nTechnical isolation: not verified. Client-use gate: blocked.\n\nInitialization installs resources only. It does not grant execution, provider calls, push, merge, or deployment.\n`;
 }
 async function initialize(project, store, opts) {
   const target = release(ownRoot), current = await readPin(project);

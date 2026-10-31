@@ -6,13 +6,13 @@ Read this quick reference for ordinary assignments. Inspect effective host setti
 
 | Need | Source of truth / action |
 | --- | --- |
-| Pi startup model and role selections | User `~/.pi/agent/settings.json`: `defaultProvider`, `defaultModel`, `defaultThinkingLevel`, `subagents.agentOverrides`; inspect any trusted project `.pi/settings.json` overrides. |
-| Claude startup model and role selections | User `~/.claude/settings.json` and native `~/.claude/agents/isswf-{worker,researcher,reviewer,planner}.md`; inspect trusted project overrides. |
+| Pi startup model and role selections | Trusted project `.pi/settings.json` is the native owner for project defaults and `subagents.agentOverrides`. Inspect user `~/.pi/agent/settings.json` only to determine precedence/effective mapping; a conflicting user override leaves the affected role pending, not a second selection to reconcile here. |
+| Claude startup model and role selections | Use Claude Code's supported native model/configuration/profile/delegation mechanisms as the selection owner. This record holds approval/application status and points to that owner; do not create a second editable model table. Inspect user/project layers for effective selection and conflicts. |
 | Shared role methodology | `.agents/roles/`; use `.agents/hosts/pi.md` or `.agents/hosts/claude-code.md` for the selected host. Roles are conditional, not a mandatory pipeline. |
 | Worktree root | Read `git config --local --get isswf.worktreeRoot` in the canonical repository. Approved convention: sibling `<parent>/<repo>-worktrees/<feature>`, with a unique direct feature child. Validate the root and existing worktrees before authorized creation; bind the child's working directory explicitly. No global absolute root. |
 | Current objective, acceptance and budget | The selected initiative's canonical plan and current brief, or a bounded operator handoff. Prior grants and spent budgets do not restart. |
 
-Legacy `.factory/models.json` applies only to explicitly selected legacy-executor assignments; do not copy native role defaults into it. Preserve explicit project choices and unrelated settings.
+`.factory/models.json` is legacy-only: it applies to explicitly selected legacy-executor assignments. Current Pi and Claude selections belong to their respective host-native configuration owners above. Do not copy native role defaults into JSON or treat offered presets/historical decisions as a second current selection. Preserve explicit project choices and unrelated settings.
 
 ## Project choices and boundaries
 
