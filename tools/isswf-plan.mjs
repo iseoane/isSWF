@@ -41,8 +41,13 @@ function validateDependencyGraph(jobs) {
   for (const job of jobs) visit(job);
 }
 export function parsePlan(markdown) {
-  const jobs = [], seen = new Set(); let current, section;
+  const jobs = [], seen = new Set(); let current, section, type;
   for (const line of markdown.split('\n')) {
+    if (!current && line.startsWith('Type:')) {
+      if (type !== undefined) throw Error('invalid-plan-type');
+      type = line.slice('Type:'.length).trim();
+      if (!['bug', 'enhancement', 'maintenance', 'research'].includes(type)) throw Error('invalid-plan-type');
+    }
     const header = /^## ([A-Z][A-Z0-9-]{0,63})$/u.exec(line);
     if (header) {
       if (seen.has(header[1])) throw Error('duplicate-job');
@@ -57,6 +62,7 @@ export function parsePlan(markdown) {
       else if (section && line.startsWith('- ')) current[section].push(line.slice(2));
     }
   }
+  if (type === undefined) throw Error('invalid-plan-type');
   if (!jobs.length || jobs.length > 100) throw Error('invalid-plan');
   const parsed = jobs.map(job => {
     if (!planStates.includes(job.Status) || ['Objective', 'Depends on', 'Brief', 'Blocker', 'Next step'].some(field => !job[field]) || !job.acceptance.length) throw Error('invalid-job');
@@ -64,7 +70,9 @@ export function parsePlan(markdown) {
     if (!brief || brief[2] !== job.id) throw Error('unsafe-brief-reference');
     const dependencies = job['Depends on'] === 'None' ? [] : job['Depends on'].split(', ');
     if (new Set(dependencies).size !== dependencies.length || dependencies.some(dep => !seen.has(dep) || dep === job.id)) throw Error('invalid-dependency');
-    return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence: job.evidence.filter(item => item !== 'None.'), briefName: `brief-r${brief[1]}.md` };
+    const evidence = job.evidence.filter(item => item !== 'None.');
+    if (job.Status === 'completed' && !evidence.some(item => item.trim())) throw Error('completed jobs require evidence');
+    return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence, briefName: `brief-r${brief[1]}.md` };
   });
   validateDependencyGraph(parsed);
   return parsed;
@@ -75,7 +83,7 @@ function render(value, initiative) {
   if (ids.size !== value.jobs.length || [...ids].some(job => !id(job))) throw Error('unique job IDs required');
   for (const job of value.jobs) {
     if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !planStates.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
-    if (job.status === 'completed' && !job.evidence.length) throw Error('completed jobs require evidence');
+    if (job.status === 'completed' && !job.evidence.some(item => item !== 'None.' && item.trim())) throw Error('completed jobs require evidence');
   }
   validateDependencyGraph(value.jobs.map(job => ({ id: job.id, dependencies: job.dependsOn })));
   const list = values => values.length ? values.map(item => `- ${item}`).join('\n') : '- None.';
