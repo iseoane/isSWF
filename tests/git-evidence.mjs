@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { cp, lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -29,10 +29,45 @@ function invoke(binding, args = ['identity']) {
   try { output = JSON.parse(result.stdout); } catch { assert.fail(`invalid CLI output: ${result.stdout}`); }
   return { status: result.status, output };
 }
+async function assertStalledInputRefused(operation, partial) {
+  const started = Date.now();
+  const child = spawn(process.execPath, [cli, operation], { cwd: source, stdio: ['pipe', 'pipe', 'pipe'] });
+  let stdout = '', stderr = '', forced = false;
+  child.stdout.on('data', chunk => { stdout += chunk; });
+  child.stderr.on('data', chunk => { stderr += chunk; });
+  child.stdin.on('error', () => {});
+  const closed = new Promise((done, reject) => {
+    child.once('error', reject);
+    child.once('close', (code, signal) => done({ code, signal }));
+  });
+  const guard = setTimeout(() => { forced = true; child.kill('SIGKILL'); }, 5000);
+  try {
+    if (partial) child.stdin.write(partial);
+    // Deliberately keep this process's stdin open: the public CLI must cease itself.
+    const result = await closed;
+    assert.equal(forced, false, `${operation} must refuse an open input stream before the fixture kills it`);
+    assert.equal(result.signal, null, stderr);
+    assert.equal(result.code, 2, stderr);
+    assert.ok(Date.now() - started < 5000, 'input collection has a finite wall-clock deadline');
+    assert.ok(Buffer.byteLength(stdout) <= 512, 'input refusal is bounded');
+    const evidence = JSON.parse(stdout);
+    assert.equal(evidence.operation, operation);
+    assert.equal(evidence.reason, 'binding-input-timeout');
+  } finally {
+    clearTimeout(guard);
+    child.stdin.destroy();
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGKILL');
+      await closed;
+    }
+  }
+}
 async function fingerprint(paths) {
   return Object.fromEntries(await Promise.all(paths.map(async path => [path, createHash('sha256').update(await readFile(join(root, path))).digest('hex')])));
 }
 try {
+  await assertStalledInputRefused('diff', '{"version":1}');
+  await assertStalledInputRefused('identity', '');
   command(git, ['init', '-q']);
   await writeFile(join(root, 'tracked.txt'), 'initial\n');
   command(git, ['add', 'tracked.txt']);
@@ -227,7 +262,7 @@ try {
   assert.equal(linkedStore.output.reason, 'unsupported-object-store-topology');
   assert.equal(invoke(binding, ['diff']).output.reason, 'unsupported-object-store-topology');
   assert.equal(await readFile(join(externalPack, 'sentinel'), 'utf8'), 'outside-object-store\n', 'outside object-store sentinel must remain unchanged');
-  console.log(JSON.stringify({ status: 'PASS', cases: ['bound exact identities and observed HEAD', 'known text diff and successful empty diff preserve exact bytes, length and digest', 'binary/add/delete/unusual-name committed diff returned without truncation', 'dirty attributes ignored and external attributes config refused', 'missing/altered/extra bindings and extra operation args fail closed', 'patch overflow returns bounded error without partial data', 'external common Git storage refused', 'all error output bounded with binding digest', 'conditional external includes refused', 'hostile include/helper config refused without execution', 'alternate object store refused', 'linked pack store refused without outside mutation', 'worktree/index/config bytes preserved and outside sentinel unchanged'], platform: process.platform, gitVersion: command(git, ['--version'], source) }));
+  console.log(JSON.stringify({ status: 'PASS', cases: ['stalled zero/partial stdin refuses and self-ceases within fixed input deadline', 'bound exact identities and observed HEAD', 'known text diff and successful empty diff preserve exact bytes, length and digest', 'binary/add/delete/unusual-name committed diff returned without truncation', 'dirty attributes ignored and external attributes config refused', 'missing/altered/extra bindings and extra operation args fail closed', 'patch overflow returns bounded error without partial data', 'external common Git storage refused', 'all error output bounded with binding digest', 'conditional external includes refused', 'hostile include/helper config refused without execution', 'alternate object store refused', 'linked pack store refused without outside mutation', 'worktree/index/config bytes preserved and outside sentinel unchanged'], platform: process.platform, gitVersion: command(git, ['--version'], source) }));
 } finally {
   await rm(root, { recursive: true, force: true });
 }

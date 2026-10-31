@@ -183,10 +183,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const operation = process.argv[2];
     const chunks = [];
     let size = 0;
-    for await (const chunk of process.stdin) {
-      size += chunk.length;
-      if (size > 16384) throw Error('binding-input-limit');
-      chunks.push(chunk);
+    // The operation timeout is unavailable until JSON/EOF arrives, so input has its own fixed deadline.
+    const inputDeadline = setTimeout(() => process.stdin.destroy(Error('binding-input-timeout')), 2000);
+    try {
+      for await (const chunk of process.stdin) {
+        size += chunk.length;
+        if (size > 16384) throw Error('binding-input-limit');
+        chunks.push(chunk);
+      }
+    } finally {
+      clearTimeout(inputDeadline);
     }
     let binding;
     try { binding = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
