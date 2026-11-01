@@ -59,7 +59,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
 - Next step: Within the current explicit start, consume J002 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
 
@@ -76,10 +76,10 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: blocked
+- Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J004/brief-r2.md)
 - Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
 - Next step: Within the current explicit start, consume J003 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
 
@@ -122,3 +122,11 @@ Final independent reviewer e22f56d0-7cad-4ada-8349-7e8f72223080 assessed exact e
 All original live acceptance gates remain: Pi operator conversation while agent and CI work pending, cancellation/interruption/recovery and stale/duplicate/candidate-change observations, real Claude native Agent background completion/results with verified effective permissions, equivalent Windows outcomes. No appropriately verified live Claude or Windows host is available through this Pi session; installation, host switching, alternate dispatcher or extra model calls are not authorized substitutes. Current Pi native async dispatch, notifications and one same-context resume were observed during actual work, but are not a controlled full operator-conversation/CI/recovery probe. Keep J001-J004 blocked for their unmet criteria. J002/J003 source instructions are verified, not full functional acceptance.
 
 Budget consumed: two researchers, one initial worker, its one correction and both independent review rounds. No reviewers remain under the current finite ceiling. One second initial worker allowance is unused, but cannot supply missing Claude/Windows host capability or reset review budget. No active model writer/reviewer remains after final completion. Next authorized action is coordinator-owned draft PR publication and exact-head CI observation; no integration under current MEDIUM classification and unresolved acceptance. Reopen execution only for a concrete supported live probe within remaining authority; do not ask for generic approval or relabel this as LOW. No release, deployment, installation or cleanup.
+
+## Staged integration and verification continuation
+
+Current operator explicitly selected integration because complete live tests are scheduled later in J004; that concrete MEDIUM-risk decision supersedes the earlier LOW-only integration restriction for PR138, not for other work. PR138 merged normally with expected-head d85cbb7a4ecd85980d10ec508ef3c0a22ecb923a as main7b6828cddaa7a8d1b5f04b31151d953195a0b06e. Exact-head CI41291801696 SUCCESS3/3. Six Linux/Windows reports inspected PASS on synthetic09fea087 (parents57439126,d85cbb7), tree43c989f9609e7cc249567ec569781dcef8e309b0 equal head and actual merge. External durable receipt https://github.com/iseoane/isSWF/pull/138#issuecomment-6555985862 records these later observations without rewriting reviewed source. Full acceptance is not inferred.
+
+Current explicit continuation: “Coordinador continuas con el resto de la iniciativa?”. Continue J003 verification and J004 journeys; their evidence may be collected together after the integrated instruction baseline, while original closure criteria remain unchanged. Earlier r1 prepare-only brief text is historical; r2 below supplies current scope and budget. This continuation does not reset consumed actors or reviews. One unused second initial worker (luna/high <=25min) is allocated verification-only; no production/test/CI code changes or new review calls. It can run existing offline native checks, audit actual prior session observations and report the smallest unsupported journey. No child network/model calls, paid API, nested delegation, host switching or installations. Coordinator owns records and future feature-branch publication. Current native tool status reports no active actors; checkout is tracked-clean except private .pi/subagents. Available disk4.3GiB /tmp,84GiB source volume; verification fixture budget512MiB, one copy, no automatic deletion.
+
+Current evidence boundary: tests/host-native-delegation.mjs invokes real Pi SDK/extension with a loopback synthetic provider, explicit async:false and synthetic foreground cancellation; it does not cover background conversation, live Claude or Windows execution. Its locked dependency subagent bundle is absent here, but installed pi-subagents bundle is present and may be explicitly supplied via supported ISSWF_PI_SUBAGENTS override after verifying version0.83.0; missing/broken prerequisites must remain BLOCKED/FAIL. No installation inferred. Previously retained actual native async run/completion/resume and operator question while reviewer running may supply narrow opportunistic Pi observations, not all recovery/CI criteria. Worker must attribute what can actually be verified; not invent controlled reproduction or retain private transcripts. Full accepted Claude-native/Windows/live journey remains blocked until the actual corresponding supported host is available. Do not spend a model call to wait or invent a substitute dispatcher.
