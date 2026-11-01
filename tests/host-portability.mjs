@@ -25,6 +25,10 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   assert.ok(body.length < 1200, `${file} should remain a thin wrapper`);
 }
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
+const completionGate = skill.slice(skill.indexOf('A candidate commit is not terminal execution status'), skill.indexOf('\n\nA plan, partial commit'));
+for (const pattern of [/terminal execution status/u, /returned required report/u, /retained curated evidence/u, /supported interface/u, /consume any known returned completion\/result references/u, /before elective successful-path stopping/u, /Do not infer a lost report solely/u, /inspect known accessible result artifacts/u, /not private transcripts/u, /safety stop.*denial\/no-retry.*timeout.*cancellation.*exhausted budget/u, /must not delay cessation/u, /authorize extra calls or replacement/u, /Preserve partial work/u, /Never fabricate retrospective RED/u]) assert.match(completionGate, pattern);
+// Static contract walkthrough: ordinary result/commit-before-report completion requires result consumption and retention;
+// interruption/denial skips retention work that would delay stopping; missing results are searched for within scope, then disclosed.
 assert.ok(skill.includes('[isswf-issue](../isswf-issue/SKILL.md)'), 'Coordinator must route independent reports to the shared issue skill');
 assert.match(skill, /actually running in Claude Code/);
 assert.match(skill, /Windows and Linux, Pi and Claude Code are equal/);
@@ -132,6 +136,8 @@ const claudeSkill = await read('skills/isswf-coordinator/SKILL.md');
 assert.match(claudeSkill, /Required child context/);
 assert.doesNotMatch(claudeSkill, /locate|runtimeId|artifactId/);
 const host = await read('.agents/hosts/claude-code.md');
+const claudeCompletion = host.slice(host.indexOf('A candidate commit is not terminal execution status'), host.indexOf('\n\n## Bound identity'));
+for (const pattern of [/native Agent call's returned completion\/result/u, /consume any known returned result references/u, /before elective successful-path stopping/u, /check known accessible result artifacts/u, /Do not invent a `TaskOutput` API/u, /must not delay cessation/u, /keep an unsafe actor alive/u, /Preserve partial work/u, /never fabricate retrospective RED/u]) assert.match(claudeCompletion, pattern);
 assert.match(host, /## Required child context/);
 assert.match(host, /## External worktree assignments/);
 assert.match(host, /isswf\.worktreeRoot/u);
@@ -171,6 +177,8 @@ assert.match(host, /Bash.*not.*sandbox/i);
 assert.match(host, /exact retained candidate.*stopped writer|stopped writer.*partial candidate/i);
 assert.doesNotMatch(host, /bypassPermissions|permissionMode:|hooks:|mcpServers:/i);
 const piHost = await read('.agents/hosts/pi.md');
+const piCompletion = piHost.slice(piHost.indexOf('5. For normal completion'), piHost.indexOf('\n\n## Bound identity'));
+for (const pattern of [/supported `output` launch parameter/u, /terminal execution status/u, /consume known completion\/result references/u, /verify the required report\/evidence/u, /do not infer a lost report from context stop alone/u, /check known accessible result artifacts/u, /On safety stop.*denial\/no-retry.*timeout.*cancellation.*exhausted budget/u, /stop promptly/u, /do not let evidence collection delay cessation/u, /keep an unsafe actor alive or authorize another call/u, /Preserve partial work/u]) assert.match(piCompletion, pattern);
 assert.match(piHost, /pi-subagents.*0\.83\.0/);
 assert.match(piHost, /agentOverrides/);
 assert.match(piHost, /thinking/);
