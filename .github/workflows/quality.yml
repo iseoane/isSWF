@@ -90,6 +90,12 @@ jobs:
         run: node tests/factory-tools-install.mjs .
       - name: Verify initiative plan boundaries
         run: node tests/initiative-plan.mjs .
+      - name: Verify canonical plan parser invariants
+        run: node tests/initiative-dependencies.mjs .
+      - name: Verify readonly malformed-plan status
+        run: node tests/initiative-status.mjs .
+      - name: Verify readonly malformed-plan panel
+        run: node tests/initiative-panel.mjs .
       - name: Verify worker-route admission
         run: node tests/worker-route-admission.mjs .
       - name: Verify static host portability

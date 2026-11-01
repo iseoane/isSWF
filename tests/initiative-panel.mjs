@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { request } from 'node:http';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, lstat, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, lstat, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -10,7 +10,7 @@ import { pathToFileURL } from 'node:url';
 const source = resolve(process.argv[2] ?? '.');
 const { startPanel } = await import(pathToFileURL(join(source, 'tools/isswf-panel.mjs')));
 const { status } = await import(pathToFileURL(join(source, 'tools/isswf-status.mjs')));
-const root = await mkdtemp(join(tmpdir(), 'isswf-panel-test-')), project = join(root, 'project');
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-panel-test-'))), project = join(root, 'project');
 await mkdir(project);
 const run = (binary, args) => { const r = spawnSync(binary, args, { encoding: 'utf8', timeout: 15000 }); assert.equal(r.status, 0, r.stderr); return r; };
 run('git', ['init', '-q', project]);
@@ -42,7 +42,7 @@ try {
   await writeFile(grant, JSON.stringify({ version: 1, project, initiative: 'I0002', reference: 'Synthetic plan-only grant', permissions: ['plan'] }));
   run(process.execPath, [join(source, 'tools/isswf-plan.mjs'), 'prepare', '--project', project, '--initiative', 'I0002', '--proposal', proposal, '--grant', grant]);
   await mkdir(join(project, '.factory/initiatives/IEMPTY'));
-  await symlink(root, join(project, '.factory/initiatives/IUNSAFE'));
+  await symlink(root, join(project, '.factory/initiatives/IUNSAFE'), process.platform === 'win32' ? 'junction' : 'dir');
   const before = await tree(project);
   panel = await startPanel({ project, port: 0 });
   assert.equal(panel.initialUrl, panel.url + '/');
@@ -114,6 +114,12 @@ try {
   assert.equal(responses.records[0].note, 'Please change <script>not-code</script>');
   assert.deepEqual(await readFile(join(project, '.factory/initiatives/I0001/plan.md')), planBefore);
   assert.match((await get(panel.url, '/i/I0001')).body, /Please change &lt;script&gt;not-code&lt;\/script&gt;/u);
+  const malformedPlan = Buffer.from(planBefore.toString().replace('Type: enhancement\n', ''));
+  await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), malformedPlan);
+  assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).status, 'unknown');
+  assert.match((await get(panel.url, '/i/I0001')).body, /Plan unavailable/u);
+  assert.deepEqual(await readFile(join(project, '.factory/initiatives/I0001/plan.md')), malformedPlan, 'panel reads never repair malformed plan bytes');
+  await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planBefore);
   const raceId = '1'.repeat(32), raced = await Promise.all([post({ responseId: raceId }), post({ responseId: raceId })]);
   assert.deepEqual(raced.map(r=>r.code).sort(), [201,409]);
   const responseDir = join(job, 'responses'), originalRecord = await readFile(join(responseDir, form.responseId + '.json'));
@@ -121,7 +127,7 @@ try {
   assert.equal((await post({ responseId: '3'.repeat(32) })).code, 400);
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.responses.status, 'unknown');
   assert.deepEqual(await readFile(join(responseDir, form.responseId + '.json')), originalRecord);
-  await rm(responseDir, { recursive: true }); await symlink(root, responseDir);
+  await rm(responseDir, { recursive: true }); await symlink(root, responseDir, process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal((await post({ responseId: '4'.repeat(32) })).code, 400);
   await rm(responseDir);
 
@@ -133,7 +139,7 @@ try {
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'unknown');
   await rm(join(job, 'delivery.md'));
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'absent');
-  await symlink(root, join(project, '.factory/initiatives/I0001/jobs/J002'));
+  await symlink(root, join(project, '.factory/initiatives/I0001/jobs/J002'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[1].artifacts.status, 'unknown');
   await rm(join(project, '.factory/initiatives/I0001/plan.md'));
   const absent = await get(panel.url, '/i/I0001'); assert.match(absent.body, /Plan unavailable/u); assert.match(absent.body, /not interpreted as an empty job list/u);
@@ -141,7 +147,7 @@ try {
   const empty = await startPanel({ project: emptyProject });
   try { assert.match((await get(empty.url)).body, /Listing unavailable/u); assert.equal(JSON.parse((await get(empty.url, '/api/status')).body).status, 'absent'); }
   finally { await new Promise(done => empty.server.close(done)); }
-  const unsafeProject = join(root, 'unsafe'); await mkdir(unsafeProject); await symlink(project + '/.factory', join(unsafeProject, '.factory'));
+  const unsafeProject = join(root, 'unsafe'); await mkdir(unsafeProject); await symlink(join(project, '.factory'), join(unsafeProject, '.factory'), process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(startPanel({ project: unsafeProject }), /unsafe-or-unreadable-project/u);
   for (let i = 0; i < 101; i++) await mkdir(join(project, '.factory/initiatives/X' + i));
   assert.equal(JSON.parse((await get(panel.url, '/api/status')).body).status, 'unknown');

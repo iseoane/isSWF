@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, lstat, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, lstat, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-const source = resolve(process.argv[2] || '.'), root = await mkdtemp(join(tmpdir(), 'isswf-status-test-'));
+const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-status-test-')));
 const project = join(root, 'project'); await mkdir(project);
 assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);
 const invoke = (tool, args) => spawnSync(process.execPath, [join(source, 'tools', tool), ...args], { encoding: 'utf8', timeout: 15000 });
@@ -45,7 +45,7 @@ try {
   assert.equal(observed.jobs[1].blocker, 'Await integrated J001'); assert.ok(observed.plan.modifiedAt); assert.match(observed.limits, /not process heartbeats/u);
   assert.deepEqual(await tree(project), before);
   await writeFile(join(job, 'intake.json'), '{}'); assert.equal(inspect().jobs[0].artifacts.intake.status, 'unknown');
-  await symlink(join(root, 'private'), join(directory, 'jobs/J002'));
+  await symlink(join(root, 'private'), join(directory, 'jobs/J002'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal(inspect().jobs[1].artifacts.status, 'unknown');
   const planPath = join(directory, 'plan.md'), original = await readFile(planPath, 'utf8');
   await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: Factory v1'));
@@ -57,6 +57,10 @@ try {
   assert.equal(inspect().status, 'unknown'); assert.equal(inspect().freshness, 'not-verified');
   await writeFile(planPath, original.replace('- Status: in-progress', '- Status: invented'));
   assert.equal(inspect().status, 'unknown');
+  await writeFile(planPath, original.replace('Type: enhancement\n', ''));
+  const malformedBytes = await tree(project);
+  assert.equal(inspect().status, 'unknown', 'missing canonical plan type remains explicitly unknown');
+  assert.deepEqual(await tree(project), malformedBytes, 'status reads never rewrite malformed plan bytes');
   await writeFile(planPath, original.replace('## J002', '## J001')); assert.equal(inspect().status, 'unknown');
   await rm(planPath); await symlink(grant, planPath); assert.equal(inspect().status, 'unknown');
   console.log('PASS: actual plan and artifacts summarized without writes; absent/malformed/unsafe records visible; reported progress never becomes liveness or acceptance');
