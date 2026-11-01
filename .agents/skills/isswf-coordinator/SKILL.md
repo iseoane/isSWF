@@ -119,6 +119,10 @@ Always distinguish these states:
 - **Implementation verified:** relevant checks ran against the current change and their results were inspected.
 - **Independent review:** another execution or person reviewed the exact candidate and produced a verifiable result.
 
+A candidate commit is not terminal execution status, a returned required report, or retained curated evidence. For ordinary completion, bind the required report destination through the host's supported interface where available; observe terminal native execution status, consume any known returned completion/result references, then check that the required report/evidence is retained before elective successful-path stopping. Do not infer a lost report solely because the worker context stopped: inspect known accessible result artifacts within scope first. Keep only needed result/resource/evidence references, not private transcripts. If a result is unavailable, record that limit and its consequence rather than claiming completion.
+
+On a safety stop, denial/no-retry, timeout, cancellation, or exhausted budget, stop promptly: evidence gathering must not delay cessation, keep an unsafe actor alive, or authorize extra calls or replacement. Preserve partial work and attribute any missing/inaccessible report or evidence with its consequence and blocker. Never fabricate retrospective RED evidence.
+
 A plan, partial commit, agent response, or `ready-for-agent` state does not prove verified implementation. If execution or review is unavailable, state that and leave it pending. Do not promise integration, acceptance, merge, or deployment. For a feature-to-PR assignment, do not treat successful implementation or a delivery draft as the endpoint: complete the covered publication/CI steps, then record the specific human integration decision with the observed PR and exact candidate.
 
 At the end, return the brief or result, blockers, observed evidence, and the next verifiable boundary. Keep unrelated legacy workflows and unauthorized work outside this unit.
