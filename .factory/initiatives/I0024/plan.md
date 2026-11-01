@@ -22,8 +22,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify capabilities and reproduce blocking: Inspect coordinator and both native hosts; reproduce a slow task blocking conversation and select the minimum functional unit.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Full reproduction/equivalence remains partial; Windows final observation is now operator-owned, not an absent host.
-- Next step: Consume J004/A003 and final Linux review; retain missing reproduction/equivalence without redispatch under spent probe budgets.
+- Blocker: Bounded Linux Pi verification is complete; remaining Claude control/equivalence and operator-owned Windows observations prevent full cross-host closure.
+- Next step: Reuse A003–A006 and V003 plus final CI-conversation receipt; retain Claude/Windows gaps and no automatic redispatch under spent budgets.
 
 ### Acceptance
 
@@ -42,7 +42,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
-- Blocker: Source-policy unit integrated via PR138; full cross-host conversation/CI and Windows outcomes are not all accepted.
+- Blocker: Source-policy unit integrated via PR138; Linux Pi conversation during native work and actual CI is verified. Full Claude/Windows outcomes remain pending.
 - Next step: Reuse retained source PASS/CI evidence and Linux A003; operator supplies final Windows outcome; do not mark full acceptance from source integration.
 
 ### Acceptance
@@ -62,8 +62,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Actual Pi interruption/resume, changed-candidate rejection, steer delivery+ack and cancellation now observed; broader callback/Claude controls still require remaining evidence, with Claude quota paused.
-- Next step: Review bounded Linux evidence in J004/A003; retain unverified recovery/callback criteria and do not spend another probe automatically.
+- Blocker: Bounded Linux Pi recovery, identity reconciliation and integrated duplicate/late transport are verified; native Claude controls remain quota-paused and Windows outcomes pending.
+- Next step: Reuse A004–A006/V002/V003 for Linux Pi; obtain remaining authorized Claude/Windows evidence without resetting spent calls.
 
 ### Acceptance
 
@@ -82,8 +82,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r5.md](jobs/J004/brief-r5.md)
-- Blocker: New integrated Pi transport fixture and live agent conversation await independent assessment; actual conversation during CI still pending. Claude quota pause and operator-owned Windows remain open.
-- Next step: Independently assess A006 under r5, publish accurate bounded records and observe exact-head CI plus live CI conversation; retain Claude/Windows blockers and any unsupported Pi criteria.
+- Blocker: Linux Pi technical verification complete within retained limits; full initiative remains blocked by quota-paused Claude controls and operator-owned native Windows journeys.
+- Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
 
 ### Acceptance
 
@@ -218,3 +218,15 @@ J004/A006 retains the consumed blocked worker result, actual operator question/r
 Reviewer `26172f1d-e825-4071-89c7-2056260a6a5b` completed/process-terminal observed; coordinator consumed full output and transcribed it unchanged as J004/V003.md. Exact candidate `5bf50d8dfbfc296d7d9a1552e05eac9dfb7054f9` against `a8461287c370908b2983b90322ec1d7f6bef4de6`, verified native patch22032bytes/SHA256 `639259b5addf65dc0a032d128b5381627c47afde744b5521d2cc0ea9b714b47f`. Accurate record delta and bounded Pi evidence: Standards PASS, Spec PASS, aggregate PASS, record-only risk LOW; no blocking record findings. Linux Pi complete acceptance remains INCONCLUSIVE/BLOCKED solely for actual CI conversation; complete Linux/fullI0024 remains blocked for Claude/Windows.
 
 Reviewer finds combined retained actual and integrated-fixture Pi evidence sufficient aside from stated CI-conversation boundary; no arbitrary distributed race/powerloss/permanent-harness requirement added. No earlier adverse verdict or incomplete worker result is relabelled. r5 primary reviewer consumed; conditional affected-delta reserve unused and not automatically invoked. Current delta adds this receipt plus verbatim review, no functional behavior changes; coordinator will publish I0024 records only, inspect exact-head CI and preserve actual conversation during pending CI if it occurs. I0025/I0026 remain local prepare-only and excluded from this PR. No Pi closure or operator acceptance inferred from record integration.
+
+## Final Linux Pi technical-verification receipt (local checkpoint)
+
+At `2026-11-01T19:48:53.349Z`, the operator asked “Pues a ver si respondes?” and coordinator replied while PR141 exact-head `028bf0c3d067a6d2675d01df64956ed2aadef152` Portable and Windows checks were IN_PROGRESS; Ubuntu was already SUCCESS at19:48:40Z. This genuine operator exchange supplies V003’s final remaining Linux Pi boundary. The user-triggered bounded status read was not a polling loop. One scheduled session-only deferred check `isswf-i0024-integrated-ci-once` fired as workflow `e4abf5b7-00d4-4eee-8683-2dbc9954e8ba` with zero child runs; completion triggered one terminal CI reconciliation, no automatic timer renewal or waiting model child.
+
+Quality run `41343511155` SUCCESS3/3 on exact head028bf0c; all six actual platform/host/source-isolation reports inspected PASS. Reports identify synthetic `5af1fd0ccc62c60092b3d483726033e7ce4094a6`, parents `a8461287c370908b2983b90322ec1d7f6bef4de6` and `028bf0c3d067a6d2675d01df64956ed2aadef152`, tree `7273a7e349583f1e27477b0b8b6155d5596db79a` equal tested head. These CI discovery/package outcomes do not certify live Windows or Claude journeys. Ignored artifacts retained under `tooling/.local/i0024/integrated/ci-41343511155/`.
+
+Normal expected-head protected merge of PR141 observed as `4b9c0118e6493098b9557d8437b65f12c31f5106`, same parents/tree, at19:52:41Z. External durable receipt: https://github.com/iseoane/isSWF/pull/141#issuecomment-6563046057. Independent review applies to5bf50d8; later delta is verbatim verdict/status reconciliation. This final receipt changes no executable scope and mechanically records subsequent identities/outcomes; no correction invalidates reviewed evidence and no additional model review is required. Conditional reserve remains unspent.
+
+Disposition: **bounded Linux Pi technical verification complete**, using actual native lifecycle/conversation observations plus explicitly substituted integrated transport evidence, as scoped by V003. Whole Linux/fullI0024 and operator product acceptance remain separate/open: native Claude controls are still NEVER launched due reported quota exhaustion; Windows live outcomes remain operator-owned. All J001–J004 remain blocked at their original cross-host/platform scope. TTL-bounded dedupe, repeated observer callbacks, synthetic producer/provider/candidate policy, unsuccessful worker and first driver failure are preserved; no universal exactly-once or power-loss guarantee. No further Pi work, installation, permanent environment-bound tests or cleanup inferred.
+
+This is one local record-only receipt checkpoint after integration, not a claim it was included in PR141/its tested head. No recursive receipt PR/source re-test loop is started; later publication remains pending the next authorized delivery boundary. Local prepare-only I0025/I0026 plans/briefs are excluded from I0024 commits/publication and not implementations.
