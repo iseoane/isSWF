@@ -36,7 +36,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J002
 
-- Status: pending
+- Status: in-review
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
@@ -102,3 +102,7 @@ Two read-only native researchers completed in async workflow 85c95ead-02d8-4491-
 Initial assumption: all phases must wait for complete J001 live reproduction. Observed: independent shared instruction correction is possible now, but full live acceptance is not. Re-plan before writer start: J002 has no closure dependency on J001 and may implement the already-grounded instruction outcome, including safe-resumption instructions from J003 in the same coherent candidate to avoid overlapping shared writers. J001 and all original live/OS criteria remain blocked/pending; no acceptance is removed or waived. J003/J004 consume the source candidate and cannot claim full technical closure without their required evidence. This is a single pre-writer scope reconciliation, not a budget reset or permission for a new notifier/dispatcher.
 
 Implementation seam: canonical coordinator responsiveness and identity/authority rules; Pi native async/output/stop/resume distinctions; Claude capability-conditioned native background guidance without invented APIs; bounded non-model CI observation and exact-head validation; existing host contract tests and affected bilingual guides. Prefer instructions to code: no runtime capability gap demonstrated, no scheduler/store/adapter justified. Benefit: removes an avoidable foreground-default instruction without extra actors merely to wait. Costs: one initial worker <=25min and required independent review, focused static checks; full live-host verification remains separate visible evidence need.
+
+## Source candidate (not full initiative acceptance)
+
+Worker run d5ac8093-7644-401a-8fcf-b82ce1fa7f45 completed and bound report consumed, candidate a98cb508fcf8c183c194cd724fb663bf95fc651d. Seven functional files implement responsive coordination instructions and static assertions; author focused checks pass. Original live acceptance gaps remain: conversation during Pi agent/CI waits; cancellation/recovery; live Claude native Agent behavior and Windows equivalence. No closure or LOW-risk integration claim. J002 source review in progress does not satisfy these criteria. Budget consumed: two researchers, one initial worker; zero corrective continuations, zero reviewers before next dispatch. Pre-existing .pi/subagents is untracked and preserved.
