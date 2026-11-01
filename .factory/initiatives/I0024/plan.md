@@ -36,7 +36,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J002
 
-- Status: in-review
+- Status: blocked
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
@@ -56,7 +56,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J003
 
-- Status: pending
+- Status: blocked
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
@@ -76,7 +76,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: pending
+- Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
@@ -112,3 +112,13 @@ Worker run d5ac8093-7644-401a-8fcf-b82ce1fa7f45 completed and bound report consu
 Independent reviewer f29bd1ed-1fe9-4237-9e0f-19d9f528d34e completed; coordinator consumed full report and retained it unchanged as jobs/J002/V001.md (reviewer-authored native output, coordinator transcription). Exact reviewed candidate c1d93cc3a04d5b9d945a8c5b193aac51edc41cc6, verified patch digest c61230170aa65169f1c073cd6299fcb223ca3a953dcf341db6f3c8e0d40960f5. Source Standards INCONCLUSIVE, Spec FAIL, aggregate FAIL; full initiative BLOCKED, risk MEDIUM. Findings: missing Pi live-steer/eligible-resume branch, missing explicit author consumption/application evidence for human-documents/code-quality/comments, and original missing live/OS evidence. Suggest consolidate generic CI rules and correct stale foreground navigation. Removed continuity sentence is retained adequately by the linked feature-delivery contract; no demonstrated regression there.
 
 Coordinator exact-head c1d93cc bounded gates finished: portable quality, locked ESLint, Knip and diff all exit0; logs tooling/.local/i0024/{quality,eslint,knip,diff}.log and gates.status. These are source/static/artifact checks, not missing live acceptance. Correction allocation: resume same original worker once <=10min, bundle R1 findings, truthfully distinguish previous versus newly consumed methodology, retain live blockers. One independent review round consumed; one remains. No integration permitted while R1 fail/MEDIUM or original full acceptance blockers persist.
+
+## Corrected source disposition and current blockers
+
+Same author completed its single corrective continuation31006c61-d15e-473f-9767-6ba6632b8f3f, candidate e3e557145521079486e4095a5ab8bad42a7961e5. Correction adds Pi live-steer versus eligible-ceased-resume branches, static assertions, canonical generic CI links and accurate native delegation navigation. Initial required human-documents/code-quality/comments reads were omitted; author truthfully disclosed this, consumed them during correction and mapped current application. Initial deviation is preserved, not retroactively cured.
+
+Final independent reviewer e22f56d0-7cad-4ada-8349-7e8f72223080 assessed exact e3e5571 against57439126: source Standards PASS, Spec PASS, aggregate PASS; full initiative INCONCLUSIVE/BLOCKED, risk MEDIUM. Full report retained unchanged in jobs/J002/V002.md by coordinator after consuming reviewer output. R1 remains adverse in V001. Coordinator full gates on exact e3 source all exit0: portable quality, locked ESLint, Knip and diff, logs tooling/.local/i0024/correction. No live-host acceptance is implied.
+
+All original live acceptance gates remain: Pi operator conversation while agent and CI work pending, cancellation/interruption/recovery and stale/duplicate/candidate-change observations, real Claude native Agent background completion/results with verified effective permissions, equivalent Windows outcomes. No appropriately verified live Claude or Windows host is available through this Pi session; installation, host switching, alternate dispatcher or extra model calls are not authorized substitutes. Current Pi native async dispatch, notifications and one same-context resume were observed during actual work, but are not a controlled full operator-conversation/CI/recovery probe. Keep J001-J004 blocked for their unmet criteria. J002/J003 source instructions are verified, not full functional acceptance.
+
+Budget consumed: two researchers, one initial worker, its one correction and both independent review rounds. No reviewers remain under the current finite ceiling. One second initial worker allowance is unused, but cannot supply missing Claude/Windows host capability or reset review budget. No active model writer/reviewer remains after final completion. Next authorized action is coordinator-owned draft PR publication and exact-head CI observation; no integration under current MEDIUM classification and unresolved acceptance. Reopen execution only for a concrete supported live probe within remaining authority; do not ask for generic approval or relabel this as LOW. No release, deployment, installation or cleanup.
