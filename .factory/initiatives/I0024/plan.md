@@ -81,9 +81,9 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r4.md](jobs/J004/brief-r4.md)
-- Blocker: New bounded Pi control/component evidence independently PASS; native Claude controls paused for exhausted quota, broader live journey/callback coverage and operator-owned Windows acceptance remain open.
-- Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
+- Brief: [brief-r5.md](jobs/J004/brief-r5.md)
+- Blocker: New integrated Pi transport fixture and live agent conversation await independent assessment; actual conversation during CI still pending. Claude quota pause and operator-owned Windows remain open.
+- Next step: Independently assess A006 under r5, publish accurate bounded records and observe exact-head CI plus live CI conversation; retain Claude/Windows blockers and any unsupported Pi criteria.
 
 ### Acceptance
 
@@ -194,3 +194,27 @@ Primary reviewer35c60533-e530-4f49-9e22-abc3656327c9 completed with full output 
 Reviewer inspected actual curated native status projections/same-session report/steer events and actual installed module with retained temporary driver/results. This substantiates supported Pi task/session interruption recovery, actual candidate-change rejection, delivered/acknowledged steer, cancellation and isolated notification cases, not machine-crash guarantees or arbitrary distributed callback races. Compressed handoff path wording was clarified to actual full canonical review.md; required procedure complete, not a missing file.
 
 Current tranche primaryreview1 now consumed; reserved second review remains conditional on a real correction requiring affected independent judgment. Pi3calls spent. Native Claude controls driver still NEVER launched; its1parent/max3Agent invocations unused, paused for operator-reported exhausted quota. No automatic timer renewal, model/provider substitution, Windows setup or permanent E2E. Next coordinator action is one record-only PR with exact-head CI and expected-head protected integration under current LOW/MEDIUM permission. Current data accuracy is verified, not full initiative closure or operator acceptance.
+
+## Current confirmed Pi completion assignment
+
+Operator confirmed the new-session three-work request: complete remaining Pi coverage; plan I0025/I0026 only. Claude remains quota-paused and Windows operator-owned. Current source main `a8461287c370908b2983b90322ec1d7f6bef4de6` includes PR140’s reviewed evidence; prior next-step publication text above is historical and already fulfilled. Actual native preflight: Pi1.4.0/subagents0.83.0; approved worker luna/high and reviewer sol/medium; no active async actor after planner completion.
+
+J004/r5 sets additive finite tranche: one temporary-verification worker <=15min; one independent reviewer <=15min plus one conditional affected-delta review <=10min; no worker retry/resume/replacement, nested agents, installation or real provider calls inside temporary drivers. Previous consumption remains spent. Coordinator-owned records freeze during worker execution; output bound natively. Branch `test/i0024-pi-integrated`; no source/test/CI/settings changes. Current task is prepared, not yet dispatched at this checkpoint. Original acceptance remains unchanged, including conversation during actual agent/CI waits and live-versus-synthetic distinctions.
+
+## Integrated Pi worker returned without execution
+
+Native run `b63461fc-faf1-4648-9e07-32b90c33291d` completed/process-terminal observed, luna/high, 19:39:41.778Z–19:40:30.227Z. Full bound output consumed; worker disposition BLOCKED, no driver/test/fixture/provider launched, no source changes. Worker interpreted the single native launch restriction as a requirement for nested dispatch and stopped because that child has no subagent tools. Coordinator does not accept that interpretation as proof the model-free SDK fixture is unavailable: r5 expressly permits it and forbids nested actors. Preserve the unsuccessful attempt; the one worker allowance is consumed, with no retry/resume/replacement.
+
+Operator question “Vas a probar la evidencia integrada?” arrived while the exact run still reported running/process-terminal pending; coordinator answered without blocking on its completion. This is actual conversation-during-agent evidence, not driver execution or CI evidence.
+
+Coordinator continues independently authorized temporary verification directly: at most one local integrated fixture <=128MiB and a 15min investigation/execution bound; zero real-provider or additional child calls, no alternate model dispatcher. Use actual installed SDK/notifier/result watcher with controlled fixture ingress and explicit substitutions. Reviewer allowance remains unused. No operator decision needed for the existing permitted driver scope; an actual capability failure remains visible and blocks closure.
+
+## Coordinator integrated transport results
+
+J004/A006 retains the consumed blocked worker result, actual operator question/response while that run was active, first failed coordinator fixture and corrected integrated result. Corrected native fs result watcher/notifier/parent-wake/SDK session fixture PASS6/6, two loopback synthetic responses and zero real-provider/child/remote calls inside fixture. This extends A005 beyond isolated callbacks, but producer and provider remain controlled substitutes; native watcher does not validate Git candidates and observer callbacks may repeat. A004 real candidate/recovery evidence remains separate. No whole-Pi closure before actual CI conversation and independent assessment. Primary r5 review1<=15min remains available before dispatch; zero worker calls remain.
+
+## Integrated evidence independent review and delivery boundary
+
+Reviewer `26172f1d-e825-4071-89c7-2056260a6a5b` completed/process-terminal observed; coordinator consumed full output and transcribed it unchanged as J004/V003.md. Exact candidate `5bf50d8dfbfc296d7d9a1552e05eac9dfb7054f9` against `a8461287c370908b2983b90322ec1d7f6bef4de6`, verified native patch22032bytes/SHA256 `639259b5addf65dc0a032d128b5381627c47afde744b5521d2cc0ea9b714b47f`. Accurate record delta and bounded Pi evidence: Standards PASS, Spec PASS, aggregate PASS, record-only risk LOW; no blocking record findings. Linux Pi complete acceptance remains INCONCLUSIVE/BLOCKED solely for actual CI conversation; complete Linux/fullI0024 remains blocked for Claude/Windows.
+
+Reviewer finds combined retained actual and integrated-fixture Pi evidence sufficient aside from stated CI-conversation boundary; no arbitrary distributed race/powerloss/permanent-harness requirement added. No earlier adverse verdict or incomplete worker result is relabelled. r5 primary reviewer consumed; conditional affected-delta reserve unused and not automatically invoked. Current delta adds this receipt plus verbatim review, no functional behavior changes; coordinator will publish I0024 records only, inspect exact-head CI and preserve actual conversation during pending CI if it occurs. I0025/I0026 remain local prepare-only and excluded from this PR. No Pi closure or operator acceptance inferred from record integration.
