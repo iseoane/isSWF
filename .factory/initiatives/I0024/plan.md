@@ -78,10 +78,10 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: blocked
+- Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
+- Brief: [brief-r4.md](jobs/J004/brief-r4.md)
 - Blocker: Limited Linux evidence review PASS; complete Linux recovery/callback/conversation criteria and operator-owned Windows acceptance remain unverified.
 - Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
@@ -166,3 +166,11 @@ Still not proved: real duplicate/late callback races, changed-source race, live 
 Final approved reviewer1ed9014e-334f-4e20-b791-55d2c2f831dd completed; coordinator consumed the full output and transcribed it unchanged to J004/V001.md. Exact reviewed record candidatebcc89b50f7952e5382d9ccbc99ce930f6ba2016a, base7b6828c, verified patch50559bytes/SHA25698e64fa5d967284daadea60379c572f7a47551068fa15ab3a62958da0cd4ac2b. Limited evidence Standards PASS, Spec PASS, aggregate PASS, no blocking record findings; record-only integration risk LOW. Complete Linux journey and full I0024 acceptance INCONCLUSIVE/BLOCKED. Prior PR138 MEDIUM not downgraded; original criteria not waived. All additionally approved actors/review now consumed.
 
 This later receipt/status reconciliation adds no executable/test/CI/settings change and does not relabel the reviewed source or its previous native CI. Coordinator will publish one evidence-record PR and observe required exact-head CI; standing current LOW-risk integration permission applies only to this record-only scope after checks and normal expected-head/server protections. No automatic further probe, Windows VM setup, cleanup or permanent test harness. Pending Linux outcomes remain exactly as stated in A003/V001; operator supplies native Windows outcome separately. No claim of full technical closure or product acceptance.
+
+## Coordinator-owned next Linux budget (additive, not reset)
+
+Current operator explicitly delegates budget judgment: “ausa tu propio criterio para los presupuestos, si necesitas algo de mi, avisame”. I0024-only integration permission now covers assessed LOW/MEDIUM after exact required review/checks/CI and expected-head protections; HIGH or unresolved risk still stops. PR139 reviewed evidence integrated normally as main47af135c6ab713da2f4a0e26f654020f50406530, expected head3938190, fresh CI41332279485SUCCESS3/3; six actual native reportsPASS on synthetic23bb7bb exactparents7b6828c/3938190 equaltree34f62a55c3c0959ae2766af21641b57af739052c. Full acceptance remains open.
+
+All earlier spending remains spent. New finite tranche before dispatch: Pi3 native calls at luna/high<=10min each (initial controlled interruption, same-session resume, separate cancellation task); Claude1 coordinator opus/low<=10min and at most3 native Agent invocations total at sonnet/medium (at most2 distinct child contexts and1 eligible same-context resume, each<=5min within parent deadline); final independent sol/medium review1<=15min, plus at most1 reserved affected-delta review<=15min only if a demonstrated correction requires it. No mandatory second review, unbounded retry, automatic replacement, provider/payment change or quota claim. At most2 concurrent model readers, one writable owner; serialize Pi and Claude actor phases. Windows remains operator-owned on another machine. No installations, credentials copy, permanent E2E/source/test/CI changes or local VM work.
+
+Only coordinator-owned disposable fixtures and temporary native drivers are allowed. Fixture budget128MiB and one copy, available /tmp about4GiB; no automatic deletion. Actual Pi native interrupt is supported by installed0.83.0 action registry/source; stop is non-resumable while interrupt is a resumable pause. Use exact identity/status and authoritative resume eligibility, preserving partial results/known output paths. New Claude control outcomes must follow actual exposed native tools, not guessed TaskStop/resume parameters; unsupported mechanisms remain explicit. No extra actor merely to wait. Record actual evidence, not pretend controlled replay is native duplicate delivery or OS crash recovery.
