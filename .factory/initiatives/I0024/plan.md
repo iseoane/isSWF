@@ -94,4 +94,3 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 ### Evidence
 
 - Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
-
