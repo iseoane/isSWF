@@ -4,12 +4,12 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Resolve #128: Distinguish an available commit from completed execution and retained required worker evidence before elective successful-path stopping.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None for the bounded next step; unsupported capability remains an explicit limit.
-- Next step: One sequential native worker, relevant local checks, independent review, final-head PR CI and permitted integration.
+- Blocker: None for source-verified scope; PR/native CI and integration are separate gates.
+- Next step: Publish one final record head, verify exact-head native CI and integrate only within applicable risk/authority; retain final remote receipt on the PR.
 
 ### Acceptance
 
@@ -23,3 +23,7 @@ Type: enhancement
 
 - Current operator explicitly requests all remaining ordered issues121,126,127,125,128. This unit only: 128. Bounded native preparation/implementation/checks/feature commits/push/PR/CI in iseoane/isSWF; integration only under applicable LOW-risk protected expected-head authorization. No other unit, direct-main push, bypass, installation, release, deployment or cleanup.
 - Source base 0fbfb376902c7bc02728190599877e2e11a3b58d; actual issue observation and affected files inspected.
+
+## Source verification
+
+Candidate 342346cd98ac84e1b26b37a191ce62d371a6821f; implementation and independent Standards/Spec review verified as retained in jobs/J001/delivery.md. Author focused host/static scenario and diff checks PASS. Final independent source Standards/Spec/aggregate PASS on342346cd98ac84e1b26b37a191ce62d371a6821f; initial INCONCLUSIVE verification report preserved. Coordinator-owned exact standalone host gate: full portable quality, locked ESLint/Knip and diff PASS (exit0). Earlier linked-worktree full checks failed unchanged .git/objects layout assumptions; not relabelled passing or broadened into legacy repair. Writing/static method, not TDD/live actor reliability or cessation certification. Completed denotes source implementation/verification, not unobserved PR, CI or merge. Later results will be external PR receipts, not recursive record commits.
