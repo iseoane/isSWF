@@ -9,7 +9,7 @@ Type: enhancement
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None for source-verified scope; PR/native CI and integration are separate gates.
-- Next step: Publish one final record head, verify exact-head native CI and integrate only within applicable risk/authority; retain final remote receipt on the PR.
+- Next step: Verify refreshed exact-head native CI, then perform the explicitly approved MEDIUM-risk normal expected-head PR135 merge; retain final result externally on the PR.
 
 ### Acceptance
 
@@ -27,3 +27,9 @@ Type: enhancement
 ## Source verification
 
 Candidate 176bfbf545121d7697d4d536436013c6fc4c4fb0; implementation and independent Standards/Spec review verified as retained in jobs/J001/delivery.md. Coordinator replayed exact original RED858ac2aeee5046c4e762f8d538f2b674260c37bb: missing expected exception. Worker GREEN74a89e2 and additional coordinator test-only sentinelRED957cfd529d7ceb6cda5fdb4907a0a3a637ac32e2 -> GREEN1261805142632362660a9fce123a73009b83aae9 cover wrapped None./whitespace. Six focal reader/writer/admission tests, full portable quality, locked ESLint/Knip and diff PASS on1261805; final delta only registers existing tests in native CI. No historical file changes or live model calls. Completed denotes source implementation/verification, not unobserved PR, CI or merge. Later results will be external PR receipts, not recursive record commits.
+
+## Explicit MEDIUM-risk integration decision
+
+After the coordinator explained that stricter validation can make an entire malformed pinned plan unavailable, including another selected job, the current operator explicitly replied "Ok integra!". This grants integration of #127/PR135 with that disclosed MEDIUM risk, conditional on fresh final-head checks. It is not LOW-risk standing permission, a migration/record-repair grant, direct-main push, bypass, release or installation.
+
+The feature branch was updated by normal merge from current main c4953e640f70e1eacae24317a8a2c37299bc1358. Coordinator verified the parser is byte-identical to independently reviewed176bfbf and all three affected regression files byte-identical to previously native-CI-verifiedc29898f. Both parser-reader CI steps and the independently integrated exact-byte fixture step remain present. Focal parser/status/panel/guarded-writer suites PASS on the combined source. Prior document/source checkpoints, earlier FAIL results and MEDIUM classification stay unchanged. New final-head CI is mandatory before integration; no new reviewer/model call is needed for this unchanged-source applicability plus record-only grant delta.
