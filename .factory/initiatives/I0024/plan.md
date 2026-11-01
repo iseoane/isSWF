@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: in-progress
+- Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
-- Blocker: Final independent Linux evidence assessment pending; remaining live recovery/callback criteria and operator-owned Windows acceptance stay open.
-- Next step: Dispatch only the single authorized final reviewer on the exact retained record candidate; no further model probes, Windows preparation or permanent E2E suite.
+- Blocker: Limited Linux evidence review PASS; complete Linux recovery/callback/conversation criteria and operator-owned Windows acceptance remain unverified.
+- Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
 ### Acceptance
 
@@ -160,3 +160,9 @@ All approved Linux probes completed; coordinator consumed both full Pi reports a
 No permanent E2E/source/CI/host config changes. Native CLI test exercises real Linux background/read-only Agent and actual streaming operator interaction, not a substituted Pi provider. J004/A003 records initial evidence limits and private local retention without private thinking/credentials. Two Pi probes and native Claude parent+child additional allowance consumed; one final reviewer<=15min remains before next dispatch. Existing source candidate unchanged and source R2PASS remains separate.
 
 Still not proved: real duplicate/late callback races, changed-source race, live cancellation/interruption/crash recovery, applied live Pi steer and controlled full Pi operator/CI journey. Windows is now explicitly operator-owned at their other native machine, with no local VM work. These criteria are not waived or marked completed. Final review must distinguish limited Linux observations from full I0024 acceptance. No new probe or review beyond final single allowance.
+
+## Final Linux evidence review disposition
+
+Final approved reviewer1ed9014e-334f-4e20-b791-55d2c2f831dd completed; coordinator consumed the full output and transcribed it unchanged to J004/V001.md. Exact reviewed record candidatebcc89b50f7952e5382d9ccbc99ce930f6ba2016a, base7b6828c, verified patch50559bytes/SHA25698e64fa5d967284daadea60379c572f7a47551068fa15ab3a62958da0cd4ac2b. Limited evidence Standards PASS, Spec PASS, aggregate PASS, no blocking record findings; record-only integration risk LOW. Complete Linux journey and full I0024 acceptance INCONCLUSIVE/BLOCKED. Prior PR138 MEDIUM not downgraded; original criteria not waived. All additionally approved actors/review now consumed.
+
+This later receipt/status reconciliation adds no executable/test/CI/settings change and does not relabel the reviewed source or its previous native CI. Coordinator will publish one evidence-record PR and observe required exact-head CI; standing current LOW-risk integration permission applies only to this record-only scope after checks and normal expected-head/server protections. No automatic further probe, Windows VM setup, cleanup or permanent test harness. Pending Linux outcomes remain exactly as stated in A003/V001; operator supplies native Windows outcome separately. No claim of full technical closure or product acceptance.
