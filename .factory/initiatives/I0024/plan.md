@@ -62,7 +62,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Actual eligible Pi resume observed, but live cancellation/interruption and actual callback races remain unverified.
+- Blocker: Actual Pi interruption/resume, changed-candidate rejection, steer delivery+ack and cancellation now observed; broader callback/Claude controls still require remaining evidence, with Claude quota paused.
 - Next step: Review bounded Linux evidence in J004/A003; retain unverified recovery/callback criteria and do not spend another probe automatically.
 
 ### Acceptance
@@ -82,7 +82,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r4.md](jobs/J004/brief-r4.md)
-- Blocker: Limited Linux evidence review PASS; complete Linux recovery/callback/conversation criteria and operator-owned Windows acceptance remain unverified.
+- Blocker: New real Pi control and isolated notification evidence awaiting Codex assessment; native Claude controls paused for exhausted quota, Windows operator-owned and full acceptance open.
 - Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
 ### Acceptance
@@ -180,3 +180,9 @@ Only coordinator-owned disposable fixtures and temporary native drivers are allo
 User reports Claude quota exhausted and requests one reminder in40min while continuing independent Pi/Codex work. No new Claude control context was launched: temporary driver prepared only. Current tranche Pi3calls consumed; actual interrupt/resume/changedGitcandidate rejection/native steer delivery+ack and stopnonresumable results retained in J004/A004.md. Claude1parent/max3Agent invocations remain unused; independent review1+conditionalreserve1 remain unused. Earlier grants/counters unchanged.
 
 Current work may proceed through non-Claude evidence/deduplication inspection and Codex review; never relabel it native Claude equivalence. Reminder is one-shot/session-only/zero-model-child/zero-command;40min does not imply quota reset or reopen a closed Pi. On wake read current canonical records and actual state, reconcile ancestry rather than reset checkout, and keep Claude blocked until quota available. No duplicate dispatch, automatic repeated timer, installation, localWindows work, permanent tests or credential copies. Original remaining coverage stays visible.
+
+## Independent work completed while Claude quota paused
+
+One first-run disposable model-free Node probe exercised installed native notification component0.83.0 with isolated session/owner/callback/clock/timers:10/10 PASS,0 model calls. J004/A005 records exact module/driver hashes, actual callback-count assertions and limits; no live result store, provider, agent or permanent test was created. Native dedupe is TTL-bounded, not universal exactly-once; late owner/session emit rejection and pending/duplicate handling are component observations, not full distributed callback delivery. Original remaining outcomes are not waived.
+
+Requested one-shot sessionOnly40min reminder isswf-i0024-resume40min actually fired at18:46:33.815Z with0child runs; current records/HEAD/actor states reconciled, no active model actors. No automatic renewal or Claude call was made and quota recovery was not assumed. Continue Pi/Codex-only assessment. Current tranche Pi3calls spent; Claude1parent/max3Agent invocations still NEVER launched/unused; Codex review1+conditional affected-delta reserve1 remain before next dispatch. Current new evidence is A004/A005; original A003/V001 conclusions at earlier checkpoints remain preserved, not retroactively relabelled passing.
