@@ -81,7 +81,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r4.md](jobs/J004/brief-r4.md)
+- Brief: [brief-r5.md](jobs/J004/brief-r5.md)
 - Blocker: New bounded Pi control/component evidence independently PASS; native Claude controls paused for exhausted quota, broader live journey/callback coverage and operator-owned Windows acceptance remain open.
 - Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
@@ -194,3 +194,9 @@ Primary reviewer35c60533-e530-4f49-9e22-abc3656327c9 completed with full output 
 Reviewer inspected actual curated native status projections/same-session report/steer events and actual installed module with retained temporary driver/results. This substantiates supported Pi task/session interruption recovery, actual candidate-change rejection, delivered/acknowledged steer, cancellation and isolated notification cases, not machine-crash guarantees or arbitrary distributed callback races. Compressed handoff path wording was clarified to actual full canonical review.md; required procedure complete, not a missing file.
 
 Current tranche primaryreview1 now consumed; reserved second review remains conditional on a real correction requiring affected independent judgment. Pi3calls spent. Native Claude controls driver still NEVER launched; its1parent/max3Agent invocations unused, paused for operator-reported exhausted quota. No automatic timer renewal, model/provider substitution, Windows setup or permanent E2E. Next coordinator action is one record-only PR with exact-head CI and expected-head protected integration under current LOW/MEDIUM permission. Current data accuracy is verified, not full initiative closure or operator acceptance.
+
+## Current confirmed Pi completion assignment
+
+Operator confirmed the new-session three-work request: complete remaining Pi coverage; plan I0025/I0026 only. Claude remains quota-paused and Windows operator-owned. Current source main `a8461287c370908b2983b90322ec1d7f6bef4de6` includes PR140’s reviewed evidence; prior next-step publication text above is historical and already fulfilled. Actual native preflight: Pi1.4.0/subagents0.83.0; approved worker luna/high and reviewer sol/medium; no active async actor after planner completion.
+
+J004/r5 sets additive finite tranche: one temporary-verification worker <=15min; one independent reviewer <=15min plus one conditional affected-delta review <=10min; no worker retry/resume/replacement, nested agents, installation or real provider calls inside temporary drivers. Previous consumption remains spent. Coordinator-owned records freeze during worker execution; output bound natively. Branch `test/i0024-pi-integrated`; no source/test/CI/settings changes. Current task is prepared, not yet dispatched at this checkpoint. Original acceptance remains unchanged, including conversation during actual agent/CI waits and live-versus-synthetic distinctions.
