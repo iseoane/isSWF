@@ -4,6 +4,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { gitFixtureArgs } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const locator = process.platform === 'win32' ? 'where.exe' : 'which';
@@ -12,10 +13,8 @@ assert.ok(gitPath);
 const git = await realpath(gitPath);
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-git-content-')));
 const cli = join(source, 'tools/git-evidence.mjs');
-// Fixture commits must keep CRLF/BOM bytes even when CI sets core.autocrlf=true.
-const noEolConversion = ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', '-c', 'core.safecrlf=false'];
 function gitRun(args, expected = 0) {
-  const result = spawnSync(git, [...noEolConversion, ...args], { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+  const result = spawnSync(git, gitFixtureArgs(args), { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, expected, `${args.join(' ')}\n${result.stderr}`);
   return result.stdout.trim();

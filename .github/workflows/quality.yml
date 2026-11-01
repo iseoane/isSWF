@@ -96,6 +96,8 @@ jobs:
         run: node tests/host-portability.mjs .
       - name: Verify missing host prerequisites stay blocked without hiding failures
         run: node tests/host-prerequisites.mjs .
+      - name: Verify shared exact-byte Git fixture policy
+        run: node tests/git-fixture-helper.mjs .
       - name: Verify bounded committed Git diff CLI and identity
         run: node tests/git-evidence.mjs .
       - name: Verify exact committed Git content CLI
