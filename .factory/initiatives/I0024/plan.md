@@ -76,10 +76,10 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: blocked
+- Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r2.md](jobs/J004/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
 - Next step: Within the current explicit start, consume J003 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
 
@@ -142,3 +142,11 @@ Original full criteria remain unfulfilled. Current assignment model budget is ex
 Operator explicitly forbids permanent E2E tests tied to this workstation and authorizes temporary verification instead. No environment-bound test or CI dependency has been added. Coordinator located and authenticated the existing Omarchy noVNC console, reached the real Windows desktop and observed PowerShell read-only OS/prerequisite output. See J004/A002.md for actual results, initial failed/inconclusive driver observations and scope. This supersedes earlier unverified claims that Windows itself was inaccessible: the guest is reachable; node/npm/git/pi/claude did not resolve on its current PATH. No installation, credential retention, Docker escalation or VM configuration change. No additional model actor dispatched.
 
 Current blocker is concrete: explicit permission for temporary guest-tool download/setup and finite additional native live-probe capacity, not 'no Windows host'. Existing CI native Windows evidence remains distinct from the VM and live conversation/recovery tests. Keep original full acceptance open. Local Claude executable availability is confirmed, but actual task dispatch must still follow approved native host/model/permission and remaining budget contracts.
+
+## Linux-first live verification grant
+
+Operator approved temporary setup and finite additional calls, then explicitly replaced Windows preparation with Linux-first Pi/Claude verification and stated final Windows testing will be done personally on a separate native Windows machine. Do not prepare/install/start/stop this local VM. No permanent environment-bound E2E tests. Original Windows criteria remain operator-owned/pending, not passed or waived.
+
+Additional finite allowance, distinct from exhausted initial budget: two native Pi probe calls <=10min each (the second may be the same probe's supported eligible-context resume, not an extra reset); one actual native Claude coordinator context and one native subagent <=10min each; one independent final reviewer <=15min. At most two concurrent readers, no writer; no source/test/config changes, installs, copied credentials, paid API route, retries or nested Pi agents. Approved Pi probe model luna/high and reviewer sol/medium; actual model/effort preflight remains required. Claude uses actual supported native host/approved model/effort, not a Pi provider replacement. Before current dispatch none of the additional calls consumed. Current trusted explicit instruction to continue reiterated by operator after coordinator delay; act now, do not merely acknowledge.
+
+First Pi probe: real native async read-only task on integrated source7b6828c and current record checkpoint. Validate actual assignment/run/candidate and request one genuine supervisor decision confirming the expected source/input identity before completing read-only checks. This is a bounded host communication/steering/resumption journey, not an artificial sleep, repeated model waiting call or real cancellation of unsafe work. Parent will answer via supported native supervisor route, reconcile duplicate/stale notification metadata without dispatch/publication, and record actual evidence honestly. No claim of crash recovery, exactly-once or OS containment. Second Pi call only after terminal state/eligible-context validation within remaining total grant.
