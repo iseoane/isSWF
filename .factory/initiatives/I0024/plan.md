@@ -62,7 +62,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Actual eligible Pi resume observed, but live cancellation/interruption and actual callback races remain unverified.
+- Blocker: Actual Pi interruption/resume, changed-candidate rejection, steer delivery+ack and cancellation now observed; broader callback/Claude controls still require remaining evidence, with Claude quota paused.
 - Next step: Review bounded Linux evidence in J004/A003; retain unverified recovery/callback criteria and do not spend another probe automatically.
 
 ### Acceptance
@@ -81,8 +81,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
-- Blocker: Limited Linux evidence review PASS; complete Linux recovery/callback/conversation criteria and operator-owned Windows acceptance remain unverified.
+- Brief: [brief-r4.md](jobs/J004/brief-r4.md)
+- Blocker: New bounded Pi control/component evidence independently PASS; native Claude controls paused for exhausted quota, broader live journey/callback coverage and operator-owned Windows acceptance remain open.
 - Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
 ### Acceptance
@@ -166,3 +166,31 @@ Still not proved: real duplicate/late callback races, changed-source race, live 
 Final approved reviewer1ed9014e-334f-4e20-b791-55d2c2f831dd completed; coordinator consumed the full output and transcribed it unchanged to J004/V001.md. Exact reviewed record candidatebcc89b50f7952e5382d9ccbc99ce930f6ba2016a, base7b6828c, verified patch50559bytes/SHA25698e64fa5d967284daadea60379c572f7a47551068fa15ab3a62958da0cd4ac2b. Limited evidence Standards PASS, Spec PASS, aggregate PASS, no blocking record findings; record-only integration risk LOW. Complete Linux journey and full I0024 acceptance INCONCLUSIVE/BLOCKED. Prior PR138 MEDIUM not downgraded; original criteria not waived. All additionally approved actors/review now consumed.
 
 This later receipt/status reconciliation adds no executable/test/CI/settings change and does not relabel the reviewed source or its previous native CI. Coordinator will publish one evidence-record PR and observe required exact-head CI; standing current LOW-risk integration permission applies only to this record-only scope after checks and normal expected-head/server protections. No automatic further probe, Windows VM setup, cleanup or permanent test harness. Pending Linux outcomes remain exactly as stated in A003/V001; operator supplies native Windows outcome separately. No claim of full technical closure or product acceptance.
+
+## Coordinator-owned next Linux budget (additive, not reset)
+
+Current operator explicitly delegates budget judgment: “ausa tu propio criterio para los presupuestos, si necesitas algo de mi, avisame”. I0024-only integration permission now covers assessed LOW/MEDIUM after exact required review/checks/CI and expected-head protections; HIGH or unresolved risk still stops. PR139 reviewed evidence integrated normally as main47af135c6ab713da2f4a0e26f654020f50406530, expected head3938190, fresh CI41332279485SUCCESS3/3; six actual native reportsPASS on synthetic23bb7bb exactparents7b6828c/3938190 equaltree34f62a55c3c0959ae2766af21641b57af739052c. Full acceptance remains open.
+
+All earlier spending remains spent. New finite tranche before dispatch: Pi3 native calls at luna/high<=10min each (initial controlled interruption, same-session resume, separate cancellation task); Claude1 coordinator opus/low<=10min and at most3 native Agent invocations total at sonnet/medium (at most2 distinct child contexts and1 eligible same-context resume, each<=5min within parent deadline); final independent sol/medium review1<=15min, plus at most1 reserved affected-delta review<=15min only if a demonstrated correction requires it. No mandatory second review, unbounded retry, automatic replacement, provider/payment change or quota claim. At most2 concurrent model readers, one writable owner; serialize Pi and Claude actor phases. Windows remains operator-owned on another machine. No installations, credentials copy, permanent E2E/source/test/CI changes or local VM work.
+
+Only coordinator-owned disposable fixtures and temporary native drivers are allowed. Fixture budget128MiB and one copy, available /tmp about4GiB; no automatic deletion. Actual Pi native interrupt is supported by installed0.83.0 action registry/source; stop is non-resumable while interrupt is a resumable pause. Use exact identity/status and authoritative resume eligibility, preserving partial results/known output paths. New Claude control outcomes must follow actual exposed native tools, not guessed TaskStop/resume parameters; unsupported mechanisms remain explicit. No extra actor merely to wait. Record actual evidence, not pretend controlled replay is native duplicate delivery or OS crash recovery.
+
+## Current quota pause and safe resume point
+
+User reports Claude quota exhausted and requests one reminder in40min while continuing independent Pi/Codex work. No new Claude control context was launched: temporary driver prepared only. Current tranche Pi3calls consumed; actual interrupt/resume/changedGitcandidate rejection/native steer delivery+ack and stopnonresumable results retained in J004/A004.md. Claude1parent/max3Agent invocations remain unused; independent review1+conditionalreserve1 remain unused. Earlier grants/counters unchanged.
+
+Current work may proceed through non-Claude evidence/deduplication inspection and Codex review; never relabel it native Claude equivalence. Reminder is one-shot/session-only/zero-model-child/zero-command;40min does not imply quota reset or reopen a closed Pi. On wake read current canonical records and actual state, reconcile ancestry rather than reset checkout, and keep Claude blocked until quota available. No duplicate dispatch, automatic repeated timer, installation, localWindows work, permanent tests or credential copies. Original remaining coverage stays visible.
+
+## Independent work completed while Claude quota paused
+
+One first-run disposable model-free Node probe exercised installed native notification component0.83.0 with isolated session/owner/callback/clock/timers:10/10 PASS,0 model calls. J004/A005 records exact module/driver hashes, actual callback-count assertions and limits; no live result store, provider, agent or permanent test was created. Native dedupe is TTL-bounded, not universal exactly-once; late owner/session emit rejection and pending/duplicate handling are component observations, not full distributed callback delivery. Original remaining outcomes are not waived.
+
+Requested one-shot sessionOnly40min reminder isswf-i0024-resume40min actually fired at18:46:33.815Z with0child runs; current records/HEAD/actor states reconciled, no active model actors. No automatic renewal or Claude call was made and quota recovery was not assumed. Continue Pi/Codex-only assessment. Current tranche Pi3calls spent; Claude1parent/max3Agent invocations still NEVER launched/unused; Codex review1+conditional affected-delta reserve1 remain before next dispatch. Current new evidence is A004/A005; original A003/V001 conclusions at earlier checkpoints remain preserved, not retroactively relabelled passing.
+
+## Codex assessment during Claude quota pause
+
+Primary reviewer35c60533-e530-4f49-9e22-abc3656327c9 completed with full output consumed and transcribed unchanged to J004/V002.md. Exact reviewed four-record candidatef1ab794ebff241ccf43c59dafe83f19bcbc82f41 against47af135; bound patch22461bytes/SHA256d59c11d959153957a0890b0d5db11c6a243a343832ed6b5ccd9bb41dd133aca7 verified. Standards PASS, Spec PASS for current accurate records and bounded Pi outcomes; record-only integration risk LOW, no blocking record findings. Complete Linux/full I0024 acceptance remains INCONCLUSIVE/BLOCKED. Prior adverse/inconclusive reports and PR138MEDIUM are unchanged.
+
+Reviewer inspected actual curated native status projections/same-session report/steer events and actual installed module with retained temporary driver/results. This substantiates supported Pi task/session interruption recovery, actual candidate-change rejection, delivered/acknowledged steer, cancellation and isolated notification cases, not machine-crash guarantees or arbitrary distributed callback races. Compressed handoff path wording was clarified to actual full canonical review.md; required procedure complete, not a missing file.
+
+Current tranche primaryreview1 now consumed; reserved second review remains conditional on a real correction requiring affected independent judgment. Pi3calls spent. Native Claude controls driver still NEVER launched; its1parent/max3Agent invocations unused, paused for operator-reported exhausted quota. No automatic timer renewal, model/provider substitution, Windows setup or permanent E2E. Next coordinator action is one record-only PR with exact-head CI and expected-head protected integration under current LOW/MEDIUM permission. Current data accuracy is verified, not full initiative closure or operator acceptance.
