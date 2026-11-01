@@ -5,6 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { gitFixtureArgs } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const sdkRoot = join(source, 'tooling/host-tests/node_modules/@earendil-works/pi-coding-agent');
@@ -16,10 +17,8 @@ const profile = join(root, 'profile');
 const gitPath = spawnSync(process.platform === 'win32' ? 'where.exe' : 'which', ['git'], { encoding: 'utf8' }).stdout.trim().split(/\r?\n/u)[0];
 assert.ok(gitPath, 'Git executable must be locatable');
 const git = await realpath(gitPath);
-// Fixture commits must keep CRLF/BOM bytes even when CI sets core.autocrlf=true.
-const noEolConversion = ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', '-c', 'core.safecrlf=false'];
 const command = (bin, args, cwd) => {
-  const result = spawnSync(bin, bin === git ? [...noEolConversion, ...args] : args, { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+  const result = spawnSync(bin, bin === git ? gitFixtureArgs(args) : args, { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, 0, `${bin} ${args.join(' ')}\n${result.stderr}\n${result.stdout}`);
   return result.stdout.trim();

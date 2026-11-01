@@ -5,6 +5,7 @@ import { copyFile, mkdir, mkdtemp, readdir, readFile, realpath, rm, stat, writeF
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { gitFixtureArgs } from './support/git-fixture.mjs';
 
 // Journeys through the real stdio MCP server process that the Claude reviewer route launches.
 const source = resolve(process.argv[2] ?? '.');
@@ -15,10 +16,8 @@ const workspace = join(root, 'repo');
 const gitPath = spawnSync(process.platform === 'win32' ? 'where.exe' : 'which', ['git'], { encoding: 'utf8' }).stdout.trim().split(/\r?\n/u)[0];
 assert.ok(gitPath, 'Git executable must be locatable');
 const git = await realpath(gitPath);
-// Fixture commits must keep CRLF/BOM bytes even when CI sets core.autocrlf=true.
-const noEolConversion = ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', '-c', 'core.safecrlf=false'];
 const gitRun = args => {
-  const result = spawnSync(git, [...noEolConversion, ...args], { cwd: workspace, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+  const result = spawnSync(git, gitFixtureArgs(args), { cwd: workspace, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, 0, `${args.join(' ')}\n${result.stderr}`);
   return result.stdout.trim();
