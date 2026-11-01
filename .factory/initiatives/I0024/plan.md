@@ -8,6 +8,8 @@ Keep the coordinator available to the operator while agents, CI or other long op
 
 ## Provenance and authority
 
+Current per-job fields and latest named observations below govern reported state. Earlier named checkpoint narratives preserve historical evidence, not current liveness or permission; later explicit grants are additive and never reset consumed budgets.
+
 Recovered from the actual isSWF Pi conversation dated 2026-11-01, session `01a1936b-7639-777e-852b-401b5d6ddec8`, following the operator question “Como mejoramos la isswf para que el coordinador no se quede esperando todo de forma sincronía?”. The final four-job proposal was titled “Iniciativa: coordinación asíncrona y conversación disponible”. The prior assistant explicitly reported that it had saved neither files nor Engram memory. Engram observation 4285 corroborates the responsiveness preference, but is not the full plan or execution authority. This is an English transcription of that proposal into canonical records, not a claim that it was already implemented or approved for execution.
 
 Initial registration was prepare-only. Superseding current operator instruction: “Coordinador una vez que esté registrado, atacalo, si se puede paralelizar hazlo, y ya sabes riesgos bajos integralo sin preguntar”. This explicitly starts I0024 through implementation, checks, independent review, coordinator-owned feature commits/push/PR and exact-head CI in iseoane/isSWF targeting main. Normal protected expected-head integration is authorized only for independently assessed LOW risk with required review/CI passing; MEDIUM/HIGH/unknown risk remains awaiting-human. No direct-main push, bypass, release, installation, deployment or cleanup.
@@ -20,8 +22,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify capabilities and reproduce blocking: Inspect coordinator and both native hosts; reproduce a slow task blocking conversation and select the minimum functional unit.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Full live responsiveness reproduction on Claude and Windows is unavailable here; static evidence and Linux Pi dispatch/completion are not equivalent acceptance.
-- Next step: Within the current explicit start, verify current host capabilities and agree the minimum functional unit before writer dispatch.
+- Blocker: Full reproduction/equivalence remains partial; Windows final observation is now operator-owned, not an absent host.
+- Next step: Consume J004/A003 and final Linux review; retain missing reproduction/equivalence without redispatch under spent probe budgets.
 
 ### Acceptance
 
@@ -32,7 +34,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- Grounding and bounded re-plan below; actual Linux native observations in jobs/J004/A003.md; original full criteria remain partially unverified.
 
 ## J002
 
@@ -40,8 +42,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
-- Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
-- Next step: Within the current explicit start, consume J001 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
+- Blocker: Source-policy unit integrated via PR138; full cross-host conversation/CI and Windows outcomes are not all accepted.
+- Next step: Reuse retained source PASS/CI evidence and Linux A003; operator supplies final Windows outcome; do not mark full acceptance from source integration.
 
 ### Acceptance
 
@@ -52,7 +54,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- PR138 merged as7b6828c; source Standards/Spec PASS in jobs/J002/V002.md; exact-head CI41291801696 SUCCESS3/3; live Linux scope in jobs/J004/A003.md.
 
 ## J003
 
@@ -60,8 +62,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
-- Next step: Within the current explicit start, consume J002 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
+- Blocker: Actual eligible Pi resume observed, but live cancellation/interruption and actual callback races remain unverified.
+- Next step: Review bounded Linux evidence in J004/A003; retain unverified recovery/callback criteria and do not spend another probe automatically.
 
 ### Acceptance
 
@@ -72,7 +74,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- Two actual Pi probe reports consumed, same-session native resume and supervisor mismatch reconciliation recorded in jobs/J004/A003.md; stale metadata test is synthetic, live steer consumption not proved.
 
 ## J004
 
@@ -80,8 +82,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
-- Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
-- Next step: Within the current explicit start, consume J003 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
+- Blocker: Final independent Linux evidence assessment pending; remaining live recovery/callback criteria and operator-owned Windows acceptance stay open.
+- Next step: Dispatch only the single authorized final reviewer on the exact retained record candidate; no further model probes, Windows preparation or permanent E2E suite.
 
 ### Acceptance
 
@@ -93,9 +95,9 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- Existing Pi SDK synthetic11/11 PASS in jobs/J004/A001.md; temporary Windows prerequisites in A002.md; actual Linux Pi/Claude observations and precise gaps in A003.md.
 
-## Grounding and bounded re-plan
+## Grounding and bounded re-plan (historical checkpoint observation)
 
 Two read-only native researchers completed in async workflow 85c95ead-02d8-4491-b681-2065c625c54b (Pi child 9c7c758f-f581-40a7-b7ae-7774c6016351; Claude child 1ee32c4c-9465-4b5e-b4d5-b335a76d7811). Coordinator consumed both full returned artifacts. Researchers wrote no files; resource consumption is self-reported. Pi source/docs confirm native async dispatch, completion notifications and retained identities. The current Pi host guide explicitly recommends normal foreground async:false. Claude researcher lacked command tools, so coordinator ran local claude --version/--help: 2.1.312; help documents background sessions, which do not alone establish Agent subagent background behavior. Coordinator fetched official https://code.claude.com/docs/en/sub-agents.md, specifically Run subagents in foreground or background and Resume subagents: background concurrent work and completion notifications are documented, subject to effective version/configuration/permissions; this is upstream documentation, not a live local Claude or Windows proof. No Claude model called.
 
