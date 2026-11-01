@@ -78,11 +78,11 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: in-progress
+- Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r4.md](jobs/J004/brief-r4.md)
-- Blocker: New real Pi control and isolated notification evidence awaiting Codex assessment; native Claude controls paused for exhausted quota, Windows operator-owned and full acceptance open.
+- Blocker: New bounded Pi control/component evidence independently PASS; native Claude controls paused for exhausted quota, broader live journey/callback coverage and operator-owned Windows acceptance remain open.
 - Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
 ### Acceptance
@@ -186,3 +186,11 @@ Current work may proceed through non-Claude evidence/deduplication inspection an
 One first-run disposable model-free Node probe exercised installed native notification component0.83.0 with isolated session/owner/callback/clock/timers:10/10 PASS,0 model calls. J004/A005 records exact module/driver hashes, actual callback-count assertions and limits; no live result store, provider, agent or permanent test was created. Native dedupe is TTL-bounded, not universal exactly-once; late owner/session emit rejection and pending/duplicate handling are component observations, not full distributed callback delivery. Original remaining outcomes are not waived.
 
 Requested one-shot sessionOnly40min reminder isswf-i0024-resume40min actually fired at18:46:33.815Z with0child runs; current records/HEAD/actor states reconciled, no active model actors. No automatic renewal or Claude call was made and quota recovery was not assumed. Continue Pi/Codex-only assessment. Current tranche Pi3calls spent; Claude1parent/max3Agent invocations still NEVER launched/unused; Codex review1+conditional affected-delta reserve1 remain before next dispatch. Current new evidence is A004/A005; original A003/V001 conclusions at earlier checkpoints remain preserved, not retroactively relabelled passing.
+
+## Codex assessment during Claude quota pause
+
+Primary reviewer35c60533-e530-4f49-9e22-abc3656327c9 completed with full output consumed and transcribed unchanged to J004/V002.md. Exact reviewed four-record candidatef1ab794ebff241ccf43c59dafe83f19bcbc82f41 against47af135; bound patch22461bytes/SHA256d59c11d959153957a0890b0d5db11c6a243a343832ed6b5ccd9bb41dd133aca7 verified. Standards PASS, Spec PASS for current accurate records and bounded Pi outcomes; record-only integration risk LOW, no blocking record findings. Complete Linux/full I0024 acceptance remains INCONCLUSIVE/BLOCKED. Prior adverse/inconclusive reports and PR138MEDIUM are unchanged.
+
+Reviewer inspected actual curated native status projections/same-session report/steer events and actual installed module with retained temporary driver/results. This substantiates supported Pi task/session interruption recovery, actual candidate-change rejection, delivered/acknowledged steer, cancellation and isolated notification cases, not machine-crash guarantees or arbitrary distributed callback races. Compressed handoff path wording was clarified to actual full canonical review.md; required procedure complete, not a missing file.
+
+Current tranche primaryreview1 now consumed; reserved second review remains conditional on a real correction requiring affected independent judgment. Pi3calls spent. Native Claude controls driver still NEVER launched; its1parent/max3Agent invocations unused, paused for operator-reported exhausted quota. No automatic timer renewal, model/provider substitution, Windows setup or permanent E2E. Next coordinator action is one record-only PR with exact-head CI and expected-head protected integration under current LOW/MEDIUM permission. Current data accuracy is verified, not full initiative closure or operator acceptance.
