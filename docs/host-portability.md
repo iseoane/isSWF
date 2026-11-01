@@ -19,7 +19,7 @@ For Pi, the normal integration uses Pi 1.4.0 and `pi-subagents` 0.83.0. Install 
 }
 ```
 
-This is a configuration example, not a universal default, availability claim or cost grant. Verify the selected host's current mapping before launch. The factory package must be loaded by Pi for its package agents to be discovered. Follow [.agents/hosts/pi.md](../.agents/hosts/pi.md) for the foreground delegation contract.
+This is a configuration example, not a universal default, availability claim or cost grant. Verify the selected host's current mapping before launch. The factory package must be loaded by Pi for its package agents to be discovered. Follow [.agents/hosts/pi.md](../.agents/hosts/pi.md) for the Pi-native delegation contract.
 
 For an explicitly authorised trusted checkout, Claude's session-only plugin loading command is:
 
