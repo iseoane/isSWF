@@ -8,6 +8,8 @@ Keep the coordinator available to the operator while agents, CI or other long op
 
 ## Provenance and authority
 
+Current per-job fields and latest named observations below govern reported state. Earlier named checkpoint narratives preserve historical evidence, not current liveness or permission; later explicit grants are additive and never reset consumed budgets.
+
 Recovered from the actual isSWF Pi conversation dated 2026-11-01, session `01a1936b-7639-777e-852b-401b5d6ddec8`, following the operator question “Como mejoramos la isswf para que el coordinador no se quede esperando todo de forma sincronía?”. The final four-job proposal was titled “Iniciativa: coordinación asíncrona y conversación disponible”. The prior assistant explicitly reported that it had saved neither files nor Engram memory. Engram observation 4285 corroborates the responsiveness preference, but is not the full plan or execution authority. This is an English transcription of that proposal into canonical records, not a claim that it was already implemented or approved for execution.
 
 Initial registration was prepare-only. Superseding current operator instruction: “Coordinador una vez que esté registrado, atacalo, si se puede paralelizar hazlo, y ya sabes riesgos bajos integralo sin preguntar”. This explicitly starts I0024 through implementation, checks, independent review, coordinator-owned feature commits/push/PR and exact-head CI in iseoane/isSWF targeting main. Normal protected expected-head integration is authorized only for independently assessed LOW risk with required review/CI passing; MEDIUM/HIGH/unknown risk remains awaiting-human. No direct-main push, bypass, release, installation, deployment or cleanup.
@@ -20,8 +22,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify capabilities and reproduce blocking: Inspect coordinator and both native hosts; reproduce a slow task blocking conversation and select the minimum functional unit.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Full live responsiveness reproduction on Claude and Windows is unavailable here; static evidence and Linux Pi dispatch/completion are not equivalent acceptance.
-- Next step: Within the current explicit start, verify current host capabilities and agree the minimum functional unit before writer dispatch.
+- Blocker: Full reproduction/equivalence remains partial; Windows final observation is now operator-owned, not an absent host.
+- Next step: Consume J004/A003 and final Linux review; retain missing reproduction/equivalence without redispatch under spent probe budgets.
 
 ### Acceptance
 
@@ -32,7 +34,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- Grounding and bounded re-plan below; actual Linux native observations in jobs/J004/A003.md; original full criteria remain partially unverified.
 
 ## J002
 
@@ -40,8 +42,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
-- Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
-- Next step: Within the current explicit start, consume J001 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
+- Blocker: Source-policy unit integrated via PR138; full cross-host conversation/CI and Windows outcomes are not all accepted.
+- Next step: Reuse retained source PASS/CI evidence and Linux A003; operator supplies final Windows outcome; do not mark full acceptance from source integration.
 
 ### Acceptance
 
@@ -52,16 +54,16 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- PR138 merged as7b6828c; source Standards/Spec PASS in jobs/J002/V002.md; exact-head CI41291801696 SUCCESS3/3; live Linux scope in jobs/J004/A003.md.
 
 ## J003
 
 - Status: blocked
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
-- Next step: Within the current explicit start, consume J002 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: Actual eligible Pi resume observed, but live cancellation/interruption and actual callback races remain unverified.
+- Next step: Review bounded Linux evidence in J004/A003; retain unverified recovery/callback criteria and do not spend another probe automatically.
 
 ### Acceptance
 
@@ -72,16 +74,16 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- Two actual Pi probe reports consumed, same-session native resume and supervisor mismatch reconciliation recorded in jobs/J004/A003.md; stale metadata test is synthetic, live steer consumption not proved.
 
 ## J004
 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
-- Next step: Within the current explicit start, consume J003 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
+- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
+- Blocker: Limited Linux evidence review PASS; complete Linux recovery/callback/conversation criteria and operator-owned Windows acceptance remain unverified.
+- Next step: Publish/integrate reviewed LOW-risk evidence records only after exact-head CI; retain incomplete Linux journeys and operator-owned Windows results as open acceptance, with no further model dispatch under spent grants.
 
 ### Acceptance
 
@@ -93,9 +95,9 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ### Evidence
 
-- Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+- Existing Pi SDK synthetic11/11 PASS in jobs/J004/A001.md; temporary Windows prerequisites in A002.md; actual Linux Pi/Claude observations and precise gaps in A003.md.
 
-## Grounding and bounded re-plan
+## Grounding and bounded re-plan (historical checkpoint observation)
 
 Two read-only native researchers completed in async workflow 85c95ead-02d8-4491-b681-2065c625c54b (Pi child 9c7c758f-f581-40a7-b7ae-7774c6016351; Claude child 1ee32c4c-9465-4b5e-b4d5-b335a76d7811). Coordinator consumed both full returned artifacts. Researchers wrote no files; resource consumption is self-reported. Pi source/docs confirm native async dispatch, completion notifications and retained identities. The current Pi host guide explicitly recommends normal foreground async:false. Claude researcher lacked command tools, so coordinator ran local claude --version/--help: 2.1.312; help documents background sessions, which do not alone establish Agent subagent background behavior. Coordinator fetched official https://code.claude.com/docs/en/sub-agents.md, specifically Run subagents in foreground or background and Resume subagents: background concurrent work and completion notifications are documented, subject to effective version/configuration/permissions; this is upstream documentation, not a live local Claude or Windows proof. No Claude model called.
 
@@ -122,3 +124,45 @@ Final independent reviewer e22f56d0-7cad-4ada-8349-7e8f72223080 assessed exact e
 All original live acceptance gates remain: Pi operator conversation while agent and CI work pending, cancellation/interruption/recovery and stale/duplicate/candidate-change observations, real Claude native Agent background completion/results with verified effective permissions, equivalent Windows outcomes. No appropriately verified live Claude or Windows host is available through this Pi session; installation, host switching, alternate dispatcher or extra model calls are not authorized substitutes. Current Pi native async dispatch, notifications and one same-context resume were observed during actual work, but are not a controlled full operator-conversation/CI/recovery probe. Keep J001-J004 blocked for their unmet criteria. J002/J003 source instructions are verified, not full functional acceptance.
 
 Budget consumed: two researchers, one initial worker, its one correction and both independent review rounds. No reviewers remain under the current finite ceiling. One second initial worker allowance is unused, but cannot supply missing Claude/Windows host capability or reset review budget. No active model writer/reviewer remains after final completion. Next authorized action is coordinator-owned draft PR publication and exact-head CI observation; no integration under current MEDIUM classification and unresolved acceptance. Reopen execution only for a concrete supported live probe within remaining authority; do not ask for generic approval or relabel this as LOW. No release, deployment, installation or cleanup.
+
+## Staged integration and verification continuation
+
+Current operator explicitly selected integration because complete live tests are scheduled later in J004; that concrete MEDIUM-risk decision supersedes the earlier LOW-only integration restriction for PR138, not for other work. PR138 merged normally with expected-head d85cbb7a4ecd85980d10ec508ef3c0a22ecb923a as main7b6828cddaa7a8d1b5f04b31151d953195a0b06e. Exact-head CI41291801696 SUCCESS3/3. Six Linux/Windows reports inspected PASS on synthetic09fea087 (parents57439126,d85cbb7), tree43c989f9609e7cc249567ec569781dcef8e309b0 equal head and actual merge. External durable receipt https://github.com/iseoane/isSWF/pull/138#issuecomment-6555985862 records these later observations without rewriting reviewed source. Full acceptance is not inferred.
+
+Current explicit continuation: “Coordinador continuas con el resto de la iniciativa?”. Continue J003 verification and J004 journeys; their evidence may be collected together after the integrated instruction baseline, while original closure criteria remain unchanged. Earlier r1 prepare-only brief text is historical; r2 below supplies current scope and budget. This continuation does not reset consumed actors or reviews. One unused second initial worker (luna/high <=25min) is allocated verification-only; no production/test/CI code changes or new review calls. It can run existing offline native checks, audit actual prior session observations and report the smallest unsupported journey. No child network/model calls, paid API, nested delegation, host switching or installations. Coordinator owns records and future feature-branch publication. Current native tool status reports no active actors; checkout is tracked-clean except private .pi/subagents. Available disk4.3GiB /tmp,84GiB source volume; verification fixture budget512MiB, one copy, no automatic deletion.
+
+Current evidence boundary: tests/host-native-delegation.mjs invokes real Pi SDK/extension with a loopback synthetic provider, explicit async:false and synthetic foreground cancellation; it does not cover background conversation, live Claude or Windows execution. Its locked dependency subagent bundle is absent here, but installed pi-subagents bundle is present and may be explicitly supplied via supported ISSWF_PI_SUBAGENTS override after verifying version0.83.0; missing/broken prerequisites must remain BLOCKED/FAIL. No installation inferred. Previously retained actual native async run/completion/resume and operator question while reviewer running may supply narrow opportunistic Pi observations, not all recovery/CI criteria. Worker must attribute what can actually be verified; not invent controlled reproduction or retain private transcripts. Full accepted Claude-native/Windows/live journey remains blocked until the actual corresponding supported host is available. Do not spend a model call to wait or invent a substitute dispatcher.
+
+## Verification run and exact remaining blocker
+
+Second initial worker6e4016b6 completed, full bound report consumed; curated J004/A001.md records actual existing-suite result. Pi Linux SDK1.4.0/subagents0.83.0 PASS11/11 offline cases,16 synthetic requests,0 real-provider requests inside the fixture, single attempt. Static portability PASS. No source/test/settings changes. Native fixture confirms foreground synthetic cancellation/refusal and bound evidence, not missing background/live cross-host acceptance.
+
+Original full criteria remain unfulfilled. Current assignment model budget is exhausted: two initial workers consumed, first-worker correction consumed, two researchers and two reviews consumed. No new dispatch or review without a concrete additional allowance. Current host lacks a supported native Claude Agent session interface and Windows execution access; installed Claude executable/help and CI discovery are not substitutes. Ask only for supported actual host access and finite remaining native-probe/review capacity; do not ask for generic continuation or pretend another existing synchronous fixture will fill those gaps. Source unit remains integrated via PR138; whole initiative not accepted. No automatic retries, host replacement, installation or source changes.
+
+## Environment-independent temporary probes
+
+Operator explicitly forbids permanent E2E tests tied to this workstation and authorizes temporary verification instead. No environment-bound test or CI dependency has been added. Coordinator located and authenticated the existing Omarchy noVNC console, reached the real Windows desktop and observed PowerShell read-only OS/prerequisite output. See J004/A002.md for actual results, initial failed/inconclusive driver observations and scope. This supersedes earlier unverified claims that Windows itself was inaccessible: the guest is reachable; node/npm/git/pi/claude did not resolve on its current PATH. No installation, credential retention, Docker escalation or VM configuration change. No additional model actor dispatched.
+
+Current blocker is concrete: explicit permission for temporary guest-tool download/setup and finite additional native live-probe capacity, not 'no Windows host'. Existing CI native Windows evidence remains distinct from the VM and live conversation/recovery tests. Keep original full acceptance open. Local Claude executable availability is confirmed, but actual task dispatch must still follow approved native host/model/permission and remaining budget contracts.
+
+## Linux-first live verification grant
+
+Operator approved temporary setup and finite additional calls, then explicitly replaced Windows preparation with Linux-first Pi/Claude verification and stated final Windows testing will be done personally on a separate native Windows machine. Do not prepare/install/start/stop this local VM. No permanent environment-bound E2E tests. Original Windows criteria remain operator-owned/pending, not passed or waived.
+
+Additional finite allowance, distinct from exhausted initial budget: two native Pi probe calls <=10min each (the second may be the same probe's supported eligible-context resume, not an extra reset); one actual native Claude coordinator context and one native subagent <=10min each; one independent final reviewer <=15min. At most two concurrent readers, no writer; no source/test/config changes, installs, copied credentials, paid API route, retries or nested Pi agents. Approved Pi probe model luna/high and reviewer sol/medium; actual model/effort preflight remains required. Claude uses actual supported native host/approved model/effort, not a Pi provider replacement. Before current dispatch none of the additional calls consumed. Current trusted explicit instruction to continue reiterated by operator after coordinator delay; act now, do not merely acknowledge.
+
+First Pi probe: real native async read-only task on integrated source7b6828c and current record checkpoint. Validate actual assignment/run/candidate and request one genuine supervisor decision confirming the expected source/input identity before completing read-only checks. This is a bounded host communication/steering/resumption journey, not an artificial sleep, repeated model waiting call or real cancellation of unsafe work. Parent will answer via supported native supervisor route, reconcile duplicate/stale notification metadata without dispatch/publication, and record actual evidence honestly. No claim of crash recovery, exactly-once or OS containment. Second Pi call only after terminal state/eligible-context validation within remaining total grant.
+
+## Linux native results awaiting final independent assessment
+
+All approved Linux probes completed; coordinator consumed both full Pi reports and real native Claude metadata/result timeline, retained J004/A003.md. Pi native async/supervisor identity and actual same-context eligible resume observed; controlled stale metadata rejected without mutation. Live steer only queued, not claimed consumed. Native Claude parentopus5.5 responded at17:22:09.755 while childsonnet5.5 remained active until17:22:22.173; host completion22.227, parent final consumed33.489. Requested effortlow/medium remains declared, not runtime telemetry. Intentional driver exit143 after successful final result is retained, not masked.
+
+No permanent E2E/source/CI/host config changes. Native CLI test exercises real Linux background/read-only Agent and actual streaming operator interaction, not a substituted Pi provider. J004/A003 records initial evidence limits and private local retention without private thinking/credentials. Two Pi probes and native Claude parent+child additional allowance consumed; one final reviewer<=15min remains before next dispatch. Existing source candidate unchanged and source R2PASS remains separate.
+
+Still not proved: real duplicate/late callback races, changed-source race, live cancellation/interruption/crash recovery, applied live Pi steer and controlled full Pi operator/CI journey. Windows is now explicitly operator-owned at their other native machine, with no local VM work. These criteria are not waived or marked completed. Final review must distinguish limited Linux observations from full I0024 acceptance. No new probe or review beyond final single allowance.
+
+## Final Linux evidence review disposition
+
+Final approved reviewer1ed9014e-334f-4e20-b791-55d2c2f831dd completed; coordinator consumed the full output and transcribed it unchanged to J004/V001.md. Exact reviewed record candidatebcc89b50f7952e5382d9ccbc99ce930f6ba2016a, base7b6828c, verified patch50559bytes/SHA25698e64fa5d967284daadea60379c572f7a47551068fa15ab3a62958da0cd4ac2b. Limited evidence Standards PASS, Spec PASS, aggregate PASS, no blocking record findings; record-only integration risk LOW. Complete Linux journey and full I0024 acceptance INCONCLUSIVE/BLOCKED. Prior PR138 MEDIUM not downgraded; original criteria not waived. All additionally approved actors/review now consumed.
+
+This later receipt/status reconciliation adds no executable/test/CI/settings change and does not relabel the reviewed source or its previous native CI. Coordinator will publish one evidence-record PR and observe required exact-head CI; standing current LOW-risk integration permission applies only to this record-only scope after checks and normal expected-head/server protections. No automatic further probe, Windows VM setup, cleanup or permanent test harness. Pending Linux outcomes remain exactly as stated in A003/V001; operator supplies native Windows outcome separately. No claim of full technical closure or product acceptance.
