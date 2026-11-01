@@ -16,11 +16,11 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J001
 
-- Status: pending
+- Status: blocked
 - Objective: Verify capabilities and reproduce blocking: Inspect coordinator and both native hosts; reproduce a slow task blocking conversation and select the minimum functional unit.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Native host/OS capabilities and reproduction evidence remain to be investigated.
+- Blocker: Full live responsiveness reproduction on Claude and Windows is unavailable here; static evidence and Linux Pi dispatch/completion are not equivalent acceptance.
 - Next step: Within the current explicit start, verify current host capabilities and agree the minimum functional unit before writer dispatch.
 
 ### Acceptance
@@ -38,8 +38,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 - Status: pending
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
-- Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Depends on: None
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: Prior dependency and current host/OS feasibility must close with retained evidence before dispatch.
 - Next step: Within the current explicit start, consume J001 evidence, reconcile feasibility and budgets, then execute only the authorized scope.
 
@@ -94,3 +94,11 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 ### Evidence
 
 - Recovered conversation proposal only; no job dispatched, reproduction run, implementation or acceptance evidence.
+
+## Grounding and bounded re-plan
+
+Two read-only native researchers completed in async workflow 85c95ead-02d8-4491-b681-2065c625c54b (Pi child 9c7c758f-f581-40a7-b7ae-7774c6016351; Claude child 1ee32c4c-9465-4b5e-b4d5-b335a76d7811). Coordinator consumed both full returned artifacts. Researchers wrote no files; resource consumption is self-reported. Pi source/docs confirm native async dispatch, completion notifications and retained identities. The current Pi host guide explicitly recommends normal foreground async:false. Claude researcher lacked command tools, so coordinator ran local claude --version/--help: 2.1.312; help documents background sessions, which do not alone establish Agent subagent background behavior. Coordinator fetched official https://code.claude.com/docs/en/sub-agents.md, specifically Run subagents in foreground or background and Resume subagents: background concurrent work and completion notifications are documented, subject to effective version/configuration/permissions; this is upstream documentation, not a live local Claude or Windows proof. No Claude model called.
+
+Initial assumption: all phases must wait for complete J001 live reproduction. Observed: independent shared instruction correction is possible now, but full live acceptance is not. Re-plan before writer start: J002 has no closure dependency on J001 and may implement the already-grounded instruction outcome, including safe-resumption instructions from J003 in the same coherent candidate to avoid overlapping shared writers. J001 and all original live/OS criteria remain blocked/pending; no acceptance is removed or waived. J003/J004 consume the source candidate and cannot claim full technical closure without their required evidence. This is a single pre-writer scope reconciliation, not a budget reset or permission for a new notifier/dispatcher.
+
+Implementation seam: canonical coordinator responsiveness and identity/authority rules; Pi native async/output/stop/resume distinctions; Claude capability-conditioned native background guidance without invented APIs; bounded non-model CI observation and exact-head validation; existing host contract tests and affected bilingual guides. Prefer instructions to code: no runtime capability gap demonstrated, no scheduler/store/adapter justified. Benefit: removes an avoidable foreground-default instruction without extra actors merely to wait. Costs: one initial worker <=25min and required independent review, focused static checks; full live-host verification remains separate visible evidence need.
