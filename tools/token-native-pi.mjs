@@ -170,10 +170,14 @@ export default function tokenNativePi(pi) {
   let pending;
   const completions = new Set();
   pi.on('session_start', async (_event, ctx) => {
-    epoch++;
-    active = { epoch, ctx, destination: await loadAutoConfig(ctx.cwd), disposed: false };
+    const currentEpoch = ++epoch;
+    active = undefined;
+    pending = undefined;
     completions.clear();
-    if (active.destination) enqueue('session-start', 'session-start', ctx);
+    const destination = await loadAutoConfig(ctx.cwd);
+    if (epoch !== currentEpoch) return;
+    active = { epoch: currentEpoch, ctx, destination, disposed: false };
+    if (destination) enqueue('session-start', 'session-start', ctx);
   });
   pi.on('agent_settled', (_event, ctx) => {
     let branch;
@@ -206,9 +210,9 @@ export default function tokenNativePi(pi) {
       const receipt = await requestCost(pi, request.ctx);
       if (active !== owner || owner.epoch !== epoch || owner.disposed) return;
       await writeAutoSnapshot(owner.destination.destination, receipt, request.key, request.event, request.ctx.cwd, owner.destination.stateRoot);
-      request.ctx.ui?.setStatus?.('token-native-capture', undefined);
+      if (active === owner && owner.epoch === epoch) request.ctx.ui?.setStatus?.('token-native-capture', undefined);
     } catch {
-      request.ctx.ui?.setStatus?.('token-native-capture', 'Automatic usage capture failed');
+      if (active === owner && owner.epoch === epoch) request.ctx.ui?.setStatus?.('token-native-capture', 'Automatic usage capture failed');
     }
     finally {
       inFlight = false;
