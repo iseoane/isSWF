@@ -62,8 +62,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Linux Pi and earlier Claude cancellation are verified within retained limits; new native Claude maxTurns partial-run continuation and child-side candidate refusal are observed in A008, pending independent assessment. Broader full-platform outcome remains blocked by operator-owned Windows; previous r6 parent is spent.
-- Next step: Independently assess A008 native same-context partial-run recovery/candidate refusal without relabelling earlier partial evidence; retain Windows acceptance and other original scope limits.
+- Blocker: Native Claude maxTurns continuation/candidate refusal is independently substantiated in A008/V009, but canonical continuation/eligibility guidance and methodology-driven/duplicate-stale reconciliation coverage remain open. Windows is operator-owned; prior parent allowances remain spent.
+- Next step: Preserve A008/V009 bounded capability PASS; obtain scoped authority for the missing canonical guidance and methodology-driven validation rather than equating driver instructions with factory behavior. Retain Windows and prior failures.
 
 ### Acceptance
 
@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: blocked
+- Status: awaiting-human
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r10.md](jobs/J004/brief-r10.md)
-- Blocker: Linux Pi remains technically verified; A008 now observes bounded native Claude continuation/candidate refusal pending review. Claude conversation during actual CI is not yet verified, and native Windows journeys remain operator-owned. Prior r6 allowance is spent; remaining r10 CI/review budgets are explicitly bounded.
-- Next step: Assess A008 with the r10 independent reviewer, then perform the prepared one-parent native conversation during actual exact-head CI if pending; preserve Windows/full-acceptance blockers and exact budgets.
+- Blocker: A008/V009 verifies native continuation capability, not canonical-method-driven factory behavior. Updating Claude continuation/eligibility guidance exceeds the current probe-only/no-source-change tranche; operator scope authorization is needed. Claude duplicate/stale and actual CI conversation plus native Windows outcomes remain open.
+- Next step: Operator authorizes bounded canonical Claude guidance repair with focused checks, worker, method-driven native validation and independent review, or explicitly keeps the current probe-only scope. Do not launch another actor or claim full Claude/Linux closure meanwhile; unused CI parent remains unspent.
 
 ### Acceptance
 
@@ -306,3 +306,11 @@ A008 retains actual CLI2.1.312 continuation:1parent/1Agent/1SendMessage, initial
 New evidence resolves the initial no-SendMessage grounding gap without adding runtime code or a dispatcher; no production capability defect demonstrated. Scope remains native validation, not source repair. Native parent host-guide Read omission and short stale pending-reply lag are explicitly retained in A008 for independent assessment, not represented as universal compliance/freshness. Shared child role/host were supplied fully and actual brief/input reads observed; outer author method and inner tested actor claims stay distinct.
 
 R10 firstparent/initialworker/plannedcontinuation spent. Second nativeCIparent<=5min/0children is unused and may start only while actual covered requiredCI is pending; prepared driver syntax-check only. Primary independentreviewopus/medium1<=10min plus conditional affecteddelta1<=10min remain before dispatch. Current A008 is coordinator evidence, not independent PASS or fullClaude/Linux/I0024 acceptance. Windows remains operator-owned; earlier partial/failures and counts unchanged.
+
+## R10 review: capability PASS, factory-method gap remains
+
+Native reviewer returned full report at08:46:18.685Z, naturalexit0/no stderr and exactPID110406 absent; retained unchanged as J004/V009.md. Exactcandidateec1adbc againstmain72afcc9, bound23868bytepatch/SHA256 `3d8f3e47ab58efcf4e19b15c4550d76824ccf8b80ad48cb998d72514f66274d4` independently recomputed by coordinator. Standards PASS, Spec PASS for accurate records; record-only LOW, no blocking record findings. Native same-ID continuation/history recall/refusal is substantiated, with disclosed parent-resource and lag limits.
+
+Review S1–S3 shows why this is not full factory-method acceptance: canonical Claude host guide has no SendMessage/eligibility guidance; the tested native parent consumed neither shared coordinator methodology nor host guide and followed driver instructions; adoption refusal was expressly instructed. Duplicate/stale result reconciliation on Claude and actual pending-CI receipt remain open. Coordinator confirmed source guidance absence via current grep, retained all findings, and clarified A008 rather than silently waiving scope. Corrected only the deterministic post-run assertion script to explicitly check native resumedAgentId and second task_started (reviewer had checked both); first script/log retained, corrected assertions exit0, zero provider calls.
+
+Initial assumption was verification-only suffices after existing source policy integration. Actual evidence locates a canonical host-instruction gap and methodology-driven coverage need, so the next useful unit is bounded guidance repair plus real validation, not another isolated mechanism probe or record-only closure. Current r10 expressly excludes source edits; no writer/new probe is launched under that narrower tranche. J004 awaiting-human question is permission for this scoped source unit (no installs/permanent workstation tests), not another quota or generic continuation confirmation. R10 primaryreview spent; conditional affected-delta review<=10min and CIparent<=5min/0children remain unused, not reset. Windows/operator acceptance remains separate.
