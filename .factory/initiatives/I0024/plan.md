@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r11.md](jobs/J004/brief-r11.md)
-- Blocker: Operator now authorized the bounded canonical Claude guidance and method-driven validation unit in r11; it is prepared, not yet source-verified. Claude duplicate/stale and actual CI conversation plus operator-owned native Windows outcomes remain open.
-- Next step: Execute one approved native source writer for r11, stop/retain report, run focused checks and method-driven validation, obtain source review and actual pending-CI conversation without resetting earlier budgets; preserve Windows/full-acceptance limits.
+- Blocker: The r11 source writer stopped before any mutation because native Claude requires sensitive-file approval for .agents/hosts/claude-code.md. Its one writer allowance is spent; an explicitly authorized additional attempt with a supported native approval route is needed. Other Claude/Windows acceptance gaps remain open.
+- Next step: Operator explicitly approves a bounded additional native writer attempt and sensitive-file editing through supported native permission callback (or interactive approval). No Pi/other-tool rewrite, global rule/mode bypass or new writer meanwhile. Preserve unused validation/review/CI budgets and Windows boundaries.
 
 ### Acceptance
 
@@ -322,3 +322,11 @@ Operator accepted the explicit guide repair/method-driven validation proposal. R
 Preflight source/checkout tracked-clean except private .pi/subagents; no active native actor observed. Supported manual writer mode, builtinRead/Grep/Glob/Edit only and path-scoped CLI Edit rules for the four existing files; no Bash/Write/Agent, commits or permission bypass. Known settings layers will be inspected without credential contents; runtime denial/extra approval blocks the affected action rather than another-tool rewrite. Canonical records freeze during source writer. Native lifecycle2.1.312 and actualSendMessage capability already observed; source-only behavior needs portable static checks plus native method-driven evidence, not another dispatcher.
 
 Writer permission preflight: known user settings defaultauto with24deny rules, no ask/allow or hooks/effortenv override; project settings has no permission rules/hooks; no projectlocal or local managed file present. Static matching found no known user file-deny targeting the four assigned paths. Per-process supported manual mode overrides the startup default without persistence; exact path-scoped Edit rules preapprove only operator-covered edits, no Bash/Write/Agent. Unknown managed/host decisions are not predicted or waived: actual approval denial/no-verdict stops the mutation with no retry/bypass. This records inspected layers, not an OS containment guarantee.
+
+## Source writer stopped for native sensitive-file approval
+
+The one r11 native writer actualclaude-sonnet-5-5 read role/host/brief and selected resources, then its first Edit at09:13:44.013Z returned `Claude requested permissions to edit /home/iseoane/Work/isSWF/.agents/hosts/claude-code.md which is a sensitive file.` Driver stopped promptly, no retry/fallback. Native process exit143/no stderr, exactPID115802 absent, Git tracked diff empty; no source file mutated and no final author report produced. Curated resource/tool/error metadata retained ignored as tooling/.local/i0024/guidance/worker-blocked-metadata.json, SHA256 `7e278d8fddae60729b736289dceb542fae4032d2533361f5951c7049a4fed194`. This is unavailable native approval, not quota exhaustion or a user deny verdict.
+
+Official permission-mode docs explain sensitive/protected paths need explicit approval despite manual-mode allow rules. Native CLI defaults permission-prompts tohost but this driver supplied no permission callback channel. Official SDK public sources establish the supported --permission-prompt-tool stdio/control_request can_use_tool/behavior allow+updatedInput route; this is grounding, not a live approval already obtained. No Agent SDK is installed at the inspected project/extension dependency roots and no installation is authorized or needed for a native stdio relay. Do not add a dispatcher, hooks or permission bypass.
+
+R11 source-writer attempt is spent; method validation, source review and previously unused CI-parent budgets remain unspent. Current question is explicit protected-file approval and ONE additional bounded native writer attempt using the supported approval route (or actual interactive host), limited to the same four files/no global changes. A generic source grant/tool allowlist alone does not represent this runtime approval. Canonical records unfreeze only because the writer has ceased; no source implementation/verification/independent source PASS or PR is claimed.
