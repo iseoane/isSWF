@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r10.md](jobs/J004/brief-r10.md)
-- Blocker: A008/V009 verifies native continuation capability, not canonical-method-driven factory behavior. Updating Claude continuation/eligibility guidance exceeds the current probe-only/no-source-change tranche; operator scope authorization is needed. Claude duplicate/stale and actual CI conversation plus native Windows outcomes remain open.
-- Next step: Operator authorizes bounded canonical Claude guidance repair with focused checks, worker, method-driven native validation and independent review, or explicitly keeps the current probe-only scope. Do not launch another actor or claim full Claude/Linux closure meanwhile; unused CI parent remains unspent.
+- Brief: [brief-r11.md](jobs/J004/brief-r11.md)
+- Blocker: Operator now authorized the bounded canonical Claude guidance and method-driven validation unit in r11; it is prepared, not yet source-verified. Claude duplicate/stale and actual CI conversation plus operator-owned native Windows outcomes remain open.
+- Next step: Execute one approved native source writer for r11, stop/retain report, run focused checks and method-driven validation, obtain source review and actual pending-CI conversation without resetting earlier budgets; preserve Windows/full-acceptance limits.
 
 ### Acceptance
 
@@ -314,3 +314,9 @@ Native reviewer returned full report at08:46:18.685Z, naturalexit0/no stderr and
 Review S1–S3 shows why this is not full factory-method acceptance: canonical Claude host guide has no SendMessage/eligibility guidance; the tested native parent consumed neither shared coordinator methodology nor host guide and followed driver instructions; adoption refusal was expressly instructed. Duplicate/stale result reconciliation on Claude and actual pending-CI receipt remain open. Coordinator confirmed source guidance absence via current grep, retained all findings, and clarified A008 rather than silently waiving scope. Corrected only the deterministic post-run assertion script to explicitly check native resumedAgentId and second task_started (reviewer had checked both); first script/log retained, corrected assertions exit0, zero provider calls.
 
 Initial assumption was verification-only suffices after existing source policy integration. Actual evidence locates a canonical host-instruction gap and methodology-driven coverage need, so the next useful unit is bounded guidance repair plus real validation, not another isolated mechanism probe or record-only closure. Current r10 expressly excludes source edits; no writer/new probe is launched under that narrower tranche. J004 awaiting-human question is permission for this scoped source unit (no installs/permanent workstation tests), not another quota or generic continuation confirmation. R10 primaryreview spent; conditional affected-delta review<=10min and CIparent<=5min/0children remain unused, not reset. Windows/operator acceptance remains separate.
+
+## Scoped canonical guidance unit authorized
+
+Operator accepted the explicit guide repair/method-driven validation proposal. R11 supersedes the r10 source-edit prohibition only for Claude host guide, existing static host-contract tests and both operations mirrors. Prior evidence/reviews remain unchanged. Additive finite capacity:1nativeworkersonnet/medium<=15min/0nestedactors/0commands,1method-drivenparentopus/low<=10min with1existingworker+1same-IDcontinuation<=5min each,1newsource-reviewopus/medium<=10min; unused r10 conditional affected-delta review<=10min only for actual correction and unused r10CIparent<=5min0children are preserved, not reset. No installation/globalchanges/permanentworkstationE2E/Windows/tokenimplementation.
+
+Preflight source/checkout tracked-clean except private .pi/subagents; no active native actor observed. Supported manual writer mode, builtinRead/Grep/Glob/Edit only and path-scoped CLI Edit rules for the four existing files; no Bash/Write/Agent, commits or permission bypass. Known settings layers will be inspected without credential contents; runtime denial/extra approval blocks the affected action rather than another-tool rewrite. Canonical records freeze during source writer. Native lifecycle2.1.312 and actualSendMessage capability already observed; source-only behavior needs portable static checks plus native method-driven evidence, not another dispatcher.
