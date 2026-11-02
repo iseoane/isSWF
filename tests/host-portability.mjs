@@ -180,6 +180,27 @@ assert.match(host, /verify actual capability and permissions first/u);
 assert.match(host, /CLI background-session help does not establish Agent API support/u);
 assert.match(host, /feature-delivery\.md#drive-the-work-through-delivery/u);
 assert.match(host, /completion notification is not itself a CI event/u);
+// Static policy guards for the continuation branch; they do not show that a model follows it.
+const claudeContinuation = host.slice(host.indexOf('### Live direction and eligible continuation'), host.indexOf('\n\n## Bound identity'));
+for (const pattern of [
+  /verify the installed Claude Code version and its exposed native capability/u,
+  /exact agent ID returned by the Agent call/u,
+  /supported `SendMessage`/u,
+  /Do not invent an `Agent\.resume` call/u,
+  /not proof for Windows, other versions or every interruption mode/u,
+  /`maxTurns` partial or missing report as partial work, not normal success/u,
+  /generic stopped label does not prove eligibility/u,
+  /stopped with `TaskStop` after its native process exited may be eligible/u,
+  /cancelled by the user or SDK refuses automatic continuation/u,
+  /unknown eligibility blocks continuation without redispatch or replacement/u,
+  /not a new assignment, candidate adoption or budget reset/u,
+  /cumulative actor, call, context and time budgets/u,
+  /Do not apply Pi's `steer`\/`resume` semantics to Claude or add an automatic restart/u,
+  /duplicate, late or stale notice for an already consumed identity triggers reconciliation/u,
+  /no repeated dispatch, message, correction, commit, push, PR or other publication/u,
+  /last consumed or observed state, not as instantaneous universal freshness/u,
+  /feature-delivery\.md#drive-the-work-through-delivery/u,
+]) assert.match(claudeContinuation, pattern);
 const piHost = await read('.agents/hosts/pi.md');
 assert.match(piHost, /long independent work with explicit `async: true`/u);
 assert.match(piHost, /Native completion notifications wake/u);
