@@ -191,8 +191,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Objective: Complete supported Claude metrics while prospectively measuring the useful engineering work in Pi, including coordinator and child attempts.
 - Depends on: J003
 - Brief: [brief-r2.md](jobs/J004/brief-r2.md)
-- Blocker: Start capture supplied and retained before J004 model dispatch; rounded k/M precision and missing cacheWrite prevent an exact-token claim, not an approximate useful sample. End capture and actual installed-Claude/Windows observations remain pending.
-- Next step: Publish draft stacked PR for reviewed00a937812e93ba7bd0887379e318c4feb7066b5f and verify exact-head CI; all actor/correction/review allowances spent. Preserve same coordinator session/branch and obtain end /subagent-cost after delivery, excluding old nine children. No full native/Windows acceptance or automatic collection claim.
+- Blocker: Source reviewed/pass and PR147 published draft; prospective Pi start/end sample retained, but rounded parent/missing cacheWrite prevent a full exact total. Exact published-head CI and actual installed-Claude/Windows observations/acceptance remain separate pending gates.
+- Next step: Retain bounded measurement receipt and verify PR147 exact-head CI; all actor/correction/review allowances spent. Use approximately22.28M known processed subtotal/120turns as a preliminary sample, not savings/full-total/automatic collection or native acceptance.
 
 ### Acceptance
 
@@ -213,6 +213,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J004/V001.md: independent reviewer3298c47f-92bd-45f1-a866-965092e78f9e terminal complete; Standards fail/Spec fail exact2a85519, B1/B2 accepted for the single correction cycle. Required review procedure consumed; failing verdict retained.
 - jobs/J004/A002.md: worker correctioncb39d7e7-7d6f-4bd6-b57f-ebd79a113dd2 terminal complete; candidate00a937812e93ba7bd0887379e318c4feb7066b5f. Coordinator focused/native+report/fullportablequality PASS exactcandidate; no nativeClaude/Windows/acceptance proof.
 - jobs/J004/V002.md: reviewer5fcaf8f4-2887-4c8c-86d9-7cf93a41e8da terminal complete; Standards pass/Spec pass exactcorrectiondelta; no findings, priorFAIL retained, required procedure consumed. All four engineering actor allowances spent.
-- jobs/J004/measurement/actors.json: four new known native attempts measured,4518341processedchildtokens/66turns; old9excluded. Host-normalized, not full workflow; roundedparentend still pending.
-- jobs/J004/delivery.md: bounded source/review/check identities, Medium risk and remaining measurement/native/platform/acceptance gates.
+- jobs/J004/measurement/actors.json: four new known native attempts measured,4518341processedchildtokens/66turns; old9excluded. Host-normalized, not full workflow.
+- jobs/J004/A003.md and measurement/end.json/result.json/calculate.mjs: operator end capture received; approximate parentdelta40000input21000output17700000cacheRead/54turns. Combinedknownsubtotalapproximately22279341/120turns; parentcacheWriteunknown, no fulltotal/cache-share/accepted-outcome ratio or savings claim. Reproduction byte-identical and new native rows/old9/turns consistent.
+- jobs/J004/delivery.md: bounded source/review/check identities, Medium risk and remaining native/platform/acceptance gates. DraftPR147 verified head154509105b43647c8280df93f9b6c5cc9418ccd3; CI41503551152 portable/Ubuntu SUCCESS, Windows IN_PROGRESS at observation.
 - Basea7ac95ba53213044418c1c6d626eabd9ccf955fb, branchfeat/i0025-claude-metrics; parent PR146 all three exact-head CI41497320513 checks SUCCESS, still OPEN.

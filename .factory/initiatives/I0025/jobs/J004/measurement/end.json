@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "source": "operator-transferred-native-subagent-cost",
+  "scope": "current-Pi-coordinator-session-branch-cumulative-end",
+  "availability": "host-normalized-rounded-display",
+  "exactTokenCounts": false,
+  "moneyExcluded": true,
+  "piVersionObservedSeparately": "1.5.0",
+  "subagentsVersionObservedSeparately": "0.83.0",
+  "parent": {
+    "inputDisplay": "311k",
+    "outputDisplay": "98k",
+    "cacheReadDisplay": "64.9M",
+    "cacheWrite": null,
+    "turns": 344
+  },
+  "children": [
+    {
+      "ordinal": 1,
+      "role": "isswf-worker",
+      "inputDisplay": "124k",
+      "outputDisplay": "15k",
+      "cacheReadDisplay": "1.4M",
+      "turns": 35
+    },
+    {
+      "ordinal": 2,
+      "role": "isswf-reviewer",
+      "inputDisplay": "103k",
+      "outputDisplay": "5.0k",
+      "cacheReadDisplay": "395k",
+      "turns": 11
+    },
+    {
+      "ordinal": 3,
+      "role": "isswf-worker",
+      "inputDisplay": "89k",
+      "outputDisplay": "16k",
+      "cacheReadDisplay": "1.6M",
+      "turns": 20
+    },
+    {
+      "ordinal": 4,
+      "role": "isswf-reviewer",
+      "inputDisplay": "111k",
+      "outputDisplay": "3.9k",
+      "cacheReadDisplay": "499k",
+      "turns": 12
+    },
+    {
+      "ordinal": 5,
+      "role": "isswf-researcher",
+      "inputDisplay": "64k",
+      "outputDisplay": "7.4k",
+      "cacheReadDisplay": "330k",
+      "turns": 18
+    },
+    {
+      "ordinal": 6,
+      "role": "isswf-worker",
+      "inputDisplay": "168k",
+      "outputDisplay": "26k",
+      "cacheReadDisplay": "6.8M",
+      "turns": 61
+    },
+    {
+      "ordinal": 7,
+      "role": "isswf-reviewer",
+      "inputDisplay": "179k",
+      "outputDisplay": "6.6k",
+      "cacheReadDisplay": "1.1M",
+      "turns": 14
+    },
+    {
+      "ordinal": 8,
+      "role": "isswf-worker",
+      "inputDisplay": "59k",
+      "outputDisplay": "20k",
+      "cacheReadDisplay": "4.5M",
+      "turns": 24
+    },
+    {
+      "ordinal": 9,
+      "role": "isswf-reviewer",
+      "inputDisplay": "182k",
+      "outputDisplay": "5.9k",
+      "cacheReadDisplay": "636k",
+      "turns": 10
+    },
+    {
+      "ordinal": 10,
+      "role": "isswf-worker",
+      "inputDisplay": "100k",
+      "outputDisplay": "18k",
+      "cacheReadDisplay": "1.7M",
+      "turns": 31
+    },
+    {
+      "ordinal": 11,
+      "role": "isswf-reviewer",
+      "inputDisplay": "134k",
+      "outputDisplay": "4.5k",
+      "cacheReadDisplay": "552k",
+      "turns": 11
+    },
+    {
+      "ordinal": 12,
+      "role": "isswf-worker",
+      "inputDisplay": "39k",
+      "outputDisplay": "6.6k",
+      "cacheReadDisplay": "1.3M",
+      "turns": 12
+    },
+    {
+      "ordinal": 13,
+      "role": "isswf-reviewer",
+      "inputDisplay": "142k",
+      "outputDisplay": "4.3k",
+      "cacheReadDisplay": "550k",
+      "turns": 12
+    }
+  ],
+  "childSubtotal": {
+    "inputDisplay": "1.5M",
+    "outputDisplay": "139k",
+    "cacheReadDisplay": "21.3M",
+    "cacheWrite": null,
+    "turns": 271
+  },
+  "inclusiveTotal": {
+    "inputDisplay": "1.8M",
+    "outputDisplay": "238k",
+    "cacheReadDisplay": "86.2M",
+    "cacheWrite": null,
+    "turns": 615
+  },
+  "unavailableChildWarningInSuppliedText": false,
+  "missingWarningDoesNotEstablishCompleteness": true,
+  "nativeSessionBranchIdentity": "not-exported-by-display",
+  "continuity": "same-current-session-and-branch-required-for-end",
+  "cacheWriteAvailability": "not-displayed-unknown-not-zero",
+  "newJ004ActorsAtCapture": 4,
+  "endTiming": "operator-supplied-after-J004-code-review-correction-and-PR-publication"
+}

@@ -2,7 +2,7 @@
 
 ## What changed and why
 
-Extended the existing bounded converter for supported Claude cumulative tree windows and completed individual AgentOutput snapshots. Useful engineering was performed after an operator-supplied current-Pi start capture; the final coordinator capture is still needed. Source completion is not full installed-Claude/Windows acceptance or automatic collection.
+Extended the existing bounded converter for supported Claude cumulative tree windows and completed individual AgentOutput snapshots. Useful engineering was performed between operator-supplied current-Pi start/end captures; A003 retains the resulting preliminary real sample. Source completion is not full installed-Claude/Windows acceptance or automatic collection.
 
 ## Visual summary
 
@@ -11,7 +11,7 @@ Extended the existing bounded converter for supported Claude cumulative tree win
 | Same-session/model-set cumulative Claude start/end | Guarded per-model deltas, one inclusive report tree row |
 | Single/resumed cumulative result | Snapshot only, rejected as ordinary report window |
 | Supplied completed AgentOutput | Opaque individual snapshot; missing categories unknown, never additive to inclusive tree |
-| Pi measurement | Rounded parent start plus four exact host-normalized new child summaries; parent end pending |
+| Pi measurement | Rounded parent start/end plus four exact host-normalized new child summaries; approximately22.28M known processed subtotal, not full total |
 
 ## Checks and results
 
@@ -35,10 +35,10 @@ Existing native converter, focused tests and canonical EN/ES operations only. No
 
 ## Closure and acceptance
 
-Bounded source checks/review complete. Overall J004 remains partial: installed-Claude/Windows verification, source PR/CI delivery, current-parent end measurement and operator acceptance remain separate. No savings, full attribution or all-host readiness claim.
+Bounded source checks/review complete. Overall J004 remains partial: installed-Claude/Windows verification, exact-head CI and operator acceptance remain separate. DraftPR147 was published at1545091; source review complete. Current-parent end measurement is now retained in A003, not pending. No savings, full attribution or all-host readiness claim.
 
-`measurement/start.json` records operator-transferred rounded display before any J004 model actor. `measurement/actors.json` records the four exact known native child attempts only: input415611/output32842/cacheRead4069888/cacheWrite0, processed4518341,66hostturns. These are host-normalized counters, not provider billing or whole-workflow totals. Prior9children excluded; no unavailable warning is not completeness proof. Parent cacheWrite is undisplayed/unknown; final parent delta will be approximate due to k/M rounding. Do not sum inclusive totals plus children.
+`measurement/start.json` records operator-transferred rounded display before any J004 model actor. `measurement/actors.json` records the four exact known native child attempts only: input415611/output32842/cacheRead4069888/cacheWrite0, processed4518341,66hostturns. These are host-normalized counters, not provider billing or whole-workflow totals. Prior9children excluded; no unavailable warning is not completeness proof. Parent cacheWrite is undisplayed/unknown; retained nominal parent delta is input40000/output21000/cacheRead17700000/54turns, approximate due to k/M rounding. Combined known subtotal approximately22279341/120turns, not a full processed total. Do not sum inclusive totals plus children.
 
 ## Blockers and next action
 
-Publish a draft stacked PR against feat/i0025-native-metrics at a7ac95b and verify head/base/body/CI. Then operator runs `/subagent-cost` in the same coordinator session/branch to supply the end summary. Retain approximate parent difference and reconcile new child IDs without re-adding old work. No new measurement-only model calls. Full native capability, acceptance and merge remain open; preserve unrelated .pi/subagents and all unique evidence.
+Draft stacked PR147 against feat/i0025-native-metrics at a7ac95b was read back at head1545091; CI41503551152 portable/Ubuntu PASS and Windows IN_PROGRESS at observation. Operator supplied the end summary; A003 and measurement/calculate.mjs verify approximate parent difference and new child IDs without old-work duplication. Retain this bounded receipt checkpoint; exact-head CI and native/runtime gates remain separate. No new measurement-only model calls. Full native capability, acceptance and merge remain open; preserve unrelated .pi/subagents and all unique evidence.

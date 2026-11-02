@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "scope": "prospective-J004-useful-engineering-only",
+  "parent": {
+    "input": 40000,
+    "output": 21000,
+    "cacheRead": 17700000.000000007,
+    "cacheWrite": null,
+    "turns": 54,
+    "tokenAvailability": "approximate-difference-of-rounded-native-displays"
+  },
+  "newChildren": {
+    "input": 415611,
+    "output": 32842,
+    "cacheRead": 4069888,
+    "cacheWrite": 0,
+    "turns": 66,
+    "processed": 4518341,
+    "tokenAvailability": "native-host-normalized-integer-summaries",
+    "expectedAttempts": 4,
+    "measuredAttempts": 4
+  },
+  "knownCombinedComponents": {
+    "input": 455611,
+    "output": 53842,
+    "cacheRead": 21769888.000000007,
+    "cacheWrite": null
+  },
+  "knownProcessedSubtotalApproximate": 22279341.000000007,
+  "nominalRoundingUncertaintyApproximate": {
+    "input": 1000,
+    "output": 1000,
+    "cacheRead": 100000,
+    "knownSubtotal": 102000
+  },
+  "turns": 120,
+  "wholeWorkflowProcessedTotal": null,
+  "tokensPerAcceptedOutcome": null,
+  "cacheReadShare": null,
+  "costsIncluded": false,
+  "priorChildrenExcluded": 9,
+  "continuity": "same-coordinator-conversation-and-branch-as-operator-supplied-no-exported-native-branch-ID",
+  "checks": {
+    "oldNineDisplaysUnchanged": true,
+    "fourNewNativeSummariesMatchDisplay": true,
+    "childTurnDeltaMatches": true,
+    "inclusiveTurnDeltaMatches": true
+  },
+  "limits": [
+    "Parent compact k/M displays are rounded; nominal deltas and uncertainty are approximate, not exact provider counts or statistical confidence intervals.",
+    "Parent cache writes were not displayed and remain unknown; combined known subtotal is not a complete processed total.",
+    "Cache reads count repeated context processing, not unique or new tokens, billing, or money saved.",
+    "No product acceptance observed, so no accepted-outcome ratio; no before/after optimization comparison or savings claim.",
+    "Missing-artifact coverage and native branch continuity are not independently certified by the display.",
+    "Manual current-parent snapshots; not automatic collection, installed-Claude validation, or native Windows verification."
+  ]
+}
