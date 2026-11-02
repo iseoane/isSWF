@@ -96,12 +96,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J001
 
-- Status: awaiting-human
-- Objective: Produce a reproducible local consumption report that identifies useful improvement targets without claiming unavailable precision.
+- Status: in-progress
+- Objective: Deliver slice 1: bounded offline Pi/Claude consumption receipts and matched comparison, with available individual attribution and no model calls in the measurement path.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Further analysis completed; implementation and native collection are not authorized. Numeric baseline is not yet available; documented Claude scopes still need installed-version confirmation.
-- Next step: On explicit implementation start, materialize finite budgets and exact sanitized inputs, then deliver offline receipts/comparisons for supplied Pi and Claude summaries. Do not wait for perfect attribution or automatic collection; do not claim native collection validation from documentation.
+- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
+- Blocker: No implementation dispatched at preparation. Native collection and real baseline remain outside this unit; no I0024 completion dependency.
+- Next step: Under current explicit coordinator start, dispatch one bounded native worker after checkpointing r3; verify stopped candidate, independent combined review and feature PR/CI. Five steps only; no automatic collection or direct-main integration.
 
 ### Acceptance
 
@@ -117,4 +117,5 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 - Prepare-only operator request in current session; current-source investigation, not a measured consumption baseline or savings claim.
 - jobs/J001/brief-r1.md (original preparation, retained unchanged).
-- jobs/J001/brief-r2.md (current analysis and practical-metrics objective).
+- jobs/J001/brief-r2.md (analysis and practical-metrics objective).
+- jobs/J001/brief-r3.md (current explicit slice-1 start, finite budget, five steps and acceptance).
