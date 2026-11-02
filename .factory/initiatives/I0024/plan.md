@@ -62,8 +62,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Bounded Linux Pi recovery/identity/transport is verified; Claude cancellation is observed but interruption recovery/eligible continuation and child-side candidate reconciliation remain unverified. The r6 parent allowance is spent; Windows outcomes remain operator-owned.
-- Next step: Reuse A004–A006/V002/V003 for Linux Pi; obtain remaining authorized Claude/Windows evidence without resetting spent calls.
+- Blocker: Linux Pi and earlier Claude cancellation are verified within retained limits; new native Claude maxTurns partial-run continuation and child-side candidate refusal are observed in A008, pending independent assessment. Broader full-platform outcome remains blocked by operator-owned Windows; previous r6 parent is spent.
+- Next step: Independently assess A008 native same-context partial-run recovery/candidate refusal without relabelling earlier partial evidence; retain Windows acceptance and other original scope limits.
 
 ### Acceptance
 
@@ -82,8 +82,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r10.md](jobs/J004/brief-r10.md)
-- Blocker: Linux Pi technical verification is complete within retained limits; Claude recovery/continuation, child-side candidate reconciliation and Claude CI conversation remain unverified after the partial r6 attempt. Its parent allowance is spent; native Windows journeys remain operator-owned.
-- Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
+- Blocker: Linux Pi remains technically verified; A008 now observes bounded native Claude continuation/candidate refusal pending review. Claude conversation during actual CI is not yet verified, and native Windows journeys remain operator-owned. Prior r6 allowance is spent; remaining r10 CI/review budgets are explicitly bounded.
+- Next step: Assess A008 with the r10 independent reviewer, then perform the prepared one-parent native conversation during actual exact-head CI if pending; preserve Windows/full-acceptance blockers and exact budgets.
 
 ### Acceptance
 
@@ -298,3 +298,11 @@ Operator “Adelante” starts the three named remaining Claude journeys after i
 New grounding: official native subagent docs retrieved2026-11-02 explicitly describe SendMessage continuation, including maxTurns partial-run recovery under same agentID/history. Earlier driver exposed only Agent/TaskStop and did not exercise that seam. Current proposal uses supported maxTurns2 on genuine input/brief reading, not a fake wait or assumed TaskStop resume. Actual native tool/status/ID evidence must validate it; documentation is not live acceptance. Preserve prior partial result and every original criterion, including missing fullOS guarantees not being newly invented. Separate actual pending-CI conversation can proceed only with genuine covered CI pending and explicit controlled-input provenance.
 
 Native tool/version preflight and complete report retention are required before any closure. Canonical source base72afcc9, new branch `test/i0024-claude-continuation`; prepared only at this checkpoint, no actor claimed running. I0025/I0026 remain planning-only on separate branch, Windows operator-owned.
+
+## Native Claude continuation and changed-input observations
+
+A008 retains actual CLI2.1.312 continuation:1parent/1Agent/1SendMessage, initial hostcompleted with explicit2-turn-limit/no-report partial explanation; fixtureA→B changed after that boundary; exact same agentID resumed with native success, three actual child Read receipts, full sonnet5.5 JSON recalls original controlled challenge and rejects candidate adoption. Coordinator deterministic assertions/Gitblob verification PASS. Complete parent/child final outputs retained, naturalexit0/no stderr, exactnativePID107968 absent. This is bounded maxTurns task-run recovery, not an OS/every-mode claim.
+
+New evidence resolves the initial no-SendMessage grounding gap without adding runtime code or a dispatcher; no production capability defect demonstrated. Scope remains native validation, not source repair. Native parent host-guide Read omission and short stale pending-reply lag are explicitly retained in A008 for independent assessment, not represented as universal compliance/freshness. Shared child role/host were supplied fully and actual brief/input reads observed; outer author method and inner tested actor claims stay distinct.
+
+R10 firstparent/initialworker/plannedcontinuation spent. Second nativeCIparent<=5min/0children is unused and may start only while actual covered requiredCI is pending; prepared driver syntax-check only. Primary independentreviewopus/medium1<=10min plus conditional affecteddelta1<=10min remain before dispatch. Current A008 is coordinator evidence, not independent PASS or fullClaude/Linux/I0024 acceptance. Windows remains operator-owned; earlier partial/failures and counts unchanged.
