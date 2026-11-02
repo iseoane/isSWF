@@ -81,7 +81,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r7.md](jobs/J004/brief-r7.md)
+- Brief: [brief-r8.md](jobs/J004/brief-r8.md)
 - Blocker: Linux Pi technical verification is complete within retained limits; Claude recovery/continuation, child-side candidate reconciliation and Claude CI conversation remain unverified after the partial r6 attempt. Its parent allowance is spent; native Windows journeys remain operator-owned.
 - Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
 
@@ -266,3 +266,7 @@ Operator accepted the proposed extra read-only native Claude Code review, maximu
 R7's explicitly authorized extra native reviewer process was launched, but the first zero-model context snapshot exposed the reviewer role and no MCP tools. Driver stopped fail-closed before prompt, apiUsage null, no review/tool events or verdict; exact process ceased. Coordinator receipt J004/V006 preserves evidence and limits. Existing native tool-discovery test accounts for asynchronous MCP startup, so this single snapshot does not prove permanent missing capability or its cause; no quota failure was observed.
 
 R7 process attempt is spent without model prompt; no automatic retry, tool substitution or installation. A corrected bounded readiness check and explicit further attempt are needed before independent review can proceed. V004/V005 remain unchanged; no PASS, integration, Claude probe retry or full Linux/I0024 closure. Coordinator checkpoints/pushes this failure receipt for recovery; current original Claude evidence gaps and operator-owned Windows remain open.
+
+## Explicit corrected-readiness review attempt
+
+Operator explicitly authorized correcting readiness and one new native Claude read-only review<=10min. R8 preserves r7/V006 failed preflight and all spent budgets. CLI help confirms strict-mcp-config excludes other server configurations; the current process will explicitly configure the SAME approved bound local evidence server, with exact namespace/profile/tool preflight, and <=45sec/15 zero-model startup snapshots before any provider prompt. No installation, persistent setting change, control probe or automatic further retry. Current allowance is1reviewerprocessopus/medium,0nestedactors; final candidate checkpoint supplied after preparation.
