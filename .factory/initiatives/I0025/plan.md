@@ -154,12 +154,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J003
 
-- Status: in-progress
+- Status: in-review
 - Objective: Support native Pi/Claude usage summaries for coordinator and agents/subagents without models in the measurement path, retaining explicit host/platform capability limits.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: R001 partial source findings reconciled with current official Claude result/telemetry docs. Bounded opt-in Pi snapshot and explicit Claude result converter are feasible for source implementation; actual host activation, installed-Claude observations and native Windows evidence remain pending. Slice2 stays partial.
-- Next step: Dispatch one bounded worker under r2 for native snapshot acquisition/normalization and guarded window conversion, with no actual installation/activation/provider calls. Review exact source candidate; do not claim full native/platform acceptance from mocks.
+- Blocker: Bounded source2eca40b0a4e82a28fe84498940ec8eba9e354899 has independent Standards/Spec pass; draft publication/CI and actual Pi acquisition, installed-Claude observations and native Windows evidence remain pending. Claude snapshot-only; slice2 stays partial.
+- Next step: Publish draft stacked source PR against feat/i0025-real-baseline and verify exact-head CI. All research/worker/correction/two-review allowances consumed. Resolve separately bounded live observation/activation and Windows boundary before full native acceptance; no automatic installation/provider calls or direct-main integration.
 
 ### Acceptance
 
@@ -176,3 +176,9 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J003/R001.md: researcher9507799f-e574-49da-9380-afc0d18f6d44 complete/process terminal observed, findings partial and resource consumption self-reported. Pi RPC source established; local Claude declarations insufficient, upstream checks not available to this role.
 - jobs/J003/brief-r2.md: coordinator official-source reconciliation and bounded writer contract; research spent, worker/correction/two-review allowances unspent before dispatch. Explicit source-versus-native acceptance/activation distinction.
 - Parent PR144 and145 both OPEN; all three exact-head CI checks SUCCESS at observation. Slice2 real baseline remains partial and is not relabelled completed.
+- jobs/J003/A001.md: worker29dec949-2003-4f1f-bd82-cd183726059e complete/process terminal observed; source2741cfea0eeddcc6926a9382f2aa880032a53e5e; result explicitly partial pending native activation/installed-Claude/Windows evidence. Required resource reads including full Pi extension docs self-reported.
+- Coordinator reran native-usage and token-report focused suites plus full portable quality on2741cfe: exit0; passing fixtures do not establish native collection behavior.
+- jobs/J003/V001.md: reviewer cbf07a10-c90a-4fba-917b-2d9317883c4e complete/process terminal observed, Standards fail/Spec fail exact2741cfe; bound Git evidence consumed, all required procedure consumed self-reported. Failed verdict retained.
+- jobs/J003/A002.md: worker correction389149ce-16a1-4729-aabe-a911520af7cd terminal complete, candidate2eca40b0a4e82a28fe84498940ec8eba9e354899; B1–B4 addressed in the single consumed correction cycle. Coordinator reran native-usage/report/fullportablequality exit0; no live native proof or full acceptance inferred.
+- jobs/J003/V002.md: reviewer33fca849-3ddf-4cd2-a008-ed56217e22b6 terminal complete; Standards pass/Spec pass for exact correction delta with unchanged-evidence reuse. Optional regression suggestions nonblocking. No source edits after review; all actor allowances spent.
+- jobs/J003/delivery.md: source/review/check identities, Medium host-integration risk and explicit missing native/activation/platform acceptance.
