@@ -40,7 +40,7 @@ RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 
 ## Create an offline token summary
 
-`tools/token-report.mjs` reports only summaries you explicitly supply. It does not inspect host sessions, collect native events, call a model, or estimate billing. Manually transcribed Pi and Claude summaries are labelled in the input; native summary compatibility is not claimed. Keep input files sanitized and local.
+`tools/token-report.mjs` reports only summaries you explicitly supply. It does not inspect host sessions, call a model, or estimate billing. Manually transcribed Pi and Claude summaries are labelled in the input. Keep input files sanitized and local.
 
 Each JSON file has `version: 1`, `mode: "window"`, and `rows`. A row is one independent, nonoverlapping window and contains a bounded opaque `id`, `host` (`pi` or `claude`), `hostVersion`, `model`, `effort`, `taskClass`, `candidate`, `outcome`, nonnegative `accepted` count, provenance (`manual-pi`, `manual-claude`, `native-pi-summary`, or `native-claude-summary`), `scope` (`agent`, `unattributed`, or `tree`), `window`, and `counters` with `input`, `output`, `cacheRead`, and `cacheWrite`. IDs and metadata use 1–128 ASCII letters, digits, `.`, `_`, `:`, `+`, or `-`; use opaque identifiers, never paths or private text. Counters are nonnegative safe integers or JSON `null` for unknown. Categories must be disjoint. Rows sharing a window and outcome repeat the same candidate and acceptance count; the report counts that outcome once, not once per agent. Contradictory declarations for that group are rejected. Cumulative, reset, resumed, and event data must first be converted by the supplier to one bounded, nonoverlapping window; unsupported modes are rejected. Do not combine a tree row with other rows for the same window. Include an unattributed row when coverage is unknown; never invent actor shares. Unknown fields are refused and output contains only the allowlisted summary fields. Optional `durationSeconds`, `requests`, `turns`, `corrections`, and non-additive `reasoning` counters are separately labelled.
 
@@ -80,6 +80,21 @@ node tools/token-report.mjs --before "before.json" --after "after.json"
 ```
 
 The accepted count covers the supplied window, including failed, review, and correction work. The report shows known components, a complete processed total or labelled partial subtotal, cache-read share only when its denominator is known and positive, and tokens per accepted outcome only when all components and a positive acceptance count are known. The report labels tree-only data `aggregate-only`, individual rows `individual`, and missing attribution `unattributed` or `partial`; it does not describe an inclusive tree total as agent attribution. Comparisons match each row by window, actor ID, and outcome identity, then require matching host/version, model/effort, task class, scopes, acceptance counts and category availability. Candidate may differ between the before and after runs. A positive known baseline is required for differences. Otherwise differences are explicitly incomparable or undefined. A lower cache-read share or total alone is not a quality or savings claim. Input is capped at 1 MiB combined and 100 rows; each row is capped at 4 KiB and output at 64 KiB. This is offline arithmetic, not measured live host behavior or billing.
+
+### Normalize supported native summaries
+
+`tools/token-native-summary.mjs` accepts one explicit Pi receipt from the optional source extension or one explicitly supplied Claude final-result JSON. It reads at most 1 MiB combined and emits the same bounded input format for `token-report.mjs`; it never searches session stores or reads transcripts. The Claude adapter uses only `modelUsage` and emits one inclusive `tree` row across models (with identity `model-mix`); it does not promote main-loop `usage` to whole-tree usage or invent per-agent shares. Missing counters remain unknown.
+
+For a Pi window, supply both cumulative snapshots. The converter requires the same opaque session identity, a start-branch prefix of the end branch, monotone parent/child counters, stable existing child identities and no removed rows or unresolved async children. New child rows contribute their reported attempt counters. If lineage is not established, use a standalone labelled cumulative snapshot or refuse the window; do not add snapshots together.
+
+```bash
+node tools/token-native-summary.mjs --input "pi-receipt.json" --host pi --id task --window task-window --host-version 1.5.0 --effort high --task-class implementation --candidate current --outcome task --accepted 1 > "native-summary.json"
+node tools/token-native-summary.mjs --input "pi-end.json" --start "pi-start.json" --host pi --id task --window task-window --host-version 1.5.0 --effort high --task-class implementation --candidate current --outcome task --accepted 1 > "native-window.json"
+node tools/token-native-summary.mjs --input "claude-final-result.json" --host claude --id task --window task-window --host-version 2.1.312 --effort unknown --task-class implementation --candidate current --outcome task --accepted 1 > "claude-summary.json"
+node tools/token-report.mjs --input "native-summary.json"
+```
+
+`tools/token-native-pi.mjs` is optional source code, not autoloaded or registered. From the repository root, a user can explicitly load it with `pi -e ./tools/token-native-pi.mjs` and invoke `/token-native-snapshot --out <new-file>`. It checks the `pi-subagents` event-bus `ping` capability, then requests its documented `cost` RPC once. It writes only allowlisted normalized counters and opaque identities, records Pi host version as `unknown` because the supported API does not expose it, uses exclusive file creation, and fails without exposing RPC errors or private paths. Supply an independently observed version to the converter when known. This source implementation has fixture coverage only: it is not live host activation or proof of installed-version/platform behavior. Do not enable it without reviewing the code and choosing the destination.
 
 ## Understand the result
 
