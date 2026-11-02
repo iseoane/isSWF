@@ -81,7 +81,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r6.md](jobs/J004/brief-r6.md)
+- Brief: [brief-r7.md](jobs/J004/brief-r7.md)
 - Blocker: Linux Pi technical verification is complete within retained limits; Claude recovery/continuation, child-side candidate reconciliation and Claude CI conversation remain unverified after the partial r6 attempt. Its parent allowance is spent; native Windows journeys remain operator-owned.
 - Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
 
@@ -256,3 +256,7 @@ Delivery isolation: the tested/prepared inputs remain at their exact4eb9dd3/5047
 Conditional affected-delta reviewer `a87c0609-702a-4724-8fe5-7a5f5726f4fe` failed with `Codex error: The usage limit has been reached`; native terminal observed, acceptance rejected, no usable report returned. Coordinator failure receipt J004/V005.md retains exact0a71332/main4b9c011 candidate/base and timeline. This review attempt is spent; no automatic retry, replacement or provider substitution. V004 FAIL remains unchanged; mechanical correction checks do not establish independent PASS.
 
 Operator requested continuation after the quota failure. Current covered action is to checkpoint/push accurate unaccepted I0024 records on `test/i0024-claude-evidence`, without integration or claiming review completion. Additional bounded independent-review allowance/route must be explicitly selected before another call; actual quota/capability remains a preflight requirement. The native Claude parent allowance is also spent, so no new control probe is inferred. Token plans remain separately available on pushed `test/i0024-pi-integrated`; Windows live outcomes remain operator-owned.
+
+## Explicit additional native Claude review allowance
+
+Operator accepted the proposed extra read-only native Claude Code review, maximum10min, without rerunning probes. J004/r7 allocates exactly1native reviewer process, repository-approved opus/medium, zero nested Agent calls/retries/replacements. Codex failures remain spent and V004/V005 retained; this is explicit provider selection, not automatic fallback. Require actual native reviewer profile/evidence-tool preflight, bound exact Git inputs, every diff chunk and complete required methodology. No new source/control/Windows work or expanded integration permission. Candidate checkpoint follows this preparation; no actual review is claimed running yet.
