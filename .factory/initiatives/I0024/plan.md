@@ -81,7 +81,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r12.md](jobs/J004/brief-r12.md)
+- Brief: [brief-r13.md](jobs/J004/brief-r13.md)
 - Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Independent source/evidence review and actual pending-CI conversation remain open; Windows operator-owned.
 - Next step: Use remaining r11 native source/evidence reviewer once <=10min, then covered PR/exact-head CI and unused r10 CI conversation if review sufficient. No writer retry or Windows claim.
 
@@ -344,3 +344,7 @@ Initial host-contract/docs/diff checks pass on edited tree; committed-source ful
 ## Current operator resumption and method observation
 
 Operator explicitly says “Adelante con las cerrar lo de claude”. Continue the existing bounded Claude closure unit, not new Windows/token/installation/cleanup scope or budget reset. A010 retains completed d957a1d method validation, terminal state, full reports, controlled replay limits and deviations. Corrected portable quality exit0; first umask-related failure preserved. Both source attempts and one method parent/child/continuation are spent. No active native actor observed. Remaining one r11 independent native opus/medium review<=10min plus genuine-pending-CI r10 parent<=5min/zero children; conditional affected-delta reserve only for real corrections. Review mode combined: semantic host safety/authority and method compliance, mechanical scoped static guards/mirror/check provenance; stop on required methodology/evidence failure or HIGH/unresolved risk. Existing LOW/MEDIUM protected integration grant remains bounded to this unit, no broader acceptance.
+
+## Explicit corrected-diff review resumption
+
+R11 source review stopped on diff-output-limit, no verdict: V010 preserves complete original report. Native identity valid, diff total bound65536 below actual85728; CLI refused before MCP chunking. Process exit0/no stderr, PID164554 absent. Operator explicitly approves ONE new opus/medium native review<=10min after zero-model full-diff/chunk preflight, r13. Prior attempt remains spent; no source changes or extra method probes. New allowance1, no automatic retry; CI-parent and conditional reserve unchanged.
