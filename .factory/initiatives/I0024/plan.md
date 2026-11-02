@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r11.md](jobs/J004/brief-r11.md)
-- Blocker: The r11 source writer stopped before any mutation because native Claude requires sensitive-file approval for .agents/hosts/claude-code.md. Its one writer allowance is spent; an explicitly authorized additional attempt with a supported native approval route is needed. Other Claude/Windows acceptance gaps remain open.
-- Next step: Operator explicitly approves a bounded additional native writer attempt and sensitive-file editing through supported native permission callback (or interactive approval). No Pi/other-tool rewrite, global rule/mode bypass or new writer meanwhile. Preserve unused validation/review/CI budgets and Windows boundaries.
+- Brief: [brief-r12.md](jobs/J004/brief-r12.md)
+- Blocker: First source writer stopped for sensitive-file approval with no source changes. Operator now explicitly approved that edit and one additional <=15min native writer via supported scoped stdio callback; source/method validation remains pending. Other Claude/Windows criteria remain open.
+- Next step: Execute r12 exactly one additional scoped writer with native approval callback, retain terminal report/changes, then run existing r11 checks and method-driven validation/review. Stop on any unresolved refusal, no further automatic writer or permission change; Windows remains operator-owned.
 
 ### Acceptance
 
@@ -330,3 +330,7 @@ The one r11 native writer actualclaude-sonnet-5-5 read role/host/brief and selec
 Official permission-mode docs explain sensitive/protected paths need explicit approval despite manual-mode allow rules. Native CLI defaults permission-prompts tohost but this driver supplied no permission callback channel. Official SDK public sources establish the supported --permission-prompt-tool stdio/control_request can_use_tool/behavior allow+updatedInput route; this is grounding, not a live approval already obtained. No Agent SDK is installed at the inspected project/extension dependency roots and no installation is authorized or needed for a native stdio relay. Do not add a dispatcher, hooks or permission bypass.
 
 R11 source-writer attempt is spent; method validation, source review and previously unused CI-parent budgets remain unspent. Current question is explicit protected-file approval and ONE additional bounded native writer attempt using the supported approval route (or actual interactive host), limited to the same four files/no global changes. A generic source grant/tool allowlist alone does not represent this runtime approval. Canonical records unfreeze only because the writer has ceased; no source implementation/verification/independent source PASS or PR is claimed.
+
+## Protected-file approval and additional writer explicitly authorized
+
+Operator expressly approved the sensitive canonical-guide edit and ONE additional15min writer attempt, same four-file scope/no global changes. R12 selects official native --permission-prompt-tool stdio/control_request can_use_tool interface, grounded in public SDK sources; return behaviorallow+exactupdatedInput only for operator-approved Edit target after regular-file/realpath checks. No updatedPermissions, mode/rule changes, hooks, SDK install or other-tool rewrite. Unexpected callback/denial fails closed. Prior r11 writer remains spent and preserved; new allowance1nativeworkersonnet/medium<=15min/0nestedactors, other validation/review/CI budgets unchanged. Canonical records freeze during writer and exact new document checkpoint is supplied before actual dispatch.
