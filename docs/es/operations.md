@@ -42,16 +42,44 @@ RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 
 `tools/token-report.mjs` genera informes únicamente a partir de resúmenes que tú proporciones. No inspecciona sesiones del host, recopila eventos nativos, llama a modelos ni estima facturación. Los resúmenes de Pi y Claude transcritos manualmente se identifican como tales; no se afirma compatibilidad con sus formatos nativos. Mantén los archivos de entrada depurados y en local.
 
-Cada archivo JSON contiene `version: 1`, `mode: "window"` y `rows`. Cada fila representa una ventana independiente y no solapada; incluye un `id` opaco y acotado, `host` (`pi` o `claude`), `hostVersion`, `model`, `effort`, `taskClass`, `candidate`, `outcome`, el recuento no negativo `accepted`, la procedencia (`manual-pi`, `manual-claude` o resumen nativo declarado), `scope` (`agent`, `unattributed` o `tree`), `window` y `counters` con `input`, `output`, `cacheRead` y `cacheWrite`. Los contadores son enteros seguros no negativos o `null` en JSON si se desconocen. Las categorías deben ser disjuntas. Antes de introducir datos acumulativos, reiniciados, reanudados o de eventos, quien los suministra debe convertirlos en una ventana acotada y no solapada; se rechazan los modos no admitidos. No combines una fila de árbol con otras filas de la misma ventana. Añade una fila sin atribución cuando se desconozca la cobertura; nunca inventes proporciones por agente. Se rechazan los campos desconocidos y la salida solo contiene campos permitidos. Los campos opcionales `durationSeconds`, `requests`, `turns`, `corrections` y `reasoning` (no aditivo) se muestran por separado.
+Cada archivo JSON contiene `version: 1`, `mode: "window"` y `rows`. Cada fila representa una ventana independiente y no solapada; incluye un `id` opaco y acotado, `host` (`pi` o `claude`), `hostVersion`, `model`, `effort`, `taskClass`, `candidate`, `outcome`, el recuento no negativo `accepted`, la procedencia (`manual-pi`, `manual-claude`, `native-pi-summary` o `native-claude-summary`), `scope` (`agent`, `unattributed` o `tree`), `window` y `counters` con `input`, `output`, `cacheRead` y `cacheWrite`. Los identificadores y metadatos usan entre 1 y 128 caracteres ASCII: letras, números, `.`, `_`, `:`, `+` o `-`; utiliza identificadores opacos, nunca rutas ni texto privado. Los contadores son enteros seguros no negativos o `null` en JSON si se desconocen. Las categorías deben ser disjuntas. Las filas que comparten ventana y resultado repiten el mismo candidato y recuento de aceptación; el informe cuenta ese resultado una sola vez, no una vez por agente. Se rechazan las declaraciones contradictorias de ese grupo. Antes de introducir datos acumulativos, reiniciados, reanudados o de eventos, quien los suministra debe convertirlos en una ventana acotada y no solapada; se rechazan los modos no admitidos. No combines una fila de árbol con otras filas de la misma ventana. Añade una fila sin atribución cuando se desconozca la cobertura; nunca inventes proporciones por agente. Se rechazan los campos desconocidos y la salida solo contiene campos permitidos. Los campos opcionales `durationSeconds`, `requests`, `turns`, `corrections` y `reasoning` (no aditivo) se muestran por separado.
 
 Indica un único resumen o archivos comparables anterior/posterior:
+
+Este es un ejemplo mínimo válido de una fila:
+
+```json
+{
+  "version": 1,
+  "mode": "window",
+  "rows": [
+    {
+      "id": "agent1",
+      "host": "pi",
+      "hostVersion": "1.0",
+      "model": "model1",
+      "effort": "high",
+      "taskClass": "task1",
+      "candidate": "candidate1",
+      "outcome": "outcome1",
+      "accepted": 1,
+      "provenance": "manual-pi",
+      "scope": "agent",
+      "window": "window1",
+      "counters": { "input": 100, "output": 20, "cacheRead": 30, "cacheWrite": 5 }
+    }
+  ]
+}
+```
+
+Ejecuta un resumen o compara los archivos anterior y posterior:
 
 ```bash
 node tools/token-report.mjs --input "summary.json"
 node tools/token-report.mjs --before "before.json" --after "after.json"
 ```
 
-El recuento de aceptaciones abarca toda la ventana suministrada, incluido el trabajo fallido, las revisiones y las correcciones. El informe muestra los componentes conocidos, el total procesado completo o un subtotal parcial identificado, la proporción de lecturas de caché solo si el denominador es conocido y positivo, y los tokens por resultado aceptado solo si se conocen todos los componentes y hay aceptaciones. La comparación requiere coincidencia de host/versión, modelo/esfuerzo, clase de tarea, identificadores y ámbitos de actores, recuentos de aceptación y disponibilidad de categorías, además de una base conocida positiva. En otro caso, las diferencias se indican explícitamente como incomparables o indefinidas. Una menor proporción de lectura de caché o un total menor no demuestran por sí solos calidad ni ahorro. El límite combinado de entrada es 1 MiB y 100 filas; cada fila admite hasta 4 KiB y la salida hasta 64 KiB. Son cálculos locales, no mediciones de hosts activos ni de facturación.
+El recuento de aceptaciones abarca toda la ventana suministrada, incluido el trabajo fallido, las revisiones y las correcciones. El informe muestra los componentes conocidos, el total procesado completo o un subtotal parcial identificado, la proporción de lecturas de caché solo si el denominador es conocido y positivo, y los tokens por resultado aceptado solo si se conocen todos los componentes y hay aceptaciones. El informe etiqueta los datos solo de árbol como `aggregate-only`, las filas individuales como `individual` y la atribución ausente como `unattributed` o `partial`; no presenta un total de árbol inclusivo como atribución por agente. La comparación empareja cada fila por ventana, identificador de agente e identidad del resultado; después exige coincidencia de host/versión, modelo/esfuerzo, clase de tarea, ámbitos, recuentos de aceptación y disponibilidad de categorías. El candidato puede diferir entre las ejecuciones anterior y posterior. Se necesita una base conocida positiva para calcular diferencias. En otro caso, las diferencias se indican explícitamente como incomparables o indefinidas. Una menor proporción de lectura de caché o un total menor no demuestran por sí solos calidad ni ahorro. El límite combinado de entrada es 1 MiB y 100 filas; cada fila admite hasta 4 KiB y la salida hasta 64 KiB. Son cálculos locales, no mediciones de hosts activos ni de facturación.
 
 ## Interpretar el resultado
 

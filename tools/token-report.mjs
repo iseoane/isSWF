@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFile } from 'node:fs/promises';
+import { open } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +29,13 @@ export function normalize(input) {
     const { reasoning, ...safe } = row;
     return { ...safe, reasoning: reasoning ?? null };
   });
+  const outcomeAcceptances = new Map();
+  for (const row of rows) {
+    const key = `${row.window}\0${row.outcome}`;
+    const declared = outcomeAcceptances.get(key);
+    if (declared && (declared.accepted !== row.accepted || declared.candidate !== row.candidate)) throw Error('contradictory outcome acceptance');
+    outcomeAcceptances.set(key, { accepted: row.accepted, candidate: row.candidate });
+  }
   const windows = new Map();
   for (const row of rows) {
     if (!windows.has(row.window)) windows.set(row.window, []);
@@ -51,35 +58,62 @@ function summarize(input) {
   const counters = Object.fromEntries(fields.map(key => [key, sumKnown(rows, key)]));
   const knownSubtotal = safeSum(rows.flatMap(row => fields.map(key => row.counters[key] ?? 0)));
   const processed = fields.every(key => counters[key] !== null) ? safeSum(fields.map(key => counters[key])) : null;
-  const accepted = safeSum(rows.map(row => row.accepted));
-  const cacheDenominator = counters.input === null || counters.cacheRead === null || counters.cacheWrite === null ? null : counters.input + counters.cacheRead + counters.cacheWrite;
-  return { rows, counters, processed, processedSubtotal: processed === null ? knownSubtotal : null, totalStatus: processed === null ? 'partial-subtotal' : 'complete', accepted, tokensPerAccepted: accepted > 0 && processed !== null ? processed / accepted : null, cacheReadShare: cacheDenominator > 0 ? counters.cacheRead / cacheDenominator : null, attribution: rows.some(row => row.scope === 'unattributed') ? 'includes-unattributed' : 'attributed-rows-only' };
+  const acceptances = new Map(rows.map(row => [`${row.window}\0${row.outcome}`, row.accepted]));
+  const accepted = safeSum([...acceptances.values()]);
+  const cacheDenominator = counters.input === null || counters.cacheRead === null || counters.cacheWrite === null ? null : safeSum([counters.input, counters.cacheRead, counters.cacheWrite]);
+  const individualRows = rows.filter(row => row.scope === 'agent').length;
+  const aggregateRows = rows.filter(row => row.scope === 'tree').length;
+  const unattributedRows = rows.filter(row => row.scope === 'unattributed').length;
+  const attribution = rows.length === 0 ? 'unknown' : unattributedRows && (individualRows || aggregateRows) ? 'partial' : unattributedRows ? 'unattributed' : aggregateRows && individualRows ? 'mixed-aggregate-and-individual' : aggregateRows ? 'aggregate-only' : 'individual';
+  return { rows, counters, processed, processedSubtotal: processed === null ? knownSubtotal : null, totalStatus: processed === null ? 'partial-subtotal' : 'complete', accepted, tokensPerAccepted: accepted > 0 && processed !== null ? processed / accepted : null, cacheReadShare: cacheDenominator > 0 ? counters.cacheRead / cacheDenominator : null, attribution, coverage: { individualRows, aggregateRows, unattributedRows } };
 }
 function compare(before, after) {
   const a = before.rows, b = after.rows;
-  const keys = ['id', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted'];
-  const comparable = a.length === b.length && a.every((row, i) => keys.every(key => row[key] === b[i]?.[key]) && fields.every(key => (row.counters[key] === null) === (b[i]?.counters[key] === null)));
+  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted'];
+  const byIdentity = new Map(b.map(row => [`${row.window}\0${row.id}`, row]));
+  const comparable = a.length === b.length && a.every(row => {
+    const counterpart = byIdentity.get(`${row.window}\0${row.id}`);
+    return counterpart && keys.every(key => row[key] === counterpart[key]) && fields.every(key => (row.counters[key] === null) === (counterpart.counters[key] === null));
+  });
   const reasons = [];
-  if (!comparable) reasons.push('metadata, actor scope, acceptance basis, row count, or counter availability differs');
-  const rawDifference = comparable && before.processed !== null && after.processed !== null ? before.processed - after.processed : null;
-  const perAcceptedDifference = comparable && before.tokensPerAccepted !== null && after.tokensPerAccepted !== null ? before.tokensPerAccepted - after.tokensPerAccepted : null;
-  if (before.processed === 0) reasons.push('baseline processed total is zero');
+  if (!comparable) reasons.push('metadata, actor scope, outcome/window identity, acceptance basis, row count, or counter availability differs');
+  const positiveBaseline = before.processed !== null && before.processed > 0;
+  const rawDifference = comparable && positiveBaseline && after.processed !== null ? before.processed - after.processed : null;
+  const perAcceptedDifference = comparable && positiveBaseline && before.tokensPerAccepted !== null && after.tokensPerAccepted !== null ? before.tokensPerAccepted - after.tokensPerAccepted : null;
+  if (!positiveBaseline) reasons.push('baseline processed total is unknown or zero');
   if (before.tokensPerAccepted === null || after.tokensPerAccepted === null) reasons.push('accepted-outcome ratio is undefined');
-  return { status: comparable && before.processed > 0 ? 'comparable' : 'incomparable', reasons, processedDifference: rawDifference, processedReductionPercent: rawDifference === null ? null : 100 * rawDifference / before.processed, tokensPerAcceptedDifference: perAcceptedDifference };
+  const status = !comparable || !positiveBaseline ? 'incomparable' : after.processed === null ? 'partial' : 'comparable';
+  if (after.processed === null && positiveBaseline && comparable) reasons.push('after processed total is partial');
+  return { status, reasons, processedDifference: rawDifference, processedReductionPercent: rawDifference === null ? null : 100 * rawDifference / before.processed, tokensPerAcceptedDifference: perAcceptedDifference };
 }
 export function report(summary, beforeSummary = null) {
-  const after = summarize(normalize(summary));
-  const result = { version: 1, reportType: 'offline-token-summary', totals: after, comparison: beforeSummary ? compare(summarize(normalize(beforeSummary)), after) : null, claims: 'Curated supplied summaries only; no native collection, billing, or live-session measurement.' };
+  const afterInput = normalize(summary);
+  const beforeInput = beforeSummary ? normalize(beforeSummary) : null;
+  if (afterInput.rows.length + (beforeInput?.rows.length ?? 0) > MAX_ROWS) throw Error('row limit exceeded');
+  const after = summarize(afterInput);
+  const result = { version: 1, reportType: 'offline-token-summary', totals: after, comparison: beforeInput ? compare(summarize(beforeInput), after) : null, claims: 'Curated supplied summaries only; no native collection, billing, or live-session measurement.' };
   const output = JSON.stringify(result, null, 2);
   if (Buffer.byteLength(output) > MAX_OUTPUT) throw Error('report limit exceeded');
   return result;
 }
 
 async function load(path, total) {
-  const bytes = await readFile(resolve(path));
-  total.bytes += bytes.length;
-  if (total.bytes > MAX_INPUT) throw Error('input limit exceeded');
-  return JSON.parse(bytes.toString('utf8'));
+  const remaining = MAX_INPUT - total.bytes;
+  const buffer = Buffer.alloc(remaining + 1);
+  const handle = await open(resolve(path), 'r');
+  try {
+    let length = 0;
+    while (length < buffer.length) {
+      const { bytesRead } = await handle.read(buffer, length, buffer.length - length, null);
+      if (bytesRead === 0) break;
+      length += bytesRead;
+    }
+    if (length > remaining) throw Error('input limit exceeded');
+    total.bytes += length;
+    return JSON.parse(buffer.toString('utf8', 0, length));
+  } finally {
+    await handle.close();
+  }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
