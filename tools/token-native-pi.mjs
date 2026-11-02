@@ -6,7 +6,7 @@ const REQUEST = 'subagents:rpc:v1:request';
 const REPLY = 'subagents:rpc:v1:reply:';
 const MAX_RECEIPT = 1024 * 1024;
 const MAX_AUTO_ROWS = 100;
-const AUTO_CONFIG = '.factory/native-usage.json';
+const STATE_ROOTS = ['.isswf', '.factory'];
 const digest = value => createHash('sha256').update(String(value)).digest('hex').slice(0, 24);
 const integer = value => Number.isSafeInteger(value) && value >= 0;
 
@@ -88,20 +88,35 @@ export async function writeExclusive(path, receipt) {
 }
 
 async function loadAutoConfig(cwd) {
+  const configured = [];
+  for (const stateRoot of STATE_ROOTS) {
+    const rootPath = resolve(cwd, stateRoot);
+    try {
+      const rootInfo = await lstat(rootPath);
+      if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink()) return undefined;
+    } catch (error) { if (error.code === 'ENOENT') continue; return undefined; }
+    const configPath = resolve(rootPath, 'native-usage.json');
+    try {
+      const info = await lstat(configPath);
+      if (!info.isFile() || info.isSymbolicLink()) return undefined;
+      configured.push({ configPath, stateRoot });
+    } catch (error) { if (error.code !== 'ENOENT') return undefined; }
+  }
+  if (configured.length !== 1) return undefined;
   try {
-    const configPath = resolve(cwd, AUTO_CONFIG);
-    const info = await lstat(configPath);
+    const { configPath, stateRoot } = configured[0];
     const config = JSON.parse(await readFile(configPath, 'utf8'));
-    const destination = resolve(cwd, config?.destination ?? '');
-    const base = resolve(cwd, '.factory');
+    if (config?.version !== 1 || config.enabled !== true || typeof config.destination !== 'string' || !config.destination.trim()) return undefined;
+    const base = resolve(cwd, stateRoot);
+    const destination = resolve(base, config.destination);
     const relativePath = relative(base, destination);
-    if (!info.isFile() || info.isSymbolicLink() || config?.version !== 1 || config.enabled !== true || typeof config.destination !== 'string' || !relativePath || relativePath.startsWith('..') || isAbsolute(relativePath)) return undefined;
-    return destination;
+    if (!relativePath || relativePath.startsWith('..') || isAbsolute(relativePath)) return undefined;
+    return { destination, stateRoot };
   } catch { return undefined; }
 }
 
-async function ensureCaptureDirectory(destination, cwd) {
-  const base = resolve(cwd, '.factory');
+async function ensureCaptureDirectory(destination, cwd, stateRoot) {
+  const base = resolve(cwd, stateRoot);
   const relativePath = relative(base, destination);
   if (!relativePath || relativePath.startsWith('..') || isAbsolute(relativePath)) throw Error('unsafe capture destination');
   try { await mkdir(base, { mode: 0o700 }); } catch (error) { if (error.code !== 'EEXIST') throw error; }
@@ -117,8 +132,8 @@ async function ensureCaptureDirectory(destination, cwd) {
   }
 }
 
-async function writeAutoSnapshot(destination, receipt, key, event, cwd) {
-  await ensureCaptureDirectory(destination, cwd);
+async function writeAutoSnapshot(destination, receipt, key, event, cwd, stateRoot) {
+  await ensureCaptureDirectory(destination, cwd, stateRoot);
   const path = resolve(destination, `${receipt.session}.json`);
   let state;
   try {
@@ -190,7 +205,7 @@ export default function tokenNativePi(pi) {
     try {
       const receipt = await requestCost(pi, request.ctx);
       if (active !== owner || owner.epoch !== epoch || owner.disposed) return;
-      await writeAutoSnapshot(owner.destination, receipt, request.key, request.event, request.ctx.cwd);
+      await writeAutoSnapshot(owner.destination.destination, receipt, request.key, request.event, request.ctx.cwd, owner.destination.stateRoot);
       request.ctx.ui?.setStatus?.('token-native-capture', undefined);
     } catch {
       request.ctx.ui?.setStatus?.('token-native-capture', 'Automatic usage capture failed');

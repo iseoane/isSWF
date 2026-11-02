@@ -42,14 +42,21 @@ try {
 
   const disabled = makeHost();
   await mkdir(join(root, '.factory'), { recursive: true });
-  await writeFile(join(root, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: false, destination: '.factory/native-usage' }));
+  await writeFile(join(root, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: false, destination: 'native-usage' }));
   (await import(extensionPath)).default(disabled.pi);
   await disabled.handlers.get('session_start')({ reason: 'startup' }, ctx(['entry-a']));
   assert.equal(disabled.requests, 0, 'disabled capture makes no cost RPC requests');
   assert.equal(disabled.handlers.has('agent_settled'), true);
+  await mkdir(join(root, '.isswf'), { recursive: true });
+  await writeFile(join(root, '.isswf/native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'native-usage' }));
+  const ambiguous = makeHost();
+  (await import(extensionPath)).default(ambiguous.pi);
+  await ambiguous.handlers.get('session_start')({ reason: 'startup' }, ctx(['entry-a']));
+  assert.equal(ambiguous.requests, 0, 'two active state roots fail closed');
+  await rm(join(root, '.isswf'), { recursive: true, force: true });
 
   const enabled = makeHost();
-  await writeFile(join(root, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: '.factory/native-usage' }));
+  await writeFile(join(root, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'native-usage' }));
   (await import(extensionPath)).default(enabled.pi);
   await enabled.handlers.get('session_start')({ reason: 'startup' }, ctx(['entry-a']));
   const sessionKey = createHash('sha256').update('test-session').digest('hex').slice(0, 24);
