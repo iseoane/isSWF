@@ -225,8 +225,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
-- Blocker: A002 returned partial candidate ee57ab39c0d36143f99dc105eb669e1dcfe6da59: source/fixtures pass, but real persisted setup loading, automatic native Linux hooks and lifecycle/failure matrix remain unverified. Claude J006 not started. Original and continuation actors are terminal complete; neither may be resumed from this coordinator session.
-- Next step: Current operator explicitly requests completion of pending work. Consume the existing one source-correction allowance (one worker, at most15min, sequential, no nested delegation or replacement) to close A002 gaps, then use up to two reserved independent reviews15min each and scoped stacked delivery. Do not reset spent author allowances or change operator settings. Real Windows tests remain deferred.
+- Blocker: Corrected source8877475 has isolated actual Pi persisted-settings/session-start/settled evidence, but uses a synthetic cost responder, not installed subagents0.83 RPC or actual completion emitter. Full native acceptance remains partial. Claude J006 not started; source correction allowance spent.
+- Next step: Use first reserved independent review<=15min on exact8877475, combined semantic lifecycle/privacy/setup assessment and mechanical tests/consumer evidence. Stop with separate Standards/Spec judgments and actionable source versus native-evidence gaps; no automatic new writer beyond spent correction. Second reserved review remains unused. Windows real tests deferred.
 
 ### Acceptance
 
@@ -245,7 +245,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J005/A001.md: worker1d9c983c-32dd-408d-af70-121cac2c5bf5 terminal complete with blocked result, source unchanged atc257788. Required installed extension docs only partially consumed/self-reported; no tests or native proof.
 - Operator explicitly confirms implementation for Pi and Claude through isswf-setup; real Windows tests later. Current setup skill has no metric option; source integration pending, not configured.
 - jobs/J005/brief-r2.md: preserves A001/r1, resolves canonical plan path and chunked-doc procedure, adds setup/source scope and current incremental budget1same-context continuation30min+1source correction15min+up to2reviews15min, no replacement/reset.
-- jobs/J005/A002.md: retained actual worker report from native run f82fb6cc-6306-41de-8fd9-52afd3a51723, terminal complete observed on resumption. Source ee57ab3 partial; no actual native hook test or verified persisted activation. Current operator start resumes the assignment, not the ceased author context. Remaining source correction and review allowances only; A001 and continuation remain spent.
+- jobs/J005/A002.md: retained actual worker report from native run f82fb6cc-6306-41de-8fd9-52afd3a51723, terminal complete observed on resumption. Source ee57ab3 partial; no actual native hook test or verified persisted activation. Current operator start resumes the assignment, not the ceased author context. A001 and continuation remain spent.
+- jobs/J005/A003.md: correction context8f25124b continued as287b785d within same15min allowance; terminal complete observed. Fixed actual Pi stale UI-context shutdown race in8877475ca0e4a1c3852dd5d44e80841d8ceac11c. Worker native persisted-settings and actual settled-hook probes PASS with synthetic RPC/provider, no real provider or installed-subagents evidence. Added failure/lifecycle fixtures; coordinator focused auto/native suites PASS. Fullquality/lint/Knip/docs PASS self-reported. Initial fixture timing failure retained. Correction spent, two review allowances initially remain.
 
 ## J006
 
