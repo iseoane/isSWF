@@ -69,16 +69,67 @@ try {
   const reordered = { ...claude, modelUsage: { modelB: claude.modelUsage.modelB, modelA: claude.modelUsage.modelA } };
   const sameModels = normalizeNative({ input: reordered, meta: claudeMeta });
   assert.equal(claudeSnapshot.model, sameModels.model);
+  const changedTokenValues = normalizeNative({ input: { ...claude, modelUsage: { modelA: { ...claude.modelUsage.modelA, inputTokens: 700 }, modelB: claude.modelUsage.modelB } }, meta: claudeMeta });
+  assert.equal(claudeSnapshot.model, changedTokenValues.model);
   const changedModels = normalizeNative({ input: { ...claude, modelUsage: { modelC: claude.modelUsage.modelA } }, meta: claudeMeta });
   assert.notEqual(claudeSnapshot.model, changedModels.model);
   const hypotheticalWindow = value => ({ version: 1, mode: 'window', rows: [{ id: 'tree', host: 'claude', hostVersion: 'unknown', model: value.model, effort: 'unknown', taskClass: 'task', candidate: 'candidate', outcome: 'outcome', accepted: 1, provenance: 'native-claude-summary', scope: 'tree', window: 'window', counters: value.counters }] });
   assert.equal(report(hypotheticalWindow(claudeSnapshot), hypotheticalWindow(sameModels)).comparison.status, 'comparable');
   assert.equal(report(hypotheticalWindow(changedModels), hypotheticalWindow(claudeSnapshot)).comparison.status, 'incomparable');
   assert.throws(() => normalizeNative({ input: { ...claude, modelUsage: { '': {} } }, meta: claudeMeta }));
-  assert.throws(() => normalizeNative({ input: claude, start: claude, meta: claudeMeta }));
+  const zeroClaudeWindow = normalizeNative({ input: claude, start: claude, meta: { ...claudeMeta, hostVersion: '2.1.312' } });
+  assert.equal(zeroClaudeWindow.mode, 'window');
+  assert.deepEqual(zeroClaudeWindow.rows[0].counters, { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
   assert.throws(() => report(claudeSnapshot), /invalid token summary/u);
   const partialClaude = normalizeNative({ input: { session_id: 's', modelUsage: { model: { outputTokens: 2 } } }, meta: claudeMeta });
   assert.equal(partialClaude.counters.input, null);
+
+  const claudeStart = { session_id: 'same-session', modelUsage: {
+    modelA: { inputTokens: 100, outputTokens: 20, cacheReadInputTokens: 40, cacheCreationInputTokens: 5 },
+    modelB: { inputTokens: 30, outputTokens: 10, cacheReadInputTokens: 8, cacheCreationInputTokens: 2 },
+  }, usage: { input_tokens: 999999 } };
+  const claudeEnd = { session_id: 'same-session', modelUsage: {
+    modelB: { inputTokens: 35, outputTokens: 12, cacheReadInputTokens: 10, cacheCreationInputTokens: 4 },
+    modelA: { inputTokens: 111, outputTokens: 24, cacheReadInputTokens: 45, cacheCreationInputTokens: 6 },
+  }, usage: { input_tokens: 999999 } };
+  const claudeWindowMeta = { ...claudeMeta, hostVersion: '2.1.312' };
+  assert.throws(() => normalizeNative({ input: claudeEnd, start: claudeStart, meta: claudeMeta }));
+  const claudeWindow = normalizeNative({ input: claudeEnd, start: claudeStart, meta: claudeWindowMeta });
+  assert.equal(claudeWindow.mode, 'window');
+  assert.equal(claudeWindow.rows.length, 1);
+  assert.equal(claudeWindow.rows[0].scope, 'tree');
+  assert.deepEqual(claudeWindow.rows[0].counters, { input: 16, output: 6, cacheRead: 7, cacheWrite: 3 });
+  const claudeReport = report(claudeWindow);
+  assert.equal(claudeReport.totals.processed, 32);
+  assert.equal(claudeReport.totals.accepted, 1);
+  assert.equal(claudeReport.totals.tokensPerAccepted, 32);
+  assert.throws(() => normalizeNative({ input: { ...claudeEnd, session_id: 'reset-session' }, start: claudeStart, meta: claudeWindowMeta }));
+  assert.throws(() => normalizeNative({ input: { ...claudeEnd, modelUsage: { modelC: claudeEnd.modelUsage.modelA, modelB: claudeEnd.modelUsage.modelB } }, start: claudeStart, meta: claudeWindowMeta }));
+  const decreasedClaude = structuredClone(claudeEnd); decreasedClaude.modelUsage.modelA.outputTokens = 19;
+  assert.throws(() => normalizeNative({ input: decreasedClaude, start: claudeStart, meta: claudeWindowMeta }));
+  const missingClaude = structuredClone(claudeEnd); delete missingClaude.modelUsage.modelA.cacheReadInputTokens;
+  const missingWindow = normalizeNative({ input: missingClaude, start: claudeStart, meta: claudeWindowMeta });
+  assert.equal(missingWindow.rows[0].counters.cacheRead, null);
+  const unknownStartClaude = structuredClone(claudeStart); delete unknownStartClaude.modelUsage.modelA.inputTokens;
+  const unknownWindow = normalizeNative({ input: claudeEnd, start: unknownStartClaude, meta: claudeWindowMeta });
+  assert.equal(unknownWindow.rows[0].counters.input, null);
+  const resumedSnapshot = normalizeNative({ input: claudeEnd, meta: claudeMeta });
+  assert.equal(resumedSnapshot.mode, 'snapshot');
+  assert.throws(() => report(resumedSnapshot), /invalid token summary/u);
+
+  const agentInput = { agentOutput: {
+    agentId: 'opaque-agent-source-id', status: 'completed', resolvedModel: 'modelA', modelsUsed: ['modelA'],
+    usage: { input_tokens: 21, output_tokens: 8, cache_creation_input_tokens: null, cache_read_input_tokens: 4 },
+    content: [{ type: 'text', text: 'PRIVATE CONTENT' }], prompt: 'PRIVATE PROMPT', worktreePath: '/private/worktree',
+  } };
+  const agentSnapshot = normalizeNative({ input: agentInput, meta: claudeMeta });
+  assert.equal(agentSnapshot.mode, 'snapshot');
+  assert.equal(agentSnapshot.scope, 'agent');
+  assert.equal(agentSnapshot.sourceVersion, 'claude-sdk-tools-2.1.299');
+  assert.match(agentSnapshot.agent, /^agent-[a-f0-9]{24}$/u);
+  assert.deepEqual(agentSnapshot.counters, { input: 21, output: 8, cacheRead: 4, cacheWrite: null });
+  assert.doesNotMatch(JSON.stringify(agentSnapshot), /opaque-agent-source-id|PRIVATE|worktree|modelA/u);
+  assert.throws(() => normalizeNative({ input: { agentOutput: { ...agentInput.agentOutput, status: 'async_launched' } }, meta: claudeMeta }));
 
   const destination = join(root, 'receipt.json');
   await writeExclusive(destination, snap);
@@ -118,6 +169,15 @@ try {
 
   const claudePath = join(root, 'claude.json'), claudeOut = join(root, 'claude-snapshot.json');
   await writeFile(claudePath, JSON.stringify(claude));
+  const claudeStartPath = join(root, 'claude-start.json'), claudeEndPath = join(root, 'claude-end.json'), claudeWindowPath = join(root, 'claude-window.json');
+  await writeFile(claudeStartPath, JSON.stringify(claudeStart));
+  await writeFile(claudeEndPath, JSON.stringify(claudeEnd));
+  const claudeWindowCli = spawnSync(process.execPath, [resolve('tools/token-native-summary.mjs'), '--input', claudeEndPath, '--start', claudeStartPath, '--host', 'claude', '--host-version', '2.1.312', '--id', 'job', '--window', 'w', '--effort', 'unknown', '--task-class', 'task', '--candidate', 'c', '--outcome', 'o', '--accepted', '1'], { encoding: 'utf8' });
+  assert.equal(claudeWindowCli.status, 0, claudeWindowCli.stderr);
+  await writeFile(claudeWindowPath, claudeWindowCli.stdout);
+  const claudeWindowReport = spawnSync(process.execPath, [resolve('tools/token-report.mjs'), '--input', claudeWindowPath], { encoding: 'utf8' });
+  assert.equal(claudeWindowReport.status, 0, claudeWindowReport.stderr);
+  assert.equal(JSON.parse(claudeWindowReport.stdout).totals.processed, 32);
   const claudeCli = spawnSync(process.execPath, [resolve('tools/token-native-summary.mjs'), '--input', claudePath, '--host', 'claude'], { encoding: 'utf8' });
   assert.equal(claudeCli.status, 0, claudeCli.stderr);
   assert.equal(JSON.parse(claudeCli.stdout).hostVersion, 'unknown');

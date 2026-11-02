@@ -48,30 +48,77 @@ function piRows(receipt, allowUnresolved = false) {
   return rows;
 }
 
-function claudeSnapshot(result) {
+const claudeFields = [['inputTokens', 'input'], ['outputTokens', 'output'], ['cacheReadInputTokens', 'cacheRead'], ['cacheCreationInputTokens', 'cacheWrite']];
+function claudeUsage(result) {
   if (!result || typeof result !== 'object' || !result.modelUsage || typeof result.modelUsage !== 'object' || Array.isArray(result.modelUsage) || typeof result.session_id !== 'string' || !result.session_id) fail();
   const models = Object.entries(result.modelUsage);
   if (!models.length || models.length > MAX_ROWS || models.some(([model]) => !model.trim())) fail();
-  const modelNames = models.map(([model]) => model).sort();
-  const counters = Object.fromEntries(names.map(name => [name, 0]));
-  for (const [, usage] of models) {
+  const perModel = new Map();
+  for (const [model, usage] of models) {
     if (!usage || typeof usage !== 'object' || Array.isArray(usage)) fail();
-    for (const [key, outputKey] of [['inputTokens', 'input'], ['outputTokens', 'output'], ['cacheReadInputTokens', 'cacheRead'], ['cacheCreationInputTokens', 'cacheWrite']]) {
+    const counters = {};
+    for (const [key, name] of claudeFields) {
       const value = usage[key];
-      if (value === undefined) counters[outputKey] = null;
+      if (value === undefined) counters[name] = null;
       else if (!Number.isSafeInteger(value) || value < 0) fail();
-      else if (counters[outputKey] !== null) {
-        counters[outputKey] += value;
-        if (!Number.isSafeInteger(counters[outputKey])) fail();
-      }
+      else counters[name] = value;
+    }
+    perModel.set(model, counters);
+  }
+  const modelNames = [...perModel.keys()].sort();
+  const counters = Object.fromEntries(names.map(name => [name, 0]));
+  for (const usage of perModel.values()) for (const name of names) {
+    if (usage[name] === null) counters[name] = null;
+    else if (counters[name] !== null) {
+      counters[name] += usage[name];
+      if (!Number.isSafeInteger(counters[name])) fail();
     }
   }
+  return { session: result.session_id, modelNames, perModel, counters };
+}
+function claudeSnapshot(result) {
+  const usage = claudeUsage(result);
   return {
-    session: hash(result.session_id),
-    model: `model-mix-${hash(JSON.stringify(modelNames))}`,
-    modelCount: modelNames.length,
+    session: hash(usage.session),
+    model: `model-mix-${hash(JSON.stringify(usage.modelNames))}`,
+    modelCount: usage.modelNames.length,
+    counters: usage.counters,
+  };
+}
+function claudeWindow(startResult, endResult) {
+  const start = claudeUsage(startResult), end = claudeUsage(endResult);
+  if (start.session !== end.session || JSON.stringify(start.modelNames) !== JSON.stringify(end.modelNames)) fail();
+  const counters = Object.fromEntries(names.map(name => [name, (() => {
+    const deltas = start.modelNames.map(model => {
+      const before = start.perModel.get(model)[name], after = end.perModel.get(model)[name];
+      if (before === null || after === null) return null;
+      if (after < before) fail();
+      return after - before;
+    });
+    if (deltas.includes(null)) return null;
+    const total = deltas.reduce((sum, value) => sum + value, 0);
+    if (!Number.isSafeInteger(total)) fail();
+    return total;
+  })()]));
+  return {
+    session: hash(end.session),
+    model: `model-mix-${hash(JSON.stringify(end.modelNames))}`,
     counters,
   };
+}
+function claudeAgentSnapshot(summary) {
+  if (!summary || typeof summary !== 'object' || summary.status !== 'completed' || typeof summary.agentId !== 'string' || !summary.agentId || !summary.usage || typeof summary.usage !== 'object' || Array.isArray(summary.usage)) fail();
+  const counters = {};
+  for (const [key, name] of [['input_tokens', 'input'], ['output_tokens', 'output'], ['cache_read_input_tokens', 'cacheRead'], ['cache_creation_input_tokens', 'cacheWrite']]) {
+    const value = summary.usage[key];
+    if (value === null && (name === 'cacheRead' || name === 'cacheWrite')) counters[name] = null;
+    else if (!Number.isSafeInteger(value) || value < 0) fail();
+    else counters[name] = value;
+  }
+  const models = [...new Set([...(typeof summary.resolvedModel === 'string' ? [summary.resolvedModel] : []), ...(Array.isArray(summary.modelsUsed) ? summary.modelsUsed.filter(model => typeof model === 'string') : [])])].filter(Boolean).sort();
+  if (summary.modelsUsed !== undefined && (!Array.isArray(summary.modelsUsed) || summary.modelsUsed.some(model => typeof model !== 'string'))) fail();
+  if (summary.resolvedModel !== undefined && typeof summary.resolvedModel !== 'string') fail();
+  return { agent: `agent-${hash(summary.agentId)}`, model: models.length ? `model-mix-${hash(JSON.stringify(models))}` : 'unknown', modelCount: models.length, counters };
 }
 
 function deltaRows(start, end) {
@@ -97,8 +144,20 @@ function deltaRows(start, end) {
 export function normalizeNative({ input, start, meta }) {
   if (!meta || !['pi', 'claude'].includes(meta.host) || !safeName(meta.hostVersion)) fail();
   if (meta.host === 'claude') {
-    if (start) fail();
-    return { version: 1, mode: 'snapshot', host: 'claude', hostVersion: meta.hostVersion, sourceVersion: 1, scope: 'tree', ...claudeSnapshot(input) };
+    if (input?.agentOutput !== undefined) {
+      if (start) fail();
+      return { version: 1, mode: 'snapshot', host: 'claude', hostVersion: meta.hostVersion, sourceVersion: 'claude-sdk-tools-2.1.299', scope: 'agent', ...claudeAgentSnapshot(input.agentOutput) };
+    }
+    if (start && meta.hostVersion === 'unknown') fail();
+    const native = start ? claudeWindow(start, input) : claudeSnapshot(input);
+    if (!start) return { version: 1, mode: 'snapshot', host: 'claude', hostVersion: meta.hostVersion, sourceVersion: 1, scope: 'tree', ...native };
+    if (!['id', 'window', 'effort', 'taskClass', 'candidate', 'outcome'].every(key => safeName(meta[key])) || !Number.isSafeInteger(meta.accepted) || meta.accepted < 0) fail();
+    return { version: 1, mode: 'window', rows: [{
+      id: `${meta.id}-tree`, host: 'claude', hostVersion: meta.hostVersion, model: native.model,
+      effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate,
+      outcome: meta.outcome, accepted: meta.accepted, provenance: 'native-claude-summary',
+      scope: 'tree', window: meta.window, counters: native.counters,
+    }] };
   }
 
   const rows = start
@@ -136,7 +195,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       args[parts[index]] = parts[index + 1];
     }
     if (!args['--input'] || !['pi', 'claude'].includes(args['--host'])) throw Error('invalid options');
-    if (args['--host'] === 'claude' && args['--start']) throw Error('unsupported Claude window');
     if (args['--host'] === 'pi' && args['--start'] && args['--accepted'] === undefined) throw Error('invalid options');
     const total = { bytes: 0 };
     const input = await load(args['--input'], total);
