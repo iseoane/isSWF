@@ -192,7 +192,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Depends on: J003
 - Brief: [brief-r2.md](jobs/J004/brief-r2.md)
 - Blocker: Start capture supplied and retained before J004 model dispatch; rounded k/M precision and missing cacheWrite prevent an exact-token claim, not an approximate useful sample. End capture and actual installed-Claude/Windows observations remain pending.
-- Next step: Dispatch one bounded worker for supported Claude windows/agent snapshots under r2. Preserve same coordinator session/branch, record new run identities and request /subagent-cost again after implementation/reviews/corrections; never re-add previous nine children or substitute an empty session.
+- Next step: Publish draft stacked PR for reviewed00a937812e93ba7bd0887379e318c4feb7066b5f and verify exact-head CI; all actor/correction/review allowances spent. Preserve same coordinator session/branch and obtain end /subagent-cost after delivery, excluding old nine children. No full native/Windows acceptance or automatic collection claim.
 
 ### Acceptance
 
@@ -207,5 +207,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J004/brief-r1.md
 - Installed pi-subagents0.83 observability documentation confirms /subagent-cost is parent-plus-async-child view; current tools expose no direct invocation of that parent RPC.
 - jobs/J004/measurement/start.json: operator-transferred rounded cumulative start, parent271kinput77koutput47.2McacheRead290turns, prior9children205turns, inclusive495turns. Native formatter source confirms rounding; not exact counters, missing cacheWrite unknown, monetary estimates excluded.
-- jobs/J004/brief-r2.md: reconciled supported implementation and fresh finite budget; zero J004 actors spent before initial dispatch.
+- jobs/J004/brief-r2.md: reconciled supported implementation and fresh finite budget, pinned adfb79e354ccc0d5a4024653befd787a413e7938.
+- jobs/J004/A001.md: worker3284a124-ef2b-46ba-a20c-1dea65c3e532 complete/process terminal observed; source2a85519c9456b08af0026dd67f5cfc19128d9d42. Individual snapshots limited to locked2.1.299 source shape, no actual2.1.312/Windows observation.
+- Coordinator focused native/report and full portable quality PASS exact2a85519; new worker native numeric summary retained in measurement/actors.json, excluding prior9children. No parent/end delta or overall measurement result yet.
+- jobs/J004/V001.md: independent reviewer3298c47f-92bd-45f1-a866-965092e78f9e terminal complete; Standards fail/Spec fail exact2a85519, B1/B2 accepted for the single correction cycle. Required review procedure consumed; failing verdict retained.
+- jobs/J004/A002.md: worker correctioncb39d7e7-7d6f-4bd6-b57f-ebd79a113dd2 terminal complete; candidate00a937812e93ba7bd0887379e318c4feb7066b5f. Coordinator focused/native+report/fullportablequality PASS exactcandidate; no nativeClaude/Windows/acceptance proof.
+- jobs/J004/V002.md: reviewer5fcaf8f4-2887-4c8c-86d9-7cf93a41e8da terminal complete; Standards pass/Spec pass exactcorrectiondelta; no findings, priorFAIL retained, required procedure consumed. All four engineering actor allowances spent.
+- jobs/J004/measurement/actors.json: four new known native attempts measured,4518341processedchildtokens/66turns; old9excluded. Host-normalized, not full workflow; roundedparentend still pending.
+- jobs/J004/delivery.md: bounded source/review/check identities, Medium risk and remaining measurement/native/platform/acceptance gates.
 - Basea7ac95ba53213044418c1c6d626eabd9ccf955fb, branchfeat/i0025-claude-metrics; parent PR146 all three exact-head CI41497320513 checks SUCCESS, still OPEN.

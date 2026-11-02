@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "scope": "new-J004-child-attempts-only",
+  "status": "child-attempts-complete-parent-end-pending",
+  "oldChildrenExcluded": 9,
+  "expectedAttempts": 4,
+  "measuredAttempts": 4,
+  "actors": [
+    {
+      "kind": "initial-worker",
+      "runId": "3284a124-ef2b-46ba-a20c-1dea65c3e532",
+      "agent": "isswf-worker",
+      "source": "native-run-metadata",
+      "availability": "host-normalized",
+      "metadataSha256": "9b73205a6642c4a7240a9e576b6be72b1ec6e227fe2549dbba8f3f8037700640",
+      "counters": {
+        "input": 100248,
+        "output": 17518,
+        "cacheRead": 1700480,
+        "cacheWrite": 0,
+        "turns": 31
+      }
+    },
+    {
+      "kind": "initial-review",
+      "runId": "3298c47f-92bd-45f1-a866-965092e78f9e",
+      "agent": "isswf-reviewer",
+      "source": "native-run-metadata",
+      "availability": "host-normalized",
+      "metadataSha256": "bfa6d3a91f13b1b580cc7d5f06c128a23449af8305793f9fd6aedb7da2c10f93",
+      "counters": {
+        "input": 134207,
+        "output": 4498,
+        "cacheRead": 552320,
+        "cacheWrite": 0,
+        "turns": 11
+      }
+    },
+    {
+      "kind": "correction-worker",
+      "runId": "cb39d7e7-7d6f-4bd6-b57f-ebd79a113dd2",
+      "agent": "isswf-worker",
+      "source": "native-run-metadata",
+      "availability": "host-normalized",
+      "metadataSha256": "2d1077ccfb9476cf8cf24738e4656726089cee8f790a7077e6253a38cf3809c3",
+      "counters": {
+        "input": 39222,
+        "output": 6562,
+        "cacheRead": 1266816,
+        "cacheWrite": 0,
+        "turns": 12
+      }
+    },
+    {
+      "kind": "final-review",
+      "runId": "5fcaf8f4-2887-4c8c-86d9-7cf93a41e8da",
+      "agent": "isswf-reviewer",
+      "source": "native-run-metadata",
+      "availability": "host-normalized",
+      "metadataSha256": "8a414bd1b94ffba92ee6626347ed2dbda3dfc2751621a605b3f32e93d458450f",
+      "counters": {
+        "input": 141934,
+        "output": 4264,
+        "cacheRead": 550272,
+        "cacheWrite": 0,
+        "turns": 12
+      }
+    }
+  ],
+  "subtotal": {
+    "input": 415611,
+    "output": 32842,
+    "cacheRead": 4069888,
+    "cacheWrite": 0,
+    "turns": 66
+  },
+  "processedChildTokens": 4518341,
+  "coordinator": "end-minus-start-rounded-summary-pending",
+  "wholeWorkflowTotal": null,
+  "operatorAcceptance": "not-observed"
+}
