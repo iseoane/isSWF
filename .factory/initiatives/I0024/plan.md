@@ -81,7 +81,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r9.md](jobs/J004/brief-r9.md)
+- Brief: [brief-r10.md](jobs/J004/brief-r10.md)
 - Blocker: Linux Pi technical verification is complete within retained limits; Claude recovery/continuation, child-side candidate reconciliation and Claude CI conversation remain unverified after the partial r6 attempt. Its parent allowance is spent; native Windows journeys remain operator-owned.
 - Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
 
@@ -290,3 +290,11 @@ R9 native reviewer returned a complete report, retained unchanged as J004/V008.m
 Native process actualclaude-opus-5-5, requested effortmedium declared, only Read/Grep/Glob plus3boundGittools. Read trace confirms full review skill/canonicalreview/writing/E2E/references/Pi+Claude guides and bound diff/result-file reads; consumption/application attributed separately in report. Conditional code-quality/comments were not needed because reviewer reused unchanged R1 driver inspection instead of rejudging it. Parent returned final report naturally at07:54:44.980Z, process exit0/no stderr at07:54:45.063Z; exactPID102294 absent on follow-up. No nested actors/probe reruns/writes/permission changes during review. One-shot reminder zero children; no repeated model wait or timer renewal.
 
 R9 allowance consumed successfully. This resolves the independent correction-review blocker, not missing fullClaude/Linux/I0024 criteria. A007 remains PARTIAL: cancellation supported, no resume/eligibility/childcandidate-refusal/ClaudeCI proof; Windows remains operator-owned. Next covered action: publish I0024 evidence-only PR, inspect exact-head CI and normally integrate records under existing LOW/MEDIUM grant if gates pass. Later delta is this truthful verdict/status receipt plus full returned review, not functional source or new acceptance.
+
+## Remaining Claude journeys explicitly started
+
+Operator “Adelante” starts the three named remaining Claude journeys after integrated PR142/main72afcc9. J004/r10 allocates a new finite tranche without resetting spent work:1nativeparentopus/low<=12min with1existingsonnet/mediumworker initial run plus1same-IDSendMessagecontinuation (each<=5min within parent deadline); separate CI-conversationparentopus/low<=5min,0children; independentnativeopus/mediumreview1<=10min plus conditional affected-delta1<=10min. At most2concurrent actors, serialize phases; no automatic retries/extraquota-checks/install/permanenttests/sourcechanges or Windows work.
+
+New grounding: official native subagent docs retrieved2026-11-02 explicitly describe SendMessage continuation, including maxTurns partial-run recovery under same agentID/history. Earlier driver exposed only Agent/TaskStop and did not exercise that seam. Current proposal uses supported maxTurns2 on genuine input/brief reading, not a fake wait or assumed TaskStop resume. Actual native tool/status/ID evidence must validate it; documentation is not live acceptance. Preserve prior partial result and every original criterion, including missing fullOS guarantees not being newly invented. Separate actual pending-CI conversation can proceed only with genuine covered CI pending and explicit controlled-input provenance.
+
+Native tool/version preflight and complete report retention are required before any closure. Canonical source base72afcc9, new branch `test/i0024-claude-continuation`; prepared only at this checkpoint, no actor claimed running. I0025/I0026 remain planning-only on separate branch, Windows operator-owned.
