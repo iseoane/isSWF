@@ -158,8 +158,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Objective: Support native Pi/Claude usage summaries for coordinator and agents/subagents without models in the measurement path, retaining explicit host/platform capability limits.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Bounded source2eca40b0a4e82a28fe84498940ec8eba9e354899 has independent Standards/Spec pass; draft publication/CI and actual Pi acquisition, installed-Claude observations and native Windows evidence remain pending. Claude snapshot-only; slice2 stays partial.
-- Next step: Publish draft stacked source PR against feat/i0025-real-baseline and verify exact-head CI. All research/worker/correction/two-review allowances consumed. Resolve separately bounded live observation/activation and Windows boundary before full native acceptance; no automatic installation/provider calls or direct-main integration.
+- Blocker: Draft PR146 at3e187822d7c1b20df0887a39da319aae7357f7b0 has all three CI checks SUCCESS and reviewed source2eca40b. Authorized Pi/Linux empty-session load/API acquisition now PASS, but nonzero coordinator/children/window behavior, installed-Claude and native Windows evidence remain pending. Claude snapshot-only; slice2 partial.
+- Next step: Retain A003 native proof under the existing record-only boundary, then resolve a real ordinary-work sample and installed-Claude/Windows observations before full native acceptance. No persistent activation, further model actors, automatic provider calls or direct-main integration.
 
 ### Acceptance
 
@@ -181,4 +181,5 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J003/V001.md: reviewer cbf07a10-c90a-4fba-917b-2d9317883c4e complete/process terminal observed, Standards fail/Spec fail exact2741cfe; bound Git evidence consumed, all required procedure consumed self-reported. Failed verdict retained.
 - jobs/J003/A002.md: worker correction389149ce-16a1-4729-aabe-a911520af7cd terminal complete, candidate2eca40b0a4e82a28fe84498940ec8eba9e354899; B1–B4 addressed in the single consumed correction cycle. Coordinator reran native-usage/report/fullportablequality exit0; no live native proof or full acceptance inferred.
 - jobs/J003/V002.md: reviewer33fca849-3ddf-4cd2-a008-ed56217e22b6 terminal complete; Standards pass/Spec pass for exact correction delta with unchanged-evidence reuse. Optional regression suggestions nonblocking. No source edits after review; all actor allowances spent.
-- jobs/J003/delivery.md: source/review/check identities, Medium host-integration risk and explicit missing native/activation/platform acceptance.
+- jobs/J003/delivery.md: source/review/check identities, Medium host-integration risk and explicit missing full native/platform acceptance.
+- jobs/J003/A003.md: operator-authorized one-shot actual Pi1.5.0/subagents0.83.0 source extension load and native costRPC snapshot in fresh empty Linux session PASS; assistant/tool activity0, cleanexit0, settings hashes unchanged. Actual receipt normalized and refused as report window. Not existing coordinator/nonzero consumption, Claude or Windows evidence. Private harness retained ignored, no source changes.
