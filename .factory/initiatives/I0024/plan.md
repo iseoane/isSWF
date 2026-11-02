@@ -82,8 +82,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r13.md](jobs/J004/brief-r13.md)
-- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Independent source/evidence review and actual pending-CI conversation remain open; Windows operator-owned.
-- Next step: Use remaining r11 native source/evidence reviewer once <=10min, then covered PR/exact-head CI and unused r10 CI conversation if review sufficient. No writer retry or Windows claim.
+- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Independent source/evidence r13 PASS/LOW retained in V011; actual pending-CI conversation and exact-head CI remain open, Windows operator-owned.
+- Next step: Publish reviewed source/evidence PR, use unused r10 CI conversation only during genuine pending exact-head checks, then reconcile required CI. No new reviewer/writer or Windows claim.
 
 ### Acceptance
 
@@ -348,3 +348,13 @@ Operator explicitly says “Adelante con las cerrar lo de claude”. Continue th
 ## Explicit corrected-diff review resumption
 
 R11 source review stopped on diff-output-limit, no verdict: V010 preserves complete original report. Native identity valid, diff total bound65536 below actual85728; CLI refused before MCP chunking. Process exit0/no stderr, PID164554 absent. Operator explicitly approves ONE new opus/medium native review<=10min after zero-model full-diff/chunk preflight, r13. Prior attempt remains spent; no source changes or extra method probes. New allowance1, no automatic retry; CI-parent and conditional reserve unchanged.
+
+## R13 source/evidence review and coordinator reconciliation
+
+Operator explicitly addresses coordinator to own completion. Native reviewer actualopus5.5 returned Standards/Spec/aggregate PASS, LOW, no blockers for exact7e7b944 against72afcc9; complete report retained verbatim V011. Exit0/no stderr at2026-11-02T12:26:08.186Z, PID169073 absent. Required methodology consumed, four verified diff chunks fully read (host saved first three). This independently supports bounded source/method scope, not full Linux/Windows acceptance.
+
+Deviation retained: optional bound content request for host-portability exceeded32768 and refused; reviewer did not retry that call but continued using complete bound diff and unchanged working-tree context, contrary to the dispatch's blanket stop-on-evidence-refusal instruction. Coordinator does not relabel that procedural deviation as compliance. Required exact patch evidence was complete and independently verified before this supplemental request; no missing required source or methodology identified. Shared review guidance distinguishes unavailable optional evidence from incomplete required evidence. Accordingly retain supported substantive PASS, not a fully compliant process claim; no new model call solely for an optional transport refusal. Coordinator independently confirmed four source files byte-identical d957a1d..7e7b944. First failed V010 remains inconclusive, not overwritten.
+
+V011 S1/S2 precision suggestions applied to A010 only: explicitly instructed child nonadoption and prelabelled stale replay, no new behavioral claim. S3 is retained as a limit: actual evidence covers same-ID continuation after maxTurns partial, not live SendMessage direction. Existing host capability-conditioned prohibition prevents unsupported continuation; no further source change or required correction identified. Later delta is verbatim verdict/qualified record/status only; source checks and independent source judgment unchanged. Parser/docs/diff checks cover record delta; exact-head CI still required.
+
+R13 allowance consumed; no active model actor. Remaining r10 actual-CI parent opus/low<=5min/zero children may run only for genuine pending required checks on the exact published head. This factual observation and required CI are the final bounded Linux Claude boundary by V011; Windows and operator acceptance remain separate. Existing conditional affected-delta reserve stays unused, not automatic. No cleanup/install/global change or token implementation.
