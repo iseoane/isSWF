@@ -96,12 +96,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Deliver slice 1: bounded offline Pi/Claude consumption receipts and matched comparison, with available individual attribution and no model calls in the measurement path.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
-- Blocker: No implementation dispatched at preparation. Native collection and real baseline remain outside this unit; no I0024 completion dependency.
-- Next step: Under current explicit coordinator start, dispatch one bounded native worker after checkpointing r3; verify stopped candidate, independent combined review and feature PR/CI. Five steps only; no automatic collection or direct-main integration.
+- Blocker: Source candidate 31603985d34137c36fa8a8211ac75b71cbdd4045 has independent Standards/Spec pass; feature publication and exact-head CI pending. V001 failed verdict preserved; native collection/real baseline outside this unit.
+- Next step: Publish the bounded feature PR with retained evidence and verify exact-head CI. All engineering actor/correction/review allowances spent. No automatic collection or direct-main integration; operator acceptance and integration remain separate.
 
 ### Acceptance
 
@@ -119,3 +119,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J001/brief-r1.md (original preparation, retained unchanged).
 - jobs/J001/brief-r2.md (analysis and practical-metrics objective).
 - jobs/J001/brief-r3.md (current explicit slice-1 start, finite budget, five steps and acceptance).
+- jobs/J001/A001.md: native worker 9d9db4d1-60a4-464e-aef2-b8b82e3d374d complete/process terminal observed; candidate 56b018141bfd084390bb4e7ece00ba5ca39f7dc4. Coordinator reran focused token suite and full portable quality on this candidate: exit 0. Source usage and live Windows collection are not established.
+- jobs/J001/V001.md: independent reviewer 6115877b-51a4-401c-a9e2-932b3e755642 terminal complete; Standards fail, Spec fail. Bound exact Git evidence observed. Four blockers accepted for the one correction cycle.
+- jobs/J001/A002.md: resumed worker cd81163b-a3da-4eaa-ac25-b3dc5592d5f7 terminal complete; correction31603985d34137c36fa8a8211ac75b71cbdd4045. B1–B4 and bounded optional suggestions addressed; coordinator focused+full portable quality rerun exit0.
+- jobs/J001/V002.md: independent reviewer ecd2d3ad-bafd-4df2-9168-2c3070346243 terminal complete; Standards pass, Spec pass on exact correction delta with justified unchanged-scope reuse. One optional identity-syntax documentation precision suggestion remains nonblocking. Worker/correction/two reviews consumed; no active actor or further automatic budget.
+- jobs/J001/delivery.md: source/review/check identities, bounded risk and pending publication/CI/acceptance.
