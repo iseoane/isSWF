@@ -129,7 +129,34 @@ try {
   assert.match(agentSnapshot.agent, /^agent-[a-f0-9]{24}$/u);
   assert.deepEqual(agentSnapshot.counters, { input: 21, output: 8, cacheRead: 4, cacheWrite: null });
   assert.doesNotMatch(JSON.stringify(agentSnapshot), /opaque-agent-source-id|PRIVATE|worktree|modelA/u);
+  assert.throws(() => report(agentSnapshot), /invalid token summary/u);
+  for (const [field, name] of [['input_tokens', 'input'], ['output_tokens', 'output'], ['cache_read_input_tokens', 'cacheRead'], ['cache_creation_input_tokens', 'cacheWrite']]) {
+    const incomplete = structuredClone(agentInput.agentOutput);
+    delete incomplete.usage[field];
+    const normalized = normalizeNative({ input: { agentOutput: incomplete }, meta: claudeMeta });
+    assert.equal(normalized.mode, 'snapshot');
+    assert.equal(normalized.counters[name], null);
+    assert.equal(normalized.counters.input, name === 'input' ? null : 21);
+    assert.equal(normalized.counters.output, name === 'output' ? null : 8);
+    assert.doesNotMatch(JSON.stringify(normalized), /opaque-agent-source-id|PRIVATE|worktree|modelA/u);
+    assert.throws(() => report(normalized), /invalid token summary/u);
+  }
+  for (const value of [-1, Number.MAX_SAFE_INTEGER + 1, '21', null]) {
+    const malformed = structuredClone(agentInput.agentOutput);
+    malformed.usage.input_tokens = value;
+    assert.throws(() => normalizeNative({ input: { agentOutput: malformed }, meta: claudeMeta }));
+  }
+  for (const field of ['cache_read_input_tokens', 'cache_creation_input_tokens']) {
+    const malformed = structuredClone(agentInput.agentOutput);
+    malformed.usage[field] = -1;
+    assert.throws(() => normalizeNative({ input: { agentOutput: malformed }, meta: claudeMeta }));
+  }
   assert.throws(() => normalizeNative({ input: { agentOutput: { ...agentInput.agentOutput, status: 'async_launched' } }, meta: claudeMeta }));
+
+  const maxClaudeId = normalizeNative({ input: claudeEnd, start: claudeStart, meta: { ...claudeWindowMeta, id: 'x'.repeat(123) } });
+  assert.equal(maxClaudeId.rows[0].id.length, 128);
+  assert.equal(report(maxClaudeId).totals.processed, 32);
+  assert.throws(() => normalizeNative({ input: claudeEnd, start: claudeStart, meta: { ...claudeWindowMeta, id: 'x'.repeat(124) } }));
 
   const destination = join(root, 'receipt.json');
   await writeExclusive(destination, snap);

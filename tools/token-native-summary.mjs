@@ -111,7 +111,7 @@ function claudeAgentSnapshot(summary) {
   const counters = {};
   for (const [key, name] of [['input_tokens', 'input'], ['output_tokens', 'output'], ['cache_read_input_tokens', 'cacheRead'], ['cache_creation_input_tokens', 'cacheWrite']]) {
     const value = summary.usage[key];
-    if (value === null && (name === 'cacheRead' || name === 'cacheWrite')) counters[name] = null;
+    if (value === undefined || (value === null && (name === 'cacheRead' || name === 'cacheWrite'))) counters[name] = null;
     else if (!Number.isSafeInteger(value) || value < 0) fail();
     else counters[name] = value;
   }
@@ -152,8 +152,10 @@ export function normalizeNative({ input, start, meta }) {
     const native = start ? claudeWindow(start, input) : claudeSnapshot(input);
     if (!start) return { version: 1, mode: 'snapshot', host: 'claude', hostVersion: meta.hostVersion, sourceVersion: 1, scope: 'tree', ...native };
     if (!['id', 'window', 'effort', 'taskClass', 'candidate', 'outcome'].every(key => safeName(meta[key])) || !Number.isSafeInteger(meta.accepted) || meta.accepted < 0) fail();
+    const id = `${meta.id}-tree`;
+    if (!safeName(id)) fail();
     return { version: 1, mode: 'window', rows: [{
-      id: `${meta.id}-tree`, host: 'claude', hostVersion: meta.hostVersion, model: native.model,
+      id, host: 'claude', hostVersion: meta.hostVersion, model: native.model,
       effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate,
       outcome: meta.outcome, accepted: meta.accepted, provenance: 'native-claude-summary',
       scope: 'tree', window: meta.window, counters: native.counters,
