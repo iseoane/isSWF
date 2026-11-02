@@ -81,7 +81,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: blocked
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r8.md](jobs/J004/brief-r8.md)
+- Brief: [brief-r9.md](jobs/J004/brief-r9.md)
 - Blocker: Linux Pi technical verification is complete within retained limits; Claude recovery/continuation, child-side candidate reconciliation and Claude CI conversation remain unverified after the partial r6 attempt. Its parent allowance is spent; native Windows journeys remain operator-owned.
 - Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
 
@@ -278,3 +278,7 @@ The explicitly authorized corrected-readiness process discovered actual native r
 Native process returned final result/exit0, no stderr; exactPID96443 absent after completion. This establishes report delivery and cessation of that process, not review PASS or quota failure. Standards/Spec/aggregate INCONCLUSIVE; methodology consumption incomplete because review stopped before assessment. V004 FAIL and later unavailable/preflight reports remain unchanged. R8 process/model allowance spent; zero nestedactors or probe reruns, no integration.
 
 Next boundary is a supported, explicitly operator-approved permission resolution for read-only bound evidence tools; the documented native reviewer route does not itself require plan mode. No automatic mode/rule change, permission bypass, retry or newactor follows from the denial. Coordinator retains/pushes records only while required independent review remains blocked. Original Claude recovery/continuation/candidate-reconciliation/CI gaps and operator-owned Windows remain open.
+
+## Explicit normal-mode read-only review resolution
+
+Operator authorized one new native Claude review in normal mode, <=10min, limited to reading and the same3boundGittools, no execution/writes/probe reruns. Actual CLI help selects supported manual mode (no default literal), not auto/acceptEdits/bypassPermissions. R9 governs: same native reviewer/opusmedium, explicit process-local read-only allowlist and approved local MCP server, finite zero-model startup plus600sec total. Prior plan-mode refusal is preserved; no persistent setting change or automatic retry. Current candidate checkpoint follows preparation, not an assertion that review has passed.
