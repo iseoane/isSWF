@@ -69,10 +69,10 @@ Linux evidence here is documentation and installed-source/help inspection; Windo
 
 Initial assumption versus result: Pi has existing usage summaries, not an isSWF measurement methodology already implemented. Claude also has native usage surfaces; we do not need a second accounting system. The remaining work is a small common receipt/comparison format and version-specific confirmation of totals, not exhaustive attribution infrastructure. No baseline numbers or savings were measured in this continuation.
 
-### Ordered functional units (proposed, not started; refined by the analysis continuation)
+### Ordered functional units (original proposal; current job sections below record actual starts)
 
 1. **One reproducible offline receipt:** explicitly supplied sanitized summary → bounded report with counters, scope, availability and provenance. Include implementation, fixtures and affected bilingual usage docs in one candidate. Known totals, unknown/malformed/oversized input and sensitive-field exclusion must be checked. No private-store discovery.
-2. **One accepted-outcome baseline:** after unit 1 integration, map coordinator/children/reviews/retries/resumes with explicit identities; replace cumulative snapshots rather than adding them, deduplicate terminal updates and report unmatched actors. Check missing children, interruption and resume. Retain correctness-checked real baseline with accepted-outcome identity and coverage. A synthetic fixture validates aggregation, not actual consumption.
+2. **One accepted-outcome baseline:** using unit 1's reviewed candidate (stacked PR delivery explicitly approved later), map coordinator/children/reviews/retries/resumes with explicit identities; replace cumulative snapshots rather than adding them, deduplicate terminal updates and report unmatched actors. Check missing children, interruption and resume. Retain correctness-checked real baseline with accepted-outcome identity and coverage. A synthetic fixture validates aggregation, not actual consumption.
 3. **Supported host/platform collection:** reuse native Pi summaries and the Claude surfaces identified above; confirm installed schemas before claiming native integration. Unit 1 accepts supplied summaries from both hosts without waiting for automatic collection. Exercise portable fixtures and authorized native observations on Linux/Windows separately. Partial Pi evidence does not close full-host acceptance.
 
 ### Operator clarifications: attribution and measurement overhead
@@ -157,9 +157,9 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Status: in-progress
 - Objective: Support native Pi/Claude usage summaries for coordinator and agents/subagents without models in the measurement path, retaining explicit host/platform capability limits.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Exact native integration feasibility is being grounded before writer dispatch. Slice2 stays partial; live Windows evidence remains unavailable here. No main-integration dependency under stacked delivery.
-- Next step: Dispatch one bounded read-only researcher for supported mechanisms/version/scope and minimum viable implementation. Adopt findings before selecting writer scope; preserve no-install/no-raw-history/no-artificial-provider-call boundaries.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: R001 partial source findings reconciled with current official Claude result/telemetry docs. Bounded opt-in Pi snapshot and explicit Claude result converter are feasible for source implementation; actual host activation, installed-Claude observations and native Windows evidence remain pending. Slice2 stays partial.
+- Next step: Dispatch one bounded worker under r2 for native snapshot acquisition/normalization and guarded window conversion, with no actual installation/activation/provider calls. Review exact source candidate; do not claim full native/platform acceptance from mocks.
 
 ### Acceptance
 
@@ -172,5 +172,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 ### Evidence
 
 - Current operator explicitly says to proceed with slice3; current source635277b834e63f461a12296401a9ee0b1fbc897c on feat/i0025-native-metrics.
-- jobs/J003/brief-r1.md: finite researcher/worker/correction/two-review allowance and feasibility-first dispatch boundary.
+- jobs/J003/brief-r1.md: original finite allowance and feasibility-first boundary, retained unchanged.
+- jobs/J003/R001.md: researcher9507799f-e574-49da-9380-afc0d18f6d44 complete/process terminal observed, findings partial and resource consumption self-reported. Pi RPC source established; local Claude declarations insufficient, upstream checks not available to this role.
+- jobs/J003/brief-r2.md: coordinator official-source reconciliation and bounded writer contract; research spent, worker/correction/two-review allowances unspent before dispatch. Explicit source-versus-native acceptance/activation distinction.
 - Parent PR144 and145 both OPEN; all three exact-head CI checks SUCCESS at observation. Slice2 real baseline remains partial and is not relabelled completed.
