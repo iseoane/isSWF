@@ -62,8 +62,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Bounded Linux Pi recovery/identity/transport is verified; Claude cancellation is observed but interruption recovery/eligible continuation and child-side candidate reconciliation remain unverified. The r6 parent allowance is spent; Windows outcomes remain operator-owned.
-- Next step: Reuse A004–A006/V002/V003 for Linux Pi; obtain remaining authorized Claude/Windows evidence without resetting spent calls.
+- Blocker: A008/V009 substantiate native capability; A009/A010 add canonical guidance and method-driven continuation/replay evidence pending source review and actual-CI conversation. Windows is operator-owned; spent allowances remain spent.
+- Next step: Review exact A009/A010 source/evidence; preserve prior capability verdict and disclosed deviations. Complete remaining actual-CI boundary without claiming Windows acceptance.
 
 ### Acceptance
 
@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: blocked
+- Status: in-progress
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r9.md](jobs/J004/brief-r9.md)
-- Blocker: Linux Pi technical verification is complete within retained limits; Claude recovery/continuation, child-side candidate reconciliation and Claude CI conversation remain unverified after the partial r6 attempt. Its parent allowance is spent; native Windows journeys remain operator-owned.
-- Next step: Retain final Linux Pi receipt and PR141 integration; resume only remaining Claude/Windows criteria under actual capability and finite authority. No new Pi probe or review is required for unchanged accepted scope.
+- Brief: [brief-r13.md](jobs/J004/brief-r13.md)
+- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Independent source/evidence r13 PASS/LOW retained in V011; actual pending-CI conversation and exact-head CI remain open, Windows operator-owned.
+- Next step: Publish reviewed source/evidence PR, use unused r10 CI conversation only during genuine pending exact-head checks, then reconcile required CI. No new reviewer/writer or Windows claim.
 
 ### Acceptance
 
@@ -290,3 +290,71 @@ R9 native reviewer returned a complete report, retained unchanged as J004/V008.m
 Native process actualclaude-opus-5-5, requested effortmedium declared, only Read/Grep/Glob plus3boundGittools. Read trace confirms full review skill/canonicalreview/writing/E2E/references/Pi+Claude guides and bound diff/result-file reads; consumption/application attributed separately in report. Conditional code-quality/comments were not needed because reviewer reused unchanged R1 driver inspection instead of rejudging it. Parent returned final report naturally at07:54:44.980Z, process exit0/no stderr at07:54:45.063Z; exactPID102294 absent on follow-up. No nested actors/probe reruns/writes/permission changes during review. One-shot reminder zero children; no repeated model wait or timer renewal.
 
 R9 allowance consumed successfully. This resolves the independent correction-review blocker, not missing fullClaude/Linux/I0024 criteria. A007 remains PARTIAL: cancellation supported, no resume/eligibility/childcandidate-refusal/ClaudeCI proof; Windows remains operator-owned. Next covered action: publish I0024 evidence-only PR, inspect exact-head CI and normally integrate records under existing LOW/MEDIUM grant if gates pass. Later delta is this truthful verdict/status receipt plus full returned review, not functional source or new acceptance.
+
+## Remaining Claude journeys explicitly started
+
+Operator “Adelante” starts the three named remaining Claude journeys after integrated PR142/main72afcc9. J004/r10 allocates a new finite tranche without resetting spent work:1nativeparentopus/low<=12min with1existingsonnet/mediumworker initial run plus1same-IDSendMessagecontinuation (each<=5min within parent deadline); separate CI-conversationparentopus/low<=5min,0children; independentnativeopus/mediumreview1<=10min plus conditional affected-delta1<=10min. At most2concurrent actors, serialize phases; no automatic retries/extraquota-checks/install/permanenttests/sourcechanges or Windows work.
+
+New grounding: official native subagent docs retrieved2026-11-02 explicitly describe SendMessage continuation, including maxTurns partial-run recovery under same agentID/history. Earlier driver exposed only Agent/TaskStop and did not exercise that seam. Current proposal uses supported maxTurns2 on genuine input/brief reading, not a fake wait or assumed TaskStop resume. Actual native tool/status/ID evidence must validate it; documentation is not live acceptance. Preserve prior partial result and every original criterion, including missing fullOS guarantees not being newly invented. Separate actual pending-CI conversation can proceed only with genuine covered CI pending and explicit controlled-input provenance.
+
+Native tool/version preflight and complete report retention are required before any closure. Canonical source base72afcc9, new branch `test/i0024-claude-continuation`; prepared only at this checkpoint, no actor claimed running. I0025/I0026 remain planning-only on separate branch, Windows operator-owned.
+
+## Native Claude continuation and changed-input observations
+
+A008 retains actual CLI2.1.312 continuation:1parent/1Agent/1SendMessage, initial hostcompleted with explicit2-turn-limit/no-report partial explanation; fixtureA→B changed after that boundary; exact same agentID resumed with native success, three actual child Read receipts, full sonnet5.5 JSON recalls original controlled challenge and rejects candidate adoption. Coordinator deterministic assertions/Gitblob verification PASS. Complete parent/child final outputs retained, naturalexit0/no stderr, exactnativePID107968 absent. This is bounded maxTurns task-run recovery, not an OS/every-mode claim.
+
+New evidence resolves the initial no-SendMessage grounding gap without adding runtime code or a dispatcher; no production capability defect demonstrated. Scope remains native validation, not source repair. Native parent host-guide Read omission and short stale pending-reply lag are explicitly retained in A008 for independent assessment, not represented as universal compliance/freshness. Shared child role/host were supplied fully and actual brief/input reads observed; outer author method and inner tested actor claims stay distinct.
+
+R10 firstparent/initialworker/plannedcontinuation spent. Second nativeCIparent<=5min/0children is unused and may start only while actual covered requiredCI is pending; prepared driver syntax-check only. Primary independentreviewopus/medium1<=10min plus conditional affecteddelta1<=10min remain before dispatch. Current A008 is coordinator evidence, not independent PASS or fullClaude/Linux/I0024 acceptance. Windows remains operator-owned; earlier partial/failures and counts unchanged.
+
+## R10 review: capability PASS, factory-method gap remains
+
+Native reviewer returned full report at08:46:18.685Z, naturalexit0/no stderr and exactPID110406 absent; retained unchanged as J004/V009.md. Exactcandidateec1adbc againstmain72afcc9, bound23868bytepatch/SHA256 `3d8f3e47ab58efcf4e19b15c4550d76824ccf8b80ad48cb998d72514f66274d4` independently recomputed by coordinator. Standards PASS, Spec PASS for accurate records; record-only LOW, no blocking record findings. Native same-ID continuation/history recall/refusal is substantiated, with disclosed parent-resource and lag limits.
+
+Review S1–S3 shows why this is not full factory-method acceptance: canonical Claude host guide has no SendMessage/eligibility guidance; the tested native parent consumed neither shared coordinator methodology nor host guide and followed driver instructions; adoption refusal was expressly instructed. Duplicate/stale result reconciliation on Claude and actual pending-CI receipt remain open. Coordinator confirmed source guidance absence via current grep, retained all findings, and clarified A008 rather than silently waiving scope. Corrected only the deterministic post-run assertion script to explicitly check native resumedAgentId and second task_started (reviewer had checked both); first script/log retained, corrected assertions exit0, zero provider calls.
+
+Initial assumption was verification-only suffices after existing source policy integration. Actual evidence locates a canonical host-instruction gap and methodology-driven coverage need, so the next useful unit is bounded guidance repair plus real validation, not another isolated mechanism probe or record-only closure. Current r10 expressly excludes source edits; no writer/new probe is launched under that narrower tranche. J004 awaiting-human question is permission for this scoped source unit (no installs/permanent workstation tests), not another quota or generic continuation confirmation. R10 primaryreview spent; conditional affected-delta review<=10min and CIparent<=5min/0children remain unused, not reset. Windows/operator acceptance remains separate.
+
+## Scoped canonical guidance unit authorized
+
+Operator accepted the explicit guide repair/method-driven validation proposal. R11 supersedes the r10 source-edit prohibition only for Claude host guide, existing static host-contract tests and both operations mirrors. Prior evidence/reviews remain unchanged. Additive finite capacity:1nativeworkersonnet/medium<=15min/0nestedactors/0commands,1method-drivenparentopus/low<=10min with1existingworker+1same-IDcontinuation<=5min each,1newsource-reviewopus/medium<=10min; unused r10 conditional affected-delta review<=10min only for actual correction and unused r10CIparent<=5min0children are preserved, not reset. No installation/globalchanges/permanentworkstationE2E/Windows/tokenimplementation.
+
+Preflight source/checkout tracked-clean except private .pi/subagents; no active native actor observed. Supported manual writer mode, builtinRead/Grep/Glob/Edit only and path-scoped CLI Edit rules for the four existing files; no Bash/Write/Agent, commits or permission bypass. Known settings layers will be inspected without credential contents; runtime denial/extra approval blocks the affected action rather than another-tool rewrite. Canonical records freeze during source writer. Native lifecycle2.1.312 and actualSendMessage capability already observed; source-only behavior needs portable static checks plus native method-driven evidence, not another dispatcher.
+
+Writer permission preflight: known user settings defaultauto with24deny rules, no ask/allow or hooks/effortenv override; project settings has no permission rules/hooks; no projectlocal or local managed file present. Static matching found no known user file-deny targeting the four assigned paths. Per-process supported manual mode overrides the startup default without persistence; exact path-scoped Edit rules preapprove only operator-covered edits, no Bash/Write/Agent. Unknown managed/host decisions are not predicted or waived: actual approval denial/no-verdict stops the mutation with no retry/bypass. This records inspected layers, not an OS containment guarantee.
+
+## Source writer stopped for native sensitive-file approval
+
+The one r11 native writer actualclaude-sonnet-5-5 read role/host/brief and selected resources, then its first Edit at09:13:44.013Z returned `Claude requested permissions to edit /home/iseoane/Work/isSWF/.agents/hosts/claude-code.md which is a sensitive file.` Driver stopped promptly, no retry/fallback. Native process exit143/no stderr, exactPID115802 absent, Git tracked diff empty; no source file mutated and no final author report produced. Curated resource/tool/error metadata retained ignored as tooling/.local/i0024/guidance/worker-blocked-metadata.json, SHA256 `7e278d8fddae60729b736289dceb542fae4032d2533361f5951c7049a4fed194`. This is unavailable native approval, not quota exhaustion or a user deny verdict.
+
+Official permission-mode docs explain sensitive/protected paths need explicit approval despite manual-mode allow rules. Native CLI defaults permission-prompts tohost but this driver supplied no permission callback channel. Official SDK public sources establish the supported --permission-prompt-tool stdio/control_request can_use_tool/behavior allow+updatedInput route; this is grounding, not a live approval already obtained. No Agent SDK is installed at the inspected project/extension dependency roots and no installation is authorized or needed for a native stdio relay. Do not add a dispatcher, hooks or permission bypass.
+
+R11 source-writer attempt is spent; method validation, source review and previously unused CI-parent budgets remain unspent. Current question is explicit protected-file approval and ONE additional bounded native writer attempt using the supported approval route (or actual interactive host), limited to the same four files/no global changes. A generic source grant/tool allowlist alone does not represent this runtime approval. Canonical records unfreeze only because the writer has ceased; no source implementation/verification/independent source PASS or PR is claimed.
+
+## Protected-file approval and additional writer explicitly authorized
+
+Operator expressly approved the sensitive canonical-guide edit and ONE additional15min writer attempt, same four-file scope/no global changes. R12 selects official native --permission-prompt-tool stdio/control_request can_use_tool interface, grounded in public SDK sources; return behaviorallow+exactupdatedInput only for operator-approved Edit target after regular-file/realpath checks. No updatedPermissions, mode/rule changes, hooks, SDK install or other-tool rewrite. Unexpected callback/denial fails closed. Prior r11 writer remains spent and preserved; new allowance1nativeworkersonnet/medium<=15min/0nestedactors, other validation/review/CI budgets unchanged. Canonical records freeze during writer and exact new document checkpoint is supplied before actual dispatch.
+
+## Source writer completed through explicit native approval
+
+R12 native writer actualsonnet5.5 returned full author report; coordinator consumed it and all selected metadata. Four per-action native can_use_tool Edit requests approved via stdio under explicit operator grant, exact target/realpath/inputdigest checks, original input relayed and no updatedPermissions. Only the four allowed host/test/EN/ES files changed; naturalexit0/no stderr11:09:20.050Z, exactPID128013 absent. First refusal preserved. A009 retains scope, checks and author-resource deviation: durable-work Read80of91lines misreported as full; omitted panel-notes/legacy-route tail untouched, coordinator inspected it, independent reviewer must assess consequence, no retroactive full-read claim.
+
+Initial host-contract/docs/diff checks pass on edited tree; committed-source full quality/static and native method-driven validation remain pending. Source writers both spent; r11 validationparent10min+oneexistingworker/onecontinuation and source-review10min unused, r10CIparent5min/conditionalreview10min unchanged. Canonical records unfreeze after author cessation, no source-review/overallacceptance inferred.
+
+## Current operator resumption and method observation
+
+Operator explicitly says “Adelante con las cerrar lo de claude”. Continue the existing bounded Claude closure unit, not new Windows/token/installation/cleanup scope or budget reset. A010 retains completed d957a1d method validation, terminal state, full reports, controlled replay limits and deviations. Corrected portable quality exit0; first umask-related failure preserved. Both source attempts and one method parent/child/continuation are spent. No active native actor observed. Remaining one r11 independent native opus/medium review<=10min plus genuine-pending-CI r10 parent<=5min/zero children; conditional affected-delta reserve only for real corrections. Review mode combined: semantic host safety/authority and method compliance, mechanical scoped static guards/mirror/check provenance; stop on required methodology/evidence failure or HIGH/unresolved risk. Existing LOW/MEDIUM protected integration grant remains bounded to this unit, no broader acceptance.
+
+## Explicit corrected-diff review resumption
+
+R11 source review stopped on diff-output-limit, no verdict: V010 preserves complete original report. Native identity valid, diff total bound65536 below actual85728; CLI refused before MCP chunking. Process exit0/no stderr, PID164554 absent. Operator explicitly approves ONE new opus/medium native review<=10min after zero-model full-diff/chunk preflight, r13. Prior attempt remains spent; no source changes or extra method probes. New allowance1, no automatic retry; CI-parent and conditional reserve unchanged.
+
+## R13 source/evidence review and coordinator reconciliation
+
+Operator explicitly addresses coordinator to own completion. Native reviewer actualopus5.5 returned Standards/Spec/aggregate PASS, LOW, no blockers for exact7e7b944 against72afcc9; complete report retained verbatim V011. Exit0/no stderr at2026-11-02T12:26:08.186Z, PID169073 absent. Required methodology consumed, four verified diff chunks fully read (host saved first three). This independently supports bounded source/method scope, not full Linux/Windows acceptance.
+
+Deviation retained: optional bound content request for host-portability exceeded32768 and refused; reviewer did not retry that call but continued using complete bound diff and unchanged working-tree context, contrary to the dispatch's blanket stop-on-evidence-refusal instruction. Coordinator does not relabel that procedural deviation as compliance. Required exact patch evidence was complete and independently verified before this supplemental request; no missing required source or methodology identified. Shared review guidance distinguishes unavailable optional evidence from incomplete required evidence. Accordingly retain supported substantive PASS, not a fully compliant process claim; no new model call solely for an optional transport refusal. Coordinator independently confirmed four source files byte-identical d957a1d..7e7b944. First failed V010 remains inconclusive, not overwritten.
+
+V011 S1/S2 precision suggestions applied to A010 only: explicitly instructed child nonadoption and prelabelled stale replay, no new behavioral claim. S3 is retained as a limit: actual evidence covers same-ID continuation after maxTurns partial, not live SendMessage direction. Existing host capability-conditioned prohibition prevents unsupported continuation; no further source change or required correction identified. Later delta is verbatim verdict/qualified record/status only; source checks and independent source judgment unchanged. Parser/docs/diff checks cover record delta; exact-head CI still required.
+
+R13 allowance consumed; no active model actor. Remaining r10 actual-CI parent opus/low<=5min/zero children may run only for genuine pending required checks on the exact published head. This factual observation and required CI are the final bounded Linux Claude boundary by V011; Windows and operator acceptance remain separate. Existing conditional affected-delta reserve stays unused, not automatic. No cleanup/install/global change or token implementation.
