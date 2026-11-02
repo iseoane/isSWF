@@ -260,3 +260,9 @@ Operator requested continuation after the quota failure. Current covered action 
 ## Explicit additional native Claude review allowance
 
 Operator accepted the proposed extra read-only native Claude Code review, maximum10min, without rerunning probes. J004/r7 allocates exactly1native reviewer process, repository-approved opus/medium, zero nested Agent calls/retries/replacements. Codex failures remain spent and V004/V005 retained; this is explicit provider selection, not automatic fallback. Require actual native reviewer profile/evidence-tool preflight, bound exact Git inputs, every diff chunk and complete required methodology. No new source/control/Windows work or expanded integration permission. Candidate checkpoint follows this preparation; no actual review is claimed running yet.
+
+## Native Claude extra review stopped before model prompt
+
+R7's explicitly authorized extra native reviewer process was launched, but the first zero-model context snapshot exposed the reviewer role and no MCP tools. Driver stopped fail-closed before prompt, apiUsage null, no review/tool events or verdict; exact process ceased. Coordinator receipt J004/V006 preserves evidence and limits. Existing native tool-discovery test accounts for asynchronous MCP startup, so this single snapshot does not prove permanent missing capability or its cause; no quota failure was observed.
+
+R7 process attempt is spent without model prompt; no automatic retry, tool substitution or installation. A corrected bounded readiness check and explicit further attempt are needed before independent review can proceed. V004/V005 remain unchanged; no PASS, integration, Claude probe retry or full Linux/I0024 closure. Coordinator checkpoints/pushes this failure receipt for recovery; current original Claude evidence gaps and operator-owned Windows remain open.
