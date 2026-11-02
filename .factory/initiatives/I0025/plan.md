@@ -150,3 +150,27 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - PR144 observed OPEN at f08a28be6bf480a5865334b2eae94e6fa195d040; CI41467736080 all three checks SUCCESS. Observation is not integration or acceptance.
 - Operator explicitly approved stacked PRs and instructed continuation; branch feat/i0025-real-baseline based on exact reviewed parent, PR base feat/i0025-offline-metrics.
 - jobs/J002/A001.md and baseline/input.json, report.json, provenance.json: coordinator-observed real host-normalized summaries of four known native child attempts; 4380689 processed tokens, 90.1634% cache-read input share, no accepted-outcome ratio and no savings claim. No raw conversations or new model calls used.
+
+
+## J003
+
+- Status: in-progress
+- Objective: Support native Pi/Claude usage summaries for coordinator and agents/subagents without models in the measurement path, retaining explicit host/platform capability limits.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: Exact native integration feasibility is being grounded before writer dispatch. Slice2 stays partial; live Windows evidence remains unavailable here. No main-integration dependency under stacked delivery.
+- Next step: Dispatch one bounded read-only researcher for supported mechanisms/version/scope and minimum viable implementation. Adopt findings before selecting writer scope; preserve no-install/no-raw-history/no-artificial-provider-call boundaries.
+
+### Acceptance
+
+- Use supported version-bound native summaries with explicit coordinator/child/tree scope and provenance, unknown counters and coverage visible.
+- Normalize native data into the existing deterministic reporting path with no model extraction, raw prompt/tool/auth retention or hidden collection infrastructure.
+- Handle duplicates, overlapping trees, cumulative snapshots, resumes and resets according to the actual source semantics, without invented attribution.
+- Verify portable mechanics and native capabilities separately for Pi/Claude and Linux/Windows; missing required native evidence remains an explicit blocker.
+- Deliver bounded source/tests/bilingual docs and exact-candidate review/stacked PR/CI without implying product acceptance, merge or demonstrated savings.
+
+### Evidence
+
+- Current operator explicitly says to proceed with slice3; current source635277b834e63f461a12296401a9ee0b1fbc897c on feat/i0025-native-metrics.
+- jobs/J003/brief-r1.md: finite researcher/worker/correction/two-review allowance and feasibility-first dispatch boundary.
+- Parent PR144 and145 both OPEN; all three exact-head CI checks SUCCESS at observation. Slice2 real baseline remains partial and is not relabelled completed.
