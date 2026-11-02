@@ -217,3 +217,50 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J004/A003.md and measurement/end.json/result.json/calculate.mjs: operator end capture received; approximate parentdelta40000input21000output17700000cacheRead/54turns. Combinedknownsubtotalapproximately22279341/120turns; parentcacheWriteunknown, no fulltotal/cache-share/accepted-outcome ratio or savings claim. Reproduction byte-identical and new native rows/old9/turns consistent.
 - jobs/J004/delivery.md: bounded source/review/check identities, Medium risk and remaining native/platform/acceptance gates. DraftPR147 verified head154509105b43647c8280df93f9b6c5cc9418ccd3; CI41503551152 portable/Ubuntu SUCCESS, Windows IN_PROGRESS at observation.
 - Basea7ac95ba53213044418c1c6d626eabd9ccf955fb, branchfeat/i0025-claude-metrics; parent PR146 all three exact-head CI41497320513 checks SUCCESS, still OPEN.
+
+
+## J005
+
+- Status: in-progress
+- Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit opt-in, without per-measurement commands or copied counters.
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: Implementation not yet dispatched at preparation. Existing manual snapshot/source adapters do not satisfy automatic acquisition. One-time opt-in/loading differs from repeated manual measurement.
+- Next step: Dispatch one bounded native worker for event-driven capture under supported Pi1.4/1.5 and subagents0.83 APIs; verify native hooks without a capture command and no real provider calls, then combined review/stacked PR/CI. No main integration wait.
+
+### Acceptance
+
+- After explicit one-time local opt-in, initial and settled/completion usage is exported automatically without user counter commands or model calls to collect it.
+- Reuse native cost API with bounded duplicate/in-flight/session-switch/shutdown handling; no timer polling, dispatcher, unbounded history or hidden activation.
+- Persist only numeric allowlists and opaque correlations; preserve missingness, non-additive scope, host-normalized provenance and sink/overflow failures visibly.
+- Provide deterministic consumable window/record output, preserve snapshot/window and identity guarantees, and update equivalent EN/ES usage instructions.
+- Verify actual Pi/native API automatic hook execution separately from injected counter data and Windows capability; no empty-session-only or source-only full workflow claim.
+
+### Evidence
+
+- Operator explicitly said adelante and addressed coordinator after selecting automatic Pi capture then actual Claude acquisition. Optimization issues148–150 stay deferred.
+- Sourcebaseba0336beb4f13cb8eece483244d23b009eff5a4d, branchfeat/i0025-auto-pi-capture; parentPR147 all three exact-head CI41504376219 checks SUCCESS, stillOPEN.
+- Actual installed Pi1.5 and locked1.4 type declarations expose agent_settled; subagents0.83 docs document costRPC and advertised completion events. Unknown mechanism is not assumed supported.
+- jobs/J005/brief-r1.md: one worker30min, one correction15min, up to two reviews15min each, sequential, no nested/retry/fallback/paidAPI; no prior allowance reused.
+
+## J006
+
+- Status: pending
+- Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
+- Depends on: J005
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: Native acquisition mechanism and sensitive activation boundaries need technical grounding before writer; existing file converters and locked declarations alone are not acquisition.
+- Next step: After current sequential Pi unit, inspect supported installed/current official Claude numeric transport and establish exact mechanism, bounds and finite budget; continue current start without another generic approval gate. No automatic telemetry/settings activation or artificial provider experiment.
+
+### Acceptance
+
+- Obtain supported native numeric source with deterministic extraction, not only convert operator-supplied files.
+- Preserve real source/version/session/reset identities, unknown fields/coverage and tree-versus-individual non-additivity without raw transcripts/auth or model extraction.
+- Make one-time activation requirements explicit and remove repeated manual counter/file transfer from normal use.
+- Separate source/fixture/native Linux/Windows evidence and keep actual missing native capability visible.
+
+### Evidence
+
+- Current explicit operator start selects this next functional unit after Pi; preparation is not dispatch.
+- jobs/J006/brief-r1.md
+- J003/J004 establish bounded source converters, not installed-Claude acquisition or complete native platform acceptance.
