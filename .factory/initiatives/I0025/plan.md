@@ -222,11 +222,11 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 ## J005
 
 - Status: in-progress
-- Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit opt-in, without per-measurement commands or copied counters.
+- Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Implementation not yet dispatched at preparation. Existing manual snapshot/source adapters do not satisfy automatic acquisition. One-time opt-in/loading differs from repeated manual measurement.
-- Next step: Dispatch one bounded native worker for event-driven capture under supported Pi1.4/1.5 and subagents0.83 APIs; verify native hooks without a capture command and no real provider calls, then combined review/stacked PR/CI. No main integration wait.
+- Brief: [brief-r2.md](jobs/J005/brief-r2.md)
+- Blocker: Initial attempt blocked/no code retained. Resource is available; continuation must finish full document reads in chunks before editing. Current explicit operator start adds setup integration and a finite same-context author continuation, not a claim that any automatic capture exists yet.
+- Next step: Resume only the host-eligible exact original context under current r2/checkpoint and incremental30min allowance, preserving initial spent attempt. Implement Pi+setup then review/stacked delivery; no global settings or operator-session activation side effect. Real Windows tests explicitly deferred.
 
 ### Acceptance
 
@@ -242,15 +242,18 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Sourcebaseba0336beb4f13cb8eece483244d23b009eff5a4d, branchfeat/i0025-auto-pi-capture; parentPR147 all three exact-head CI41504376219 checks SUCCESS, stillOPEN.
 - Actual installed Pi1.5 and locked1.4 type declarations expose agent_settled; subagents0.83 docs document costRPC and advertised completion events. Unknown mechanism is not assumed supported.
 - jobs/J005/brief-r1.md: one worker30min, one correction15min, up to two reviews15min each, sequential, no nested/retry/fallback/paidAPI; no prior allowance reused.
+- jobs/J005/A001.md: worker1d9c983c-32dd-408d-af70-121cac2c5bf5 terminal complete with blocked result, source unchanged atc257788. Required installed extension docs only partially consumed/self-reported; no tests or native proof.
+- Operator explicitly confirms implementation for Pi and Claude through isswf-setup; real Windows tests later. Current setup skill has no metric option; source integration pending, not configured.
+- jobs/J005/brief-r2.md: preserves A001/r1, resolves canonical plan path and chunked-doc procedure, adds setup/source scope and current incremental budget1same-context continuation30min+1source correction15min+up to2reviews15min, no replacement/reset.
 
 ## J006
 
 - Status: pending
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: Native acquisition mechanism and sensitive activation boundaries need technical grounding before writer; existing file converters and locked declarations alone are not acquisition.
-- Next step: After current sequential Pi unit, inspect supported installed/current official Claude numeric transport and establish exact mechanism, bounds and finite budget; continue current start without another generic approval gate. No automatic telemetry/settings activation or artificial provider experiment.
+- Brief: [brief-r2.md](jobs/J006/brief-r2.md)
+- Blocker: Native acquisition mechanism and sensitive activation boundaries need technical grounding before writer; existing file converters and locked declarations alone are not acquisition. Setup scope and finite allowance now explicitly prepared.
+- Next step: After current sequential Pi unit, establish exact installed/current-official Claude numeric mechanism and source/setup consumers, then freeze implementation inputs. Current explicit start covers bounded source and isolated native tests, not global/operator-session activation or artificial provider work. Real Windows tests deferred.
 
 ### Acceptance
 
@@ -262,5 +265,5 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 ### Evidence
 
 - Current explicit operator start selects this next functional unit after Pi; preparation is not dispatch.
-- jobs/J006/brief-r1.md
+- jobs/J006/brief-r1.md (original acquisition goal retained); jobs/J006/brief-r2.md (current setup scope, current explicit start and reserved1worker40min/1correction15min/up to2reviews15min sequential allowance).
 - J003/J004 establish bounded source converters, not installed-Claude acquisition or complete native platform acceptance.
