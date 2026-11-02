@@ -62,8 +62,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Native Claude maxTurns continuation/candidate refusal is independently substantiated in A008/V009, but canonical continuation/eligibility guidance and methodology-driven/duplicate-stale reconciliation coverage remain open. Windows is operator-owned; prior parent allowances remain spent.
-- Next step: Preserve A008/V009 bounded capability PASS; obtain scoped authority for the missing canonical guidance and methodology-driven validation rather than equating driver instructions with factory behavior. Retain Windows and prior failures.
+- Blocker: A008/V009 substantiate native capability; A009/A010 add canonical guidance and method-driven continuation/replay evidence pending source review and actual-CI conversation. Windows is operator-owned; spent allowances remain spent.
+- Next step: Review exact A009/A010 source/evidence; preserve prior capability verdict and disclosed deviations. Complete remaining actual-CI boundary without claiming Windows acceptance.
 
 ### Acceptance
 
@@ -82,8 +82,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r12.md](jobs/J004/brief-r12.md)
-- Blocker: First source writer stopped for sensitive-file approval with no source changes. Operator now explicitly approved that edit and one additional <=15min native writer via supported scoped stdio callback; source/method validation remains pending. Other Claude/Windows criteria remain open.
-- Next step: Execute r12 exactly one additional scoped writer with native approval callback, retain terminal report/changes, then run existing r11 checks and method-driven validation/review. Stop on any unresolved refusal, no further automatic writer or permission change; Windows remains operator-owned.
+- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Independent source/evidence review and actual pending-CI conversation remain open; Windows operator-owned.
+- Next step: Use remaining r11 native source/evidence reviewer once <=10min, then covered PR/exact-head CI and unused r10 CI conversation if review sufficient. No writer retry or Windows claim.
 
 ### Acceptance
 
@@ -340,3 +340,7 @@ Operator expressly approved the sensitive canonical-guide edit and ONE additiona
 R12 native writer actualsonnet5.5 returned full author report; coordinator consumed it and all selected metadata. Four per-action native can_use_tool Edit requests approved via stdio under explicit operator grant, exact target/realpath/inputdigest checks, original input relayed and no updatedPermissions. Only the four allowed host/test/EN/ES files changed; naturalexit0/no stderr11:09:20.050Z, exactPID128013 absent. First refusal preserved. A009 retains scope, checks and author-resource deviation: durable-work Read80of91lines misreported as full; omitted panel-notes/legacy-route tail untouched, coordinator inspected it, independent reviewer must assess consequence, no retroactive full-read claim.
 
 Initial host-contract/docs/diff checks pass on edited tree; committed-source full quality/static and native method-driven validation remain pending. Source writers both spent; r11 validationparent10min+oneexistingworker/onecontinuation and source-review10min unused, r10CIparent5min/conditionalreview10min unchanged. Canonical records unfreeze after author cessation, no source-review/overallacceptance inferred.
+
+## Current operator resumption and method observation
+
+Operator explicitly says “Adelante con las cerrar lo de claude”. Continue the existing bounded Claude closure unit, not new Windows/token/installation/cleanup scope or budget reset. A010 retains completed d957a1d method validation, terminal state, full reports, controlled replay limits and deviations. Corrected portable quality exit0; first umask-related failure preserved. Both source attempts and one method parent/child/continuation are spent. No active native actor observed. Remaining one r11 independent native opus/medium review<=10min plus genuine-pending-CI r10 parent<=5min/zero children; conditional affected-delta reserve only for real corrections. Review mode combined: semantic host safety/authority and method compliance, mechanical scoped static guards/mirror/check provenance; stop on required methodology/evidence failure or HIGH/unresolved risk. Existing LOW/MEDIUM protected integration grant remains bounded to this unit, no broader acceptance.
