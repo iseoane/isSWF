@@ -183,3 +183,29 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J003/V002.md: reviewer33fca849-3ddf-4cd2-a008-ed56217e22b6 terminal complete; Standards pass/Spec pass for exact correction delta with unchanged-evidence reuse. Optional regression suggestions nonblocking. No source edits after review; all actor allowances spent.
 - jobs/J003/delivery.md: source/review/check identities, Medium host-integration risk and explicit missing full native/platform acceptance.
 - jobs/J003/A003.md: operator-authorized one-shot actual Pi1.5.0/subagents0.83.0 source extension load and native costRPC snapshot in fresh empty Linux session PASS; assistant/tool activity0, cleanexit0, settings hashes unchanged. Actual receipt normalized and refused as report window. Not existing coordinator/nonzero consumption, Claude or Windows evidence. Private harness retained ignored, no source changes.
+
+
+## J004
+
+- Status: in-progress
+- Objective: Complete supported Claude metrics while prospectively measuring the useful engineering work in Pi, including coordinator and child attempts.
+- Depends on: J003
+- Brief: [brief-r2.md](jobs/J004/brief-r2.md)
+- Blocker: Start capture supplied and retained before J004 model dispatch; rounded k/M precision and missing cacheWrite prevent an exact-token claim, not an approximate useful sample. End capture and actual installed-Claude/Windows observations remain pending.
+- Next step: Dispatch one bounded worker for supported Claude windows/agent snapshots under r2. Preserve same coordinator session/branch, record new run identities and request /subagent-cost again after implementation/reviews/corrections; never re-add previous nine children or substitute an empty session.
+
+### Acceptance
+
+- Capture actual current-parent start and end native counters before/after ordinary useful Claude engineering; reconcile implementation, reviews, corrections and unknown coverage without double counting.
+- Extend Claude window/individual attribution only through supported source identity/counter semantics; unknown or unavailable capability stays explicit.
+- No models to extract metrics, artificial provider work, telemetry activation, raw transcript/auth discovery, global installation or invented Windows/native proof.
+- Deliver scoped code/tests/bilingual guidance and exact-candidate independent review/stacked PR/CI while distinguishing sample coverage, product acceptance and integration.
+
+### Evidence
+
+- Current operator explicitly approved this combined assignment and said to proceed; initial native numeric summary arrived before any implementation actor.
+- jobs/J004/brief-r1.md
+- Installed pi-subagents0.83 observability documentation confirms /subagent-cost is parent-plus-async-child view; current tools expose no direct invocation of that parent RPC.
+- jobs/J004/measurement/start.json: operator-transferred rounded cumulative start, parent271kinput77koutput47.2McacheRead290turns, prior9children205turns, inclusive495turns. Native formatter source confirms rounding; not exact counters, missing cacheWrite unknown, monetary estimates excluded.
+- jobs/J004/brief-r2.md: reconciled supported implementation and fresh finite budget; zero J004 actors spent before initial dispatch.
+- Basea7ac95ba53213044418c1c6d626eabd9ccf955fb, branchfeat/i0025-claude-metrics; parent PR146 all three exact-head CI41497320513 checks SUCCESS, still OPEN.
