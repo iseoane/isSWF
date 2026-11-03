@@ -166,8 +166,9 @@ try {
   }
   // Each suite owns a different temporary project/store and only reads this artifact.
   // Wait for ALL children before fixture teardown, including when one fails.
+  // Whole-suite wall-clock limit, not a product deadline: the reviewer suite alone takes about 92 s on Windows (#176).
   const roleResults = await Promise.allSettled(['planner-task', 'reviewer-task', 'diagnostic-task'].map(test =>
-    promisify(execFile)(process.execPath, [join(source, 'tests', test + '.mjs'), installed], { cwd: temp, env, timeout: 45000, maxBuffer: 4 * 1024 * 1024 })
+    promisify(execFile)(process.execPath, [join(source, 'tests', test + '.mjs'), installed], { cwd: temp, env, timeout: 240000, maxBuffer: 4 * 1024 * 1024 })
   ));
   for (const result of roleResults) assert.equal(result.status, 'fulfilled', result.reason?.stack);
   assert.deepEqual(await inventory(releaseA), packageFiles, 'Packing does not modify release');
