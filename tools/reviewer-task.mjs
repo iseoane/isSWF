@@ -7,7 +7,7 @@ import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'nod
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
-import { readReleaseSource } from './release-source.mjs';
+import { readReleaseSource, readReleaseSources } from './release-source.mjs';
 import { validateProbes, runDiagnosticProbes, evidenceDigest, sourceObjectsPath } from './diagnostic-probes.mjs';
 import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
 
@@ -20,11 +20,41 @@ const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !p
 const equal = isDeepStrictEqual;
 const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/reviewer.md', '.agents/roles/references/review.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', '.agents/roles/references/verification-principles.md'];
-function git(repo, args, deadlineAt = Infinity) {
+function git(repo, args, deadlineAt = Infinity, { input, maxBuffer = 1024 * 1024 } = {}) {
   const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'review-operation-deadline');
-  const result = spawnSync('git', ['-C', repo, ...args], { maxBuffer: 1024 * 1024, timeout, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const result = spawnSync('git', ['-C', repo, ...args], { input, maxBuffer, timeout, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1', GIT_LITERAL_PATHSPECS: '1' } });
   assert(result.status === 0 && !result.error && Date.now() < deadlineAt, 'pinned-git-operation-failed');
   return result.stdout;
+}
+// One ls-tree and one cat-file --batch per checkpoint instead of two processes per path:
+// process start-up dominates on Windows. Each path keeps the exact-entry, regular-file and
+// 1 MiB-per-blob checks of blob(); missing paths map to undefined when allowMissing is set.
+function blobs(repo, checkpoint, paths, { allowMissing = false } = {}) {
+  assert(sha(checkpoint) && paths.every(safe), 'explicit-git-pin-required');
+  const result = new Map();
+  if (!paths.length) return result;
+  const entries = new Map(git(repo, ['ls-tree', '-z', checkpoint, '--', ...paths]).toString().split('\0').filter(Boolean).map(item => [item.slice(item.indexOf('\t') + 1), item]));
+  const wanted = [];
+  for (const path of paths) {
+    const entry = entries.get(path);
+    if (entry === undefined && allowMissing) { result.set(path, undefined); continue; }
+    assert(entry && /^100(?:644|755) blob [0-9a-f]{40}\t/u.test(entry), 'committed-regular-file-required');
+    wanted.push([path, entry.slice(0, entry.indexOf('\t')).split(' ')[2]]);
+  }
+  if (!wanted.length) return result;
+  const output = git(repo, ['cat-file', '--batch'], Infinity, { input: wanted.map(([, object]) => object).join('\n') + '\n', maxBuffer: wanted.length * (1024 * 1024 + 128) });
+  let offset = 0;
+  for (const [path, object] of wanted) {
+    const end = output.indexOf(0x0a, offset);
+    const header = /^([0-9a-f]{40}) blob (\d+)$/u.exec(output.subarray(offset, end).toString());
+    assert(header && header[1] === object && Number(header[2]) <= 1024 * 1024, 'committed-regular-file-required');
+    const size = Number(header[2]);
+    result.set(path, Buffer.from(output.subarray(end + 1, end + 1 + size)));
+    assert(output[end + 1 + size] === 0x0a, 'pinned-git-operation-failed');
+    offset = end + 2 + size;
+  }
+  assert(offset === output.length, 'pinned-git-operation-failed');
+  return result;
 }
 function blob(repo, checkpoint, path) {
   assert(sha(checkpoint) && safe(path), 'explicit-git-pin-required');
@@ -115,39 +145,35 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
     } else assert(grant.allowOriginalEvidence !== true, 'original-evidence-descriptor-required');
   } else assert(grant.allowWorkspaceProbes !== true, 'review-probes-require-workspace');
   assert(sha(job.methodologySha), 'own-methodology-checkpoint-required');
-  const methods = profilePaths.map(path => ({ path, text: decode(blob(source, job.methodologySha, path)) }));
-  if (methods[0].text.includes('../skills/isswf-review/SKILL.md')) {
-    const path = '.agents/skills/isswf-review/SKILL.md';
-    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
-  }
-  for (const name of ['security', 'performance', 'observability']) {
-    const path = `.agents/skills/isswf-${name}/SKILL.md`;
-    if (methods[0].text.includes(`../skills/isswf-${name}/SKILL.md`)) methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
-  }
-  if (methods[1].text.includes('review-convergence.md')) {
-    const path = '.agents/roles/references/review-convergence.md';
-    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
-  }
-  if (methods[0].text.includes('references/design-principles.md')) {
-    const path = '.agents/roles/references/design-principles.md';
-    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
-  }
+  // A release receipt serves every path from one verification; otherwise read pinned Git objects in one batch.
+  const methodology = paths => {
+    if (!paths.length) return [];
+    const released = readReleaseSources(source, job.methodologySha, paths);
+    const fetched = released === null ? blobs(source, job.methodologySha, paths) : null;
+    return paths.map(path => ({ path, text: decode(released === null ? fetched.get(path) : released[path]) }));
+  };
+  const methods = methodology(profilePaths);
+  const extra = [];
+  if (methods[0].text.includes('../skills/isswf-review/SKILL.md')) extra.push('.agents/skills/isswf-review/SKILL.md');
+  for (const name of ['security', 'performance', 'observability']) if (methods[0].text.includes(`../skills/isswf-${name}/SKILL.md`)) extra.push(`.agents/skills/isswf-${name}/SKILL.md`);
+  if (methods[1].text.includes('review-convergence.md')) extra.push('.agents/roles/references/review-convergence.md');
+  if (methods[0].text.includes('references/design-principles.md')) extra.push('.agents/roles/references/design-principles.md');
+  methods.push(...methodology(extra));
   assert(Array.isArray(job.contextPaths) && job.contextPaths.length > 0 && job.contextPaths.length <= maxContextFiles && new Set(job.contextPaths).size === job.contextPaths.length, 'explicit-standards-context-required');
   const diff = git(target, ['diff', '--binary', '--full-index', '--no-ext-diff', '--no-textconv', '--no-renames', job.targetBase, job.candidateSha, '--']);
   const changed = decode(git(target, ['diff', '--name-only', '-z', '--no-renames', job.targetBase, job.candidateSha, '--'])).split('\0').filter(Boolean);
   assert(changed.length > 0 && changed.length <= maxChangedFiles && changed.every(safe), 'bounded-changed-files-required');
   const evidenceMode = job.evidenceMode ?? 'base-and-candidate';
   assert(['base-and-candidate', 'candidate-and-diff'].includes(evidenceMode) && (job.evidenceMode === undefined ? grant.evidenceMode === undefined : grant.evidenceMode === evidenceMode), 'explicit-evidence-mode-binding-required');
+  const versions = evidenceMode === 'candidate-and-diff' ? [['candidate', job.candidateSha]] : [['base', job.targetBase], ['candidate', job.candidateSha]];
+  const read = versions.map(([name, checkpoint]) => [name, blobs(target, checkpoint, changed, { allowMissing: true })]);
   const changes = changed.map(path => {
     const files = {};
-    const versions = evidenceMode === 'candidate-and-diff' ? [['candidate', job.candidateSha]] : [['base', job.targetBase], ['candidate', job.candidateSha]];
-    for (const [name, checkpoint] of versions) {
-      const entry = git(target, ['ls-tree', '-z', checkpoint, '--', path]);
-      files[name] = entry.length ? decode(blob(target, checkpoint, path)) : null;
-    }
+    for (const [name, bytes] of read) files[name] = bytes.get(path) === undefined ? null : decode(bytes.get(path));
     return { path, ...files };
   });
-  const context = job.contextPaths.map(path => ({ path, text: decode(blob(target, job.candidateSha, path)) }));
+  const contextBytes = blobs(target, job.candidateSha, job.contextPaths);
+  const context = job.contextPaths.map(path => ({ path, text: decode(contextBytes.get(path)) }));
   const brief = decode(blob(project, inputSha, job.briefPath));
   // Supply the actual verified assignment/grant fields, never auth locators or credentials.
   const assignment = { inputSha, jobPath, jobSha256: hash(jobBytes), logicalJobRef: job.logicalJobRef, targetBase: job.targetBase, candidateSha: job.candidateSha, workspace: job.workspace ?? null };

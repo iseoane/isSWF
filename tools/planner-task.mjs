@@ -6,7 +6,7 @@ import { readFile, realpath, mkdir, rmdir, open, link, unlink, lstat } from 'nod
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sdkResearchBackend } from './researcher-task.mjs';
-import { readReleaseSource } from './release-source.mjs';
+import { readReleaseSource, readReleaseSources } from './release-source.mjs';
 import { prepareCapacity, acquireCapacity } from './execution-capacity.mjs';
 
 const source = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -18,10 +18,37 @@ const safe = path => typeof path === 'string' && path && !isAbsolute(path) && !p
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/planner.md', '.agents/roles/references/planning.md', 'docs/durable-work.md'];
-function git(repo, args) {
-  const result = spawnSync('git', ['-C', repo, ...args], { maxBuffer: 1024 * 1024, timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+function git(repo, args, { input, maxBuffer = 1024 * 1024 } = {}) {
+  const result = spawnSync('git', ['-C', repo, ...args], { input, maxBuffer, timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1', GIT_LITERAL_PATHSPECS: '1' } });
   assert(result.status === 0 && !result.error, 'pinned-git-operation-failed');
   return result.stdout;
+}
+// One ls-tree and one cat-file --batch per checkpoint instead of two processes per path:
+// process start-up dominates on Windows. Each path keeps blob()'s exact-entry,
+// regular-file and 1 MiB-per-blob checks.
+function blobs(repo, checkpoint, paths) {
+  assert(sha(checkpoint) && paths.every(safe), 'explicit-git-pin-required');
+  const result = new Map();
+  if (!paths.length) return result;
+  const entries = new Map(git(repo, ['ls-tree', '-z', checkpoint, '--', ...paths]).toString().split('\0').filter(Boolean).map(item => [item.slice(item.indexOf('\t') + 1), item]));
+  const wanted = paths.map(path => {
+    const entry = entries.get(path);
+    assert(entry && /^100(?:644|755) blob [0-9a-f]{40}\t/u.test(entry), 'committed-regular-file-required');
+    return [path, entry.slice(0, entry.indexOf('\t')).split(' ')[2]];
+  });
+  const output = git(repo, ['cat-file', '--batch'], { input: wanted.map(([, object]) => object).join('\n') + '\n', maxBuffer: wanted.length * (1024 * 1024 + 128) });
+  let offset = 0;
+  for (const [path, object] of wanted) {
+    const end = output.indexOf(0x0a, offset);
+    const header = /^([0-9a-f]{40}) blob (\d+)$/u.exec(output.subarray(offset, end).toString());
+    assert(header && header[1] === object && Number(header[2]) <= 1024 * 1024, 'committed-regular-file-required');
+    const size = Number(header[2]);
+    result.set(path, Buffer.from(output.subarray(end + 1, end + 1 + size)));
+    assert(output[end + 1 + size] === 0x0a, 'pinned-git-operation-failed');
+    offset = end + 2 + size;
+  }
+  assert(offset === output.length, 'pinned-git-operation-failed');
+  return result;
 }
 function blob(repo, checkpoint, path) {
   assert(sha(checkpoint) && safe(path), 'explicit-git-pin-required');
@@ -87,13 +114,18 @@ export async function preparePlanProposal({ project, store, inputSha, jobPath, g
   const models = blob(project, job.models.sha, job.models.path);
   assert(hash(models) === job.models.sha256 && equal(JSON.parse(decode(models)).roles?.planner, route) && equal(grant.approvedRoute, route), 'fixed-planner-route-required');
   assert(sha(job.methodologySha), 'own-methodology-checkpoint-required');
-  const methods = profilePaths.map(path => ({ path, text: decode(blob(source, job.methodologySha, path)) }));
-  if (methods[0].text.includes('references/design-principles.md')) {
-    const path = '.agents/roles/references/design-principles.md';
-    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
-  }
+  // A release receipt serves every path from one verification; otherwise read pinned Git objects in one batch.
+  const methodology = paths => {
+    if (!paths.length) return [];
+    const released = readReleaseSources(source, job.methodologySha, paths);
+    const fetched = released === null ? blobs(source, job.methodologySha, paths) : null;
+    return paths.map(path => ({ path, text: decode(released === null ? fetched.get(path) : released[path]) }));
+  };
+  const methods = methodology(profilePaths);
+  if (methods[0].text.includes('references/design-principles.md')) methods.push(...methodology(['.agents/roles/references/design-principles.md']));
   assert(Array.isArray(job.contextPaths) && job.contextPaths.length > 0 && job.contextPaths.length <= 20 && new Set(job.contextPaths).size === job.contextPaths.length, 'explicit-spec-grounding-context-required');
-  const context = job.contextPaths.map(path => ({ path, checkpoint: inputSha, text: decode(blob(project, inputSha, path)) }));
+  const contextBytes = blobs(project, inputSha, job.contextPaths);
+  const context = job.contextPaths.map(path => ({ path, checkpoint: inputSha, text: decode(contextBytes.get(path)) }));
   const brief = decode(blob(project, inputSha, job.briefPath));
   const bundle = { inputSha, targetRepo: target, targetBase: job.targetBase, logicalJobRef: job.logicalJobRef, brief, context };
   const prompt = JSON.stringify(bundle);
