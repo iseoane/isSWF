@@ -257,12 +257,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
 - Brief: [brief-r3.md](jobs/J006/brief-r3.md)
 - Blocker: V004 source Standards/Spec FAIL exactbe4df46. F1 privacy regression fixed; F2 still permits malformed compound payloads disguised under scalar variant keys (stringValue object/boolValue object/intValue array), enabling order-sensitive identity and duplicate counts. Latest correction/review calls spent. Process incidents and policy/platform limits remain separate/adverse; no complete J006 claim.
-- Next step: Await explicit finite extension of one worker<=5min and one independent affected-delta reviewer<=5min, same approved models, solely scalar-variant payload validation and positive/negative literal regressions. No automatic further cycle/reset or global cleanup/repair. Do not publish/activate as complete while this source blocker remains.
+- Next step: Operator explicitly answered Ok to one worker<=5min and one independent affected-delta reviewer<=5min, same Luna/high and Sol/medium, solely scalar-variant payload validation and positive/negative literal regressions. No automatic further cycle/reset or global cleanup/repair. Do not publish/activate as complete while this source blocker remains.
 
 ### Acceptance
 
