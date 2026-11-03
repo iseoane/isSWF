@@ -262,7 +262,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Depends on: J005
 - Brief: [brief-r8.md](jobs/J006/brief-r8.md) (current: transcript reader) ; previous [brief-r7.md](jobs/J006/brief-r7.md) (post-start verification change) + [brief-r6.md](jobs/J006/brief-r6.md) (authority) on design [brief-r5.md](jobs/J006/brief-r5.md)
 - Blocker: none for the r6 unit; observed-only scope accepted by the operator, whole-work completeness explicitly not required.
-- Next step: Transcript reader 3d24963 technically verified on Linux (V008 PASS). Operator acceptance, actual Windows run, push/PR/integration separate and not granted. Non-blocking V008 suggestions open.
+- Next step: Transcript reader f13245c technically verified on Linux (V009 PASS, informational notes only). Operator acceptance, actual Windows run, push/PR/integration separate and not granted. J006 budget fully used.
 
 ### Acceptance
 
@@ -302,3 +302,4 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J006/A007.md + V007.md: correction candidate deaf6b9; first V007 launch INCONCLUSIVE due to coordinator binding error (not evaluated), rebound launch PASS Standards/Spec. Budget fully used; SKILL.md/docs reviewed from coordinator-attested working tree, not bound content.
 - Operator 2026-11-03: telemetry daemon/global settings rejected as over-engineering; approved local transcript reader (brief-r8) as primary zero-token Claude capture with parent/subagent rows and total, invalid format → recommend isSWF issue. Budget 40+15 (+15+15 conditional). Windows run still requires an actual Windows host (this session is Linux).
 - jobs/J006/A008.md + V008.md: A008 Writes got repeated auto-mode no-verdicts until the operator switched to bypass; fresh worker then delivered 3d24963 (transcript reader, parent+subagent rows, total, invalid-format issue recommendation). Worker ran out-of-scope `pkill -x cat` (reported, no observed effect). V008 bound review Standards/Spec PASS with 4 non-blocking suggestions. Coordinator observed on 3d24963: focused test, ESLint, Knip, check-docs PASS. Real counts-only run self-reported (4 files, 165 requests, total complete).
+- jobs/J006/A009.md + V009.md: single correction f13245c resolved all V008 suggestions; V009 bound review Standards/Spec PASS with 5 informational notes (shared entry-limit doc wording, conservative cross-file conflict drop, test reusing clean.summary, unbounded versions list, non-ASCII Windows encoding unverified). Coordinator observed focused test PASS on f13245c.
