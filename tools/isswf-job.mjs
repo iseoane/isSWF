@@ -2,7 +2,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, realpath, mkdir, mkdtemp, lstat, readdir, open, link, unlink } from 'node:fs/promises';
-import { dirname, join, resolve, isAbsolute, basename, relative } from 'node:path';
+import { dirname, join, resolve, isAbsolute, basename, relative, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyPackage, canonicalPath } from './factory-package.mjs';
@@ -79,7 +79,7 @@ async function canonicalStore(path, project, create = true) {
   const store = await canonicalPath(path);
   for (const tree of [project, root]) {
     const child = relative(tree, store), parent = relative(store, tree);
-    const inside = path => path === '' || (path !== '..' && !path.startsWith('../') && !isAbsolute(path));
+    const inside = path => path === '' || (path !== '..' && !path.startsWith('..' + sep) && !isAbsolute(path));
     if (inside(child) || inside(parent)) throw new Error('runs store must be outside project and source trees');
   }
   if (create) await mkdir(store, { recursive: true });
@@ -283,7 +283,7 @@ async function trustedJSON(path, project, label, store) {
   const canonical = await realpath(path);
   for (const tree of [project, root, store]) {
     const child = relative(await realpath(tree), canonical);
-    if (child === '' || (child !== '..' && !child.startsWith('../') && !isAbsolute(child))) throw Error('file must be outside untrusted project, runtime source and runs store');
+    if (child === '' || (child !== '..' && !child.startsWith('..' + sep) && !isAbsolute(child))) throw Error('file must be outside untrusted project, runtime source and runs store');
   }
   const stat = await lstat(canonical);
   if (!stat.isFile() || stat.size > 16000) throw Error('bounded regular approval file required');

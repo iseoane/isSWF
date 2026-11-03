@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, cp, readFile, writeFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] ?? dirname(dirname(fileURLToPath(import.meta.url))));
 const root = await mkdtemp(join(tmpdir(), 'isswf-worker-capacity-'));
@@ -52,9 +52,10 @@ try {
   await json(grantFile, grant);
   for(const slot of [0,1])await rm(join(pool,'slot-'+slot),{recursive:true});
   const hook=join(root,'lose-admission.mjs');
-  await writeFile(hook,`import fs from 'node:fs/promises'; import {syncBuiltinESMExports} from 'node:module'; const original=fs.link; fs.link=async(a,b)=>{if(b.includes('/admissions/'))throw Object.assign(new Error('synthetic competing admission'),{code:'EEXIST'});return original(a,b);}; syncBuiltinESMExports();`);
-  const lost=command(process.execPath,['--import',hook,...args]);
+  await writeFile(hook,`import fs from 'node:fs/promises'; import {syncBuiltinESMExports} from 'node:module'; const original=fs.link; fs.link=async(a,b)=>{if(/[\\\\/]admissions[\\\\/]/.test(b))throw Object.assign(new Error('synthetic competing admission'),{code:'EEXIST'});return original(a,b);}; syncBuiltinESMExports();`);
+  const lost=command(process.execPath,['--import',pathToFileURL(hook).href,...args]);
   assert.equal(lost.status,1,lost.stderr);
+  assert.match(lost.stderr,/logical job admission already claimed/u,'the injected competing admission must fire');
   assert.equal((await readdir(pool)).filter(name=>name.startsWith('slot-')).length,0,'losing admission must not strand execution capacity');
   assert.equal((await readdir(pool+'/completed')).length,1);
   await assert.rejects(readFile(join(store,grant.attemptId+'.job.json')),error=>error.code==='ENOENT');

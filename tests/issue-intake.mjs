@@ -122,7 +122,7 @@ try {
   assert.equal(planResult.status, 0, planResult.stderr);
   const scoped = ['--initiative', 'I0021', '--job', 'J001', '--type', 'enhancement'];
   const scopedFirst = cli('prepare', [...inputs, ...scoped]);
-  assert.equal(scopedFirst.status, 'prepared'); assert.match(scopedFirst.briefPath, /initiatives\/I0021\/jobs\/J001\/brief-r1.md$/u);
+  assert.equal(scopedFirst.status, 'prepared'); assert.match(scopedFirst.briefPath, /initiatives[\\/]I0021[\\/]jobs[\\/]J001[\\/]brief-r1\.md$/u);
   const scopedBytes = await readFile(scopedFirst.briefPath, 'utf8');
   assert.match(scopedBytes, /lint: not-detected/u); assert.match(scopedBytes, /No installation or script execution/u);
   assert.equal(cli('prepare', [...inputs, ...scoped]).status, 'reused');

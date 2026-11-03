@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease } from '../tools/release-source.mjs';
 
@@ -128,7 +128,7 @@ try {
     const current = { ...request, store: caseStore };
     mock.timers.enable({ apis: ['setTimeout', 'Date'] });
     let r;
-    try { r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
+    try { r = await runReview(current, { mode: 'fixture', backend: fixture(kind, join(caseStore, basename(p.dir))) }); }
     finally { mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
     assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');
@@ -233,7 +233,7 @@ try {
   assert.equal(reviewCapacityRecord.status, 'recorded'); assert.equal(plannerCapacityRecord.status, 'recorded');
   assert.equal(reviewCapacityRecord.binding.capacity.pool, plannerCapacityRecord.binding.capacity.pool);
   assert.equal(reviewCapacityRecord.binding.capacity.role, 'reviewer'); assert.equal(plannerCapacityRecord.binding.capacity.role, 'planner');
-  const successive = await runReview(scoped[2], { mode: 'fixture', backend: fixture('normal', join(scoped[2].store, p.dir.split('/').at(-1))) });
+  const successive = await runReview(scoped[2], { mode: 'fixture', backend: fixture('normal', join(scoped[2].store, basename(p.dir))) });
   assert.equal(successive.status, 'response-complete', 'a later panel entry can use a completed execution slot');
   assert.equal((await readdir(join(pool, 'completed'))).length, 3, 'completed reservations remain preserved');
   for (const id of await readdir(join(pool, 'completed'))) {
@@ -249,7 +249,7 @@ try {
   for (let index = 0; index < 2; index++) {
     const caseStore = join(root, 'uncertain-pool-' + index); await mkdir(caseStore);
     const caseGrant = join(root, 'uncertain-pool-' + index + '.json'); await json(caseGrant, { ...grant, store: caseStore, ...capacityGrant });
-    const result = await runReview({ ...request, store: caseStore, grantFile: caseGrant }, { mode: 'fixture', backend: fixture('http400', join(caseStore, p.dir.split('/').at(-1))) });
+    const result = await runReview({ ...request, store: caseStore, grantFile: caseGrant }, { mode: 'fixture', backend: fixture('http400', join(caseStore, basename(p.dir))) });
     assert.equal(result.status, 'blocked');
   }
   assert.equal((await readdir(pool)).filter(name => name.startsWith('slot-')).length, 2, 'uncertain provider outcomes retain capacity');
@@ -263,7 +263,7 @@ try {
   await writeFile(join(partialPool, 'policy.json'), policy);
   const partialStore = join(root, 'partial-allowed'); await mkdir(partialStore);
   const partialGrant = join(root, 'partial-grant.json'); await json(partialGrant, { ...grant, store: partialStore, ...capacityGrant, capacity: { ...capacity, pool: partialPool } });
-  const unrelated = await runReview({ ...request, store: partialStore, grantFile: partialGrant }, { mode: 'fixture', backend: fixture('normal', join(partialStore, p.dir.split('/').at(-1))) });
+  const unrelated = await runReview({ ...request, store: partialStore, grantFile: partialGrant }, { mode: 'fixture', backend: fixture('normal', join(partialStore, basename(p.dir))) });
   assert.equal(unrelated.status, 'response-complete'); assert.deepEqual(await readdir(join(partialPool, 'slot-0')), [], 'incomplete claims remain occupied without blocking the other slot');
   const probeStore = join(root, 'workspace-review'); await mkdir(probeStore);
   const workspaceRepo = join(root, 'candidate-checkout');
@@ -275,14 +275,14 @@ try {
   await json(grantFile, probeGrant); const probeRequest = { ...request, inputSha: probeInput, store: probeStore };
   let probesCalled = 0;
   const observations = [{ name: 'answer', command: workspace.probes[0].command, expectedExitCode: 0, exitCode: 0, expectationMatched: true, stdout: '2\n', stderr: '', targetBase: candidate }];
-  const probeResult = await runReview(probeRequest, { mode: 'fixture', backend: fixture('normal', join(probeStore, p.dir.split('/').at(-1))), probeRunner: async request => { probesCalled++; assert.equal(request.targetBase, candidate); assert.equal(request.targetRepo, workspaceRepo); return observations; } });
+  const probeResult = await runReview(probeRequest, { mode: 'fixture', backend: fixture('normal', join(probeStore, basename(p.dir))), probeRunner: async request => { probesCalled++; assert.equal(request.targetBase, candidate); assert.equal(request.targetRepo, workspaceRepo); return observations; } });
   assert.equal(probesCalled, 1, 'explicit workspace review must execute its authorized probe before the model');
   assert.equal(probeResult.status, 'response-complete');
   const probeRead = await readReview({ project, store: probeStore, logicalJobRef: job.logicalJobRef });
   assert.equal(probeRead.status, 'recorded'); assert.equal(probeRead.binding.workspace.candidateSha, candidate);
-  const probeEvidence = JSON.parse(await readFile(join(probeStore, p.dir.split('/').at(-1), 'evidence.json')));
+  const probeEvidence = JSON.parse(await readFile(join(probeStore, basename(p.dir), 'evidence.json')));
   assert.deepEqual(JSON.parse(probeEvidence.prompt).workspaceVerification.results, observations);
-  const intentPath = join(probeStore, p.dir.split('/').at(-1), 'probe-intent.json');
+  const intentPath = join(probeStore, basename(p.dir), 'probe-intent.json');
   const originalIntent = await readFile(intentPath, 'utf8');
   const intentRecord = JSON.parse(originalIntent);
   for (const changed of [{ ...intentRecord, workspace: { ...workspace, probes: [{ ...workspace.probes[0], command: 'false' }] } }, { ...intentRecord, providerPromptStarted: true }]) {
@@ -303,7 +303,7 @@ try {
   if (process.env.ISSWF_REVIEW_SANDBOX === '1') {
     const realStore = join(root, 'actual-workspace'); await mkdir(realStore);
     await json(grantFile, { ...probeGrant, store: realStore, deadlineMs: 10000 });
-    const sandboxResult = await runReview({ ...probeRequest, store: realStore }, { mode: 'fixture', backend: fixture('normal', join(realStore, p.dir.split('/').at(-1))) });
+    const sandboxResult = await runReview({ ...probeRequest, store: realStore }, { mode: 'fixture', backend: fixture('normal', join(realStore, basename(p.dir))) });
     assert.equal(sandboxResult.status, 'response-complete', JSON.stringify(sandboxResult));
     const sandboxRead = await readReview({ project, store: realStore, logicalJobRef: job.logicalJobRef });
     assert.equal(sandboxRead.status, 'recorded'); assert.equal(sandboxRead.binding.workspace.results[0].stdout, '2\n');
