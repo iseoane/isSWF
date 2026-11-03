@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "source": "pi-subagents-native-metadata",
+  "subagentsVersion": "0.83.0",
+  "scope": "four-known-slice1-child-attempts-only",
+  "expectedChildAttempts": 4,
+  "measuredChildAttempts": 4,
+  "coordinatorMeasured": false,
+  "expectedCoordinatorContexts": null,
+  "productAcceptance": "not-observed",
+  "acceptedCountInterpretation": "zero-observed-acceptances-not-product-rejection",
+  "claudeMeasured": false,
+  "windowsNativeMeasured": false,
+  "rawTranscriptsRead": false,
+  "modelCallsForMeasurement": 0,
+  "rows": [
+    {
+      "id": "worker-initial",
+      "runId": "9d9db4d1-60a4-464e-aef2-b8b82e3d374d",
+      "agent": "isswf-worker",
+      "metadataSha256": "17c375c26d8d74d7f8c0d0d57fa545bf3432313a4ae667aa6d36d97945206949",
+      "availability": "host-normalized",
+      "scope": "one-native-run-attempt"
+    },
+    {
+      "id": "review-initial",
+      "runId": "6115877b-51a4-401c-a9e2-932b3e755642",
+      "agent": "isswf-reviewer",
+      "metadataSha256": "b5476a934870f752dc6c6f40db0699072a3ad23376d5a2fc512b1dd5f24cfea7",
+      "availability": "host-normalized",
+      "scope": "one-native-run-attempt"
+    },
+    {
+      "id": "worker-correction",
+      "runId": "cd81163b-a3da-4eaa-ac25-b3dc5592d5f7",
+      "agent": "isswf-worker",
+      "metadataSha256": "62d44eac398eaf7889cc4f6ea4be992e6f66fa012d375b5cecad3920dc23bdf4",
+      "availability": "host-normalized",
+      "scope": "one-native-run-attempt"
+    },
+    {
+      "id": "review-final",
+      "runId": "ecd2d3ad-bafd-4df2-9168-2c3070346243",
+      "agent": "isswf-reviewer",
+      "metadataSha256": "10561db68a4160dca927861e9d090d5735ba94ceec520eb7b88e7e6a26acadb8",
+      "availability": "host-normalized",
+      "scope": "one-native-run-attempt"
+    }
+  ]
+}

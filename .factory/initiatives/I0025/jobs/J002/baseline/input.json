@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "mode": "window",
+  "rows": [
+    {
+      "id": "worker-initial",
+      "host": "pi",
+      "hostVersion": "1.5.0",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "taskClass": "offline-token-tool",
+      "candidate": "31603985d34137c36fa8a8211ac75b71cbdd4045",
+      "outcome": "i0025-slice1-preacceptance",
+      "accepted": 0,
+      "provenance": "native-pi-summary",
+      "scope": "agent",
+      "window": "i0025-slice1-child-attempts",
+      "counters": {
+        "input": 123796,
+        "output": 15433,
+        "cacheRead": 1374208,
+        "cacheWrite": 0
+      },
+      "turns": 35
+    },
+    {
+      "id": "review-initial",
+      "host": "pi",
+      "hostVersion": "1.5.0",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "taskClass": "offline-token-tool",
+      "candidate": "31603985d34137c36fa8a8211ac75b71cbdd4045",
+      "outcome": "i0025-slice1-preacceptance",
+      "accepted": 0,
+      "provenance": "native-pi-summary",
+      "scope": "agent",
+      "window": "i0025-slice1-child-attempts",
+      "counters": {
+        "input": 103468,
+        "output": 5015,
+        "cacheRead": 395136,
+        "cacheWrite": 0
+      },
+      "turns": 11
+    },
+    {
+      "id": "worker-correction",
+      "host": "pi",
+      "hostVersion": "1.5.0",
+      "model": "gpt-6-luna",
+      "effort": "high",
+      "taskClass": "offline-token-tool",
+      "candidate": "31603985d34137c36fa8a8211ac75b71cbdd4045",
+      "outcome": "i0025-slice1-preacceptance",
+      "accepted": 0,
+      "provenance": "native-pi-summary",
+      "scope": "agent",
+      "window": "i0025-slice1-child-attempts",
+      "counters": {
+        "input": 89059,
+        "output": 16391,
+        "cacheRead": 1644544,
+        "cacheWrite": 0
+      },
+      "turns": 20
+    },
+    {
+      "id": "review-final",
+      "host": "pi",
+      "hostVersion": "1.5.0",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "taskClass": "offline-token-tool",
+      "candidate": "31603985d34137c36fa8a8211ac75b71cbdd4045",
+      "outcome": "i0025-slice1-preacceptance",
+      "accepted": 0,
+      "provenance": "native-pi-summary",
+      "scope": "agent",
+      "window": "i0025-slice1-child-attempts",
+      "counters": {
+        "input": 110585,
+        "output": 3854,
+        "cacheRead": 499200,
+        "cacheWrite": 0
+      },
+      "turns": 12
+    }
+  ]
+}

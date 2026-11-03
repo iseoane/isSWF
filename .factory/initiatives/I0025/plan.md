@@ -96,12 +96,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J001
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Deliver slice 1: bounded offline Pi/Claude consumption receipts and matched comparison, with available individual attribution and no model calls in the measurement path.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
-- Blocker: Source candidate 31603985d34137c36fa8a8211ac75b71cbdd4045 has independent Standards/Spec pass; feature publication and exact-head CI pending. V001 failed verdict preserved; native collection/real baseline outside this unit.
-- Next step: Publish the bounded feature PR with retained evidence and verify exact-head CI. All engineering actor/correction/review allowances spent. No automatic collection or direct-main integration; operator acceptance and integration remain separate.
+- Blocker: PR144 OPEN at f08a28be6bf480a5865334b2eae94e6fa195d040; all three CI41467736080 checks SUCCESS. Source3160398 has independent Standards/Spec pass; operator product acceptance/integration remain separate, V001 fail retained.
+- Next step: Operator decision on acceptance/integration of https://github.com/iseoane/isSWF/pull/144 at the verified head. Current operator explicitly permits stacked J002 work against this candidate without waiting for main integration. All J001 engineering budgets spent.
 
 ### Acceptance
 
@@ -124,3 +124,29 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J001/A002.md: resumed worker cd81163b-a3da-4eaa-ac25-b3dc5592d5f7 terminal complete; correction31603985d34137c36fa8a8211ac75b71cbdd4045. B1–B4 and bounded optional suggestions addressed; coordinator focused+full portable quality rerun exit0.
 - jobs/J001/V002.md: independent reviewer ecd2d3ad-bafd-4df2-9168-2c3070346243 terminal complete; Standards pass, Spec pass on exact correction delta with justified unchanged-scope reuse. One optional identity-syntax documentation precision suggestion remains nonblocking. Worker/correction/two reviews consumed; no active actor or further automatic budget.
 - jobs/J001/delivery.md: source/review/check identities, bounded risk and pending publication/CI/acceptance.
+
+
+## J002
+
+- Status: in-progress
+- Objective: Produce the first real scoped consumption baseline, with individual agent attribution where available and no model calls in measurement.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Blocker: Preliminary real child baseline exists (4/4 known child attempts) but coordinator window counters and product acceptance are missing. This is not a complete accepted-outcome baseline; no main-integration dependency under approved stacked delivery.
+- Next step: Publish scoped preliminary evidence as a draft stacked PR against feat/i0025-offline-metrics. Obtain an admissible coordinator-window summary/acceptance or use a future ordinary authorized task for the complete baseline; no artificial calls/raw history access. Zero new model actors.
+
+### Acceptance
+
+- Retain one real bounded sanitized baseline and reproduction command, distinguishing observed, missing and estimated fields.
+- Reconcile coordinator, agents/subagents, reviews, corrections, retries and resumes without overlapping counts; expose missing actor coverage.
+- Count accepted outcomes once; if actual acceptance is unknown, report preliminary consumption without accepted-outcome efficiency.
+- Use native summaries and deterministic code only, with no models to extract metrics, raw private-session discovery or artificial provider calls.
+- Keep host/platform scope explicit; one Pi sample does not close Claude or Windows collection verification.
+
+### Evidence
+
+- Current operator explicitly requests the next slice; preparation started, no delegated execution inferred.
+- jobs/J002/brief-r1.md
+- PR144 observed OPEN at f08a28be6bf480a5865334b2eae94e6fa195d040; CI41467736080 all three checks SUCCESS. Observation is not integration or acceptance.
+- Operator explicitly approved stacked PRs and instructed continuation; branch feat/i0025-real-baseline based on exact reviewed parent, PR base feat/i0025-offline-metrics.
+- jobs/J002/A001.md and baseline/input.json, report.json, provenance.json: coordinator-observed real host-normalized summaries of four known native child attempts; 4380689 processed tokens, 90.1634% cache-read input share, no accepted-outcome ratio and no savings claim. No raw conversations or new model calls used.
