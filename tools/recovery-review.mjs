@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { readFile, readdir, lstat, open, link, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { workspaceTree } from './native-recovery.mjs';
+import { externalEffect } from './external-effect-journal.mjs';
 
 // Windows reports synthetic permission bits and cannot represent the executable bit, so it
 // records the Git-representable model: directories 0o755, writable files 0o644, read-only
@@ -12,7 +13,6 @@ const recordedMode = stat => {
   if (stat.isDirectory()) return 0o755;
   return stat.mode & 0o200 ? 0o644 : 0o444;
 };
-import { externalEffect } from './external-effect-journal.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const encoded = value => JSON.stringify(value);

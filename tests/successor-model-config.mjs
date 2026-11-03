@@ -54,6 +54,10 @@ try {
     await refused({ modelChange: { previous: oldModels, next: newModels, extra: true } });
   }
   await refused({ cumulativeWorkerTotal: 3 });
+  // A read-only candidate file is observable on every platform and must not match the base.
+  await fs.chmod(join(workspace, 'code.txt'), 0o444);
+  await assert.rejects(claimSuccessor({ store, request, job, baseline, grant, load }), /review receipt missing, stale or mismatched/u);
+  await fs.chmod(join(workspace, 'code.txt'), 0o644);
   const successor = await claimSuccessor({ store, request, job, baseline, grant, load });
   const binding = { ...request, successor };
   await validateSuccessorBinding({ store, binding });
