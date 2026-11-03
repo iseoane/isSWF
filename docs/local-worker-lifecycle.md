@@ -118,7 +118,7 @@ Run the same command with `--action record --review-file /absolute/operator-revi
 
 The attempt-local `recovery-review-receipt.json` is atomic and write-once. It records the approval digest/reference, exact candidate, check exit, and output digests, not raw output. Matching repeated records preserve bytes without rerunning the check. `--action check` recomputes the fingerprint and validates the receipt read-only. Missing, corrupt, stale, or conflicting evidence blocks; ordinary `read` and `reconcile` never create receipts or execute checks.
 
-A receipt is an observation of exact bytes, not a lease, authenticated review, product acceptance, charge reconciliation, or successor grant. The logical admission remains consumed. This operation does not handle reboot, arbitrary surviving writers, or unknown external effects.
+A receipt is an observation of exact bytes, not a lease, authenticated review, product acceptance, charge reconciliation, or successor grant. Its permission digest records exact permission bits on Linux. Windows cannot represent the executable bit, so there it records the Git-representable model instead (directories `0755`, writable files `0644`, read-only files `0444`); an executable-bit change is not detectable on Windows. The logical admission remains consumed. This operation does not handle reboot, arbitrary surviving writers, or unknown external effects.
 
 ## Admit one explicitly granted successor
 
