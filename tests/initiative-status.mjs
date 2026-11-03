@@ -4,6 +4,7 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, lstat, rm, syml
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
+import { fileSymlinkOrSkip } from './support/file-symlink.mjs';
 const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-status-test-')));
 const project = join(root, 'project'); await mkdir(project);
 assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);
@@ -62,6 +63,6 @@ try {
   assert.equal(inspect().status, 'unknown', 'missing canonical plan type remains explicitly unknown');
   assert.deepEqual(await tree(project), malformedBytes, 'status reads never rewrite malformed plan bytes');
   await writeFile(planPath, original.replace('## J002', '## J001')); assert.equal(inspect().status, 'unknown');
-  await rm(planPath); await symlink(grant, planPath); assert.equal(inspect().status, 'unknown');
+  await rm(planPath); if (await fileSymlinkOrSkip(grant, planPath, 'initiative-status symlinked plan refusal')) assert.equal(inspect().status, 'unknown');
   console.log('PASS: actual plan and artifacts summarized without writes; absent/malformed/unsafe records visible; reported progress never becomes liveness or acceptance');
 } finally { await rm(root, { recursive: true, force: true }); }

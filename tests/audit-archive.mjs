@@ -5,6 +5,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { archiveAudit, verifyAuditArchive } from '../tooling/maintenance/archive-audit.mjs';
+import { fileSymlinkOrSkip } from './support/file-symlink.mjs';
 
 const roots = [];
 async function fixture({ ignore = true } = {}) {
@@ -27,21 +28,21 @@ async function fixture({ ignore = true } = {}) {
 }
 try {
   const f = await fixture(), sourceBytes = await fs.readFile(join(f.root, 'source.txt'));
-  await fs.symlink(join(f.root, 'missing-outside-target'), join(f.root, '.audit/link'));
+  const linked = await fileSymlinkOrSkip(join(f.root, 'missing-outside-target'), join(f.root, '.audit/link'), 'audit-archive dangling symlink preservation');
   const before = await fs.lstat(join(f.root, '.audit/private/local.bin'));
   const preview = await archiveAudit(f.root);
-  assert.equal(preview.status, 'preview'); assert.equal(preview.files, 4);
+  assert.equal(preview.status, 'preview'); assert.equal(preview.files, linked ? 4 : 3);
   await assert.rejects(fs.stat(join(f.root, 'tooling')), { code: 'ENOENT' });
   await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: '0'.repeat(40) }), /expected HEAD/u);
   const result = await archiveAudit(f.root, { apply: true, expectedHead: f.head });
-  assert.equal(result.status, 'verified'); assert.equal(result.trackedFiles, 1); assert.equal(result.localFiles, 3);
+  assert.equal(result.status, 'verified'); assert.equal(result.trackedFiles, 1); assert.equal(result.localFiles, linked ? 3 : 2);
   assert.equal(result.checkpoint, f.head); assert.equal(result.gitTree, f.git('rev-parse', f.head + ':.audit'));
   assert.deepEqual((await fs.readdir(join(f.root, '.audit'))).sort(), ['README.md', 'archive.json']);
   const payload = join(f.root, result.archivePath, 'payload');
   assert.deepEqual(await fs.readFile(join(payload, 'private/local.bin')), Buffer.from([0, 255, 7, 10]));
   const after = await fs.lstat(join(payload, 'private/local.bin'));
   assert.equal(after.ino, before.ino); assert.equal(after.mode, before.mode);
-  assert.equal(await fs.readlink(join(payload, 'link')), join(f.root, 'missing-outside-target'));
+  if (linked) assert.equal(await fs.readlink(join(payload, 'link')), join(f.root, 'missing-outside-target'));
   assert.deepEqual(await fs.readFile(join(f.root, 'source.txt')), sourceBytes);
   const guide = await fs.readFile(join(f.root, 'docs/history.md'), 'utf8');
   assert(guide.includes('https://github.com/fixture/repo/blob/' + f.head + '/.audit/tracked.json'));
@@ -84,7 +85,7 @@ try {
   await assert.rejects(archiveAudit(exposed.root, { apply: true, expectedHead: exposed.head }), /Git-ignored/u);
   await assert.rejects(fs.stat(join(exposed.root, 'tooling')), { code: 'ENOENT' });
   const escape = await fixture(), outside = await mkdtemp(join(tmpdir(), 'isswf-audit-outside-')); roots.push(outside);
-  await fs.mkdir(join(escape.root, 'tooling')); await fs.symlink(outside, join(escape.root, 'tooling/.local'));
+  await fs.mkdir(join(escape.root, 'tooling')); await fs.symlink(outside, join(escape.root, 'tooling/.local'), process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(archiveAudit(escape.root, { apply: true, expectedHead: escape.head }));
   assert.deepEqual(await fs.readdir(outside), []);
   assert.equal(await fs.readFile(join(escape.root, '.audit/ignored.log'), 'utf8'), 'private log\n');

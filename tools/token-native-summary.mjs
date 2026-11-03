@@ -141,6 +141,41 @@ function deltaRows(start, end) {
   });
 }
 
+const digits = value => typeof value === 'string' && /^[1-9][0-9]*$/u.test(value);
+
+// Observed per-series snapshot: each native series keeps its own interval; no common window is inferred.
+export function snapshotClaudeOtel({ input, meta }) {
+  if (!input || input.version !== 2 || input.host !== 'claude' || input.provenance !== 'native-claude-otel' || input.sourceVersion !== 'claude_code.token.usage-otlp-cumulative' || !['export-observed', 'no-export-observed'].includes(input.exportStatus) || !Number.isSafeInteger(input.receivedExports) || input.receivedExports < 0 || !Number.isSafeInteger(input.ignoredRequests) || input.ignoredRequests < 0 || !safeName(input.hostVersion) || !/^[a-f0-9]{24}$/u.test(input.capture ?? '') || !Array.isArray(input.series) || input.series.length > MAX_ROWS || meta.host !== 'claude' || meta.hostVersion !== input.hostVersion) fail();
+  if (!['effort', 'taskClass', 'candidate'].every(key => safeName(meta[key]))) fail();
+  const seen = new Set(), observed = new Map();
+  const series = input.series.map(entry => {
+    if (!entry || Object.keys(entry).length !== 7 || !/^[a-f0-9]{24}$/u.test(entry.series ?? '') || seen.has(entry.series) || !digits(entry.start) || !digits(entry.end) || BigInt(entry.end) <= BigInt(entry.start) || !sources.has(entry.source) || !safeName(entry.model) || !['input', 'output', 'cacheRead', 'cacheCreation'].includes(entry.category) || !Number.isSafeInteger(entry.value) || entry.value < 0) fail();
+    seen.add(entry.series);
+    return { series: entry.series, source: entry.source, model: entry.model, category: entry.category, start: entry.start, end: entry.end, value: entry.value };
+  }).sort((x, y) => (x.series < y.series ? -1 : x.series > y.series ? 1 : 0));
+  // Shared rule: export-observed exactly when at least one native token series was accepted.
+  if ((input.exportStatus === 'export-observed') !== (series.length > 0) || (series.length > 0) !== (input.receivedExports > 0)) fail();
+  for (const entry of series) {
+    // Distinct native series under one visible projection have disjoint attribute sets, so their values add.
+    const key = `${entry.source}:${entry.model}:${entry.category}`;
+    const row = observed.get(key) ?? { source: entry.source, model: entry.model, category: entry.category, value: 0, series: [] };
+    row.value += entry.value; row.series.push(entry.series);
+    if (!Number.isSafeInteger(row.value)) fail();
+    observed.set(key, row);
+  }
+  const rows = [...observed.values()].sort((x, y) => { const a = `${x.source}:${x.model}:${x.category}`, b = `${y.source}:${y.model}:${y.category}`; return a < b ? -1 : a > b ? 1 : 0; });
+  const observedSubtotal = rows.reduce((sum, row) => sum + row.value, 0);
+  if (!Number.isSafeInteger(observedSubtotal)) fail();
+  return {
+    version: 1, mode: 'observed-snapshot', host: 'claude', hostVersion: input.hostVersion, provenance: 'native-claude-otel',
+    effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate, capture: input.capture,
+    exportStatus: input.exportStatus, coverage: 'observed-series-only', series, observed: rows,
+    observedSubtotal: input.exportStatus === 'export-observed' ? observedSubtotal : null, total: null, totalStatus: 'unknown-coverage',
+  };
+}
+
+const sources = new Set(['main', 'subagent', 'auxiliary']);
+
 export function normalizeNative({ input, start, meta }) {
   if (!meta || !['pi', 'claude'].includes(meta.host) || !safeName(meta.hostVersion)) fail();
   if (meta.host === 'claude') {
@@ -190,18 +225,21 @@ export function normalizeNative({ input, start, meta }) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const args = {}, fields = new Set(['--input', '--capture', '--start', '--host', '--id', '--window', '--host-version', '--effort', '--task-class', '--candidate', '--outcome', '--accepted']);
+    const args = {}, fields = new Set(['--input', '--capture', '--otel', '--start', '--host', '--id', '--window', '--host-version', '--effort', '--task-class', '--candidate', '--outcome', '--accepted']);
     const parts = process.argv.slice(2);
     for (let index = 0; index < parts.length; index += 2) {
       if (!fields.has(parts[index]) || !parts[index + 1] || Object.hasOwn(args, parts[index])) throw Error('invalid option');
       args[parts[index]] = parts[index + 1];
     }
-    if ((!args['--input'] && !args['--capture']) || (args['--input'] && args['--capture']) || !['pi', 'claude'].includes(args['--host'] ?? (args['--capture'] ? 'pi' : ''))) throw Error('invalid options');
-    const host = args['--host'] ?? 'pi';
+    if ([args['--input'], args['--capture'], args['--otel']].filter(Boolean).length !== 1 || !['pi', 'claude'].includes(args['--host'] ?? (args['--capture'] ? 'pi' : args['--otel'] ? 'claude' : ''))) throw Error('invalid options');
+    const host = args['--host'] ?? (args['--otel'] ? 'claude' : 'pi');
+    if (args['--otel'] && (host !== 'claude' || args['--start'])) throw Error('invalid options');
     if (host === 'pi' && (args['--start'] || args['--capture']) && args['--accepted'] === undefined) throw Error('invalid options');
     const total = { bytes: 0 };
     let input, start;
-    if (args['--capture']) {
+    if (args['--otel']) {
+      input = await load(args['--otel'], total);
+    } else if (args['--capture']) {
       const capture = await load(args['--capture'], total);
       if (capture?.version !== 1 || capture.owner !== 'isswf/pi-native-capture-v1' || capture.latest?.host !== 'pi' || !capture.baseline) throw Error('invalid automatic capture');
       input = capture.latest;
@@ -210,14 +248,14 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       input = await load(args['--input'], total);
       start = args['--start'] ? await load(args['--start'], total) : undefined;
     }
-    const hostVersion = args['--host-version'] ?? (host === 'pi' ? input.hostVersion : 'unknown');
+    const hostVersion = args['--host-version'] ?? (args['--otel'] ? input.hostVersion : host === 'pi' ? input.hostVersion : 'unknown');
     const meta = {
       host, id: args['--id'] ?? 'native', window: args['--window'] ?? 'window', hostVersion,
       effort: args['--effort'] ?? 'unknown', taskClass: args['--task-class'] ?? 'native-summary',
       candidate: args['--candidate'] ?? 'unknown', outcome: args['--outcome'] ?? 'unknown',
       accepted: Number(args['--accepted']),
     };
-    const summary = normalizeNative({ input, start, meta });
+    const summary = args['--otel'] ? snapshotClaudeOtel({ input, meta }) : normalizeNative({ input, start, meta });
     const output = `${JSON.stringify(summary, null, 2)}\n`;
     if (Buffer.byteLength(output) > 64 * 1024) throw Error('native summary output limit exceeded');
     process.stdout.write(output);

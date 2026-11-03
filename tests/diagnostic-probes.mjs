@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { mock } from 'node:test';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, rm, symlink, link } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, link } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createServer, connect } from 'node:net';
 import { pathToFileURL } from 'node:url';
+import { fileSymlinkOrSkip } from './support/file-symlink.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { runDiagnosticProbes, validateProbes, evidenceDigest } = await import(pathToFileURL(join(source, 'tools/diagnostic-probes.mjs')));
@@ -18,8 +19,8 @@ try {
   const evidence = join(deadlineRoot, 'evidence'); await mkdir(evidence); await writeFile(join(evidence, 'original'), 'retained');
   const pin = await evidenceDigest(evidence);
   await writeFile(join(evidence, 'original'), 'changed'); assert.notEqual(await evidenceDigest(evidence), pin);
-  await symlink(join(evidence, 'original'), join(evidence, 'alias')); await assert.rejects(evidenceDigest(evidence), /regular-evidence/u);
-  await rm(join(evidence, 'alias')); await link(join(evidence, 'original'), join(evidence, 'hard-alias'));
+  if (await fileSymlinkOrSkip(join(evidence, 'original'), join(evidence, 'alias'), 'diagnostic-probes symlinked evidence refusal')) { await assert.rejects(evidenceDigest(evidence), /regular-evidence/u); await rm(join(evidence, 'alias')); }
+  await link(join(evidence, 'original'), join(evidence, 'hard-alias'));
   await assert.rejects(evidenceDigest(evidence), /single-link-evidence/u);
   await assert.rejects(evidenceDigest(tmpdir()), /canonical-temporary/u);
   const bounded = join(deadlineRoot, 'bounded'); await mkdir(bounded); await writeFile(join(bounded, 'record'), 'bounded');

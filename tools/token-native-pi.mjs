@@ -132,6 +132,17 @@ async function ensureCaptureDirectory(destination, cwd, stateRoot) {
   }
 }
 
+// Windows refuses to replace a file while another handle (a reader, the panel,
+// antivirus) has it open. The capture lock is held, so a bounded retry is safe.
+async function replaceFile(temporary, path) {
+  for (let attempt = 1; ; attempt++) {
+    try { return await rename(temporary, path); } catch (error) {
+      if (process.platform !== 'win32' || !['EPERM', 'EACCES', 'EBUSY'].includes(error.code) || attempt >= 20) throw error;
+      await new Promise(done => setTimeout(done, 10 * attempt));
+    }
+  }
+}
+
 async function writeAutoSnapshot(destination, receipt, key, event, cwd, stateRoot) {
   await ensureCaptureDirectory(destination, cwd, stateRoot);
   const path = resolve(destination, `${receipt.session}.json`);
@@ -164,7 +175,7 @@ async function writeAutoSnapshot(destination, receipt, key, event, cwd, stateRoo
     try {
       const handle = await open(temporary, 'wx', 0o600);
       try { await handle.writeFile(body, 'utf8'); } finally { await handle.close(); }
-      if (existed) await rename(temporary, path);
+      if (existed) await replaceFile(temporary, path);
       else {
         await link(temporary, path);
         await unlink(temporary);

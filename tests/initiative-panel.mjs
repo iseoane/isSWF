@@ -6,6 +6,7 @@ import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, lstat, rm, syml
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { fileSymlinkOrSkip } from './support/file-symlink.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { startPanel } = await import(pathToFileURL(join(source, 'tools/isswf-panel.mjs')));
@@ -123,9 +124,10 @@ try {
   const raceId = '1'.repeat(32), raced = await Promise.all([post({ responseId: raceId }), post({ responseId: raceId })]);
   assert.deepEqual(raced.map(r=>r.code).sort(), [201,409]);
   const responseDir = join(job, 'responses'), originalRecord = await readFile(join(responseDir, form.responseId + '.json'));
-  await symlink(grant, join(responseDir, '2'.repeat(32) + '.json'));
-  assert.equal((await post({ responseId: '3'.repeat(32) })).code, 400);
-  assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.responses.status, 'unknown');
+  if (await fileSymlinkOrSkip(grant, join(responseDir, '2'.repeat(32) + '.json'), 'initiative-panel symlinked response refusal')) {
+    assert.equal((await post({ responseId: '3'.repeat(32) })).code, 400);
+    assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.responses.status, 'unknown');
+  }
   assert.deepEqual(await readFile(join(responseDir, form.responseId + '.json')), originalRecord);
   await rm(responseDir, { recursive: true }); await symlink(root, responseDir, process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal((await post({ responseId: '4'.repeat(32) })).code, 400);
@@ -135,9 +137,11 @@ try {
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'unknown');
   await writeFile(join(job, 'delivery.md'), '# Delivery\n## Visual summary\n' + 'x'.repeat(33000));
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'unknown');
-  await rm(join(job, 'delivery.md')); await symlink(grant, join(job, 'delivery.md'));
-  assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'unknown');
   await rm(join(job, 'delivery.md'));
+  if (await fileSymlinkOrSkip(grant, join(job, 'delivery.md'), 'initiative-panel symlinked delivery refusal')) {
+    assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'unknown');
+    await rm(join(job, 'delivery.md'));
+  }
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[0].artifacts.delivery.status, 'absent');
   await symlink(root, join(project, '.factory/initiatives/I0001/jobs/J002'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal(JSON.parse((await get(panel.url, '/api/status/I0001')).body).jobs[1].artifacts.status, 'unknown');

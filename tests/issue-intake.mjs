@@ -220,7 +220,7 @@ try {
   assert.notEqual(reverseCall.status, 0); assert.match(reverseCall.stderr, /already linked/u);
   const alias = join(root, 'symlink-project'); await mkdir(alias);
   assert.equal(command('git', ['-C', alias, 'init', '-q']).status, 0);
-  await symlink(join(project, '.factory'), join(alias, '.factory'));
+  await symlink(join(project, '.factory'), join(alias, '.factory'), process.platform === 'win32' ? 'junction' : 'dir');
   const unsafe = command(process.execPath, [tool, 'read', '--project', alias, '--repository', 'factory/demo', '--issue', '21']);
   assert.equal(JSON.parse(unsafe.stdout).status, 'unknown-incomplete-or-corrupt');
   console.log('PASS public native intake: no duplicate brief, changed inputs block, authority boundaries, readonly absence/read, corruption/partial block, cooperative duplicate claim, and symlink refusal; no network or models invoked');

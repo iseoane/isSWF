@@ -104,7 +104,8 @@ async function synced(path, bytes) {
   const file = await open(path, 'wx', 0o600);
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
 }
-async function syncDirectory(path) { const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } }
+// Windows rejects directory-handle sync; regular-file sync remains mandatory.
+async function syncDirectory(path) { if (process.platform === 'win32') return; const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } }
 async function reconcile({ root, id, initiative, revision, reconciliationPath, grant, source, proposal }) {
   if (!isAbsolute(reconciliationPath ?? '')) throw Error('external reconciliation attestation required');
   const external = await realpath(reconciliationPath);
