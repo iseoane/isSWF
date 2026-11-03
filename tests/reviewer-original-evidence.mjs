@@ -44,7 +44,10 @@ try {
   for (const changed of [{ allowOriginalEvidence: false }, { workspace: { ...ordinary.workspace, evidence: { path: original, sha256: '0'.repeat(64) } } }]) {
     await json(ordinary.grantFile, { ...ordinary.grant, ...changed }); await assert.rejects(prepareReview(ordinary.request));
   }
-  const alias = join(root, 'auth-alias'); await symlink(join(original, 'record'), alias);
+  // Unprivileged Windows cannot create file symlinks; a directory junction reaches the same evidence through an alias.
+  let alias = join(root, 'auth-alias');
+  if (process.platform === 'win32') { await symlink(original, alias, 'junction'); alias = join(alias, 'record'); }
+  else await symlink(join(original, 'record'), alias);
   await json(ordinary.grantFile, { ...ordinary.grant, authPath: alias });
   await assert.rejects(prepareReview(ordinary.request), /separate-original-evidence/u);
   await json(ordinary.grantFile, ordinary.grant);
