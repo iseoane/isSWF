@@ -12,11 +12,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J001
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/audit-archive.mjs pass on Windows without elevation, preserving its Linux guarantees (#152; group B: directory fsync EPERM; related #85).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -27,15 +27,16 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #170 (047d0a6) directory fsync
+- PR #171 (3e3b90f) Windows permission model; test passes on Windows
 
 ## J002
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/issue-intake.mjs pass on Windows without elevation, preserving its Linux guarantees (#153; group A: path separator in expected brief path).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -46,15 +47,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) separator-agnostic assertion; test passes on Windows
 
 ## J003
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/planner-task.mjs pass on Windows without elevation, preserving its Linux guarantees (#154; group D: undiagnosed http400 fetch count; same message as #155).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -65,15 +66,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) basename(p.dir); test passes on Windows
 
 ## J004
 
-- Status: pending
+- Status: blocked
 - Objective: Make tests/reviewer-task.mjs pass on Windows without elevation, preserving its Linux guarantees (#155; group D: undiagnosed http400 fetch count; same message as #154).
-- Depends on: None
+- Depends on: J014
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: Root cause shared with #176 (J014): per-file git process starts exceed the 10 s review deadline on Windows.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -88,11 +89,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J005
 
-- Status: pending
+- Status: blocked
 - Objective: Make tests/release-package.mjs pass on Windows without elevation, preserving its Linux guarantees (#156; group D: undiagnosed strict equality).
-- Depends on: None
+- Depends on: J014
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: Separator fix in PR #175 (6d83ce9); remaining timeout shares root cause with #176 (J014).
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -107,11 +108,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J006
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/researcher-quota-fallback.mjs pass on Windows without elevation, preserving its Linux guarantees (#157; group A: grant-must-be-external; related #83).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -122,15 +123,16 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) containment
+- PR #170 (047d0a6) directory fsync; test passes on Windows
 
 ## J007
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/researcher-session-affinity.mjs pass on Windows without elevation, preserving its Linux guarantees (#158; group A: capacity-scope-must-be-separate).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -141,15 +143,16 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) containment
+- PR #170 (047d0a6) directory fsync; test passes on Windows
 
 ## J008
 
-- Status: pending
+- Status: blocked
 - Objective: Make tests/review-panel-capacity.mjs pass on Windows without elevation, preserving its Linux guarantees (#159; group A: capacity-scope-must-be-separate).
-- Depends on: None
+- Depends on: J014
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: Root cause shared with #176 (J014): review deadline and 5 s progress wait exceeded on Windows.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -164,11 +167,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J009
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/worker-capacity-api.mjs pass on Windows without elevation, preserving its Linux guarantees (#160; group A: capacity-scope-must-be-separate).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -179,15 +182,16 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) containment
+- PR #170 (047d0a6) directory fsync; test passes on Windows
 
 ## J010
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/worker-capacity.mjs pass on Windows without elevation, preserving its Linux guarantees (#161; group A: runs store must be outside project and source trees).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -198,15 +202,16 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) containment and fault hook
+- PR #170 (047d0a6) directory fsync; test passes on Windows
 
 ## J011
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/worker-dependencies.mjs pass on Windows without elevation, preserving its Linux guarantees (#162; group A: runs store must be outside project and source trees).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -217,15 +222,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #169 (7171230) separator-agnostic assertions; test passes on Windows
 
 ## J012
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/successor-model-config.mjs pass on Windows without elevation, preserving its Linux guarantees (#163; group C: candidate tree and permissions mismatch).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -236,15 +241,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #171 (3e3b90f) Windows permission model; test passes on Windows
 
 ## J013
 
-- Status: pending
+- Status: in-review
 - Objective: Make tests/reviewer-original-evidence.mjs pass on Windows without elevation, preserving its Linux guarantees (#164; group B: symlink EPERM; related #86).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -255,5 +260,23 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #172 (63c4952) directory junction fixture; test passes on Windows from a normal clone
 
+## J014
+
+- Status: pending
+- Objective: Keep reviewer, planner and diagnostic preparation within their deadlines on Windows by reducing per-file git process starts (#176).
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J014/brief-r1.md)
+- Blocker: None; triaged ready-for-agent.
+- Next step: Measure with isswf-performance, batch tree and blob reads with one ls-tree -r and one cat-file --batch per checkpoint, add a regression bounding git process starts, then reassess test timeouts.
+
+### Acceptance
+
+- node tests/reviewer-task.mjs, tests/review-panel-capacity.mjs and tests/release-package.mjs exit 0 on Windows 11 in an unprivileged terminal.
+- Prepared bundles stay byte-identical and refusal behavior is unchanged on Linux and Windows.
+- A regression test bounds the number of git process starts per prepared bundle.
+
+### Evidence
+
+- None.
