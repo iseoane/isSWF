@@ -71,7 +71,7 @@ if (process.argv[3] === '--probe') {
   assert.ok(isolated.skills.some(skill => skill.name === 'unrelated-fixture'));
   for (const observed of [probe(neighbour), probe(project, true)]) {
     assert.deepEqual(observed.diagnostics, []);
-    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 14);
+    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 15);
     assert.ok(observed.skills.some(skill => skill.name === 'unrelated-fixture'));
   }
   assert.deepEqual(await readFile(join(home, 'pi/settings.json')), globalPi, 'User settings remain unchanged');
