@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
 import {readFile,realpath,mkdir,open,link,unlink,rmdir} from 'node:fs/promises';
-import {resolve,join,relative,isAbsolute,dirname} from 'node:path';
+import {resolve,join,relative,isAbsolute,dirname,sep} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {sdkPackageManifest} from './sdk-package.mjs';
@@ -10,7 +10,7 @@ import {createHash,randomUUID} from 'node:crypto';
 import {prepareCapacity,acquireCapacity} from './execution-capacity.mjs';
 const source=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const hash=b=>createHash('sha256').update(b).digest('hex');
-const inside=(a,b)=>{const r=relative(a,b);return r===''||(!r.startsWith('../')&&r!=='..'&&!isAbsolute(r));};
+const inside=(a,b)=>{const r=relative(a,b);return r===''||(!r.startsWith('..' + sep)&&r!=='..'&&!isAbsolute(r));};
 const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const fail=code=>{throw new Error(code);};
 async function boundedJSON(path){const bytes=await readFile(path);assert(bytes.length<=65536,'input-too-large');return {value:JSON.parse(bytes),sha256:hash(bytes)};}
