@@ -7,7 +7,7 @@ const MAX_INPUT = 1024 * 1024, MAX_ROWS = 100, MAX_ROW = 4096, MAX_OUTPUT = 64 *
 const fields = ['input', 'output', 'cacheRead', 'cacheWrite'];
 const metaFields = ['host', 'hostVersion', 'model', 'effort', 'taskClass', 'candidate', 'outcome', 'provenance', 'scope'];
 const allowedTop = new Set(['version', 'mode', 'rows']);
-const allowedRow = new Set(['id', ...metaFields, 'accepted', 'window', 'counters', 'durationSeconds', 'requests', 'turns', 'corrections', 'reasoning', 'source', 'segment']);
+const allowedRow = new Set(['id', ...metaFields, 'accepted', 'window', 'counters', 'durationSeconds', 'requests', 'turns', 'corrections', 'reasoning']);
 const ownKeysOnly = (value, allowed) => Object.keys(value).every(key => allowed.has(key));
 const text = (value, max = 128) => typeof value === 'string' && value.length > 0 && value.length <= max && /^[A-Za-z0-9][A-Za-z0-9._:+-]*$/u.test(value);
 const count = value => value === null || (Number.isSafeInteger(value) && value >= 0);
@@ -19,15 +19,12 @@ export function normalize(input) {
   const ids = new Set(), rows = input.rows.map(row => {
     if (!row || typeof row !== 'object' || Array.isArray(row) || !ownKeysOnly(row, allowedRow) || Buffer.byteLength(JSON.stringify(row)) > MAX_ROW) invalid();
     for (const key of ['id', ...metaFields, 'window']) if (!text(row[key])) invalid();
-    const expectedSource = row.provenance === `manual-${row.host}` || row.provenance === `native-${row.host}-summary` || (row.host === 'claude' && row.provenance === 'native-claude-otel');
+    const expectedSource = row.provenance === `manual-${row.host}` || row.provenance === `native-${row.host}-summary`;
     if (!['pi', 'claude'].includes(row.host) || !['agent', 'unattributed', 'tree'].includes(row.scope) || !expectedSource) invalid();
     if (!Number.isSafeInteger(row.accepted) || row.accepted < 0 || !row.counters || typeof row.counters !== 'object' || Array.isArray(row.counters) || !ownKeysOnly(row.counters, new Set(fields))) invalid();
     for (const key of fields) if (!Object.hasOwn(row.counters, key) || !count(row.counters[key])) invalid();
     if (ids.has(`${row.window}\0${row.id}`)) throw Error('duplicate row identity/window');
     ids.add(`${row.window}\0${row.id}`);
-    if (row.provenance === 'native-claude-otel') {
-      if (!['main', 'subagent', 'auxiliary'].includes(row.source) || !/^[a-f0-9]{24}$/u.test(row.segment ?? '')) invalid();
-    } else if (Object.hasOwn(row, 'source') || Object.hasOwn(row, 'segment')) invalid();
     for (const key of ['durationSeconds', 'requests', 'turns', 'corrections', 'reasoning']) if (Object.hasOwn(row, key) && !count(row[key])) invalid();
     const { reasoning, ...safe } = row;
     return { ...safe, reasoning: reasoning ?? null };
@@ -72,7 +69,7 @@ function summarize(input) {
 }
 function compare(before, after) {
   const a = before.rows, b = after.rows;
-  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted', 'provenance', 'source'];
+  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted', 'provenance'];
   const byIdentity = new Map(b.map(row => [`${row.window}\0${row.id}`, row]));
   const comparable = a.length === b.length && a.every(row => {
     const counterpart = byIdentity.get(`${row.window}\0${row.id}`);
@@ -162,12 +159,10 @@ export function report(summary, beforeSummary = null) {
   const beforeInput = beforeSummary ? normalize(beforeSummary) : null;
   if (afterInput.rows.length + (beforeInput?.rows.length ?? 0) > MAX_ROWS) throw Error('row limit exceeded');
   const after = summarize(afterInput);
-  const hasClaudeOtel = afterInput.rows.some(row => row.provenance === 'native-claude-otel');
   const result = {
     version: 1, reportType: 'offline-token-summary', totals: after,
     comparison: beforeInput ? compare(summarize(beforeInput), after) : null,
-    collectionPolicy: hasClaudeOtel ? 'managed-policy-not-inspected; local-only export is unverified' : null,
-    claims: hasClaudeOtel ? 'Native Claude OTLP metrics normalized locally; this is not billing, a wider session total, or verified local-only telemetry.' : 'Curated supplied summaries only; no native collection, billing, or live-session measurement.',
+    claims: 'Curated supplied summaries only; no native collection, billing, or live-session measurement.',
   };
   const output = JSON.stringify(result, null, 2);
   if (Buffer.byteLength(output) > MAX_OUTPUT) throw Error('report limit exceeded');

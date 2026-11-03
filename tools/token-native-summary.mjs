@@ -145,15 +145,16 @@ const digits = value => typeof value === 'string' && /^[1-9][0-9]*$/u.test(value
 
 // Observed per-series snapshot: each native series keeps its own interval; no common window is inferred.
 export function snapshotClaudeOtel({ input, meta }) {
-  if (!input || input.version !== 2 || input.host !== 'claude' || input.provenance !== 'native-claude-otel' || input.sourceVersion !== 'claude_code.token.usage-otlp-cumulative' || !['export-observed', 'no-export-observed'].includes(input.exportStatus) || !Number.isSafeInteger(input.receivedExports) || input.receivedExports < 0 || (input.exportStatus === 'export-observed') !== (input.receivedExports > 0) || !safeName(input.hostVersion) || !/^[a-f0-9]{24}$/u.test(input.capture ?? '') || !Array.isArray(input.series) || input.series.length > MAX_ROWS || meta.host !== 'claude' || meta.hostVersion !== input.hostVersion) fail();
+  if (!input || input.version !== 2 || input.host !== 'claude' || input.provenance !== 'native-claude-otel' || input.sourceVersion !== 'claude_code.token.usage-otlp-cumulative' || !['export-observed', 'no-export-observed'].includes(input.exportStatus) || !Number.isSafeInteger(input.receivedExports) || input.receivedExports < 0 || !Number.isSafeInteger(input.ignoredRequests) || input.ignoredRequests < 0 || !safeName(input.hostVersion) || !/^[a-f0-9]{24}$/u.test(input.capture ?? '') || !Array.isArray(input.series) || input.series.length > MAX_ROWS || meta.host !== 'claude' || meta.hostVersion !== input.hostVersion) fail();
   if (!['effort', 'taskClass', 'candidate'].every(key => safeName(meta[key]))) fail();
   const seen = new Set(), observed = new Map();
   const series = input.series.map(entry => {
     if (!entry || Object.keys(entry).length !== 7 || !/^[a-f0-9]{24}$/u.test(entry.series ?? '') || seen.has(entry.series) || !digits(entry.start) || !digits(entry.end) || BigInt(entry.end) <= BigInt(entry.start) || !sources.has(entry.source) || !safeName(entry.model) || !['input', 'output', 'cacheRead', 'cacheCreation'].includes(entry.category) || !Number.isSafeInteger(entry.value) || entry.value < 0) fail();
     seen.add(entry.series);
     return { series: entry.series, source: entry.source, model: entry.model, category: entry.category, start: entry.start, end: entry.end, value: entry.value };
-  }).sort((x, y) => x.series.localeCompare(y.series));
-  if (input.exportStatus === 'no-export-observed' && series.length) fail();
+  }).sort((x, y) => (x.series < y.series ? -1 : x.series > y.series ? 1 : 0));
+  // Shared rule: export-observed exactly when at least one native token series was accepted.
+  if ((input.exportStatus === 'export-observed') !== (series.length > 0) || (series.length > 0) !== (input.receivedExports > 0)) fail();
   for (const entry of series) {
     // Distinct native series under one visible projection have disjoint attribute sets, so their values add.
     const key = `${entry.source}:${entry.model}:${entry.category}`;
@@ -162,7 +163,7 @@ export function snapshotClaudeOtel({ input, meta }) {
     if (!Number.isSafeInteger(row.value)) fail();
     observed.set(key, row);
   }
-  const rows = [...observed.values()].sort((x, y) => `${x.source}:${x.model}:${x.category}`.localeCompare(`${y.source}:${y.model}:${y.category}`));
+  const rows = [...observed.values()].sort((x, y) => { const a = `${x.source}:${x.model}:${x.category}`, b = `${y.source}:${y.model}:${y.category}`; return a < b ? -1 : a > b ? 1 : 0; });
   const observedSubtotal = rows.reduce((sum, row) => sum + row.value, 0);
   if (!Number.isSafeInteger(observedSubtotal)) fail();
   return {

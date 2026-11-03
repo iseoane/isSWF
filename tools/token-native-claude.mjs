@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 const MAX_BODY = 1024 * 1024, MAX_ROWS = 100, MAX_ROW = 4096, MAX_REPORT = 64 * 1024;
 const categories = new Set(['input', 'output', 'cacheRead', 'cacheCreation']);
 const sources = new Set(['main', 'subagent', 'auxiliary']);
+const byCodePoint = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const hash = value => createHash('sha256').update(value).digest('hex').slice(0, 24);
 
 function canonicalAttributes(attributes) {
@@ -29,7 +30,7 @@ function canonicalAttributes(attributes) {
     else throw Error('invalid metric attribute value');
     return [item.key, { [variant]: normalized }];
   });
-  entries.sort(([a], [b]) => a.localeCompare(b));
+  entries.sort(([a], [b]) => byCodePoint(a, b));
   return JSON.stringify(entries);
 }
 
@@ -73,7 +74,7 @@ function countersFrom(payload) {
     }
   }
   if (counters.size > MAX_ROWS) throw Error('metric row limit exceeded');
-  return [...counters].sort(([a], [b]) => a.localeCompare(b)).map(([key, row]) => ({ id: key, ...row }));
+  return [...counters].sort(([a], [b]) => byCodePoint(a, b)).map(([key, row]) => ({ id: key, ...row }));
 }
 
 export async function readConfig(cwd) {
@@ -194,27 +195,29 @@ async function run() {
   if (hostVersion === 'unknown') throw Error('Claude version output was not recognized; refusing instrumented launch');
   const id = randomBytes(32).toString('hex'), route = `/${randomBytes(24).toString('hex')}`;
   let rows = new Map();
-  let rejected = false, concurrent = 0, receivedExports = 0, rejectionCode = '';
+  let rejected = false, concurrent = 0, receivedExports = 0, ignoredRequests = 0, rejectionCode = '';
   const server = createServer((req, res) => {
-    if (req.method !== 'POST' || req.url !== route || req.headers['content-type']?.split(';')[0] !== 'application/json' || req.headers.authorization !== `Bearer ${id}`) { rejected = true; rejectionCode = 'route-method-content-or-auth'; req.resume(); res.writeHead(404).end(); return; }
-    if (concurrent >= 2 || Number(req.headers['content-length']) > MAX_BODY) { rejected = true; req.resume(); res.writeHead(413).end(); return; }
+    if (req.method !== 'POST' || req.url !== route || req.headers['content-type']?.split(';')[0] !== 'application/json' || req.headers.authorization !== `Bearer ${id}`) { ignoredRequests++; req.resume(); res.writeHead(404).end(); return; }
+    if (concurrent >= 2 || Number(req.headers['content-length']) > MAX_BODY) { rejected = true; rejectionCode ||= concurrent >= 2 ? 'concurrency-limit' : 'request-too-large'; req.resume(); res.writeHead(413).end(); return; }
     concurrent++; let size = 0, settled = false; const chunks = [];
     const release = () => { if (!settled) { settled = true; concurrent--; } };
-    const deadline = setTimeout(() => { rejected = true; rejectionCode = 'request-timeout'; req.destroy(); }, 3000);
+    const deadline = setTimeout(() => { rejected = true; rejectionCode ||= 'request-timeout'; req.destroy(); }, 3000);
     req.on('close', () => { clearTimeout(deadline); release(); });
     req.on('data', chunk => { size += chunk.length; if (size <= MAX_BODY) chunks.push(chunk); });
     req.on('end', () => {
       clearTimeout(deadline);
       release();
       try {
-        if (size > MAX_BODY) throw Error();
-        receivedExports++;
-        rows = mergeCumulative(rows, countersFrom(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
+        if (size > MAX_BODY) throw Error('request-too-large');
+        const received = countersFrom(JSON.parse(Buffer.concat(chunks).toString('utf8')));
         chunks.length = 0;
+        rows = mergeCumulative(rows, received);
+        // Only validated exports carrying native Claude token series count as observed.
+        if (received.length) receivedExports++;
         res.writeHead(200).end('{}');
       } catch (error) {
         rejected = true;
-        rejectionCode = ['cumulative metrics required', 'invalid metric counter', 'duplicate metric series', 'cumulative metric reset detected', 'conflicting metric observation', 'cumulative metric segment changed; unsupported transition', 'replayed or out-of-order metric export', 'metric row limit exceeded'].includes(error.message) ? error.message : 'payload-validation';
+        rejectionCode ||= ['request-too-large', 'cumulative metrics required', 'invalid metric counter', 'duplicate metric series', 'cumulative metric reset detected', 'conflicting metric observation', 'cumulative metric segment changed; unsupported transition', 'replayed or out-of-order metric export', 'metric row limit exceeded'].includes(error.message) ? error.message : 'payload-validation';
         res.writeHead(400).end();
       }
     });
@@ -233,7 +236,7 @@ async function run() {
     cancelled = signal;
     child.kill(signal);
     signalTimer = setTimeout(() => child.kill('SIGKILL'), 3000);
-    forceTimer = setTimeout(() => { if (!closed) { process.stderr.write('Claude child did not close after bounded cancellation; descendant state is unknown.\\n'); process.exit(1); } }, 6000);
+    forceTimer = setTimeout(() => { if (!closed) { process.stderr.write('Claude child did not close after bounded cancellation; descendant state is unknown.\n'); process.exit(1); } }, 6000);
   };
   process.once('SIGINT', forwardSignal);
   process.once('SIGTERM', forwardSignal);
@@ -251,15 +254,15 @@ async function run() {
   if (!rejected) {
     const safeRows = outputRows.map(row => ({ series: row.series, start: row.start, end: row.end, source: row.source, model: row.model, category: row.category, value: row.value }));
     // Observed local delivery for this run only; not a policy-compliance certificate.
-    const exportStatus = receivedExports > 0 ? 'export-observed' : 'no-export-observed';
-    const receipt = { version: 2, host: 'claude', hostVersion, sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', capture: hash(id), cancellation: cancelled, processExit: outcome.code, signal: outcome.signal, exportStatus, receivedExports, series: safeRows };
+    const exportStatus = safeRows.length ? 'export-observed' : 'no-export-observed';
+    const receipt = { version: 2, host: 'claude', hostVersion, sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', capture: hash(id), cancellation: cancelled, processExit: outcome.code, signal: outcome.signal, exportStatus, receivedExports, ignoredRequests, series: safeRows };
     const output = `${JSON.stringify(receipt, null, 2)}\n`;
     try {
       if (Buffer.byteLength(output) > MAX_REPORT) throw Error('Claude metrics report limit exceeded');
       await persistReceipt(config, output);
     } catch { rejected = true; }
   }
-  if (rejected) process.stderr.write(`Claude metrics capture invalid (exports=${receivedExports}, rows=${outputRows.length}, rejection=${rejectionCode || 'receipt-storage'}); no receipt retained.\n`);
+  if (rejected) process.stderr.write(`Claude metrics capture invalid (exports=${receivedExports}, ignored=${ignoredRequests}, rows=${outputRows.length}, rejection=${rejectionCode || 'receipt-storage'}); no receipt retained.\n`);
   else if (!receivedExports) process.stderr.write('Claude metrics: no-export-observed; coverage unknown (possible managed endpoint override or missing final export), not zero usage.\n');
   if (outcome.signal) process.exitCode = 1;
   else process.exitCode = outcome.code ?? 1;

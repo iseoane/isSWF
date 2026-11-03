@@ -83,7 +83,7 @@ assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ scope: {
 const metadata = { host: 'claude', hostVersion: '2.1.312', effort: 'unknown', taskClass: 'fixture', candidate: 'current' };
 const recorded = [['input', 11, '1793704489527000000'], ['output', 7, '1793704489528000000'], ['cacheRead', 5, '1793704489528000000'], ['cacheCreation', 3, '1793704489528000000']]
   .map(([category, value, start], index) => ({ series: String(index + 1).repeat(24), source: 'main', model: 'model-0123456789abcdef01234567', category, start, end: '1793704489600000000', value }));
-const receiptOf = series => ({ version: 2, host: 'claude', hostVersion: '2.1.312', sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', capture: '0123456789abcdef01234567', cancellation: null, processExit: 0, signal: null, exportStatus: 'export-observed', receivedExports: 2, series });
+const receiptOf = series => ({ version: 2, host: 'claude', hostVersion: '2.1.312', sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', capture: '0123456789abcdef01234567', cancellation: null, processExit: 0, signal: null, exportStatus: 'export-observed', receivedExports: 2, ignoredRequests: 0, series });
 const permutations = list => list.length <= 1 ? [list] : list.flatMap((item, index) => permutations([...list.slice(0, index), ...list.slice(index + 1)]).map(rest => [item, ...rest]));
 const baseline = snapshotClaudeOtel({ input: receiptOf(recorded), meta: metadata });
 for (const order of permutations(recorded)) assert.deepEqual(snapshotClaudeOtel({ input: receiptOf(order), meta: metadata }), baseline, 'category order never changes the snapshot');
@@ -107,6 +107,23 @@ const narrower = report(partial, baseline).comparison;
 assert.equal(narrower.unmatched.length, 2, 'unmatched categories stay explicit');
 assert.equal(report(independent, { ...baseline, taskClass: 'other' }).comparison.status, 'incomparable');
 const empty = snapshotClaudeOtel({ input: { ...receiptOf([]), exportStatus: 'no-export-observed', receivedExports: 0 }, meta: metadata });
+assert.throws(() => snapshotClaudeOtel({ input: receiptOf([]), meta: metadata }), /invalid native summary/u, 'export-observed requires native series (shared rule)');
+assert.throws(() => report({ ...empty, exportStatus: 'export-observed', observedSubtotal: 0 }), /invalid token summary/u, 'report applies the same empty-series rule');
+// Explicit per-series intervals for the recorded 1 ms pair.
+for (const row of baseline.series) assert.equal(row.start, row.category === 'input' ? '1793704489527000000' : '1793704489528000000', `${row.category} keeps its own start`);
+// Equivalent OTLP export through the collector: every point order yields the same series and starts.
+const otlpPoints = recorded.map(row => metric(row.category, 'main', row.value, [], { start: row.start, end: row.end }).sum.dataPoints[0]);
+const otlpOf = points => ({ resourceMetrics: [{ scopeMetrics: [{ metrics: [{ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 2, dataPoints: points } }] }] }] });
+const otlpBaseline = [...mergeCumulative(new Map(), countersFrom(otlpOf(otlpPoints))).values()];
+for (const order of permutations(otlpPoints)) assert.deepEqual([...mergeCumulative(new Map(), countersFrom(otlpOf(order))).values()], otlpBaseline);
+assert.deepEqual(Object.fromEntries(otlpBaseline.map(row => [row.category, row.start])), { input: '1793704489527000000', output: '1793704489528000000', cacheRead: '1793704489528000000', cacheCreation: '1793704489528000000' });
+assert.equal(otlpBaseline.reduce((sum, row) => sum + row.value, 0), 26);
+// Cardinality overflow is deterministic in both the parser and the merged state.
+const manyPoints = count => Array.from({ length: count }, (_, index) => metric('input', 'main', 1, [{ key: 'n', value: { intValue: index } }]).sum.dataPoints[0]);
+assert.throws(() => countersFrom(otlpOf(manyPoints(101))), /metric row limit exceeded/u);
+const firstHundred = mergeCumulative(new Map(), countersFrom(otlpOf(manyPoints(100))));
+const extra = countersFrom(otlpOf([metric('input', 'main', 1, [{ key: 'n', value: { intValue: 500 } }]).sum.dataPoints[0]]));
+assert.throws(() => mergeCumulative(firstHundred, extra), /metric row limit exceeded/u);
 assert.equal(empty.observedSubtotal, null, 'no observed export is unknown, not zero');
 assert.equal(report(independent, empty).comparison.status, 'incomparable');
 assert.throws(() => snapshotClaudeOtel({ input: { ...receiptOf(recorded), exportStatus: 'no-export-observed', receivedExports: 0 }, meta: metadata }), /invalid native summary/u);
@@ -153,6 +170,12 @@ try {
   assert.equal(await readFile(receiptPath, 'utf8'), storedBytes);
   await assert.rejects(persistReceipt({ base: state, destination: receiptDirectory }, storedBytes), { code: 'EEXIST' });
   assert.equal(await readFile(receiptPath, 'utf8'), storedBytes, 'existing receipt is never overwritten');
+  const fullDirectory = join(state, 'full-receipts');
+  await persistReceipt({ base: state, destination: fullDirectory }, `${JSON.stringify({ capture: 'f'.repeat(24), pad: 'x'.repeat(1024 * 1024 - 100) })}\n`);
+  await assert.rejects(persistReceipt({ base: state, destination: fullDirectory }, `${JSON.stringify({ capture: 'e'.repeat(24), pad: 'x'.repeat(200) })}\n`), /storage limit exceeded/u, 'byte storage ceiling is deterministic');
+  const countDirectory = join(state, 'count-receipts'); await mkdir(countDirectory);
+  for (let index = 0; index < 100; index++) await writeFile(join(countDirectory, `${index.toString(16).padStart(24, '0')}.json`), '{}');
+  await assert.rejects(persistReceipt({ base: state, destination: countDirectory }, `${JSON.stringify({ capture: 'd'.repeat(24) })}\n`), /storage limit exceeded/u, 'file-count ceiling is deterministic');
   const staleClaim = join(receiptDirectory, '.claude-capture.lock');
   await writeFile(staleClaim, 'existing claim', { flag: 'wx' });
   await assert.rejects(persistReceipt({ base: state, destination: receiptDirectory }, `${JSON.stringify({ ...storedReceipt, capture: 'abcdef0123456789abcdef01' })}\n`), { code: 'EEXIST' });
@@ -181,8 +204,16 @@ else {
   const token = decodeURIComponent(process.env.OTEL_EXPORTER_OTLP_METRICS_HEADERS.slice('Authorization='.length).replace('Bearer%20',''));
   const point = { attributes: [{key:'type',value:{stringValue:'input'}},{key:'query_source',value:{stringValue:'main'}},{key:'model',value:{stringValue:'fixture-model'}}], asInt: 11, startTimeUnixNano:'100', timeUnixNano:'200' };
   const exportBody = (value, end, pad = '') => JSON.stringify({resourceMetrics:[{resource:{attributes:[]},scopeMetrics:[{metrics:[{name:'padding',description:pad},{name:'claude_code.token.usage',sum:{isMonotonic:true,aggregationTemporality:2,dataPoints:[{...point,asInt:value,timeUnixNano:String(end)}]}}]}]}]});
-  if (mode === 'many' || mode === 'none') {
-    const send = body => new Promise(done => { const request = http.request(endpoint, {method:'POST',headers:{'content-type':'application/json',authorization:'Bearer ' + token,'content-length':Buffer.byteLength(body)}}, response => { response.resume(); response.on('end', done); }); request.on('error', done); request.end(body); });
+  if (['many', 'none', 'intruder', 'nonnative', 'stream-oversize', 'concurrent'].includes(mode)) {
+    const send = (body, authorization = 'Bearer ' + token, target = endpoint) => new Promise(done => { const request = http.request(target, {method:'POST',headers:{'content-type':'application/json',authorization,'content-length':Buffer.byteLength(body)}}, response => { response.resume(); response.on('end', done); }); request.on('error', done); request.end(body); });
+    if (mode === 'intruder') { await send(exportBody(99, 150), 'Bearer wrong'); await send(exportBody(99, 150), 'Bearer ' + token, new URL(endpoint.pathname + '/bad', endpoint)); await send(exportBody(11, 200)); }
+    if (mode === 'nonnative') await send(JSON.stringify({resourceMetrics:[{resource:{attributes:[]},scopeMetrics:[{metrics:[{name:'claude_code.session.count',sum:{isMonotonic:true,aggregationTemporality:2,dataPoints:[]}}]}]}]}));
+    if (mode === 'stream-oversize') await new Promise(done => { const request = http.request(endpoint, {method:'POST',headers:{'content-type':'application/json',authorization:'Bearer ' + token}}, response => { response.resume(); response.on('end', done); }); request.on('error', done); for (let index = 0; index < 17; index++) request.write('x'.repeat(65536)); request.end(); });
+    if (mode === 'concurrent') {
+      const open = [0, 1, 2].map(() => { const request = http.request(endpoint, {method:'POST',headers:{'content-type':'application/json',authorization:'Bearer ' + token,'content-length':10}}); request.on('error', () => {}); request.on('response', response => response.resume()); request.write('{'); return request; });
+      await new Promise(done => setTimeout(done, 300));
+      await Promise.all(open.map(request => new Promise(done => { request.on('close', done); request.end('"a":1234}'); })));
+    }
     if (mode === 'many') for (let index = 0; index < 12; index++) await send(exportBody(11 + index, 200 + index, 'x'.repeat(100000)));
     process.stdout.write('done' + String.fromCharCode(10));
   } else {
@@ -229,11 +260,23 @@ else {
   const noneReceipt = JSON.parse(await readFile(join(noneCase.caseState, 'capture', (await readdir(join(noneCase.caseState, 'capture')))[0]), 'utf8'));
   assert.equal(noneReceipt.exportStatus, 'no-export-observed');
   assert.deepEqual(noneReceipt.series, []);
-  for (const mode of ['wrong-route', 'auth', 'schema', 'oversize']) {
+  const intruderCase = await enabledCase('intruder');
+  const intruderRun = await runHelper(intruderCase.cwd, entry, [nativeFixtureScript, '--mode=intruder'], intruderCase.env);
+  const intruderReceipt = JSON.parse(await readFile(join(intruderCase.caseState, 'capture', (await readdir(join(intruderCase.caseState, 'capture')))[0]), 'utf8'));
+  assert.equal(intruderRun.code, 0, intruderRun.stderr);
+  assert.equal(intruderReceipt.ignoredRequests, 2, 'unauthenticated and wrong-route requests are counted');
+  assert.deepEqual(intruderReceipt.series.map(row => row.value), [11], 'ignored requests neither discard nor contribute data');
+  const nonnativeCase = await enabledCase('nonnative');
+  await runHelper(nonnativeCase.cwd, entry, [nativeFixtureScript, '--mode=nonnative'], nonnativeCase.env);
+  const nonnativeReceipt = JSON.parse(await readFile(join(nonnativeCase.caseState, 'capture', (await readdir(join(nonnativeCase.caseState, 'capture')))[0]), 'utf8'));
+  assert.equal(nonnativeReceipt.exportStatus, 'no-export-observed', 'an export without native token series is not observed coverage');
+  assert.equal(nonnativeReceipt.receivedExports, 0);
+  assert.equal(snapshotClaudeOtel({ input: nonnativeReceipt, meta: { ...metadata, hostVersion: nonnativeReceipt.hostVersion } }).observedSubtotal, null);
+  for (const [mode, code] of [['schema', 'invalid metric counter'], ['oversize', 'request-too-large'], ['stream-oversize', 'request-too-large'], ['concurrent', 'concurrency-limit']]) {
     const failedCase = await enabledCase(mode);
     const failedRun = await runHelper(failedCase.cwd, entry, [nativeFixtureScript, `--mode=${mode}`], failedCase.env);
     assert.equal(failedRun.code, 0, `${mode} does not alter the child exit status`);
-    assert.match(failedRun.stderr, /capture invalid/u);
+    assert.ok(failedRun.stderr.includes(`rejection=${code})`), `${mode}: ${failedRun.stderr}`);
     assert.equal(await import('node:fs/promises').then(({ access }) => access(join(failedCase.caseState, 'capture'))).then(() => true, () => false), false, `${mode} retains no receipt`);
   }
   const missingExecutable = await enabledCase('spawn-failure');
