@@ -14,6 +14,7 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-understanding` | Comprender un tema o sistema, aclarar una explicación o aprender mediante práctica y feedback. |
 | `isswf-pr` | Preparar descripciones de PR y actualizaciones autorizadas con evidencias y evaluación obligatoria del riesgo. |
 | `isswf-issue` | Reportar bugs independientes o proponer funcionalidades y mejoras, con destino verificado y `needs-triage` obligatorio. |
+| `isswf-triage` | Clasificar issues existentes en briefs nativos: listas para un agente, faltan datos, duplicadas o requieren investigación técnica. |
 | `isswf-e2e` | Crear, ejecutar o mantener pruebas ejecutables de recorridos críticos de usuario, con Playwright u otro controlador adecuado para la interfaz real. |
 | `isswf-debug` | Reproducir defectos, investigar causas y devolver un diagnóstico causal o incertidumbre explícita. |
 | `isswf-review` | Revisar un candidato exacto frente a Standards y Spec con evidencias proporcionadas al riesgo. |
@@ -23,7 +24,7 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-performance` | Diagnosticar lentitud medida, evaluar un presupuesto de rendimiento u optimizar un cuello de botella demostrado. |
 | `isswf-observability` | Diseñar, evaluar o implementar logs, métricas, trazas y alertas concretos con límites de privacidad y coste. |
 
-En Pi se invocan con `/skill:`. En Claude Code, con `/isswf:`. También existe `isswf-triage` en el código fuente para los prototipos históricos de entrada de issues; no es una entrada habitual del paquete completo instalado.
+En Pi se invocan con `/skill:`. En Claude Code, con `/isswf:`.
 
 La skill de redacción determina la audiencia a partir de la petición y del contexto del documento. Te pregunta cuando la audiencia no está clara y sigue las convenciones de idioma y documentación del proyecto de destino. Utiliza `/skill:isswf-writing` en Pi o `/isswf:isswf-writing` en Claude Code. No requiere activar el proyecto.
 

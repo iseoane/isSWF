@@ -14,6 +14,7 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | `isswf-understanding` | Understand a topic or system, clarify an explanation, or learn through practice and feedback. |
 | `isswf-pr` | Prepare PR descriptions and authorized updates with evidence and a mandatory risk assessment. |
 | `isswf-issue` | Report independent bugs or propose features and improvements, with verified routing and mandatory `needs-triage`. |
+| `isswf-triage` | Triage existing issues into native briefs: ready for an agent, needs information, duplicate, or technical grounding. |
 | `isswf-e2e` | Create, run or maintain executable tests of critical user journeys, with Playwright or another driver suitable for the real interface. |
 | `isswf-debug` | Reproduce defects, investigate causes and return a causal diagnosis or explicit uncertainty. |
 | `isswf-review` | Review an exact candidate against Standards and Spec with proportionate evidence. |
@@ -23,7 +24,7 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | `isswf-performance` | Diagnose measured slowness, evaluate a performance budget or optimize a demonstrated bottleneck. |
 | `isswf-observability` | Design, assess or implement focused logs, metrics, traces and alerts with privacy and cost limits. |
 
-In Pi, invoke them with `/skill:`. In Claude Code, use `/isswf:`. There is also a source-only `isswf-triage` skill for the historical intake prototypes; it is not a normal entry point in the complete installed package.
+In Pi, invoke them with `/skill:`. In Claude Code, use `/isswf:`.
 
 The writing skill determines the audience from the request and document context. It asks you when the audience is unclear and follows the target project’s language and documentation conventions. Use `/skill:isswf-writing` in Pi or `/isswf:isswf-writing` in Claude Code. It does not require project activation.
 
