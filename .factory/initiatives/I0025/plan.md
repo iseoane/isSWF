@@ -257,12 +257,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
 - Brief: [brief-r8.md](jobs/J006/brief-r8.md) (current: transcript reader) ; previous [brief-r7.md](jobs/J006/brief-r7.md) (post-start verification change) + [brief-r6.md](jobs/J006/brief-r6.md) (authority) on design [brief-r5.md](jobs/J006/brief-r5.md)
 - Blocker: none for the r6 unit; observed-only scope accepted by the operator, whole-work completeness explicitly not required.
-- Next step: Candidate deaf6b9 technically verified (V007 Standards/Spec PASS). Operator acceptance, push, PR and integration are separate and not granted; open suggestions: late older export ordering, timeout cause in docs, ES wording nits.
+- Next step: Transcript reader 3d24963 technically verified on Linux (V008 PASS). Operator acceptance, actual Windows run, push/PR/integration separate and not granted. Non-blocking V008 suggestions open.
 
 ### Acceptance
 
@@ -301,3 +301,4 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J006/V006.md: bound review of 63a64d0, Standards/Spec FAIL with bounded findings (rejection codes, export provenance/empty-series rule, missing cardinality/storage tests, unauthenticated-request invalidation, residual native-claude-otel window path/docs, per-series start assertion). Conditional 15min correction + 15min second review now used.
 - jobs/J006/A007.md + V007.md: correction candidate deaf6b9; first V007 launch INCONCLUSIVE due to coordinator binding error (not evaluated), rebound launch PASS Standards/Spec. Budget fully used; SKILL.md/docs reviewed from coordinator-attested working tree, not bound content.
 - Operator 2026-11-03: telemetry daemon/global settings rejected as over-engineering; approved local transcript reader (brief-r8) as primary zero-token Claude capture with parent/subagent rows and total, invalid format → recommend isSWF issue. Budget 40+15 (+15+15 conditional). Windows run still requires an actual Windows host (this session is Linux).
+- jobs/J006/A008.md + V008.md: A008 Writes got repeated auto-mode no-verdicts until the operator switched to bypass; fresh worker then delivered 3d24963 (transcript reader, parent+subagent rows, total, invalid-format issue recommendation). Worker ran out-of-scope `pkill -x cat` (reported, no observed effect). V008 bound review Standards/Spec PASS with 4 non-blocking suggestions. Coordinator observed on 3d24963: focused test, ESLint, Knip, check-docs PASS. Real counts-only run self-reported (4 files, 165 requests, total complete).
