@@ -19,7 +19,7 @@ export function normalize(input) {
   const ids = new Set(), rows = input.rows.map(row => {
     if (!row || typeof row !== 'object' || Array.isArray(row) || !ownKeysOnly(row, allowedRow) || Buffer.byteLength(JSON.stringify(row)) > MAX_ROW) invalid();
     for (const key of ['id', ...metaFields, 'window']) if (!text(row[key])) invalid();
-    const expectedSource = row.provenance === `manual-${row.host}` || row.provenance === `native-${row.host}-summary`;
+    const expectedSource = row.provenance === `manual-${row.host}` || row.provenance === `native-${row.host}-summary` || (row.host === 'claude' && row.provenance === 'native-claude-otel');
     if (!['pi', 'claude'].includes(row.host) || !['agent', 'unattributed', 'tree'].includes(row.scope) || !expectedSource) invalid();
     if (!Number.isSafeInteger(row.accepted) || row.accepted < 0 || !row.counters || typeof row.counters !== 'object' || Array.isArray(row.counters) || !ownKeysOnly(row.counters, new Set(fields))) invalid();
     for (const key of fields) if (!Object.hasOwn(row.counters, key) || !count(row.counters[key])) invalid();
@@ -91,7 +91,13 @@ export function report(summary, beforeSummary = null) {
   const beforeInput = beforeSummary ? normalize(beforeSummary) : null;
   if (afterInput.rows.length + (beforeInput?.rows.length ?? 0) > MAX_ROWS) throw Error('row limit exceeded');
   const after = summarize(afterInput);
-  const result = { version: 1, reportType: 'offline-token-summary', totals: after, comparison: beforeInput ? compare(summarize(beforeInput), after) : null, claims: 'Curated supplied summaries only; no native collection, billing, or live-session measurement.' };
+  const hasClaudeOtel = afterInput.rows.some(row => row.provenance === 'native-claude-otel');
+  const result = {
+    version: 1, reportType: 'offline-token-summary', totals: after,
+    comparison: beforeInput ? compare(summarize(beforeInput), after) : null,
+    collectionPolicy: hasClaudeOtel ? 'managed-policy-not-inspected; local-only export is unverified' : null,
+    claims: hasClaudeOtel ? 'Native Claude OTLP metrics normalized locally; this is not billing, a wider session total, or verified local-only telemetry.' : 'Curated supplied summaries only; no native collection, billing, or live-session measurement.',
+  };
   const output = JSON.stringify(result, null, 2);
   if (Buffer.byteLength(output) > MAX_OUTPUT) throw Error('report limit exceeded');
   return result;

@@ -141,6 +141,32 @@ function deltaRows(start, end) {
   });
 }
 
+export function normalizeClaudeOtel({ input, meta }) {
+  if (!input || input.version !== 1 || input.host !== 'claude' || input.provenance !== 'native-claude-otel' || input.sourceVersion !== 'claude_code.token.usage-otlp-cumulative' || input.policyStatus !== 'managed-policy-not-inspected' || !safeName(input.hostVersion) || !/^[a-f0-9]{24}$/u.test(input.session ?? '') || !Array.isArray(input.counters) || input.counters.length > MAX_ROWS || meta.host !== 'claude' || meta.hostVersion !== input.hostVersion) fail();
+  if (!['id', 'window', 'effort', 'taskClass', 'candidate', 'outcome'].every(key => safeName(meta[key])) || !Number.isSafeInteger(meta.accepted) || meta.accepted < 0) fail();
+  const models = new Map();
+  for (const entry of input.counters) {
+    if (!entry || !safeName(entry.id) || !sources.has(entry.source) || !safeName(entry.model) || !['input', 'output', 'cacheRead', 'cacheCreation'].includes(entry.category) || !Number.isSafeInteger(entry.value) || entry.value < 0) fail();
+    const key = `${entry.source}:${entry.model}`;
+    const row = models.get(key) ?? { source: entry.source, model: entry.model, counters: Object.fromEntries(names.map(name => [name, null])) };
+    const field = entry.category === 'cacheCreation' ? 'cacheWrite' : entry.category;
+    if (row.counters[field] !== null) fail();
+    row.counters[field] = entry.value;
+    models.set(key, row);
+  }
+  if (!models.size || models.size > MAX_ROWS) fail();
+  const rows = [...models.values()].map(row => ({
+    id: `${meta.id}-${row.source}-${row.model}`, host: 'claude', hostVersion: input.hostVersion, model: row.model,
+    effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate, outcome: meta.outcome,
+    accepted: meta.accepted, provenance: 'native-claude-otel', scope: 'unattributed', window: meta.window,
+    counters: row.counters,
+  }));
+  if (rows.some(row => !safeName(row.id))) fail();
+  return { version: 1, mode: 'window', rows };
+}
+
+const sources = new Set(['main', 'subagent', 'auxiliary']);
+
 export function normalizeNative({ input, start, meta }) {
   if (!meta || !['pi', 'claude'].includes(meta.host) || !safeName(meta.hostVersion)) fail();
   if (meta.host === 'claude') {
@@ -190,18 +216,21 @@ export function normalizeNative({ input, start, meta }) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const args = {}, fields = new Set(['--input', '--capture', '--start', '--host', '--id', '--window', '--host-version', '--effort', '--task-class', '--candidate', '--outcome', '--accepted']);
+    const args = {}, fields = new Set(['--input', '--capture', '--otel', '--start', '--host', '--id', '--window', '--host-version', '--effort', '--task-class', '--candidate', '--outcome', '--accepted']);
     const parts = process.argv.slice(2);
     for (let index = 0; index < parts.length; index += 2) {
       if (!fields.has(parts[index]) || !parts[index + 1] || Object.hasOwn(args, parts[index])) throw Error('invalid option');
       args[parts[index]] = parts[index + 1];
     }
-    if ((!args['--input'] && !args['--capture']) || (args['--input'] && args['--capture']) || !['pi', 'claude'].includes(args['--host'] ?? (args['--capture'] ? 'pi' : ''))) throw Error('invalid options');
-    const host = args['--host'] ?? 'pi';
+    if ([args['--input'], args['--capture'], args['--otel']].filter(Boolean).length !== 1 || !['pi', 'claude'].includes(args['--host'] ?? (args['--capture'] ? 'pi' : args['--otel'] ? 'claude' : ''))) throw Error('invalid options');
+    const host = args['--host'] ?? (args['--otel'] ? 'claude' : 'pi');
+    if (args['--otel'] && (host !== 'claude' || args['--start'])) throw Error('invalid options');
     if (host === 'pi' && (args['--start'] || args['--capture']) && args['--accepted'] === undefined) throw Error('invalid options');
     const total = { bytes: 0 };
     let input, start;
-    if (args['--capture']) {
+    if (args['--otel']) {
+      input = await load(args['--otel'], total);
+    } else if (args['--capture']) {
       const capture = await load(args['--capture'], total);
       if (capture?.version !== 1 || capture.owner !== 'isswf/pi-native-capture-v1' || capture.latest?.host !== 'pi' || !capture.baseline) throw Error('invalid automatic capture');
       input = capture.latest;
@@ -210,14 +239,14 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       input = await load(args['--input'], total);
       start = args['--start'] ? await load(args['--start'], total) : undefined;
     }
-    const hostVersion = args['--host-version'] ?? (host === 'pi' ? input.hostVersion : 'unknown');
+    const hostVersion = args['--host-version'] ?? (args['--otel'] ? input.hostVersion : host === 'pi' ? input.hostVersion : 'unknown');
     const meta = {
       host, id: args['--id'] ?? 'native', window: args['--window'] ?? 'window', hostVersion,
       effort: args['--effort'] ?? 'unknown', taskClass: args['--task-class'] ?? 'native-summary',
       candidate: args['--candidate'] ?? 'unknown', outcome: args['--outcome'] ?? 'unknown',
       accepted: Number(args['--accepted']),
     };
-    const summary = normalizeNative({ input, start, meta });
+    const summary = args['--otel'] ? normalizeClaudeOtel({ input, meta }) : normalizeNative({ input, start, meta });
     const output = `${JSON.stringify(summary, null, 2)}\n`;
     if (Buffer.byteLength(output) > 64 * 1024) throw Error('native summary output limit exceeded');
     process.stdout.write(output);
