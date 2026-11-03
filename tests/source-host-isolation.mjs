@@ -71,7 +71,7 @@ if (process.argv[3] === '--probe') {
   assert.ok(isolated.skills.some(skill => skill.name === 'unrelated-fixture'));
   for (const observed of [probe(neighbour), probe(project, true)]) {
     assert.deepEqual(observed.diagnostics, []);
-    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 14);
+    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 15);
     assert.ok(observed.skills.some(skill => skill.name === 'unrelated-fixture'));
   }
   assert.deepEqual(await readFile(join(home, 'pi/settings.json')), globalPi, 'User settings remain unchanged');
@@ -104,7 +104,7 @@ if (process.argv[3] === '--probe') {
   const inline = run(claude, ['--plugin-dir', project, 'plugin', 'details', 'isswf']);
   assert.match(inline, /Source: isswf@inline/u);
   assert.match(inline, /Description: isolated-source-fixture/u);
-  assert.match(inline, /Skills \(14\)/u);
+  assert.match(inline, /Skills \(15\)/u);
   assert.deepEqual(await readFile(join(home, 'claude/settings.json')), globalClaude);
   const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'fifteen factory source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
   await writeJSON(join(root, 'source-isolation-report.json'), result);

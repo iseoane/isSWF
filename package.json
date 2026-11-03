@@ -25,6 +25,7 @@
     ".agents/skills/isswf-security",
     ".agents/skills/isswf-performance",
     ".agents/skills/isswf-observability",
+    ".agents/skills/isswf-triage",
     ".claude-plugin",
     ".factory/models.json",
     ".factory/templates",
@@ -57,7 +58,8 @@
       "./.agents/skills/isswf-tdd",
       "./.agents/skills/isswf-security",
       "./.agents/skills/isswf-performance",
-      "./.agents/skills/isswf-observability"
+      "./.agents/skills/isswf-observability",
+      "./.agents/skills/isswf-triage"
     ]
   }
 }
