@@ -12,33 +12,42 @@ const categories = new Set(['input', 'output', 'cacheRead', 'cacheCreation']);
 const sources = new Set(['main', 'subagent', 'auxiliary']);
 const hash = value => createHash('sha256').update(value).digest('hex').slice(0, 24);
 
+function timestamp(value) {
+  if (!(typeof value === 'string' && /^(0|[1-9][0-9]*)$/u.test(value)) && !(Number.isSafeInteger(value) && value >= 0)) throw Error('invalid metric timestamp');
+  const parsed = BigInt(value);
+  if (parsed <= 0n) throw Error('invalid metric timestamp');
+  return parsed.toString();
+}
+
 function countersFrom(payload) {
   if (!payload || !Array.isArray(payload.resourceMetrics) || payload.resourceMetrics.length > 10) throw Error('invalid metrics payload');
   const counters = new Map();
   for (const resource of payload.resourceMetrics) {
     if (!Array.isArray(resource.scopeMetrics) || resource.scopeMetrics.length > 20) throw Error('invalid metrics payload');
+    const resourceIdentity = hash(JSON.stringify(resource.resource?.attributes ?? []));
     for (const scope of resource.scopeMetrics) for (const metric of scope.metrics ?? []) {
       if (metric.name !== 'claude_code.token.usage') continue;
       if (metric.sum?.isMonotonic !== true || metric.sum?.aggregationTemporality !== 2 || !Array.isArray(metric.sum.dataPoints)) throw Error('cumulative metrics required');
       for (const point of metric.sum.dataPoints) {
         const attrs = Object.fromEntries((point.attributes ?? []).filter(item => ['type', 'query_source', 'model'].includes(item.key)).map(item => [item.key, item.value?.stringValue]));
         if (!categories.has(attrs.type) || !sources.has(attrs.query_source)) continue;
+        if (Object.hasOwn(point, 'asInt') === Object.hasOwn(point, 'asDouble')) throw Error('invalid metric counter');
+        const rawValue = Object.hasOwn(point, 'asInt') ? point.asInt : point.asDouble;
+        const value = typeof rawValue === 'string' && /^(0|[1-9][0-9]*)$/u.test(rawValue) ? Number(rawValue) : rawValue;
+        if (typeof rawValue !== 'number' && typeof rawValue !== 'string' || !Number.isSafeInteger(value) || value < 0) throw Error('invalid metric counter');
+        const start = timestamp(point.startTimeUnixNano), end = timestamp(point.timeUnixNano);
+        if (BigInt(end) <= BigInt(start)) throw Error('invalid metric timestamp order');
         const model = typeof attrs.model === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}$/u.test(attrs.model) ? `model-${hash(attrs.model)}` : 'unknown';
-        const rawValue = point.asInt ?? point.asDouble;
-        const value = Number(rawValue);
-        if (!Number.isSafeInteger(value) || value < 0) throw Error('invalid metric counter');
-        const key = `${attrs.query_source}:${model}:${attrs.type}`;
-        const current = counters.get(key);
-        if (current !== undefined && current !== value) throw Error('duplicate metric series');
-        counters.set(key, value);
+        const group = hash(JSON.stringify([resourceIdentity, attrs.query_source, model]));
+        const series = hash(JSON.stringify([group, attrs.type]));
+        const key = `${series}:${attrs.query_source}:${model}:${attrs.type}`;
+        if (counters.has(key)) throw Error('duplicate metric series');
+        counters.set(key, { source: attrs.query_source, model, category: attrs.type, value, series, group, start, end });
       }
     }
   }
   if (counters.size > MAX_ROWS) throw Error('metric row limit exceeded');
-  return [...counters].sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => {
-    const [source, model, category] = key.split(':');
-    return { id: `${source}-${model}-${category}`, source, model, category, value };
-  });
+  return [...counters].sort(([a], [b]) => a.localeCompare(b)).map(([key, row]) => ({ id: key, ...row }));
 }
 
 export async function readConfig(cwd) {
@@ -81,8 +90,13 @@ export { countersFrom };
 
 export function mergeCumulative(previousRows, receivedRows) {
   const next = new Map(previousRows);
+  const seen = new Set();
   for (const row of receivedRows) {
+    if (seen.has(row.id)) throw Error('duplicate metric series');
+    seen.add(row.id);
     const previous = next.get(row.id);
+    if (previous && row.start !== previous.start) throw Error('cumulative metric segment changed; unsupported transition');
+    if (previous && BigInt(row.end) <= BigInt(previous.end)) throw Error('replayed or out-of-order metric export');
     if (previous && row.value < previous.value) throw Error('cumulative metric reset detected');
     next.set(row.id, row);
   }
@@ -180,15 +194,19 @@ async function run() {
   const child = spawn(executable, args, { cwd, env, stdio: 'inherit', shell: false, windowsHide: false });
   let spawnError;
   child.once('error', error => { spawnError = error; });
-  let signalTimer;
+  let signalTimer, forceTimer, cancelled = null, closed = false;
+  const outcomePromise = new Promise(resolveExit => child.once('close', (code, signal) => { closed = true; resolveExit({ code, signal }); }));
   const forwardSignal = signal => {
+    if (cancelled) return;
+    cancelled = signal;
     child.kill(signal);
-    signalTimer ??= setTimeout(() => child.kill(), 3000);
+    signalTimer = setTimeout(() => child.kill('SIGKILL'), 3000);
+    forceTimer = setTimeout(() => { if (!closed) { process.stderr.write('Claude child did not close after bounded cancellation; descendant state is unknown.\\n'); process.exit(1); } }, 6000);
   };
   process.once('SIGINT', forwardSignal);
   process.once('SIGTERM', forwardSignal);
-  const outcome = await new Promise(resolveExit => child.once('close', (code, signal) => resolveExit({ code, signal })));
-  clearTimeout(signalTimer);
+  const outcome = await outcomePromise;
+  clearTimeout(signalTimer); clearTimeout(forceTimer);
   process.removeListener('SIGINT', forwardSignal);
   process.removeListener('SIGTERM', forwardSignal);
   await new Promise(resolveClose => {
@@ -199,8 +217,8 @@ async function run() {
   if (spawnError) throw Error('unable to start Claude executable');
   const outputRows = [...rows.values()];
   if (!rejected && outputRows.length) {
-    const safeRows = outputRows.map(row => ({ id: row.id, source: row.source, model: row.model, category: row.category, value: row.value }));
-    const receipt = { version: 1, host: 'claude', hostVersion, sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', session: hash(id), processExit: outcome.code, signal: outcome.signal, policyStatus: 'managed-policy-not-inspected', counters: safeRows };
+    const safeRows = outputRows.map(row => ({ id: row.id, series: row.series, group: row.group, start: row.start, end: row.end, source: row.source, model: row.model, category: row.category, value: row.value }));
+    const receipt = { version: 1, host: 'claude', hostVersion, sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', session: hash(id), cancellation: cancelled, processExit: outcome.code, signal: outcome.signal, policyStatus: 'managed-policy-not-inspected', counters: safeRows };
     const output = `${JSON.stringify(receipt, null, 2)}\n`;
     try {
       if (Buffer.byteLength(output) > MAX_REPORT) throw Error('Claude metrics report limit exceeded');

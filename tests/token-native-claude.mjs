@@ -1,36 +1,47 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { delimiter, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { conflictingTelemetryEnvironment, countersFrom, mergeCumulative, persistReceipt, readConfig } from '../tools/token-native-claude.mjs';
 import { normalizeClaudeOtel } from '../tools/token-native-summary.mjs';
 import { report } from '../tools/token-report.mjs';
 
-const modelId = `model-${createHash('sha256').update('claude-sonnet-4-6').digest('hex').slice(0, 24)}`;
-const metric = (type, query_source, asInt, extra = []) => ({ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 2, dataPoints: [{ attributes: [{ key: 'type', value: { stringValue: type } }, { key: 'query_source', value: { stringValue: query_source } }, { key: 'model', value: { stringValue: 'claude-sonnet-4-6' } }, ...extra], asInt }] } });
+const metric = (type, query_source, asInt, extra = [], timing = {}) => ({ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 2, dataPoints: [{ attributes: [{ key: 'type', value: { stringValue: type } }, { key: 'query_source', value: { stringValue: query_source } }, { key: 'model', value: { stringValue: 'claude-sonnet-4-6' } }, ...extra], asInt, startTimeUnixNano: timing.start ?? '100', timeUnixNano: timing.end ?? '200' }] } });
 const result = countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', 11, [{ key: 'user.email', value: { stringValue: 'secret@example.test' } }]), metric('output', 'main', 7), metric('cacheRead', 'main', 5), metric('cacheCreation', 'main', 3), metric('input', 'subagent', 99), { name: 'other', sum: {} }] }] }] });
-assert.deepEqual(result.map(({ id, source, model, category, value }) => ({ id, source, model, category, value })), [
-  { id: `main-${modelId}-cacheCreation`, source: 'main', category: 'cacheCreation', value: 3, model: modelId },
-  { id: `main-${modelId}-cacheRead`, source: 'main', category: 'cacheRead', value: 5, model: modelId },
-  { id: `main-${modelId}-input`, source: 'main', category: 'input', value: 11, model: modelId },
-  { id: `main-${modelId}-output`, source: 'main', category: 'output', value: 7, model: modelId },
-  { id: `subagent-${modelId}-input`, source: 'subagent', category: 'input', value: 99, model: modelId },
-]);
+assert.deepEqual(result.map(({ id, source, model, category, value }) => ({ id, source, model, category, value })), result.map(({ id, source, model, category, value }) => ({ id, source, model, category, value })).sort((a, b) => a.id.localeCompare(b.id)));
+assert.deepEqual(new Set(result.map(row => `${row.source}:${row.category}:${row.value}`)), new Set(['main:input:11', 'main:output:7', 'main:cacheRead:5', 'main:cacheCreation:3', 'subagent:input:99']));
 assert.doesNotMatch(JSON.stringify(result), /secret@example|other|claude-sonnet/u);
 const firstSnapshot = mergeCumulative(new Map(), result);
-const repeatedSnapshot = mergeCumulative(firstSnapshot, [{ ...result[0], value: 3 }]);
-assert.equal(repeatedSnapshot.get(result[0].id).value, 3, 'repeated cumulative exports replace rather than add');
-const changedSnapshot = mergeCumulative(repeatedSnapshot, [{ ...result[0], value: 8 }]);
-assert.equal(changedSnapshot.get(result[0].id).value, 8, 'changed cumulative exports keep the latest value');
+const trackedRow = result.find(row => row.category === 'input' && row.source === 'main');
+const repeatedSnapshot = mergeCumulative(firstSnapshot, [{ ...trackedRow, end: '300' }]);
+assert.equal(repeatedSnapshot.get(trackedRow.id).value, 11, 'repeated cumulative exports replace rather than add');
+const changedSnapshot = mergeCumulative(repeatedSnapshot, [{ ...trackedRow, value: 18, end: '400' }]);
+assert.equal(changedSnapshot.get(trackedRow.id).value, 18, 'changed cumulative exports keep the latest value');
 assert.equal(mergeCumulative(changedSnapshot, []).size, changedSnapshot.size, 'missing series does not become a fabricated zero');
-assert.throws(() => mergeCumulative(changedSnapshot, [{ ...result[0], value: 2 }]), /reset detected/u);
-const receipt = { version: 1, host: 'claude', hostVersion: '2.1.312', sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', session: '0123456789abcdef01234567', policyStatus: 'managed-policy-not-inspected', counters: result.slice(0, 4) };
+assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 2, end: '500' }]), /reset detected/u);
+assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 18, end: '400' }]), /replayed or out-of-order/u);
+assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 18, start: '101', end: '500' }]), /segment changed/u);
+assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', false)] }] }] }), /invalid metric counter/u);
+assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', '')] }] }] }), /invalid metric counter/u);
+assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', 1, [], { end: '100' })] }] }] }), /timestamp order/u);
+const canonicalString = metric('input', 'main', '11');
+assert.equal(countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [canonicalString] }] }] })[0].value, 11);
+const ambiguous = metric('input', 'main', 11); ambiguous.sum.dataPoints[0].asDouble = null;
+assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [ambiguous] }] }] }), /invalid metric counter/u);
+const doubleCounter = metric('input', 'main', 11); delete doubleCounter.sum.dataPoints[0].asInt; doubleCounter.sum.dataPoints[0].asDouble = 11;
+assert.equal(countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [doubleCounter] }] }] })[0].value, 11);
+const nullCounter = metric('input', 'main', 11); nullCounter.sum.dataPoints[0].asInt = null; nullCounter.sum.dataPoints[0].asDouble = null;
+assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [nullCounter] }] }] }), /invalid metric counter/u);
+const receipt = { version: 1, host: 'claude', hostVersion: '2.1.312', sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', session: '0123456789abcdef01234567', cancellation: null, policyStatus: 'managed-policy-not-inspected', counters: result.filter(row => row.source === 'main') };
 const metadata = { host: 'claude', hostVersion: '2.1.312', id: 'task', window: 'run', effort: 'unknown', taskClass: 'fixture', candidate: 'current', outcome: 'fixture', accepted: 1 };
 const window = normalizeClaudeOtel({ input: receipt, meta: metadata });
 assert.deepEqual(window.rows[0].counters, { input: 11, output: 7, cacheRead: 5, cacheWrite: 3 });
 assert.equal(window.rows[0].provenance, 'native-claude-otel');
 assert.equal(window.rows[0].scope, 'unattributed');
+const longIdWindow = normalizeClaudeOtel({ input: receipt, meta: { ...metadata, id: 'a'.repeat(128) } });
+assert.match(longIdWindow.rows[0].id, /^claude-[a-f0-9]{24}$/u);
 const rendered = report(window);
 assert.equal(rendered.totals.processed, 26);
 assert.equal(rendered.collectionPolicy, 'managed-policy-not-inspected; local-only export is unverified');
@@ -39,7 +50,7 @@ assert.doesNotMatch(JSON.stringify(window), /secret|claude-sonnet|user.email/u);
 const partialReceipt = { ...receipt, counters: receipt.counters.slice(0, 2) };
 const partialWindow = normalizeClaudeOtel({ input: partialReceipt, meta: metadata });
 assert.equal(report(partialWindow).totals.processed, null);
-assert.equal(report(partialWindow).totals.processedSubtotal, 8);
+assert.equal(report(partialWindow).totals.processedSubtotal, 12);
 assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', -1)] }] }] }));
 assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [{ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 1, dataPoints: [] } }] }] }] }));
 assert.deepEqual(conflictingTelemetryEnvironment({ PATH: '/bin', OTEL_EXPORTER_OTLP_ENDPOINT: 'ignored', CLAUDE_CODE_USE_MANAGED_SETTINGS_ONLY: '1' }).sort(), ['CLAUDE_CODE_USE_MANAGED_SETTINGS_ONLY', 'OTEL_EXPORTER_OTLP_ENDPOINT']);
@@ -70,6 +81,17 @@ try {
   await writeFile(staleClaim, 'existing claim', { flag: 'wx' });
   await assert.rejects(persistReceipt({ base: state, destination: receiptDirectory }, `${JSON.stringify({ ...storedReceipt, session: 'abcdef0123456789abcdef01' })}\n`), { code: 'EEXIST' });
   assert.equal(await readFile(staleClaim, 'utf8'), 'existing claim', 'stale claim is never removed');
+  await writeFile(configPath, JSON.stringify({ version: 1, enabled: false }));
+  const bin = join(project, 'bin'); await mkdir(bin);
+  const fakeClaude = join(bin, 'claude');
+  await writeFile(fakeClaude, `#!/usr/bin/env node\nprocess.stdout.write(JSON.stringify({args: process.argv.slice(2)}) + String.fromCharCode(10)); process.stdin.pipe(process.stdout);\n`);
+  await chmod(fakeClaude, 0o700);
+  const entry = fileURLToPath(new URL('../tools/token-native-claude.mjs', import.meta.url));
+  const launch = execFileSync(process.execPath, [entry, '--', '--model', 'preserve-me'], { cwd: project, env: { ...process.env, PATH: `${bin}${delimiter}${process.env.PATH}` }, input: 'stdin-preserved', encoding: 'utf8', timeout: 5000 });
+  assert.ok(launch.includes('"args":["--model","preserve-me"]'));
+  assert.match(launch, /stdin-preserved/u);
+  assert.equal(await readFile(configPath, 'utf8'), JSON.stringify({ version: 1, enabled: false }));
+  assert.equal(await import('node:fs/promises').then(({ access }) => access(join(state, 'claude-native-usage'))).then(() => true, () => false), false, 'disabled launch creates no receiver destination or receipt');
   await mkdir(join(project, '.factory'));
   assert.equal((await readConfig(project)).enabled, false, 'ambiguous state roots fail closed');
 } finally { await rm(project, { recursive: true, force: true }); }
