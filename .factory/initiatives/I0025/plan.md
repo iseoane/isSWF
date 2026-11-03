@@ -221,12 +221,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J005
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
-- Blocker: V003 Standards/source-Spec PASS for B1–B3 on448a6ae; V002 fail on8877475 retained. Coordinator A005 now verifies actual Pi/subagents integrated nonzero automatic capture AND genuine native completion in isolated Linux RPC. Reviewer native INCONCLUSIVE remains its historical observation. Draft PR151 published/readback verified at161408664b3f137ffc3657465248695f793bd8ac, basefeat/i0025-claude-metrics. CI41589977520 Ubuntu discovery SUCCESS, portable and Windows IN_PROGRESS at observation. Operator acceptance/integration remain separate; Windows real metric journeys deferred.
-- Next step: Observe remaining exact-head PR151 checks through native event or one bounded deferred read; no active polling/model calls just to wait. Current CI pending is technical, not a human-approval blocker. No merge or current-session activation. Continue J006 local grounding under separate allowance; no additional J005 engineering actors.
+- Blocker: V003 Standards/source-Spec PASS for B1–B3 on448a6ae; V002 fail on8877475 retained. Coordinator A005 now verifies actual Pi/subagents integrated nonzero automatic capture AND genuine native completion in isolated Linux RPC. Reviewer native INCONCLUSIVE remains its historical observation. Draft PR151 latest published/readback verified headad5042adf66f22e9553087ace2195c479832b584, basefeat/i0025-claude-metrics. All three exact-head CI41590159558 checks SUCCESS; receipt-only successor to source448a6ae. Operator acceptance/integration remain separate; Windows real metric journeys deferred.
+- Next step: Operator integration/product-acceptance decision for draftPR151 exactad5042a remains separate; no merge or current-session activation. Continue explicitly requested J006 under separate allowance; no additional J005 engineering actors.
 
 ### Acceptance
 
@@ -257,12 +257,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
-- Brief: [brief-r2.md](jobs/J006/brief-r2.md)
-- Blocker: Installed2.1.312 isolated process-local startup metrics export now observed, but token/subagent/reset/flush behavior and managed policy precedence remain unproved. Repository settings cannot activate telemetry by official contract. Existing result converter cannot silently consume OTLP. No J006 actor dispatched; first J005 review failed at Codex usage limit, without verdict.
-- Next step: Prove isolated installed-Claude metrics-only activation and source scope without real providers; then pin the smallest supported setup/launch/consumer design before writer. Current explicit continuation covers local grounding, not provider substitution/retries/global activation. Real Windows tests deferred.
+- Brief: [brief-r3.md](jobs/J006/brief-r3.md)
+- Blocker: Native process-local token transport now proven on installed2.1.312 with synthetic loopback usage, but automatic helper/setup/consumer not implemented. Individual-agent attribution and managed-policy constraints must remain honest; no repo-settings activation shortcut.
+- Next step: Current operator explicitly requests completing Claude. Dispatch first reserved worker<=40min under r3 to deliver setup-selected foreground native launch, metrics-only loopback acquisition and deterministic consumer; then independent combined review under existing finite J006 allowance. No global activation/installation/provider experiments. Windows real tests deferred.
 
 ### Acceptance
 
@@ -276,4 +276,5 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Current explicit operator start selects this next functional unit after Pi; preparation is not dispatch.
 - jobs/J006/brief-r1.md (original acquisition goal retained); jobs/J006/brief-r2.md (current setup scope, current explicit start and reserved1worker40min/1correction15min/up to2reviews15min sequential allowance).
 - J003/J004 establish bounded source converters, not installed-Claude acquisition or complete native platform acceptance.
-- Coordinator continuation: installedClaude2.1.312 version/help and current official monitoring/cost/headless sources examined. Ignored tooling/.local/i0025-claude-feasibility/metrics-startup.mjs plus receipt.json retain native startup probe: initialize true,8loopbackexports/8704bytes of session.count, no malformedpayloads, cleanexit0. One nonmetricsloopbackrequest rejected503, no prompts or real credential/provider. Native token/subagent/reset/flush/policy and Windows evidence still missing; not implemented or accepted.
+- Coordinator continuation: installedClaude2.1.312 version/help and current official monitoring/cost/headless sources examined. Ignored tooling/.local/i0025-claude-feasibility/metrics-startup.mjs plus receipt.json retain native startup probe: initialize true,8loopbackexports/8704bytes of session.count, no malformedpayloads, cleanexit0. One nonmetricsloopbackrequest rejected503, no prompts or real credential/provider. Native token/subagent/reset/flush/policy and Windows evidence still missing at that startup observation; not implemented or accepted.
+- Coordinator later `metrics-tokens.mjs` native probe PASS installedClaude2.1.312: one synthetic loopback Messages response, exported input11/output7/cacheRead5/cacheCreation3 under query_sourcemain, cleanexit0. Ignored numeric tokens-receipt.json retained; no rawattributes/output/auth. This proves token transport/finalexport, not children/resets/policy/Windows. r3 selects smallest supported foreground launch/receiver plus existing consumer, no daemon/globaltelemetry or manualJSON fallback. Branchfeat/i0025-auto-claude-capture basead5042a; no J006 actor dispatched before r3 checkpoint.
