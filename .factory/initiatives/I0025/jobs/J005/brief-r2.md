@@ -27,3 +27,9 @@ Selected observability and focused tests/writing, no TDD/RED claim. Five quality
 ## Incremental current grant and accounting
 
 The previous initial attempt is **spent and retained**, not reset. Under the operator's new explicit implementation/start instruction: one same-context author continuation<=30min for Pi+setup, one actual source correction<=15min if needed, up to2 independent reviews<=15min each. Sequential1child; zero nested/retries/replacements/model substitution/additional paid API costs. Requested approved worker `openai-codex/gpt-6-luna` high, reviewer `openai-codex/gpt-6.1-sol` medium. Host resume eligibility remains authoritative; refusal blocks, no silent replacement. Claude is next sequential J006 and needs its own finite dispatch boundary; no overlap or reuse of spent calls. This is a finite explicit continuation, not an automatic recovery loop.
+
+## Review reconciliation and pending allowance decision
+
+Independent V002 on source `8877475ca0e4a1c3852dd5d44e80841d8ceac11c` reports Standards/source-Spec fail: incorrect setup extension-path base (B1), changed observations discarded by event-key-only deduplication (B2), and uncoordinated read–modify–rename sink writes (B3). Native installed-subagents proof remains unestablished. The original correction and both review calls are spent; the first review failed at quota without a verdict, and the operator explicitly restored quota before V002. Quota is no longer the blocker.
+
+State: **awaiting-human** for a finite budget extension, not a product-design question. Proposed next allowance: one worker<=30min addressing B1–B3 plus missing native proof, followed by one independent affected-delta reviewer<=15min, sequential with the same approved models and no automatic additional correction/retry. Resume condition: explicit operator approval of that allowance. Preserve existing attempts/verdicts and exclusions; do not start a replacement or borrow J006's separate allowance.

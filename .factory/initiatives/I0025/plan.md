@@ -221,12 +221,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J005
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
-- Blocker: Corrected source8877475 has isolated actual Pi persisted-settings/session-start/settled evidence, but uses a synthetic cost responder, not installed subagents0.83 RPC or actual completion emitter. Full native acceptance remains partial. Claude J006 not started; source correction allowance spent.
-- Next step: First review f44a7acb failed terminally before producing a verdict: Codex usage limit reached. Review remains unavailable, not PASS or source rejection. No automatic retry/model substitution; second review allowance unused, not authority to bypass unavailable provider. Continue independent local J006 grounding under current operator continuation. Native Pi completion proof and required review still block J005 closure; Windows real tests deferred.
+- Blocker: V002 Standards fail, Spec/source fail on8877475: B1 incorrect setup extension path base; B2 event-key dedup discards changed same-boundary counters/coverage; B3 unlocked replacement can lose competing writes or clobber newly created unrelated files. Native installed-subagents proof remains missing. Existing J005 correction and both review calls spent; quota restored by operator, not a current blocker.
+- Next step: Await operator decision on finite additional J005 allowance: one worker<=30min for B1–B3 and missing native proof, plus one independent affected-delta review<=15min, sequential same approved models, no automatic additional correction/retry. Resume only on that explicit budget extension; preserve prior failures and spent calls. J006 local grounding can proceed independently under existing scope; Windows real tests deferred.
 
 ### Acceptance
 
@@ -247,7 +247,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J005/brief-r2.md: preserves A001/r1, resolves canonical plan path and chunked-doc procedure, adds setup/source scope and current incremental budget1same-context continuation30min+1source correction15min+up to2reviews15min, no replacement/reset.
 - jobs/J005/A002.md: retained actual worker report from native run f82fb6cc-6306-41de-8fd9-52afd3a51723, terminal complete observed on resumption. Source ee57ab3 partial; no actual native hook test or verified persisted activation. Current operator start resumes the assignment, not the ceased author context. A001 and continuation remain spent.
 - jobs/J005/A003.md: correction context8f25124b continued as287b785d within same15min allowance; terminal complete observed. Fixed actual Pi stale UI-context shutdown race in8877475ca0e4a1c3852dd5d44e80841d8ceac11c. Worker native persisted-settings and actual settled-hook probes PASS with synthetic RPC/provider, no real provider or installed-subagents evidence. Added failure/lifecycle fixtures; coordinator focused auto/native suites PASS. Fullquality/lint/Knip/docs PASS self-reported. Initial fixture timing failure retained. Correction spent, two review allowances initially remain.
-- First independent review f44a7acb-762c-4661-b811-ac81129e10ca: terminal failed/process terminal observed, approved sol/medium, provider error `The usage limit has been reached`; no Standards/Spec verdict or retained review report. Candidate remains8877475; no retry/substitution or review acceptance inferred.
+- First independent review f44a7acb-762c-4661-b811-ac81129e10ca: terminal failed/process terminal observed, approved sol/medium, provider error `The usage limit has been reached`; no Standards/Spec verdict or retained review report. Candidate remains8877475; no review acceptance inferred.
+- jobs/J005/V002.md: operator explicitly clarified restored quota and requested continuation; second reserved review acf82146-1650-4d80-980a-f222fae68898 terminal complete observed. Bound exactdiff80222bytes verified; Standards fail, Spec/source fail, native inconclusive. B1–B3 retained. Coordinator supplied mechanical equality attestations for pinned documents/source context; reviewer read them without execution tools. Both review calls now spent; no ungranted writer or review replacement.
 
 ## J006
 
