@@ -16,7 +16,14 @@ Limited budget or access does not waive required methodology or authorize anothe
 
 ## Project review guide
 
-When the target repository root contains `REVIEW.md`, read it before reviewing. Its code owners use it to state what failure looks like in that project, paths to skip, a cap on minor findings, paths that always need a person, and any extra evidence format. Apply it as project-specific review standards. It narrows or sharpens this guide; it never grants authority, waives a required check or methodology, or overrides the accepted brief. A missing `REVIEW.md` is not a limitation. When the same finding recurs across reviews, recommend moving it into `REVIEW.md`, a check or a lint rule rather than repeating it.
+Before reviewing, check whether the target repository root contains `REVIEW.md`. Its code owners use it to state what failure looks like in that project, paths to skip, a cap on minor findings, paths that always need a person, and extra evidence requirements.
+
+- **Present and readable:** apply it under Standards as project review standards and record its path and revision. It sharpens this guide; it cannot grant authority, waive a required check or methodology, or override the accepted brief.
+- **Absent:** continue with this guide. Absence is not a limitation.
+- **Present but unreadable:** record it as a missing required resource and follow the [required methodology](#required-methodology) outcome.
+- **Candidate touches a path it lists as always needing a person:** state under Limits that integration requires that person's approval. A review verdict never substitutes for it.
+
+When the same finding recurs across reviews of one project, recommend moving it into `REVIEW.md`, a check or a lint rule.
 
 ## Choose sufficient verification
 
@@ -34,7 +41,11 @@ For each changed candidate, compare its delta with the exact prior candidate and
 
 ### Converge across review rounds
 
-A review round is one review of one candidate in the same job. After the first two full rounds, review only the delta from the last reviewed candidate and the consumers it affects; earlier unchanged scope keeps its recorded result. Never re-report a finding already reported in an earlier round: cite it by its earlier identity and state whether it is now resolved, still open or changed. After the third round that still has blocking findings, stop requesting corrections and return to the coordinator with a recommendation to reconsider the approach; the coordinator decides with the operator. This cap never renews a spent correction budget.
+A review round is one review of one candidate within the same job. The coordinator supplies the round number and the prior review IDs in the brief. If they are missing, state that and review the candidate in full as round 1.
+
+From round 2, scope the review to the delta as described above. Do not report a finding again: cite its earlier ID and record whether it is resolved, still open or changed.
+
+When round 3 or later still reports a blocking finding, the reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks the operator before dispatching more corrections. This cap never renews a spent correction budget.
 
 Stop when the scoped criteria are covered and required checks pass. Record limitations outside that scope without turning them into new acceptance criteria. A genuine uncovered risk or changed acceptance requires an explicit revised scope; it does not justify identical model retries. Preserve prior verdicts when correcting an overbroad review requirement, and record the new decision rather than relabeling an inconclusive report as pass.
 
@@ -104,9 +115,13 @@ Use safe checks named by the brief or already documented by the project. A faile
 
 ## Findings and outcome
 
-Each finding names the exact path and line range, the concrete condition and supporting evidence, its impact, confidence, and a recommended action. Distinguish observed facts from inferences. Use functional severities `blocking`, `suggestion`, or `information`. Mark each finding `introduced` when the candidate causes it, or `pre-existing` when it already reproduces at the base. A pre-existing finding never blocks the candidate; report it as a follow-up so its author is not held responsible for inherited defects. Use `unknown origin` only when a bounded check cannot tell, and name that check.
+Each finding names the exact path and line range, the concrete condition and supporting evidence, its impact, confidence, and a recommended action. Distinguish observed facts from inferences. Use functional severities `blocking`, `suggestion`, or `information`. Mark each finding with its origin:
 
-When a finding is an instance of a defect class, such as a repeated path comparison, unchecked return value or platform assumption, search the candidate and its affected consumers for other instances. Report the class once with every instance found and the search used, so one correction fixes all of them rather than one line per round.
+- `introduced`: the candidate causes it, or makes an existing defect reachable or worse.
+- `pre-existing`: it reproduces unchanged at the base. It never blocks the candidate; report it as a follow-up.
+- `unknown origin`: a bounded check cannot tell. Name the check that would decide it.
+
+When a finding is an instance of a defect class, such as a repeated path comparison, an unchecked return value or a platform assumption, search the candidate and its affected consumers for other instances. Report the class once, listing every instance with its origin and the search used, so one correction covers all of them.
 
 Order findings by material impact, with correctness and security failures before structural regressions and optional polish. Prefer a few well-supported findings to speculative volume. Group comments that share one cause and remedy. Confidence is the strength of the evidence, not a substitute for impact; an unconfirmed suspicion calls for a discriminating check, not an asserted defect. Keep stylistic preferences optional unless a project standard makes them required. A review need not invent praise, nits or findings to fill a template.
 

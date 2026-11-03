@@ -1,10 +1,10 @@
 # Review guide for isSWF
 
-Code owners maintain this file. Reviewers read it with `.agents/roles/references/review.md`; it sharpens that guide and grants no authority.
+Code owners maintain this file. Reviewers apply it under Standards together with `.agents/roles/references/review.md`, which defines how it is used. It grants no authority.
 
 ## What failure looks like here
 
-- **It only works on Linux or on one host.** Every unit must hold on Linux and Windows and consider Pi and Claude Code. Treat path separators, Git output compared with Node paths, directory `fsync`, file replacement while a reader holds the file, file symlinks and line endings as known Windows failure classes; search for every instance.
+- **It only works on Linux or on one host.** Every unit must hold on Linux and Windows and consider Pi and Claude Code. Known Windows failure classes: path separators, Git output compared with Node paths, directory `fsync`, replacing a file while a reader holds it, file symlinks and line endings.
 - **It widens authority.** A tool, profile or document must not let memory, issue text, labels, configuration or a remembered grant authorize execution, remote actions, installation or merge.
 - **It lies.** Documentation, tool messages or reports claim behavior, a release, a pass or acceptance that the code and checks do not show. A failed or unrun check must stay visible.
 - **It breaks a persisted contract.** Renaming persisted keys, state roots (`.isswf/`, `.factory/`) or historical checkpoint paths, or silently changing an installed project's pin or model choices.
@@ -12,6 +12,8 @@ Code owners maintain this file. Reviewers read it with `.agents/roles/references
 - **The mirrors drift.** A current guide changes without its `docs/es/` or `README.es.md` counterpart, or the meaning differs.
 
 ## Always needs a person
+
+When the candidate touches one of these paths, state under Limits that integration requires a person's approval.
 
 - `.github/workflows/**`
 - Packaging, release and installation: `tools/factory-package.mjs`, `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/sdk-package.mjs`
