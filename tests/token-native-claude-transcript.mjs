@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { encodeProject, ISSUE_URL, parseArgs, parseTranscript, readSession } from '../tools/token-native-claude-transcript.mjs';
+import { encodeProject, ISSUE_URL, LIMITS, parseArgs, parseTranscript, readSession } from '../tools/token-native-claude-transcript.mjs';
 import { report } from '../tools/token-report.mjs';
 
 const tool = fileURLToPath(new URL('../tools/token-native-claude-transcript.mjs', import.meta.url));
@@ -29,6 +29,8 @@ for (const [bad, check] of [[[assistant('r1', usage(1, 1, 1, 1)), assistant('r1'
   assert.throws(() => parseTranscript(bad.join('\n')), error => error.message === check && !error.message.includes(SECRET));
 }
 assert.throws(() => parseTranscript('x'.repeat(4 * 1024 * 1024 + 1) + '\n'), /line-size-limit/u);
+assert.throws(() => parseTranscript('é'.repeat(2 * 1024 * 1024 + 1) + '\n'), /line-size-limit/u, 'line limit is measured in bytes');
+assert.throws(() => parseTranscript([user, user, ''].join('\n'), { entries: 0, maxEntries: 1 }), /entry-limit/u);
 
 const root = await mkdtemp(join(tmpdir(), 'isswf-transcript-'));
 try {
@@ -72,6 +74,26 @@ try {
   await writeFile(join(sub, 'agent-bbb.jsonl'), assistant('b1', usage(1, 1, 1, 1)) + '\n');
   const clean = await readSession({ claudeDir, project, session: SESSION });
   assert.equal(clean.coverage.recommendation, undefined);
+  assert.equal(report(clean.summary).totals.attribution, 'partial');
+  assert.equal(report(clean.summary).totals.totalStatus, 'complete');
+  assert.ok(rendered.totals && coverage.recommendation.includes('2.1.312') && coverage.recommendation.includes('isswf-issue'));
+
+  // Size, entry and subagent limits.
+  const limited = async (overrides) => readSession({ claudeDir, project, limits: { ...LIMITS, ...overrides } });
+  const fileLimit = await limited({ file: 10 });
+  assert.ok(fileLimit.coverage.invalid.every(item => item.check === 'file-size-limit') && fileLimit.coverage.filesInvalid === 3);
+  assert.equal(fileLimit.coverage.recommendation, undefined, 'size limits are not a format issue');
+  const totalLimit = await limited({ total: 400 });
+  assert.ok(totalLimit.coverage.invalid.some(item => item.check === 'total-size-limit'));
+  const entryLimit = await limited({ entries: 2 });
+  assert.ok(entryLimit.coverage.invalid.some(item => item.check === 'entry-limit'));
+  await assert.rejects(limited({ subagents: 1 }), /subagent limit exceeded/u);
+
+  // Cross-file conflicting counters for one requestId invalidate the later file.
+  await writeFile(join(sub, 'agent-bbb.jsonl'), assistant('p1', usage(99, 2, 100, 5)) + '\n');
+  const conflict = await readSession({ claudeDir, project });
+  assert.deepEqual(conflict.coverage.invalid, [{ row: conflict.summary.rows.find(row => row.counters.input === null).id, check: 'cross-file-conflicting-request' }]);
+  assert.ok(conflict.coverage.recommendation.includes(ISSUE_URL));
   assert.equal(report(clean.summary).totals.processed, 13 + 6 + 100 + 5 + 7 + 1 + 50 + 2 + 4);
 
   // Unknown version is reported with an issue recommendation, counters still produced.
@@ -81,10 +103,24 @@ try {
   assert.ok(unknown.coverage.recommendation.includes(ISSUE_URL));
 
   await assert.rejects(readSession({ claudeDir, project, session: '../x' }), /invalid session id/u);
+  await assert.rejects(readSession({ claudeDir, project, session: '99999999-2222-4333-8444-555555555555' }), /Claude session transcript not found/u);
+  await assert.rejects(readSession({ claudeDir, project: join(root, 'other'), session: SESSION }), /Claude session transcript not found/u);
+  const empty = join(root, 'claude', 'projects', encodeProject(join(root, 'empty')));
+  await mkdir(empty, { recursive: true });
+  await assert.rejects(readSession({ claudeDir, project: join(root, 'empty') }), /no Claude session transcript for project/u, 'latest-session selection fails without transcripts');
+  // Version recorded from an invalid parent file.
+  const lone = join(root, 'lone');
+  const loneDir = join(root, 'claude', 'projects', encodeProject(lone));
+  await mkdir(loneDir, { recursive: true });
+  await writeFile(join(loneDir, `${SESSION}.jsonl`), [JSON.stringify({ type: 'user', version: '2.1.400' }), '{bad', user, ''].join('\n'));
+  const loneResult = await readSession({ claudeDir, project: lone });
+  assert.deepEqual(loneResult.coverage.versions, ['2.1.400']);
+  assert.ok(loneResult.coverage.recommendation.includes('2.1.400'));
   await assert.rejects(readSession({ claudeDir, project: join(root, 'none') }), /no Claude session transcript for project/u);
 
   // CLI: summary on stdout, counts-only coverage on stderr, fixed messages on error.
-  const out = execFileSync(process.execPath, [tool, '--claude-dir', claudeDir, '--project', project], { encoding: 'utf8' });
+  const out = execFileSync(process.execPath, [tool, '--claude-dir', claudeDir, '--project', project], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  assert.throws(() => execFileSync(process.execPath, [tool, '--claude-dir', claudeDir, '--project', project, '--session', '99999999-2222-4333-8444-555555555555'], { stdio: 'pipe' }), error => error.status === 1 && String(error.stderr).trim() === 'Claude session transcript not found');
   assert.equal(JSON.parse(out).mode, 'window');
   assert.throws(() => execFileSync(process.execPath, [tool, '--claude-dir', claudeDir, '--project', project, '--session', 'nope'], { stdio: 'pipe' }), error => String(error.stderr).trim() === 'invalid session id');
 } finally {
