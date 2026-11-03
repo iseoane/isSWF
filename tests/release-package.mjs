@@ -78,7 +78,8 @@ try {
   // The Claude evidence server and everything it launches or imports ship with the release (build-release includes every top-level tools/*.mjs; this fixture keeps pi.subagents).
   const plugin = await readJSON(join(releaseA, '.claude-plugin/plugin.json'));
   const serverPath = plugin.mcpServers.isswf_git_evidence.args[0].replace('${CLAUDE_PLUGIN_ROOT}', releaseA);
-  assert.equal(serverPath, join(releaseA, 'tools/git-evidence-mcp.mjs'));
+  // plugin.json keeps a portable '/' path after ${CLAUDE_PLUGIN_ROOT}; compare it as a native path.
+  assert.equal(resolve(serverPath), join(releaseA, 'tools/git-evidence-mcp.mjs'));
   for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.deepEqual(await readFile(join(releaseA, 'tools', name)), await readFile(join(source, 'tools', name)), `${name} ships in the release`);
   assert.equal(rootManifest.version, plugin.version);
   assert.equal(await readdir(releaseA).then(entries => entries.includes('.git')), false);
