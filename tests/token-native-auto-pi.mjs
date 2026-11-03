@@ -191,6 +191,32 @@ try {
   await assert.rejects(readFile(conflictPath), { code: 'ENOENT' }, 'a conflicted transaction cannot create or clobber capture data');
   assert.equal(await readFile(lockPath, 'utf8'), competingClaim, 'a competing or stale claim is never automatically deleted');
 
+  const interleaveRoot = join(root, 'interleave');
+  await mkdir(join(interleaveRoot, '.factory'), { recursive: true });
+  await writeFile(join(interleaveRoot, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'native-usage' }));
+  const interleaveStatuses = [];
+  const interleaveCtx = { ...ctx(['entry']), cwd: interleaveRoot, ui: { setStatus(_key, value) { interleaveStatuses.push(value); } } };
+  const writerA = makeHost(), writerB = makeHost();
+  (await import(extensionPath)).default(writerA.pi);
+  (await import(extensionPath)).default(writerB.pi);
+  await Promise.all([
+    writerA.handlers.get('session_start')({ reason: 'startup' }, interleaveCtx),
+    writerB.handlers.get('session_start')({ reason: 'startup' }, interleaveCtx),
+  ]);
+  const interleaveKey = createHash('sha256').update('test-session').digest('hex').slice(0, 24);
+  const interleavePath = join(interleaveRoot, `.factory/native-usage/${interleaveKey}.json`);
+  await waitFile(interleavePath);
+  writerA.emitCompletion('run-a');
+  writerB.emitCompletion('run-b');
+  await waitUntil(async () => {
+    const state = JSON.parse(await readFile(interleavePath, 'utf8'));
+    return state.records.some(record => record.event === 'async-complete') || interleaveStatuses.includes('Automatic usage capture failed');
+  }, 'interleaved writers either serialize or expose a fail-closed conflict');
+  await new Promise(resolve => setTimeout(resolve, 25));
+  const interleaved = JSON.parse(await readFile(interleavePath, 'utf8'));
+  const asyncRecords = interleaved.records.filter(record => record.event === 'async-complete');
+  assert.ok(asyncRecords.length === 2 || (asyncRecords.length === 1 && interleaveStatuses.includes('Automatic usage capture failed')), 'interleaved writers never silently clobber a competing snapshot');
+
   const overflowRoot = join(root, 'overflow');
   await mkdir(join(overflowRoot, '.factory'), { recursive: true });
   await writeFile(join(overflowRoot, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'native-usage' }));
