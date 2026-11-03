@@ -4,6 +4,8 @@
 
 **Stopped: operator rejects indefinite patch/review cycles; the proposed allowance is not approved.** Existing operator objective remains automatic Claude numeric acquisition through setup-selected ordinary launch, no copied counters/results, no model calls to collect metrics. This revision records a wrong technical assumption and a technical proposal, not execution permission. The prior proposed worker20min/reviewer10min extension is superseded by the stop: do not dispatch it or ask routinely for another cycle. All earlier actors, failures and incidents remain retained. Before any new implementation, establish a bounded technical outcome and explicit stopping criteria; resumption requires a new explicit instruction, not this document.
 
+Current operator instruction now authorizes **researcher-first investigation and design**, not this implementation proposal. Follow [research-brief-r1.md](research-brief-r1.md): one read-only researcher<=20min, then coordinator design reconciliation against actual code and official primary sources. Treat the per-series proposal below as a hypothesis to challenge, not an approved design. No writer/reviewer, runtime experiment, installation or new patch loop is selected by this research start.
+
 Trusted factory root/exclusive checkout `/home/iseoane/Work/isSWF`, branch `feat/i0025-auto-claude-capture`. Current source candidate `cafe6859159d576c1950b225b2e02e92985228fa`. A dispatch must supply the new full document checkpoint separately from this runtime candidate. No active author/reviewer remains.
 
 ## Evidence that changes the technical plan
