@@ -11,6 +11,7 @@
     "tools/git-evidence-pi-extension.mjs",
     "tools/token-native-pi.mjs",
     "tools/token-native-claude.mjs",
+    "tools/token-native-claude-transcript.mjs",
     "tools/git-evidence-mcp.mjs",
     "tools/worker-lifecycle.mjs",
     "tools/factory-package.mjs",
