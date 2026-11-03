@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
+import { link, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 const REQUEST = 'subagents:rpc:v1:request';
@@ -135,32 +135,49 @@ async function ensureCaptureDirectory(destination, cwd, stateRoot) {
 async function writeAutoSnapshot(destination, receipt, key, event, cwd, stateRoot) {
   await ensureCaptureDirectory(destination, cwd, stateRoot);
   const path = resolve(destination, `${receipt.session}.json`);
-  let state;
+  const lock = `${path}.lock`;
+  const claim = await open(lock, 'wx', 0o600);
   try {
-    const info = await lstat(path);
-    if (!info.isFile() || info.isSymbolicLink() || info.size > MAX_RECEIPT) throw Error('capture storage limit exceeded');
-    state = JSON.parse(await readFile(path, 'utf8'));
-    if (state?.version !== 1 || state.owner !== 'isswf/pi-native-capture-v1' || state.session !== receipt.session || !Array.isArray(state.records) || state.records.length > MAX_AUTO_ROWS) throw Error('invalid existing capture');
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-    state = { version: 1, owner: 'isswf/pi-native-capture-v1', session: receipt.session, baseline: receipt, latest: receipt, records: [] };
+    let state;
+    let existed = true;
+    try {
+      const info = await lstat(path);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > MAX_RECEIPT) throw Error('capture storage limit exceeded');
+      state = JSON.parse(await readFile(path, 'utf8'));
+      if (state?.version !== 1 || state.owner !== 'isswf/pi-native-capture-v1' || state.session !== receipt.session || !Array.isArray(state.records) || state.records.length > MAX_AUTO_ROWS) throw Error('invalid existing capture');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      existed = false;
+      state = { version: 1, owner: 'isswf/pi-native-capture-v1', session: receipt.session, baseline: receipt, latest: receipt, records: [] };
+    }
+    const index = state.records.findIndex(record => record.key === key);
+    if (index >= 0 && JSON.stringify(state.records[index].snapshot) === JSON.stringify(receipt)) return false;
+    if (index < 0 && state.records.length >= MAX_AUTO_ROWS) throw Error('capture record limit exceeded');
+    const records = [...state.records];
+    const record = { key, event, snapshot: receipt };
+    if (index >= 0) records[index] = record;
+    else records.push(record);
+    const next = { version: 1, owner: 'isswf/pi-native-capture-v1', session: receipt.session, baseline: state.baseline, latest: receipt, records };
+    const body = `${JSON.stringify(next)}\n`;
+    if (Buffer.byteLength(body) > MAX_RECEIPT) throw Error('capture storage limit exceeded');
+    const temporary = `${path}.${randomUUID()}.tmp`;
+    try {
+      const handle = await open(temporary, 'wx', 0o600);
+      try { await handle.writeFile(body, 'utf8'); } finally { await handle.close(); }
+      if (existed) await rename(temporary, path);
+      else {
+        await link(temporary, path);
+        await unlink(temporary);
+      }
+    } catch (error) {
+      try { await unlink(temporary); } catch {}
+      throw error;
+    }
+    return true;
+  } finally {
+    await claim.close();
+    await unlink(lock);
   }
-  if (state.records.some(record => record.key === key)) return false;
-  if (state.records.length >= MAX_AUTO_ROWS) throw Error('capture record limit exceeded');
-  const record = { key, event, snapshot: receipt };
-  const next = { version: 1, owner: 'isswf/pi-native-capture-v1', session: receipt.session, baseline: state.baseline, latest: receipt, records: [...state.records, record] };
-  const body = `${JSON.stringify(next)}\n`;
-  if (Buffer.byteLength(body) > MAX_RECEIPT) throw Error('capture storage limit exceeded');
-  const temporary = `${path}.${randomUUID()}.tmp`;
-  try {
-    const handle = await open(temporary, 'wx', 0o600);
-    try { await handle.writeFile(body, 'utf8'); } finally { await handle.close(); }
-    await rename(temporary, path);
-  } catch (error) {
-    try { await unlink(temporary); } catch {}
-    throw error;
-  }
-  return true;
 }
 
 export default function tokenNativePi(pi) {

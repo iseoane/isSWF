@@ -32,7 +32,7 @@ try {
   const ctx = branch => ({ cwd: root, sessionManager: { getSessionId: () => 'test-session', getBranch: () => branch.map(id => ({ id })) }, ui: { setStatus() {} } });
   const waitUntil = async (predicate, message) => {
     for (let index = 0; index < 1000; index++) {
-      if (predicate()) return;
+      if (await predicate()) return;
       await new Promise(resolve => setTimeout(resolve, 5));
     }
     throw Error(message);
@@ -93,7 +93,23 @@ try {
   const repeatedBranch = ctx(['entry-a', 'entry-b']);
   await enabled.handlers.get('agent_settled')({}, repeatedBranch);
   await new Promise(resolve => setImmediate(resolve));
-  assert.equal(JSON.parse(await readFile(path, 'utf8')).records.length, 3, 'unchanged settled branch snapshots are deduplicated');
+  const unchanged = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(unchanged.records.length, 3, 'unchanged settled branch snapshots are deduplicated');
+  const changedCost = { version: 1, parent: { input: 17, output: 5, cacheRead: 8, cacheWrite: 9 }, children: [{ runId: 'child-private', usage: { input: 4, output: 3, cacheRead: 2, cacheWrite: 1 } }], unresolvedAsyncChildren: 1 };
+  enabled.setCost(changedCost);
+  await enabled.handlers.get('agent_settled')({}, repeatedBranch);
+  await waitUntil(async () => JSON.parse(await readFile(path, 'utf8')).latest.rows[0].counters.input === 17, 'changed same-branch counters refresh latest');
+  let changed = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(changed.baseline.rows[0].counters.input, 1, 'changed settlement never replaces the first baseline');
+  assert.equal(changed.latest.rows[0].counters.input, 17, 'same-boundary changed counters refresh the latest snapshot');
+  assert.equal(changed.latest.unresolvedAsyncChildren, 1, 'incomplete child coverage remains visible');
+  enabled.setCost({ ...changedCost, unresolvedAsyncChildren: 0 });
+  await enabled.handlers.get('agent_settled')({}, repeatedBranch);
+  await waitUntil(async () => JSON.parse(await readFile(path, 'utf8')).latest.unresolvedAsyncChildren === 0, 'resolved child coverage refreshes latest');
+  changed = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(changed.records.length, 3, 'changed observation updates its keyed row instead of growing history');
+  assert.equal(changed.latest.unresolvedAsyncChildren, 0, 'later settled boundary refreshes resolved child coverage');
+  assert.equal(changed.records[1].snapshot.rows[0].counters.input, 17, 'same-boundary event row tracks latest counters');
   assert.ok(enabled.requests >= 8, 'enabled capture requests ping/cost automatically at lifecycle boundaries');
   const converted = spawnSync(process.execPath, ['tools/token-native-summary.mjs', '--capture', path, '--id', 'task', '--window', 'w', '--effort', 'high', '--task-class', 'task', '--candidate', 'fixture', '--outcome', 'completed', '--accepted', '1'], { cwd: process.cwd(), encoding: 'utf8' });
   assert.equal(converted.status, 0, converted.stderr);
@@ -101,7 +117,7 @@ try {
   await writeFile(summaryPath, converted.stdout);
   const report = spawnSync(process.execPath, ['tools/token-report.mjs', '--input', summaryPath], { cwd: process.cwd(), encoding: 'utf8' });
   assert.equal(report.status, 0, report.stderr);
-  assert.equal(JSON.parse(report.stdout).totals.processed, 29);
+  assert.equal(JSON.parse(report.stdout).totals.processed, 39);
 
   const isolatedRoot = join(root, 'lifecycle');
   await mkdir(join(isolatedRoot, '.factory'), { recursive: true });
@@ -156,6 +172,24 @@ try {
   await sink.handlers.get('session_start')({ reason: 'startup' }, sinkCtx);
   await waitUntil(() => statuses.includes('Automatic usage capture failed'), 'invalid existing sink reports a visible generic failure');
   assert.equal(await readFile(protectedPath, 'utf8'), protectedBytes, 'capture never overwrites unowned sink data');
+
+  const conflictRoot = join(root, 'conflict');
+  await mkdir(join(conflictRoot, '.factory'), { recursive: true });
+  await writeFile(join(conflictRoot, '.factory/native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'native-usage' }));
+  const conflictStatuses = [];
+  const conflictCtx = { ...ctx(['entry']), cwd: conflictRoot, ui: { setStatus(_key, value) { conflictStatuses.push(value); } } };
+  const conflictKey = createHash('sha256').update('test-session').digest('hex').slice(0, 24);
+  const conflictPath = join(conflictRoot, `.factory/native-usage/${conflictKey}.json`);
+  const lockPath = `${conflictPath}.lock`;
+  await mkdir(join(conflictRoot, '.factory/native-usage'), { recursive: true });
+  const competingClaim = 'competing-writer';
+  await writeFile(lockPath, competingClaim, { flag: 'wx' });
+  const competingWriter = makeHost();
+  (await import(extensionPath)).default(competingWriter.pi);
+  await competingWriter.handlers.get('session_start')({ reason: 'startup' }, conflictCtx);
+  await waitUntil(() => conflictStatuses.includes('Automatic usage capture failed'), 'a competing transaction claim fails closed visibly');
+  await assert.rejects(readFile(conflictPath), { code: 'ENOENT' }, 'a conflicted transaction cannot create or clobber capture data');
+  assert.equal(await readFile(lockPath, 'utf8'), competingClaim, 'a competing or stale claim is never automatically deleted');
 
   const overflowRoot = join(root, 'overflow');
   await mkdir(join(overflowRoot, '.factory'), { recursive: true });
