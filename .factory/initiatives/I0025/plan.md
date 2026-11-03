@@ -257,10 +257,10 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
-- Brief: [brief-r7.md](jobs/J006/brief-r7.md) (post-start verification change) + [brief-r6.md](jobs/J006/brief-r6.md) (authority) on design [brief-r5.md](jobs/J006/brief-r5.md)
+- Brief: [brief-r8.md](jobs/J006/brief-r8.md) (current: transcript reader) ; previous [brief-r7.md](jobs/J006/brief-r7.md) (post-start verification change) + [brief-r6.md](jobs/J006/brief-r6.md) (authority) on design [brief-r5.md](jobs/J006/brief-r5.md)
 - Blocker: none for the r6 unit; observed-only scope accepted by the operator, whole-work completeness explicitly not required.
 - Next step: Candidate deaf6b9 technically verified (V007 Standards/Spec PASS). Operator acceptance, push, PR and integration are separate and not granted; open suggestions: late older export ordering, timeout cause in docs, ES wording nits.
 
@@ -300,3 +300,4 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J006/A006.md: worker stopped at r5 pre-start policy gate, no candidate (report coordinator-retained after worker Write no-verdict). Operator selected option 2 (post-start export verification), recorded in brief-r7; continuing same worker within unspent r6 allowance.
 - jobs/J006/V006.md: bound review of 63a64d0, Standards/Spec FAIL with bounded findings (rejection codes, export provenance/empty-series rule, missing cardinality/storage tests, unauthenticated-request invalidation, residual native-claude-otel window path/docs, per-series start assertion). Conditional 15min correction + 15min second review now used.
 - jobs/J006/A007.md + V007.md: correction candidate deaf6b9; first V007 launch INCONCLUSIVE due to coordinator binding error (not evaluated), rebound launch PASS Standards/Spec. Budget fully used; SKILL.md/docs reviewed from coordinator-attested working tree, not bound content.
+- Operator 2026-11-03: telemetry daemon/global settings rejected as over-engineering; approved local transcript reader (brief-r8) as primary zero-token Claude capture with parent/subagent rows and total, invalid format → recommend isSWF issue. Budget 40+15 (+15+15 conditional). Windows run still requires an actual Windows host (this session is Linux).
