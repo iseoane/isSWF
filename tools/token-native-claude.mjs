@@ -45,13 +45,16 @@ function countersFrom(payload) {
   const counters = new Map();
   for (const resource of payload.resourceMetrics) {
     if (!Array.isArray(resource.scopeMetrics) || resource.scopeMetrics.length > 20) throw Error('invalid metrics payload');
-    const resourceIdentity = hash(canonicalAttributes(resource.resource?.attributes ?? []));
+    const resourceIdentity = canonicalAttributes(resource.resource?.attributes ?? []);
     for (const scope of resource.scopeMetrics) for (const metric of scope.metrics ?? []) {
+      const scopeName = scope.scope?.name ?? '', scopeVersion = scope.scope?.version ?? '';
+      if (typeof scopeName !== 'string' || typeof scopeVersion !== 'string') throw Error('invalid metric scope');
+      const scopeIdentity = JSON.stringify([scopeName, scopeVersion, canonicalAttributes(scope.scope?.attributes ?? [])]);
       if (metric.name !== 'claude_code.token.usage') continue;
       if (metric.sum?.isMonotonic !== true || metric.sum?.aggregationTemporality !== 2 || !Array.isArray(metric.sum.dataPoints)) throw Error('cumulative metrics required');
       for (const point of metric.sum.dataPoints) {
         const pointAttributes = point.attributes ?? [];
-        canonicalAttributes(pointAttributes);
+        const pointIdentity = canonicalAttributes(pointAttributes);
         const attrs = Object.fromEntries(pointAttributes.filter(item => ['type', 'query_source', 'model'].includes(item.key)).map(item => [item.key, item.value.stringValue]));
         if (!categories.has(attrs.type) || !sources.has(attrs.query_source)) continue;
         if (Object.hasOwn(point, 'asInt') === Object.hasOwn(point, 'asDouble')) throw Error('invalid metric counter');
@@ -61,11 +64,11 @@ function countersFrom(payload) {
         const start = timestamp(point.startTimeUnixNano), end = timestamp(point.timeUnixNano);
         if (BigInt(end) <= BigInt(start)) throw Error('invalid metric timestamp order');
         const model = typeof attrs.model === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}$/u.test(attrs.model) ? `model-${hash(attrs.model)}` : 'unknown';
-        const group = hash(JSON.stringify([resourceIdentity, attrs.query_source, model]));
-        const series = hash(JSON.stringify([group, attrs.type]));
-        const key = `${series}:${attrs.query_source}:${model}:${attrs.type}`;
-        if (counters.has(key)) throw Error('duplicate metric series');
-        counters.set(key, { source: attrs.query_source, model, category: attrs.type, value, series, group, start, end });
+        if (metric.unit !== undefined && typeof metric.unit !== 'string') throw Error('invalid metric unit');
+        // Native stream identity: resource, scope, metric properties and every point attribute.
+        const series = hash(JSON.stringify([resourceIdentity, scopeIdentity, metric.name, metric.unit ?? '', pointIdentity]));
+        if (counters.has(series)) throw Error('duplicate metric series');
+        counters.set(series, { source: attrs.query_source, model, category: attrs.type, value, series, start, end });
       }
     }
   }
@@ -90,6 +93,8 @@ export async function readConfig(cwd) {
   }
   if (config?.version !== 1 || typeof config.enabled !== 'boolean') return { enabled: false, reason: 'Claude capture disabled: setup configuration is invalid.' };
   if (!config.enabled) return { enabled: false };
+  const interval = config.exportIntervalMs ?? 60000;
+  if (!Number.isSafeInteger(interval) || interval < 1000 || interval > 60000) return { enabled: false, reason: 'Claude capture disabled: setup configuration is invalid.' };
   if (typeof config.destination !== 'string' || !config.destination) throw Error('enabled Claude capture requires a destination');
   const destination = resolve(base, config.destination), rel = relative(base, destination);
   if (!rel || rel.startsWith('..') || isAbsolute(rel)) throw Error('unsafe capture destination');
@@ -102,7 +107,7 @@ export async function readConfig(cwd) {
     try { const info = lstatSync(parent); if (!info.isDirectory() || info.isSymbolicLink()) throw Error('unsafe capture destination'); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-  return { enabled: true, destination, base, configPath };
+  return { enabled: true, destination, base, configPath, exportIntervalMs: interval };
 }
 
 export function conflictingTelemetryEnvironment(environment) {
@@ -120,6 +125,8 @@ export function mergeCumulative(previousRows, receivedRows) {
     if (seen.has(row.id)) throw Error('duplicate metric series');
     seen.add(row.id);
     const previous = next.get(row.id);
+    if (previous && row.start === previous.start && row.end === previous.end && row.value === previous.value) continue;
+    if (previous && row.end === previous.end) throw Error('conflicting metric observation');
     if (previous && row.start !== previous.start) throw Error('cumulative metric segment changed; unsupported transition');
     if (previous && BigInt(row.end) <= BigInt(previous.end)) throw Error('replayed or out-of-order metric export');
     if (previous && row.value < previous.value) throw Error('cumulative metric reset detected');
@@ -154,7 +161,7 @@ export async function persistReceipt(config, output) {
       total += info.size;
     }
     if (files > MAX_ROWS || total > MAX_BODY) throw Error('Claude capture storage limit exceeded');
-    const receipt = JSON.parse(output), path = join(config.destination, `${receipt.session}.json`);
+    const receipt = JSON.parse(output), path = join(config.destination, `${receipt.capture}.json`);
     const handle = await open(path, 'wx', 0o600);
     try { await handle.writeFile(output, 'utf8'); } finally { await handle.close(); }
   } finally {
@@ -177,7 +184,7 @@ async function run() {
   }
   const conflicts = conflictingTelemetryEnvironment(process.env);
   if (conflicts.length) throw Error(`conflicting or managed telemetry environment (${conflicts.length} setting(s)); refusing instrumented launch`);
-  process.stderr.write('Claude telemetry managed policy is not inspected; verify local export is permitted before opting in.\n');
+  process.stderr.write('Claude telemetry policy compatibility is unknown until local metric exports are observed; managed settings may redirect exports elsewhere.\n');
   let hostVersion = 'unknown';
   try {
     const output = execFileSync(executable, ['--version'], { cwd, env: process.env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000, windowsHide: true });
@@ -187,7 +194,7 @@ async function run() {
   if (hostVersion === 'unknown') throw Error('Claude version output was not recognized; refusing instrumented launch');
   const id = randomBytes(32).toString('hex'), route = `/${randomBytes(24).toString('hex')}`;
   let rows = new Map();
-  let rejected = false, bodyBytes = 0, concurrent = 0, receivedExports = 0, rejectionCode = '';
+  let rejected = false, concurrent = 0, receivedExports = 0, rejectionCode = '';
   const server = createServer((req, res) => {
     if (req.method !== 'POST' || req.url !== route || req.headers['content-type']?.split(';')[0] !== 'application/json' || req.headers.authorization !== `Bearer ${id}`) { rejected = true; rejectionCode = 'route-method-content-or-auth'; req.resume(); res.writeHead(404).end(); return; }
     if (concurrent >= 2 || Number(req.headers['content-length']) > MAX_BODY) { rejected = true; req.resume(); res.writeHead(413).end(); return; }
@@ -199,22 +206,22 @@ async function run() {
     req.on('end', () => {
       clearTimeout(deadline);
       release();
-      bodyBytes += size;
       try {
-        if (size > MAX_BODY || bodyBytes > MAX_BODY) throw Error();
+        if (size > MAX_BODY) throw Error();
         receivedExports++;
         rows = mergeCumulative(rows, countersFrom(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
+        chunks.length = 0;
         res.writeHead(200).end('{}');
       } catch (error) {
         rejected = true;
-        rejectionCode = ['cumulative metrics required', 'invalid metric counter', 'duplicate metric series', 'cumulative metric reset detected', 'metric row limit exceeded'].includes(error.message) ? error.message : 'payload-validation';
+        rejectionCode = ['cumulative metrics required', 'invalid metric counter', 'duplicate metric series', 'cumulative metric reset detected', 'conflicting metric observation', 'cumulative metric segment changed; unsupported transition', 'replayed or out-of-order metric export', 'metric row limit exceeded'].includes(error.message) ? error.message : 'payload-validation';
         res.writeHead(400).end();
       }
     });
   });
   await new Promise((resolveListen, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolveListen); });
   const endpoint = `http://127.0.0.1:${server.address().port}${route}`;
-  const env = { ...process.env, CLAUDE_CODE_ENABLE_TELEMETRY: '1', OTEL_METRICS_EXPORTER: 'otlp', OTEL_LOGS_EXPORTER: 'none', OTEL_TRACES_EXPORTER: 'none', OTEL_EXPORTER_OTLP_METRICS_PROTOCOL: 'http/json', OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: endpoint, OTEL_EXPORTER_OTLP_METRICS_HEADERS: `Authorization=Bearer%20${id}`, OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative', OTEL_METRIC_EXPORT_INTERVAL: '1000', OTEL_EXPORTER_OTLP_TIMEOUT: '1000', OTEL_METRICS_INCLUDE_ACCOUNT_UUID: 'false', OTEL_METRICS_INCLUDE_SESSION_ID: 'false', OTEL_METRICS_INCLUDE_REPOSITORY: 'false' };
+  const env = { ...process.env, CLAUDE_CODE_ENABLE_TELEMETRY: '1', OTEL_METRICS_EXPORTER: 'otlp', OTEL_LOGS_EXPORTER: 'none', OTEL_TRACES_EXPORTER: 'none', OTEL_EXPORTER_OTLP_METRICS_PROTOCOL: 'http/json', OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: endpoint, OTEL_EXPORTER_OTLP_METRICS_HEADERS: `Authorization=Bearer%20${id}`, OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative', OTEL_METRIC_EXPORT_INTERVAL: String(config.exportIntervalMs), OTEL_EXPORTER_OTLP_TIMEOUT: '1000', OTEL_METRICS_INCLUDE_ACCOUNT_UUID: 'false', OTEL_METRICS_INCLUDE_SESSION_ID: 'false', OTEL_METRICS_INCLUDE_REPOSITORY: 'false' };
   delete env.OTEL_EXPORTER_OTLP_ENDPOINT; delete env.OTEL_EXPORTER_OTLP_HEADERS;
   const child = spawn(executable, args, { cwd, env, stdio: 'inherit', shell: false, windowsHide: false });
   let spawnError;
@@ -241,16 +248,19 @@ async function run() {
   });
   if (spawnError) throw Error('unable to start Claude executable');
   const outputRows = [...rows.values()];
-  if (!rejected && outputRows.length) {
-    const safeRows = outputRows.map(row => ({ id: row.id, series: row.series, group: row.group, start: row.start, end: row.end, source: row.source, model: row.model, category: row.category, value: row.value }));
-    const receipt = { version: 1, host: 'claude', hostVersion, sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', session: hash(id), cancellation: cancelled, processExit: outcome.code, signal: outcome.signal, policyStatus: 'managed-policy-not-inspected', counters: safeRows };
+  if (!rejected) {
+    const safeRows = outputRows.map(row => ({ series: row.series, start: row.start, end: row.end, source: row.source, model: row.model, category: row.category, value: row.value }));
+    // Observed local delivery for this run only; not a policy-compliance certificate.
+    const exportStatus = receivedExports > 0 ? 'export-observed' : 'no-export-observed';
+    const receipt = { version: 2, host: 'claude', hostVersion, sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', capture: hash(id), cancellation: cancelled, processExit: outcome.code, signal: outcome.signal, exportStatus, receivedExports, series: safeRows };
     const output = `${JSON.stringify(receipt, null, 2)}\n`;
     try {
       if (Buffer.byteLength(output) > MAX_REPORT) throw Error('Claude metrics report limit exceeded');
       await persistReceipt(config, output);
     } catch { rejected = true; }
   }
-  if (rejected || !outputRows.length) process.stderr.write(`Claude metrics capture incomplete (exports=${receivedExports}, rows=${outputRows.length}, rejection=${rejectionCode || 'no-token-points'}); no receipt retained.\n`);
+  if (rejected) process.stderr.write(`Claude metrics capture invalid (exports=${receivedExports}, rows=${outputRows.length}, rejection=${rejectionCode || 'receipt-storage'}); no receipt retained.\n`);
+  else if (!receivedExports) process.stderr.write('Claude metrics: no-export-observed; coverage unknown (possible managed endpoint override or missing final export), not zero usage.\n');
   if (outcome.signal) process.exitCode = 1;
   else process.exitCode = outcome.code ?? 1;
 }

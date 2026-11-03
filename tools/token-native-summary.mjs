@@ -141,31 +141,36 @@ function deltaRows(start, end) {
   });
 }
 
-export function normalizeClaudeOtel({ input, meta }) {
-  if (!input || input.version !== 1 || input.host !== 'claude' || input.provenance !== 'native-claude-otel' || input.sourceVersion !== 'claude_code.token.usage-otlp-cumulative' || input.policyStatus !== 'managed-policy-not-inspected' || !safeName(input.hostVersion) || !/^[a-f0-9]{24}$/u.test(input.session ?? '') || !Array.isArray(input.counters) || input.counters.length > MAX_ROWS || meta.host !== 'claude' || meta.hostVersion !== input.hostVersion) fail();
-  if (!['id', 'window', 'effort', 'taskClass', 'candidate', 'outcome'].every(key => safeName(meta[key])) || !Number.isSafeInteger(meta.accepted) || meta.accepted < 0) fail();
-  const models = new Map();
-  for (const entry of input.counters) {
-    if (!entry || !safeName(entry.id) || !/^[a-f0-9]{24}$/u.test(entry.series ?? '') || !/^[a-f0-9]{24}$/u.test(entry.group ?? '') || !/^(0|[1-9][0-9]*)$/u.test(entry.start ?? '') || !/^(0|[1-9][0-9]*)$/u.test(entry.end ?? '') || BigInt(entry.end) <= BigInt(entry.start) || !sources.has(entry.source) || !safeName(entry.model) || !['input', 'output', 'cacheRead', 'cacheCreation'].includes(entry.category) || !Number.isSafeInteger(entry.value) || entry.value < 0) fail();
-    const key = `${entry.source}:${entry.model}:${entry.group}`;
-    const row = models.get(key) ?? { source: entry.source, model: entry.model, group: entry.group, start: entry.start, end: entry.end, counters: Object.fromEntries(names.map(name => [name, null])) };
-    if (row.end !== entry.end || (BigInt(row.start) > BigInt(entry.start) ? BigInt(row.start) - BigInt(entry.start) : BigInt(entry.start) - BigInt(row.start)) > 1n) fail();
-    if (BigInt(entry.start) > BigInt(row.start)) row.start = entry.start;
-    const field = entry.category === 'cacheCreation' ? 'cacheWrite' : entry.category;
-    if (row.counters[field] !== null) fail();
-    row.counters[field] = entry.value;
-    models.set(key, row);
+const digits = value => typeof value === 'string' && /^[1-9][0-9]*$/u.test(value);
+
+// Observed per-series snapshot: each native series keeps its own interval; no common window is inferred.
+export function snapshotClaudeOtel({ input, meta }) {
+  if (!input || input.version !== 2 || input.host !== 'claude' || input.provenance !== 'native-claude-otel' || input.sourceVersion !== 'claude_code.token.usage-otlp-cumulative' || !['export-observed', 'no-export-observed'].includes(input.exportStatus) || !Number.isSafeInteger(input.receivedExports) || input.receivedExports < 0 || (input.exportStatus === 'export-observed') !== (input.receivedExports > 0) || !safeName(input.hostVersion) || !/^[a-f0-9]{24}$/u.test(input.capture ?? '') || !Array.isArray(input.series) || input.series.length > MAX_ROWS || meta.host !== 'claude' || meta.hostVersion !== input.hostVersion) fail();
+  if (!['effort', 'taskClass', 'candidate'].every(key => safeName(meta[key]))) fail();
+  const seen = new Set(), observed = new Map();
+  const series = input.series.map(entry => {
+    if (!entry || Object.keys(entry).length !== 7 || !/^[a-f0-9]{24}$/u.test(entry.series ?? '') || seen.has(entry.series) || !digits(entry.start) || !digits(entry.end) || BigInt(entry.end) <= BigInt(entry.start) || !sources.has(entry.source) || !safeName(entry.model) || !['input', 'output', 'cacheRead', 'cacheCreation'].includes(entry.category) || !Number.isSafeInteger(entry.value) || entry.value < 0) fail();
+    seen.add(entry.series);
+    return { series: entry.series, source: entry.source, model: entry.model, category: entry.category, start: entry.start, end: entry.end, value: entry.value };
+  }).sort((x, y) => x.series.localeCompare(y.series));
+  if (input.exportStatus === 'no-export-observed' && series.length) fail();
+  for (const entry of series) {
+    // Distinct native series under one visible projection have disjoint attribute sets, so their values add.
+    const key = `${entry.source}:${entry.model}:${entry.category}`;
+    const row = observed.get(key) ?? { source: entry.source, model: entry.model, category: entry.category, value: 0, series: [] };
+    row.value += entry.value; row.series.push(entry.series);
+    if (!Number.isSafeInteger(row.value)) fail();
+    observed.set(key, row);
   }
-  if (!models.size || models.size > MAX_ROWS) fail();
-  const rows = [...models.values()].map(row => ({
-    id: `claude-${hash(JSON.stringify([meta.id, row.source, row.model, row.group]))}`, host: 'claude', hostVersion: input.hostVersion, model: row.model,
-    effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate, outcome: meta.outcome,
-    accepted: meta.accepted, provenance: 'native-claude-otel', scope: 'unattributed', window: meta.window,
-    source: row.source, segment: hash(JSON.stringify([input.session, row.group, `${row.start}:${row.end}`])),
-    counters: row.counters,
-  }));
-  if (rows.some(row => !safeName(row.id))) fail();
-  return { version: 1, mode: 'window', rows };
+  const rows = [...observed.values()].sort((x, y) => `${x.source}:${x.model}:${x.category}`.localeCompare(`${y.source}:${y.model}:${y.category}`));
+  const observedSubtotal = rows.reduce((sum, row) => sum + row.value, 0);
+  if (!Number.isSafeInteger(observedSubtotal)) fail();
+  return {
+    version: 1, mode: 'observed-snapshot', host: 'claude', hostVersion: input.hostVersion, provenance: 'native-claude-otel',
+    effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate, capture: input.capture,
+    exportStatus: input.exportStatus, coverage: 'observed-series-only', series, observed: rows,
+    observedSubtotal: input.exportStatus === 'export-observed' ? observedSubtotal : null, total: null, totalStatus: 'unknown-coverage',
+  };
 }
 
 const sources = new Set(['main', 'subagent', 'auxiliary']);
@@ -249,7 +254,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       candidate: args['--candidate'] ?? 'unknown', outcome: args['--outcome'] ?? 'unknown',
       accepted: Number(args['--accepted']),
     };
-    const summary = args['--otel'] ? normalizeClaudeOtel({ input, meta }) : normalizeNative({ input, start, meta });
+    const summary = args['--otel'] ? snapshotClaudeOtel({ input, meta }) : normalizeNative({ input, start, meta });
     const output = `${JSON.stringify(summary, null, 2)}\n`;
     if (Buffer.byteLength(output) > 64 * 1024) throw Error('native summary output limit exceeded');
     process.stdout.write(output);
