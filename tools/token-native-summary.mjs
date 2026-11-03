@@ -148,9 +148,9 @@ export function normalizeClaudeOtel({ input, meta }) {
   for (const entry of input.counters) {
     if (!entry || !safeName(entry.id) || !/^[a-f0-9]{24}$/u.test(entry.series ?? '') || !/^[a-f0-9]{24}$/u.test(entry.group ?? '') || !/^(0|[1-9][0-9]*)$/u.test(entry.start ?? '') || !/^(0|[1-9][0-9]*)$/u.test(entry.end ?? '') || BigInt(entry.end) <= BigInt(entry.start) || !sources.has(entry.source) || !safeName(entry.model) || !['input', 'output', 'cacheRead', 'cacheCreation'].includes(entry.category) || !Number.isSafeInteger(entry.value) || entry.value < 0) fail();
     const key = `${entry.source}:${entry.model}:${entry.group}`;
-    const interval = `${entry.start}:${entry.end}`;
-    const row = models.get(key) ?? { source: entry.source, model: entry.model, group: entry.group, interval, counters: Object.fromEntries(names.map(name => [name, null])) };
-    if (row.interval !== interval) fail();
+    const row = models.get(key) ?? { source: entry.source, model: entry.model, group: entry.group, start: entry.start, end: entry.end, counters: Object.fromEntries(names.map(name => [name, null])) };
+    if (row.end !== entry.end || (BigInt(row.start) > BigInt(entry.start) ? BigInt(row.start) - BigInt(entry.start) : BigInt(entry.start) - BigInt(row.start)) > 1n) fail();
+    if (BigInt(entry.start) > BigInt(row.start)) row.start = entry.start;
     const field = entry.category === 'cacheCreation' ? 'cacheWrite' : entry.category;
     if (row.counters[field] !== null) fail();
     row.counters[field] = entry.value;
@@ -161,7 +161,7 @@ export function normalizeClaudeOtel({ input, meta }) {
     id: `claude-${hash(JSON.stringify([meta.id, row.source, row.model, row.group]))}`, host: 'claude', hostVersion: input.hostVersion, model: row.model,
     effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate, outcome: meta.outcome,
     accepted: meta.accepted, provenance: 'native-claude-otel', scope: 'unattributed', window: meta.window,
-    source: row.source, segment: hash(JSON.stringify([input.session, row.group, row.interval])),
+    source: row.source, segment: hash(JSON.stringify([input.session, row.group, `${row.start}:${row.end}`])),
     counters: row.counters,
   }));
   if (rows.some(row => !safeName(row.id))) fail();

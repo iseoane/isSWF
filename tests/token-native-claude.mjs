@@ -81,6 +81,10 @@ const independentLaunch = normalizeClaudeOtel({ input: { ...receipt, session: 'a
 assert.notEqual(independentLaunch.rows[0].segment, window.rows[0].segment);
 assert.equal(report(independentLaunch, window).comparison.status, 'comparable', 'matched independent native launches compare by stable source/group identity despite opaque segment differences');
 assert.throws(() => normalizeClaudeOtel({ input: { ...receipt, counters: receipt.counters.map((row, index) => ({ ...row, end: index ? '301' : '300' })) }, meta: metadata }), /invalid native summary/u);
+const oneNanosecondSkew = normalizeClaudeOtel({ input: { ...receipt, counters: receipt.counters.map((row, index) => ({ ...row, start: index ? '101' : '100' })) }, meta: metadata });
+const commonBoundary = normalizeClaudeOtel({ input: { ...receipt, counters: receipt.counters.map(row => ({ ...row, start: '101' })) }, meta: metadata });
+assert.equal(oneNanosecondSkew.rows[0].segment, commonBoundary.rows[0].segment, 'one-nanosecond start skew uses the common interval boundary');
+assert.throws(() => normalizeClaudeOtel({ input: { ...receipt, counters: receipt.counters.map((row, index) => ({ ...row, start: index ? '102' : '100' })) }, meta: metadata }), /invalid native summary/u, 'larger interval skew remains incoherent');
 const longIdWindow = normalizeClaudeOtel({ input: receipt, meta: { ...metadata, id: 'a'.repeat(128) } });
 assert.match(longIdWindow.rows[0].id, /^claude-[a-f0-9]{24}$/u);
 const rendered = report(window);
