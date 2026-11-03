@@ -260,7 +260,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Status: in-progress
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
-- Brief: [brief-r6.md](jobs/J006/brief-r6.md) (authority) implementing design [brief-r5.md](jobs/J006/brief-r5.md)
+- Brief: [brief-r7.md](jobs/J006/brief-r7.md) (post-start verification change) + [brief-r6.md](jobs/J006/brief-r6.md) (authority) on design [brief-r5.md](jobs/J006/brief-r5.md)
 - Blocker: none for the r6 unit; observed-only scope accepted by the operator, whole-work completeness explicitly not required.
 - Next step: Dispatch one isswf-worker (≤40min) on r6/r5, then one bound isswf-reviewer (≤15min); one correction+review (15+15min) only for bounded defects. Stop on exhaustion or any r5 stop condition.
 
@@ -297,3 +297,4 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J006/R001.md: researcher cf176611 terminalcomplete observed, findings-only; no repositoryfile written and no commands/tests run. Codebaseafe1b2e/runtimecafe685/docsa945ffa, sourcebyteequality attestedbycoordinator. Official8snapshots URL/time/hash provenance consumed, methodology consumption self-reported. Recommends per-series snapshot identity and observed-only claims, not fabricated commonprocesswindow; warns1s cadence+1MiBlifetimeingress, policy/platform/nativecoverage gaps. Source unchanged.
 - Coordinator reconciled R001 against actual helper/summary/report and primarySDK/Claude/data-model sections. Additional static finding: nativepoint dimensions (skill/effort/plugin etc.) and instrumentation scope are lost by current projected serieskey, risking collisions. r5 design distinguishes fullopaque nativeidentity from visible comparisonprojection, snapshot-specific report semantics from legacyactor/windows, per-request/state bounds from lifetimebytes, and blockedunknownpolicy from warning-onlyactivation. This is a design proposal, not a code fix or new source grant; no native tests or global operations during research/design.
 - Operator 2026-11-03 accepted r5 observed-only scope and started implementation ("adelante coordinador"), selecting 1worker40min + 1review15min, conditional 1correction15min + 1review15min, sequential. Recorded in brief-r6; no push/PR/install/global/cleanup granted.
+- jobs/J006/A006.md: worker stopped at r5 pre-start policy gate, no candidate (report coordinator-retained after worker Write no-verdict). Operator selected option 2 (post-start export verification), recorded in brief-r7; continuing same worker within unspent r6 allowance.
