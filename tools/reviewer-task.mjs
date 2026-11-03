@@ -124,6 +124,10 @@ export async function prepareReview({ project, store, inputSha, jobPath, grantFi
     const path = `.agents/skills/isswf-${name}/SKILL.md`;
     if (methods[0].text.includes(`../skills/isswf-${name}/SKILL.md`)) methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
   }
+  if (methods[1].text.includes('review-convergence.md')) {
+    const path = '.agents/roles/references/review-convergence.md';
+    methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });
+  }
   if (methods[0].text.includes('references/design-principles.md')) {
     const path = '.agents/roles/references/design-principles.md';
     methods.push({ path, text: decode(blob(source, job.methodologySha, path)) });

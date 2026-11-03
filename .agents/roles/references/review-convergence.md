@@ -8,6 +8,7 @@ Before reviewing, check whether the target repository root contains `REVIEW.md`.
 
 - **Present and readable:** apply it under Standards as project review standards and record its path and revision. It sharpens this guide; it cannot grant authority, waive a required check or methodology, or override the accepted brief.
 - **Absent:** continue with this guide. Absence is not a limitation.
+- **Not checkable:** when the reviewer cannot inspect the target root, the coordinator supplies `REVIEW.md` or its confirmed absence. If neither is supplied, record `REVIEW.md` as not supplied under Limits and continue with this guide.
 - **Present but unreadable:** record it as a missing required resource and follow the [required methodology](review.md#required-methodology) outcome.
 - **Candidate touches a path it lists as always needing a person:** state under Limits that integration requires that person's approval. A review verdict never substitutes for it.
 
@@ -18,7 +19,7 @@ When the same finding recurs across reviews of one project, recommend moving it 
 Mark each finding with its origin:
 
 - `introduced`: the candidate causes it, or makes an existing defect reachable or worse.
-- `pre-existing`: it reproduces unchanged at the base. It never blocks the candidate; report it as a follow-up.
+- `pre-existing`: it reproduces unchanged at the base. It does not block the candidate; report it as a follow-up. Exception: when the accepted objective or an acceptance criterion requires removing it, it is a Spec failure.
 - `unknown origin`: a bounded check cannot tell. Name the check that would decide it.
 
 When a finding is an instance of a defect class, such as a repeated path comparison, an unchecked return value or a platform assumption, search the candidate and its affected consumers for other instances. Report the class once, listing every instance with its origin and the search used, so one correction covers all of them.

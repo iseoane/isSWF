@@ -1,6 +1,6 @@
 # Review guide for isSWF
 
-Code owners maintain this file. Reviewers apply it under Standards together with `.agents/roles/references/review.md`, which defines how it is used. It grants no authority.
+Code owners maintain this file. Reviewers apply it under Standards as defined in `.agents/roles/references/review-convergence.md`. It grants no authority.
 
 ## What failure looks like here
 

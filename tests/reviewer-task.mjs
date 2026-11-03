@@ -43,6 +43,8 @@ try {
   const selected = ['security', 'performance', 'observability'];
   const resourcePaths = selected.filter(name => roleText.includes('../skills/isswf-' + name + '/SKILL.md')).map(name => '.agents/skills/isswf-' + name + '/SKILL.md');
   if (roleText.includes('references/design-principles.md')) resourcePaths.push('.agents/roles/references/design-principles.md');
+  const guidanceText = released ? await readFile(join(source, '.agents/roles/references/review.md'), 'utf8') : command('git', ['-C', source, 'show', job.methodologySha + ':.agents/roles/references/review.md']).stdout;
+  if (guidanceText.includes('review-convergence.md')) resourcePaths.push('.agents/roles/references/review-convergence.md');
   for (const path of resourcePaths) {
     const pinned = released ? { status: 0, stdout: await readFile(join(source, path), 'utf8') } : command('git', ['-C', source, 'show', job.methodologySha + ':' + path]);
     assert.equal(pinned.status, 0, pinned.stderr);
