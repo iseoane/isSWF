@@ -86,6 +86,8 @@ export function conflictingTelemetryEnvironment(environment) {
   return Object.keys(environment).filter(key => /^(?:OTEL_|CLAUDE_CODE_(?:ENABLE_TELEMETRY|OTEL_|USE_MANAGED_SETTINGS_ONLY))/iu.test(key));
 }
 
+export function claudeExecutable(platform = process.platform) { return platform === 'win32' ? 'claude.exe' : 'claude'; }
+
 export { countersFrom };
 
 export function mergeCumulative(previousRows, receivedRows) {
@@ -140,7 +142,7 @@ export async function persistReceipt(config, output) {
 
 async function run() {
   const cwd = process.cwd(), config = await readConfig(cwd);
-  const executable = process.platform === 'win32' ? 'claude.exe' : 'claude';
+  const executable = claudeExecutable();
   const args = process.argv.slice(2);
   if (args[0] === '--') args.shift();
   if (!config.enabled) {

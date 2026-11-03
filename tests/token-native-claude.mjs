@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { conflictingTelemetryEnvironment, countersFrom, mergeCumulative, persistReceipt, readConfig } from '../tools/token-native-claude.mjs';
+import { claudeExecutable, conflictingTelemetryEnvironment, countersFrom, mergeCumulative, persistReceipt, readConfig } from '../tools/token-native-claude.mjs';
 import { normalizeClaudeOtel } from '../tools/token-native-summary.mjs';
 import { report } from '../tools/token-report.mjs';
 
 const metric = (type, query_source, asInt, extra = [], timing = {}) => ({ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 2, dataPoints: [{ attributes: [{ key: 'type', value: { stringValue: type } }, { key: 'query_source', value: { stringValue: query_source } }, { key: 'model', value: { stringValue: 'claude-sonnet-4-6' } }, ...extra], asInt, startTimeUnixNano: timing.start ?? '100', timeUnixNano: timing.end ?? '200' }] } });
+assert.equal(claudeExecutable('linux'), 'claude');
+assert.equal(claudeExecutable('win32'), 'claude.exe');
 const result = countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', 11, [{ key: 'user.email', value: { stringValue: 'secret@example.test' } }]), metric('output', 'main', 7), metric('cacheRead', 'main', 5), metric('cacheCreation', 'main', 3), metric('input', 'subagent', 99), { name: 'other', sum: {} }] }] }] });
 assert.deepEqual(result.map(({ id, source, model, category, value }) => ({ id, source, model, category, value })), result.map(({ id, source, model, category, value }) => ({ id, source, model, category, value })).sort((a, b) => a.id.localeCompare(b.id)));
 assert.deepEqual(new Set(result.map(row => `${row.source}:${row.category}:${row.value}`)), new Set(['main:input:11', 'main:output:7', 'main:cacheRead:5', 'main:cacheCreation:3', 'subagent:input:99']));
@@ -55,6 +57,17 @@ assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics:
 assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [{ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 1, dataPoints: [] } }] }] }] }));
 assert.deepEqual(conflictingTelemetryEnvironment({ PATH: '/bin', OTEL_EXPORTER_OTLP_ENDPOINT: 'ignored', CLAUDE_CODE_USE_MANAGED_SETTINGS_ONLY: '1' }).sort(), ['CLAUDE_CODE_USE_MANAGED_SETTINGS_ONLY', 'OTEL_EXPORTER_OTLP_ENDPOINT']);
 assert.deepEqual(conflictingTelemetryEnvironment({ PATH: '/bin' }), []);
+const runHelper = (cwd, entry, args, env, signalAfterReady = false) => new Promise((resolveRun, rejectRun) => {
+  const started = Date.now(), child = spawn(process.execPath, [entry, '--', ...args], { cwd, env, stdio: ['pipe', 'pipe', 'pipe'] });
+  let stdout = '', stderr = '', signalled = false;
+  child.stdout.setEncoding('utf8').on('data', chunk => { stdout += chunk; if (signalAfterReady && stdout.includes('RESISTING')) { signalled = true; child.kill('SIGTERM'); } });
+  child.stderr.setEncoding('utf8').on('data', chunk => { stderr += chunk; });
+  child.stdin.end('fixture-stdin');
+  const deadline = setTimeout(() => { child.kill('SIGKILL'); rejectRun(Error('helper fixture timed out')); }, 9000);
+  child.once('error', rejectRun);
+  child.once('close', (code, signal) => { clearTimeout(deadline); resolveRun({ code, signal, stdout, stderr, elapsed: Date.now() - started, signalled }); });
+});
+
 const project = await mkdtemp(join(tmpdir(), 'claude-native-config-'));
 try {
   assert.equal((await readConfig(project)).enabled, false, 'missing state root disables capture');
@@ -92,6 +105,60 @@ try {
   assert.match(launch, /stdin-preserved/u);
   assert.equal(await readFile(configPath, 'utf8'), JSON.stringify({ version: 1, enabled: false }));
   assert.equal(await import('node:fs/promises').then(({ access }) => access(join(state, 'claude-native-usage'))).then(() => true, () => false), false, 'disabled launch creates no receiver destination or receipt');
+  const fixtureBin = join(project, 'fixture-bin'); await mkdir(fixtureBin);
+  const fixtureClaude = join(fixtureBin, 'claude');
+  await writeFile(fixtureClaude, `#!/usr/bin/env node
+const http = require('node:http');
+const mode = process.argv.find(value => value.startsWith('--mode='))?.slice(7) ?? 'valid';
+if (process.argv.includes('--version')) { process.stdout.write('2.1.312\\n'); process.exit(0); }
+if (mode === 'resistant') { process.stdout.write('RESISTING\\n'); process.on('SIGTERM', () => {}); setInterval(() => {}, 1000); }
+else {
+  const endpoint = new URL(process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT);
+  const token = decodeURIComponent(process.env.OTEL_EXPORTER_OTLP_METRICS_HEADERS.slice('Authorization='.length).replace('Bearer%20',''));
+  const point = { attributes: [{key:'type',value:{stringValue:'input'}},{key:'query_source',value:{stringValue:'main'}},{key:'model',value:{stringValue:'fixture-model'}}], asInt: 11, startTimeUnixNano:'100', timeUnixNano:'200' };
+  let body = JSON.stringify({resourceMetrics:[{resource:{attributes:[]},scopeMetrics:[{metrics:[{name:'claude_code.token.usage',sum:{isMonotonic:true,aggregationTemporality:2,dataPoints:[point]}}]}]}]});
+  if (mode === 'schema') body = JSON.stringify({resourceMetrics:[{scopeMetrics:[{metrics:[{name:'claude_code.token.usage',sum:{isMonotonic:true,aggregationTemporality:2,dataPoints:[{...point,asInt:false}]}}]}]}]});
+  if (mode === 'oversize') body = 'x'.repeat(1024 * 1024 + 1);
+  if (mode === 'wrong-route') endpoint.pathname += '/bad';
+  const authorization = mode === 'auth' ? 'Bearer wrong' : 'Bearer ' + token;
+  const request = http.request(endpoint, {method:'POST',headers:{'content-type':'application/json',authorization,'content-length':Buffer.byteLength(body)}}, response => response.resume());
+  request.on('error', () => {}); request.end(body);
+  process.stdout.write(JSON.stringify(process.argv.slice(2)) + String.fromCharCode(10)); process.stdin.pipe(process.stdout);
+}
+`);
+  await chmod(fixtureClaude, 0o700);
+  const enabledCase = async mode => {
+    const cwd = join(project, `case-${mode}`), caseState = join(cwd, '.isswf');
+    await mkdir(caseState, { recursive: true });
+    await writeFile(join(caseState, 'claude-native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'capture' }));
+    return { cwd, caseState, env: { ...process.env, PATH: `${fixtureBin}${delimiter}${process.env.PATH}` } };
+  };
+  const validCase = await enabledCase('valid');
+  const enabledRun = await runHelper(validCase.cwd, entry, ['--model', 'preserved', '--mode=valid'], validCase.env);
+  assert.equal(enabledRun.code, 0, enabledRun.stderr);
+  assert.doesNotMatch(enabledRun.stderr, /capture incomplete/u, enabledRun.stderr);
+  assert.ok(enabledRun.stdout.includes('"--model","preserved"'));
+  assert.ok(enabledRun.stdout.includes('fixture-stdin'));
+  const { readdir } = await import('node:fs/promises');
+  const captured = await readdir(join(validCase.caseState, 'capture'));
+  assert.equal(captured.length, 1);
+  const retained = JSON.parse(await readFile(join(validCase.caseState, 'capture', captured[0]), 'utf8'));
+  assert.equal(retained.counters[0].value, 11);
+  for (const mode of ['wrong-route', 'auth', 'schema', 'oversize']) {
+    const failedCase = await enabledCase(mode);
+    const failedRun = await runHelper(failedCase.cwd, entry, [`--mode=${mode}`], failedCase.env);
+    assert.equal(failedRun.code, 0, `${mode} does not alter the child exit status`);
+    assert.match(failedRun.stderr, /capture incomplete/u);
+    assert.equal(await import('node:fs/promises').then(({ access }) => access(join(failedCase.caseState, 'capture'))).then(() => true, () => false), false, `${mode} retains no receipt`);
+  }
+  const missingExecutable = await enabledCase('spawn-failure');
+  const spawnFailure = await runHelper(missingExecutable.cwd, entry, ['--mode=valid'], { ...process.env, PATH: '/usr/bin' });
+  assert.equal(spawnFailure.code, 1, 'version/spawn failure is surfaced');
+  const resistantCase = await enabledCase('resistant');
+  const cancellation = await runHelper(resistantCase.cwd, entry, ['--mode=resistant'], resistantCase.env, true);
+  assert.equal(cancellation.signalled, true);
+  assert.equal(cancellation.code, 1);
+  assert.ok(cancellation.elapsed < 6000, `resistant child cancellation was bounded (${cancellation.elapsed}ms)`);
   await mkdir(join(project, '.factory'));
   assert.equal((await readConfig(project)).enabled, false, 'ambiguous state roots fail closed');
 } finally { await rm(project, { recursive: true, force: true }); }
