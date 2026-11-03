@@ -13,7 +13,7 @@ async function publish(path, value) {
   try { await file.writeFile(JSON.stringify(value, null, 2) + '\n'); await file.sync(); } finally { await file.close(); }
   try { await link(temp, path); } finally { await unlink(temp); }
 }
-async function sync(path) { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } }
+async function sync(path) { const file = await open(path, 'r'); try { await file.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await file.close(); } }
 async function tree(root) {
   await dir(root);
   const files = [];

@@ -148,7 +148,7 @@ async function claimAdmission(store, record, checkOnly = false) {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const stat = await lstat(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('admission directory must be a real private directory');
-  const sync = async path => { const handle = await open(path, 'r'); try { await handle.sync(); } finally { await handle.close(); } };
+  const sync = async path => { const handle = await open(path, 'r'); try { await handle.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await handle.close(); } };
   await sync(store);
   const pending = join(directory, '.pending-' + randomUUID());
   const file = await open(pending, 'wx', 0o600);

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const inside = (root, path) => { const part = relative(root, path); return part === '' || (part !== '..' && !part.startsWith('..' + sep) && !isAbsolute(part)); };
-const sync = async path => { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } };
+const sync = async path => { const file = await open(path, 'r'); try { await file.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await file.close(); } };
 async function regular(path) {
   const stat = await lstat(path); assert(stat.isFile() && !stat.isSymbolicLink() && stat.size <= 4096, 'bounded-capacity-record-required');
   const bytes = await readFile(path); assert(bytes.length <= 4096, 'bounded-capacity-record-required'); return bytes;

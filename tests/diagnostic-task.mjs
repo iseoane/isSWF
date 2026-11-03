@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { verifyRelease } from '../tools/release-source.mjs';
 
@@ -155,7 +155,7 @@ try {
     const current = { ...request, store: caseStore };
     mock.timers.enable({ apis: ['setTimeout', 'Date'] });
     let r;
-    try { r = await runDiagnosis(current, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture(kind, join(caseStore, p.dir.split('/').at(-1))) }); }
+    try { r = await runDiagnosis(current, { mode: 'fixture', probeRunner:syntheticProbes, backend: fixture(kind, join(caseStore, basename(p.dir))) }); }
     finally { mock.timers.reset(); }
     assert.equal(r.status, 'blocked', kind); assert.equal(r.attemptsConsumed, kind === 'preflight' ? 0 : 1);
     assert.equal(r.fetches, kind === 'preflight' ? 0 : kind === 'second-fetch' ? 2 : 1, kind + ': fetch count');
@@ -163,7 +163,7 @@ try {
   }
   const uncertainStore = join(root,'capacity-uncertain'); await mkdir(uncertainStore);
   await json(grantFile,{...capacityGrant,store:uncertainStore});
-  const uncertain = await runDiagnosis({...request,store:uncertainStore},{mode:'fixture',probeRunner:syntheticProbes,backend:fixture('http400',join(uncertainStore,p.dir.split('/').at(-1)))});
+  const uncertain = await runDiagnosis({...request,store:uncertainStore},{mode:'fixture',probeRunner:syntheticProbes,backend:fixture('http400',join(uncertainStore,basename(p.dir)))});
   assert.equal(uncertain.status,'blocked'); assert.equal(uncertain.attemptsConsumed,1);
   assert.equal((await readdir(pool)).includes('slot-0'),true);
   const waitingStore=join(root,'capacity-waiting'); await mkdir(waitingStore); await json(grantFile,{...capacityGrant,store:waitingStore});

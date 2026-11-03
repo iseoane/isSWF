@@ -33,7 +33,7 @@ async function publish(directory, key, value) {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const stat = await lstat(directory);
   if (!stat.isDirectory() || stat.isSymbolicLink()) throw Error('successor directory must be a real private directory');
-  const sync = async path => { const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); } };
+  const sync = async path => { const file = await open(path, 'r'); try { await file.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await file.close(); } };
   await sync(join(directory, '..'));
   const pending = join(directory, '.pending-' + randomUUID());
   const file = await open(pending, 'wx', 0o600);

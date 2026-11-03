@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const privateBase = 'tooling/.local/audit-archive';
@@ -69,7 +69,7 @@ async function documentPlan(root, head, tracked) {
     const before = await fs.readFile(file, 'utf8');
     let after = before.replace(/\]\(([^)\s]*\.audit\/[^)\s]+)\)/gu, (original, target) => {
       if (/^[a-z]+:/iu.test(target)) return original;
-      const artifact = relative(root, resolve(dirname(file), target));
+      const artifact = relative(root, resolve(dirname(file), target)).split(sep).join('/');
       if (!artifact.startsWith('.audit/') || ['.audit/README.md', '.audit/archive.json'].includes(artifact)) return original;
       if (tracked.has(artifact)) { publicLinks++; return '](' + repositoryURL + '/blob/' + head + '/' + artifact.split('/').map(encodeURIComponent).join('/') + ')'; }
       privateLinks++;
@@ -89,7 +89,7 @@ async function syncedJSON(path, value) {
   const file = await fs.open(path, 'wx', 0o600);
   try { await file.writeFile(encode(value)); await file.sync(); } finally { await file.close(); }
 }
-async function syncDirectory(path) { const file = await fs.open(path, 'r'); try { await file.sync(); } finally { await file.close(); } }
+async function syncDirectory(path) { const file = await fs.open(path, 'r'); try { await file.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await file.close(); } }
 async function archivePointer(audit) {
   const file = join(audit, 'archive.json'), stat = await fs.lstat(file);
   assert(stat.isFile() && !stat.isSymbolicLink() && stat.nlink === 1 && stat.size <= 8192, 'invalid archive pointer');
@@ -142,7 +142,7 @@ export async function archiveAudit(root, { apply = false, expectedHead } = {}) {
   try {
     const before = await manifest(audit, true);
     directory = await fs.mkdtemp(join(parent, 'audit-' + head.slice(0, 12) + '-'));
-    const archivePath = relative(root, directory), treeEntry = git(root, ['ls-tree', '-d', head, '--', '.audit']);
+    const archivePath = relative(root, directory).split(sep).join('/'), treeEntry = git(root, ['ls-tree', '-d', head, '--', '.audit']);
     const gitTree = treeEntry ? treeEntry.split(/\s+/u)[2] : null;
     const trackedPaths = new Set(git(root, ['ls-files', '-z', '--', '.audit']).split('\0').filter(Boolean));
     const documents = await documentPlan(root, head, trackedPaths);

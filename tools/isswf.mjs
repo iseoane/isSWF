@@ -42,7 +42,7 @@ async function writeExclusive(path, bytes) {
 async function syncDirectory(path) {
   // Windows rejects directory-handle sync; regular-file sync remains mandatory.
   if (process.platform === 'win32') return;
-  const file = await open(path, 'r'); try { await file.sync(); } finally { await file.close(); }
+  const file = await open(path, 'r'); try { await file.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await file.close(); }
 }
 async function atomic(path, bytes) {
   const temp = join(dirname(path), '.isswf-' + randomUUID());
