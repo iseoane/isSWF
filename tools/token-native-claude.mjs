@@ -19,8 +19,15 @@ function canonicalAttributes(attributes) {
     if (!item || typeof item.key !== 'string' || !item.key || seen.has(item.key) || !item.value || typeof item.value !== 'object' || Array.isArray(item.value)) throw Error('invalid or duplicate metric attribute');
     seen.add(item.key);
     const keys = Object.keys(item.value);
-    if (keys.length !== 1 || !['stringValue', 'intValue', 'doubleValue', 'boolValue', 'bytesValue'].includes(keys[0])) throw Error('invalid metric attribute value');
-    return [item.key, item.value];
+    if (keys.length !== 1) throw Error('invalid metric attribute value');
+    const variant = keys[0], payload = item.value[variant];
+    let normalized;
+    if (variant === 'stringValue' && typeof payload === 'string') normalized = payload;
+    else if (variant === 'boolValue' && typeof payload === 'boolean') normalized = payload;
+    else if (variant === 'doubleValue' && typeof payload === 'number' && Number.isFinite(payload)) normalized = Object.is(payload, -0) ? 0 : payload;
+    else if (variant === 'intValue' && (typeof payload === 'number' && Number.isSafeInteger(payload) || typeof payload === 'string' && /^-?(0|[1-9][0-9]*)$/u.test(payload) && Number.isSafeInteger(Number(payload)))) normalized = Number(payload);
+    else throw Error('invalid metric attribute value');
+    return [item.key, { [variant]: normalized }];
   });
   entries.sort(([a], [b]) => a.localeCompare(b));
   return JSON.stringify(entries);

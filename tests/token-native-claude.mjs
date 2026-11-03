@@ -35,6 +35,22 @@ assert.throws(() => countersFrom(compoundAttribute({ kvlistValue: { values: [{ k
 assert.throws(() => countersFrom(compoundAttribute({ kvlistValue: { values: [{ key: 'a', value: { stringValue: '1' } }, { key: 'a', value: { stringValue: '2' } }] } })), /invalid metric attribute value/u, 'nested duplicate keys fail closed before identity hashing');
 assert.throws(() => countersFrom(compoundAttribute({ arrayValue: { values: [{ stringValue: '1' }, { stringValue: '2' }] } })), /invalid metric attribute value/u, 'compound arrays fail closed');
 assert.throws(() => countersFrom(compoundAttribute({ stringValue: 'ambiguous', intValue: 11 })), /invalid metric attribute value/u, 'ambiguous scalar values fail closed');
+const scalarExport = value => compoundAttribute(value);
+for (const [variant, value] of [['stringValue', { nested: { z: 1, a: 2 } }], ['boolValue', { nested: { z: 1, a: 2 } }], ['intValue', [11]], ['stringValue', null], ['boolValue', null], ['doubleValue', null], ['intValue', null], ['stringValue', 1], ['boolValue', 'true'], ['doubleValue', '1'], ['doubleValue', Infinity], ['intValue', '9007199254740992'], ['bytesValue', 'AQI=']]) {
+  assert.throws(() => countersFrom(scalarExport({ [variant]: value })), /invalid metric attribute value/u, `${variant} rejects malformed or unsupported payload`);
+}
+const disguisedA = scalarExport({ stringValue: { nested: { a: 1, b: 2 } } });
+const disguisedB = scalarExport({ stringValue: { nested: { b: 2, a: 1 } } });
+assert.throws(() => countersFrom(disguisedA), /invalid metric attribute value/u);
+assert.throws(() => countersFrom(disguisedB), /invalid metric attribute value/u);
+for (const value of [{ stringValue: 'valid' }, { boolValue: true }, { doubleValue: 1.5 }, { intValue: 11 }, { bytesValue: 'AQI=' }]) {
+  // Bytes have no supported canonical representation in this consumer.
+  if (Object.hasOwn(value, 'bytesValue')) continue;
+  assert.equal(countersFrom(scalarExport(value)).length, 1, 'supported scalar payload is accepted');
+}
+const intNumber = countersFrom(scalarExport({ intValue: 11 }));
+assert.throws(() => countersFrom(scalarExport({ intValue: '011' })), /invalid metric attribute value/u, 'noncanonical integer strings fail closed');
+assert.equal(intNumber[0].id, countersFrom(scalarExport({ intValue: '11' }))[0].id, 'equivalent integer representations share identity');
 assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 2, end: '500' }]), /reset detected/u);
 assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 18, end: '400' }]), /replayed or out-of-order/u);
 assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 18, start: '101', end: '500' }]), /segment changed/u);
