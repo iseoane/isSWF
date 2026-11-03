@@ -257,12 +257,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
 - Brief: [brief-r3.md](jobs/J006/brief-r3.md)
 - Blocker: V003 Standards/Spec FAIL exactc7afd30: F1 newly allowed source/segment fields bypass validation on Pi/manual/other non-OTLP provenance and echo arbitrary content; F2 accepted nested keyed attribute values remain order-sensitive and can duplicate cumulative counts. Earlier portable-fixture and core consumer-boundary fixes accepted. Original and extra actor/correction/review calls spent. Policy/process incidents remain separate/adverse; no complete J006 claim.
-- Next step: Await explicit finite extension: one worker<=10min for provenance-specific field validation and rejection or complete validation/canonicalization of unsupported compound attributes, with literal negative/reorder regressions; then one independent affected-delta review<=10min, same approved models and sequential. No automatic extra cycle/reset, publication/activation as complete or global cleanup/repair. Native Windows journeys remain deferred; source privacy correctness is not deferred.
+- Next step: Operator explicitly answered Ok to one worker<=10min for provenance-specific field validation and rejecting or fully validating unsupported compound attributes, with literal negative regressions; then one independent affected-delta reviewer<=10min, same Luna/high and Sol/medium, sequential. No automatic extra cycle/reset, publication/activation as complete or global cleanup/repair. Native Windows journeys remain deferred; source privacy correctness is not deferred.
 
 ### Acceptance
 
