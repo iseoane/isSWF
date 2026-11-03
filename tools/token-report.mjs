@@ -7,7 +7,7 @@ const MAX_INPUT = 1024 * 1024, MAX_ROWS = 100, MAX_ROW = 4096, MAX_OUTPUT = 64 *
 const fields = ['input', 'output', 'cacheRead', 'cacheWrite'];
 const metaFields = ['host', 'hostVersion', 'model', 'effort', 'taskClass', 'candidate', 'outcome', 'provenance', 'scope'];
 const allowedTop = new Set(['version', 'mode', 'rows']);
-const allowedRow = new Set(['id', ...metaFields, 'accepted', 'window', 'counters', 'durationSeconds', 'requests', 'turns', 'corrections', 'reasoning']);
+const allowedRow = new Set(['id', ...metaFields, 'accepted', 'window', 'counters', 'durationSeconds', 'requests', 'turns', 'corrections', 'reasoning', 'source', 'segment']);
 const ownKeysOnly = (value, allowed) => Object.keys(value).every(key => allowed.has(key));
 const text = (value, max = 128) => typeof value === 'string' && value.length > 0 && value.length <= max && /^[A-Za-z0-9][A-Za-z0-9._:+-]*$/u.test(value);
 const count = value => value === null || (Number.isSafeInteger(value) && value >= 0);
@@ -25,6 +25,7 @@ export function normalize(input) {
     for (const key of fields) if (!Object.hasOwn(row.counters, key) || !count(row.counters[key])) invalid();
     if (ids.has(`${row.window}\0${row.id}`)) throw Error('duplicate row identity/window');
     ids.add(`${row.window}\0${row.id}`);
+    if (row.provenance === 'native-claude-otel' && (!['main', 'subagent', 'auxiliary'].includes(row.source) || !/^[a-f0-9]{24}$/u.test(row.segment ?? ''))) invalid();
     for (const key of ['durationSeconds', 'requests', 'turns', 'corrections', 'reasoning']) if (Object.hasOwn(row, key) && !count(row[key])) invalid();
     const { reasoning, ...safe } = row;
     return { ...safe, reasoning: reasoning ?? null };
@@ -69,7 +70,7 @@ function summarize(input) {
 }
 function compare(before, after) {
   const a = before.rows, b = after.rows;
-  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted'];
+  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted', 'provenance', 'source', 'segment'];
   const byIdentity = new Map(b.map(row => [`${row.window}\0${row.id}`, row]));
   const comparable = a.length === b.length && a.every(row => {
     const counterpart = byIdentity.get(`${row.window}\0${row.id}`);

@@ -12,6 +12,20 @@ const categories = new Set(['input', 'output', 'cacheRead', 'cacheCreation']);
 const sources = new Set(['main', 'subagent', 'auxiliary']);
 const hash = value => createHash('sha256').update(value).digest('hex').slice(0, 24);
 
+function canonicalAttributes(attributes) {
+  if (!Array.isArray(attributes)) throw Error('invalid metric attributes');
+  const seen = new Set();
+  const entries = attributes.map(item => {
+    if (!item || typeof item.key !== 'string' || !item.key || seen.has(item.key) || !item.value || typeof item.value !== 'object' || Array.isArray(item.value)) throw Error('invalid or duplicate metric attribute');
+    seen.add(item.key);
+    const keys = Object.keys(item.value);
+    if (keys.length !== 1 || !['stringValue', 'intValue', 'doubleValue', 'boolValue', 'arrayValue', 'kvlistValue', 'bytesValue'].includes(keys[0])) throw Error('invalid metric attribute value');
+    return [item.key, item.value];
+  });
+  entries.sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify(entries);
+}
+
 function timestamp(value) {
   if (!(typeof value === 'string' && /^(0|[1-9][0-9]*)$/u.test(value)) && !(Number.isSafeInteger(value) && value >= 0)) throw Error('invalid metric timestamp');
   const parsed = BigInt(value);
@@ -24,12 +38,14 @@ function countersFrom(payload) {
   const counters = new Map();
   for (const resource of payload.resourceMetrics) {
     if (!Array.isArray(resource.scopeMetrics) || resource.scopeMetrics.length > 20) throw Error('invalid metrics payload');
-    const resourceIdentity = hash(JSON.stringify(resource.resource?.attributes ?? []));
+    const resourceIdentity = hash(canonicalAttributes(resource.resource?.attributes ?? []));
     for (const scope of resource.scopeMetrics) for (const metric of scope.metrics ?? []) {
       if (metric.name !== 'claude_code.token.usage') continue;
       if (metric.sum?.isMonotonic !== true || metric.sum?.aggregationTemporality !== 2 || !Array.isArray(metric.sum.dataPoints)) throw Error('cumulative metrics required');
       for (const point of metric.sum.dataPoints) {
-        const attrs = Object.fromEntries((point.attributes ?? []).filter(item => ['type', 'query_source', 'model'].includes(item.key)).map(item => [item.key, item.value?.stringValue]));
+        const pointAttributes = point.attributes ?? [];
+        canonicalAttributes(pointAttributes);
+        const attrs = Object.fromEntries(pointAttributes.filter(item => ['type', 'query_source', 'model'].includes(item.key)).map(item => [item.key, item.value.stringValue]));
         if (!categories.has(attrs.type) || !sources.has(attrs.query_source)) continue;
         if (Object.hasOwn(point, 'asInt') === Object.hasOwn(point, 'asDouble')) throw Error('invalid metric counter');
         const rawValue = Object.hasOwn(point, 'asInt') ? point.asInt : point.asDouble;
