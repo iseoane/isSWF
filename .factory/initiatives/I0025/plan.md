@@ -69,10 +69,10 @@ Linux evidence here is documentation and installed-source/help inspection; Windo
 
 Initial assumption versus result: Pi has existing usage summaries, not an isSWF measurement methodology already implemented. Claude also has native usage surfaces; we do not need a second accounting system. The remaining work is a small common receipt/comparison format and version-specific confirmation of totals, not exhaustive attribution infrastructure. No baseline numbers or savings were measured in this continuation.
 
-### Ordered functional units (proposed, not started; refined by the analysis continuation)
+### Ordered functional units (original proposal; current job sections below record actual starts)
 
 1. **One reproducible offline receipt:** explicitly supplied sanitized summary → bounded report with counters, scope, availability and provenance. Include implementation, fixtures and affected bilingual usage docs in one candidate. Known totals, unknown/malformed/oversized input and sensitive-field exclusion must be checked. No private-store discovery.
-2. **One accepted-outcome baseline:** after unit 1 integration, map coordinator/children/reviews/retries/resumes with explicit identities; replace cumulative snapshots rather than adding them, deduplicate terminal updates and report unmatched actors. Check missing children, interruption and resume. Retain correctness-checked real baseline with accepted-outcome identity and coverage. A synthetic fixture validates aggregation, not actual consumption.
+2. **One accepted-outcome baseline:** using unit 1's reviewed candidate (stacked PR delivery explicitly approved later), map coordinator/children/reviews/retries/resumes with explicit identities; replace cumulative snapshots rather than adding them, deduplicate terminal updates and report unmatched actors. Check missing children, interruption and resume. Retain correctness-checked real baseline with accepted-outcome identity and coverage. A synthetic fixture validates aggregation, not actual consumption.
 3. **Supported host/platform collection:** reuse native Pi summaries and the Claude surfaces identified above; confirm installed schemas before claiming native integration. Unit 1 accepts supplied summaries from both hosts without waiting for automatic collection. Exercise portable fixtures and authorized native observations on Linux/Windows separately. Partial Pi evidence does not close full-host acceptance.
 
 ### Operator clarifications: attribution and measurement overhead
@@ -150,3 +150,36 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - PR144 observed OPEN at f08a28be6bf480a5865334b2eae94e6fa195d040; CI41467736080 all three checks SUCCESS. Observation is not integration or acceptance.
 - Operator explicitly approved stacked PRs and instructed continuation; branch feat/i0025-real-baseline based on exact reviewed parent, PR base feat/i0025-offline-metrics.
 - jobs/J002/A001.md and baseline/input.json, report.json, provenance.json: coordinator-observed real host-normalized summaries of four known native child attempts; 4380689 processed tokens, 90.1634% cache-read input share, no accepted-outcome ratio and no savings claim. No raw conversations or new model calls used.
+
+
+## J003
+
+- Status: in-review
+- Objective: Support native Pi/Claude usage summaries for coordinator and agents/subagents without models in the measurement path, retaining explicit host/platform capability limits.
+- Depends on: J001
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: Draft PR146 at3e187822d7c1b20df0887a39da319aae7357f7b0 has all three CI checks SUCCESS and reviewed source2eca40b. Authorized Pi/Linux empty-session load/API acquisition now PASS, but nonzero coordinator/children/window behavior, installed-Claude and native Windows evidence remain pending. Claude snapshot-only; slice2 partial.
+- Next step: Retain A003 native proof under the existing record-only boundary, then resolve a real ordinary-work sample and installed-Claude/Windows observations before full native acceptance. No persistent activation, further model actors, automatic provider calls or direct-main integration.
+
+### Acceptance
+
+- Use supported version-bound native summaries with explicit coordinator/child/tree scope and provenance, unknown counters and coverage visible.
+- Normalize native data into the existing deterministic reporting path with no model extraction, raw prompt/tool/auth retention or hidden collection infrastructure.
+- Handle duplicates, overlapping trees, cumulative snapshots, resumes and resets according to the actual source semantics, without invented attribution.
+- Verify portable mechanics and native capabilities separately for Pi/Claude and Linux/Windows; missing required native evidence remains an explicit blocker.
+- Deliver bounded source/tests/bilingual docs and exact-candidate review/stacked PR/CI without implying product acceptance, merge or demonstrated savings.
+
+### Evidence
+
+- Current operator explicitly says to proceed with slice3; current source635277b834e63f461a12296401a9ee0b1fbc897c on feat/i0025-native-metrics.
+- jobs/J003/brief-r1.md: original finite allowance and feasibility-first boundary, retained unchanged.
+- jobs/J003/R001.md: researcher9507799f-e574-49da-9380-afc0d18f6d44 complete/process terminal observed, findings partial and resource consumption self-reported. Pi RPC source established; local Claude declarations insufficient, upstream checks not available to this role.
+- jobs/J003/brief-r2.md: coordinator official-source reconciliation and bounded writer contract; research spent, worker/correction/two-review allowances unspent before dispatch. Explicit source-versus-native acceptance/activation distinction.
+- Parent PR144 and145 both OPEN; all three exact-head CI checks SUCCESS at observation. Slice2 real baseline remains partial and is not relabelled completed.
+- jobs/J003/A001.md: worker29dec949-2003-4f1f-bd82-cd183726059e complete/process terminal observed; source2741cfea0eeddcc6926a9382f2aa880032a53e5e; result explicitly partial pending native activation/installed-Claude/Windows evidence. Required resource reads including full Pi extension docs self-reported.
+- Coordinator reran native-usage and token-report focused suites plus full portable quality on2741cfe: exit0; passing fixtures do not establish native collection behavior.
+- jobs/J003/V001.md: reviewer cbf07a10-c90a-4fba-917b-2d9317883c4e complete/process terminal observed, Standards fail/Spec fail exact2741cfe; bound Git evidence consumed, all required procedure consumed self-reported. Failed verdict retained.
+- jobs/J003/A002.md: worker correction389149ce-16a1-4729-aabe-a911520af7cd terminal complete, candidate2eca40b0a4e82a28fe84498940ec8eba9e354899; B1–B4 addressed in the single consumed correction cycle. Coordinator reran native-usage/report/fullportablequality exit0; no live native proof or full acceptance inferred.
+- jobs/J003/V002.md: reviewer33fca849-3ddf-4cd2-a008-ed56217e22b6 terminal complete; Standards pass/Spec pass for exact correction delta with unchanged-evidence reuse. Optional regression suggestions nonblocking. No source edits after review; all actor allowances spent.
+- jobs/J003/delivery.md: source/review/check identities, Medium host-integration risk and explicit missing full native/platform acceptance.
+- jobs/J003/A003.md: operator-authorized one-shot actual Pi1.5.0/subagents0.83.0 source extension load and native costRPC snapshot in fresh empty Linux session PASS; assistant/tool activity0, cleanexit0, settings hashes unchanged. Actual receipt normalized and refused as report window. Not existing coordinator/nonzero consumption, Claude or Windows evidence. Private harness retained ignored, no source changes.
