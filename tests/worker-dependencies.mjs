@@ -50,10 +50,10 @@ try {
   await blocked({ markdown: original.replace('- Depends on: None', '- Depends on: J002') }, 'dependency-cycle');
   await blocked({ markdown: original.replace('- Status: completed', '- Status: pending'), attestations: { J001: { kind: 'decision', reference: 'Synthetic operator decision' } } }, 'decision');
   for (const options of [{ includeGrant: false }, { descriptor: { sha256: '0'.repeat(64) } }, { grantChange: { jobSha256: '0'.repeat(64) } }, { grantChange: { allowDependencyCheck: false } }, { attestations: { J001: { kind: 'code', commit: base }, J003: { kind: 'code', commit: base } } }]) {
-    const r = await invoke(options); assert.notEqual(r.status, 0); assert(!r.stderr.includes('.pi/settings.json'), 'invalid authority must not reach activation');
+    const r = await invoke(options); assert.notEqual(r.status, 0); assert(!/\.pi[\\/]settings\.json/u.test(r.stderr), 'invalid authority must not reach activation');
   }
   for (const options of [{ attestations: { J001: { kind: 'code', commit: base } } }, { attestations: { J001: { kind: 'code', commit: base } }, dirty: true }, { attestations: { J001: { kind: 'decision', reference: 'Synthetic accepted decision' } } }, { selectedJob: 'J003' }, { legacy: true }]) {
-    const r = await invoke(options); assert.equal(r.status, 1); assert.match(r.stderr, /\.pi\/settings\.json/u, 'satisfied gate reaches the deliberately absent activation, not a worker execution');
+    const r = await invoke(options); assert.equal(r.status, 1); assert.match(r.stderr, /\.pi[\\/]settings\.json/u, 'satisfied gate reaches the deliberately absent activation, not a worker execution');
   }
   console.log('PASS normal worker dependency gate: decision/evidence/ancestry/cycle refusal before all admission effects; pinned input ignores dirty replacement, valid and unrelated cases reach activation; no worker execution claimed');
 } finally { await rm(root, { recursive: true, force: true }); }

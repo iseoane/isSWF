@@ -52,7 +52,7 @@ try {
   await json(grantFile, grant);
   for(const slot of [0,1])await rm(join(pool,'slot-'+slot),{recursive:true});
   const hook=join(root,'lose-admission.mjs');
-  await writeFile(hook,`import fs from 'node:fs/promises'; import {syncBuiltinESMExports} from 'node:module'; const original=fs.link; fs.link=async(a,b)=>{if(b.includes('/admissions/'))throw Object.assign(new Error('synthetic competing admission'),{code:'EEXIST'});return original(a,b);}; syncBuiltinESMExports();`);
+  await writeFile(hook,`import fs from 'node:fs/promises'; import {syncBuiltinESMExports} from 'node:module'; const original=fs.link; fs.link=async(a,b)=>{if(/[\\\\/]admissions[\\\\/]/.test(b))throw Object.assign(new Error('synthetic competing admission'),{code:'EEXIST'});return original(a,b);}; syncBuiltinESMExports();`);
   const lost=command(process.execPath,['--import',hook,...args]);
   assert.equal(lost.status,1,lost.stderr);
   assert.equal((await readdir(pool)).filter(name=>name.startsWith('slot-')).length,0,'losing admission must not strand execution capacity');
