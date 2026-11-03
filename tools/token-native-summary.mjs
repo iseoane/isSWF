@@ -158,7 +158,7 @@ export function normalizeClaudeOtel({ input, meta }) {
   }
   if (!models.size || models.size > MAX_ROWS) fail();
   const rows = [...models.values()].map(row => ({
-    id: `claude-${hash(JSON.stringify([meta.id, input.session, row.source, row.model, row.group, row.interval]))}`, host: 'claude', hostVersion: input.hostVersion, model: row.model,
+    id: `claude-${hash(JSON.stringify([meta.id, row.source, row.model, row.group]))}`, host: 'claude', hostVersion: input.hostVersion, model: row.model,
     effort: meta.effort, taskClass: meta.taskClass, candidate: meta.candidate, outcome: meta.outcome,
     accepted: meta.accepted, provenance: 'native-claude-otel', scope: 'unattributed', window: meta.window,
     source: row.source, segment: hash(JSON.stringify([input.session, row.group, row.interval])),

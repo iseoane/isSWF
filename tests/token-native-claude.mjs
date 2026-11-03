@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
-import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { delimiter, join } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { claudeExecutable, conflictingTelemetryEnvironment, countersFrom, mergeCumulative, persistReceipt, readConfig } from '../tools/token-native-claude.mjs';
 import { normalizeClaudeOtel } from '../tools/token-native-summary.mjs';
@@ -55,6 +55,9 @@ const changedLaunch = normalizeClaudeOtel({ input: { ...receipt, session: 'abcde
 assert.notEqual(changedLaunch.rows[0].segment, window.rows[0].segment, 'launch identity is retained opaquely');
 const changedBoundary = normalizeClaudeOtel({ input: { ...receipt, counters: receipt.counters.map(row => ({ ...row, end: '300' })) }, meta: metadata });
 assert.notEqual(changedBoundary.rows[0].segment, window.rows[0].segment, 'cumulative interval is retained opaquely');
+const independentLaunch = normalizeClaudeOtel({ input: { ...receipt, session: 'abcdef0123456789abcdef01', counters: receipt.counters.map((row, index) => ({ ...row, value: index === 0 ? row.value + 1 : row.value, start: '101', end: '301' })) }, meta: metadata });
+assert.notEqual(independentLaunch.rows[0].segment, window.rows[0].segment);
+assert.equal(report(independentLaunch, window).comparison.status, 'comparable', 'matched independent native launches compare by stable source/group identity despite opaque segment differences');
 assert.throws(() => normalizeClaudeOtel({ input: { ...receipt, counters: receipt.counters.map((row, index) => ({ ...row, end: index ? '301' : '300' })) }, meta: metadata }), /invalid native summary/u);
 const longIdWindow = normalizeClaudeOtel({ input: receipt, meta: { ...metadata, id: 'a'.repeat(128) } });
 assert.match(longIdWindow.rows[0].id, /^claude-[a-f0-9]{24}$/u);
@@ -110,21 +113,22 @@ try {
   assert.equal(await readFile(staleClaim, 'utf8'), 'existing claim', 'stale claim is never removed');
   await writeFile(configPath, JSON.stringify({ version: 1, enabled: false }));
   const bin = join(project, 'bin'); await mkdir(bin);
-  const fakeClaude = join(bin, 'claude');
-  await writeFile(fakeClaude, `#!/usr/bin/env node\nprocess.stdout.write(JSON.stringify({args: process.argv.slice(2)}) + String.fromCharCode(10)); process.stdin.pipe(process.stdout);\n`);
-  await chmod(fakeClaude, 0o700);
+  const fakeClaude = join(bin, claudeExecutable());
+  const fixtureScript = join(project, 'fixture.mjs');
+  await writeFile(fixtureScript, `process.stdout.write(JSON.stringify({args: process.argv.slice(2)}) + String.fromCharCode(10)); process.stdin.pipe(process.stdout);\n`);
+  await copyFile(process.execPath, fakeClaude);
   const entry = fileURLToPath(new URL('../tools/token-native-claude.mjs', import.meta.url));
-  const launch = execFileSync(process.execPath, [entry, '--', '--model', 'preserve-me'], { cwd: project, env: { ...process.env, PATH: `${bin}${delimiter}${process.env.PATH}` }, input: 'stdin-preserved', encoding: 'utf8', timeout: 5000 });
+  const launch = execFileSync(process.execPath, [entry, '--', fixtureScript, '--model', 'preserve-me'], { cwd: project, env: { ...process.env, PATH: bin }, input: 'stdin-preserved', encoding: 'utf8', timeout: 5000 });
   assert.ok(launch.includes('"args":["--model","preserve-me"]'));
   assert.match(launch, /stdin-preserved/u);
   assert.equal(await readFile(configPath, 'utf8'), JSON.stringify({ version: 1, enabled: false }));
   assert.equal(await import('node:fs/promises').then(({ access }) => access(join(state, 'claude-native-usage'))).then(() => true, () => false), false, 'disabled launch creates no receiver destination or receipt');
   const fixtureBin = join(project, 'fixture-bin'); await mkdir(fixtureBin);
-  const fixtureClaude = join(fixtureBin, 'claude');
-  await writeFile(fixtureClaude, `#!/usr/bin/env node
-const http = require('node:http');
+  const fixtureClaude = join(fixtureBin, claudeExecutable());
+  const nativeFixtureScript = join(project, 'native-fixture.mjs');
+  await copyFile(process.execPath, fixtureClaude);
+  await writeFile(nativeFixtureScript, `import http from 'node:http';
 const mode = process.argv.find(value => value.startsWith('--mode='))?.slice(7) ?? 'valid';
-if (process.argv.includes('--version')) { process.stdout.write('2.1.312\\n'); process.exit(0); }
 if (mode === 'resistant') { process.stdout.write('RESISTING\\n'); process.on('SIGTERM', () => {}); setInterval(() => {}, 1000); }
 else {
   const endpoint = new URL(process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT);
@@ -140,15 +144,14 @@ else {
   process.stdout.write(JSON.stringify(process.argv.slice(2)) + String.fromCharCode(10)); process.stdin.pipe(process.stdout);
 }
 `);
-  await chmod(fixtureClaude, 0o700);
   const enabledCase = async mode => {
     const cwd = join(project, `case-${mode}`), caseState = join(cwd, '.isswf');
     await mkdir(caseState, { recursive: true });
     await writeFile(join(caseState, 'claude-native-usage.json'), JSON.stringify({ version: 1, enabled: true, destination: 'capture' }));
-    return { cwd, caseState, env: { ...process.env, PATH: `${fixtureBin}${delimiter}${process.env.PATH}` } };
+    return { cwd, caseState, env: { ...process.env, PATH: fixtureBin } };
   };
   const validCase = await enabledCase('valid');
-  const enabledRun = await runHelper(validCase.cwd, entry, ['--model', 'preserved', '--mode=valid'], validCase.env);
+  const enabledRun = await runHelper(validCase.cwd, entry, [nativeFixtureScript, '--model', 'preserved', '--mode=valid'], validCase.env);
   assert.equal(enabledRun.code, 0, enabledRun.stderr);
   assert.doesNotMatch(enabledRun.stderr, /capture incomplete/u, enabledRun.stderr);
   assert.ok(enabledRun.stdout.includes('"--model","preserved"'));
@@ -160,19 +163,24 @@ else {
   assert.equal(retained.counters[0].value, 11);
   for (const mode of ['wrong-route', 'auth', 'schema', 'oversize']) {
     const failedCase = await enabledCase(mode);
-    const failedRun = await runHelper(failedCase.cwd, entry, [`--mode=${mode}`], failedCase.env);
+    const failedRun = await runHelper(failedCase.cwd, entry, [nativeFixtureScript, `--mode=${mode}`], failedCase.env);
     assert.equal(failedRun.code, 0, `${mode} does not alter the child exit status`);
     assert.match(failedRun.stderr, /capture incomplete/u);
     assert.equal(await import('node:fs/promises').then(({ access }) => access(join(failedCase.caseState, 'capture'))).then(() => true, () => false), false, `${mode} retains no receipt`);
   }
   const missingExecutable = await enabledCase('spawn-failure');
-  const spawnFailure = await runHelper(missingExecutable.cwd, entry, ['--mode=valid'], { ...process.env, PATH: '/usr/bin' });
+  const emptyPath = join(project, 'empty-executable-path'); await mkdir(emptyPath);
+  const spawnFailure = await runHelper(missingExecutable.cwd, entry, [nativeFixtureScript, '--mode=valid'], { ...process.env, PATH: emptyPath });
   assert.equal(spawnFailure.code, 1, 'version/spawn failure is surfaced');
   const resistantCase = await enabledCase('resistant');
-  const cancellation = await runHelper(resistantCase.cwd, entry, ['--mode=resistant'], resistantCase.env, true);
-  assert.equal(cancellation.signalled, true);
-  assert.equal(cancellation.code, 1);
-  assert.ok(cancellation.elapsed < 6000, `resistant child cancellation was bounded (${cancellation.elapsed}ms)`);
+  if (process.platform !== 'win32') {
+    const cancellation = await runHelper(resistantCase.cwd, entry, [nativeFixtureScript, '--mode=resistant'], resistantCase.env, true);
+    assert.equal(cancellation.signalled, true);
+    assert.equal(cancellation.code, 1);
+    assert.ok(cancellation.elapsed < 6000, `POSIX resistant-child cancellation was bounded (${cancellation.elapsed}ms)`);
+  } else {
+    assert.equal(claudeExecutable('win32'), 'claude.exe', 'Windows fixture uses a copied native Node executable, not a .cmd/shim');
+  }
   await mkdir(join(project, '.factory'));
   assert.equal((await readConfig(project)).enabled, false, 'ambiguous state roots fail closed');
 } finally { await rm(project, { recursive: true, force: true }); }

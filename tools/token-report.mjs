@@ -70,7 +70,7 @@ function summarize(input) {
 }
 function compare(before, after) {
   const a = before.rows, b = after.rows;
-  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted', 'provenance', 'source', 'segment'];
+  const keys = ['window', 'id', 'outcome', 'host', 'hostVersion', 'model', 'effort', 'taskClass', 'scope', 'accepted', 'provenance', 'source'];
   const byIdentity = new Map(b.map(row => [`${row.window}\0${row.id}`, row]));
   const comparable = a.length === b.length && a.every(row => {
     const counterpart = byIdentity.get(`${row.window}\0${row.id}`);

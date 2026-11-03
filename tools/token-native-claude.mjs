@@ -174,7 +174,7 @@ async function run() {
   let hostVersion = 'unknown';
   try {
     const output = execFileSync(executable, ['--version'], { cwd, env: process.env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000, windowsHide: true });
-    const match = output.match(/\b(\d+\.\d+\.\d+)\b/u);
+    const match = output.match(/(?:^|\s)v?(\d+\.\d+\.\d+)\b/mu);
     if (match) hostVersion = match[1];
   } catch { throw Error('cannot determine Claude version; refusing instrumented launch'); }
   if (hostVersion === 'unknown') throw Error('Claude version output was not recognized; refusing instrumented launch');
