@@ -1,10 +1,12 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { open } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { link, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
+import { isAbsolute, relative, resolve } from 'node:path';
 
 const REQUEST = 'subagents:rpc:v1:request';
 const REPLY = 'subagents:rpc:v1:reply:';
 const MAX_RECEIPT = 1024 * 1024;
+const MAX_AUTO_ROWS = 100;
+const STATE_ROOTS = ['.isswf', '.factory'];
 const digest = value => createHash('sha256').update(String(value)).digest('hex').slice(0, 24);
 const integer = value => Number.isSafeInteger(value) && value >= 0;
 
@@ -85,7 +87,156 @@ export async function writeExclusive(path, receipt) {
   finally { await handle.close(); }
 }
 
+async function loadAutoConfig(cwd) {
+  const configured = [];
+  for (const stateRoot of STATE_ROOTS) {
+    const rootPath = resolve(cwd, stateRoot);
+    try {
+      const rootInfo = await lstat(rootPath);
+      if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink()) return undefined;
+    } catch (error) { if (error.code === 'ENOENT') continue; return undefined; }
+    const configPath = resolve(rootPath, 'native-usage.json');
+    try {
+      const info = await lstat(configPath);
+      if (!info.isFile() || info.isSymbolicLink()) return undefined;
+      configured.push({ configPath, stateRoot });
+    } catch (error) { if (error.code !== 'ENOENT') return undefined; }
+  }
+  if (configured.length !== 1) return undefined;
+  try {
+    const { configPath, stateRoot } = configured[0];
+    const config = JSON.parse(await readFile(configPath, 'utf8'));
+    if (config?.version !== 1 || config.enabled !== true || typeof config.destination !== 'string' || !config.destination.trim()) return undefined;
+    const base = resolve(cwd, stateRoot);
+    const destination = resolve(base, config.destination);
+    const relativePath = relative(base, destination);
+    if (!relativePath || relativePath.startsWith('..') || isAbsolute(relativePath)) return undefined;
+    return { destination, stateRoot };
+  } catch { return undefined; }
+}
+
+async function ensureCaptureDirectory(destination, cwd, stateRoot) {
+  const base = resolve(cwd, stateRoot);
+  const relativePath = relative(base, destination);
+  if (!relativePath || relativePath.startsWith('..') || isAbsolute(relativePath)) throw Error('unsafe capture destination');
+  try { await mkdir(base, { mode: 0o700 }); } catch (error) { if (error.code !== 'EEXIST') throw error; }
+  const baseInfo = await lstat(base);
+  if (!baseInfo.isDirectory() || baseInfo.isSymbolicLink()) throw Error('unsafe capture destination');
+  let current = base;
+  for (const segment of relativePath.split(/[\\/]+/u)) {
+    if (!segment || segment === '.' || segment === '..') throw Error('unsafe capture destination');
+    current = resolve(current, segment);
+    try { await mkdir(current, { mode: 0o700 }); } catch (error) { if (error.code !== 'EEXIST') throw error; }
+    const info = await lstat(current);
+    if (!info.isDirectory() || info.isSymbolicLink()) throw Error('unsafe capture destination');
+  }
+}
+
+async function writeAutoSnapshot(destination, receipt, key, event, cwd, stateRoot) {
+  await ensureCaptureDirectory(destination, cwd, stateRoot);
+  const path = resolve(destination, `${receipt.session}.json`);
+  const lock = `${path}.lock`;
+  const claim = await open(lock, 'wx', 0o600);
+  try {
+    let state;
+    let existed = true;
+    try {
+      const info = await lstat(path);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > MAX_RECEIPT) throw Error('capture storage limit exceeded');
+      state = JSON.parse(await readFile(path, 'utf8'));
+      if (state?.version !== 1 || state.owner !== 'isswf/pi-native-capture-v1' || state.session !== receipt.session || !Array.isArray(state.records) || state.records.length > MAX_AUTO_ROWS) throw Error('invalid existing capture');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      existed = false;
+      state = { version: 1, owner: 'isswf/pi-native-capture-v1', session: receipt.session, baseline: receipt, latest: receipt, records: [] };
+    }
+    const index = state.records.findIndex(record => record.key === key);
+    if (index >= 0 && JSON.stringify(state.records[index].snapshot) === JSON.stringify(receipt)) return false;
+    if (index < 0 && state.records.length >= MAX_AUTO_ROWS) throw Error('capture record limit exceeded');
+    const records = [...state.records];
+    const record = { key, event, snapshot: receipt };
+    if (index >= 0) records[index] = record;
+    else records.push(record);
+    const next = { version: 1, owner: 'isswf/pi-native-capture-v1', session: receipt.session, baseline: state.baseline, latest: receipt, records };
+    const body = `${JSON.stringify(next)}\n`;
+    if (Buffer.byteLength(body) > MAX_RECEIPT) throw Error('capture storage limit exceeded');
+    const temporary = `${path}.${randomUUID()}.tmp`;
+    try {
+      const handle = await open(temporary, 'wx', 0o600);
+      try { await handle.writeFile(body, 'utf8'); } finally { await handle.close(); }
+      if (existed) await rename(temporary, path);
+      else {
+        await link(temporary, path);
+        await unlink(temporary);
+      }
+    } catch (error) {
+      try { await unlink(temporary); } catch {}
+      throw error;
+    }
+    return true;
+  } finally {
+    await claim.close();
+    await unlink(lock);
+  }
+}
+
 export default function tokenNativePi(pi) {
+  let epoch = 0;
+  let active;
+  let inFlight = false;
+  let pending;
+  const completions = new Set();
+  pi.on('session_start', async (_event, ctx) => {
+    const currentEpoch = ++epoch;
+    active = undefined;
+    pending = undefined;
+    completions.clear();
+    const destination = await loadAutoConfig(ctx.cwd);
+    if (epoch !== currentEpoch) return;
+    active = { epoch: currentEpoch, ctx, destination, disposed: false };
+    if (destination) enqueue('session-start', 'session-start', ctx);
+  });
+  pi.on('agent_settled', (_event, ctx) => {
+    let branch;
+    try { branch = ctx.sessionManager.getBranch().map(entry => entry.id); } catch { return; }
+    if (branch.some(id => typeof id !== 'string' || !id)) return;
+    enqueue(`settled:${digest(branch.join(':'))}`, 'agent-settled', ctx);
+  });
+  pi.on('session_shutdown', () => { epoch++; active = undefined; pending = undefined; completions.clear(); });
+  pi.events?.on?.('subagent:async-complete', event => {
+    const id = event?.runId;
+    if (typeof id !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/u.test(id) || completions.has(id)) return;
+    if (completions.size >= MAX_AUTO_ROWS) return;
+    completions.add(id);
+    enqueue(`async:${digest(id)}`, 'async-complete');
+  });
+
+  function enqueue(key, event, ctx = active?.ctx) {
+    if (!active?.destination || !ctx) return;
+    pending = { key, event, ctx };
+    void drain();
+  }
+
+  async function drain() {
+    if (inFlight || !pending || !active?.destination) return;
+    const request = pending;
+    pending = undefined;
+    const owner = active;
+    inFlight = true;
+    try {
+      const receipt = await requestCost(pi, request.ctx);
+      if (active !== owner || owner.epoch !== epoch || owner.disposed) return;
+      await writeAutoSnapshot(owner.destination.destination, receipt, request.key, request.event, request.ctx.cwd, owner.destination.stateRoot);
+      if (active === owner && owner.epoch === epoch) request.ctx.ui?.setStatus?.('token-native-capture', undefined);
+    } catch {
+      if (active === owner && owner.epoch === epoch) request.ctx.ui?.setStatus?.('token-native-capture', 'Automatic usage capture failed');
+    }
+    finally {
+      inFlight = false;
+      if (pending && active?.destination) void drain();
+    }
+  }
+
   pi.registerCommand('token-native-snapshot', {
     description: 'Write one bounded native Pi usage snapshot to a new file',
     handler: async (args, ctx) => {

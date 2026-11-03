@@ -190,20 +190,29 @@ export function normalizeNative({ input, start, meta }) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const args = {}, fields = new Set(['--input', '--start', '--host', '--id', '--window', '--host-version', '--effort', '--task-class', '--candidate', '--outcome', '--accepted']);
+    const args = {}, fields = new Set(['--input', '--capture', '--start', '--host', '--id', '--window', '--host-version', '--effort', '--task-class', '--candidate', '--outcome', '--accepted']);
     const parts = process.argv.slice(2);
     for (let index = 0; index < parts.length; index += 2) {
       if (!fields.has(parts[index]) || !parts[index + 1] || Object.hasOwn(args, parts[index])) throw Error('invalid option');
       args[parts[index]] = parts[index + 1];
     }
-    if (!args['--input'] || !['pi', 'claude'].includes(args['--host'])) throw Error('invalid options');
-    if (args['--host'] === 'pi' && args['--start'] && args['--accepted'] === undefined) throw Error('invalid options');
+    if ((!args['--input'] && !args['--capture']) || (args['--input'] && args['--capture']) || !['pi', 'claude'].includes(args['--host'] ?? (args['--capture'] ? 'pi' : ''))) throw Error('invalid options');
+    const host = args['--host'] ?? 'pi';
+    if (host === 'pi' && (args['--start'] || args['--capture']) && args['--accepted'] === undefined) throw Error('invalid options');
     const total = { bytes: 0 };
-    const input = await load(args['--input'], total);
-    const start = args['--start'] ? await load(args['--start'], total) : undefined;
-    const hostVersion = args['--host-version'] ?? (args['--host'] === 'pi' ? input.hostVersion : 'unknown');
+    let input, start;
+    if (args['--capture']) {
+      const capture = await load(args['--capture'], total);
+      if (capture?.version !== 1 || capture.owner !== 'isswf/pi-native-capture-v1' || capture.latest?.host !== 'pi' || !capture.baseline) throw Error('invalid automatic capture');
+      input = capture.latest;
+      start = capture.baseline;
+    } else {
+      input = await load(args['--input'], total);
+      start = args['--start'] ? await load(args['--start'], total) : undefined;
+    }
+    const hostVersion = args['--host-version'] ?? (host === 'pi' ? input.hostVersion : 'unknown');
     const meta = {
-      host: args['--host'], id: args['--id'] ?? 'native', window: args['--window'] ?? 'window', hostVersion,
+      host, id: args['--id'] ?? 'native', window: args['--window'] ?? 'window', hostVersion,
       effort: args['--effort'] ?? 'unknown', taskClass: args['--task-class'] ?? 'native-summary',
       candidate: args['--candidate'] ?? 'unknown', outcome: args['--outcome'] ?? 'unknown',
       accepted: Number(args['--accepted']),

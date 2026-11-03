@@ -217,3 +217,63 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - jobs/J004/A003.md and measurement/end.json/result.json/calculate.mjs: operator end capture received; approximate parentdelta40000input21000output17700000cacheRead/54turns. Combinedknownsubtotalapproximately22279341/120turns; parentcacheWriteunknown, no fulltotal/cache-share/accepted-outcome ratio or savings claim. Reproduction byte-identical and new native rows/old9/turns consistent.
 - jobs/J004/delivery.md: bounded source/review/check identities, Medium risk and remaining native/platform/acceptance gates. DraftPR147 verified head154509105b43647c8280df93f9b6c5cc9418ccd3; CI41503551152 portable/Ubuntu SUCCESS, Windows IN_PROGRESS at observation.
 - Basea7ac95ba53213044418c1c6d626eabd9ccf955fb, branchfeat/i0025-claude-metrics; parent PR146 all three exact-head CI41497320513 checks SUCCESS, still OPEN.
+
+
+## J005
+
+- Status: in-review
+- Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
+- Depends on: J004
+- Brief: [brief-r2.md](jobs/J005/brief-r2.md)
+- Blocker: V003 Standards/source-Spec PASS for B1–B3 on448a6ae; V002 fail on8877475 retained. Coordinator A005 now verifies actual Pi/subagents integrated nonzero automatic capture AND genuine native completion in isolated Linux RPC. Reviewer native INCONCLUSIVE remains its historical observation. Draft PR151 published/readback verified at161408664b3f137ffc3657465248695f793bd8ac, basefeat/i0025-claude-metrics. CI41589977520 Ubuntu discovery SUCCESS, portable and Windows IN_PROGRESS at observation. Operator acceptance/integration remain separate; Windows real metric journeys deferred.
+- Next step: Observe remaining exact-head PR151 checks through native event or one bounded deferred read; no active polling/model calls just to wait. Current CI pending is technical, not a human-approval blocker. No merge or current-session activation. Continue J006 local grounding under separate allowance; no additional J005 engineering actors.
+
+### Acceptance
+
+- After explicit one-time local opt-in, initial and settled/completion usage is exported automatically without user counter commands or model calls to collect it.
+- Reuse native cost API with bounded duplicate/in-flight/session-switch/shutdown handling; no timer polling, dispatcher, unbounded history or hidden activation.
+- Persist only numeric allowlists and opaque correlations; preserve missingness, non-additive scope, host-normalized provenance and sink/overflow failures visibly.
+- Provide deterministic consumable window/record output, preserve snapshot/window and identity guarantees, and update equivalent EN/ES usage instructions.
+- Verify actual Pi/native API automatic hook execution separately from injected counter data and Windows capability; no empty-session-only or source-only full workflow claim.
+
+### Evidence
+
+- Operator explicitly said adelante and addressed coordinator after selecting automatic Pi capture then actual Claude acquisition. Optimization issues148–150 stay deferred.
+- Sourcebaseba0336beb4f13cb8eece483244d23b009eff5a4d, branchfeat/i0025-auto-pi-capture; parentPR147 all three exact-head CI41504376219 checks SUCCESS, stillOPEN.
+- Actual installed Pi1.5 and locked1.4 type declarations expose agent_settled; subagents0.83 docs document costRPC and advertised completion events. Unknown mechanism is not assumed supported.
+- jobs/J005/brief-r1.md: one worker30min, one correction15min, up to two reviews15min each, sequential, no nested/retry/fallback/paidAPI; no prior allowance reused.
+- jobs/J005/A001.md: worker1d9c983c-32dd-408d-af70-121cac2c5bf5 terminal complete with blocked result, source unchanged atc257788. Required installed extension docs only partially consumed/self-reported; no tests or native proof.
+- Operator explicitly confirms implementation for Pi and Claude through isswf-setup; real Windows tests later. Current setup skill has no metric option; source integration pending, not configured.
+- jobs/J005/brief-r2.md: preserves A001/r1, resolves canonical plan path and chunked-doc procedure, adds setup/source scope and current incremental budget1same-context continuation30min+1source correction15min+up to2reviews15min, no replacement/reset.
+- jobs/J005/A002.md: retained actual worker report from native run f82fb6cc-6306-41de-8fd9-52afd3a51723, terminal complete observed on resumption. Source ee57ab3 partial; no actual native hook test or verified persisted activation. Current operator start resumes the assignment, not the ceased author context. A001 and continuation remain spent.
+- jobs/J005/A003.md: correction context8f25124b continued as287b785d within same15min allowance; terminal complete observed. Fixed actual Pi stale UI-context shutdown race in8877475ca0e4a1c3852dd5d44e80841d8ceac11c. Worker native persisted-settings and actual settled-hook probes PASS with synthetic RPC/provider, no real provider or installed-subagents evidence. Added failure/lifecycle fixtures; coordinator focused auto/native suites PASS. Fullquality/lint/Knip/docs PASS self-reported. Initial fixture timing failure retained. Correction spent, two review allowances initially remain.
+- First independent review f44a7acb-762c-4661-b811-ac81129e10ca: terminal failed/process terminal observed, approved sol/medium, provider error `The usage limit has been reached`; no Standards/Spec verdict or retained review report. Candidate remains8877475; no review acceptance inferred.
+- jobs/J005/V002.md: operator explicitly clarified restored quota and requested continuation; second reserved review acf82146-1650-4d80-980a-f222fae68898 terminal complete observed. Bound exactdiff80222bytes verified; Standards fail, Spec/source fail, native inconclusive. B1–B3 retained. Coordinator supplied mechanical equality attestations for pinned documents/source context; reviewer read them without execution tools. Both original review calls now spent; subsequent finite extension was explicitly approved, not inferred.
+- jobs/J005/A004.md and A004.0a22ff9a.md: same extra30min correction contextd17808a5 continued0a22ff9a, terminal complete observed. Candidate448a6ae145c2d783df296bb82a77e84a55160229 addresses B1–B3 with regressions; coordinator focusedauto/nativePASS exactcandidate. Worker fullquality/lint/Knip/docsPASS selfreported. Diagnosed actualprobe childmarker/no-session harnessconditions; actualPi1.5+subagents0.83 empty startupcostcapturePASS, no providers. Integratednonzero/actualcompletion unproved; failedsynthetic-subagentsprobe retained. No further sourceedit in continuation; extra15minreview subsequently consumed by V003.
+- jobs/J005/V003.md: reviewer0e1a92a6-1d6c-4837-a730-76a5ae51e083 terminal complete observed. Standards affected-delta PASS; Spec/source B1–B3 PASS exact448a6ae; full native/overall INCONCLUSIVE. Required methodology consumed, bound identity/diff/content observed; semantic context from coordinator-attested frozen bytes. Nonblocking suggestion: isolate completion-phase conflict statuses in test197–218; no source defect established.
+- Coordinator actual integrated nonzero probe after V003, source unchanged448a6ae: `node tooling/.local/j005-correction/native-rpc-nonzero.mjs` PASS; actual Pi1.5/subagents0.83 persisted configuration, new_session then one loopback synthetic response. Automatic session-start baseline0 and agent-settled latest11input/7output/0cacheRead/0cacheWrite via actual costRPC, cleanexit0. No real provider, capture command or manualcompletionevent. Ignored harness and native-rpc-nonzero-receipt.json retain numeric proof; temporary fixture retained. Genuine child completion remains pending; this does not retroactively expand reviewer observations.
+- Coordinator `node tools/check-quality.mjs` PASS working tree at recordHEAD316371caf147df7001fda88c9b2a49b24da755fb with runtime source unchanged448a6ae. Committed-source packaging tested that HEAD, not later receipt edits. Separate nativeHostDelegation NOT_RUN; lint/Knip unchanged worker self-report. No Windows PASS inferred.
+- jobs/J005/A005.md: coordinator actual installedPi/subagents genuinecompletion PASS after explicit fixture tool selection; four local syntheticresponses, parent33input21output and child11input7output/unresolved0, automaticstart/settled/async-complete/settled, cleanexit0. No realprovider/capturecommand/manualevent. Failed tool-discovery and too-strict-counter harness assertions retained separately. Runtime source unchanged448a6ae; no new engineering actors or model-provider experiment. This later evidence does not relabel V003's historical nativeINCONCLUSIVE or establish livebilling/Windows/productacceptance.
+
+## J006
+
+- Status: pending
+- Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
+- Depends on: J005
+- Brief: [brief-r2.md](jobs/J006/brief-r2.md)
+- Blocker: Installed2.1.312 isolated process-local startup metrics export now observed, but token/subagent/reset/flush behavior and managed policy precedence remain unproved. Repository settings cannot activate telemetry by official contract. Existing result converter cannot silently consume OTLP. No J006 actor dispatched; first J005 review failed at Codex usage limit, without verdict.
+- Next step: Prove isolated installed-Claude metrics-only activation and source scope without real providers; then pin the smallest supported setup/launch/consumer design before writer. Current explicit continuation covers local grounding, not provider substitution/retries/global activation. Real Windows tests deferred.
+
+### Acceptance
+
+- Obtain supported native numeric source with deterministic extraction, not only convert operator-supplied files.
+- Preserve real source/version/session/reset identities, unknown fields/coverage and tree-versus-individual non-additivity without raw transcripts/auth or model extraction.
+- Make one-time activation requirements explicit and remove repeated manual counter/file transfer from normal use.
+- Separate source/fixture/native Linux/Windows evidence and keep actual missing native capability visible.
+
+### Evidence
+
+- Current explicit operator start selects this next functional unit after Pi; preparation is not dispatch.
+- jobs/J006/brief-r1.md (original acquisition goal retained); jobs/J006/brief-r2.md (current setup scope, current explicit start and reserved1worker40min/1correction15min/up to2reviews15min sequential allowance).
+- J003/J004 establish bounded source converters, not installed-Claude acquisition or complete native platform acceptance.
+- Coordinator continuation: installedClaude2.1.312 version/help and current official monitoring/cost/headless sources examined. Ignored tooling/.local/i0025-claude-feasibility/metrics-startup.mjs plus receipt.json retain native startup probe: initialize true,8loopbackexports/8704bytes of session.count, no malformedpayloads, cleanexit0. One nonmetricsloopbackrequest rejected503, no prompts or real credential/provider. Native token/subagent/reset/flush/policy and Windows evidence still missing; not implemented or accepted.
