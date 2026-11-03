@@ -221,12 +221,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J005
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
-- Blocker: V002 Standards fail, Spec/source fail on8877475: B1 incorrect setup extension path base; B2 event-key dedup discards changed same-boundary counters/coverage; B3 unlocked replacement can lose competing writes or clobber newly created unrelated files. Native installed-subagents proof remains missing. Existing J005 correction and both review calls spent; quota restored by operator, not a current blocker.
-- Next step: Await operator decision on finite additional J005 allowance: one worker<=30min for B1–B3 and missing native proof, plus one independent affected-delta review<=15min, sequential same approved models, no automatic additional correction/retry. Resume only on that explicit budget extension; preserve prior failures and spent calls. J006 local grounding can proceed independently under existing scope; Windows real tests deferred.
+- Blocker: V002 Standards fail, Spec/source fail on8877475: B1 incorrect setup extension path base; B2 event-key dedup discards changed same-boundary counters/coverage; B3 unlocked replacement can lose competing writes or clobber newly created unrelated files. Native installed-subagents proof remains missing. Original J005 correction and both review calls spent; quota restored by operator, not a current blocker. One additional correction30min and review15min now explicitly approved.
+- Next step: Operator explicitly approved the requested extension with Sí: dispatch one worker<=30min for B1–B3 and missing native proof, then one independent affected-delta reviewer<=15min, sequential same Luna/high and Sol/medium models. No automatic additional correction/retry or prior budget reset; preserve V002 failures. Windows real tests deferred.
 
 ### Acceptance
 
