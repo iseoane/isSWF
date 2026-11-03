@@ -159,6 +159,10 @@ Valorar si la capacidad compartida debe abarcar más vías de ejecución. Las re
 
 Valorar la consulta reciente de procesos y estado remoto si los usuarios la necesitan. El panel actual lee registros del proyecto; la telemetría en directo y el despacho automático son funcionalidades distintas.
 
+## Calidad de la revisión
+
+Construir un conjunto de regresión del revisor con los defectos que una revisión no detectó y que se confirmaron después, como reversiones o fallos de plataforma que se escaparon. Cada caso conserva el candidato exacto, el brief aceptado y el defecto confirmado. Volver a ejecutar el perfil de revisión sobre el conjunto cada vez que cambien su metodología, su modelo o su esfuerzo, y conservar un cambio solo cuando encuentre más defectos confirmados sin más hallazgos marcados después como erróneos. Ejecutarlo también sobre candidatos limpios conocidos para contar las falsas alarmas. Las resoluciones de hallazgos registradas en los informes de revisión aportan los datos de ruido.
+
 ## Mantenimiento
 
 Mantener las guías bilingües, los ejemplos y las comprobaciones alineados con el código. Consultar documentos históricos cuando hagan falta sus evidencias o datos de entrada; no convertir demostraciones antiguas en el manual vigente del producto.

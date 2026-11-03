@@ -3,6 +3,8 @@
 ## Candidate identity
 
 - Job ID and review ID:
+- Review round in this job, and prior review IDs:
+- Project `REVIEW.md` consumed (path and revision), or absent:
 - Brief path and exact revision:
 - Base commit SHA:
 - Candidate commit SHA, or reproducible snapshot identity:
@@ -14,7 +16,9 @@
 ## Standards
 
 - Verdict: pass, fail, or inconclusive:
-- Findings with path, location, severity, and evidence:
+- Finding count by severity and origin (`introduced`, `pre-existing`, `unknown origin`):
+- Findings with ID, path, location, severity, origin, evidence and defect class instances:
+- Earlier findings carried forward (ID and current state: resolved, open or changed):
 - Selected-method evidence assessment: `<under Standards, assess each selected method's required evidence and any disclosed deviation against the brief; missing required evidence with no declared deviation is a supported finding or inconclusive, never silent pass. Disclosure alone does not waive the accepted requirement. For selected TDD, verify each named test-only RED commit fails at the asserted behavioral result and its following GREEN commit passes; record exact command, assertion and provenance, or “not re-run” with the actual CI/coordinator evidence relied upon>`.
 - Retained substitute evidence assessment, when used for missing RED: `<verify the harness and run log are retained in committed tests/ evidence or ignored tooling/.local/<job>/; check both artifact paths in the attempt/review record, archived commit and an unmutated baseline run, injected change and result. Record personal verification or attribute supplied observations; missing retention is not satisfied by scratch-only evidence>`.
 - Required-resource consumption: `<resource → observed (host trace) or self-reported; do not treat self-report as observed>`.
@@ -32,4 +36,5 @@
 - Unreviewed areas and evidence limits:
 - Required corrections or unresolved questions:
 - Return this artifact to the coordinator. Do not edit the candidate or disposition your own findings.
+- Finding resolutions, recorded afterwards by the coordinator: `<finding ID → fixed, wrong, intentional or not material, with the reason>`.
 - A changed candidate requires a new review identifying its exact base and candidate.

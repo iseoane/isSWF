@@ -159,6 +159,10 @@ Consider whether shared capacity should cover more execution paths. Existing cap
 
 Consider fresh process and remote-state visibility if users need it. The current panel reads project records; live telemetry and automatic dispatch are different features.
 
+## Review quality
+
+Build a reviewer regression set from defects a review missed and that were confirmed later, such as reverts or escaped platform failures. Each case keeps the exact candidate, the accepted brief and the confirmed defect. Rerun the reviewer profile on the set whenever its methodology, model or effort changes, and keep a change only when it finds more confirmed defects without more findings later marked wrong. Run it on known-clean candidates too, to count false alarms. The finding resolutions recorded in review reports supply the noise data.
+
 ## Maintenance
 
 Keep bilingual guides, examples, and checks aligned with the code. Reassess historical documents only when their evidence or inputs are needed; do not turn old demonstrations into the current product manual.
