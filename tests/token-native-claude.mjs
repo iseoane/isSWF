@@ -29,6 +29,12 @@ assert.equal(resourceFirst[0].id, resourceReordered[0].id, 'resource attribute o
 const resourceMerged = mergeCumulative(mergeCumulative(new Map(), resourceFirst), resourceReordered.map(row => ({ ...row, end: '500' })));
 assert.equal([...resourceMerged.values()].reduce((sum, row) => sum + row.value, 0), 11, 'reordered resource attributes replace, never double-count');
 assert.throws(() => countersFrom({ resourceMetrics: [{ resource: { attributes: [{ key: 'x', value: { stringValue: 'a' } }, { key: 'x', value: { stringValue: 'b' } }] }, scopeMetrics: [{ metrics: [metric('input', 'main', 11)] }] }] }), /duplicate metric attribute/u);
+const compoundAttribute = value => ({ resourceMetrics: [{ resource: { attributes: [{ key: 'labels', value }] }, scopeMetrics: [{ metrics: [metric('input', 'main', 11)] }] }] });
+assert.throws(() => countersFrom(compoundAttribute({ kvlistValue: { values: [{ key: 'a', value: { stringValue: '1' } }, { key: 'b', value: { stringValue: '2' } }] } })), /invalid metric attribute value/u, 'nested keyed attributes are outside the supported identity domain');
+assert.throws(() => countersFrom(compoundAttribute({ kvlistValue: { values: [{ key: 'b', value: { stringValue: '2' } }, { key: 'a', value: { stringValue: '1' } }] } })), /invalid metric attribute value/u, 'nested reordered keyed attributes fail closed');
+assert.throws(() => countersFrom(compoundAttribute({ kvlistValue: { values: [{ key: 'a', value: { stringValue: '1' } }, { key: 'a', value: { stringValue: '2' } }] } })), /invalid metric attribute value/u, 'nested duplicate keys fail closed before identity hashing');
+assert.throws(() => countersFrom(compoundAttribute({ arrayValue: { values: [{ stringValue: '1' }, { stringValue: '2' }] } })), /invalid metric attribute value/u, 'compound arrays fail closed');
+assert.throws(() => countersFrom(compoundAttribute({ stringValue: 'ambiguous', intValue: 11 })), /invalid metric attribute value/u, 'ambiguous scalar values fail closed');
 assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 2, end: '500' }]), /reset detected/u);
 assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 18, end: '400' }]), /replayed or out-of-order/u);
 assert.throws(() => mergeCumulative(changedSnapshot, [{ ...trackedRow, value: 18, start: '101', end: '500' }]), /segment changed/u);
@@ -62,6 +68,8 @@ assert.throws(() => normalizeClaudeOtel({ input: { ...receipt, counters: receipt
 const longIdWindow = normalizeClaudeOtel({ input: receipt, meta: { ...metadata, id: 'a'.repeat(128) } });
 assert.match(longIdWindow.rows[0].id, /^claude-[a-f0-9]{24}$/u);
 const rendered = report(window);
+assert.equal(rendered.totals.rows[0].source, 'main');
+assert.equal(rendered.totals.rows[0].segment, window.rows[0].segment, 'valid native OTLP source and opaque segment are retained');
 assert.equal(rendered.totals.processed, 26);
 assert.equal(rendered.collectionPolicy, 'managed-policy-not-inspected; local-only export is unverified');
 assert.match(rendered.claims, /not billing.*or verified local-only telemetry/u);

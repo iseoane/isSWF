@@ -25,7 +25,9 @@ export function normalize(input) {
     for (const key of fields) if (!Object.hasOwn(row.counters, key) || !count(row.counters[key])) invalid();
     if (ids.has(`${row.window}\0${row.id}`)) throw Error('duplicate row identity/window');
     ids.add(`${row.window}\0${row.id}`);
-    if (row.provenance === 'native-claude-otel' && (!['main', 'subagent', 'auxiliary'].includes(row.source) || !/^[a-f0-9]{24}$/u.test(row.segment ?? ''))) invalid();
+    if (row.provenance === 'native-claude-otel') {
+      if (!['main', 'subagent', 'auxiliary'].includes(row.source) || !/^[a-f0-9]{24}$/u.test(row.segment ?? '')) invalid();
+    } else if (Object.hasOwn(row, 'source') || Object.hasOwn(row, 'segment')) invalid();
     for (const key of ['durationSeconds', 'requests', 'turns', 'corrections', 'reasoning']) if (Object.hasOwn(row, key) && !count(row[key])) invalid();
     const { reasoning, ...safe } = row;
     return { ...safe, reasoning: reasoning ?? null };

@@ -15,6 +15,12 @@ assert.equal(result.totals.accepted, 2);
 assert.equal(result.totals.tokensPerAccepted, 155);
 assert.equal(result.totals.cacheReadShare, 60 / 230);
 assert.equal(result.totals.rows.length, 2);
+for (const unsupported of [
+  { ...row('pi-source', 1), source: { prompt: 'dummy prompt text' } },
+  { ...row('pi-segment', 1), segment: 'arbitrary segment text' },
+  { ...row('claude-source', 1), host: 'claude', provenance: 'manual-claude', source: { prompt: 'dummy prompt text' } },
+  { ...row('claude-segment', 1), host: 'claude', provenance: 'manual-claude', segment: 'arbitrary segment text' },
+]) assert.throws(() => report({ version: 1, mode: 'window', rows: [unsupported] }), /invalid token summary/u);
 const claude = { version: 1, mode: 'window', rows: [{ ...row('all', 100, 1, 'unattributed'), host: 'claude', provenance: 'manual-claude', counters: { input: null, output: 20, cacheRead: 5, cacheWrite: 0 } }] };
 const partial = report(claude);
 assert.equal(partial.totals.processed, null);

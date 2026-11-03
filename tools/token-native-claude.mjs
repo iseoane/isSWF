@@ -19,7 +19,7 @@ function canonicalAttributes(attributes) {
     if (!item || typeof item.key !== 'string' || !item.key || seen.has(item.key) || !item.value || typeof item.value !== 'object' || Array.isArray(item.value)) throw Error('invalid or duplicate metric attribute');
     seen.add(item.key);
     const keys = Object.keys(item.value);
-    if (keys.length !== 1 || !['stringValue', 'intValue', 'doubleValue', 'boolValue', 'arrayValue', 'kvlistValue', 'bytesValue'].includes(keys[0])) throw Error('invalid metric attribute value');
+    if (keys.length !== 1 || !['stringValue', 'intValue', 'doubleValue', 'boolValue', 'bytesValue'].includes(keys[0])) throw Error('invalid metric attribute value');
     return [item.key, item.value];
   });
   entries.sort(([a], [b]) => a.localeCompare(b));
