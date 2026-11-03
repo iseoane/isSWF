@@ -32,6 +32,7 @@
 - Required: yes or no
 - Criteria: Standards and Spec criteria the reviewer must assess:
 - Constraints: reviewer profile, model and effort, read-only requirement, exact candidate identity, and any excluded areas:
+- Review round in this job, and prior review IDs with their candidate identities (`none` for round 1):
 
 ## Inputs and bases
 

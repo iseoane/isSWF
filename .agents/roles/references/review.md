@@ -45,7 +45,7 @@ A review round is one review of one candidate within the same job. The coordinat
 
 From round 2, scope the review to the delta as described above. Do not report a finding again: cite its earlier ID and record whether it is resolved, still open or changed.
 
-When round 3 or later still reports a blocking finding, the reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks the operator before dispatching more corrections. This cap never renews a spent correction budget.
+When the brief's review-round or correction budget is spent and a blocking finding remains, the reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks the operator before any further correction. This recommendation never renews a spent budget.
 
 Stop when the scoped criteria are covered and required checks pass. Record limitations outside that scope without turning them into new acceptance criteria. A genuine uncovered risk or changed acceptance requires an explicit revised scope; it does not justify identical model retries. Preserve prior verdicts when correcting an overbroad review requirement, and record the new decision rather than relabeling an inconclusive report as pass.
 
