@@ -3,6 +3,15 @@ import { spawnSync } from 'node:child_process';
 import { readFile, readdir, lstat, open, link, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { workspaceTree } from './native-recovery.mjs';
+
+// Windows reports synthetic permission bits and cannot represent the executable bit, so it
+// records the Git-representable model: directories 0o755, writable files 0o644, read-only
+// files 0o444. Other platforms record the exact permission bits.
+const recordedMode = stat => {
+  if (process.platform !== 'win32' || !(stat.isDirectory() || stat.isFile())) return stat.mode & 0o7777;
+  if (stat.isDirectory()) return 0o755;
+  return stat.mode & 0o200 ? 0o644 : 0o444;
+};
 import { externalEffect } from './external-effect-journal.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -51,7 +60,7 @@ async function snapshot(load) {
     models: binding.models, briefPath: binding.briefPath, briefSha256: binding.briefSha256, taskSha256: binding.taskSha256,
     admissionSha256: hash(await readFile(join(store, 'admissions', admissionKey + '.json'))),
     treeSha256: digest(entries(tree)),
-    permissionModesSha256: digest(await Promise.all(['', ...Object.keys(tree).sort()].map(async path => [path, (await lstat(join(dispatch.workspace, path))).mode & 0o7777]))),
+    permissionModesSha256: digest(await Promise.all(['', ...Object.keys(tree).sort()].map(async path => [path, recordedMode(await lstat(join(dispatch.workspace, path)))]))),
     changedEntries: changed.map(path => [path, tree[path]]),
     nativeEvidenceSha256: digest(evidence), protectedCheckCommandSha256: hash(job.protectedCheckCommand),
     nodeSha256: hash(await readFile(process.execPath)), bwrapSha256: hash(await readFile('/usr/bin/bwrap')),

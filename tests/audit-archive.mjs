@@ -61,7 +61,8 @@ try {
   await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
   await assert.rejects(archiveAudit(f.root, { apply: true, expectedHead: f.head }), /changed/u);
   await fs.writeFile(binary, Buffer.from([0, 255, 7, 10]));
-  await fs.chmod(binary, 0o644); await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
+  // Windows cannot distinguish 0o600 from 0o644, so this mode-only change is not observable there.
+  await fs.chmod(binary, 0o644); if (process.platform !== 'win32') await assert.rejects(verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 }), /changed/u);
   await fs.chmod(binary, 0o600); await verifyAuditArchive(f.root, result.archivePath, { manifestSha256: result.manifestSha256 });
   const manifestPath = join(f.root, result.archivePath, 'manifest.json');
   const originalManifest = await fs.readFile(manifestPath, 'utf8');
