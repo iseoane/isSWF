@@ -257,12 +257,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
 - Brief: [brief-r3.md](jobs/J006/brief-r3.md)
 - Blocker: V002 Standards/Spec FAIL exact9be29fa: B1a resource-attribute ordering doublecounts equivalent cumulative data (coordinator reproduced11->22), B1b converter discards launch/segment boundaries and accepts incoherent categories, B4 registered tests use POSIX-only executable mechanics on Windows. B2 numeric and B3 Linux cancellation improvements accepted. Original author/correction/two reviews spent; policy/process incidents remain separate and adverse. No complete J006 claim.
-- Next step: Await operator decision on finite extension: one worker<=20min for canonical resource identity, consumer boundary/source coherence and platform-supported controlled fixtures, then one independent affected-delta review<=15min using same approved models. Resume only on explicit approval; no budget reset or automatic extra cycle. Do not publish/activate a complete Claude feature while these source blockers remain. Windows native journeys still deferred; portable-suite correctness is not deferred.
+- Next step: Operator explicitly says continue/quota restored in response to the pending finite extension. Dispatch one worker<=20min for canonical resource identity, consumer boundary/source coherence and platform-supported controlled fixtures, then one independent affected-delta reviewer<=15min, same Luna/high and Sol/medium, sequential. Previous budgets remain spent; no automatic extra cycle. Do not publish/activate as complete while source blockers remain. Windows native journeys deferred, portable-suite correctness not deferred.
 
 ### Acceptance
 
