@@ -17,7 +17,7 @@ function git(root, args) {
 }
 async function repository(root) {
   root = await fs.realpath(root);
-  assert.equal(git(root, ['rev-parse', '--show-toplevel']), root, 'explicit Git root required');
+  assert.equal(await fs.realpath(git(root, ['rev-parse', '--show-toplevel'])), root, 'explicit Git root required');
   return root;
 }
 async function manifest(directory, withHashes) {

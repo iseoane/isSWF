@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, open, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -38,12 +38,12 @@ try {
     throw Error(message);
   };
   const waitFile = async (path, records = 1) => {
-    for (let index = 0; index < 100; index++) {
+    for (let index = 0; index < 1000; index++) {
       try {
         const value = JSON.parse(await readFile(path, 'utf8'));
         if (value.records.length >= records) return value;
       } catch {}
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise(resolve => setTimeout(resolve, 5));
     }
     throw Error('automatic capture did not write its expected record');
   };
@@ -87,7 +87,7 @@ try {
   for (let index = 0; index < 100; index++) {
     completed = JSON.parse(await readFile(path, 'utf8'));
     if (completed.records.some(record => record.event === 'async-complete')) break;
-    await new Promise(resolve => setImmediate(resolve));
+    await new Promise(resolve => setTimeout(resolve, 5));
   }
   assert.equal(completed.records.filter(record => record.event === 'async-complete').length, 1);
   const repeatedBranch = ctx(['entry-a', 'entry-b']);
@@ -97,7 +97,10 @@ try {
   assert.equal(unchanged.records.length, 3, 'unchanged settled branch snapshots are deduplicated');
   const changedCost = { version: 1, parent: { input: 17, output: 5, cacheRead: 8, cacheWrite: 9 }, children: [{ runId: 'child-private', usage: { input: 4, output: 3, cacheRead: 2, cacheWrite: 1 } }], unresolvedAsyncChildren: 1 };
   enabled.setCost(changedCost);
+  const reader = await open(path, 'r');
   await enabled.handlers.get('agent_settled')({}, repeatedBranch);
+  await new Promise(resolve => setTimeout(resolve, 50));
+  await reader.close();
   await waitUntil(async () => JSON.parse(await readFile(path, 'utf8')).latest.rows[0].counters.input === 17, 'changed same-branch counters refresh latest');
   let changed = JSON.parse(await readFile(path, 'utf8'));
   assert.equal(changed.baseline.rows[0].counters.input, 1, 'changed settlement never replaces the first baseline');

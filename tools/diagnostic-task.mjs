@@ -48,7 +48,7 @@ async function publish(path, value) {
 async function roots(project, store) {
   assert(isAbsolute(project ?? '') && isAbsolute(store ?? ''), 'absolute-project-store-required');
   project = await realpath(project); store = await realpath(store);
-  assert(decode(git(project, ['rev-parse', '--show-toplevel'])).trim() === project, 'git-root-required');
+  assert(await realpath(decode(git(project, ['rev-parse', '--show-toplevel'])).trim()) === project, 'git-root-required');
   assert(!inside(project, store) && !inside(source, store) && !inside(store, project) && !inside(store, source), 'private-external-store-required');
   return { project, store };
 }
