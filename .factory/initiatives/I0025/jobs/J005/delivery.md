@@ -28,8 +28,8 @@ Pi capture/runtime consumer, focused tests/quality registration, setup instructi
 
 ## Closure and acceptance
 
-Linux source/mechanism verified within the stated synthetic scope. Publication/exact-head CI pending at this receipt. Operator product acceptance, Windows native testing and integration are separate; no merge authorized here.
+Linux source/mechanism verified within the stated synthetic scope. Draft [PR151](https://github.com/iseoane/isSWF/pull/151) published and head/base/body/draft readback verified: head `161408664b3f137ffc3657465248695f793bd8ac`, base `feat/i0025-claude-metrics`. Full portable quality PASS on that exact published head. CI41589977520: Ubuntu discovery SUCCESS, portable and Windows discovery IN_PROGRESS at observation. Operator product acceptance, Windows native metric journeys and integration are separate; no merge authorized here.
 
 ## Blockers and next action
 
-Publish the scoped draft stacked PR and inspect CI for its exact head under the original delivery grant. Continue J006 under its separate prepared budget; this delivery does not claim I0025 complete.
+Remaining PR151 exact-head CI is pending; inspect through a native completion event or one bounded deferred read, without active polling/model calls merely to wait. Continue J006 under its separate prepared budget; this delivery does not claim I0025 complete. This receipt records observed published identities rather than changing the runtime source or reviewer verdict.

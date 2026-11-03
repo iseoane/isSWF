@@ -225,8 +225,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
-- Blocker: V003 Standards/source-Spec PASS for B1–B3 on448a6ae; V002 fail on8877475 retained. Coordinator A005 now verifies actual Pi/subagents integrated nonzero automatic capture AND genuine native completion in isolated Linux RPC. Reviewer native INCONCLUSIVE remains its historical observation. Draft publication/exact-head CI and operator acceptance remain separate; Windows real tests deferred.
-- Next step: Retain V003/A005 and publish scoped draft stacked PR against feat/i0025-claude-metrics under original J005 delivery grant; verify exact-head CI without merge or current-session activation. No additional J005 engineering actors. Continue J006 under its separate existing allowance after grounding/pinning the native mechanism.
+- Blocker: V003 Standards/source-Spec PASS for B1–B3 on448a6ae; V002 fail on8877475 retained. Coordinator A005 now verifies actual Pi/subagents integrated nonzero automatic capture AND genuine native completion in isolated Linux RPC. Reviewer native INCONCLUSIVE remains its historical observation. Draft PR151 published/readback verified at161408664b3f137ffc3657465248695f793bd8ac, basefeat/i0025-claude-metrics. CI41589977520 Ubuntu discovery SUCCESS, portable and Windows IN_PROGRESS at observation. Operator acceptance/integration remain separate; Windows real metric journeys deferred.
+- Next step: Observe remaining exact-head PR151 checks through native event or one bounded deferred read; no active polling/model calls just to wait. Current CI pending is technical, not a human-approval blocker. No merge or current-session activation. Continue J006 local grounding under separate allowance; no additional J005 engineering actors.
 
 ### Acceptance
 
