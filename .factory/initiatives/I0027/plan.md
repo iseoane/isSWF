@@ -105,7 +105,6 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - tests/release-package.mjs PASS on Windows 11 after J015 (#179)
-- None.
 
 ## J006
 

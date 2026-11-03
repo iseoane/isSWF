@@ -49,7 +49,7 @@ const atomicWriteOnce = async (path, value) => {
 const parseJson = async path => JSON.parse(await readFile(path, 'utf8'));
 
 function linuxStat(pid) {
-  if (process.platform !== 'linux') throw new Error('process identity requires Linux; this runner does not support Windows process identity');
+  if (process.platform !== 'linux') throw new Error('process identity requires Linux; this runner does not support other platforms');
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
   const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
   const fields = stat.slice(stat.lastIndexOf(')') + 2).trim().split(/\s+/);
@@ -67,7 +67,7 @@ function linuxProcess(pid) {
 function linuxIdentity(pid, nonce) {
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
   if (typeof nonce !== 'string' || !/^[0-9a-f]{48}$/.test(nonce)) throw new Error('process nonce must be 48 lowercase hexadecimal characters');
-  if (process.platform !== 'linux') throw new Error('process identity requires Linux; this runner does not support Windows process identity');
+  if (process.platform !== 'linux') throw new Error('process identity requires Linux; this runner does not support other platforms');
   const bootId = readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim();
   const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
   const close = stat.lastIndexOf(')');
