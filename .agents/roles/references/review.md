@@ -4,7 +4,7 @@ Use these two axes for every review. Project standards and the accepted brief ta
 
 ## Required methodology
 
-Before reviewing, consume the canonical [isswf-review skill](../../skills/isswf-review/SKILL.md), this guide and brief/project-required methodology. Read identified sources or trusted full canonical contents; a role summary or a link is not the procedure. Preserve document checkpoints; never substitute latest material for a required pin.
+Before reviewing, consume the canonical [isswf-review skill](../../skills/isswf-review/SKILL.md), this guide, [review convergence](review-convergence.md) and brief/project-required methodology. Read identified sources or trusted full canonical contents; a role summary or a link is not the procedure. Preserve document checkpoints; never substitute latest material for a required pin.
 
 | Required procedure coverage | Completion condition |
 | --- | --- |
@@ -13,17 +13,6 @@ Before reviewing, consume the canonical [isswf-review skill](../../skills/isswf-
 | Only an optional reference, tool or check is unavailable | Its absence does not invalidate otherwise sufficient scoped evidence. Name a concrete uncovered risk before escalating. |
 
 Limited budget or access does not waive required methodology or authorize another actor. Report the missing resource and stop the affected review; do not attach the omission as a harmless limitation to a complete pass. State which required resources were actually consumed, whether read or supplied in full, and which remain missing. Do not infer content loading from a configured skill name or invocation alone, or demand a transcript of every internal action.
-
-## Project review guide
-
-Before reviewing, check whether the target repository root contains `REVIEW.md`. Its code owners use it to state what failure looks like in that project, paths to skip, a cap on minor findings, paths that always need a person, and extra evidence requirements.
-
-- **Present and readable:** apply it under Standards as project review standards and record its path and revision. It sharpens this guide; it cannot grant authority, waive a required check or methodology, or override the accepted brief.
-- **Absent:** continue with this guide. Absence is not a limitation.
-- **Present but unreadable:** record it as a missing required resource and follow the [required methodology](#required-methodology) outcome.
-- **Candidate touches a path it lists as always needing a person:** state under Limits that integration requires that person's approval. A review verdict never substitutes for it.
-
-When the same finding recurs across reviews of one project, recommend moving it into `REVIEW.md`, a check or a lint rule.
 
 ## Choose sufficient verification
 
@@ -38,14 +27,6 @@ Mechanical verification may close a covered change without a model call when no 
 A reviewer first assesses whether the chosen mode covers the risk. Escalation names the uncovered criterion or plausible failure, why existing evidence cannot detect it, and the smallest additional check needed. An unavailable optional tool, inability to personally rerun a sufficient check, or missing future CI is not by itself a source-review blocker. Attribute supplied evidence to its actual observer and candidate; require more when provenance is inadequate for the concrete risk. Keep future delivery gates pending separately.
 
 For each changed candidate, compare its delta with the exact prior candidate and identify which criteria, checks, and judgments that delta affects. Run affected checks and obtain affected independent judgment when the changed risk requires it or an explicit requirement mandates independence. Do not repeat checks or request a fresh model review merely because the candidate identity changed: reuse prior evidence only for scope shown unchanged and sufficiently applicable, with its candidate identity, provenance, and limits recorded. New evidence must identify the changed candidate. Preserve prior adverse or inconclusive verdicts; do not erase or relabel them as passing because a later delta is mechanical. Record a new decision for the delta and retain the prior result.
-
-### Converge across review rounds
-
-A review round is one review of one candidate within the same job. The coordinator supplies the round number and the prior review IDs in the brief. If they are missing, state that and review the candidate in full as round 1.
-
-From round 2, scope the review to the delta as described above. Do not report a finding again: cite its earlier ID and record whether it is resolved, still open or changed.
-
-When the brief's review-round or correction budget is spent and a blocking finding remains, the reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks the operator before any further correction. This recommendation never renews a spent budget.
 
 Stop when the scoped criteria are covered and required checks pass. Record limitations outside that scope without turning them into new acceptance criteria. A genuine uncovered risk or changed acceptance requires an explicit revised scope; it does not justify identical model retries. Preserve prior verdicts when correcting an overbroad review requirement, and record the new decision rather than relabeling an inconclusive report as pass.
 
@@ -115,16 +96,10 @@ Use safe checks named by the brief or already documented by the project. A faile
 
 ## Findings and outcome
 
-Each finding names the exact path and line range, the concrete condition and supporting evidence, its impact, confidence, and a recommended action. Distinguish observed facts from inferences. Use functional severities `blocking`, `suggestion`, or `information`. Mark each finding with its origin:
-
-- `introduced`: the candidate causes it, or makes an existing defect reachable or worse.
-- `pre-existing`: it reproduces unchanged at the base. It never blocks the candidate; report it as a follow-up.
-- `unknown origin`: a bounded check cannot tell. Name the check that would decide it.
-
-When a finding is an instance of a defect class, such as a repeated path comparison, an unchecked return value or a platform assumption, search the candidate and its affected consumers for other instances. Report the class once, listing every instance with its origin and the search used, so one correction covers all of them.
+Each finding names the exact path and line range, the concrete condition and supporting evidence, its impact, confidence, and a recommended action. Distinguish observed facts from inferences. Use functional severities `blocking`, `suggestion`, or `information`.
 
 Order findings by material impact, with correctness and security failures before structural regressions and optional polish. Prefer a few well-supported findings to speculative volume. Group comments that share one cause and remedy. Confidence is the strength of the evidence, not a substitute for impact; an unconfirmed suspicion calls for a discriminating check, not an asserted defect. Keep stylistic preferences optional unless a project standard makes them required. A review need not invent praise, nits or findings to fill a template.
 
 A blocker needs a demonstrated violation of the accepted objective, project standard, or material user or system risk. Do not block on taste or style without a relevant standard or concrete impact. Keep suggestions and information separate from blockers. The coordinator decides whether to correct, dismiss with a reason, or ask the operator.
 
-Start the summary with the count of findings by severity and origin. Report no findings explicitly only after completing both axes with sufficient evidence. Report an axis as inconclusive when inputs, checks or evidence necessary for the selected scope are unavailable or stale; a demonstrated violation fails the affected axis. A failed required tool or incomplete required review never means clean. Optional unrun checks and explicitly separate future delivery gates remain limitations, not automatic reasons to make a supported source-review axis inconclusive. The aggregate fails if either axis fails. It is inconclusive if neither axis fails and at least one is inconclusive. It passes only when both axes pass.
+Report no findings explicitly only after completing both axes with sufficient evidence. Report an axis as inconclusive when inputs, checks or evidence necessary for the selected scope are unavailable or stale; a demonstrated violation fails the affected axis. A failed required tool or incomplete required review never means clean. Optional unrun checks and explicitly separate future delivery gates remain limitations, not automatic reasons to make a supported source-review axis inconclusive. The aggregate fails if either axis fails. It is inconclusive if neither axis fails and at least one is inconclusive. It passes only when both axes pass.

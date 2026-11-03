@@ -34,6 +34,7 @@ const historicalMethodProfiles = [
   '.agents/roles/references/comments.md',
   '.agents/roles/references/planning.md',
   '.agents/roles/references/review.md',
+  '.agents/roles/references/review-convergence.md',
   'docs/durable-work.md',
 ];
 const fixedInventoryPaths = [
