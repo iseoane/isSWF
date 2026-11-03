@@ -47,6 +47,7 @@ const payloadPaths = [
   ".agents/roles/references/code-quality.md",
   ".agents/roles/references/comments.md",
   ".agents/roles/references/review.md",
+  ".agents/roles/references/review-convergence.md",
   "docs/durable-work.md",
   "docs/model-routing.md",
   ".factory/templates/job-brief.md",
