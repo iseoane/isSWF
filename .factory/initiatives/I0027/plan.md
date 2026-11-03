@@ -89,11 +89,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J005
 
-- Status: blocked
+- Status: in-review
 - Objective: Make tests/release-package.mjs pass on Windows without elevation, preserving its Linux guarantees (#156; group D: undiagnosed strict equality).
 - Depends on: J015
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Separator fix in PR #175 and role-suite timeout fix in PR #178; remaining failure at tests/release-package.mjs:266 is Linux-only process identity (#179, J015).
+- Blocker: None; awaiting PR CI and merge.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -104,6 +104,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
+- tests/release-package.mjs PASS on Windows 11 after J015 (#179)
 - None.
 
 ## J006
@@ -283,11 +284,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J015
 
-- Status: pending
+- Status: in-review
 - Objective: Make owner and process identity checks work on Windows or refuse explicitly, without weakening Linux checks (#179).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J015/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting PR CI and merge.
 - Next step: Map every /proc identity read (isswf, native-recovery, worker-lifecycle, release-package test), decide equivalent Windows identity or explicit refusal per caller, then implement with tests.
 
 ### Acceptance
@@ -298,4 +299,4 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- Windows 11 clean no-hardlink clone with #179/#180/#173 patches: node tools/check-quality.mjs PASS; node tests/release-package.mjs PASS

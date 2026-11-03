@@ -263,7 +263,10 @@ try {
   checkpoint();
   const recoveryDir = join(project, '.isswf/local/transactions/interrupted');
   await mkdir(recoveryDir);
-  const deadOwner = { pid: 2147483647, startTicks: '1', bootId: (await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() };
+  // Owner identity is platform-specific: Linux boot ID plus start ticks, Windows CIM boot and creation times.
+  const windowsIdentity = pid => JSON.parse(spawnSync(join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', `$p = Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}'; @{bootId=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o'); startTime=$p.CreationDate.ToUniversalTime().ToString('o')} | ConvertTo-Json -Compress`], { encoding: 'utf8', windowsHide: true }).stdout.replace(/^\uFEFF/u, '').trim());
+  const selfWindows = process.platform === 'win32' ? windowsIdentity(process.pid) : null;
+  const deadOwner = selfWindows ? { platform: 'win32', pid: 2147483644, startTime: selfWindows.startTime, bootId: selfWindows.bootId } : { pid: 2147483647, startTicks: '1', bootId: (await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() };
   await writeJSON(join(recoveryDir, 'record.json'), { format: 1, id: 'interrupted', kind: 'migrate', owner: deadOwner, files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }] });
   await writeFile(pinFile, pinB);
   await mkdir(join(project, '.isswf/local/operation'));
@@ -276,14 +279,14 @@ try {
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'bootstrap', owner: deadOwner, transaction: bootstrap });
   assert.equal(JSON.parse(cli(releaseB, 'recover', ['--id', 'bootstrap']).stdout).status, 'recovered', 'Claim bootstrap is recoverable before journal creation');
   assert.deepEqual(await readFile(pinFile), pinA);
-  const selfStat = await readFile(`/proc/${process.pid}/stat`, 'utf8');
-  const liveOwner = { pid: process.pid, startTicks: selfStat.slice(selfStat.lastIndexOf(')') + 2).split(/\s+/u)[19], bootId: deadOwner.bootId };
+  const selfStat = selfWindows ? null : await readFile(`/proc/${process.pid}/stat`, 'utf8');
+  const liveOwner = selfWindows ? { platform: 'win32', pid: process.pid, startTime: selfWindows.startTime, bootId: selfWindows.bootId } : { pid: process.pid, startTicks: selfStat.slice(selfStat.lastIndexOf(')') + 2).split(/\s+/u)[19], bootId: deadOwner.bootId };
   await mkdir(join(project, '.isswf/local/operation'));
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'live-bootstrap', owner: liveOwner, transaction: { ...bootstrap, id: 'live-bootstrap', owner: liveOwner } });
   assert.match(cli(releaseB, 'recover', ['--id', 'live-bootstrap'], false).stderr, /live or uncertain/u);
   await rm(join(project, '.isswf/local/operation'), { recursive: true });
   const outsideJournal = join(temp, 'outside-journal'); await mkdir(outsideJournal);
-  await symlink(outsideJournal, join(project, '.isswf/local/transactions/symlink-journal'));
+  await symlink(outsideJournal, join(project, '.isswf/local/transactions/symlink-journal'), process.platform === 'win32' ? 'junction' : 'dir');
   await mkdir(join(project, '.isswf/local/operation'));
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'symlink-journal', owner: deadOwner, transaction: { ...bootstrap, id: 'symlink-journal' } });
   assert.match(cli(releaseB, 'recover', ['--id', 'symlink-journal'], false).stderr, /Real directory/u);
@@ -293,13 +296,14 @@ try {
   checkpoint();
   const ready = join(temp, 'race-ready'), proceed = join(temp, 'race-proceed'), preload = join(temp, 'pause-verify.mjs');
   await writeFile(preload, `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const original=fs.readdirSync;let paused=false;fs.readdirSync=function(path,...args){if(!paused&&path===${JSON.stringify(location.runtimeRoot)}){paused=true;fs.writeFileSync(${JSON.stringify(ready)},'ready');const end=Date.now()+15000;while(!fs.existsSync(${JSON.stringify(proceed)})){if(Date.now()>end)throw Error('race probe deadline');Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,10);}}return original.call(this,path,...args);};syncBuiltinESMExports();`);
-  const raceChild = spawn(process.execPath, ['--import', preload, join(installed, 'tools/isswf.mjs'), 'exec', '--project', project, '--store', store, '--', 'isswf-status', '--initiative', 'I0001'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const raceChild = spawn(process.execPath, ['--import', pathToFileURL(preload).href, join(installed, 'tools/isswf.mjs'), 'exec', '--project', project, '--store', store, '--', 'isswf-status', '--initiative', 'I0001'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
   let raceError = ''; raceChild.stderr.on('data', bytes => { raceError += bytes; });
   const raceExit = new Promise((done, reject) => { raceChild.once('error', reject); raceChild.once('exit', code => done(code)); });
   try {
     let observed = false;
     for (let count = 0; count < 1000; count++) { try { await readFile(ready); observed = true; break; } catch (error) { if (error.code !== 'ENOENT') throw error; } await new Promise(done => setTimeout(done, 10)); }
-    assert.equal(observed, true, 'Race probe must pause at runtime verification');
+    assert.equal(observed, true, `Race probe must pause at runtime verification
+${raceError}`);
     const racePreview = JSON.parse(cli(releaseB, 'inspect').stdout);
     assert.equal(JSON.parse(cli(releaseB, 'migrate', ['--id', 'M0002', '--expected', racePreview.expected, '--quiescent-ref', 'Fixture only']).stdout).status, 'migrated');
   } finally { await writeFile(proceed, 'continue'); }
@@ -311,7 +315,7 @@ try {
   const driftPreview = JSON.parse(cli(releaseB, 'inspect').stdout);
   const driftReady = join(temp, 'drift-ready'), driftProceed = join(temp, 'drift-proceed'), driftPreload = join(temp, 'pause-retention.mjs');
   await writeFile(driftPreload, `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const original=fs.readdirSync;let calls=0;fs.readdirSync=function(path,...args){if(path===${JSON.stringify(releaseB)}&&++calls===2){fs.writeFileSync(${JSON.stringify(driftReady)},'ready');const end=Date.now()+15000;while(!fs.existsSync(${JSON.stringify(driftProceed)})){if(Date.now()>end)throw Error('drift probe deadline');Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,10);}}return original.call(this,path,...args);};syncBuiltinESMExports();`);
-  const driftChild = spawn(process.execPath, ['--import', driftPreload, join(releaseB, 'tools/isswf.mjs'), 'migrate', '--project', project, '--store', store, '--id', 'M0003', '--expected', driftPreview.expected, '--quiescent-ref', 'Fixture'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const driftChild = spawn(process.execPath, ['--import', pathToFileURL(driftPreload).href, join(releaseB, 'tools/isswf.mjs'), 'migrate', '--project', project, '--store', store, '--id', 'M0003', '--expected', driftPreview.expected, '--quiescent-ref', 'Fixture'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
   let driftError = ''; driftChild.stderr.on('data', bytes => { driftError += bytes; });
   const driftExit = new Promise((done, reject) => { driftChild.once('error', reject); driftChild.once('exit', code => done(code)); });
   let editedPin;
@@ -329,7 +333,7 @@ try {
   await writeFile(join(corrupt, 'tools/isswf-status.mjs'), 'tampered');
   assert.throws(() => verifyRelease(corrupt), /hash mismatch/u);
   const linked = join(temp, 'linked'); await cp(releaseA, linked, { recursive: true });
-  await symlink(join(temp, 'outside'), join(linked, 'unexpected-link'));
+  await symlink(join(temp, 'outside'), join(linked, 'unexpected-link'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.throws(() => verifyRelease(linked), /symbolic link/u);
   await rm(join(project, '.isswf'), { recursive: true });
   await mkdir(join(project, '.factory/initiatives/I0002/jobs/J001'), { recursive: true });
