@@ -22,7 +22,7 @@ const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/reviewer.md', '.agents/roles/references/review.md', '.agents/roles/references/code-quality.md', '.agents/roles/references/comments.md', '.agents/roles/references/verification-principles.md'];
 function git(repo, args, deadlineAt = Infinity, { input, maxBuffer = 1024 * 1024 } = {}) {
   const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'review-operation-deadline');
-  const result = spawnSync('git', ['-C', repo, ...args], { input, maxBuffer, timeout, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const result = spawnSync('git', ['-C', repo, ...args], { input, maxBuffer, timeout, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1', GIT_LITERAL_PATHSPECS: '1' } });
   assert(result.status === 0 && !result.error && Date.now() < deadlineAt, 'pinned-git-operation-failed');
   return result.stdout;
 }

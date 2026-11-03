@@ -20,7 +20,7 @@ const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const route = [{ model: 'openai-codex/gpt-6-luna', effort: 'high' }];
 const profilePaths = ['.agents/roles/diagnostician.md', '.agents/roles/references/bug-diagnosis.md', 'docs/durable-work.md'];
 function git(repo, args, { input, maxBuffer = 1024 * 1024 } = {}) {
-  const result = spawnSync('git', ['-C', repo, ...args], { input, maxBuffer, timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const result = spawnSync('git', ['-C', repo, ...args], { input, maxBuffer, timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1', GIT_LITERAL_PATHSPECS: '1' } });
   assert(result.status === 0 && !result.error, 'pinned-git-operation-failed');
   return result.stdout;
 }
