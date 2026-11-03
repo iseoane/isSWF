@@ -38,6 +38,49 @@ RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 
 `inspect` shows installation and migration information without changing the project or store. `locate` verifies and locates the selected retained runtime. `exec` uses that project's pinned runtime, not automatically the newest globally installed package. Missing or damaged retained code blocks the operation.
 
+## Create an offline token summary
+
+`tools/token-report.mjs` reports only summaries you explicitly supply. It does not inspect host sessions, collect native events, call a model, or estimate billing. Manually transcribed Pi and Claude summaries are labelled in the input; native summary compatibility is not claimed. Keep input files sanitized and local.
+
+Each JSON file has `version: 1`, `mode: "window"`, and `rows`. A row is one independent, nonoverlapping window and contains a bounded opaque `id`, `host` (`pi` or `claude`), `hostVersion`, `model`, `effort`, `taskClass`, `candidate`, `outcome`, nonnegative `accepted` count, provenance (`manual-pi`, `manual-claude`, `native-pi-summary`, or `native-claude-summary`), `scope` (`agent`, `unattributed`, or `tree`), `window`, and `counters` with `input`, `output`, `cacheRead`, and `cacheWrite`. IDs and metadata use 1–128 ASCII letters, digits, `.`, `_`, `:`, `+`, or `-`; use opaque identifiers, never paths or private text. Counters are nonnegative safe integers or JSON `null` for unknown. Categories must be disjoint. Rows sharing a window and outcome repeat the same candidate and acceptance count; the report counts that outcome once, not once per agent. Contradictory declarations for that group are rejected. Cumulative, reset, resumed, and event data must first be converted by the supplier to one bounded, nonoverlapping window; unsupported modes are rejected. Do not combine a tree row with other rows for the same window. Include an unattributed row when coverage is unknown; never invent actor shares. Unknown fields are refused and output contains only the allowlisted summary fields. Optional `durationSeconds`, `requests`, `turns`, `corrections`, and non-additive `reasoning` counters are separately labelled.
+
+Provide a single summary or matched before/after files:
+
+A minimal valid single-row summary is:
+
+```json
+{
+  "version": 1,
+  "mode": "window",
+  "rows": [
+    {
+      "id": "agent1",
+      "host": "pi",
+      "hostVersion": "1.0",
+      "model": "model1",
+      "effort": "high",
+      "taskClass": "task1",
+      "candidate": "candidate1",
+      "outcome": "outcome1",
+      "accepted": 1,
+      "provenance": "manual-pi",
+      "scope": "agent",
+      "window": "window1",
+      "counters": { "input": 100, "output": 20, "cacheRead": 30, "cacheWrite": 5 }
+    }
+  ]
+}
+```
+
+Run one summary or compare before/after files:
+
+```bash
+node tools/token-report.mjs --input "summary.json"
+node tools/token-report.mjs --before "before.json" --after "after.json"
+```
+
+The accepted count covers the supplied window, including failed, review, and correction work. The report shows known components, a complete processed total or labelled partial subtotal, cache-read share only when its denominator is known and positive, and tokens per accepted outcome only when all components and a positive acceptance count are known. The report labels tree-only data `aggregate-only`, individual rows `individual`, and missing attribution `unattributed` or `partial`; it does not describe an inclusive tree total as agent attribution. Comparisons match each row by window, actor ID, and outcome identity, then require matching host/version, model/effort, task class, scopes, acceptance counts and category availability. Candidate may differ between the before and after runs. A positive known baseline is required for differences. Otherwise differences are explicitly incomparable or undefined. A lower cache-read share or total alone is not a quality or savings claim. Input is capped at 1 MiB combined and 100 rows; each row is capped at 4 KiB and output at 64 KiB. This is offline arithmetic, not measured live host behavior or billing.
+
 ## Understand the result
 
 `awaiting-human` means a specific decision is needed, whether during definition, setup, acceptance or PR integration. The record should name the question and what answer allows work to resume; a definition question does not need a delivery first. `blocked` describes a technical condition needing resolution, not automatically a request for your approval. Notes in the panel do not apply either decision; the coordinator reconciles your actual instruction.
