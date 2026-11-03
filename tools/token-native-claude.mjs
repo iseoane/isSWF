@@ -41,7 +41,7 @@ function countersFrom(payload) {
   });
 }
 
-async function readConfig(cwd) {
+export async function readConfig(cwd) {
   const roots = ['.isswf', '.factory'].filter(name => {
     try { const info = lstatSync(join(cwd, name)); return info.isDirectory() && !info.isSymbolicLink(); } catch { return false; }
   });
@@ -73,9 +73,24 @@ async function readConfig(cwd) {
   return { enabled: true, destination, base, configPath };
 }
 
+export function conflictingTelemetryEnvironment(environment) {
+  return Object.keys(environment).filter(key => /^(?:OTEL_|CLAUDE_CODE_(?:ENABLE_TELEMETRY|OTEL_|USE_MANAGED_SETTINGS_ONLY))/iu.test(key));
+}
+
 export { countersFrom };
 
-async function persistReceipt(config, output) {
+export function mergeCumulative(previousRows, receivedRows) {
+  const next = new Map(previousRows);
+  for (const row of receivedRows) {
+    const previous = next.get(row.id);
+    if (previous && row.value < previous.value) throw Error('cumulative metric reset detected');
+    next.set(row.id, row);
+  }
+  if (next.size > MAX_ROWS || [...next.values()].some(row => Buffer.byteLength(JSON.stringify(row)) > MAX_ROW)) throw Error('metric row limit exceeded');
+  return next;
+}
+
+export async function persistReceipt(config, output) {
   const rel = relative(config.base, config.destination);
   let current = config.base;
   const baseInfo = await lstat(current);
@@ -93,7 +108,7 @@ async function persistReceipt(config, output) {
     let total = Buffer.byteLength(output), files = 1;
     for (const entry of entries) {
       if (entry.name === '.claude-capture.lock') continue;
-      if (!entry.isFile() || !/^[a-f0-9]{24}\\.json$/u.test(entry.name)) throw Error('unexpected capture file');
+      if (!entry.isFile() || !/^[a-f0-9]{24}\.json$/u.test(entry.name)) throw Error('unexpected capture file');
       const info = await lstat(join(config.destination, entry.name));
       if (!info.isFile() || info.isSymbolicLink()) throw Error('unsafe existing capture');
       files++;
@@ -121,7 +136,7 @@ async function run() {
     process.exitCode = outcome.signal ? 1 : outcome.code ?? 1;
     return;
   }
-  const conflicts = Object.keys(process.env).filter(key => /^(?:OTEL_|CLAUDE_CODE_(?:ENABLE_TELEMETRY|OTEL_|USE_MANAGED_SETTINGS_ONLY))/iu.test(key));
+  const conflicts = conflictingTelemetryEnvironment(process.env);
   if (conflicts.length) throw Error(`conflicting or managed telemetry environment (${conflicts.length} setting(s)); refusing instrumented launch`);
   process.stderr.write('Claude telemetry managed policy is not inspected; verify local export is permitted before opting in.\n');
   let hostVersion = 'unknown';
@@ -132,24 +147,24 @@ async function run() {
   } catch { throw Error('cannot determine Claude version; refusing instrumented launch'); }
   if (hostVersion === 'unknown') throw Error('Claude version output was not recognized; refusing instrumented launch');
   const id = randomBytes(32).toString('hex'), route = `/${randomBytes(24).toString('hex')}`;
-  const rows = new Map(); let rejected = false, bodyBytes = 0, concurrent = 0, receivedExports = 0, rejectionCode = '';
+  let rows = new Map();
+  let rejected = false, bodyBytes = 0, concurrent = 0, receivedExports = 0, rejectionCode = '';
   const server = createServer((req, res) => {
     if (req.method !== 'POST' || req.url !== route || req.headers['content-type']?.split(';')[0] !== 'application/json' || req.headers.authorization !== `Bearer ${id}`) { rejected = true; rejectionCode = 'route-method-content-or-auth'; req.resume(); res.writeHead(404).end(); return; }
     if (concurrent >= 2 || Number(req.headers['content-length']) > MAX_BODY) { rejected = true; req.resume(); res.writeHead(413).end(); return; }
-    concurrent++; let size = 0; const chunks = [];
-    req.setTimeout(3000, () => { rejected = true; req.destroy(); });
+    concurrent++; let size = 0, settled = false; const chunks = [];
+    const release = () => { if (!settled) { settled = true; concurrent--; } };
+    const deadline = setTimeout(() => { rejected = true; rejectionCode = 'request-timeout'; req.destroy(); }, 3000);
+    req.on('close', () => { clearTimeout(deadline); release(); });
     req.on('data', chunk => { size += chunk.length; if (size <= MAX_BODY) chunks.push(chunk); });
     req.on('end', () => {
-      concurrent--; bodyBytes += size;
+      clearTimeout(deadline);
+      release();
+      bodyBytes += size;
       try {
         if (size > MAX_BODY || bodyBytes > MAX_BODY) throw Error();
         receivedExports++;
-        for (const row of countersFrom(JSON.parse(Buffer.concat(chunks).toString('utf8')))) {
-          const previous = rows.get(row.id);
-          if (previous && row.value < previous.value) throw Error('cumulative metric reset detected');
-          rows.set(row.id, row);
-        }
-        if (rows.size > MAX_ROWS || [...rows.values()].some(row => Buffer.byteLength(JSON.stringify(row)) > MAX_ROW)) throw Error();
+        rows = mergeCumulative(rows, countersFrom(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
         res.writeHead(200).end('{}');
       } catch (error) {
         rejected = true;

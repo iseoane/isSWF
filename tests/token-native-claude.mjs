@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { countersFrom } from '../tools/token-native-claude.mjs';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { conflictingTelemetryEnvironment, countersFrom, mergeCumulative, persistReceipt, readConfig } from '../tools/token-native-claude.mjs';
 import { normalizeClaudeOtel } from '../tools/token-native-summary.mjs';
 import { report } from '../tools/token-report.mjs';
 
@@ -15,6 +18,13 @@ assert.deepEqual(result.map(({ id, source, model, category, value }) => ({ id, s
   { id: `subagent-${modelId}-input`, source: 'subagent', category: 'input', value: 99, model: modelId },
 ]);
 assert.doesNotMatch(JSON.stringify(result), /secret@example|other|claude-sonnet/u);
+const firstSnapshot = mergeCumulative(new Map(), result);
+const repeatedSnapshot = mergeCumulative(firstSnapshot, [{ ...result[0], value: 3 }]);
+assert.equal(repeatedSnapshot.get(result[0].id).value, 3, 'repeated cumulative exports replace rather than add');
+const changedSnapshot = mergeCumulative(repeatedSnapshot, [{ ...result[0], value: 8 }]);
+assert.equal(changedSnapshot.get(result[0].id).value, 8, 'changed cumulative exports keep the latest value');
+assert.equal(mergeCumulative(changedSnapshot, []).size, changedSnapshot.size, 'missing series does not become a fabricated zero');
+assert.throws(() => mergeCumulative(changedSnapshot, [{ ...result[0], value: 2 }]), /reset detected/u);
 const receipt = { version: 1, host: 'claude', hostVersion: '2.1.312', sourceVersion: 'claude_code.token.usage-otlp-cumulative', provenance: 'native-claude-otel', session: '0123456789abcdef01234567', policyStatus: 'managed-policy-not-inspected', counters: result.slice(0, 4) };
 const metadata = { host: 'claude', hostVersion: '2.1.312', id: 'task', window: 'run', effort: 'unknown', taskClass: 'fixture', candidate: 'current', outcome: 'fixture', accepted: 1 };
 const window = normalizeClaudeOtel({ input: receipt, meta: metadata });
@@ -32,4 +42,35 @@ assert.equal(report(partialWindow).totals.processed, null);
 assert.equal(report(partialWindow).totals.processedSubtotal, 8);
 assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [metric('input', 'main', -1)] }] }] }));
 assert.throws(() => countersFrom({ resourceMetrics: [{ scopeMetrics: [{ metrics: [{ name: 'claude_code.token.usage', sum: { isMonotonic: true, aggregationTemporality: 1, dataPoints: [] } }] }] }] }));
+assert.deepEqual(conflictingTelemetryEnvironment({ PATH: '/bin', OTEL_EXPORTER_OTLP_ENDPOINT: 'ignored', CLAUDE_CODE_USE_MANAGED_SETTINGS_ONLY: '1' }).sort(), ['CLAUDE_CODE_USE_MANAGED_SETTINGS_ONLY', 'OTEL_EXPORTER_OTLP_ENDPOINT']);
+assert.deepEqual(conflictingTelemetryEnvironment({ PATH: '/bin' }), []);
+const project = await mkdtemp(join(tmpdir(), 'claude-native-config-'));
+try {
+  assert.equal((await readConfig(project)).enabled, false, 'missing state root disables capture');
+  const state = join(project, '.isswf'); await mkdir(state);
+  assert.equal((await readConfig(project)).enabled, false, 'missing opt-in does not enable capture');
+  const configPath = join(state, 'claude-native-usage.json');
+  await writeFile(configPath, JSON.stringify({ version: 1, enabled: false }));
+  assert.equal((await readConfig(project)).enabled, false, 'explicitly disabled capture stays disabled');
+  await writeFile(configPath, JSON.stringify({ version: 1, enabled: true, destination: 'claude-native-usage' }));
+  const enabled = await readConfig(project);
+  assert.equal(enabled.enabled, true);
+  assert.equal(enabled.destination, join(state, 'claude-native-usage'));
+  await writeFile(configPath, JSON.stringify({ version: 1, enabled: true, destination: '../outside' }));
+  await assert.rejects(readConfig(project), /unsafe capture destination/u);
+  const receiptDirectory = join(state, 'receipts');
+  const storedReceipt = { version: 1, session: '0123456789abcdef01234567', counters: [{ input: 11 }] };
+  const storedBytes = `${JSON.stringify(storedReceipt)}\n`;
+  await persistReceipt({ base: state, destination: receiptDirectory }, storedBytes);
+  const receiptPath = join(receiptDirectory, `${storedReceipt.session}.json`);
+  assert.equal(await readFile(receiptPath, 'utf8'), storedBytes);
+  await assert.rejects(persistReceipt({ base: state, destination: receiptDirectory }, storedBytes), { code: 'EEXIST' });
+  assert.equal(await readFile(receiptPath, 'utf8'), storedBytes, 'existing receipt is never overwritten');
+  const staleClaim = join(receiptDirectory, '.claude-capture.lock');
+  await writeFile(staleClaim, 'existing claim', { flag: 'wx' });
+  await assert.rejects(persistReceipt({ base: state, destination: receiptDirectory }, `${JSON.stringify({ ...storedReceipt, session: 'abcdef0123456789abcdef01' })}\n`), { code: 'EEXIST' });
+  assert.equal(await readFile(staleClaim, 'utf8'), 'existing claim', 'stale claim is never removed');
+  await mkdir(join(project, '.factory'));
+  assert.equal((await readConfig(project)).enabled, false, 'ambiguous state roots fail closed');
+} finally { await rm(project, { recursive: true, force: true }); }
 console.log('PASS: Claude OTLP token metric allowlist, exact cumulative counters and malformed-value refusal');
