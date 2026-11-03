@@ -27,7 +27,7 @@ const onlyOptions = (args, allowed) => {
   for (const name of Object.keys(args)) if (!allowed.includes(name)) throw new Error(`unsupported option: --${name}`);
 };
 const runGit = (repo, args, input) => {
-  const result = spawnSync('git', ['-C', repo, ...args], { input, encoding: 'buffer', maxBuffer: 64 * 1024 * 1024, stdio: ['pipe', 'pipe', 'pipe'] });
+  const result = spawnSync('git', ['-C', repo, ...args], { input, encoding: 'buffer', maxBuffer: 64 * 1024 * 1024, stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, GIT_LITERAL_PATHSPECS: '1' } });
   if (result.error || result.status !== 0) throw new Error(`git ${args[0]} failed: ${result.stderr?.toString().slice(0, 1000) || result.error?.message}`);
   return result.stdout;
 };
@@ -127,7 +127,7 @@ async function launch(args) {
   if (isAbsolute(briefPath) || briefPath.split('/').includes('..') || !briefPath) throw new Error('brief must be a safe repository-relative path');
   commitExists(repo, inputSha);
   commitExists(repo, targetBase);
-  const briefEntry = runGit(repo, ['ls-tree', '-z', inputSha, '--', briefPath]).toString('utf8').split('\0').filter(Boolean)[0];
+  const briefEntry = runGit(repo, ['ls-tree', '-z', inputSha, '--', briefPath]).toString('utf8').split('\0').find(value => value.slice(value.indexOf('\t') + 1) === briefPath);
   if (!briefEntry || !briefEntry.startsWith('100644 blob ') && !briefEntry.startsWith('100755 blob ')) throw new Error('brief must be a committed regular file at input SHA');
   const briefObject = briefEntry.slice(0, briefEntry.indexOf('\t')).split(' ')[2];
   const brief = runGit(repo, ['cat-file', 'blob', briefObject]);

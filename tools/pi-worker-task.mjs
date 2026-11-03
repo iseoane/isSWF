@@ -35,7 +35,7 @@ const safePath = (value, label) => {
   return value;
 };
 const git = (repo, args) => {
-  const result = spawnSync('git', ['-C', repo, ...args], { encoding: 'buffer', maxBuffer: 4 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'], env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: '/nonexistent' } });
+  const result = spawnSync('git', ['-C', repo, ...args], { encoding: 'buffer', maxBuffer: 4 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'], env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: '/nonexistent', GIT_LITERAL_PATHSPECS: '1' } });
   if (result.status !== 0) throw new Error(`pinned Git read failed (${args[0]})`);
   return result.stdout;
 };
@@ -72,7 +72,7 @@ async function prepare(args) {
   const files = {}, releasedFiles = released === null ? null : readReleaseSources(repo, profile.sha, profile.files);
   for (const path of profile.files) {
     if (released !== null) { files[path] = releasedFiles[path].toString('utf8'); continue; }
-    const entry = git(repo, ['ls-tree', '-z', profile.sha, '--', path]).toString().split('\0').find(Boolean);
+    const entry = git(repo, ['ls-tree', '-z', profile.sha, '--', path]).toString().split('\0').find(value => value.slice(value.indexOf('\t') + 1) === path);
     if (!entry || !/^100644 blob /.test(entry)) throw new Error(`profile reference is not a committed regular file: ${path}`);
     const object = entry.slice(0, entry.indexOf('\t')).split(' ')[2];
     files[path] = git(repo, ['cat-file', 'blob', object]).toString('utf8');

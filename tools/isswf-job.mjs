@@ -27,7 +27,7 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const fullSha = value => typeof value === 'string' && /^[0-9a-f]{40}$/.test(value);
 const safeRelative = value => typeof value === 'string' && !value.includes('\\') && !value.includes('\0') && !value.startsWith('/') && value.split('/').every(part => part && part !== '.' && part !== '..');
 function invoke(binary, args, timeout = 30000) {
-  const result = spawnSync(binary, args, { encoding: 'buffer', timeout, maxBuffer: 4 * 1024 * 1024, env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: '/nonexistent', PI_TELEMETRY: '0' } });
+  const result = spawnSync(binary, args, { encoding: 'buffer', timeout, maxBuffer: 4 * 1024 * 1024, env: { PATH: process.env.PATH || '/usr/bin:/bin', HOME: '/nonexistent', PI_TELEMETRY: '0', GIT_LITERAL_PATHSPECS: '1' } });
   if (result.error || result.status !== 0) throw new Error(`local ${basename(binary)} operation failed: ${result.stderr?.toString().slice(0, 1200) || result.error?.code || result.status}`);
   return result.stdout;
 }

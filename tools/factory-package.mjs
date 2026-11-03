@@ -111,6 +111,7 @@ function runGit(source, args, encoding = "utf8") {
     encoding,
     maxBuffer: 16 * 1024 * 1024,
     timeout: 30_000,
+    env: { ...process.env, GIT_LITERAL_PATHSPECS: "1" },
   });
   if (result.error || result.status !== 0) {
     fail(`git ${args.join(" ")} failed: ${result.error?.message ?? result.stderr}`);
@@ -473,7 +474,7 @@ async function installTools({ source, revision, project }) {
   if (await realpath(runGit(projectRoot, ["rev-parse", "--show-toplevel"]).trim()) !== projectRoot) fail("Target must be a Git root");
   const payload = new Map();
   for (const name of installedToolNames) {
-    const entry = runGit(sourceRoot, ["ls-tree", "-z", revision, "--", `tools/${name}`]).split("\0").filter(Boolean);
+    const entry = runGit(sourceRoot, ["ls-tree", "-z", revision, "--", `tools/${name}`]).split("\0").filter(value => value.slice(value.indexOf("\t") + 1) === `tools/${name}`);
     if (entry.length !== 1 || !/^100(?:644|755) blob [0-9a-f]+\t/u.test(entry[0])) fail(`Missing regular committed tool: ${name}`);
     payload.set(name, runGit(sourceRoot, ["cat-file", "blob", entry[0].slice(0, entry[0].indexOf("\t")).split(" ")[2]], null));
   }
