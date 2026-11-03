@@ -70,11 +70,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J004
 
-- Status: blocked
+- Status: in-review
 - Objective: Make tests/reviewer-task.mjs pass on Windows without elevation, preserving its Linux guarantees (#155; group D: undiagnosed http400 fetch count; same message as #154).
 - Depends on: J014
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: Root cause shared with #176 (J014): per-file git process starts exceed the 10 s review deadline on Windows.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -85,15 +85,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #178 (7f43305) batched pinned git reads; test passes on Windows from a normal clone
 
 ## J005
 
 - Status: blocked
 - Objective: Make tests/release-package.mjs pass on Windows without elevation, preserving its Linux guarantees (#156; group D: undiagnosed strict equality).
-- Depends on: J014
+- Depends on: J015
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Separator fix in PR #175 (6d83ce9); remaining timeout shares root cause with #176 (J014).
+- Blocker: Separator fix in PR #175 and role-suite timeout fix in PR #178; remaining failure at tests/release-package.mjs:266 is Linux-only process identity (#179, J015).
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -148,11 +148,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J008
 
-- Status: blocked
+- Status: in-review
 - Objective: Make tests/review-panel-capacity.mjs pass on Windows without elevation, preserving its Linux guarantees (#159; group A: capacity-scope-must-be-separate).
 - Depends on: J014
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: Root cause shared with #176 (J014): review deadline and 5 s progress wait exceeded on Windows.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -163,7 +163,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #178 (7f43305) batched pinned git reads; test passes on Windows from a normal clone
 
 ## J009
 
@@ -264,11 +264,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J014
 
-- Status: pending
+- Status: in-review
 - Objective: Keep reviewer, planner and diagnostic preparation within their deadlines on Windows by reducing per-file git process starts (#176).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None; awaiting Windows check-quality confirmation.
 - Next step: Measure with isswf-performance, batch tree and blob reads with one ls-tree -r and one cat-file --batch per checkpoint, add a regression bounding git process starts, then reassess test timeouts.
 
 ### Acceptance
@@ -276,6 +276,25 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - node tests/reviewer-task.mjs, tests/review-panel-capacity.mjs and tests/release-package.mjs exit 0 on Windows 11 in an unprivileged terminal.
 - Prepared bundles stay byte-identical and refusal behavior is unchanged on Linux and Windows.
 - A regression test bounds the number of git process starts per prepared bundle.
+
+### Evidence
+
+- PR #178 (7f43305) batched pinned git reads and literal pathspecs; reviewer-task and review-panel-capacity pass on Windows
+
+## J015
+
+- Status: pending
+- Objective: Make owner and process identity checks work on Windows or refuse explicitly, without weakening Linux checks (#179).
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J015/brief-r1.md)
+- Blocker: None; triaged ready-for-agent.
+- Next step: Map every /proc identity read (isswf, native-recovery, worker-lifecycle, release-package test), decide equivalent Windows identity or explicit refusal per caller, then implement with tests.
+
+### Acceptance
+
+- node tests/release-package.mjs exits 0 on Windows 11 in an unprivileged terminal.
+- Linux owner and process identity checks are unchanged.
+- Windows either supplies an equivalent identity (process ID, start time, boot time) or refuses with an explicit documented unsupported message.
 
 ### Evidence
 
