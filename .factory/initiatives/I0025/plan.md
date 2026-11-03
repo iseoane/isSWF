@@ -255,7 +255,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
 - Brief: [brief-r2.md](jobs/J006/brief-r2.md)
-- Blocker: Official-source grounding rules out repository-settings-only telemetry activation; metrics-only process-local transport/flush and installed2.1.312 behavior remain unproved. Existing result converter cannot silently consume OTLP. No J006 actor dispatched; first J005 review failed at Codex usage limit, without verdict.
+- Blocker: Installed2.1.312 isolated process-local startup metrics export now observed, but token/subagent/reset/flush behavior and managed policy precedence remain unproved. Repository settings cannot activate telemetry by official contract. Existing result converter cannot silently consume OTLP. No J006 actor dispatched; first J005 review failed at Codex usage limit, without verdict.
 - Next step: Prove isolated installed-Claude metrics-only activation and source scope without real providers; then pin the smallest supported setup/launch/consumer design before writer. Current explicit continuation covers local grounding, not provider substitution/retries/global activation. Real Windows tests deferred.
 
 ### Acceptance
@@ -270,3 +270,4 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Current explicit operator start selects this next functional unit after Pi; preparation is not dispatch.
 - jobs/J006/brief-r1.md (original acquisition goal retained); jobs/J006/brief-r2.md (current setup scope, current explicit start and reserved1worker40min/1correction15min/up to2reviews15min sequential allowance).
 - J003/J004 establish bounded source converters, not installed-Claude acquisition or complete native platform acceptance.
+- Coordinator continuation: installedClaude2.1.312 version/help and current official monitoring/cost/headless sources examined. Ignored tooling/.local/i0025-claude-feasibility/metrics-startup.mjs plus receipt.json retain native startup probe: initialize true,8loopbackexports/8704bytes of session.count, no malformedpayloads, cleanexit0. One nonmetricsloopbackrequest rejected503, no prompts or real credential/provider. Native token/subagent/reset/flush/policy and Windows evidence still missing; not implemented or accepted.
