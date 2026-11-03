@@ -83,7 +83,7 @@ async function publish(directory, value) {
   try {
     await link(pending, join(directory, 'recovery-review-receipt.json'));
     const parent = await open(directory, 'r');
-    try { await parent.sync(); } finally { await parent.close(); }
+    try { await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await parent.close(); }
   } finally { await unlink(pending); }
 }
 

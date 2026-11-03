@@ -40,7 +40,7 @@ const atomicCreate = async (path, content) => {
     await link(temp, path);
     await unlink(temp);
     const directory = await open(dirname(path), 'r');
-    try { await directory.sync(); } finally { await directory.close(); }
+    try { await directory.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await directory.close(); }
   } catch (error) { await rm(temp, { force: true }); throw error; }
 };
 const atomicWriteOnce = async (path, value) => {

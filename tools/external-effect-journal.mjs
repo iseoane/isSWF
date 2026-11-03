@@ -21,7 +21,7 @@ export function effectIntent(binding, job) {
 
 async function syncDirectory(path) {
   const file = await open(path, 'r');
-  try { await file.sync(); } finally { await file.close(); }
+  try { await file.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await file.close(); }
 }
 async function fact(path) {
   try {

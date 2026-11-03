@@ -43,7 +43,7 @@ async function publish(path, value) {
   const pending = path + '.pending', file = await open(pending, 'wx', 0o600);
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
   await link(pending, path); await unlink(pending);
-  const directory = await open(dirname(path), 'r'); try { await directory.sync(); } finally { await directory.close(); }
+  const directory = await open(dirname(path), 'r'); try { await directory.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await directory.close(); }
 }
 async function roots(project, store) {
   assert(isAbsolute(project ?? '') && isAbsolute(store ?? ''), 'absolute-project-store-required');
@@ -106,11 +106,11 @@ export async function runDiagnosis(request, { backend, mode = 'real', probeRunne
   assert(mode === 'real' || mode === 'fixture', 'explicit-mode-required');
   assert(mode === 'real' ? grant.allowProviderCalls === true && !backend && !probeRunner : grant.allowProviderCalls === false && backend, 'provider-grant-or-fixture-required');
   await mkdir(dir, { mode: 0o700 });
-  const parent = await open(p.store, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+  const parent = await open(p.store, 'r'); try { await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await parent.close(); }
   const reservation = await acquireCapacity(p.capacity, {role:'diagnostician',logicalJobRef:job.logicalJobRef,mode});
   if (!reservation) {
     await rmdir(dir);
-    const parent = await open(p.store,'r'); try { await parent.sync(); } finally { await parent.close(); }
+    const parent = await open(p.store,'r'); try { await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await parent.close(); }
     return {version:1,status:'blocked',reason:'capacity',attemptsConsumed:0,fetches:0,capacity:p.capacity,executionAuthorized:false};
   }
   const deadlineAt = Date.now() + grant.deadlineMs;

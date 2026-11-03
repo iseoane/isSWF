@@ -15,7 +15,7 @@ const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const fail=code=>{throw new Error(code);};
 async function boundedJSON(path){const bytes=await readFile(path);assert(bytes.length<=65536,'input-too-large');return {value:JSON.parse(bytes),sha256:hash(bytes)};}
 function blob(repo,sha,path){assert(/^[0-9a-f]{40}$/.test(sha),'full-checkpoint-required');assert(typeof path==='string'&&path&&!isAbsolute(path)&&!path.split('/').includes('..'),'invalid-git-path');const r=spawnSync('git',['-C',repo,'show',sha+':'+path],{maxBuffer:1024*1024});assert(r.status===0,'pinned-blob-unavailable');return r.stdout;}
-async function publish(path,value){const temp=path+'.pending',f=await open(temp,'wx',0o600);try{await f.writeFile(JSON.stringify(value)+'\n');await f.sync();}finally{await f.close();}await link(temp,path);await unlink(temp);const d=await open(dirname(path),'r');try{await d.sync();}finally{await d.close();}}
+async function publish(path,value){const temp=path+'.pending',f=await open(temp,'wx',0o600);try{await f.writeFile(JSON.stringify(value)+'\n');await f.sync();}finally{await f.close();}await link(temp,path);await unlink(temp);const d=await open(dirname(path),'r');try{await d.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; });}finally{await d.close();}}
 
 async function quotaFromResponse(response,provider,signal){
  if(provider!=='opencode-go'||response.status!==429)return;
@@ -89,9 +89,9 @@ export async function runResearch(request,{backend,mode='real'}={}){
  if(mode==='real')assert(grant.allowProviderCalls===true&&!backend,'explicit-provider-grant-required');
  else assert(backend&&grant.allowProviderCalls===false,'fixture-backend-required');
  await mkdir(dir,{mode:0o700});
- const parent=await open(p.store,'r');try{await parent.sync();}finally{await parent.close();}
+ const parent=await open(p.store,'r');try{await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; });}finally{await parent.close();}
  const reservation=await acquireCapacity(p.capacity,{role:'researcher',logicalJobRef:job.logicalJobRef,mode});
- if(!reservation){await rmdir(dir);const parent=await open(p.store,'r');try{await parent.sync();}finally{await parent.close();}return {version:1,status:'blocked',reason:'capacity',attemptsConsumed:0,records:[],capacity:p.capacity,executionAuthorized:false};}
+ if(!reservation){await rmdir(dir);const parent=await open(p.store,'r');try{await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; });}finally{await parent.close();}return {version:1,status:'blocked',reason:'capacity',attemptsConsumed:0,records:[],capacity:p.capacity,executionAuthorized:false};}
  const sessionId=randomUUID();
  await publish(join(dir,'binding.json'),{version:1,mode,sessionId,...(reservation.info?{capacity:reservation.info}:{}),callerSha256:grant.callerSha256,project:p.project,inputSha:p.inputSha,jobPath:p.jobPath,logicalJobRef:job.logicalJobRef,grantSha256:p.grantSha256,models:job.models,route,budgets:{totalAttempts:grant.totalAttempts,retryBudget:grant.retryBudget,deadlineMs:grant.deadlineMs,outputBytes:grant.outputBytes,maxOutputTokens:grant.maxOutputTokens},authority:'external-grant; no replay or automatic recovery'});
  let calls=0,retries=0,index=0;const started=Date.now(),records=[];

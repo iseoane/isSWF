@@ -31,7 +31,7 @@ async function createNativeToolRunner({ work, factoryRoot }) {
     await fs.link(temp, path);
     await fs.unlink(temp);
     const parent = await fs.open(dirname(path), 'r');
-    try { await parent.sync(); } finally { await parent.close(); }
+    try { await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await parent.close(); }
   };
   await fs.mkdir(records);
   await atomic(join(directory, 'native-recovery.json'), {

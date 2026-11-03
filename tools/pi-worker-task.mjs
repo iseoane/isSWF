@@ -135,7 +135,7 @@ const publishInvocation = async value => {
   try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
   await fs.link(temp,path); await fs.unlink(temp);
   const parent=await fs.open(directory,'r');
-  try { await parent.sync(); } finally { await parent.close(); }
+  try { await parent.sync().catch(error => { if (process.platform !== 'win32' || error.code !== 'EPERM') throw error; }); } finally { await parent.close(); }
   return hash(bytes);
 };
 const bounded = async (command, timeout = 10000, modelCall) => {
