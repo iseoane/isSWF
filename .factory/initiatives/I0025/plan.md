@@ -262,7 +262,7 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Depends on: J005
 - Brief: [brief-r4.md](jobs/J006/brief-r4.md)
 - Blocker: V005 source Standards/Spec FAIL exactcafe685: scalarF2 corrected, but converter rolling tolerance is order-dependent and1ns cannot repair recorded1ms case. Technical replan needed, not another threshold. Official OTel context permits first-measurement starts per timeseries, not mandatory equality across category attribute sets. Current source/quality/process/policy/platform limits remain; no complete J006 claim.
-- Next step: Await approval for one worker<=20min and one independent affected-delta reviewer<=10min, same models/sequential, under r4 per-series/process-snapshot reconciliation. Keep actual category boundaries, no invented intersection/tolerance, deterministic recorded1ms/permutation/reset/ownership regressions and actual native proof. All prior calls spent; no automatic extra cycle, publication as complete, global cleanup/repair or activation.
+- Next step: Operator rejects indefinite patch/review cycles; the proposed r4 extension is NOT approved. Stop new implementation/review dispatches and budget-extension loops. Preserve candidate, failed verdicts and incidents. Any next implementation needs a bounded outcome/technical decision and explicit stopping criteria, not another ad hoc patch or assumption that another review will close it. No publication as complete, global cleanup/repair or activation.
 
 ### Acceptance
 
