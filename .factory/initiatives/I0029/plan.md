@@ -12,12 +12,12 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Read pinned paths literally and by exact entry name in the remaining worker tools (#180).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None; awaiting PR CI and merge.
-- Next step: Reproduce the first-entry substitution with a committed ':/x' path, then set GIT_LITERAL_PATHSPECS in each git helper, select exact entries and extend tests/git-literal-pathspecs.mjs.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -28,6 +28,7 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 ### Evidence
 
 - Windows 11 clean no-hardlink clone with #179/#180/#173 patches: node tools/check-quality.mjs PASS; node tests/release-package.mjs PASS; tests/git-literal-pathspecs.mjs RED before, GREEN after
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J002
 
@@ -36,7 +37,7 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Identify the smallest public entry point per tool that performs the pinned read, then add behavioral fixtures.
+- Next step: None.
 
 ### Acceptance
 
