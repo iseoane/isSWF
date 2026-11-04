@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Improve proportionate review guidance and validate known-defect and valid-control cases without changing caller permissions
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: No local verification blocker. Independent review of the methodology, source commit, remote CI and publication have not been performed or newly authorized.
-- Next step: Operator reviews the pending source change and the bounded evaluation; obtain any later checkpoint or publication authorization separately.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -27,3 +27,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - jobs/J001/evaluation.md
 - tooling/.local/review-guidance-eval/quality-final.log
 - tooling/.local/review-guidance-eval/summary.json
+
+## Operator acceptance and closure
+
+On 2026-11-04 the operator accepted this initiative: “I0025 I007 I008 acepto”. All jobs are closed on their retained evidence within its stated limits; no further work is planned.
