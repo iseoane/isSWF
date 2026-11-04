@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Archive development audit artifacts without losing evidence or changing factory runtime
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md) (pending until prepared)
-- Blocker: Source verification complete under operator-authorized proportional scope; exact PR/main CI still gate publication.
-- Next step: Publish the verified archive and proportional instruction correction after exact CI gates, without more payload model calls.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -33,3 +33,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - Operator authorizes proportional review: Pues adelante mejoremos!
 - Corrected scope: .factory/initiatives/I0003/jobs/J001/brief-r2.md
 - Instruction Standards/Spec PASS and mechanical archival disposition: .factory/initiatives/I0003/jobs/J001/V002.md
+
+## Closure
+
+The archive publication is integrated in main: source checkpoint 1ad7fc3 and procedure checkpoint 7678f64 are ancestors of main, archive commit eda2b11 leaves only `.audit/README.md` and `.audit/archive.json`. J001 is completed with no remaining step.
