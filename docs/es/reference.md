@@ -15,6 +15,7 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-pr` | Preparar descripciones de PR y actualizaciones autorizadas con evidencias y evaluación obligatoria del riesgo. |
 | `isswf-issue` | Reportar bugs independientes o proponer funcionalidades y mejoras, con destino verificado y `needs-triage` obligatorio. |
 | `isswf-triage` | Clasificar issues existentes en briefs nativos: listas para un agente, faltan datos, duplicadas o requieren investigación técnica. |
+| `isswf-interview` | Entrevista opcional que hace una pregunta cada vez, con una respuesta recomendada, para cerrar huecos de alcance, intención de producto o aceptación. |
 | `isswf-e2e` | Crear, ejecutar o mantener pruebas ejecutables de recorridos críticos de usuario, con Playwright u otro controlador adecuado para la interfaz real. |
 | `isswf-debug` | Reproducir defectos, investigar causas y devolver un diagnóstico causal o incertidumbre explícita. |
 | `isswf-review` | Revisar un candidato exacto frente a Standards y Spec con evidencias proporcionadas al riesgo. |
@@ -29,6 +30,8 @@ En Pi se invocan con `/skill:`. En Claude Code, con `/isswf:`.
 La skill de redacción determina la audiencia a partir de la petición y del contexto del documento. Te pregunta cuando la audiencia no está clara y sigue las convenciones de idioma y documentación del proyecto de destino. Utiliza `/skill:isswf-writing` en Pi o `/isswf:isswf-writing` en Claude Code. No requiere activar el proyecto.
 
 La skill de comprensión elige entre reformular, explicar o aprender con práctica según tu petición. Se adapta a los conocimientos que muestras y pregunta solo cuando una ambigüedad cambiaría la respuesta. Utiliza `/skill:isswf-understanding` en Pi o `/isswf:isswf-understanding` en Claude Code. Sirve para distintos temas y proyectos sin crear cursos ni registros de progreso por defecto.
+
+La skill de entrevista es opcional. Primero investiga el código, la documentación y el glosario; después hace una pregunta cada vez, en orden de dependencia, cada una con una respuesta recomendada y sin un número fijo de preguntas. Las respuestas se registran en el plan de la iniciativa como confirmadas por el operador, y la planificación y los briefs se preparan a partir de ese registro; si la detienes («basta, decide»), los puntos restantes se registran como supuestos explícitos. El coordinador la propone en una línea para funcionalidades nuevas, cambios de comportamiento visibles para el usuario, conceptos que faltan en el glosario o aceptación no escrita; no hace falta cuando la especificación no tiene huecos, es decir, cuando el agente no tiene que presuponer, inferir ni decidir nada. Utiliza `/skill:isswf-interview` en Pi o `/isswf:isswf-interview` en Claude Code en cualquier momento. No autoriza implementación ni publicación.
 
 La skill de PR funciona directamente o desde Delivery. Inspecciona el candidato, explica el alcance y los límites de verificación, y evalúa el riesgo incluso en cambios solo de documentación. Delivery aporta sus identidades y evidencias y reutiliza la misma evaluación. Utiliza `/skill:isswf-pr` en Pi o `/isswf:isswf-pr` en Claude Code. Redactar no autoriza publicar ni fusionar.
 

@@ -15,6 +15,7 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | `isswf-pr` | Prepare PR descriptions and authorized updates with evidence and a mandatory risk assessment. |
 | `isswf-issue` | Report independent bugs or propose features and improvements, with verified routing and mandatory `needs-triage`. |
 | `isswf-triage` | Triage existing issues into native briefs: ready for an agent, needs information, duplicate, or technical grounding. |
+| `isswf-interview` | Opt-in interview that asks one question at a time, with a recommended answer, to close gaps in scope, product intent or acceptance. |
 | `isswf-e2e` | Create, run or maintain executable tests of critical user journeys, with Playwright or another driver suitable for the real interface. |
 | `isswf-debug` | Reproduce defects, investigate causes and return a causal diagnosis or explicit uncertainty. |
 | `isswf-review` | Review an exact candidate against Standards and Spec with proportionate evidence. |
@@ -29,6 +30,8 @@ In Pi, invoke them with `/skill:`. In Claude Code, use `/isswf:`.
 The writing skill determines the audience from the request and document context. It asks you when the audience is unclear and follows the target project’s language and documentation conventions. Use `/skill:isswf-writing` in Pi or `/isswf:isswf-writing` in Claude Code. It does not require project activation.
 
 The understanding skill selects reformulation, explanation, or practical learning from your request. It adapts to your demonstrated knowledge and asks only when an ambiguity would change the response. Use `/skill:isswf-understanding` in Pi or `/isswf:isswf-understanding` in Claude Code. It works across subjects and projects without creating courses or progress records by default.
+
+The interview skill is opt-in. It investigates code, docs and the glossary first, then asks one question at a time in dependency order, each with a recommended answer, with no fixed question count. Answers are recorded in the initiative plan as confirmed by the operator, and planning and briefs are prepared from that record; if you stop it ("enough, decide"), the remaining points are recorded as explicit assumptions. The coordinator proposes it in one line for new features, user-visible behavior changes, concepts missing from the glossary or unwritten acceptance; it is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything. Use `/skill:isswf-interview` in Pi or `/isswf:isswf-interview` in Claude Code at any time. It does not authorize implementation or publication.
 
 The PR skill works directly or through Delivery. It inspects the candidate, explains scope and verification limits, and assesses risk even for documentation-only changes. Delivery supplies its identities and evidence and reuses the same assessment. Use `/skill:isswf-pr` in Pi or `/isswf:isswf-pr` in Claude Code. Drafting does not authorize publication or merge.
 

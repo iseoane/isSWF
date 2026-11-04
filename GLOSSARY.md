@@ -66,3 +66,7 @@ _Avoid_: conversation or process as synonyms for a work session.
 
 **Retrospective**:
 Analysis of a job's or session's evidence to propose improvements to the project or factory.
+
+**Interview**:
+An opt-in exchange in which an agent asks the operator one question at a time, each with a recommended answer, until the specification leaves nothing to presume, infer or decide. Answers are recorded as confirmed by the operator; points left open when the operator stops it are recorded as assumptions.
+_Avoid_: questionnaire when implying a fixed list or count of questions.
