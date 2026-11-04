@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 // Resolve this checkout's own object store from its .git entry only, without searching enclosing
 // repositories: a directory is a normal clone; a file is a linked worktree whose gitdir names its
 // common directory through 'commondir'. Any unreadable or malformed entry falls back to the default
-// '<root>/.git/objects', which the evidence-root checks then refuse explicitly instead of failing at import.
+// '<root>/.git/objects', which the evidence-root checks then refuse with a named error instead of failing at import.
 function ownObjectsPath(root) {
   const dotGit = join(root, '.git'), fallback = join(dotGit, 'objects');
   try {
@@ -47,7 +47,7 @@ export function validateProbes(probes) {
 export async function evidenceDigest(path, deadlineAt = Date.now() + 10000) {
   assert(Number.isFinite(deadlineAt), 'finite-evidence-deadline-required');
   assert(typeof path === 'string', 'canonical-temporary-evidence-root-required');
-  const canonicalPath = await realpath(path);
+  const canonicalPath = await realpath(path).catch(() => assert.fail('canonical-temporary-evidence-root-required'));
   const canonicalTemporaryRoot = process.platform === 'win32' ? await realpath(tmpdir()) : null;
   const relativeToTemporaryRoot = canonicalTemporaryRoot === null ? '' : relative(canonicalTemporaryRoot, path);
   const windowsTemporaryChild = relativeToTemporaryRoot !== '' && relativeToTemporaryRoot !== '..' && !relativeToTemporaryRoot.startsWith('..' + sep) && !isAbsolute(relativeToTemporaryRoot);
