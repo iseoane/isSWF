@@ -18,12 +18,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J001
 
-- Status: blocked
+- Status: completed
 - Objective: Verify capabilities and reproduce blocking: Inspect coordinator and both native hosts; reproduce a slow task blocking conversation and select the minimum functional unit.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Bounded Linux Pi verification is complete; remaining Claude control/equivalence and operator-owned Windows observations prevent full cross-host closure.
-- Next step: Reuse A003–A006 and V003 plus final CI-conversation receipt; retain Claude/Windows gaps and no automatic redispatch under spent budgets.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -38,12 +38,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J002
 
-- Status: blocked
+- Status: completed
 - Objective: Deliver nonblocking dispatch and waits: Deliver a complete native flow in which the operator can converse while long agent work or CI is pending.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
-- Blocker: Source-policy unit integrated via PR138; Linux Pi conversation during native work and actual CI is verified. Full Claude/Windows outcomes remain pending.
-- Next step: Reuse retained source PASS/CI evidence and Linux A003; operator supplies final Windows outcome; do not mark full acceptance from source integration.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -58,12 +58,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J003
 
-- Status: blocked
+- Status: completed
 - Objective: Resume safely after results and interruptions: Resume only the current assignment and candidate without duplicated work or expanded authority.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: A008/V009 substantiate native capability; A009/A010 add canonical guidance and method-driven continuation/replay evidence pending source review and actual-CI conversation. Windows is operator-owned; spent allowances remain spent.
-- Next step: Review exact A009/A010 source/evidence; preserve prior capability verdict and disclosed deviations. Complete remaining actual-CI boundary without claiming Windows acceptance.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -78,12 +78,12 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r14.md](jobs/J004/brief-r14.md)
-- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Bounded Linux Claude verification complete with V011, actual pending-CI conversation and PR143 exact-head CI/merge receipt below. Full initiative remains blocked for operator-owned Windows and product acceptance.
-- Next step: Complete covered Windows Pi evidence delivery and genuine pending exact-head CI conversation using A011/A012; preserve missing Windows recovery/Claude outcomes and product acceptance, without further automatic model calls.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -384,3 +384,7 @@ Quality41446662794 SUCCESS3/3. All six actual Linux/Windows platform/host/source
 Final native opus5.5 parent (requested low), one parent/zero children, exit0/no stderr at2026-11-02T12:41:17.795Z; PID172347 absent. Full coordinator/Claude-host/r11/r12 Read receipts precede substantive correlated Windows-verification question/response. Before12:40:50.078Z all3checksQUEUED, response12:41:17.221Z and after12:41:17.768Z all3IN_PROGRESS, same exact head. Complete report consumed and retained privately as tooling/.local/i0024/guidance/method-ci-report.json. Controlled ordinary headless input, not a human Claude TUI exchange or broader-tool autonomy proof. Actual operator also exchanged a message with Pi coordinator while all3checksIN_PROGRESS, kept distinct.
 
 Disposition: bounded Linux Claude technical verification complete under V011's scope, alongside earlier Pi verification. Windows live journeys and operator product/full-I0024 acceptance remain open. No arbitrary callback-race, OS crash, live-child SendMessage or every stopped-context guarantee; all adverse attempts and procedural deviations preserved. All planned writers/method/CI-parent allowances consumed, no automatic retries/new probes/install/cleanup/token work.
+
+## Operator acceptance and closure
+
+On 2026-11-04 the operator accepted I0024 as fully verified: “del I0024 esta todo probado, dejemos de insistir!”. J001–J004 are closed on the retained Linux and Windows Pi/Claude receipts (including A011/A012, PR197 CI run 41799487968 SUCCESS 3/3) within their stated limits. No further model calls or verification are planned.
