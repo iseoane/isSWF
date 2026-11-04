@@ -22,6 +22,19 @@ try {
   await writeFile(join(common, 'worktrees/linked/commondir'), '../..\n');
   assert.equal(await layout('linked', checkout => writeFile(join(checkout, '.git'), `gitdir: ${join(common, 'worktrees/linked')}\n`)), join(common, 'objects'));
   assert.equal(await layout('plain'), join(root, 'plain/.git/objects'), 'a checkout without .git keeps the unavailable default path');
+  // Relative gitdir and a CRLF .git file resolve like git does, against the checkout.
+  assert.equal(await layout('relative', checkout => writeFile(join(checkout, '.git'), 'gitdir: ../main/.git/worktrees/linked\r\n')), join(common, 'objects'));
+  // Missing commondir: the gitdir itself holds the objects (submodule-style gitfile).
+  await mkdir(join(root, 'modules/sub'), { recursive: true });
+  assert.equal(await layout('submodule', checkout => writeFile(join(checkout, '.git'), `gitdir: ${join(root, 'modules/sub')}\n`)), join(root, 'modules/sub/objects'));
+  // A gitdir that names a file (ENOTDIR) falls back to the unavailable default path instead of throwing at import.
+  await writeFile(join(root, 'not-a-directory'), 'x');
+  assert.equal(await layout('enotdir', checkout => writeFile(join(checkout, '.git'), `gitdir: ${join(root, 'not-a-directory')}\n`)), join(root, 'enotdir/.git/objects'));
+  if (process.platform === 'win32') {
+    // git may record a lowercase drive letter; the resolved path must match the canonical (uppercase) form.
+    const lower = join(common, 'worktrees/linked').replace(/^[A-Z]:/u, drive => drive.toLowerCase());
+    assert.equal(await layout('lowercase-drive', checkout => writeFile(join(checkout, '.git'), `gitdir: ${lower}\n`)), join(common, 'objects').replace(/^[a-z]:/u, drive => drive.toUpperCase()));
+  }
 } finally {
   await rm(root, { recursive: true, force: true });
 }

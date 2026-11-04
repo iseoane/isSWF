@@ -9,20 +9,22 @@ import { fileURLToPath } from 'node:url';
 
 // Resolve this checkout's own object store from its .git entry only, without searching enclosing
 // repositories: a directory is a normal clone; a file is a linked worktree whose gitdir names its
-// common directory through 'commondir'.
+// common directory through 'commondir'. Any unreadable or malformed entry falls back to the default
+// '<root>/.git/objects', which the evidence-root checks then refuse explicitly instead of failing at import.
 function ownObjectsPath(root) {
-  const dotGit = join(root, '.git');
+  const dotGit = join(root, '.git'), fallback = join(dotGit, 'objects');
   try {
-    if (!lstatSync(dotGit).isFile()) return join(dotGit, 'objects');
+    if (!lstatSync(dotGit).isFile()) return fallback;
     const gitdir = /^gitdir: (.+)$/mu.exec(readFileSync(dotGit, 'utf8'))?.[1].trim();
-    if (!gitdir) return join(dotGit, 'objects');
+    if (!gitdir) return fallback;
     const worktreeGitdir = resolve(root, gitdir);
+    if (!lstatSync(worktreeGitdir).isDirectory()) return fallback;
     let common = worktreeGitdir;
-    try { common = resolve(worktreeGitdir, readFileSync(join(worktreeGitdir, 'commondir'), 'utf8').trim()); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-    return join(common, 'objects');
-  } catch (error) {
-    if (error.code === 'ENOENT') return join(dotGit, 'objects');
-    throw error;
+    try { common = resolve(worktreeGitdir, readFileSync(join(worktreeGitdir, 'commondir'), 'utf8').trim()); } catch (error) { if (error.code !== 'ENOENT') return fallback; }
+    // git may record a lowercase drive letter; canonical Windows paths use an uppercase one.
+    return join(common, 'objects').replace(/^[a-z](?=:)/u, drive => process.platform === 'win32' ? drive.toUpperCase() : drive);
+  } catch {
+    return fallback;
   }
 }
 export const sourceObjectsPath = ownObjectsPath(resolve(dirname(fileURLToPath(import.meta.url)), '..'));
