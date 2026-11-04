@@ -1,6 +1,6 @@
 # Delivery summary
 
-> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from.
+> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from. Always fill the identity, base/candidate and pinned-input fields below with exact values, never a link in their place.
 
 > Local evidence record, not a mandatory remote PR body. For concise English issue/PR text, follow `.agents/roles/references/delivery.md`. This record does not publish or accept work. The coordinator continues covered feature-to-PR actions without another routine permission request. Do not claim a remote PR exists unless its URL and state were observed.
 
