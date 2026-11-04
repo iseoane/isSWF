@@ -1,5 +1,7 @@
 # Attempt report
 
+> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from.
+
 ## Identity and pinned inputs
 
 - Job ID and attempt ID:

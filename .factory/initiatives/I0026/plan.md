@@ -175,3 +175,9 @@ Lever: PR206 moved the Claude bound reviewer launch into its own reference and m
 Reading: the lever saves about 4k tokens per request (about 3%), as estimated. It is not visible in the totals because #204 was a larger delivery (new test, CI step, two review rounds, one failed reviewer launch, a stale PR head). The fixed startup context (about 87k per request, the operator's host environment, not isSWF) remains about two thirds of coordinator cost. Avoidable cost observed: the failed reviewer launch (non-canonical Windows paths in the binding).
 
 Conclusion: isSWF methodology offers only small further savings; the largest lever is the host environment, which is the operator's configuration. Units 3 (#149) and 4 (#150) remain available but are not started.
+
+### Units 3 and 4 (2026-11-04)
+
+- Unit 3 (#149): the worker profile now requires exercising each explicit brief or consumer boundary (absent/unknown/malformed input, consumer size/format/identifier limits) through the real consumer before review, with expected results from the contract. This targets the J004 class of first-review findings; review independence is unchanged.
+- Unit 4 (#150): attempt, review and delivery templates and the coordinator brief step now link unchanged scope, authorization, budgets, identities and limits instead of restating them, keeping a stated-source restatement only where a record must stand alone.
+- Not measured separately: both act on later deliveries; their effect is visible only across future comparable work.
