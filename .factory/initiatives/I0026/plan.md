@@ -22,6 +22,35 @@ Source map at the examined base: `tools/project-state.mjs:1–17` state selectio
 2. **Change one cause:** after selection and explicit implementation budget, deliver a reversible vertical unit with its tests and affected bilingual docs. Preserve independence, method-loading obligations, authority and recovery. Do not replace semantic judgment by deterministic checks.
 3. **Compare complete outcomes:** after unit 2 candidate and integrated I0025 accounting, repeat equivalent representative workloads; retain all samples, failed attempts, retries, corrections and required reviews. Exact-candidate independent judgment plus correctness and measurement gates precede retention/publication of any optimization.
 
+### First actionable diagnostic from I0025/J004
+
+Operator clarified that the purpose of the metrics is to identify procedures, skills, agent behavior and coordination worth improving, not merely report totals or demand a savings result before drawing useful hypotheses. This is a coordinator-owned analysis continuation, not authorization to implement/change shared methodology, dispatch more agents or publish I0026. Historical examined runtime source `ba0336beb4f13cb8eece483244d23b009eff5a4d` (not the current checkout); measurement endpoints and reviewed functional candidate are separately identified in I0025/J004 A003. No new model actor was used for this analysis.
+
+Correctness/coverage-qualified evidence: J004 has a prospectively retained current-parent start/end plus four known new native child attempts. The parent is rounded and cache writes unavailable, so these shares describe the **known processed subtotal**, not full provider spend. Product acceptance and causal optimization comparison are not established. This suffices to prioritize investigations, not to attribute cost to individual skills or certify savings.
+
+| Priority for investigation | Actual signal | Concrete procedure/owner to inspect | Bounded change to evaluate, not implemented |
+| --- | --- | --- | --- |
+| 1: Coordinator context/control overhead | Parent known subtotal approximately17.761M of22.279M, about79.7%;54parent turns. Approximate cache reads average328k per parent turn. This is repeated context processing, not unique text or fresh input. | Shared coordinator skill; feature-delivery handoff/report procedure; actual coordinator dispatch and verification habits. No per-turn/per-skill trace exists, so no individual resource can be blamed. | Use a compact current-unit operating context, preserve pinned resources/grants/recovery, avoid repeating the same brief in dispatch prose, and group independent deterministic inspections before returning to the model. Start with dispatch/context transport rather than a factory-wide rewrite. |
+| 2: Avoidable contract-boundary rework | V001 found two existing-brief violations: missing individual counters were rejected, and a composed row ID overflowed the consumer. Correction plus final review consumed2009070known child processed tokens, about9.0% of the whole known subtotal. That is the observed stage cost, not a guaranteed removable amount. | Worker profile, verification principles and scoped test-selection practice; J004r2 already stated the required invariants, so simply adding more general instructions is not the remedy. | Before first review, map the brief's concrete input/consumer boundaries to a few literal tests: absent/unknown/malformed counters and composed ID at/over128. Keep the independent review. Use the initial candidate as the regression case, not a new mandatory checklist for every assignment. |
+| 3: Repeated narrative/evidence transport | Current initiative plan31947bytes and J004brief10566bytes; A001/A002/V001/V002/delivery total44169bytes. These are source sizes, NOT token attribution or proof that every byte was read in each turn. The same identities/limits recur in multiple records and handoffs. | Canonical plan/current brief and delivery/resource-consumption report wording at existing owners. | Keep unique failed/passing reports intact; make current plan/delivery refer to them with minimal status/identity/evidence rather than repeatedly restating them. Preserve mandatory method loading and truthful provenance, not duplicate narrative. |
+
+The initial worker accounted for1818246known processed tokens; reviews together1387495 (30.7% of measured child processing), correction1312600. Reviews found real faults, so this sample does not justify deleting independent review, weakening checks or changing models merely to make counts lower. A model/effort comparison needs correctness and independent evidence under its own grant.
+
+**Recommended first hypothesis:** a compact current-unit coordinator context/handoff while retaining identical authority, methodology and review requirements. Use a supported fresh or compacted context at a naturally authorized unit boundary, preserving pins/grants/budgets/actor state and mandatory resources; a shorter child prompt alone does not erase the parent's historical context. No session switch, new dispatcher or host change is performed by this analysis. It addresses the largest observed stage and needs no collector framework. Expected mechanism: fewer model turns carrying long historical context and less duplicate transport. Maintenance cost: small instruction/handoff adjustment at existing owners, plus verification that no required input or recovery/authority state is lost. No predicted savings percentage.
+
+Next discriminating comparison: on a naturally authorized comparable small CLI/adapter assignment, retain the same model/effort, host and review selection; use the compact handoff only, capture parent start/end and new child attempts, and report parent/whole-window input/output/cache components, turn count, first-review blockers and correctness. Fewer parent turns with inflated context/output or more failures is not success. A different task/cold-cache state must be marked confounded, not causal proof. No artificial provider experiment or new actor is authorized here.
+
+Evidence: [measurement and provenance](../I0025/jobs/J004/A003.md), [initial findings](../I0025/jobs/J004/V001.md), [corrected review](../I0025/jobs/J004/V002.md), and [worker source contract](../../../.agents/roles/worker.md). Required references and methodology remain authoritative; these are candidate changes, not edits to shipped roles/skills.
+
+### Published proposals, deferred from I0025 completion
+
+At the operator's explicit issue-publication request, the coordinator created and read back these three separate proposals in the verified public `iseoane/isSWF` repository:
+- [#148 — Review coordinator context growth and repeated control-turn overhead](https://github.com/iseoane/isSWF/issues/148).
+- [#149 — Review first-pass contract-boundary tests to reduce correction cycles](https://github.com/iseoane/isSWF/issues/149).
+- [#150 — Review duplicated brief, handoff and delivery narrative](https://github.com/iseoane/isSWF/issues/150).
+
+At publication, all were OPEN with verified `research` and `needs-triage` labels. Recovery inspection confirmed that all three remain OPEN; labels were not reverified. Open/closed behavior searches and plausible related issues were inspected before creation; distinct scope versus #94/#95/#97/#121/#128/#129 is recorded in each body. Only sanitized already-public project evidence is linked. These are proposals, not approved implementation or triage advancement. At that historical checkpoint, the user redirected functional priority back to I0025 automatic Pi capture and actual Claude metric acquisition; this is not a statement of current I0025 delivery status. None of these optimization proposals was started by publication.
+
 ### Candidate hypotheses, not ranked bottlenecks
 
 - Reuse deterministic quality inventory, plan parsing, status extraction and aggregation instead of repeated model reconstruction. Add code only for a demonstrated repeatable need.
@@ -41,9 +70,9 @@ Numerator includes coordinator, children, reviews, failures, retries and correct
 - Status: awaiting-human
 - Objective: Reduce total token consumption per accepted functional outcome while preserving correctness, independent review, authority, traceability and recovery.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Prepared design complete; implementation is not authorized. Ranking and savings depend on I0025’s coverage-qualified real baseline.
-- Next step: On explicit implementation start, materialize finite budgets and exact inputs, then deliver the first bounded unit below. No execution is inferred from this plan.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: A coverage-qualified real J004 sample now supports actionable stage-level diagnostic priorities, not per-skill causal attribution or savings. Optimization implementation is not authorized; native/acceptance limits remain explicit.
+- Next step: On explicit optimization start, bound the compact coordinator dispatch/context-transport hypothesis and compare it during ordinary equivalent work, preserving methodology/review/authority. Do not add more general instructions or remove reviews merely from totals.
 
 ### Acceptance
 
@@ -58,4 +87,6 @@ Numerator includes coordinator, children, reviews, failures, retries and correct
 ### Evidence
 
 - Prepare-only operator request in current session; current-source investigation, not a measured consumption baseline or savings claim.
-- jobs/J001/brief-r1.md
+- jobs/J001/brief-r1.md (original preparation preserved).
+- jobs/J001/brief-r2.md (current practical diagnostic objective and first selected hypothesis).
+- I0025/J004 retained start/end/actor/result data and V001/V002 show coordinator share and concrete boundary rework; this analysis uses those observations without new provider calls or methodology edits.
