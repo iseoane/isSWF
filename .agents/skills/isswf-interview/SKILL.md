@@ -27,7 +27,7 @@ There is no fixed question count. Ask as many questions as needed to close the s
 
 ## 4. Record the outcome
 
-Record each settled point where the assignment already keeps its scope and acceptance, such as its brief, without creating a separate plan or status store:
+Record the clarified specification in the initiative's canonical plan (`<state>/initiatives/<ID>/plan.md`), so it stays documented and complete and later planning and briefs are prepared from it. Briefs link that record instead of being the only place it lives. Do not create a separate plan or status store:
 
 - Mark operator answers as `confirmed by operator`.
 - When the operator stops the interview, record every remaining point as an explicit `assumption` with the recommended answer that will be applied.
