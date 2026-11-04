@@ -163,7 +163,7 @@ Next: unit 2 (#148) compares a compact coordinator handoff against this parent b
 
 ### Unit 2 comparison (2026-11-04)
 
-Lever: PR206 moved the Claude bound reviewer launch into its own reference and made coordinator resume start from . Workload: #204, delivered by a fresh Claude Code coordinator session as PR209 (plan-record validation, CI step approved by the operator, two review rounds PASS).
+Lever: PR206 moved the Claude bound reviewer launch into its own reference and made coordinator resume start from `isswf-status`. Workload: #204, delivered by a fresh Claude Code coordinator session as PR209 (plan-record validation, CI step approved by the operator, two review rounds PASS).
 
 | | Unit 1 (#201) | Unit 2 (#204) |
 | --- | --- | --- |
