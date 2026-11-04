@@ -82,8 +82,8 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
 - Brief: [brief-r13.md](jobs/J004/brief-r13.md)
-- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Independent source/evidence r13 PASS/LOW retained in V011; actual pending-CI conversation and exact-head CI remain open, Windows operator-owned.
-- Next step: Publish reviewed source/evidence PR, use unused r10 CI conversation only during genuine pending exact-head checks, then reconcile required CI. No new reviewer/writer or Windows claim.
+- Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Bounded Linux Claude verification complete with V011, actual pending-CI conversation and PR143 exact-head CI/merge receipt below. Full initiative remains blocked for operator-owned Windows and product acceptance.
+- Next step: Await operator-owned native Windows outcomes and product acceptance; no further Claude model dispatch or publication loop. Preserve bounded Linux evidence and prior limits.
 
 ### Acceptance
 
@@ -358,3 +358,13 @@ Deviation retained: optional bound content request for host-portability exceeded
 V011 S1/S2 precision suggestions applied to A010 only: explicitly instructed child nonadoption and prelabelled stale replay, no new behavioral claim. S3 is retained as a limit: actual evidence covers same-ID continuation after maxTurns partial, not live SendMessage direction. Existing host capability-conditioned prohibition prevents unsupported continuation; no further source change or required correction identified. Later delta is verbatim verdict/qualified record/status only; source checks and independent source judgment unchanged. Parser/docs/diff checks cover record delta; exact-head CI still required.
 
 R13 allowance consumed; no active model actor. Remaining r10 actual-CI parent opus/low<=5min/zero children may run only for genuine pending required checks on the exact published head. This factual observation and required CI are the final bounded Linux Claude boundary by V011; Windows and operator acceptance remain separate. Existing conditional affected-delta reserve stays unused, not automatic. No cleanup/install/global change or token implementation.
+
+## Bounded Linux Claude closure receipt
+
+PR143 merged normally with expected-head protection at2026-11-02T13:37:04Z as968545d83980200fe1b49dfb37f182ce212923f0. Tested head e6e97763f7cf1e2cfdb5dee1013a807ce4682c90; independent source/evidence candidate7e7b944, Standards/Spec PASS and LOW (V011), later record-only qualifications preserved.
+
+Quality41446662794 SUCCESS3/3. All six actual Linux/Windows platform/host/source-isolation reports PASS at synthetic3ef269bb69ceba41c4e8c215894ecde238c541ce, parents72afcc9522470a733df82c684c27a84eea24ea79/e6e97763f7cf1e2cfdb5dee1013a807ce4682c90, treef782a43bc62870cf9311a5f03c5b9c6837422245 equal tested head and actual merge. These certify their packaging/discovery scope, not live Windows.
+
+Final native opus5.5 parent (requested low), one parent/zero children, exit0/no stderr at2026-11-02T12:41:17.795Z; PID172347 absent. Full coordinator/Claude-host/r11/r12 Read receipts precede substantive correlated Windows-verification question/response. Before12:40:50.078Z all3checksQUEUED, response12:41:17.221Z and after12:41:17.768Z all3IN_PROGRESS, same exact head. Complete report consumed and retained privately as tooling/.local/i0024/guidance/method-ci-report.json. Controlled ordinary headless input, not a human Claude TUI exchange or broader-tool autonomy proof. Actual operator also exchanged a message with Pi coordinator while all3checksIN_PROGRESS, kept distinct.
+
+Disposition: bounded Linux Claude technical verification complete under V011's scope, alongside earlier Pi verification. Windows live journeys and operator product/full-I0024 acceptance remain open. No arbitrary callback-race, OS crash, live-child SendMessage or every stopped-context guarantee; all adverse attempts and procedural deviations preserved. All planned writers/method/CI-parent allowances consumed, no automatic retries/new probes/install/cleanup/token work.
