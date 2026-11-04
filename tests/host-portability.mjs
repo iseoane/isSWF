@@ -219,6 +219,10 @@ for (const pattern of [/supported `output` launch parameter/u, /terminal executi
 assert.match(piHost, /pi-subagents.*0\.83\.0/);
 assert.match(piHost, /agentOverrides/);
 assert.match(piHost, /thinking/);
+const piOptionalTools = piHost.slice(piHost.indexOf('#### Add CodeGraph and Engram tools when installed'), piHost.indexOf('\n\nFor current Pi work'));
+for (const pattern of [/`isswf-worker`, `isswf-researcher` and `isswf-planner`/u, /Never add them to `isswf-reviewer`/u, /replaces the profile allowlist instead of merging/u, /`subagentOnlyExtensions`/u, /`codegraph`/u, /`mem_current_project`, `mem_context`, `mem_search`, `mem_get_observation` and `mem_save`/u, /installed and loaded/u, /never install/u, /user settings/u]) assert.match(piOptionalTools, pattern);
+for (const role of ['worker', 'researcher', 'planner', 'reviewer']) assert.doesNotMatch(await read(`.agents/hosts/pi/agents/isswf-${role}.md`), /codegraph|mem_/u, `Shipped Pi ${role} profile must not require optional providers`);
+assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /\[CodeGraph and Engram tools\]\(.*hosts\/pi\.md#add-codegraph-and-engram-tools-when-installed/u);
 assert.match(piHost, /async: false/);
 assert.match(piHost, /contact_supervisor/);
 assert.match(piHost, /does not install.*automatically/i);
