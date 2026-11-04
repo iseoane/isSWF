@@ -144,8 +144,8 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Status: completed
 - Objective: Give isSWF reviewers narrowly scoped read-only Git evidence without a general shell.
 - Depends on: None
-- Brief: [brief-r21.md](jobs/J023/brief-r21.md) (reduced scope; Claude route per brief-r19/r20).
-- Blocker: None. Status operation removed and actual tool use made optional by operator decision (brief-r21); Pi actual use not observed and not required.
+- Brief: [brief-r21.md](jobs/J023/brief-r21.md)
+- Blocker: None. Reduced scope per brief-r21; Claude route per brief-r19/r20. Status operation removed and actual tool use made optional by operator decision (brief-r21); Pi actual use not observed and not required.
 - Next step: None under J023. Next per operator order: J032.
 
 ### Acceptance
