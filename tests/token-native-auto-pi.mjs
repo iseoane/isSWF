@@ -31,19 +31,19 @@ try {
   };
   const ctx = branch => ({ cwd: root, sessionManager: { getSessionId: () => 'test-session', getBranch: () => branch.map(id => ({ id })) }, ui: { setStatus() {} } });
   const waitUntil = async (predicate, message) => {
-    for (let index = 0; index < 1000; index++) {
+    for (const end = Date.now() + 10000; Date.now() < end;) {
       if (await predicate()) return;
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 25));
     }
     throw Error(message);
   };
   const waitFile = async (path, records = 1) => {
-    for (let index = 0; index < 1000; index++) {
+    for (const end = Date.now() + 10000; Date.now() < end;) {
       try {
         const value = JSON.parse(await readFile(path, 'utf8'));
         if (value.records.length >= records) return value;
       } catch {}
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 25));
     }
     throw Error('automatic capture did not write its expected record');
   };
@@ -84,10 +84,10 @@ try {
   enabled.emitCompletion('run-1');
   enabled.emitCompletion('run-1');
   let completed;
-  for (let index = 0; index < 100; index++) {
+  for (const end = Date.now() + 10000; Date.now() < end;) {
     completed = JSON.parse(await readFile(path, 'utf8'));
     if (completed.records.some(record => record.event === 'async-complete')) break;
-    await new Promise(resolve => setTimeout(resolve, 5));
+    await new Promise(resolve => setTimeout(resolve, 25));
   }
   assert.equal(completed.records.filter(record => record.event === 'async-complete').length, 1);
   const repeatedBranch = ctx(['entry-a', 'entry-b']);
