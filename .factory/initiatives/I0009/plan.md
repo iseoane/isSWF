@@ -322,12 +322,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J028
 
-- Status: pending
+- Status: completed
 - Objective: Rescue only confirmed independently useful residual portability from PR87 on current main.
 - Depends on: J027, J032
 - Brief: [brief-r1.md](jobs/J028/brief-r1.md)
-- Blocker: No independent supported native consumer established for legacy capacity/diagnostic/researcher residuals; do not treat them as native workflow prerequisites.
-- Next step: Apply the consumer-selection checkpoint, then deliver only justified complete caller journeys or record explicit legacy-only parking. No implementation selected now.
+- Blocker: None. Disposition 2026-11-04: not rescued; no native consumer needs the legacy residuals and PR87 is closed.
+- Next step: None.
 
 ### Acceptance
 
@@ -382,12 +382,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J031
 
-- Status: blocked
+- Status: completed
 - Objective: Close PR87 only after reconciled dispositions and verified preservation of unique work.
-- Depends on: J027, J028, J029, J030, J032
+- Depends on: J027, J028
 - Brief: [brief-r1.md](jobs/J031/brief-r1.md)
-- Blocker: Durable retrievable backup/evidence retention and downstream final dispositions remain unverified; current request excludes remote closure.
-- Next step: Establish preserved closure readiness and accepted dispositions, then obtain separately authorized fresh-head remote closure/readback. Do not delete refs, worktrees or evidence.
+- Blocker: None. PR87 closed without merge on 2026-11-04 (operator decision); unique isolation work archived at tag archive/pr87-windows-isolation (1c7e898) and tracked as #219.
+- Next step: None.
 
 ### Acceptance
 
@@ -420,3 +420,7 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 - Current operator explicitly requests resolving model configuration after rejecting multiple divergent sources; coordinator inspected native setup boundaries, host guides and installer/default consumers.
 - jobs/J033/brief-r1.md records scope, initial reassessment, reading map and finite actors; no implementation or model call at registration.
+
+## PR87 closure (2026-11-04)
+
+Operator chose to close PR87 without merge and keep only the parked Windows isolation engine, archived at tag `archive/pr87-windows-isolation` (1c7e898) with follow-up #219. Branches `feature/native-windows-factory`, `backup/native-windows-local` and the related local stash were removed. J029 and J030 stay as independent work on main; they never depended on PR87 code.
