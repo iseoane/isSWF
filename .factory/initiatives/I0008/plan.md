@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Deliver reusable security, performance and observability skills plus stronger design guidance with verified host and pinned-execution integration
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
-- Blocker: No local verification or independent source-review blocker. Operator acceptance, source checkpoint, remote CI, publication and installation are separate and not performed.
-- Next step: Operator inspects the verified local change and grants any desired checkpoint or publication step separately.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -27,3 +27,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - jobs/J001/verification.md
 - tooling/.local/specialized-skills-validation/candidate.json
 - tooling/.local/specialized-skills-validation/review-result.json
+
+## Operator acceptance and closure
+
+On 2026-11-04 the operator accepted this initiative: “I0025 I007 I008 acepto”. All jobs are closed on their retained evidence within its stated limits; no further work is planned.

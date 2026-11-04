@@ -6,12 +6,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Install complete Pi/plugin integrations with a common version, per-repo .isswf state and explicit safe upgrades without requiring a development checkout.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Product acceptance, release publication, installation and migration remain separate decisions. The operator has explicitly authorised committing the current work and pushing main to origin; that does not authorise a release or Claude execution.
-- Next step: Checkpoint the reviewed working-tree scope, verify the exact commit, and push main without force. Keep the original candidate's independent review distinct from the later English-resource and documentation changes.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -34,3 +34,7 @@ This coordinator-owned plan records reported progress, not execution permission 
 - jobs/J001/V001.md preserves previous failures and final Standards PASS / Spec PASS for candidate 0b8d40a634e5eedd20f09b12431f0c57dbe1ac38def512ee3af13719e331f0c8.
 - jobs/J001/delivery.md records verified scope, checks, limits and pending operator acceptance.
 - jobs/J001/candidate-r2.json pins the exact reviewed uncommitted product-source inventory.
+
+## Closure
+
+Superseded by later published releases v1.4.0 (2026-10-24) through v1.6.1 (2026-10-31), which shipped the installable factory. On 2026-11-04 the operator confirmed the releases already happened; no separate acceptance step remains.

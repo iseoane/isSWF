@@ -96,12 +96,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Deliver slice 1: bounded offline Pi/Claude consumption receipts and matched comparison, with available individual attribution and no model calls in the measurement path.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
-- Blocker: PR144 OPEN at f08a28be6bf480a5865334b2eae94e6fa195d040; all three CI41467736080 checks SUCCESS. Source3160398 has independent Standards/Spec pass; operator product acceptance/integration remain separate, V001 fail retained.
-- Next step: Operator decision on acceptance/integration of https://github.com/iseoane/isSWF/pull/144 at the verified head. Current operator explicitly permits stacked J002 work against this candidate without waiting for main integration. All J001 engineering budgets spent.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -128,12 +128,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Objective: Produce the first real scoped consumption baseline, with individual agent attribution where available and no model calls in measurement.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Preliminary real child baseline exists (4/4 known child attempts) but coordinator window counters and product acceptance are missing. This is not a complete accepted-outcome baseline; no main-integration dependency under approved stacked delivery.
-- Next step: Publish scoped preliminary evidence as a draft stacked PR against feat/i0025-offline-metrics. Obtain an admissible coordinator-window summary/acceptance or use a future ordinary authorized task for the complete baseline; no artificial calls/raw history access. Zero new model actors.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -154,12 +154,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J003
 
-- Status: in-review
+- Status: completed
 - Objective: Support native Pi/Claude usage summaries for coordinator and agents/subagents without models in the measurement path, retaining explicit host/platform capability limits.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Draft PR146 at3e187822d7c1b20df0887a39da319aae7357f7b0 has all three CI checks SUCCESS and reviewed source2eca40b. Authorized Pi/Linux empty-session load/API acquisition now PASS, but nonzero coordinator/children/window behavior, installed-Claude and native Windows evidence remain pending. Claude snapshot-only; slice2 partial.
-- Next step: Retain A003 native proof under the existing record-only boundary, then resolve a real ordinary-work sample and installed-Claude/Windows observations before full native acceptance. No persistent activation, further model actors, automatic provider calls or direct-main integration.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -187,12 +187,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Objective: Complete supported Claude metrics while prospectively measuring the useful engineering work in Pi, including coordinator and child attempts.
 - Depends on: J003
 - Brief: [brief-r2.md](jobs/J004/brief-r2.md)
-- Blocker: Source reviewed/pass and PR147 published draft; prospective Pi start/end sample retained, but rounded parent/missing cacheWrite prevent a full exact total. Exact published-head CI and actual installed-Claude/Windows observations/acceptance remain separate pending gates.
-- Next step: Retain bounded measurement receipt and verify PR147 exact-head CI; all actor/correction/review allowances spent. Use approximately22.28M known processed subtotal/120turns as a preliminary sample, not savings/full-total/automatic collection or native acceptance.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -221,12 +221,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J005
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Automatically capture Pi current-parent and subagent usage during normal work after one explicit setup-managed opt-in, without per-measurement commands or copied counters.
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
-- Blocker: V003 Standards/source-Spec PASS for B1–B3 on448a6ae; V002 fail on8877475 retained. Coordinator A005 now verifies actual Pi/subagents integrated nonzero automatic capture AND genuine native completion in isolated Linux RPC. Reviewer native INCONCLUSIVE remains its historical observation. Draft PR151 latest published/readback verified headad5042adf66f22e9553087ace2195c479832b584, basefeat/i0025-claude-metrics. All three exact-head CI41590159558 checks SUCCESS; receipt-only successor to source448a6ae. Operator acceptance/integration remain separate; Windows real metric journeys deferred.
-- Next step: Operator integration/product-acceptance decision for draftPR151 exactad5042a remains separate; no merge or current-session activation. Continue explicitly requested J006 under separate allowance; no additional J005 engineering actors.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -257,12 +257,12 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 
 ## J006
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Acquire actual native Claude numeric usage during normal work without manual JSON/counter transfers, preserving parent/tree/individual scope where available.
 - Depends on: J005
-- Brief: [brief-r8.md](jobs/J006/brief-r8.md) (current: transcript reader) ; previous [brief-r7.md](jobs/J006/brief-r7.md) (post-start verification change) + [brief-r6.md](jobs/J006/brief-r6.md) (authority) on design [brief-r5.md](jobs/J006/brief-r5.md)
-- Blocker: none for the r6 unit; observed-only scope accepted by the operator, whole-work completeness explicitly not required.
-- Next step: Transcript reader f13245c technically verified on Linux (V009 PASS, informational notes only). Operator acceptance, actual Windows run, push/PR/integration separate and not granted. J006 budget fully used.
+- Brief: [brief-r8.md](jobs/J006/brief-r8.md)
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -303,3 +303,8 @@ Minimum baseline unblock: admissible retained sanitized summary or explicitly au
 - Operator 2026-11-03: telemetry daemon/global settings rejected as over-engineering; approved local transcript reader (brief-r8) as primary zero-token Claude capture with parent/subagent rows and total, invalid format → recommend isSWF issue. Budget 40+15 (+15+15 conditional). Windows run still requires an actual Windows host (this session is Linux).
 - jobs/J006/A008.md + V008.md: A008 Writes got repeated auto-mode no-verdicts until the operator switched to bypass; fresh worker then delivered 3d24963 (transcript reader, parent+subagent rows, total, invalid-format issue recommendation). Worker ran out-of-scope `pkill -x cat` (reported, no observed effect). V008 bound review Standards/Spec PASS with 4 non-blocking suggestions. Coordinator observed on 3d24963: focused test, ESLint, Knip, check-docs PASS. Real counts-only run self-reported (4 files, 165 requests, total complete).
 - jobs/J006/A009.md + V009.md: single correction f13245c resolved all V008 suggestions; V009 bound review Standards/Spec PASS with 5 informational notes (shared entry-limit doc wording, conservative cross-file conflict drop, test reusing clean.summary, unbounded versions list, non-ASCII Windows encoding unverified). Coordinator observed focused test PASS on f13245c.
+
+## Operator acceptance and closure
+
+On 2026-11-04 the operator accepted this initiative: “I0025 I007 I008 acepto”. All jobs are closed on their retained evidence within its stated limits; no further work is planned.
+J006 superseded briefs remain retained: [brief-r7.md](jobs/J006/brief-r7.md), [brief-r6.md](jobs/J006/brief-r6.md), [brief-r5.md](jobs/J006/brief-r5.md); the Brief field now holds only the current reference so the plan parses.
