@@ -96,6 +96,8 @@ jobs:
         run: node tests/initiative-status.mjs .
       - name: Verify readonly malformed-plan panel
         run: node tests/initiative-panel.mjs .
+      - name: Verify repository plan records parse
+        run: node tests/plan-records.mjs .
       - name: Verify worker-route admission
         run: node tests/worker-route-admission.mjs .
       - name: Verify static host portability

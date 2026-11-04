@@ -140,3 +140,23 @@ Measurement: `tools/token-native-claude-transcript.mjs` on session hash `a481bd9
 Limits: parent only. The independent review ran as a separate bound `isswf-reviewer` process outside the session transcript, so its tokens are not included; this is a parent-scope baseline, not a whole-delivery total. One sample, one host. Comparison with J004 is indicative only (different task size, host and review rules): J004's parent averaged about 328k cache read per turn; this baseline averages about 128k per request.
 
 Next: unit 2 (#148) compares a compact coordinator handoff against this parent baseline on an equivalent small task, also capturing the reviewer process.
+
+## J003
+
+- Status: awaiting-human
+- Objective: Deliver #204 as I0026 unit 2 comparison workload under current review rules.
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Operator integration decision on PR209 (touches .github/workflows, needs a person per REVIEW.md); then record the parent token measurement for comparison with J002.
+
+### Acceptance
+
+- #204 delivered through a PR with independent review and exact-head CI.
+- Parent token measurement retained in this plan for comparison with J002.
+
+### Evidence
+
+- PR: https://github.com/iseoane/isSWF/pull/209 (commits 7c224f8, 2e9dbd8).
+- Independent review (bound isswf-reviewer, claude -p, opus/medium): first launch INCONCLUSIVE, coordinator binding used non-canonical Windows paths, no judgment; round 1 on 7c224f8 PASS with F1 suggestion (isswf-status exits 0 for an invalid plan) and F2 informational (test not in check-quality, out of scope); round 2 delta on 2e9dbd8 PASS, F1 resolved.
+- Local Windows checks: plan-records PASS (26 plans, 2 historical exceptions), check-docs PASS; check-quality fails at reviewer-original-evidence identically on base 4e1a5df (pre-existing).
