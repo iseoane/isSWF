@@ -106,9 +106,37 @@ Ordered units, none started; implementation still needs an explicit start:
 
 ## J002
 
-- Status: active
+- Status: completed
 - Objective: Deliver #201 as I0026 unit 1 baseline workload under current review rules.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: None
-- Next step: RED test, GREEN fix, independent review, PR and exact-head CI.
+- Blocker: None.
+- Next step: None.
+
+### Acceptance
+
+- #201 delivered through PR202 with TDD, independent review and exact-head CI.
+- Parent token baseline retained in this plan.
+
+### Evidence
+
+- Delivery: https://github.com/iseoane/isSWF/pull/202
+- Measurement: tools/token-native-claude-transcript.mjs, session hash a481bd99dd3fa737
+
+### Unit 1 baseline (2026-11-04)
+
+Workload: issue #201 (named refusal for an unresolvable `evidenceDigest` root), delivered by a fresh Claude Code coordinator session under the current review rules, integrated as PR202 (+25/-2, 3 commits, TDD RED/GREEN, round-1 independent review PASS with 0 blockers, CI 3/3 on exact head 027bd6a).
+
+Measurement: `tools/token-native-claude-transcript.mjs` on session hash `a481bd99dd3fa737`, Claude Code 2.1.318, claude-opus-5-5 effort low, 31 parent requests, zero transcript subagents.
+
+| Component | Tokens |
+| --- | --- |
+| Input | 62 |
+| Output | 11,845 |
+| Cache read | 3,982,696 (97.1%) |
+| Cache write | 118,827 |
+| Processed (parent) | 4,113,430 |
+
+Limits: parent only. The independent review ran as a separate bound `isswf-reviewer` process outside the session transcript, so its tokens are not included; this is a parent-scope baseline, not a whole-delivery total. One sample, one host. Comparison with J004 is indicative only (different task size, host and review rules): J004's parent averaged about 328k cache read per turn; this baseline averages about 128k per request.
+
+Next: unit 2 (#148) compares a compact coordinator handoff against this parent baseline on an equivalent small task, also capturing the reviewer process.
