@@ -313,13 +313,13 @@ assert.match(durableDispatchGuidance, /prepared brief, option choice or brief ap
 assert.match(durableDispatchGuidance, /Status is not dispatch evidence/u);
 // Static scenario walkthrough: choice/brief approval => no new dispatch; explicit start => bounded workflow; ambiguous approval => ask and wait; allowed correction => continue under original grant.
 assert.match(featureFlow, /configuration.*not permission|not permission on their own/iu);
-assert.match(featureFlow, /two independent review rounds per functional unit total, including the initial review/u);
-assert.match(featureFlow, /one correction cycle total/u);
-assert.match(featureFlow, /first review's findings are bundled/u);
+assert.match(featureFlow, /three independent review rounds per functional unit total, including the initial review/u);
+assert.match(featureFlow, /two correction cycles total/u);
+assert.match(featureFlow, /Each review's in-scope findings are bundled into the next correction cycle/u);
 assert.match(featureFlow, /without routine operator reconfirmation/u);
 assert.match(featureFlow, /Explicit tighter grants take precedence, including zero/u);
-assert.match(briefBudgets, /two independent review rounds total including initial review/u);
-assert.match(briefBudgets, /one correction cycle total/u);
+assert.match(briefBudgets, /three independent review rounds total including initial review/u);
+assert.match(briefBudgets, /two correction cycles total/u);
 assert.match(briefBudgets, /account spent budget on resume without reset/u);
 assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /Establish readiness for normal feature delivery/u);
 assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /Initialization defaults alone do not establish this readiness/u);
@@ -364,7 +364,7 @@ for (const row of [
   '| Researcher | `haiku` / `high` | `openai-codex/gpt-6-luna` / `high` |',
   '| Reviewer | `opus` / `medium` | `openai-codex/gpt-6.1-sol` / `medium` |',
 ]) assert.ok(preset.includes(row), 'Complete confirmed factory role preset: ' + row);
-for (const pattern of [/Accept these defaults, keep the existing selections, or customize/u, /up to two review rounds per functional unit/u, /ceiling, not two mandatory reviews/u, /Beyond two rounds, stop/u, /does not reset spent actors/u, /never silently substitute, inherit or clamp/u, /Installation alone makes no settings changes or model calls/u, /\.pi\/settings\.json/u, /Do not change user-global defaults or legacy/u]) assert.match(preset, pattern);
+for (const pattern of [/Accept these defaults, keep the existing selections, or customize/u, /up to three review rounds per functional unit/u, /ceiling, not three mandatory reviews/u, /Beyond three rounds, stop/u, /does not reset spent actors/u, /never silently substitute, inherit or clamp/u, /Installation alone makes no settings changes or model calls/u, /\.pi\/settings\.json/u, /Do not change user-global defaults or legacy/u]) assert.match(preset, pattern);
 for (const hostPath of ['.agents/hosts/pi.md', '.agents/hosts/claude-code.md']) assert.match(await read(hostPath), /SKILL\.md#confirm-portable-factory-defaults/u);
 for (const native of [path.posix, path.win32]) {
   const primary = native === path.posix ? '/projects/team repo' : 'C:\\projects\\team repo';
