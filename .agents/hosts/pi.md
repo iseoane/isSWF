@@ -101,6 +101,10 @@ subagent({
 
 The loaded `pi-subagents` contract passes these namespaces through `PI_SUBAGENT_EXTENSION_BINDINGS` during child extension startup. The child-only extension captures and validates each once before any later environment restoration. The reviewer must call `isswf_git_diff`, check the returned bound identities, `patchBytes`, `patchSha256` and native integrity-verification result, and use the exact returned patch block. When exact file evidence is required, call `isswf_git_content` with an allowlisted path and base/candidate slot; check the selected commit/path, status, byte count, digest verification and exact readable view or explicit base64-only result. The invoker performs byte decoding and digest verification; do not attribute those computations to a reviewer that has no execution tool. Do not resume a retained child for this evidence step: `extensionBindings` is launch-only and retained resumes reject it. A coordinator-supplied result or synthetic fixture does not prove that the reviewer invoked the tool.
 
+## Continue a unit in a fresh coordinator context
+
+Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) with Pi's supported mechanisms: the operator starts a fresh session by running `pi` in the assigned checkout without `--continue` or `--resume` and gives it the handoff, or runs `/compact [instructions]` with instructions to retain the handoff. Then reload the coordinator skill (`/skill:isswf-coordinator`) and the methodology the next step requires, and reconcile the records before acting. Do not change Pi's automatic compaction settings for this purpose.
+
 ## Boundaries
 
 Use only the extension's verified capabilities. Do not claim OS filesystem/network containment, descendant-process cessation or durable crash recovery from a foreground session, tool list or separate context window. These are not the guarantees of the retained LPAC/Bubblewrap executors. Host settings and extensions execute trusted code; do not load project resources without the host's trust decision or copy credentials between profiles.

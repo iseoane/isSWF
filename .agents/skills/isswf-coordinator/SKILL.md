@@ -129,6 +129,10 @@ A plan, partial commit, agent response, or `ready-for-agent` state does not prov
 
 At the end, return the brief or result, blockers, observed evidence, and the next verifiable boundary. Keep unrelated legacy workflows and unauthorized work outside this unit.
 
+## Unit boundary handoff
+
+For multi-unit work, close each functional unit with the [compact handoff](../../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) and continue the next unit in a fresh coordinator context.
+
 ## Independent findings and new proposals
 
 When an independent bug or new improvement is discovered outside the current assignment, use [isswf-issue](../isswf-issue/SKILL.md) to prepare the report and resolve project versus factory ownership. Keep ordinary implementation errors within their existing job. Report a blocking independent finding to the operator without expanding scope. Creating the report requires its own applicable publication grant; creating jobs or implementing it is a later decision.

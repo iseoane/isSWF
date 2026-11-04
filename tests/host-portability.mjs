@@ -305,6 +305,14 @@ for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf
 for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
 for (const contract of [featureFlow, skill]) assert.doesNotMatch(contract, /or approval of a clearly presented feature-to-PR assignment/u);
 assert.match(featureFlow, /design-option choice, brief approval.*preparation only; do not dispatch a new actor/u);
+const handoffSection = featureFlow.split('## Close each functional unit with a compact handoff')[1]?.split('\n## ')[0] ?? '';
+assert.ok(handoffSection, 'feature-delivery.md must define the unit-boundary handoff');
+for (const pattern of [/plan and brief/u, /candidate and base/u, /grants/u, /cumulative budgets/u, /actor state/u, /open decisions/u, /next step/u, /grants no authority/u, /reconcile/u, /not automatic/u, /fresh coordinator session or supported host compaction/u]) assert.match(handoffSection, pattern, 'Unit handoff must cover: ' + pattern);
+assert.ok(skill.includes('feature-delivery.md#close-each-functional-unit-with-a-compact-handoff'), 'Coordinator skill must link the unit handoff rule');
+for (const hostPath of ['.agents/hosts/pi.md', '.agents/hosts/claude-code.md']) assert.ok((await read(hostPath)).includes('feature-delivery.md#close-each-functional-unit-with-a-compact-handoff'), 'Host guide must link the unit handoff rule: ' + hostPath);
+const claudeHandoff = await read('.agents/hosts/claude-code.md');
+for (const pattern of [/\/compact/u, /claude -p --permission-mode acceptEdits --settings/u, /Edit\(path\)/u, /Write\(path\)` rules are ignored/u, /--output-format stream-json --verbose/u, /--plugin-dir/u, /delegated edit surface/u]) assert.match(claudeHandoff, pattern, 'Claude headless coordinator launch must document: ' + pattern);
+assert.match(await read('.agents/hosts/pi.md'), /\/compact/u);
 assert.match(featureFlow, /current trusted start instruction and its bounded action scope/u);
 assert.match(featureFlow, /If approval is genuinely ambiguous, clarify whether to start and wait before dispatch/u);
 assert.match(featureFlow, /continuation or correction.*does not need a redundant start prompt/u);

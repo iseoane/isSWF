@@ -51,6 +51,22 @@ For a human wait, put the question in the existing brief or coordinator record a
 5. Read back repository, target base, actual head, URL and state after remote writes. For long CI, use a verified native completion event or one bounded deferred read-only check; if neither is available, report pending/manual revisit. Never use continuous watch, sleep, active polling or model calls just to wait. Observe required CI on the exact head, diagnose relevant failures and repeat affected checks after changes. Preserve uncertain external outcomes and reconcile before retrying. Do not claim a published PR or green CI from a draft, a local path or an earlier head.
 6. Deliver the verified PR and record the concrete human integration decision. Keep technical closure, PR publication, product acceptance and integration distinct. A PR that still has a required technical blocker is not ready merely because it exists.
 
+## Close each functional unit with a compact handoff
+
+Coordinator cost grows with conversation length: a fresh session's accumulated history is a small share of its cost, but a long multi-unit coordinator conversation reprocesses its whole history on every request. When a functional unit reaches a verified boundary (delivered PR, recorded human wait or recorded blocker) and further units remain, close it with a compact, self-sufficient handoff and continue the next unit in a fresh coordinator session or supported host compaction. A single-unit assignment needs no handoff.
+
+Write the handoff into the existing plan's next step or coordinator record, not a new store. It contains:
+
+- the current plan and brief references (paths and, for pinned inputs, full SHAs);
+- the candidate and base identities (branch, exact head and base SHAs, PR URL and state);
+- the current grants and their authorization source, including explicit limits;
+- cumulative budgets: actors, calls, review rounds and correction cycles spent and remaining;
+- actor state: each actor's identity and last observed or consumed state, and whether any may still be running;
+- open decisions and blockers, with the exact question or exit condition;
+- the next step and the methodology resources it requires.
+
+The handoff is a summary of retained records and grants no authority. The continuing session reloads the coordinator skill and required methodology, reads the referenced records, and must reconcile the handoff against them before acting, as for any resume; on conflict, the records and the trusted current request prevail. It keeps spent budgets, never resets them, and does not inherit a grant the records do not show. Unknown actor state still blocks replacement. Starting the next session or compacting is not automatic: the coordinator or operator performs it through the host's supported mechanism ([Claude Code](../../hosts/claude-code.md#continue-a-unit-in-a-fresh-coordinator-context), [Pi](../../hosts/pi.md#continue-a-unit-in-a-fresh-coordinator-context)). This rule adds no dispatcher, telemetry, automatic context reset or host configuration change.
+
 ## Stop before integrating into main
 
 The default ends at the PR, not at integration. Do not merge, squash, rebase into the integration branch, push directly to it, arm auto-merge or a merge queue, or treat passing CI as human acceptance. Release publication, deployment, privileged setting changes and destructive actions are outside this default too.
