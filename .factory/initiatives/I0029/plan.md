@@ -28,3 +28,21 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 ### Evidence
 
 - Windows 11 clean no-hardlink clone with #179/#180/#173 patches: node tools/check-quality.mjs PASS; node tests/release-package.mjs PASS; tests/git-literal-pathspecs.mjs RED before, GREEN after
+
+## J002
+
+- Status: pending
+- Objective: Pin exact ls-tree entry selection with behavioral tests through the tool entry points (#187).
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Blocker: None; triaged ready-for-agent.
+- Next step: Identify the smallest public entry point per tool that performs the pinned read, then add behavioral fixtures.
+
+### Acceptance
+
+- A test commits sibling names (for example x and x/...) or requests a directory path and calls the pinned-read entry points of pi-worker-task, worker-lifecycle and factory-package, asserting refusal or the exact entry.
+- The source-regex check is replaced or backed by these behavioral cases.
+
+### Evidence
+
+- None.
