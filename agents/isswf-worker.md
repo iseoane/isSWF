@@ -1,7 +1,7 @@
 ---
 name: isswf-worker
 description: Follow the shared isSWF worker profile for an authorized Claude Code assignment.
-tools: Read, Grep, Glob, Bash, Edit, Write
+tools: Read, Grep, Glob, Bash, Edit, Write, mcp__codegraph__codegraph_explore, mcp__engram__mem_current_project, mcp__engram__mem_context, mcp__engram__mem_search, mcp__engram__mem_get_observation, mcp__engram__mem_save
 model: inherit
 ---
 

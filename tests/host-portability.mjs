@@ -22,7 +22,11 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   assert.match(body, /before.*work/i);
   assert.match(body, /missing.*block|block.*missing/i);
   if (role === 'reviewer') assert.match(body, /^tools: Read, Grep, Glob, mcp__plugin_isswf_isswf_git_evidence__identity, mcp__plugin_isswf_isswf_git_evidence__diff, mcp__plugin_isswf_isswf_git_evidence__content$/m, 'Claude reviewer has only read tools and the three bound evidence tools');
-  assert.ok(body.length < 1200, `${file} should remain a thin wrapper`);
+  const knowledge = ['mcp__codegraph__codegraph_explore', 'mcp__engram__mem_context', 'mcp__engram__mem_search', 'mcp__engram__mem_save'];
+  const toolLine = body.match(/^tools: (.*)$/m)?.[1] ?? '';
+  if (role === 'reviewer') assert.ok(knowledge.every(tool => !toolLine.includes(tool)), 'Claude reviewer must not read the live index or memory instead of the bound candidate');
+  else assert.ok(knowledge.every(tool => toolLine.includes(tool)), `${role} must be able to use installed CodeGraph and Engram`);
+  assert.ok(body.length < 1500, `${file} should remain a thin wrapper`);
 }
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
 const completionGate = skill.slice(skill.indexOf('A candidate commit is not terminal execution status'), skill.indexOf('\n\nA plan, partial commit'));
