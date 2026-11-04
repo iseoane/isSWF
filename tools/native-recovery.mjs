@@ -5,6 +5,7 @@ import { join } from 'node:path';
 async function processEvidence(pid) {
   const fs = await import('node:fs/promises');
   if (!Number.isInteger(pid) || pid <= 0) throw Error('invalid PID');
+  if (process.platform !== 'linux') throw Error('native process evidence requires Linux');
   const stat = await fs.readFile(`/proc/${pid}/stat`, 'utf8');
   const fields = stat.slice(stat.lastIndexOf(')') + 2).trim().split(/\s+/);
   return {
@@ -139,6 +140,7 @@ const load = async path => {
 };
 const blocked = reason => ({ status:'blocked', reason, reviewRequired:true, retry:'never' });
 async function ceased(identity) {
+  if (process.platform !== 'linux') return false;
   if (!identity || !Number.isSafeInteger(identity.pid) || identity.pid<=0 || typeof identity.startTicks!=='string' || !/^\d+$/.test(identity.startTicks) || typeof identity.bootId!=='string' || !/^[0-9a-f-]{36}$/.test(identity.bootId) || typeof identity.namespace!=='string' || !/^pid:\[\d+\]$/.test(identity.namespace) || typeof identity.exe!=='string' || !identity.exe.startsWith('/')) return false;
   if ((await readFile('/proc/sys/kernel/random/boot_id','utf8')).trim()!==identity.bootId) return false;
   let stat;

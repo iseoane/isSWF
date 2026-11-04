@@ -49,6 +49,7 @@ const atomicWriteOnce = async (path, value) => {
 const parseJson = async path => JSON.parse(await readFile(path, 'utf8'));
 
 function linuxStat(pid) {
+  if (process.platform !== 'linux') throw new Error('process identity requires Linux; this runner does not support other platforms');
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
   const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
   const fields = stat.slice(stat.lastIndexOf(')') + 2).trim().split(/\s+/);
@@ -66,6 +67,7 @@ function linuxProcess(pid) {
 function linuxIdentity(pid, nonce) {
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('process PID must be a positive integer');
   if (typeof nonce !== 'string' || !/^[0-9a-f]{48}$/.test(nonce)) throw new Error('process nonce must be 48 lowercase hexadecimal characters');
+  if (process.platform !== 'linux') throw new Error('process identity requires Linux; this runner does not support other platforms');
   const bootId = readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim();
   const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
   const close = stat.lastIndexOf(')');
@@ -292,6 +294,7 @@ async function observeExecutionChild(attemptDir, dispatch) {
   catch (error) { return { state: 'unknown', reason: error.code === 'ENOENT' ? 'child identity not published' : 'corrupt child identity' }; }
   const child = record?.child;
   if (record?.version !== 1 || record.attemptId !== dispatch.attemptId || record.taskSha256 !== dispatch.taskSha256 || !child || !Number.isInteger(child.pid) || child.pid <= 0 || child.pgid !== child.pid || typeof child.bootId !== 'string' || !/^[0-9a-f-]{36}$/.test(child.bootId) || typeof child.startTicks !== 'string' || !/^\d+$/.test(child.startTicks) || typeof child.exe !== 'string' || !isAbsolute(child.exe) || typeof child.spawnedAt !== 'string' || !Number.isFinite(Date.parse(child.spawnedAt))) return { state: 'unknown', reason: 'invalid child identity' };
+  if (process.platform !== 'linux') return { state: 'unknown', reason: 'child process identity requires Linux' };
   try {
     if (readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim() !== child.bootId) return { state: 'unknown', reason: 'child boot identity mismatched' };
     let actual;
