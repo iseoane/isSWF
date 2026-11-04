@@ -80,7 +80,7 @@ New installations keep shared project records under `.isswf/`. They describe pla
 
 Older projects may still use `.factory/`. Migration is explicit and preserves existing records; do not keep both as active state directories.
 
-Engram can help recover useful context, but it is not the job database or a source of permissions. Codegraph can help locate code. Neither is required when the repository itself provides enough information.
+When installed and available, Engram is used to recover and save project context and Codegraph is used first to locate and understand code. Neither is required, and neither is the job database or a source of permissions.
 
 ## Versions and updates
 

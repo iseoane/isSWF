@@ -80,7 +80,7 @@ Las instalaciones nuevas conservan los registros compartidos del proyecto en `.i
 
 Los proyectos antiguos pueden seguir utilizando `.factory/`. La migración es explícita y conserva los registros existentes; no mantengas ambas carpetas como estados activos.
 
-Engram puede ayudar a recuperar contexto útil, pero no es la base de datos de los encargos ni una fuente de permisos. Codegraph puede ayudar a localizar código. Ninguno es obligatorio cuando el repositorio aporta información suficiente.
+Cuando están instalados y disponibles, Engram se usa para recuperar y guardar el contexto del proyecto y Codegraph se usa primero para localizar y entender el código. Ninguno es obligatorio, y ninguno es la base de datos de los encargos ni una fuente de permisos.
 
 ## Versiones y actualizaciones
 
