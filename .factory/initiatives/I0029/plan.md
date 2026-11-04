@@ -17,7 +17,7 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce the first-entry substitution with a committed ':/x' path, then set GIT_LITERAL_PATHSPECS in each git helper, select exact entries and extend tests/git-literal-pathspecs.mjs.
+- Next step: None.
 
 ### Acceptance
 
@@ -37,7 +37,7 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Identify the smallest public entry point per tool that performs the pinned read, then add behavioral fixtures.
+- Next step: None.
 
 ### Acceptance
 

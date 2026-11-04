@@ -17,7 +17,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -38,7 +38,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -58,7 +58,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -78,7 +78,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: J014
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -98,7 +98,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: J015
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -118,7 +118,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -139,7 +139,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -160,7 +160,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: J014
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -180,7 +180,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -201,7 +201,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -222,7 +222,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -242,7 +242,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -262,7 +262,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
+- Next step: None.
 
 ### Acceptance
 
@@ -282,7 +282,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md)
 - Blocker: None.
-- Next step: Measure with isswf-performance, batch tree and blob reads with one ls-tree -r and one cat-file --batch per checkpoint, add a regression bounding git process starts, then reassess test timeouts.
+- Next step: None.
 
 ### Acceptance
 
@@ -302,7 +302,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J015/brief-r1.md)
 - Blocker: None.
-- Next step: Map every /proc identity read (isswf, native-recovery, worker-lifecycle, release-package test), decide equivalent Windows identity or explicit refusal per caller, then implement with tests.
+- Next step: None.
 
 ### Acceptance
 
@@ -322,7 +322,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J016/brief-r1.md)
 - Blocker: None.
-- Next step: Replace the 100 x 5 ms poll with a deadline-based wait and add a case proving a missing event still fails.
+- Next step: None.
 
 ### Acceptance
 
@@ -340,7 +340,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J017/brief-r1.md)
 - Blocker: None.
-- Next step: Measure per-test durations on Windows and Linux, then apply a per-test or platform-scoped timeout in check-quality.
+- Next step: None.
 
 ### Acceptance
 

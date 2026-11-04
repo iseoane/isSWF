@@ -17,7 +17,7 @@ Reported in #173 while working on I0027. Observed on Windows from a linked workt
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce from a linked worktree on Linux, search tools for other hard-coded .git paths, then fix with a regression test that runs from a worktree.
+- Next step: None.
 
 ### Acceptance
 
@@ -37,7 +37,7 @@ Reported in #173 while working on I0027. Observed on Windows from a linked workt
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Reproduce ENOTDIR and lowercase-drive gitdir cases on Windows, then add the refusal and edge-case tests.
+- Next step: None.
 
 ### Acceptance
 
