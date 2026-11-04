@@ -90,3 +90,16 @@ Numerator includes coordinator, children, reviews, failures, retries and correct
 - jobs/J001/brief-r1.md (original preparation preserved).
 - jobs/J001/brief-r2.md (current practical diagnostic objective and first selected hypothesis).
 - I0025/J004 retained start/end/actor/result data and V001/V002 show coordinator share and concrete boundary rework; this analysis uses those observations without new provider calls or methodology edits.
+
+## Triage of #148, #149 and #150 (2026-11-04)
+
+Operator asked to triage the three proposals against this plan and against the recent review changes before any optimization. None duplicates another or an existing closed issue (#94, #95, #121, #128, #129 checked); each maps to one diagnostic priority above and is adopted as an I0026 unit.
+
+The J004 sample (at or before `ba0336b`, 2026-11-02) predates PR167 (2026-11-03, `review-convergence.md`): from round 2 reviews are scoped to the delta and cite earlier finding IDs, defect classes are reported once with every instance, findings carry their origin, and the round cap leads to reconsidering the approach. The sample's correction/re-review shares therefore no longer describe current practice.
+
+Ordered units, none started; implementation still needs an explicit start:
+
+1. **Fresh baseline:** measure one ordinary comparable assignment under the current review rules before any comparison, so a later saving is not confused with PR167's effect.
+2. **#148 coordinator context/control overhead:** unchanged scope; primary hypothesis (compact current-unit coordinator context/handoff).
+3. **#149 first-pass contract-boundary tests:** narrowed to the worker side (turning explicit brief/consumer invariants into discriminating tests before review). The re-review cost side is covered by PR167.
+4. **#150 duplicated narrative:** valid but lowest priority; its signal is source size, not attributed tokens.
