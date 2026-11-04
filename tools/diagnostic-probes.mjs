@@ -1,12 +1,31 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { lstat, realpath, readdir, readFile } from 'node:fs/promises';
+import { lstatSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-export const sourceObjectsPath = resolve(dirname(fileURLToPath(import.meta.url)), '../.git/objects');
+// Resolve this checkout's own object store from its .git entry only, without searching enclosing
+// repositories: a directory is a normal clone; a file is a linked worktree whose gitdir names its
+// common directory through 'commondir'.
+function ownObjectsPath(root) {
+  const dotGit = join(root, '.git');
+  try {
+    if (!lstatSync(dotGit).isFile()) return join(dotGit, 'objects');
+    const gitdir = /^gitdir: (.+)$/mu.exec(readFileSync(dotGit, 'utf8'))?.[1].trim();
+    if (!gitdir) return join(dotGit, 'objects');
+    const worktreeGitdir = resolve(root, gitdir);
+    let common = worktreeGitdir;
+    try { common = resolve(worktreeGitdir, readFileSync(join(worktreeGitdir, 'commondir'), 'utf8').trim()); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    return join(common, 'objects');
+  } catch (error) {
+    if (error.code === 'ENOENT') return join(dotGit, 'objects');
+    throw error;
+  }
+}
+export const sourceObjectsPath = ownObjectsPath(resolve(dirname(fileURLToPath(import.meta.url)), '..'));
 
 const git = (project, args, deadlineAt) => {
   const timeout = Math.min(10000, deadlineAt - Date.now()); assert(timeout > 0, 'diagnostic-probe-deadline');
