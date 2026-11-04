@@ -72,6 +72,25 @@ A response is not verification or acceptance. Inspect the diff and relevant chec
 
 A bound review runs as its own `claude -p` process with `ISSWF_GIT_EVIDENCE_BINDINGS` and `MAX_MCP_OUTPUT_TOKENS=100000` set only in that process; an Agent-tool dispatch inside the coordinator session is not a bound review. Before launching or checking one, read the [bound reviewer launch](claude-code-review-launch.md) reference in full: it holds the server, binding, launch command, truncation and verifier rules.
 
+## Continue a unit in a fresh coordinator context
+
+Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) with Claude Code's supported mechanisms: the operator starts a fresh interactive `claude` session in the assigned checkout and gives it the handoff, or runs `/compact` with instructions to retain the handoff. After compaction or in the new session, reload the coordinator skill and the methodology the next step requires; a compaction summary is not a substitute for those resources or for reconciling the records.
+
+### Headless coordinator launch
+
+A parent coordinator may launch the next unit as a headless `claude -p` coordinator only when the operator explicitly authorizes that launch, its edit surface and its delivery scope. The child cannot answer prompts, so pass the handoff, the trusted request and its limits in the prompt, and require the final report to state any decision or consent it could not obtain. Verified launch form:
+
+```sh
+claude -p --permission-mode acceptEdits --settings '{"permissions":{"allow":["Edit(./<path>/**)"]}}' --allowedTools "Bash Read Edit Write Grep Glob Skill" --output-format stream-json --verbose "<handoff prompt>"
+```
+
+- `acceptEdits` alone still prompts for files the host treats as sensitive (observed for `.agents/**` and `tests/**`), and a headless session cannot approve them. The observed cause was `--plugin-dir` pointing at the checkout being edited: files of a loaded plugin are protected. Load the plugin from a different trusted checkout than the one the child edits; then `acceptEdits` plus scoped `Edit(...)` rules edit those paths without prompts.
+- Only `Edit(path)` rules are matched by file permission checks, and they cover all file-editing tools; `Write(path)` rules are ignored.
+- Keep the allow list limited to the delegated edit surface; one `Edit(./<path>/**)` entry per authorized directory, never the whole checkout.
+- `--output-format stream-json --verbose` lets the operator follow the run live; the stream is also the child-call trace described under [Required child context](#required-child-context).
+
+These flags are per-process arguments, not a host configuration change. Do not use permission bypass modes.
+
 ## Existing legacy runtime assignments
 
 Explicitly retained legacy assignments keep their original launcher, runtime pin, release identity and checkpointed inputs under `docs/installation.md` and `docs/local-worker-lifecycle.md`. Read those guides from their retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.
