@@ -143,12 +143,12 @@ Next: unit 2 (#148) compares a compact coordinator handoff against this parent b
 
 ## J003
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Deliver #204 as I0026 unit 2 comparison workload under current review rules.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Operator integration decision on PR209 (touches .github/workflows, needs a person per REVIEW.md); then record the parent token measurement for comparison with J002.
+- Next step: None.
 
 ### Acceptance
 
@@ -160,3 +160,18 @@ Next: unit 2 (#148) compares a compact coordinator handoff against this parent b
 - PR: https://github.com/iseoane/isSWF/pull/209 (commits 7c224f8, 2e9dbd8).
 - Independent review (bound isswf-reviewer, claude -p, opus/medium): first launch INCONCLUSIVE, coordinator binding used non-canonical Windows paths, no judgment; round 1 on 7c224f8 PASS with F1 suggestion (isswf-status exits 0 for an invalid plan) and F2 informational (test not in check-quality, out of scope); round 2 delta on 2e9dbd8 PASS, F1 resolved.
 - Local Windows checks: plan-records PASS (26 plans, 2 historical exceptions), check-docs PASS; check-quality fails at reviewer-original-evidence identically on base 4e1a5df (pre-existing).
+
+### Unit 2 comparison (2026-11-04)
+
+Lever: PR206 moved the Claude bound reviewer launch into its own reference and made coordinator resume start from . Workload: #204, delivered by a fresh Claude Code coordinator session as PR209 (plan-record validation, CI step approved by the operator, two review rounds PASS).
+
+| | Unit 1 (#201) | Unit 2 (#204) |
+| --- | --- | --- |
+| Coordinator processed | 4.11M (31 requests at measurement) | 6.81M (47 requests) |
+| Reviewer processes | not captured | 1.73M (failed launch 0.29M, round 1 0.94M, round 2 0.50M) |
+| Context at request 1 | 87.1k | 87.2k |
+| Context at request 7 (methodology loaded) | 127.5k | 123.5k |
+
+Reading: the lever saves about 4k tokens per request (about 3%), as estimated. It is not visible in the totals because #204 was a larger delivery (new test, CI step, two review rounds, one failed reviewer launch, a stale PR head). The fixed startup context (about 87k per request, the operator's host environment, not isSWF) remains about two thirds of coordinator cost. Avoidable cost observed: the failed reviewer launch (non-canonical Windows paths in the binding).
+
+Conclusion: isSWF methodology offers only small further savings; the largest lever is the host environment, which is the operator's configuration. Units 3 (#149) and 4 (#150) remain available but are not started.
