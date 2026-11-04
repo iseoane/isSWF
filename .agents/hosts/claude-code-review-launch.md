@@ -19,7 +19,30 @@ claude -p --agent isswf:isswf-reviewer --plugin-dir /absolute/factory-root \
   < review-task.md
 ```
 
-Fill each namespace as in the Pi guide: full commit IDs, canonical repository, trusted Git executable, `timeoutMs`, `outputBytes` and, for content, `paths`. Do not export the variable in a shell that starts other Claude sessions: every session started from that shell would be bound to the same candidate. Setting it only for one command limits that exposure but it is still a coordinator-supplied input, not an operating-system boundary. Pass the review task (exact base/candidate and required checks) on standard input, as above: `--allowedTools` takes a variadic list, so a positional task after it is consumed as another tool name and the reviewer starts without a prompt. `--allowedTools` is for the non-interactive process to use those three tools without a prompt and is not a permission bypass.
+On Windows PowerShell, which has no inline environment prefix and rejects `<`, set the variables only for the one review and pipe the task on standard input:
+
+```powershell
+$env:ISSWF_GIT_EVIDENCE_BINDINGS = '{"isswf.git-evidence/1":{...},"isswf.git-evidence.diff/1":{...},"isswf.git-evidence.content/1":{...}}'
+$env:MAX_MCP_OUTPUT_TOKENS = '100000'
+try {
+  Get-Content -Raw -Encoding UTF8 review-task.md | claude -p --agent isswf:isswf-reviewer --plugin-dir C:\absolute\factory-root `
+    --model <approved-model> --effort <approved-effort> `
+    --allowedTools "mcp__plugin_isswf_isswf_git_evidence__identity mcp__plugin_isswf_isswf_git_evidence__diff mcp__plugin_isswf_isswf_git_evidence__content"
+} finally {
+  Remove-Item Env:ISSWF_GIT_EVIDENCE_BINDINGS, Env:MAX_MCP_OUTPUT_TOKENS -ErrorAction SilentlyContinue
+}
+```
+
+`$env:` assignments last for the whole PowerShell session, not one command, so run the block in a dedicated `powershell -NoProfile` process, keep the `finally` removal and start no other Claude session from it while the variables are set.
+
+Fill each namespace as in the Pi guide: full commit IDs, canonical repository, trusted Git executable, `timeoutMs`, `outputBytes` and, for content, `paths`. `repository` and `gitExecutable` must equal their own `realpath` exactly, or every tool refuses (`repository-binding-not-canonical`, `git-executable-not-canonical-regular-file`). On Windows this means an absolute path with the drive letter and every component in their on-disk case and backslash separators, with no forward slashes, `~`, 8.3 short names, junctions or symbolic links, for example `C:\Users\me\src\isswf` and `C:\Program Files\Git\mingw64\bin\git.exe` (in JSON each backslash is written `\`). `repository` must also be an ordinary clone whose `.git` is a directory: a linked worktree (a `.git` file) is refused as `unsupported-gitdir-topology`. Derive both values with Node's realpath instead of typing them, and build the binding from them with `ConvertTo-Json -Compress` so the backslashes are escaped:
+
+```powershell
+$repo = node -p "fs.realpathSync.native(process.argv[1])" (git -C C:\path\to\clone rev-parse --show-toplevel)
+$git = node -p "fs.realpathSync.native(process.argv[1])" (Get-Command git -CommandType Application -TotalCount 1).Source
+```
+
+Do not export the variable in a shell that starts other Claude sessions: every session started from that shell would be bound to the same candidate. Setting it only for one command limits that exposure but it is still a coordinator-supplied input, not an operating-system boundary. Pass the review task (exact base/candidate and required checks) on standard input, as above: `--allowedTools` takes a variadic list, so a positional task after it is consumed as another tool name and the reviewer starts without a prompt. `--allowedTools` is for the non-interactive process to use those three tools without a prompt and is not a permission bypass.
 
 Claude Code truncates MCP text beyond its token limit (default 25,000 tokens, `MAX_MCP_OUTPUT_TOKENS`) and appends an `[OUTPUT TRUNCATED` marker. The server cannot see that limit, so the no-partial-evidence guarantee requires the coordinator's `MAX_MCP_OUTPUT_TOKENS=100000` in the review process, as in the launch command above. Evidence with that marker is incomplete: treat it as a failure. The server refuses, instead of truncating, any result whose text exceeds 98,304 bytes. This usually limits content to about 40,000 raw bytes; choose a content `outputBytes` of 32,768 or less. A diff is returned in chunks of at most 24,576 bytes; every chunk states its number, the chunk count and the whole patch's byte count and SHA-256. Treat the patch as complete only when chunks 1 to `chunkCount` concatenate to that digest. Call `diff` once per chunk number. On Claude Code 2.1.312 the host may instead save a large tool result to a file and show the reviewer only a short preview with its path. The preview is not the evidence: the reviewer must read the saved file in full, and any truncation marker or incomplete read is a failure (the chunk digest rule above still decides completeness). This was observed on 2.1.312 only; other versions are unverified.
 
