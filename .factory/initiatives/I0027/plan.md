@@ -299,3 +299,39 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - Windows 11 clean no-hardlink clone with #179/#180/#173 patches: node tools/check-quality.mjs PASS; node tests/release-package.mjs PASS
+
+## J016
+
+- Status: pending
+- Objective: Make the token-native-auto-pi async-completion wait deadline-based so loaded runners do not fail it spuriously (#185).
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J016/brief-r1.md)
+- Blocker: None; triaged ready-for-agent.
+- Next step: Replace the 100 x 5 ms poll with a deadline-based wait and add a case proving a missing event still fails.
+
+### Acceptance
+
+- tests/token-native-auto-pi.mjs waits for async-complete with a time deadline (not a fixed iteration count) and still fails when the event is absent.
+- The test passes on Windows 11 while another quality suite runs in parallel.
+
+### Evidence
+
+- None.
+
+## J017
+
+- Status: pending
+- Objective: Scope the check-quality per-test timeout so only slow tests or Windows get 300 s (#186).
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J017/brief-r1.md)
+- Blocker: None; triaged ready-for-agent.
+- Next step: Measure per-test durations on Windows and Linux, then apply a per-test or platform-scoped timeout in check-quality.
+
+### Acceptance
+
+- tools/check-quality.mjs keeps a short default per-test timeout and applies the longer one only to named slow tests or win32.
+- node tools/check-quality.mjs passes on Windows 11 and Linux CI.
+
+### Evidence
+
+- None.
