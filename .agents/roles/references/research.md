@@ -12,7 +12,7 @@ Use this procedure for repository-grounded research assigned by the coordinator.
 ## Inspect primary sources
 
 1. Start from the brief's question and acceptance criteria. Search relevant code, tests, symbols, callers, configuration, and dependency declarations. Prefer direct source and executable tests over summaries.
-2. Codegraph is optional. Use it only if the tool is available and the indexed project and revision are known. Treat its results as leads, not proof. If unavailable or stale, use Git and read files directly. Do not fabricate index results or infer a symbol relationship from a name alone.
+2. When Codegraph is available for the indexed project, use it first for structural questions (where something is, how it works, callers, impact) before grep or file reads. If it is unavailable, use Git and read files directly. Do not fabricate index results or infer a symbol relationship from a name alone.
 3. Read the relevant source in context, including callers and invariants. Reopen the actual target checkout before finalizing every path, symbol, and line range. Capture line ranges from that checkout, not an old report or input checkpoint.
 4. Run only read-only, local checks permitted by the brief. A test or command is evidence only for its observed output and scope. Do not alter the tree to run a check. Do not use production, external services, or network sources unless the grant specifically permits them.
 5. If primary evidence is inaccessible, distinguish an observed access failure from an inference. Name the missing file, tool, permission, or safe probe. Block only the affected claim or deliverable; never guess a result.

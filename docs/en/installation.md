@@ -14,7 +14,7 @@ You need:
 - A supported, authenticated model account before running agent jobs.
 - Linux for the current complete installed workflow. Isolated Pi workers also need bubblewrap.
 
-Engram and Codegraph are optional. The historical Python and SQLite prototypes are not required.
+Engram and Codegraph are not required; when installed and available, roles use them (Codegraph first for code questions, Engram for project context). The historical Python and SQLite prototypes are not required.
 
 ## Get a prepared release folder
 

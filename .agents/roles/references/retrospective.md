@@ -4,7 +4,7 @@
 
 For a completed feature or bug, review the full authorized work for that job, even when it had no incident. For an explicit session close, review authorized project work since the previous retrospective, including completed work and active or pending jobs. A chat ending alone does not trigger this review.
 
-Use only project-owned artifacts and records covered by the grant, such as the approved brief and pinned inputs, attempt and review reports, decisions, checks, changes, and outcomes. Read an instruction source before proposing a change to it. Do not search broad session logs, other clients' records, or unrelated project history. Engram may hold external learning, but it is not job authority, current job state, or evidence that an action occurred. Check any relevant memory against authorized project evidence.
+Use only project-owned artifacts and records covered by the grant, such as the approved brief and pinned inputs, attempt and review reports, decisions, checks, changes, and outcomes. Read an instruction source before proposing a change to it. Do not search broad session logs, other clients' records, or unrelated project history. Engram may hold external learning, but it is not job authority, current job state, or evidence that an action occurred. When Engram is available, use it to recover this project's learning and to save the retrospective's findings.
 
 Record failures, decisions, friction, and outcomes with the source that supports each claim. Separate observed facts, inference, and unknowns. If the evidence is missing, inaccessible, or outside the grant, say so rather than filling gaps.
 

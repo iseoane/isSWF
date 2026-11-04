@@ -14,7 +14,7 @@ Necesitas:
 - Una cuenta de modelos compatible y autenticada antes de ejecutar encargos con agentes.
 - Linux para el flujo instalado completo actual. Los workers aislados de Pi necesitan además bubblewrap.
 
-Engram y Codegraph son opcionales. Los prototipos históricos de Python y SQLite no son necesarios.
+Engram y Codegraph no son obligatorios; cuando están instalados y disponibles, los roles los usan (Codegraph primero para preguntas sobre el código, Engram para el contexto del proyecto). Los prototipos históricos de Python y SQLite no son necesarios.
 
 ## Conseguir una carpeta de versión preparada
 
