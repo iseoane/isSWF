@@ -31,11 +31,11 @@ Reported in #173 while working on I0027. Observed on Windows from a linked workt
 
 ## J002
 
-- Status: pending
+- Status: completed
 - Objective: Refuse explicitly when the source object store cannot be resolved at import of diagnostic-probes (#188).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None.
 - Next step: Reproduce ENOTDIR and lowercase-drive gitdir cases on Windows, then add the refusal and edge-case tests.
 
 ### Acceptance
@@ -46,4 +46,4 @@ Reported in #173 while working on I0027. Observed on Windows from a linked workt
 
 ### Evidence
 
-- None.
+- PR #191 merged: fallback to refused default path, win32 drive-letter normalization; independent review approved

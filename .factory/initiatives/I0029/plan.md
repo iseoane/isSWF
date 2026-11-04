@@ -31,11 +31,11 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 
 ## J002
 
-- Status: pending
+- Status: completed
 - Objective: Pin exact ls-tree entry selection with behavioral tests through the tool entry points (#187).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None.
 - Next step: Identify the smallest public entry point per tool that performs the pinned read, then add behavioral fixtures.
 
 ### Acceptance
@@ -45,4 +45,4 @@ Reported in #180 from the independent review of #178. #178 already fixed reviewe
 
 ### Evidence
 
-- None.
+- PRs #193 and this PR: behavioral refusal through worker-lifecycle launch, pi-worker-task prepare and factory-package install-tools; RED against pre-#183 tools

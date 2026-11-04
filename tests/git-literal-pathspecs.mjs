@@ -35,6 +35,30 @@ try {
     assert.notEqual(result.status, 0, `worker-lifecycle must refuse brief ${brief}`);
     assert.match(result.stderr, /brief must be a committed regular file at input SHA/u, `worker-lifecycle must refuse brief ${brief} as not an exact committed file: ${result.stderr}`);
   }
+
+  // pi-worker-task prepare: profile files are read from the pinned methodology baseline of the source
+  // checkout. ':/GLOSSARY.md' would resolve to GLOSSARY.md without literal pathspecs; it must be refused.
+  const sourceRepo = await realpath(source);
+  const config = join(root, 'pi-config.json');
+  await writeFile(config, JSON.stringify({ version: 1, mode: 'offline', sdkPath: root, nodeBinary: process.execPath, authPath: join(root, 'auth.json'), profile: { repo: sourceRepo, sha: '37a56ebc902e94f21fc10666f33fceac44946af7', files: [':/GLOSSARY.md'] } }));
+  const prepared = spawnSync(process.execPath, [join(source, 'tools/pi-worker-task.mjs'), 'prepare', '--config', config, '--output', join(root, 'task-out.mjs')], { encoding: 'utf8' });
+  assert.notEqual(prepared.status, 0, 'pi-worker-task must refuse a magic profile path');
+  assert.match(prepared.stderr, /profile reference is not a committed regular file: :\/GLOSSARY\.md/u, `pi-worker-task must refuse the magic profile path itself: ${prepared.stderr}`);
+
+  // factory-package install-tools: a fixed tool name committed as a directory is refused, not replaced
+  // by an entry inside it.
+  const toolSource = join(root, 'tool-source'), toolProject = join(root, 'tool-project');
+  await mkdir(join(toolSource, 'tools/isswf-plan.mjs'), { recursive: true });
+  await writeFile(join(toolSource, 'tools/isswf-plan.mjs/inner.mjs'), 'export {};\n');
+  const sourceGit = (...args) => spawnSync('git', ['-C', toolSource, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1' } });
+  assert.equal(sourceGit('init', '-q').status, 0);
+  assert.equal(sourceGit('add', '.').status, 0);
+  assert.equal(sourceGit('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'tools').status, 0);
+  await mkdir(toolProject);
+  assert.equal(spawnSync('git', ['-C', toolProject, 'init', '-q']).status, 0);
+  const installed = spawnSync(process.execPath, [join(source, 'tools/factory-package.mjs'), 'install-tools', '--source', await realpath(toolSource), '--revision', sourceGit('rev-parse', 'HEAD').stdout.trim(), '--project', await realpath(toolProject)], { encoding: 'utf8' });
+  assert.notEqual(installed.status, 0, 'factory-package must refuse a tool committed as a directory');
+  assert.match(installed.stderr, /Missing regular committed tool: isswf-plan\.mjs/u, `factory-package must refuse the directory entry: ${installed.stderr}`);
 } finally {
   await rm(root, { recursive: true, force: true });
   await rm(join(root, '..', `${basename(root)}-runs`), { recursive: true, force: true });
