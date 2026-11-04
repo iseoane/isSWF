@@ -83,7 +83,7 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Depends on: J003
 - Brief: [brief-r14.md](jobs/J004/brief-r14.md)
 - Blocker: Scoped source writer and method-driven validation completed; corrected full quality PASS after retained wrapper-umask failure. Bounded Linux Claude verification complete with V011, actual pending-CI conversation and PR143 exact-head CI/merge receipt below. Full initiative remains blocked for operator-owned Windows and product acceptance.
-- Next step: Await operator-owned native Windows outcomes and product acceptance; no further Claude model dispatch or publication loop. Preserve bounded Linux evidence and prior limits.
+- Next step: Complete covered Windows Pi evidence delivery and genuine pending exact-head CI conversation using A011/A012; preserve missing Windows recovery/Claude outcomes and product acceptance, without further automatic model calls.
 
 ### Acceptance
 
@@ -218,6 +218,10 @@ J004/A006 retains the consumed blocked worker result, actual operator question/r
 Reviewer `26172f1d-e825-4071-89c7-2056260a6a5b` completed/process-terminal observed; coordinator consumed full output and transcribed it unchanged as J004/V003.md. Exact candidate `5bf50d8dfbfc296d7d9a1552e05eac9dfb7054f9` against `a8461287c370908b2983b90322ec1d7f6bef4de6`, verified native patch22032bytes/SHA256 `639259b5addf65dc0a032d128b5381627c47afde744b5521d2cc0ea9b714b47f`. Accurate record delta and bounded Pi evidence: Standards PASS, Spec PASS, aggregate PASS, record-only risk LOW; no blocking record findings. Linux Pi complete acceptance remains INCONCLUSIVE/BLOCKED solely for actual CI conversation; complete Linux/fullI0024 remains blocked for Claude/Windows.
 
 Reviewer finds combined retained actual and integrated-fixture Pi evidence sufficient aside from stated CI-conversation boundary; no arbitrary distributed race/powerloss/permanent-harness requirement added. No earlier adverse verdict or incomplete worker result is relabelled. r5 primary reviewer consumed; conditional affected-delta reserve unused and not automatically invoked. Current delta adds this receipt plus verbatim review, no functional behavior changes; coordinator will publish I0024 records only, inspect exact-head CI and preserve actual conversation during pending CI if it occurs. I0025/I0026 remain local prepare-only and excluded from this PR. No Pi closure or operator acceptance inferred from record integration.
+
+## Windows Pi live async observation — partial acceptance
+
+R14 native worker 29d53cd1-e0f9-47a3-b469-09ddf8c90b12 completed; full unchanged report retained as A011, supervisor provenance/limits as A012. Actual Windows native start08:20:07.794Z, operator exchange with running-state confirmation08:21:13.009Z and terminal completion/result reconciliation08:23:27.330Z on2026-11-04. One initial worker spent; optional concrete eligible continuation unused. No nested call, fake delay, polling loop or automatic retry. Worker correctly states it did not launch a nested child or observe parent conversation; supervisor's separate native evidence establishes this worker's own async execution and operator availability. No full initiative acceptance follows. Windows Pi real-CI conversation, recovery/continuation/cancellation and Windows Claude criteria remain separately visible; original blocked job scope is not narrowed.
 
 ## Windows Pi route resolution and bounded verification
 
