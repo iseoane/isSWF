@@ -98,7 +98,7 @@ const checkoutLineEndingsResult = run(process.execPath, [join(source, 'tests/che
 const hostPortabilityResult = run(process.execPath, [join(source, 'tests/host-portability.mjs'), source]);
 const hostPrerequisiteResult = run(process.execPath, [join(source, 'tests/host-prerequisites.mjs'), source]);
 const worktreeLocationResult = run(process.execPath, [join(source, 'tests/worktree-location.mjs'), source]);
-// release-package reruns the planner, diagnostic and reviewer suites inside an installed package; measured 309-374 s on local Windows (#217).
+// release-package reruns the planner, diagnostic and reviewer suites inside an installed package; measured 309-328 s locally on Windows, 374 s reported in #217.
 const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source], 600000);
 const bunReleaseResult = run(process.execPath, [join(source, 'tests/bun-release.mjs'), source]);
 const workerDependencyResult = run(process.execPath, [join(source, 'tests/worker-dependencies.mjs'), source]);
