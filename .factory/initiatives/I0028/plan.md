@@ -12,11 +12,11 @@ Reported in #173 while working on I0027. Observed on Windows from a linked workt
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Resolve the source object store correctly from a linked Git worktree (#173).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None; awaiting PR CI and merge.
+- Blocker: None.
 - Next step: Reproduce from a linked worktree on Linux, search tools for other hard-coded .git paths, then fix with a regression test that runs from a worktree.
 
 ### Acceptance
@@ -28,6 +28,7 @@ Reported in #173 while working on I0027. Observed on Windows from a linked workt
 ### Evidence
 
 - Windows 11 clean no-hardlink clone with #179/#180/#173 patches: node tools/check-quality.mjs PASS; node tests/release-package.mjs PASS; tests/reviewer-original-evidence.mjs PASS from a linked worktree; tests/source-objects-path.mjs RED before, GREEN after
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J002
 

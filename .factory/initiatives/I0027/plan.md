@@ -12,11 +12,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/audit-archive.mjs pass on Windows without elevation, preserving its Linux guarantees (#152; group B: directory fsync EPERM; related #85).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -29,14 +29,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 - PR #170 (047d0a6) directory fsync
 - PR #171 (3e3b90f) Windows permission model; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/issue-intake.mjs pass on Windows without elevation, preserving its Linux guarantees (#153; group A: path separator in expected brief path).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -48,14 +49,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #169 (7171230) separator-agnostic assertion; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J003
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/planner-task.mjs pass on Windows without elevation, preserving its Linux guarantees (#154; group D: undiagnosed http400 fetch count; same message as #155).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -67,14 +69,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #169 (7171230) basename(p.dir); test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J004
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/reviewer-task.mjs pass on Windows without elevation, preserving its Linux guarantees (#155; group D: undiagnosed http400 fetch count; same message as #154).
 - Depends on: J014
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -86,14 +89,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #178 (7f43305) batched pinned git reads; test passes on Windows from a normal clone
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J005
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/release-package.mjs pass on Windows without elevation, preserving its Linux guarantees (#156; group D: undiagnosed strict equality).
 - Depends on: J015
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: None; awaiting PR CI and merge.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -105,14 +109,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - tests/release-package.mjs PASS on Windows 11 after J015 (#179)
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J006
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/researcher-quota-fallback.mjs pass on Windows without elevation, preserving its Linux guarantees (#157; group A: grant-must-be-external; related #83).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -125,14 +130,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 - PR #169 (7171230) containment
 - PR #170 (047d0a6) directory fsync; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J007
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/researcher-session-affinity.mjs pass on Windows without elevation, preserving its Linux guarantees (#158; group A: capacity-scope-must-be-separate).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -145,14 +151,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 - PR #169 (7171230) containment
 - PR #170 (047d0a6) directory fsync; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J008
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/review-panel-capacity.mjs pass on Windows without elevation, preserving its Linux guarantees (#159; group A: capacity-scope-must-be-separate).
 - Depends on: J014
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -164,14 +171,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #178 (7f43305) batched pinned git reads; test passes on Windows from a normal clone
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J009
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/worker-capacity-api.mjs pass on Windows without elevation, preserving its Linux guarantees (#160; group A: capacity-scope-must-be-separate).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -184,14 +192,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 - PR #169 (7171230) containment
 - PR #170 (047d0a6) directory fsync; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J010
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/worker-capacity.mjs pass on Windows without elevation, preserving its Linux guarantees (#161; group A: runs store must be outside project and source trees).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -204,14 +213,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 - PR #169 (7171230) containment and fault hook
 - PR #170 (047d0a6) directory fsync; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J011
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/worker-dependencies.mjs pass on Windows without elevation, preserving its Linux guarantees (#162; group A: runs store must be outside project and source trees).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -223,14 +233,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #169 (7171230) separator-agnostic assertions; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J012
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/successor-model-config.mjs pass on Windows without elevation, preserving its Linux guarantees (#163; group C: candidate tree and permissions mismatch).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -242,14 +253,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #171 (3e3b90f) Windows permission model; test passes on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J013
 
-- Status: in-review
+- Status: completed
 - Objective: Make tests/reviewer-original-evidence.mjs pass on Windows without elevation, preserving its Linux guarantees (#164; group B: symlink EPERM; related #86).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Reproduce on current main, check whether draft PR #87 already fixes the cause, then diagnose with isswf-debug and repair with a regression test.
 
 ### Acceptance
@@ -261,14 +273,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #172 (63c4952) directory junction fixture; test passes on Windows from a normal clone
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J014
 
-- Status: in-review
+- Status: completed
 - Objective: Keep reviewer, planner and diagnostic preparation within their deadlines on Windows by reducing per-file git process starts (#176).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md)
-- Blocker: None; awaiting Windows check-quality confirmation.
+- Blocker: None.
 - Next step: Measure with isswf-performance, batch tree and blob reads with one ls-tree -r and one cat-file --batch per checkpoint, add a regression bounding git process starts, then reassess test timeouts.
 
 ### Acceptance
@@ -280,14 +293,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - PR #178 (7f43305) batched pinned git reads and literal pathspecs; reviewer-task and review-panel-capacity pass on Windows
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J015
 
-- Status: in-review
+- Status: completed
 - Objective: Make owner and process identity checks work on Windows or refuse explicitly, without weakening Linux checks (#179).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J015/brief-r1.md)
-- Blocker: None; awaiting PR CI and merge.
+- Blocker: None.
 - Next step: Map every /proc identity read (isswf, native-recovery, worker-lifecycle, release-package test), decide equivalent Windows identity or explicit refusal per caller, then implement with tests.
 
 ### Acceptance
@@ -299,6 +313,7 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 ### Evidence
 
 - Windows 11 clean no-hardlink clone with #179/#180/#173 patches: node tools/check-quality.mjs PASS; node tests/release-package.mjs PASS
+- Integrated in main; main CI green at e2d3421 (2026-11-04); linked issues closed.
 
 ## J016
 
