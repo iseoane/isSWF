@@ -144,6 +144,8 @@ try {
     'skills/isswf-issue/SKILL.md',
     '.agents/skills/isswf-triage/SKILL.md',
     'skills/isswf-triage/SKILL.md',
+    '.agents/skills/isswf-interview/SKILL.md',
+    'skills/isswf-interview/SKILL.md',
   ]) {
     assert.ok(receiptA.files[path], `Utility resource missing from release: ${path}`);
     assert.equal(await readFile(join(installed, path), 'utf8'), await readFile(join(source, path), 'utf8'));

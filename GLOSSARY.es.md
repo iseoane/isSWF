@@ -66,3 +66,7 @@ _Avoid_: conversación o proceso como sinónimos de sesión de trabajo.
 
 **Retrospectiva**:
 El análisis de evidencias de un trabajo o sesión para proponer mejoras al proyecto o a la factory.
+
+**Entrevista**:
+Un intercambio opcional en el que un agente hace al operador una pregunta cada vez, cada una con una respuesta recomendada, hasta que la especificación no deja nada que presuponer, inferir ni decidir. Las respuestas se registran como confirmadas por el operador; los puntos abiertos cuando el operador la detiene se registran como supuestos.
+_Avoid_: cuestionario cuando sugiera una lista o un número fijo de preguntas.

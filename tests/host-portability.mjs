@@ -242,7 +242,7 @@ assert.match(docs, /static contract check, not proof of live delegation/i);
 assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
-assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability', './.agents/skills/isswf-triage']);
+assert.deepEqual(piManifest.pi.skills, ['./.agents/skills/isswf-coordinator', './.agents/skills/isswf-setup', './.agents/skills/isswf-writing', './.agents/skills/isswf-understanding', './.agents/skills/isswf-pr', './.agents/skills/isswf-issue', './.agents/skills/isswf-e2e', './.agents/skills/isswf-debug', './.agents/skills/isswf-review', './.agents/skills/isswf-retrospective', './.agents/skills/isswf-tdd', './.agents/skills/isswf-security', './.agents/skills/isswf-performance', './.agents/skills/isswf-observability', './.agents/skills/isswf-triage', './.agents/skills/isswf-interview']);
 assert.deepEqual(piManifest.bin, { isswf: 'tools/isswf.mjs' }, 'Retained legacy executable is not removed');
 assert.deepEqual(piManifest.pi.subagents, { agents: ['./.agents/hosts/pi/agents'] });
 for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
@@ -257,7 +257,14 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
     assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
   } else if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
 }
-for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-security', 'isswf-performance', 'isswf-observability', 'isswf-triage']) {
+{
+  const coordinator = await read('.agents/skills/isswf-coordinator/SKILL.md');
+  assert.ok(coordinator.includes('An [interview](../isswf-interview/SKILL.md) is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself.'));
+  assert.ok(coordinator.includes('propose it in one line that the operator accepts or skips; never make it mandatory. Always run it when the operator asks for it.'));
+  const interview = await read('.agents/skills/isswf-interview/SKILL.md');
+  for (const phrase of ['Ask exactly one question', 'Give a recommended answer', 'There is no fixed question count.', 'Never ask what can be found locally', '"enough, decide"', '`confirmed by operator`', 'explicit `assumption`', '`GLOSSARY.es.md`']) assert.ok(interview.includes(phrase), phrase);
+}
+for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-security', 'isswf-performance', 'isswf-observability', 'isswf-triage', 'isswf-interview']) {
   assert.ok(piManifest.files.includes(`.agents/skills/${name}`));
   assert.ok(manifest.skills.includes(`./skills/${name}`));
   const body = await read(`.agents/skills/${name}/SKILL.md`);

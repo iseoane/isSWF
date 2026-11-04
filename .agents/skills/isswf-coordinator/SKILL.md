@@ -33,7 +33,7 @@ The coordinator keeps the operator conversation available while long work runs. 
 
 Classify what this assignment needs and briefly explain why:
 
-- If the objective and acceptance are clear, prepare the brief without an interview.
+- If the objective and acceptance are clear, prepare the brief without an interview. An [interview](../isswf-interview/SKILL.md) is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself. Otherwise, on new features, user-visible behavior changes, concepts missing from the glossary or unwritten acceptance, propose it in one line that the operator accepts or skips; never make it mandatory. Always run it when the operator asks for it.
 - If a technical fact affects the solution, investigate the relevant code and context.
 - For a bug with a clear, locally reproducible cause, assign diagnosis and repair together to the worker. Use the [diagnostician profile](../../roles/diagnostician.md) when the cause is unknown, intermittent, crosses components, or has high impact; its task is to collect causal evidence and recommend the next step, not implement by default. If relevant surfaces or data are inaccessible, record the attempt and evidence of inaccessibility, block only the affected step, and name the missing access or safe probe; do not infer a cause.
 - If only the operator can supply a missing decision, mark the affected work `awaiting-human` with that question and its exit condition. Investigate technical facts yourself within the grant and continue independent authorized work.
