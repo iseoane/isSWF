@@ -9,7 +9,8 @@ import { verifyPackage } from './factory-package.mjs';
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 function run(binary, args) {
   const result = spawnSync(binary, args, {
-    cwd: source, encoding: 'utf8', timeout: 300000, maxBuffer: 4 * 1024 * 1024,
+  // Windows process start and git costs make tests/reviewer-task.mjs take ~93 s there; keep fast failure elsewhere.
+    cwd: source, encoding: 'utf8', timeout: process.platform === 'win32' ? 300000 : 60000, maxBuffer: 4 * 1024 * 1024,
     env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' },
   });
   assert.ifError(result.error);
