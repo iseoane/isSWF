@@ -76,7 +76,7 @@ Engram and Codegraph are optional. Use them from the coordinator, before dispatc
 
 ## 4. Prepare a decision-ready brief
 
-Write a concise brief containing:
+Write a concise brief. Link earlier briefs, the plan and prior reports instead of copying their history; a revised brief states what changed. It contains:
 
 - The observable outcome and reason.
 - Authorized scope and exclusions.
