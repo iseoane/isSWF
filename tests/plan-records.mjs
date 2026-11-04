@@ -13,7 +13,7 @@ for (const status of ['active', 'done', 'ready']) assert.throws(() => parsePlan(
 assert.throws(() => parsePlan(job({ acceptance: '' })), /^Error: invalid-job$/u);
 
 // Historical records predate the current contract and stay unchanged; any other plan must parse.
-const knownHistorical = new Map([['I0009', 'unsafe-brief-reference'], ['I0012', 'invalid-job']]);
+const knownHistorical = new Map();
 const root = join(source, '.factory/initiatives');
 let checked = 0;
 for (const entry of (await readdir(root, { withFileTypes: true })).filter(item => item.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {

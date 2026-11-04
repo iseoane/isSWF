@@ -8,12 +8,12 @@ Type: maintenance
 
 ## J001
 
-- Status: ready
+- Status: completed
 - Objective: Prepare and verify v1.5.1 source and real native release artifacts, then publish under explicit release grant.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: none for source preparation; exact review/CI and actual merged-source packages pending.
-- Next step: Review source candidate, deliver version/source-only release skill and minimal CI package retention through protected PR, then inspect exact-main Windows/Linux archives for authorized publication.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -25,3 +25,7 @@ Type: maintenance
 ### Evidence
 
 - Latest publishedv1.5.0; clean source628edc1e5e886629d33348df6eb7ee317df880cd and Quality41045598877 SUCCESS. Native shell Bun absent; Debian WSL existing Bun1.4.4/Node24.22.1/npm11.19.1, while Quality pins Bun1.4.3. Both previous native tgz assets required, not just reports. Worker stopped after aligned version edits and local notes, no artifact constructed. Coordinator inspected current matrix: tests/platform-package already builds/packs/native-validates with pinned Bun1.4.3 on both targets. Retain those success-only tgz outputs rather than install another local compiler. User additionally selected reusable source-project release skill; brief-r2 owns expanded acceptance and gates.
+
+## Closure
+
+v1.5.1 was published on 2026-10-30 (GitHub release `v1.5.1`, "isSWF 1.5.1 — coordination reliability"), so J001 is completed.
