@@ -103,3 +103,12 @@ Ordered units, none started; implementation still needs an explicit start:
 2. **#148 coordinator context/control overhead:** unchanged scope; primary hypothesis (compact current-unit coordinator context/handoff).
 3. **#149 first-pass contract-boundary tests:** narrowed to the worker side (turning explicit brief/consumer invariants into discriminating tests before review). The re-review cost side is covered by PR167.
 4. **#150 duplicated narrative:** valid but lowest priority; its signal is source size, not attributed tokens.
+
+## J002
+
+- Status: active
+- Objective: Deliver #201 as I0026 unit 1 baseline workload under current review rules.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Blocker: None
+- Next step: RED test, GREEN fix, independent review, PR and exact-head CI.
