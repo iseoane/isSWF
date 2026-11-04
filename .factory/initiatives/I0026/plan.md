@@ -67,12 +67,12 @@ Numerator includes coordinator, children, reviews, failures, retries and correct
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Reduce total token consumption per accepted functional outcome while preserving correctness, independent review, authority, traceability and recovery.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: A coverage-qualified real J004 sample now supports actionable stage-level diagnostic priorities, not per-skill causal attribution or savings. Optimization implementation is not authorized; native/acceptance limits remain explicit.
-- Next step: On explicit optimization start, bound the compact coordinator dispatch/context-transport hypothesis and compare it during ordinary equivalent work, preserving methodology/review/authority. Do not add more general instructions or remove reviews merely from totals.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -181,3 +181,7 @@ Conclusion: isSWF methodology offers only small further savings; the largest lev
 - Unit 3 (#149): the worker profile now requires exercising each explicit brief or consumer boundary (absent/unknown/malformed input, consumer size/format/identifier limits) through the real consumer before review, with expected results from the contract. This targets the J004 class of first-review findings; review independence is unchanged.
 - Unit 4 (#150): attempt, review and delivery templates and the coordinator brief step now link unchanged scope, authorization, budgets, identities and limits instead of restating them, keeping a stated-source restatement only where a record must stand alone.
 - Not measured separately: both act on later deliveries; their effect is visible only across future comparable work.
+
+## Operator closure (2026-11-04)
+
+The operator closed I0026 after units 1–4: baseline, phase-loaded reviewer launch and status-first resume (PR206), first-pass contract-boundary checks and linked record context (PR213). Remaining context lever: #148 (long coordinator sessions), tracked as its own issue outside this initiative.
