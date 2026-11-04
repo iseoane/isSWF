@@ -8,9 +8,9 @@ import { verifyPackage } from './factory-package.mjs';
 
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 // Windows process start and git costs make tests/reviewer-task.mjs take ~93 s there; keep fast failure elsewhere.
-function run(binary, args) {
+function run(binary, args, win32Timeout = 300000) {
   const result = spawnSync(binary, args, {
-    cwd: source, encoding: 'utf8', timeout: process.platform === 'win32' ? 300000 : 60000, maxBuffer: 4 * 1024 * 1024,
+    cwd: source, encoding: 'utf8', timeout: process.platform === 'win32' ? win32Timeout : 60000, maxBuffer: 4 * 1024 * 1024,
     env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' },
   });
   assert.ifError(result.error);
@@ -98,7 +98,8 @@ const checkoutLineEndingsResult = run(process.execPath, [join(source, 'tests/che
 const hostPortabilityResult = run(process.execPath, [join(source, 'tests/host-portability.mjs'), source]);
 const hostPrerequisiteResult = run(process.execPath, [join(source, 'tests/host-prerequisites.mjs'), source]);
 const worktreeLocationResult = run(process.execPath, [join(source, 'tests/worktree-location.mjs'), source]);
-const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source]);
+// release-package reruns the planner, diagnostic and reviewer suites inside an installed package; measured 309-328 s locally on Windows, 374 s reported in #217.
+const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source], 600000);
 const bunReleaseResult = run(process.execPath, [join(source, 'tests/bun-release.mjs'), source]);
 const workerDependencyResult = run(process.execPath, [join(source, 'tests/worker-dependencies.mjs'), source]);
 const workerCapacityResult = run(process.execPath, [join(source, 'tests/worker-capacity.mjs'), source]);
