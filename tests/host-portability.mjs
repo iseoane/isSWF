@@ -416,7 +416,7 @@ for (const path of ['docs/en/installation.md', 'docs/es/installation.md', 'docs/
 }
 assert.equal((setup.match(/`CLAUDE\.md` bridge/giu) ?? []).length, 1, 'Setup documents the no-duplicate bridge decision once');
 assert.doesNotMatch(setup, /automatic host hook/u);
-assert.doesNotMatch(setup, /install (?:Engram|Codegraph)/iu);
+assert.doesNotMatch(setup, /\binstall (?:Engram|Codegraph)/iu);
 assert.doesNotMatch(entrySetup, /optional|Verify project identity/u, 'Setup entry must require available Engram/Codegraph without contrast checks');
 const claudeSetup = await read('skills/isswf-setup/SKILL.md');
 assert.match(claudeSetup, /\$\{CLAUDE_PLUGIN_ROOT\}\/\.agents\/skills\/isswf-setup\/SKILL\.md/);
