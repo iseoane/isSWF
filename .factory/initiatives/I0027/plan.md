@@ -302,11 +302,11 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ## J016
 
-- Status: pending
+- Status: completed
 - Objective: Make the token-native-auto-pi async-completion wait deadline-based so loaded runners do not fail it spuriously (#185).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J016/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None.
 - Next step: Replace the 100 x 5 ms poll with a deadline-based wait and add a case proving a missing event still fails.
 
 ### Acceptance
@@ -316,15 +316,15 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #190 merged: deadline-based 25 ms polling; 60/60 Windows passes
 
 ## J017
 
-- Status: pending
+- Status: completed
 - Objective: Scope the check-quality per-test timeout so only slow tests or Windows get 300 s (#186).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J017/brief-r1.md)
-- Blocker: None; triaged ready-for-agent.
+- Blocker: None.
 - Next step: Measure per-test durations on Windows and Linux, then apply a per-test or platform-scoped timeout in check-quality.
 
 ### Acceptance
@@ -334,4 +334,4 @@ Observed on Windows 11 Pro 10.0.26300, Node.js 26.12.1, LF clone at 7721bc6. Pro
 
 ### Evidence
 
-- None.
+- PR #192 merged: 300 s timeout on win32 only, 60 s elsewhere
