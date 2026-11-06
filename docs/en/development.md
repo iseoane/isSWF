@@ -156,6 +156,15 @@ node tooling/maintenance/workflow-diagrams.mjs --check
 
 The second command needs only Node.js. It checks translation fields, preview references, generated SVG bytes, and HTML hashes against the portable generated manifest. The portable quality suite also tests these checks against disposable missing-translation, stale-source, invalid-reference, duplicate-ID, and modified-artifact fixtures. It does not rerun browser validation or verify translation meaning. Inspect both preview images and review the translations after regeneration. Local Archify delivery receipts contain machine paths and are ignored; the portable manifest is retained with the diagrams.
 
+To re-pin the source citations to a newer commit, preview the result and then write it:
+
+```sh
+node tooling/maintenance/workflow-citations.mjs <new-revision>
+node tooling/maintenance/workflow-citations.mjs --write <new-revision>
+```
+
+Each cited line range is looked up by exact text in the new revision. A range that occurs exactly once moves with its text. A range whose text changed, disappeared or occurs more than once is listed as `UNRESOLVED` with its path, old range and enclosing heading, is never guessed, and makes the command exit nonzero. `--write` updates the moved citations and the pinned revision, so fix the unresolved ones by hand and then regenerate the diagrams.
+
 ## Source of truth and history
 
 Check actual tools, manifests, and tests before documenting current behaviour. Use [the source map](architecture.md) to find the owner. Keep accepted objectives distinct from implementation evidence and [future proposals](future-actions.md).

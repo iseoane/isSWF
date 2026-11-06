@@ -156,6 +156,15 @@ node tooling/maintenance/workflow-diagrams.mjs --check
 
 El segundo comando solo necesita Node.js. Comprueba los campos de traducción, las referencias del resumen, los bytes de los SVG generados y los hashes de los HTML contra el manifiesto generado portable. La suite de calidad portable también prueba esas comprobaciones con fixtures desechables que omiten traducciones, dejan la fuente desactualizada, incluyen referencias inválidas o identificadores duplicados y modifican los artefactos. No repite la validación en navegador ni verifica el significado de las traducciones. Inspecciona ambas imágenes y revisa las traducciones después de regenerar. Los recibos locales de entrega de Archify contienen rutas de la máquina y se ignoran; el manifiesto portable se conserva con los diagramas.
 
+Para fijar las citas de fuentes a un commit más reciente, previsualiza el resultado y luego escríbelo:
+
+```sh
+node tooling/maintenance/workflow-citations.mjs <new-revision>
+node tooling/maintenance/workflow-citations.mjs --write <new-revision>
+```
+
+Cada rango de líneas citado se busca por texto exacto en la nueva revisión. Un rango que aparece exactamente una vez se mueve con su texto. Un rango cuyo texto cambió, desapareció o aparece más de una vez se lista como `UNRESOLVED` con su ruta, el rango anterior y el encabezado que lo contiene, nunca se adivina y hace que el comando termine con código distinto de cero. `--write` actualiza las citas movidas y la revisión fijada, así que corrige a mano las no resueltas y después regenera los diagramas.
+
 ## Fuente de la verdad e historial
 
 Comprueba las herramientas, los manifiestos y las pruebas reales antes de documentar el comportamiento actual. El [mapa del código](architecture.md) ayuda a localizar al responsable. Distingue los objetivos aceptados de las pruebas de implementación y de las [propuestas futuras](future-actions.md).
