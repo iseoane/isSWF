@@ -20,7 +20,7 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Operator decides whether to keep, integrate or discard the branch.
+- Next step: None; merged in #230 and released in v1.8.0.
 
 ### Acceptance
 
@@ -39,7 +39,7 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Operator decides whether to keep, integrate or discard the branch. Follow-up for next release: update docs/diagrams/workflow.json:650-651 and regenerate workflow.html (EN/ES), plus README.
+- Next step: None; merged in #230 (docs in #233) and released in v1.8.0.
 
 ### Acceptance
 
@@ -61,7 +61,7 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Operator reruns trial E on a fresh worktree from this head.
+- Next step: None; trial E2 confirmed negative controls and the assertion map before closing without a reviewer; merged in #230, released in v1.8.0. Formal verification (pilot B) is recorded in docs/en/future-actions.md.
 
 ### Acceptance
 

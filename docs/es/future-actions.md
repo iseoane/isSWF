@@ -163,6 +163,8 @@ Valorar la consulta reciente de procesos y estado remoto si los usuarios la nece
 
 Construir un conjunto de regresión del revisor con los defectos que una revisión no detectó y que se confirmaron después, como reversiones o fallos de plataforma que se escaparon. Cada caso conserva el candidato exacto, el brief aceptado y el defecto confirmado. Volver a ejecutar el perfil de revisión sobre el conjunto cada vez que cambien su metodología, su modelo o su esfuerzo, y conservar un cambio solo cuando encuentre más defectos confirmados sin más hallazgos marcados después como erróneos. Ejecutarlo también sobre candidatos limpios conocidos para contar las falsas alarmas. Las resoluciones de hallazgos registradas en los informes de revisión aportan los datos de ruido.
 
+Probar la verificación formal con un invariante de alto riesgo, tras el modo de revisión empírico (I0033). Un candidato es «nunca dos escritores activos sobre la misma asignación» en el ciclo de vida de los workers (`docs/local-worker-lifecycle.md`), donde caídas, reintentos y sustituciones pueden intercalarse en órdenes que los tests rara vez alcanzan. Modelarlo con un comprobador de modelos como TLA+, demostrar que la comprobación falla con una variante sin la protección y registrar qué archivos y commit cubre el modelo para que se vea cuándo queda desfasado. Antes de empezar, valorar la dependencia de desarrollo de Java/TLC y el riesgo de que el modelo se separe del código.
+
 ## Mantenimiento
 
 Mantener las guías bilingües, los ejemplos y las comprobaciones alineados con el código. Consultar documentos históricos cuando hagan falta sus evidencias o datos de entrada; no convertir demostraciones antiguas en el manual vigente del producto.
