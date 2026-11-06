@@ -56,12 +56,12 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Objective: Make empirical closure in the coordinator conditional on recorded negative controls and a criterion-to-assertion map.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements; reviewer checks the delta; operator reruns trial E.
+- Next step: Operator reruns trial E on a fresh worktree from this head.
 
 ### Acceptance
 
@@ -71,4 +71,5 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 
 ### Evidence
 
-- None.
+- Worker commit 978b3cb; independent reviewer round 1: Standards pass, Spec pass, S1 optional (concrete-risk exception) applied by the coordinator in the closing commit as a one-clause wording change matching review.md:26, not re-reviewed.
+- Coordinator rerun after S1: review-guidance, host-portability, check-docs and git diff --check exit 0.
