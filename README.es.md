@@ -2,7 +2,7 @@
 
 [English](README.md) | Español
 
-isSWF te ayuda a dirigir el trabajo de desarrollo asistido por IA mediante encargos pequeños y revisables. Tú mantienes el control: instalar la integración no inicia agentes, y un flujo de funcionalidad no autoriza su merge ni su despliegue.
+isSWF es una factoría de software asistida por IA donde los agentes ejecutan y las personas deciden. Es un marco de gobierno para el desarrollo de software con agentes: divide el trabajo en encargos pequeños y revisables, elige la verificación según el riesgo y exige evidencias verificables. Tú mantienes el control: instalar la integración no inicia agentes, y un flujo de funcionalidad no autoriza su merge ni su despliegue.
 
 ## Empieza con un host nativo
 

@@ -2,7 +2,7 @@
 
 English | [Español](README.es.md)
 
-isSWF helps you direct AI-assisted software work in small, reviewable assignments. You stay in control: installing the integration does not start agents, and a feature workflow does not authorize merging or deployment.
+isSWF is an AI-assisted software factory where agents execute and people decide. It is a governance framework for agentic software development: it splits work into small, reviewable assignments, selects verification by risk and requires verifiable evidence. You stay in control: installing the integration does not start agents, and a feature workflow does not authorize merging or deployment.
 
 ## Start with a native host
 
