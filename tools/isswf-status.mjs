@@ -129,7 +129,7 @@ export async function initiatives({ project }) {
       if (record.status === 'absent') { items.push({ initiative, status: 'absent', reason: 'missing-plan' }); continue; }
       const file = await snapshot(record.path);
       if (file.sha256 !== record.sha256) throw Error('changed-plan');
-      const prefix = '# ' + initiative + ': ', heading = record.markdown.split('\n', 1)[0];
+      const prefix = '# ' + initiative + ': ', heading = record.markdown.split(/\r?\n/u, 1)[0];
       const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
       if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-title');
       const jobs = parsePlan(record.markdown);
@@ -148,7 +148,7 @@ export async function status({ project, initiative }) {
   try {
     const file = await snapshot(record.path);
     if (file.sha256 !== record.sha256) throw Error('changed-plan');
-    const heading = record.markdown.split('\n', 1)[0], prefix = `# ${initiative}: `;
+    const heading = record.markdown.split(/\r?\n/u, 1)[0], prefix = `# ${initiative}: `;
     const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
     if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-plan-identity');
     const parsed = parsePlan(record.markdown), jobs = [];

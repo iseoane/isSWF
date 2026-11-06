@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const root = path.resolve(process.argv[2] ?? '.');
@@ -470,4 +471,44 @@ assert.match(await read('.agents/roles/references/research.md'), /never substitu
 const methodEvidence = spawnSync(process.execPath, [path.join(root, 'tests/worker-method-evidence.mjs'), root], { encoding: 'utf8', timeout: 10_000 });
 assert.ifError(methodEvidence.error);
 assert.equal(methodEvidence.status, 0, `method evidence contracts must pass on the native host: ${methodEvidence.stderr}`);
+// A packaged Markdown link must resolve to a file that ships too; a source-only target is a dead link once installed.
+async function packagedLinkViolations(base) {
+  const entries = JSON.parse(await readFile(path.join(base, 'package.json'), 'utf8')).files;
+  const shipped = new Set();
+  async function collect(rel) {
+    const abs = path.join(base, rel);
+    const children = await readdir(abs, { withFileTypes: true }).catch(error => { if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return null; throw error; });
+    if (!children) return void (await readFile(abs).then(() => shipped.add(rel), () => {}));
+    for (const child of children) await collect(`${rel}/${child.name}`);
+  }
+  for (const entry of entries) {
+    if (entry.endsWith('/*.mjs')) {
+      const dir = entry.slice(0, -'/*.mjs'.length);
+      for (const child of await readdir(path.join(base, dir), { withFileTypes: true })) if (child.isFile() && child.name.endsWith('.mjs')) shipped.add(`${dir}/${child.name}`);
+    } else await collect(entry);
+  }
+  const violations = [];
+  for (const file of [...shipped].filter(name => name.endsWith('.md'))) {
+    const body = (await readFile(path.join(base, file), 'utf8')).replace(/^(```|~~~)[\s\S]*?^\1/gmu, '');
+    for (const match of body.matchAll(/\]\(([^)\s]+)(?:\s+"[^"]*")?\)/gu)) {
+      const target = match[1].split('#')[0];
+      if (!target || /^[a-z][a-z0-9+.-]*:/iu.test(target) || target.startsWith('/')) continue;
+      const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), decodeURIComponent(target)));
+      if (!shipped.has(resolved)) violations.push(`${file} -> ${target}`);
+    }
+  }
+  return violations;
+}
+assert.deepEqual(await packagedLinkViolations(root), [], 'every relative link in a packaged Markdown file must target a packaged file');
+{
+  const fixture = await mkdtemp(path.join(tmpdir(), 'isswf-links-'));
+  try {
+    await mkdir(path.join(fixture, 'skills/a'), { recursive: true });
+    await mkdir(path.join(fixture, 'docs/en'), { recursive: true });
+    await writeFile(path.join(fixture, 'package.json'), JSON.stringify({ files: ['skills'] }));
+    await writeFile(path.join(fixture, 'docs/en/reference.md'), '# source only\n');
+    await writeFile(path.join(fixture, 'skills/a/SKILL.md'), '[ok](./SKILL.md#x) [bad](../../docs/en/reference.md)\n```\n[fenced](../missing.md)\n```\n');
+    assert.deepEqual(await packagedLinkViolations(fixture), ['skills/a/SKILL.md -> ../../docs/en/reference.md'], 'a link to an unshipped file must be reported');
+  } finally { await rm(fixture, { recursive: true, force: true }); }
+}
 console.log('host-portability: static manifest and preserved contract checks ok; no Claude invocation');

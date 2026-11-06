@@ -43,7 +43,7 @@ function validateDependencyGraph(jobs) {
 }
 export function parsePlan(markdown) {
   const jobs = [], seen = new Set(); let current, section, type;
-  for (const line of markdown.split('\n')) {
+  for (const line of markdown.replaceAll('\r\n', '\n').split('\n')) {
     if (!current && line.startsWith('Type:')) {
       if (type !== undefined) throw Error('invalid-plan-type');
       type = line.slice('Type:'.length).trim();

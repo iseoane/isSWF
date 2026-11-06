@@ -52,6 +52,8 @@ try {
   await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: Factory v1'));
   assert.equal(inspect().label, 'I0001 · Factory v1');
   assert.equal(inspect().initiative, 'I0001');
+  await writeFile(planPath, original.replaceAll('\n', '\r\n'));
+  const crlf = inspect(); assert.equal(crlf.status, 'observed', 'A CRLF plan must parse through isswf-status'); assert.equal(crlf.title, 'Status fixture'); assert.equal(crlf.jobs.length, observed.jobs.length);
   await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: '));
   assert.equal(inspect().status, 'unknown');
   await writeFile(planPath, original.replace('jobs/J001/brief-r1.md', '../../outside.md'));

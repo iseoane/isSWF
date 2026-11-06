@@ -18,6 +18,7 @@ try {
   const markdown = await readFile(prepared.path, 'utf8');
   const parsed = parsePlan(markdown);
   assert.deepEqual(parsed.map(j => ({ id: j.id, dependencies: j.dependencies, status: j.reportedStatus })), [{ id: 'J001', dependencies: [], status: 'pending' }, { id: 'J002', dependencies: ['J001'], status: 'pending' }]);
+  assert.deepEqual(parsePlan(markdown.replaceAll('\n', '\r\n')), parsed, 'CRLF plans must parse identically to LF plans');
   assert.throws(() => parsePlan(markdown.replace('- Depends on: None', '- Depends on: J002')), /cyclic job dependencies/u);
   assert.throws(() => parsePlan(markdown.replace('- Depends on: J001', '- Depends on: J001, J001')), /invalid-dependency/u);
   assert.throws(() => parsePlan(markdown.replace('- Depends on: J001', '- Depends on: MISSING')), /invalid-dependency/u);

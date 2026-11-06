@@ -62,6 +62,14 @@ When a brief selects TDD, each behavioral RED commit is test-only and intentiona
 
 When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` tasks, pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires both the artifact and Linux sandbox checks. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk without changing the diagnostic evidence root policy. These fixtures do not execute Claude or real providers.
 
+CI also runs two host checks outside the portable check: `tests/host-prerequisites.mjs` and `tests/source-host-isolation.mjs`. Run both locally with one command:
+
+```bash
+node tooling/quality/host-checks.mjs
+```
+
+The command never installs dependencies or builds the platform output. It prints `SKIPPED` with the reason when a prerequisite is missing and exits nonzero only when a check that ran fails, so a skip is not a pass. The isolation check needs `tooling/host-tests` dependencies (`npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund`) and `ISSWF_PLATFORM_ROOT` pointing to a fresh `tests/platform-package.mjs` output.
+
 Some checks use the current files, while committed-source packaging checks use a Git revision. A passing run does not mean every uncommitted file has been packaged or every live model integration has been tested.
 
 If you need the separate static-analysis tools and they are not installed, prepare the development dependencies:
@@ -147,6 +155,15 @@ node tooling/maintenance/workflow-diagrams.mjs --check
 ```
 
 The second command needs only Node.js. It checks translation fields, preview references, generated SVG bytes, and HTML hashes against the portable generated manifest. The portable quality suite also tests these checks against disposable missing-translation, stale-source, invalid-reference, duplicate-ID, and modified-artifact fixtures. It does not rerun browser validation or verify translation meaning. Inspect both preview images and review the translations after regeneration. Local Archify delivery receipts contain machine paths and are ignored; the portable manifest is retained with the diagrams.
+
+To re-pin the source citations to a newer commit, preview the result and then write it:
+
+```sh
+node tooling/maintenance/workflow-citations.mjs <new-revision>
+node tooling/maintenance/workflow-citations.mjs --write <new-revision>
+```
+
+Each cited line range is looked up by exact text in the new revision. A range that occurs exactly once moves with its text. A range whose text changed, disappeared or occurs more than once is listed as `UNRESOLVED` with its path, old range and enclosing heading, is never guessed, and makes the command exit nonzero. `--write` updates the moved citations and the pinned revision, so fix the unresolved ones by hand and then regenerate the diagrams.
 
 ## Source of truth and history
 

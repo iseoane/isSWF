@@ -62,6 +62,14 @@ Cuando un brief selecciona TDD, cada commit RED de comportamiento contiene solo 
 
 Cuando Bun está disponible, la comprobación portable también construye e instala un paquete Bun real en directorios temporales. Prueba las exportaciones de paquetes externos similares a un SDK y sus dependencias transitivas, las tareas `.mjs` con rutas absolutas y relativas, el traspaso al binario fijado y, cuando está disponible, Bubblewrap en Linux con un SDK simulado. Sin Bun, la prueba de artefacto indica SKIP. Asigna a `ISSWF_TEST_BUN` la ruta de un compilador para exigirla; `ISSWF_TEST_BUN_WORKER=1` exige además la comprobación del aislamiento. CI instala el compilador Bun fijado y exige las pruebas de artefacto y aislamiento Linux. En local, `ISSWF_TEST_BUN_TMPDIR` permite ubicar los datos de prueba binarios grandes en otro disco sin cambiar la política de la raíz de evidencias de diagnóstico. Estos datos de prueba no ejecutan Claude ni proveedores reales.
 
+CI también ejecuta dos comprobaciones de host fuera de la comprobación portable: `tests/host-prerequisites.mjs` y `tests/source-host-isolation.mjs`. Ejecuta ambas en local con un solo comando:
+
+```bash
+node tooling/quality/host-checks.mjs
+```
+
+El comando nunca instala dependencias ni construye la salida de plataforma. Imprime `SKIPPED` con el motivo cuando falta un requisito previo y termina con código distinto de cero solo si falla una comprobación que se ejecutó, de modo que un SKIPPED no equivale a un resultado correcto. La comprobación de aislamiento necesita las dependencias de `tooling/host-tests` (`npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund`) y que `ISSWF_PLATFORM_ROOT` apunte a una salida nueva de `tests/platform-package.mjs`.
+
 Algunas comprobaciones utilizan los archivos actuales, mientras que las del paquete generado desde un commit utilizan una revisión de Git. Que la ejecución termine bien no significa que se hayan empaquetado todos los cambios sin commit ni probado todas las integraciones con modelos reales.
 
 Si necesitas las herramientas separadas de análisis estático y todavía no están instaladas, prepara las dependencias de desarrollo:
@@ -147,6 +155,15 @@ node tooling/maintenance/workflow-diagrams.mjs --check
 ```
 
 El segundo comando solo necesita Node.js. Comprueba los campos de traducción, las referencias del resumen, los bytes de los SVG generados y los hashes de los HTML contra el manifiesto generado portable. La suite de calidad portable también prueba esas comprobaciones con fixtures desechables que omiten traducciones, dejan la fuente desactualizada, incluyen referencias inválidas o identificadores duplicados y modifican los artefactos. No repite la validación en navegador ni verifica el significado de las traducciones. Inspecciona ambas imágenes y revisa las traducciones después de regenerar. Los recibos locales de entrega de Archify contienen rutas de la máquina y se ignoran; el manifiesto portable se conserva con los diagramas.
+
+Para fijar las citas de fuentes a un commit más reciente, previsualiza el resultado y luego escríbelo:
+
+```sh
+node tooling/maintenance/workflow-citations.mjs <new-revision>
+node tooling/maintenance/workflow-citations.mjs --write <new-revision>
+```
+
+Cada rango de líneas citado se busca por texto exacto en la nueva revisión. Un rango que aparece exactamente una vez se mueve con su texto. Un rango cuyo texto cambió, desapareció o aparece más de una vez se lista como `UNRESOLVED` con su ruta, el rango anterior y el encabezado que lo contiene, nunca se adivina y hace que el comando termine con código distinto de cero. `--write` actualiza las citas movidas y la revisión fijada, así que corrige a mano las no resueltas y después regenera los diagramas.
 
 ## Fuente de la verdad e historial
 
