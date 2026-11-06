@@ -27,6 +27,8 @@ Choose a small set of journeys from the assignment's risk and user value. Record
 
 Keep the journey map with the existing suite documentation. If none exists, use a short README beside the new tests, not a second project plan. A useful row names the journey, test file, preconditions, expected result and known coverage limits. Cover the entry points the requirement promises, not just the easiest path.
 
+Confirm the checkout builds and starts as-is before writing journeys. If it does not, report the exact failure, or repair it only within the grant. Scaffolding for an irrelevant missing asset is marked as test scaffolding and removed at teardown. Launch must reach a usable state from an empty data directory, including migrations and seed data.
+
 This step ends when the selected journeys have observable expectations and a feasible driver, or the affected journey has a concrete blocker.
 
 ## 3. Choose a driver for each surface
@@ -49,8 +51,6 @@ Read [test design and delivery](references/test-quality.md) when creating, chang
 Use real application components wherever the journey claims coverage. A stub at an external boundary narrows that claim; record it. Keep provider-enabled or destructive journeys separate and opt-in. Authentication, spending and external writes require their own grant. Protect credentials in fixtures, traces and logs.
 
 For a new test, demonstrate sensitivity to a relevant wrong result when feasible, using a controlled fixture or disposable copy. A setup failure is not a regression demonstration. Existing working behavior need not be broken in the production checkout merely to claim TDD; report sensitivity checks that were not performed.
-
-Confirm the checkout builds and starts as-is before writing journeys. If it does not, report the exact failure, or repair it only within the grant. Scaffolding for an irrelevant missing asset is marked as test scaffolding and removed at teardown. Launch must reach a usable state from an empty data directory, including migrations and seed data.
 
 This step ends with independently runnable tests and their fixtures. If the user requested execution only, keep the existing suite and proceed to the next step.
 
