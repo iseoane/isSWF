@@ -1,15 +1,15 @@
 {
-  "sourceSha256": "d5ad09711794f287a6c3bb5763d3a61409c334f81efbabfc4e7426611a08b927",
+  "sourceSha256": "8de9ac078a93a3adb4baa6029e3c870f564b9473d3dd999d9631061657975024",
   "artifacts": {
     "en": {
-      "specificationSha256": "904eada3e3fd6e93f1a74dbb04ac9e6f1e4596a83cf16139b3be9a109def036f",
-      "htmlSha256": "2904cfb37d42e0b84b7c3990b3f2d5fccb67412bf3bf4d21b52f36d0c4a08c0d",
-      "svgSha256": "b09979ac4e293e839504858b34b8f629e35b381c93067c5efaf41fd903b0e6db"
+      "specificationSha256": "355c44c65af3f67ebdcf3bb61dca740f4c03ea8b9e8ba7cc0c2aba17b7fb7b61",
+      "htmlSha256": "5125f0e140053e1434b17e4e64acac80a3550e8d0289c550f691f237bea9a77b",
+      "svgSha256": "7f1453f9283a9c488be322d60d6a9adc86886ce4fbd9553f5d8514f431f84c24"
     },
     "es": {
-      "specificationSha256": "339611bb61974fd76dd654f0d4eb8de4ddb7e6e91bd60d18048eba8614f53af4",
-      "htmlSha256": "155fb4947aff0d40ddd508cbb8ac83ee7925e6b3d69ed79f4a6f3941fa7e031c",
-      "svgSha256": "4e91375060430e8c6268642455b48d00cf449ce8cc3cd08c9ff3ce2216545f5b"
+      "specificationSha256": "ba40434801f38fb80ed092a9741fa094be903b854ca257ce4ffae55f168f55ab",
+      "htmlSha256": "cbdfe687b9f599aa35a83495a55c4035754fc76ec67495674eb1f0ac32331b86",
+      "svgSha256": "db476f67a1949b521f5218893ae4516e2cf139c73f5c82bf4e9246ffc926addb"
     }
   }
 }

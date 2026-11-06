@@ -10,7 +10,7 @@
       "quality_profile": "showcase",
       "repository": {
         "url": "https://github.com/iseoane/isSWF.git",
-        "revision": "4b57aebbf323e36d2ca1e142379982942e4d758f"
+        "revision": "d304117870d56ad6a8c6e05756ef121e027cf02c"
       },
       "legend": {
         "entries": {
@@ -212,8 +212,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 15,
-            "end_line": 23
+            "line": 16,
+            "end_line": 25
           }
         ]
       },
@@ -305,8 +305,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 149,
-            "end_line": 166
+            "line": 121,
+            "end_line": 148
           }
         ]
       },
@@ -326,8 +326,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 15,
-            "end_line": 19
+            "line": 16,
+            "end_line": 20
           }
         ],
         "tag": {
@@ -454,8 +454,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 68,
-            "end_line": 84
+            "line": 77,
+            "end_line": 96
           }
         ],
         "tag": {
@@ -500,8 +500,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 86,
-            "end_line": 110
+            "line": 94,
+            "end_line": 112
           }
         ],
         "tag": {
@@ -525,8 +525,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 23,
-            "end_line": 33
+            "line": 29,
+            "end_line": 39
           }
         ],
         "tag": {
@@ -551,7 +551,7 @@
           {
             "path": ".agents/roles/worker.md",
             "line": 1,
-            "end_line": 42
+            "end_line": 44
           }
         ],
         "tag": {
@@ -618,18 +618,18 @@
         "col": 0,
         "type": "cloud",
         "label": {
-          "en": "Mechanical check",
-          "es": "Comprobación mecánica"
+          "en": "Mechanical or empirical check",
+          "es": "Check mecánico o empírico"
         },
         "sublabel": {
-          "en": "Sufficient when it covers the risk",
-          "es": "Suficiente si cubre el riesgo"
+          "en": "No model call if it covers the risk",
+          "es": "Sin modelo si cubre el riesgo"
         },
         "sources": [
           {
             "path": ".agents/roles/references/review.md",
-            "line": 5,
-            "end_line": 21
+            "line": 17,
+            "end_line": 26
           }
         ],
         "tag": {
@@ -647,14 +647,14 @@
           "es": "Seleccionar verificación"
         },
         "sublabel": {
-          "en": "Mechanical, semantic or combined",
-          "es": "Mecánica, semántica o combinada"
+          "en": "Mechanical, empirical, semantic or combined",
+          "es": "Mecánica, empírica, semántica o combinada"
         },
         "sources": [
           {
             "path": ".agents/roles/references/review.md",
-            "line": 5,
-            "end_line": 21
+            "line": 17,
+            "end_line": 26
           }
         ]
       },
@@ -675,7 +675,7 @@
           {
             "path": ".agents/roles/reviewer.md",
             "line": 1,
-            "end_line": 34
+            "end_line": 36
           }
         ],
         "tag": {
@@ -700,8 +700,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 35,
-            "end_line": 42
+            "line": 41,
+            "end_line": 48
           }
         ],
         "tag": {
@@ -726,8 +726,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 128,
-            "end_line": 138
+            "line": 103,
+            "end_line": 109
           }
         ],
         "tag": {
@@ -751,8 +751,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/review.md",
-            "line": 75,
-            "end_line": 81
+            "line": 100,
+            "end_line": 106
           }
         ]
       },
@@ -845,8 +845,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 35,
-            "end_line": 42
+            "line": 41,
+            "end_line": 48
           }
         ],
         "tag": {
@@ -870,8 +870,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 39,
-            "end_line": 42
+            "line": 45,
+            "end_line": 48
           }
         ],
         "tag": {
@@ -895,8 +895,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 35,
-            "end_line": 42
+            "line": 41,
+            "end_line": 48
           }
         ],
         "tag": {
@@ -920,8 +920,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 39,
-            "end_line": 42
+            "line": 45,
+            "end_line": 48
           }
         ]
       },
@@ -941,8 +941,8 @@
         "sources": [
           {
             "path": ".agents/skills/isswf-coordinator/SKILL.md",
-            "line": 136,
-            "end_line": 138
+            "line": 103,
+            "end_line": 103
           }
         ]
       },
@@ -962,8 +962,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 23,
-            "end_line": 33
+            "line": 29,
+            "end_line": 39
           }
         ]
       },
@@ -983,8 +983,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 44,
-            "end_line": 50
+            "line": 50,
+            "end_line": 52
           }
         ],
         "tag": {
@@ -1009,8 +1009,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 44,
-            "end_line": 50
+            "line": 50,
+            "end_line": 52
           }
         ]
       },
@@ -1030,8 +1030,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 44,
-            "end_line": 50
+            "line": 50,
+            "end_line": 52
           }
         ],
         "tag": {
@@ -1082,8 +1082,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 35,
-            "end_line": 42
+            "line": 41,
+            "end_line": 48
           }
         ],
         "tag": {
@@ -1108,8 +1108,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 35,
-            "end_line": 42
+            "line": 41,
+            "end_line": 48
           }
         ],
         "tag": {
@@ -1134,8 +1134,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/feature-delivery.md",
-            "line": 23,
-            "end_line": 33
+            "line": 29,
+            "end_line": 39
           }
         ],
         "tag": {
@@ -1721,8 +1721,8 @@
         "sources": [
           {
             "path": ".agents/roles/references/review.md",
-            "line": 75,
-            "end_line": 81
+            "line": 100,
+            "end_line": 106
           }
         ]
       }
@@ -1956,8 +1956,8 @@
         "to": "checks",
         "variant": "default",
         "label": {
-          "en": "mechanical",
-          "es": "mecánica"
+          "en": "mechanical / empirical",
+          "es": "mecánica / empírica"
         }
       },
       {
@@ -2299,8 +2299,8 @@
             "es": "Worker · worker.md. references/code-quality.md al cierre y references/comments.md durante la edición. Diseño, ejecución y verificación se cargan cuando corresponden."
           },
           {
-            "en": "isswf-tdd and references/tdd.md apply when requested or when a useful cheap test exists. isswf-e2e applies to a selected critical journey or assigned suite.",
-            "es": "isswf-tdd + references/tdd.md solo si se pide o hay una prueba útil y barata. isswf-e2e se selecciona para un recorrido crítico o una suite asignada."
+            "en": "isswf-tdd and references/tdd.md apply when requested or when a useful cheap test exists. isswf-e2e applies to a selected critical journey or assigned suite; executable coverage is always weighed before semantic review.",
+            "es": "isswf-tdd + references/tdd.md solo si se pide o hay una prueba útil y barata. isswf-e2e se selecciona para un recorrido crítico o una suite asignada; la cobertura ejecutable se valora siempre antes de la revisión semántica."
           },
           {
             "en": "isswf-security, isswf-performance and isswf-observability refine implementation, diagnosis or review according to risk. They grant no scans, installation or additional access.",
@@ -2509,8 +2509,8 @@
             },
             "details": [
               {
-                "en": "Independent review when required",
-                "es": "Revisión independiente si se exige"
+                "en": "Tests first; independent review when required",
+                "es": "Primero tests; revisión independiente si se exige"
               },
               {
                 "en": "Correct and reverify affected work",

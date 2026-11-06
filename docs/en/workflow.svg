@@ -35,7 +35,7 @@
 <rect x="410" y="320" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
 <text x="426" y="346" fill="#67e8f9" font-size="13" font-weight="700">COORDINATOR · REVIEWER</text>
 <text x="426" y="375" fill="#f8fafc" font-size="19" font-weight="700">Checks and corrections</text>
-<text x="426" y="401" fill="#cbd5e1" font-size="14">Independent review when required</text>
+<text x="426" y="401" fill="#cbd5e1" font-size="14">Tests first; independent review when required</text>
 <text x="426" y="423" fill="#cbd5e1" font-size="14">Correct and reverify affected work</text>
 <path d="M737 383H783" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
 <rect x="790" y="320" width="320" height="126" rx="10" fill="#1e293b" stroke="#67e8f9" stroke-width="1.5"/>
