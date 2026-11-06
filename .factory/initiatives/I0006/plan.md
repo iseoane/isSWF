@@ -107,12 +107,12 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ## J005
 
-- Status: in-review
+- Status: completed
 - Objective: Publish aligned Linux x64 release1.1.2 containing the verified Claude context-handoff corrections
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
-- Blocker: Exact-candidate artifact/host validation, independent source review and CI required before publication.
-- Next step: Commit and verify the retained1.1.2 candidate, then publish only verified new assets without moving main or changing prior releases.
+- Blocker: None.
+- Next step: None; closed by operator decision 2026-11-06: obsolete, superseded by later releases (current v1.7.0).
 
 ### Acceptance
 
@@ -122,5 +122,6 @@ This coordinator-owned plan records reported progress, not execution permission 
 
 ### Evidence
 
+- Closed without implementation by operator decision 2026-11-06: release 1.1.2 was never published from this job; later releases supersede it.
 - jobs/J005/brief-r1.md
 - tooling/.local/bun-release-delivery/release-1.1.2-root.txt

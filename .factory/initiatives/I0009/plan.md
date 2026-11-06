@@ -403,12 +403,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J033
 
-- Status: blocked
+- Status: completed
 - Objective: Establish one authoritative editable model configuration for current isSWF work without divergent sources or silent changes to approved selections.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J033/brief-r2.md)
-- Blocker: Historical planning registration superseded by independent I0013/J001; do not execute or use this entry as a second implementation plan.
-- Next step: Follow ../I0013/plan.md and its J001 brief; operator selected one native authority per host. Original J033 checkpoint paths and spent planner allocation preserved.
+- Blocker: None.
+- Next step: None; closed by operator decision 2026-11-06: superseded by I0013/J001.
 
 ### Acceptance
 
@@ -418,6 +418,7 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ### Evidence
 
+- Closed without implementation by operator decision 2026-11-06: superseded by I0013/J001; this entry was never executed.
 - Current operator explicitly requests resolving model configuration after rejecting multiple divergent sources; coordinator inspected native setup boundaries, host guides and installer/default consumers.
 - jobs/J033/brief-r1.md records scope, initial reassessment, reading map and finite actors; no implementation or model call at registration.
 
