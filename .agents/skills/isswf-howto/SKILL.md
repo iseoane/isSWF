@@ -43,7 +43,7 @@ If nothing fits, say so and suggest the coordinator. Do not invent a skill or fl
 Look at the target project only if the answer depends on it:
 
 - Active state directory: `.isswf/` (current) or `.factory/` (legacy). If both exist, the state is ambiguous; tell the operator to reconcile before work, as [project-state.mjs](../../../tools/project-state.mjs) refuses to choose.
-- `<state>/project-setup.md`: whether the project is set up. If it is missing, `isswf-setup` comes first.
+- `<state>/project-setup.md`: whether the project is set up. If it is missing, the answer is `/skill:isswf-setup` (Pi) or `/isswf:isswf-setup` (Claude Code), run first.
 - `<state>/install.json` present: the project is pinned to an installed release, so route inspection through its pinned launcher ([installation](../../../docs/installation.md#run-with-the-projects-version)). Not relevant to host-native delegation. Do not run the launcher from here.
 
 Mention state in the answer only when it matters. Reading these files is allowed; changing them is not.
@@ -52,6 +52,6 @@ Mention state in the answer only when it matters. Reading these files is allowed
 
 Every answer ends with one copyable prompt, in the operator's language, that the operator can send to the coordinator. It states the goal, the target (issue, path or initiative), the delivery scope the operator wants, and any limit such as local-only or prepare-only. Take only the scope the operator has stated; a prompt that asks for work does not grant more than its words say. Mark anything you could not verify as an assumption.
 
-The coordinator prompt is the default ending. When the routed skill's own text says it can be used directly (re-read its opening lines first), also offer that as an option: `/skill:isswf-<name>` in Pi or `/isswf:isswf-<name>` in Claude Code. The skill's text confirms direct use for isswf-debug, isswf-e2e, isswf-issue, isswf-observability, isswf-performance, isswf-pr, isswf-retrospective, isswf-review, isswf-security, isswf-tdd, isswf-writing and isswf-understanding. Do not offer direct use for the coordinator, [isswf-setup](../isswf-setup/SKILL.md), [isswf-triage](../isswf-triage/SKILL.md) or [isswf-interview](../isswf-interview/SKILL.md), or for the feature-to-PR flow: their text does not say so, and they go through the coordinator.
+The coordinator prompt is the default ending. When the routed skill's own text says it can be used directly (re-read its opening lines first), also offer that as an option: `/skill:isswf-<name>` in Pi or `/isswf:isswf-<name>` in Claude Code. The skill's text confirms direct use for isswf-debug, isswf-e2e, isswf-issue, isswf-observability, isswf-performance, isswf-pr, isswf-retrospective, isswf-review, isswf-security, isswf-tdd, isswf-writing, isswf-understanding, [isswf-setup](../isswf-setup/SKILL.md) (runs only on an explicit operator request) and [isswf-interview](../isswf-interview/SKILL.md) (when the operator asks for it). Do not offer direct use for the coordinator, [isswf-triage](../isswf-triage/SKILL.md) or the feature-to-PR flow: their text does not say so, and they go through the coordinator.
 
 Complete when you have answered the question, linked each file you relied on, and given the prompt. If a file is unreadable or the state is ambiguous, say what is missing and give the prompt that resolves it.

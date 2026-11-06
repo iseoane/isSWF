@@ -12,7 +12,7 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-coordinator` | Concretar un encargo, elegir el siguiente paso, coordinar trabajo autorizado y explicar el resultado. |
 | `isswf-writing` | Crear, revisar o mejorar documentos con el enfoque adecuado para humanos o agentes, en cualquier proyecto. |
 | `isswf-understanding` | Comprender un tema o sistema, aclarar una explicación o aprender mediante práctica y feedback. |
-| `isswf-howto` | Preguntar qué skill, rol o flujo encaja con tu situación y obtener un prompt para el coordinador o un comando directo de la skill, sin iniciar trabajo. |
+| `isswf-howto` | Averiguar qué skill, rol o flujo encaja con tu situación y obtener un prompt para el coordinador o un comando directo de la skill, sin iniciar trabajo. |
 | `isswf-pr` | Preparar descripciones de PR y actualizaciones autorizadas con evidencias y evaluación obligatoria del riesgo. |
 | `isswf-issue` | Reportar bugs independientes o proponer funcionalidades y mejoras, con destino verificado y `needs-triage` obligatorio. |
 | `isswf-triage` | Clasificar issues existentes en briefs nativos: listas para un agente, faltan datos, duplicadas o requieren investigación técnica. |
