@@ -15,9 +15,11 @@ For each selected journey record:
 | Expected result | A concrete visible state, durable effect or meaningful absence. |
 | Driver and command | Existing harness and the exact local/CI invocation. |
 | Test and evidence | The executable test path and where its results are captured. |
-| Coverage limit | Any stubbed boundary, unsupported platform or unexecuted optional stage. |
+| Coverage limit | Any stubbed boundary, unsupported platform, unexecuted optional stage or known gotcha, such as a precondition the seed data lacks. |
 
 Keep this information with the project's test documentation, following its conventions. A run request needs no new map if the existing suite is sufficient.
+
+A journey whose seed data lacks a precondition reports a failure, not a skip or a silent pass, and the reason is recorded in the Coverage limit field.
 
 ## Avoid false confidence
 
@@ -37,4 +39,4 @@ When adding authorized CI coverage, use the actual installed runtime and support
 
 ## State what happened
 
-Report generated-but-unrun tests as draft coverage. For executed tests state the candidate, command, environment, result, evidence and cleanup. A local pass is not remote CI, cross-platform support or independent review. Retain failures and missing prerequisites. A new candidate invalidates affected observations; rerun those checks before declaring the revised suite verified.
+Report generated-but-unrun tests as draft coverage. For executed tests state the candidate, command, environment, result, evidence and cleanup. When a journey was proven in a stand-in environment (container instead of VM, local stack instead of remote), list each setup step the stand-in performed that the real target will not; those steps stay unverified. A local pass is not remote CI, cross-platform support or independent review. Retain failures and missing prerequisites. A new candidate invalidates affected observations; rerun those checks before declaring the revised suite verified.

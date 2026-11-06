@@ -14,6 +14,8 @@ Use a PTY when prompts, raw input, terminal sizing or TTY detection are part of 
 
 Start the actual service against isolated test data and wait for a usable public endpoint. Drive documented HTTP operations with known fixtures, and read back the expected state or verify a forbidden effect through the proper interface. An HTTP 200 response alone does not prove the requested operation happened.
 
+A dry-run or test mode is not trusted by its name. Observe what it actually skips by checking files, network traffic and git refs before relying on it as a safe boundary.
+
 For a journey spanning CLI, API and a UI, bind the same test identity, environment and data throughout. Avoid unrelated fixture instances that make individual assertions pass without verifying the transition. Separate optional external/provider checks from ordinary offline CI and state exactly which boundary each substitute leaves untested.
 
 ## Ownership and teardown
