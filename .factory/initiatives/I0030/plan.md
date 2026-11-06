@@ -13,12 +13,12 @@ When an interview gap has no clear answer, `isswf-interview` offers two or three
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Add an alternatives branch for open gaps to isswf-interview.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements; one semantic review round; PR and CI.
+- Next step: Operator integration decision on the PR.
 
 ### Acceptance
 
@@ -30,4 +30,5 @@ When an interview gap has no clear answer, `isswf-interview` offers two or three
 
 ### Evidence
 
-- None.
+- Worker commits 3341937 and 265bb77 (correction cycle 1). Independent semantic review round 1: pass/pass with S1-S3; round 2 (operator-authorized) on delta 265bb77: pass/pass.
+- Coordinator rerun on the closing candidate: check-docs, host-portability and git diff --check exit 0. Static review only; no agent interview evaluation ran.
