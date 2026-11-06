@@ -76,7 +76,7 @@ Keep this development checkout separate from any installed release. Follow `docs
 
 ## Project-only release procedure
 
-For an explicit isSWF repository release request, read `.pi/skills/project-release/SKILL.md` and its release procedure. This repository-maintenance skill is project-only, separate from `.agents/skills/` factory resources, and is not part of the distributed factory package. It records repeatable gates, not standing publication, installation or migration permission.
+For an explicit isSWF repository release request, read `.claude/skills/project-release/SKILL.md` and its release procedure (Claude Code: `/project-release`; Pi loads the thin entry `.pi/skills/project-release/SKILL.md`, which points to the same files). This repository-maintenance skill is project-only, separate from `.agents/skills/` factory resources, and is not part of the distributed factory package. It records repeatable gates, not standing publication, installation or migration permission.
 
 ## Verification and delivery
 
