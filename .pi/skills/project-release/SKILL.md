@@ -17,6 +17,7 @@ Use only for an explicit isSWF repository release request. For preparation-only 
 - Preserve old tags, assets, installed pins, model choices and unique evidence. Never force or overwrite to fix a collision.
 - Do not install compilers, publish npm, deploy Pages or update consumer projects as a release side effect.
 - Require exact-candidate review, CI and inspected actual archives; green badges or platform reports alone are insufficient.
+- Some CI steps (for example `tests/source-host-isolation.mjs` and `tests/host-prerequisites.mjs`) are not part of `tools/check-quality.mjs`; a green local suite does not replace exact-head CI.
 
 ## Decision Gates
 
