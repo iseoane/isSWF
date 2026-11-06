@@ -15,7 +15,7 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 | `isswf-pr` | Preparar descripciones de PR y actualizaciones autorizadas con evidencias y evaluación obligatoria del riesgo. |
 | `isswf-issue` | Reportar bugs independientes o proponer funcionalidades y mejoras, con destino verificado y `needs-triage` obligatorio. |
 | `isswf-triage` | Clasificar issues existentes en briefs nativos: listas para un agente, faltan datos, duplicadas o requieren investigación técnica. |
-| `isswf-interview` | Entrevista opcional que hace una pregunta cada vez, con una respuesta recomendada (dos o tres alternativas con sus contrapartidas cuando el hueco está abierto), para cerrar huecos de alcance, intención de producto o aceptación. |
+| `isswf-interview` | Entrevista opcional que hace una pregunta cada vez, con una respuesta recomendada (dos o tres alternativas con sus contrapartidas y una recomendación cuando el hueco está abierto), para cerrar huecos de alcance, intención de producto o aceptación. |
 | `isswf-e2e` | Crear, ejecutar o mantener pruebas ejecutables de recorridos críticos de usuario, con Playwright u otro controlador adecuado para la interfaz real. |
 | `isswf-debug` | Reproducir defectos, investigar causas y devolver un diagnóstico causal o incertidumbre explícita. |
 | `isswf-review` | Revisar un candidato exacto frente a Standards y Spec con evidencias proporcionadas al riesgo. |

@@ -15,7 +15,7 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 | `isswf-pr` | Prepare PR descriptions and authorized updates with evidence and a mandatory risk assessment. |
 | `isswf-issue` | Report independent bugs or propose features and improvements, with verified routing and mandatory `needs-triage`. |
 | `isswf-triage` | Triage existing issues into native briefs: ready for an agent, needs information, duplicate, or technical grounding. |
-| `isswf-interview` | Opt-in interview that asks one question at a time, with a recommended answer (two or three alternatives with trade-offs for open gaps), to close gaps in scope, product intent or acceptance. |
+| `isswf-interview` | Opt-in interview that asks one question at a time, with a recommended answer (two or three alternatives with trade-offs and a recommendation for open gaps), to close gaps in scope, product intent or acceptance. |
 | `isswf-e2e` | Create, run or maintain executable tests of critical user journeys, with Playwright or another driver suitable for the real interface. |
 | `isswf-debug` | Reproduce defects, investigate causes and return a causal diagnosis or explicit uncertainty. |
 | `isswf-review` | Review an exact candidate against Standards and Spec with proportionate evidence. |

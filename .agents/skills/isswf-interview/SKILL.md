@@ -23,7 +23,7 @@ Walk the gaps in dependency order, so that an earlier answer can settle or remov
 - Give a recommended answer and its reason, so the operator can confirm quickly.
 - Wait for the answer before asking the next question.
 
-A gap is open when sources do not yield an answer, or when the operator says they are undecided. For an open gap, replace the single recommended answer with two or three alternatives, each with its main trade-off, and mark one as your recommendation with its reason. This keeps the operator choosing among concrete options instead of designing from scratch. Do not offer alternatives when one answer is clearly better or already derivable; use the single recommended answer. Still ask only this one question, and do not batch alternatives for several gaps.
+A gap is open when neither the sources nor a clearly better option settle it, or when the operator says they are undecided. For an open gap, replace the single recommended answer with two or three alternatives, each with its main trade-off, and mark one as your recommendation with its reason. This keeps the operator choosing among concrete options instead of designing from scratch. If the operator is undecided but one option is clearly better, give the single recommended answer and name why it is clearly better. Still ask only this one question, and do not batch alternatives for several gaps.
 
 There is no fixed question count. Ask as many questions as needed to close the specification and design and to resolve every doubt that would otherwise require an assumption. Stop when no gap remains, or as soon as the operator stops the interview (for example, "enough, decide"). Do not reopen answered questions unless a later answer contradicts them.
 
@@ -31,8 +31,8 @@ There is no fixed question count. Ask as many questions as needed to close the s
 
 Record the clarified specification in the initiative's canonical plan (`<state>/initiatives/<ID>/plan.md`), so it stays documented and complete and later planning and briefs are prepared from it. Briefs link that record instead of being the only place it lives. Do not create a separate plan or status store:
 
-- Mark operator answers as `confirmed by operator`.
-- When the operator stops the interview, record every remaining point as an explicit `assumption` with the recommended answer (for an open gap, the recommended alternative) that will be applied. A chosen alternative is `confirmed by operator`.
+- Mark operator answers, including a chosen alternative, as `confirmed by operator`.
+- When the operator stops the interview, record every remaining point as an explicit `assumption` with the recommended answer (for an open gap, the recommended alternative) that will be applied.
 - Add new domain terms to both `GLOSSARY.md` and `GLOSSARY.es.md` when the assignment authorizes those edits; otherwise list them as pending.
 
 Return the confirmed points, the assumptions, any pending glossary terms and any question still open. The coordinator then continues its normal planning with this outcome.
