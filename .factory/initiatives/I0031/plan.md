@@ -4,16 +4,21 @@ Type: enhancement
 
 ## Objective and authority
 
-Add an operator-invoked `isswf-howto` skill that answers "how do I ... with isSWF" questions. It routes to the right skill, role or guide, links the canonical file, checks the project state that changes the answer, and hands the operator a prompt to send to the coordinator without starting the work. Inspired by mattpocock `ask-matt` and Cursor pstack `poteto-help`. Operator request 2026-11-05 ("2. Ok"; "de momento crea las iniciativas"). This plan records preparation only.
+Add an operator-invoked `isswf-howto` skill that answers "how do I ... with isSWF" questions. It routes to the right skill, role or guide, links the canonical file, checks the project state that changes the answer, and hands the operator a prompt to send to the coordinator without starting the work. Inspired by mattpocock `ask-matt` and Cursor pstack `poteto-help`. Operator request 2026-11-05 ("2. Ok"; "de momento crea las iniciativas"). Start authorized 2026-11-06 (feature-to-PR, no merge).
+
+## Decisions
+
+- confirmed by operator (2026-11-06): when a routed skill's own text supports direct use, the answer also offers its direct invocation (`/skill:isswf-<name>` in Pi, `/isswf:isswf-<name>` in Claude Code); the coordinator prompt stays the default ending.
+- confirmed by operator (2026-11-06): a second review round and a second correction cycle were authorized.
 
 ## J001
 
-- Status: pending
+- Status: completed
 - Objective: Create and register the isswf-howto skill for Pi and Claude Code.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting an explicit operator start instruction; preparation only.
-- Next step: Operator starts implementation, for example with a feature-to-PR start.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: None.
+- Next step: Operator integration decision on the PR (REVIEW.md: touches tools/factory-package.mjs and tools/build-release.mjs).
 
 ### Acceptance
 
@@ -27,4 +32,6 @@ Add an operator-invoked `isswf-howto` skill that answers "how do I ... with isSW
 
 ### Evidence
 
-- None.
+- Worker commits 8655090 (rebased to 4c2fb6e), 93d9b35 (cycle 1: installed-package links, real pin check, triage row, direct use) and 5679c33 (cycle 2: setup and interview direct use).
+- Independent semantic review: round 1 fail (F1 unpackaged routes, F2 empty pin check); round 2 fail (R2-F3 setup/interview exclusion); narrow check on 5679c33 pass/pass.
+- Full suite exit 0 on 93d9b35 (worker); check-docs, host-portability and git diff --check exit 0 on 5679c33 (coordinator). Coordinator found 0 missing relative links from the skill directory.
