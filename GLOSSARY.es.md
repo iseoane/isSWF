@@ -6,6 +6,10 @@ Términos para conversar sobre el producto, sus trabajos y sus entregas. El mism
 
 ## Lenguaje
 
+**Factoría de software**:
+isSWF en su conjunto: una factoría asistida por IA donde los agentes ejecutan y las personas deciden. Es un marco de gobierno para el desarrollo de software con agentes que divide el trabajo en encargos pequeños y revisables, elige la verificación según el riesgo y exige evidencias verificables; el operador conserva las decisiones de producto y de integración.
+_Avoid_: pipeline, porque implica etapas fijas obligatorias; factoría autónoma, porque implica que el trabajo arranca o se integra sin el operador.
+
 **Operador**:
 La persona que define prioridades, autoriza encargos y acepta entregas.
 _Avoid_: cliente cuando se habla de quien dirige la factory.

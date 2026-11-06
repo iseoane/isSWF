@@ -6,6 +6,10 @@ Terms for discussing the product, its work, and its deliveries. Use the same lan
 
 ## Language
 
+**Software factory**:
+isSWF as a whole: an AI-assisted factory where agents execute and people decide. It is a governance framework for agentic software development that splits work into small, reviewable assignments, selects verification by risk and requires verifiable evidence; the operator keeps product and integration decisions.
+_Avoid_: pipeline, which implies fixed mandatory stages; autonomous factory, which implies work starts or merges without the operator.
+
 **Operator**:
 The person who sets priorities, authorises assignments, and accepts deliveries.
 _Avoid_: customer when referring to the person directing the factory.
