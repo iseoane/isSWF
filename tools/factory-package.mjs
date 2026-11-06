@@ -82,7 +82,7 @@ const e2ePayloadPaths = [
   ".agents/skills/isswf-e2e/references/cli-and-api.md",
   ".agents/skills/isswf-e2e/references/test-quality.md",
 ];
-const taskSkills = ["debug", "review", "retrospective", "tdd", "security", "performance", "observability", "triage", "interview"];
+const taskSkills = ["debug", "review", "retrospective", "tdd", "security", "performance", "observability", "triage", "interview", "howto"];
 const taskPayloadPaths = {
   debug: [".agents/skills/isswf-debug/SKILL.md"],
   review: [".agents/skills/isswf-review/SKILL.md"],
@@ -93,6 +93,7 @@ const taskPayloadPaths = {
   observability: [".agents/skills/isswf-observability/SKILL.md"],
   triage: [".agents/skills/isswf-triage/SKILL.md"],
   interview: [".agents/skills/isswf-interview/SKILL.md"],
+  howto: [".agents/skills/isswf-howto/SKILL.md"],
 };
 const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";

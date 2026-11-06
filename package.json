@@ -27,6 +27,7 @@
     ".agents/skills/isswf-observability",
     ".agents/skills/isswf-triage",
     ".agents/skills/isswf-interview",
+    ".agents/skills/isswf-howto",
     ".claude-plugin",
     ".factory/models.json",
     ".factory/templates",
@@ -61,7 +62,8 @@
       "./.agents/skills/isswf-performance",
       "./.agents/skills/isswf-observability",
       "./.agents/skills/isswf-triage",
-      "./.agents/skills/isswf-interview"
+      "./.agents/skills/isswf-interview",
+      "./.agents/skills/isswf-howto"
     ]
   }
 }
