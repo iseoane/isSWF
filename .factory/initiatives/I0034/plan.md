@@ -13,12 +13,12 @@ Implement the structural improvements proposed by the 2026-11-06 session retrosp
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Implement retrospective proposals P1-P5 as structural checks and tooling.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements; coordinator verifies; review per brief; PR and CI.
+- Next step: Operator integration decision on the PR.
 
 ### Acceptance
 
@@ -31,4 +31,7 @@ Implement the structural improvements proposed by the 2026-11-06 session retrosp
 
 ### Evidence
 
-- None.
+- Worker commits 50d5998 (P1), a3c0cb1 (P4), b05058c (P3), b961fe8 (P5), a704bc8 (P2); full suite exit 0 on a704bc8 (worker).
+- Criterion-to-assertion map (coordinator-checked; implementer tests are not independent judgment): P1 -> `tests/initiative-status.mjs` CRLF assertion. The parser-only test missed the `isswf-status` heading split; coordinator fix c233e35, and the old `isswf-status` fails that assertion (coordinator negative control); the real I0034 plan in CRLF reports observed. P4 -> `tests/host-portability.mjs` packaged link check, negative control with a `docs/en/reference.md` link fails. P3 -> `tooling/quality/host-checks.mjs`, local run PASS/SKIPPED, a failing host check exits 1. P5 -> `tests/workflow-citations.mjs`, ambiguous-match negative control fails; double application is covered by the `--write` assertion. P2 -> `tests/diagnostic-task.mjs` margin assertion, cap 70000 negative control fails.
+- P2 independent semantic review round 1: pass/pass; suggestions S1 (oversized fixture tied to the cap) and S2 (document the diagnostic cap in `docs/model-routing.md`) applied in 3fcbfa0.
+- Coordinator reran initiative-dependencies, plan-records, host-portability, workflow-citations, diagnostic-task, workflow-diagrams, initiative-status and check-docs: exit 0. ESLint and Knip were not run locally (dependencies absent); CI runs them.
