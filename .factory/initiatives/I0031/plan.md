@@ -4,16 +4,16 @@ Type: enhancement
 
 ## Objective and authority
 
-Add an operator-invoked `isswf-howto` skill that answers "how do I ... with isSWF" questions. It routes to the right skill, role or guide, links the canonical file, checks the project state that changes the answer, and hands the operator a prompt to send to the coordinator without starting the work. Inspired by mattpocock `ask-matt` and Cursor pstack `poteto-help`. Operator request 2026-11-05 ("2. Ok"; "de momento crea las iniciativas"). This plan records preparation only.
+Add an operator-invoked `isswf-howto` skill that answers "how do I ... with isSWF" questions. It routes to the right skill, role or guide, links the canonical file, checks the project state that changes the answer, and hands the operator a prompt to send to the coordinator without starting the work. Inspired by mattpocock `ask-matt` and Cursor pstack `poteto-help`. Operator request 2026-11-05 ("2. Ok"; "de momento crea las iniciativas"). Start authorized 2026-11-06 (feature-to-PR, no merge).
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: Create and register the isswf-howto skill for Pi and Claude Code.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting an explicit operator start instruction; preparation only.
-- Next step: Operator starts implementation, for example with a feature-to-PR start.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: None.
+- Next step: Worker implements; full suite; one semantic review round; PR and CI.
 
 ### Acceptance
 
