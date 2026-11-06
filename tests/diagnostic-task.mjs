@@ -88,7 +88,7 @@ try {
   await json(grantFile,{...grant,inputSha:missingInput,jobSha256:hash(await readFile(join(project,'diagnostic.json')))});
   await assert.rejects(prepareDiagnosis({...request,inputSha:missingInput}), /committed-regular-file-required/u);
   assert.deepEqual(await readdir(store), []);
-  await writeFile(join(project,'oversized.md'),'x'.repeat(66000));
+  await writeFile(join(project,'oversized.md'),'x'.repeat(maxBundleBytes + 1));
   await json(join(project,'diagnostic.json'),{...job,contextPaths:['oversized.md']});
   const oversizedInput = commit();
   await json(grantFile,{...grant,inputSha:oversizedInput,jobSha256:hash(await readFile(join(project,'diagnostic.json')))});
