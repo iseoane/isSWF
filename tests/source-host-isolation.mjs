@@ -17,6 +17,10 @@ if (process.argv[3] === '--probe') {
   console.log(JSON.stringify({ skills: await Promise.all(skills.map(async skill => ({ name: skill.name, path: await realpath(skill.filePath) }))), diagnostics }));
 } else {
   const report = JSON.parse(await readFile(join(root, 'platform-report.json'), 'utf8'));
+  const pluginSkills = JSON.parse(await readFile(join(source, '.claude-plugin/plugin.json'), 'utf8')).skills;
+  const piSkills = JSON.parse(await readFile(join(source, 'package.json'), 'utf8')).pi.skills;
+  assert.equal(piSkills.length, pluginSkills.length, 'Pi and Claude manifests must register the same factory skills');
+  const factorySkillCount = pluginSkills.length;
   const base = join(root, 'source-isolation'), home = join(base, 'home'), project = join(base, 'source'), neighbour = join(base, 'neighbour'), unrelated = join(base, 'unrelated');
   await mkdir(base);
   for (const path of [home, project, neighbour, unrelated]) await mkdir(path);
@@ -65,13 +69,13 @@ if (process.argv[3] === '--probe') {
   assert.deepEqual(await readFile(settingsPath), configured, 'Repeat must be byte-identical');
   const isolated = probe(project);
   assert.deepEqual(isolated.diagnostics, []);
-  assert.equal(isolated.skills.filter(skill => skill.name.startsWith('isswf-')).length, 17, 'All seventeen factory source skills, including source-only triage, remain available');
+  assert.equal(isolated.skills.filter(skill => skill.name.startsWith('isswf-')).length, factorySkillCount, 'All factory source skills registered in plugin.json, including source-only triage, remain available');
   const sourcePrefix = await realpath(join(project, '.agents/skills'));
   for (const skill of isolated.skills.filter(skill => skill.name.startsWith('isswf-'))) assert.ok(skill.path.startsWith(sourcePrefix));
   assert.ok(isolated.skills.some(skill => skill.name === 'unrelated-fixture'));
   for (const observed of [probe(neighbour), probe(project, true)]) {
     assert.deepEqual(observed.diagnostics, []);
-    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, 17);
+    assert.equal(observed.skills.filter(skill => skill.name.startsWith('isswf-')).length, factorySkillCount);
     assert.ok(observed.skills.some(skill => skill.name === 'unrelated-fixture'));
   }
   assert.deepEqual(await readFile(join(home, 'pi/settings.json')), globalPi, 'User settings remain unchanged');
@@ -104,9 +108,9 @@ if (process.argv[3] === '--probe') {
   const inline = run(claude, ['--plugin-dir', project, 'plugin', 'details', 'isswf']);
   assert.match(inline, /Source: isswf@inline/u);
   assert.match(inline, /Description: isolated-source-fixture/u);
-  assert.match(inline, /Skills \(17\)/u);
+  assert.ok(inline.includes(`Skills (${factorySkillCount})`), `Claude plugin details list ${factorySkillCount} skills`);
   assert.deepEqual(await readFile(join(home, 'claude/settings.json')), globalClaude);
-  const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'seventeen factory source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
+  const result = { status: 'PASS', platform: process.platform, revision: report.revision, checks: ['Pi collision positive control', 'Pi preview and byte-idempotent local filtering', 'all plugin.json factory source skills and unrelated skills preserved', 'neighbour and untrusted scopes unchanged', 'malformed, conflicting and non-source target refusal', 'custom package-manager command never executed', 'Claude shared project disable', 'Claude explicit inline source discovery', 'unrelated plugin and user settings preserved'], limits: 'Native resource selection only, no model prompts or delegation. Project trust and explicit overrides remain host-controlled; not a sandbox.' };
   await writeJSON(join(root, 'source-isolation-report.json'), result);
   console.log(JSON.stringify(result, null, 2));
 }
