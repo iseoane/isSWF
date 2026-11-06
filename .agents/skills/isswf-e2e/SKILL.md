@@ -27,6 +27,8 @@ Choose a small set of journeys from the assignment's risk and user value. Record
 
 Keep the journey map with the existing suite documentation. If none exists, use a short README beside the new tests, not a second project plan. A useful row names the journey, test file, preconditions, expected result and known coverage limits. Cover the entry points the requirement promises, not just the easiest path.
 
+Confirm the checkout builds and starts as-is before writing journeys. If it does not, report the exact failure, or repair it only within the grant. Scaffolding for an irrelevant missing asset is marked as test scaffolding and removed at teardown. Launch must reach a usable state from an empty data directory, including migrations and seed data.
+
 This step ends when the selected journeys have observable expectations and a feasible driver, or the affected journey has a concrete blocker.
 
 ## 3. Choose a driver for each surface
@@ -53,6 +55,8 @@ For a new test, demonstrate sensitivity to a relevant wrong result when feasible
 This step ends with independently runnable tests and their fixtures. If the user requested execution only, keep the existing suite and proceed to the next step.
 
 ## 5. Execute and prepare CI
+
+Before driving, run a read-only preflight: the running instance is the expected candidate/build, this run owns the port and data, and authentication and fixtures are valid. This separates environment failures from product regressions. If two instances cannot run side by side, say so and refuse to drive a shared or user instance rather than risk corrupting it.
 
 Run the exact retained tests against the identified candidate and actual target environment. Record commands, versions, platform, exit status, external substitutions and evidence paths. Capture the action and outcome, including relevant side effects, not just a final screenshot or a server's successful startup.
 
