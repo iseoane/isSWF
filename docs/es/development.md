@@ -62,6 +62,14 @@ Cuando un brief selecciona TDD, cada commit RED de comportamiento contiene solo 
 
 Cuando Bun está disponible, la comprobación portable también construye e instala un paquete Bun real en directorios temporales. Prueba las exportaciones de paquetes externos similares a un SDK y sus dependencias transitivas, las tareas `.mjs` con rutas absolutas y relativas, el traspaso al binario fijado y, cuando está disponible, Bubblewrap en Linux con un SDK simulado. Sin Bun, la prueba de artefacto indica SKIP. Asigna a `ISSWF_TEST_BUN` la ruta de un compilador para exigirla; `ISSWF_TEST_BUN_WORKER=1` exige además la comprobación del aislamiento. CI instala el compilador Bun fijado y exige las pruebas de artefacto y aislamiento Linux. En local, `ISSWF_TEST_BUN_TMPDIR` permite ubicar los datos de prueba binarios grandes en otro disco sin cambiar la política de la raíz de evidencias de diagnóstico. Estos datos de prueba no ejecutan Claude ni proveedores reales.
 
+CI también ejecuta dos comprobaciones de host fuera de la comprobación portable: `tests/host-prerequisites.mjs` y `tests/source-host-isolation.mjs`. Ejecuta ambas en local con un solo comando:
+
+```bash
+node tooling/quality/host-checks.mjs
+```
+
+El comando nunca instala dependencias ni construye la salida de plataforma. Imprime `SKIPPED` con el motivo cuando falta un requisito previo y termina con código distinto de cero solo si falla una comprobación que se ejecutó, de modo que un SKIPPED no equivale a un resultado correcto. La comprobación de aislamiento necesita las dependencias de `tooling/host-tests` (`npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund`) y que `ISSWF_PLATFORM_ROOT` apunte a una salida nueva de `tests/platform-package.mjs`.
+
 Algunas comprobaciones utilizan los archivos actuales, mientras que las del paquete generado desde un commit utilizan una revisión de Git. Que la ejecución termine bien no significa que se hayan empaquetado todos los cambios sin commit ni probado todas las integraciones con modelos reales.
 
 Si necesitas las herramientas separadas de análisis estático y todavía no están instaladas, prepara las dependencias de desarrollo:

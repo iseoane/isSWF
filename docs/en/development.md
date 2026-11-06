@@ -62,6 +62,14 @@ When a brief selects TDD, each behavioral RED commit is test-only and intentiona
 
 When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` tasks, pinned binary handoff and, when available, Linux Bubblewrap with a synthetic SDK. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it; `ISSWF_TEST_BUN_WORKER=1` also requires the sandbox check. CI installs the pinned Bun compiler and requires both the artifact and Linux sandbox checks. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk without changing the diagnostic evidence root policy. These fixtures do not execute Claude or real providers.
 
+CI also runs two host checks outside the portable check: `tests/host-prerequisites.mjs` and `tests/source-host-isolation.mjs`. Run both locally with one command:
+
+```bash
+node tooling/quality/host-checks.mjs
+```
+
+The command never installs dependencies or builds the platform output. It prints `SKIPPED` with the reason when a prerequisite is missing and exits nonzero only when a check that ran fails, so a skip is not a pass. The isolation check needs `tooling/host-tests` dependencies (`npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund`) and `ISSWF_PLATFORM_ROOT` pointing to a fresh `tests/platform-package.mjs` output.
+
 Some checks use the current files, while committed-source packaging checks use a Git revision. A passing run does not mean every uncommitted file has been packaged or every live model integration has been tested.
 
 If you need the separate static-analysis tools and they are not installed, prepare the development dependencies:
