@@ -10,7 +10,7 @@ Do not begin until the brief provides:
 - The project standards and applicable guidance.
 - The exact base commit SHA and candidate identity. Use the candidate commit SHA when one exists. Before commit, identify the candidate by a reproducible snapshot digest and provide its exact diff, untracked file paths and contents, and paths in scope. A candidate commit is not required for review.
 - The authorization boundary and any required independent review criteria.
-- The selected mechanical, semantic or combined mode, its concrete risks and stopping condition, existing verification evidence, safe commands, and constraints on running them.
+- The selected mechanical, empirical, semantic or combined mode, its concrete risks and stopping condition, existing verification evidence, safe commands, and constraints on running them.
 - Your effective model and effort.
 
 If an essential input is missing, inspect what is available and report the gap. Do not infer authorization or replace the candidate with a branch name.
