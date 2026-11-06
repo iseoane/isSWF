@@ -4,7 +4,7 @@ Type: enhancement
 
 ## Objective and authority
 
-When an interview gap has no clear answer, `isswf-interview` offers two or three alternatives with trade-offs and one recommendation, instead of a single recommended answer. The interview stays convergent: each gap still ends as a confirmed decision or a recorded assumption. Operator request 2026-11-05 ("lo de la propuesta de ideas recomendada me gusta"; "de momento crea las iniciativas"). This plan records preparation only.
+When an interview gap has no clear answer, `isswf-interview` offers two or three alternatives with trade-offs and one recommendation, instead of a single recommended answer. The interview stays convergent: each gap still ends as a confirmed decision or a recorded assumption. Operator request 2026-11-05 ("lo de la propuesta de ideas recomendada me gusta"; "de momento crea las iniciativas"). Start authorized 2026-11-06 (feature-to-PR, no merge).
 
 ## Decisions
 
@@ -13,12 +13,12 @@ When an interview gap has no clear answer, `isswf-interview` offers two or three
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: Add an alternatives branch for open gaps to isswf-interview.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting an explicit operator start instruction; preparation only.
-- Next step: Operator starts implementation, for example with a feature-to-PR start.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: None.
+- Next step: Worker implements; one semantic review round; PR and CI.
 
 ### Acceptance
 
