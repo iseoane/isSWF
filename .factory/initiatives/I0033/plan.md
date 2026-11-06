@@ -34,12 +34,12 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Objective: Add an empirical verification mode and make the coordinator always weigh executable evidence before selecting semantic review.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements; independent reviewer checks the policy change.
+- Next step: Operator decides whether to keep, integrate or discard the branch. Follow-up for next release: update docs/diagrams/workflow.json:650-651 and regenerate workflow.html (EN/ES), plus README.
 
 ### Acceptance
 
@@ -51,4 +51,5 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 
 ### Evidence
 
-- None.
+- Worker commits b39e4e8 and 053d845 (correction cycle 1). Independent reviewer round 1: fail (F1 blocking, S1-S3, I1, I2); round 2 on delta 053d845: Standards pass, Spec pass. I2 deferred by operator to next release.
+- Coordinator rerun on 053d845: review-guidance, host-portability, check-docs and git diff --check exit 0.
