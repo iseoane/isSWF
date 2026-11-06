@@ -21,19 +21,20 @@ Open the canonical file before you name or quote it. Never answer from memory, a
 
 | Situation | Resource to read and link |
 | --- | --- |
-| Skill list and purposes | Each `.agents/skills/isswf-*/SKILL.md` frontmatter `description`, or `docs/en/reference.md` |
+| Skill list and purposes | Each `../isswf-*/SKILL.md` frontmatter `description` |
 | Start, resume or plan an assignment | [isswf-coordinator](../isswf-coordinator/SKILL.md) |
 | Build a feature through to a PR | [feature-delivery.md](../../roles/references/feature-delivery.md) |
 | Unclear scope or acceptance before planning | [isswf-interview](../isswf-interview/SKILL.md) |
 | Unknown cause or intermittent failure | [isswf-debug](../isswf-debug/SKILL.md) |
 | Review an exact change | [isswf-review](../isswf-review/SKILL.md) |
-| PR text or an independent bug or feature report | [isswf-pr](../isswf-pr/SKILL.md), [isswf-issue](../isswf-issue/SKILL.md), [isswf-triage](../isswf-triage/SKILL.md) |
+| PR text or an independent bug or feature report | [isswf-pr](../isswf-pr/SKILL.md), [isswf-issue](../isswf-issue/SKILL.md) |
+| Assess an existing issue | [isswf-triage](../isswf-triage/SKILL.md) |
 | Tests, security, performance, telemetry | [isswf-e2e](../isswf-e2e/SKILL.md), [isswf-tdd](../isswf-tdd/SKILL.md), [isswf-security](../isswf-security/SKILL.md), [isswf-performance](../isswf-performance/SKILL.md), [isswf-observability](../isswf-observability/SKILL.md) |
 | Documents or agent instructions | [isswf-writing](../isswf-writing/SKILL.md) |
 | Close-out lessons | [isswf-retrospective](../isswf-retrospective/SKILL.md) |
 | Prepare or update a project | [isswf-setup](../isswf-setup/SKILL.md) |
-| Which role does what | `.agents/roles/*.md` |
-| Inspect work without starting agents | `docs/en/operations.md` |
+| Which role does what | [worker](../../roles/worker.md), [reviewer](../../roles/reviewer.md), [planner](../../roles/planner.md), [researcher](../../roles/researcher.md), [diagnostician](../../roles/diagnostician.md), [delivery](../../roles/delivery.md), [retrospective](../../roles/retrospective.md) |
+| Inspect work without starting agents, or run with the project's pinned version | [installation](../../../docs/installation.md#run-with-the-projects-version) |
 
 If nothing fits, say so and suggest the coordinator. Do not invent a skill or flow.
 
@@ -41,14 +42,16 @@ If nothing fits, say so and suggest the coordinator. Do not invent a skill or fl
 
 Look at the target project only if the answer depends on it:
 
-- Active state directory: `.isswf/` (current) or `.factory/` (legacy). If both exist, the state is ambiguous; tell the operator to reconcile before work, as `tools/project-state.mjs` refuses to choose.
+- Active state directory: `.isswf/` (current) or `.factory/` (legacy). If both exist, the state is ambiguous; tell the operator to reconcile before work, as [project-state.mjs](../../../tools/project-state.mjs) refuses to choose.
 - `<state>/project-setup.md`: whether the project is set up. If it is missing, `isswf-setup` comes first.
-- Installed pin and launcher: `docs/en/operations.md` describes the pinned launcher. Do not run it from here.
+- `<state>/install.json` present: the project is pinned to an installed release, so route inspection through its pinned launcher ([installation](../../../docs/installation.md#run-with-the-projects-version)). Not relevant to host-native delegation. Do not run the launcher from here.
 
 Mention state in the answer only when it matters. Reading these files is allowed; changing them is not.
 
 ## 4. End with a prompt for the coordinator
 
 Every answer ends with one copyable prompt, in the operator's language, that the operator can send to the coordinator. It states the goal, the target (issue, path or initiative), the delivery scope the operator wants, and any limit such as local-only or prepare-only. Take only the scope the operator has stated; a prompt that asks for work does not grant more than its words say. Mark anything you could not verify as an assumption.
+
+The coordinator prompt is the default ending. When the routed skill's own text says it can be used directly (re-read its opening lines first), also offer that as an option: `/skill:isswf-<name>` in Pi or `/isswf:isswf-<name>` in Claude Code. The skill's text confirms direct use for isswf-debug, isswf-e2e, isswf-issue, isswf-observability, isswf-performance, isswf-pr, isswf-retrospective, isswf-review, isswf-security, isswf-tdd, isswf-writing and isswf-understanding. Do not offer direct use for the coordinator, [isswf-setup](../isswf-setup/SKILL.md), [isswf-triage](../isswf-triage/SKILL.md) or [isswf-interview](../isswf-interview/SKILL.md), or for the feature-to-PR flow: their text does not say so, and they go through the coordinator.
 
 Complete when you have answered the question, linked each file you relied on, and given the prompt. If a file is unreadable or the state is ambiguous, say what is missing and give the prompt that resolves it.
