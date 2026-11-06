@@ -10,6 +10,7 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 
 - confirmed by operator: improve `isswf-e2e` instead of adding a pstack-style generator skill; the output stays runnable tests.
 - confirmed by operator: work stays on local branch `feat/e2e-verification-practices`; no push or integration.
+- confirmed by operator (2026-11-06): add an empirical review mode so executable evidence can replace semantic review in application repositories; the coordinator always weighs it, without making E2E mandatory.
 - assumption: only uncovered practices are added; already covered ones are not restated.
 
 ## J001
@@ -30,3 +31,24 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 ### Evidence
 
 - Worker commit 8f5188f added gaps 1-7; coordinator moved the build-as-is check to step 2. `node tests/host-portability.mjs`, `node tooling/quality/check-docs.mjs` and `git diff --check` exit 0 (coordinator rerun). No independent review; branch is local only.
+
+## J002
+
+- Status: in-progress
+- Objective: Add an empirical verification mode and make the coordinator always weigh executable evidence before selecting semantic review.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Blocker: None.
+- Next step: Worker implements; independent reviewer checks the policy change.
+
+### Acceptance
+
+- `review.md` defines an empirical mode: a behavior change whose acceptance criteria are all observable through executed tests or journeys with demonstrated sensitivity closes without a semantic reviewer, unless risk or an explicit requirement needs independent judgment.
+- Semantic review stays required for claims execution cannot establish (trust boundaries, permissions, shared contracts, design decisions, data migrations, methodology text).
+- The coordinator always records in the brief whether existing tests or `isswf-e2e` journeys cover acceptance before choosing semantic review, without making E2E mandatory.
+- Reviewer profile and `isswf-review` skill name the empirical mode consistently.
+- `tests/review-guidance.mjs`, `tests/host-portability.mjs` and `check-docs` pass.
+
+### Evidence
+
+- None.
