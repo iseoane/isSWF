@@ -53,3 +53,22 @@ Strengthen `isswf-e2e` with the verification practices from the pstack `create-v
 
 - Worker commits b39e4e8 and 053d845 (correction cycle 1). Independent reviewer round 1: fail (F1 blocking, S1-S3, I1, I2); round 2 on delta 053d845: Standards pass, Spec pass. I2 deferred by operator to next release.
 - Coordinator rerun on 053d845: review-guidance, host-portability, check-docs and git diff --check exit 0.
+
+## J003
+
+- Status: in-progress
+- Objective: Make empirical closure in the coordinator conditional on recorded negative controls and a criterion-to-assertion map.
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Worker implements; reviewer checks the delta; operator reruns trial E.
+
+### Acceptance
+
+- The coordinator text states that empirical closure requires, recorded in the brief or job evidence, an executed negative control per relevant test and a criterion-to-assertion map; otherwise the uncovered criterion goes to semantic review.
+- No duplication of the full rule: the coordinator names the two preconditions and links `review.md`.
+- `tests/review-guidance.mjs`, `tests/host-portability.mjs`, `check-docs` and `git diff --check` pass.
+
+### Evidence
+
+- None.
