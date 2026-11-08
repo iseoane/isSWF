@@ -249,13 +249,19 @@ try {
             assert.doesNotMatch(text, /JSON/u, label);
           }
         }
+        // A supplied binding that lacks a namespace is a launch defect, not an unbound Agent-tool dispatch.
+        if (label === 'empty object') for (const result of results) assert.doesNotMatch(textOf(result).join(' '), /Agent-tool reviewer is never bound/u, label);
         if (label === 'malformed JSON') assert.match(textOf(results[0]).join(' '), /launch binding is not valid JSON/u, label);
       }, options);
     }
     // Only the content binding is bound: identity and diff stay unavailable while content works.
     await withClient({ 'isswf.git-evidence.content/1': bindings['isswf.git-evidence.content/1'] }, async client => {
-      assert.equal((await client.call('identity', {})).isError, true);
-      assert.equal((await client.call('diff', {})).isError, true);
+      for (const name of ['identity', 'diff']) {
+        const result = await client.call(name, {});
+        assert.equal(result.isError, true);
+        assert.match(textOf(result).join(' '), /binding is missing/u, name);
+        assert.doesNotMatch(textOf(result).join(' '), /Agent-tool reviewer is never bound/u, name);
+      }
       assert.equal((await client.call('content', { slot: 'candidate', path: 'tracked.txt' })).isError, undefined);
     });
   });
