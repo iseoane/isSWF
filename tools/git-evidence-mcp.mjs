@@ -6,8 +6,11 @@ import { captureBinding, checkArguments, diffChunkParameters, invokeEvidence } f
 // Thin stdio MCP server for the Claude reviewer route. The launching process supplies the trusted binding in
 // ISSWF_GIT_EVIDENCE_BINDINGS (the three Pi namespaces); it is captured once here and never re-read.
 const cli = join(dirname(fileURLToPath(import.meta.url)), 'git-evidence.mjs');
-const missing = 'trusted launch binding is missing';
-const bindings = Object.fromEntries(['identity', 'diff', 'content'].map(operation => [operation, captureBinding(process.env.ISSWF_GIT_EVIDENCE_BINDINGS, operation, missing)]));
+const missing = 'not bound for this dispatch (an Agent-tool reviewer is never bound); review the exact diff supplied in the review handoff';
+// Claude passes an empty or literal "${ISSWF_GIT_EVIDENCE_BINDINGS}" value when the launcher did not set it; both mean no binding.
+const raw = process.env.ISSWF_GIT_EVIDENCE_BINDINGS;
+const supplied = raw === '' || raw === '${ISSWF_GIT_EVIDENCE_BINDINGS}' ? undefined : raw;
+const bindings = Object.fromEntries(['identity', 'diff', 'content'].map(operation => [operation, captureBinding(supplied, operation, missing)]));
 delete process.env.ISSWF_GIT_EVIDENCE_BINDINGS;
 
 const maxFrameBytes = 65536;
