@@ -50,6 +50,7 @@ This table is the single place that says when an optional resource applies. Each
 
 | Resource | Trigger |
 | --- | --- |
+| [isswf-writing](../isswf-writing/SKILL.md) | The work creates, revises or reviews documentation, including technical guides, skills or agent instructions. |
 | [isswf-interview](../isswf-interview/SKILL.md) | The specification has gaps: a new feature, user-visible behavior change, concept missing from the glossary or unwritten acceptance. |
 | [researcher](../../roles/researcher.md) | A technical fact that affects the solution needs research beyond reading the target code. |
 | [design principles](../../roles/references/design-principles.md) | The work changes data shapes, contracts, module boundaries or responsibilities. |
