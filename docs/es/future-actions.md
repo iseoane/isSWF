@@ -17,7 +17,3 @@ Probar la verificación formal con un invariante de alto riesgo, tras el modo de
 Permitir que un proyecto destino declare umbrales numéricos de calidad para el código cambiado en su `REVIEW.md` o en su registro de configuración: una puntuación de complejidad como CRAP, duplicación y tests de mutación diferenciales. El worker los ejecutaría antes de la entrega y el revisor comprobaría los resultados. Costes: nuevas dependencias de desarrollo fijadas, ejecuciones de mutación lentas con ruido de mutantes equivalentes y umbrales que se pueden manipular. Probarlo primero en `tools/`. Fuente: [unclebob/ub-mode](https://github.com/unclebob/ub-mode) (3da62bf3) y [unclebob/swarm-forge](https://github.com/unclebob/swarm-forge) (f4f5fbca).
 
 Ofrecer una asignación opcional de refactorización cuando los tests pasen, que el coordinador seleccionaría para funcionalidades grandes, con el comportamiento fijado por los tests existentes. Costes: una llamada adicional al modelo y más cambios en el código. Nunca sería una fase obligatoria. Fuente: los mismos repositorios.
-
-## Mantenimiento
-
-Acordar un procedimiento de conservación y limpieza antes de borrar runtimes antiguos, reservas o evidencias. La desinstalación no realiza actualmente una limpieza automática de esos datos.
