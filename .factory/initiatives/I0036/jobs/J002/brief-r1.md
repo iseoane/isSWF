@@ -21,6 +21,17 @@ Optional methodology stays optional, but every resource whose trigger applies to
 2. **Brief records the decision**: in `.factory/templates/job-brief.md` add a "Methodology considered" field: for each catalog resource whose trigger applies, "selected" or "not selected: <reason>"; resources whose trigger does not apply are omitted. Add the same item to the coordinator's brief content list (section 4). State that this is a decision record, not a requirement to load anything.
 3. **Reviewer check**: in `.agents/roles/references/review.md` (near Required methodology or Standards) one sentence: a resource whose catalog trigger clearly applies but is neither selected nor declined in the brief is a minor finding. It is not a blocker and does not make the resource mandatory.
 
+## Methodology considered
+
+Dogfooding this job's own rule: every resource whose trigger applies is a recorded decision.
+
+- isswf-writing (agent instructions and templates are edited): **selected**; evidence: concise text in the most specific place, no duplicated guidance.
+- design-principles (the brief template and review rule are shared contracts read by coordinator, worker and reviewer on Pi and Claude): **selected**; evidence: one owner for the trigger catalog, other places link to it.
+- verification-principles (acceptance needs non-test evidence: the decision record must be observable in a real brief): **selected**; evidence: this brief itself carries the new section, and the worker reports whether the template field and catalog would let it be written.
+- isswf-tdd: not selected: documentation-only change, no behavioral code; existing content tests are the check.
+- isswf-interview: not selected: the operator decision is explicit and no product gap remains.
+- execution-principles, isswf-debug, isswf-e2e, isswf-security, isswf-performance, isswf-observability, researcher: trigger does not apply; omitted under the new rule (listed here once only for this first use).
+
 ## Exclusions
 
 - No new skill, role, tool, dependency or mandatory method. Do not change what TDD/E2E/review modes require. Keep text short. Pi and Claude share these files; no host-specific change unless a host guide repeats the trigger list.
