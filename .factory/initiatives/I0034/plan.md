@@ -18,7 +18,7 @@ Implement the structural improvements proposed by the 2026-11-06 session retrosp
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Operator integration decision on the PR.
+- Next step: None; merged in #236 (head 51f39a5) on 2026-11-06.
 
 ### Acceptance
 
