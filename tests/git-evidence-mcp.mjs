@@ -225,6 +225,7 @@ try {
   await check('missing, literal-placeholder, malformed or invalid bindings fail closed per tool', async () => {
     const variants = [
       ['unset', undefined, {}],
+      ['empty', undefined, { raw: '' }],
       ['unexpanded placeholder', undefined, { raw: '${ISSWF_GIT_EVIDENCE_BINDINGS}' }],
       ['malformed JSON', undefined, { raw: '{not json' }],
       ['empty object', {}, {}],
@@ -239,13 +240,28 @@ try {
           assert.equal(result.isError, true, label);
           assert.match(textOf(result).join(' '), /unavailable/u, label);
         }
-        if (label !== 'relative repository') assert.match(textOf(results[0]).join(' '), /binding is missing|invalid|JSON/u, label);
+        if (label !== 'relative repository') assert.match(textOf(results[0]).join(' '), /binding is missing|invalid|JSON|not bound/u, label);
+        // An Agent-tool dispatch starts the server with no binding; it must say so, not report a JSON parse error.
+        if (['unset', 'empty', 'unexpanded placeholder'].includes(label)) {
+          for (const result of results) {
+            const text = textOf(result).join(' ');
+            assert.match(text, /not bound for this dispatch.*exact diff supplied in the review handoff/u, label);
+            assert.doesNotMatch(text, /JSON/u, label);
+          }
+        }
+        // A supplied binding that lacks a namespace is a launch defect, not an unbound Agent-tool dispatch.
+        if (label === 'empty object') for (const result of results) assert.doesNotMatch(textOf(result).join(' '), /Agent-tool reviewer is never bound/u, label);
+        if (label === 'malformed JSON') assert.match(textOf(results[0]).join(' '), /launch binding is not valid JSON/u, label);
       }, options);
     }
     // Only the content binding is bound: identity and diff stay unavailable while content works.
     await withClient({ 'isswf.git-evidence.content/1': bindings['isswf.git-evidence.content/1'] }, async client => {
-      assert.equal((await client.call('identity', {})).isError, true);
-      assert.equal((await client.call('diff', {})).isError, true);
+      for (const name of ['identity', 'diff']) {
+        const result = await client.call(name, {});
+        assert.equal(result.isError, true);
+        assert.match(textOf(result).join(' '), /binding is missing/u, name);
+        assert.doesNotMatch(textOf(result).join(' '), /Agent-tool reviewer is never bound/u, name);
+      }
       assert.equal((await client.call('content', { slot: 'candidate', path: 'tracked.txt' })).isError, undefined);
     });
   });
