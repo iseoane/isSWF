@@ -8,8 +8,33 @@ Adopt three low-cost practices from `unclebob/ub-mode` (HEAD 3da62bf3, 2026-11-0
 
 ## Decisions
 
+- confirmed by operator (2026-11-08): methodology selection must be explicit and recorded now, not deferred ("esto es básico en la factoría"); resources stay optional.
+
 - confirmed by operator: implement "attack the premise" (2), the empty-return test check (5) and "build the lever" (6).
 - confirmed by operator: project-declared numeric quality gates (1) and an optional refactor assignment (3) go to future actions, EN/ES.
+
+## J002
+
+- Status: completed
+- Objective: Make optional methodology selection a recorded decision: one trigger catalog, a brief line per triggered resource, reviewer check.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Blocker: None.
+- Next step: Integration through the feature PR, then release through `/project-release`.
+
+### Acceptance
+
+- The coordinator has one compact trigger catalog for optional skills and references; vague triggers (verification principles) are concrete.
+- The brief template records, for every resource whose trigger applies, selected or not selected with a one-line reason; resources stay optional.
+- The reviewer reports, as a minor finding, a triggered resource that the brief neither selected nor declined.
+- Existing tests and check-docs pass; no new mandatory method.
+
+### Evidence
+
+- Worker commits 2158f44 (coordinator trigger table and brief content item), fc2765b (job-brief `Methodology considered` field), 29e6713 (reviewer minor-finding rule), acadf97 (isswf-writing row), 8acc411 (worker.md links to the table), a33f4cb (review suggestions: interview bullet links to the table, E2E always-weigh restored), 752d4ed (table applies to every role; planner links to it). Attempt record [A001](jobs/J002/A001.md).
+- Dogfood: this job's brief carries its own `Methodology considered` section; applying it exposed the missing isswf-writing row, now added.
+- Checks pass on 752d4ed: worker-methodology, worker-method-evidence, host-portability, review-guidance, reviewer-task, diagnostic-task, planner-task, release-package, bun-release, check-docs, git diff --check (worker-reported).
+- Independent semantic review round 1 (supplied diff a695b76..8acc411): Standards pass, Spec pass, no blocking findings; suggestions 1-2 applied in a33f4cb; suggestion 3 is the intended narrowing. Delta 8acc411..752d4ed inspected by the coordinator (mechanical; no further independent review).
 
 ## J001
 

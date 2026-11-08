@@ -12,6 +12,8 @@ Before reviewing, consume the canonical [isswf-review skill](../../skills/isswf-
 | Any required procedure skipped, unreadable or not supplied | Review is incomplete. Mark Standards as inconclusive unless a demonstrated violation already fails it; preserve supported findings on either axis. The aggregate cannot pass. |
 | Only an optional reference, tool or check is unavailable | Its absence does not invalidate otherwise sufficient scoped evidence. Name a concrete uncovered risk before escalating. |
 
+When a resource's [catalog trigger](../../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) clearly applies but the brief neither selects nor declines it, record a minor Standards finding. It is not a blocker and does not make the resource mandatory.
+
 Limited budget or access does not waive required methodology or authorize another actor. Report the missing resource and stop the affected review; do not attach the omission as a harmless limitation to a complete pass. State which required resources were actually consumed, whether read or supplied in full, and which remain missing. Do not infer content loading from a configured skill name or invocation alone, or demand a transcript of every internal action.
 
 ## Choose sufficient verification
