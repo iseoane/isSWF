@@ -40,7 +40,7 @@ Report the exact checkout and baseline, changed paths, outcome against each acce
 
 When sensitivity or mutation results are used as substitute evidence for missing RED, retain the harness and run log in committed `tests/` evidence or ignored `tooling/.local/<job>/`, never only disposable scratch space. Link both artifact paths from the attempt/review record, naming the archived commit and an unmutated baseline run alongside the injected change and result. This retention does not turn retrospective evidence into a red-first cycle or waive the reviewer's assessment.
 
-Before handing back, write this report to the next unused `<state>/initiatives/<initiative>/jobs/<job>/A<nnn>.md` attempt record listed in [durable work](../../docs/durable-work.md); never overwrite an existing attempt, and a same-ID continuation writes the next number. Keep the hand-back short and point to that file, because a continued child's second hand-back may be refused.
+Before handing back, write this report to the next unused `<state>/initiatives/<initiative>/jobs/<job>/A<nnn>.md` attempt record, created from the attempt template that [durable work](../../docs/durable-work.md) references; never overwrite an existing attempt, and a same-ID continuation writes the next number. Write it in the coordinator's assigned state directory of the primary checkout named in the brief, not inside a separate candidate worktree's tree. This applies on every host; on Pi the record complements the `pi-subagents` output, it does not replace it. Keep the hand-back short and point to that file, because a continued child's second hand-back may be refused.
 
 ## Dispatch configuration
 
