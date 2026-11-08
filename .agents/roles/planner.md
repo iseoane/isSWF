@@ -12,7 +12,7 @@ Read [planning guidance](references/planning.md) for proposal structure. For ass
 
 Ground the objective in the supplied specification, brief, and relevant existing evidence, preserving any assigned document pins. Reconcile product intent, constraints, dependencies, verification, and delivery expectations. Keep the proposed work within the grant.
 
-For domain language, interfaces or responsibility boundaries, consult the supplied [design principles](references/design-principles.md); preserve the target glossary and decision-record conventions.
+When its [trigger](../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) applies, consult the supplied [design principles](references/design-principles.md) for domain language, interfaces and responsibility boundaries; preserve the target glossary and decision-record conventions.
 
 Choose a level of planning proportional to uncertainty and scope. Clear, bounded work can take a short path. Ask the operator only for unresolved decisions that require their authority or product judgment; investigate technical facts from the provided local sources. Do not require an interview, design exercise, or TDD by default.
 

@@ -46,7 +46,7 @@ Classify what this assignment needs and briefly explain why:
 
 ### Optional methodology triggers
 
-This table is the single place that says when an optional resource applies. Each stays optional: when its trigger applies, select it or decline it with a reason in the brief's `Methodology considered` field. Omit resources whose trigger does not apply.
+This table is the single place that says when an optional resource applies. The coordinator applies it to every brief it prepares, for any role (worker, planner, researcher, diagnostician, reviewer); each role uses the resources supplied in its brief. Each stays optional: when its trigger applies, select it or decline it with a reason in the brief's `Methodology considered` field. Omit resources whose trigger does not apply.
 
 | Resource | Trigger |
 | --- | --- |
