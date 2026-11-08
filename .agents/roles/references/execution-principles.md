@@ -21,7 +21,7 @@ These are caller decisions, not a native dependency scheduler, global lock, or n
 **Trigger:** replacing an internal API whose consumers are known. **Action:** migrate internal callers and remove the old API in the same verifiable unit. **Limit:** public APIs, persisted formats, and external integrations need compatibility or versioning policy and authorization; a temporary adapter with a defined removal point may be necessary.
 
 ## Automate and encode when justified
-**Trigger:** a procedure repeats or manual verification leaves insufficient evidence. **Action:** create the smallest tool or check that justifies its cost and can be rerun. Encode recurring mechanical mistakes in structure or checks; keep judgment, exceptions, and proportionate context in instructions. **Limit:** do not add scripts, frameworks, types, or lints as a ritual or turn a contextual rule into a universal mandate.
+**Trigger:** a procedure repeats or manual verification leaves insufficient evidence. **Action:** create the smallest tool or check that justifies its cost and can be rerun; do one unit by hand first, then compare the tool output against it before applying the tool broadly. Encode recurring mechanical mistakes in structure or checks; keep judgment, exceptions, and proportionate context in instructions. **Limit:** do not add scripts, frameworks, types, or lints as a ritual or turn a contextual rule into a universal mandate.
 
 ## Operational risk
 

@@ -165,6 +165,10 @@ Construir un conjunto de regresión del revisor con los defectos que una revisi�
 
 Probar la verificación formal con un invariante de alto riesgo, tras el modo de revisión empírico (I0033). Un candidato es «nunca dos escritores activos sobre la misma asignación» en el ciclo de vida de los workers (`docs/local-worker-lifecycle.md`), donde caídas, reintentos y sustituciones pueden intercalarse en órdenes que los tests rara vez alcanzan. Modelarlo con un comprobador de modelos como TLA+, demostrar que la comprobación falla con una variante sin la protección y registrar qué archivos y commit cubre el modelo para que se vea cuándo queda desfasado. Antes de empezar, valorar la dependencia de desarrollo de Java/TLC y el riesgo de que el modelo se separe del código.
 
+Permitir que un proyecto destino declare umbrales numéricos de calidad para el código cambiado en su `REVIEW.md` o en su registro de configuración: una puntuación de complejidad como CRAP, duplicación y tests de mutación diferenciales. El worker los ejecutaría antes de la entrega y el revisor comprobaría los resultados. Costes: nuevas dependencias de desarrollo fijadas, ejecuciones de mutación lentas con ruido de mutantes equivalentes y umbrales que se pueden manipular. Probarlo primero en `tools/`. Fuente: [unclebob/ub-mode](https://github.com/unclebob/ub-mode) (3da62bf3) y [unclebob/swarm-forge](https://github.com/unclebob/swarm-forge) (f4f5fbca).
+
+Ofrecer una asignación opcional de refactorización cuando los tests pasen, que el coordinador seleccionaría para funcionalidades grandes, con el comportamiento fijado por los tests existentes. Costes: una llamada adicional al modelo y más cambios en el código. Nunca sería una fase obligatoria. Fuente: los mismos repositorios.
+
 ## Mantenimiento
 
 Mantener las guías bilingües, los ejemplos y las comprobaciones alineados con el código. Consultar documentos históricos cuando hagan falta sus evidencias o datos de entrada; no convertir demostraciones antiguas en el manual vigente del producto.

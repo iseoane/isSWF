@@ -37,7 +37,7 @@ Identify a committed candidate by its commit SHA. A review may run before commit
 
 ## Examine behavior and tests first
 
-After confirming the objective, candidate and review mode, read the applicable acceptance criteria and relevant tests before the implementation. Map each changed behavior to the observable result and failure path the tests protect. For documentation or deterministic transformations, use the relevant contract and preservation checks instead of inventing a test requirement.
+After confirming the objective, candidate and review mode, read the applicable acceptance criteria and relevant tests before the implementation. Map each changed behavior to the observable result and failure path the tests protect. A test that would still pass if every function under test returned nothing protects no behavior; report it as a test gap. For documentation or deterministic transformations, use the relevant contract and preservation checks instead of inventing a test requirement.
 
 Trace affected consumers and exercised assertions. A changed required test not executed on the exact candidate needs sufficient CI/coordinator evidence or inconclusive verification. Optional gaps alone do not block; required `BLOCKED` is not a pass and stays nonzero.
 
