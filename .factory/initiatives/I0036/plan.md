@@ -13,12 +13,12 @@ Adopt three low-cost practices from `unclebob/ub-mode` (HEAD 3da62bf3, 2026-11-0
 
 ## J001
 
-- Status: pending
+- Status: completed
 - Objective: Add the three practices to the shared methodology and record the two future actions.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatch.
+- Next step: Integration through the feature PR, then release through `/project-release`.
 
 ### Acceptance
 
@@ -27,3 +27,9 @@ Adopt three low-cost practices from `unclebob/ub-mode` (HEAD 3da62bf3, 2026-11-0
 - Automation guidance requires one hand-done unit first and comparison of the tool's output against it.
 - `docs/en/future-actions.md` and `docs/es/future-actions.md` record project-declared numeric quality gates and an optional refactor assignment, with source and cost/risk.
 - check-docs, host-portability and the worker/methodology tests pass.
+
+### Evidence
+
+- Worker commits 398827e (attack the premise; the existing "Cause before patch" sentence was made stricter instead of duplicated), 0b19723 (empty-return check), 1a3b200 (build the lever), eafdbf9 (future actions EN/ES). Attempt record [A001](jobs/J001/A001.md).
+- Worker-reported checks pass: check-docs, host-portability, worker-methodology, worker-method-evidence, review-guidance, reviewer-task, diagnostic-task (33065 of 98304 bytes free), documentation, release-package, bun-release, git diff --check.
+- Independent semantic review round 1 (Agent-tool reviewer, supplied diff fef2d0a..eafdbf9): Standards pass, Spec pass, no blocking findings; the Spanish terminology suggestion was applied by the coordinator.
