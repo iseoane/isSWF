@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J002/brief-r3.md)
-- Blocker: Last worker continuation returned BLOCKED with unverified partial wording; coordinator checks and independent verdict pending.
-- Next step: Last budgeted worker continuation repairs F001/F002 against accepted visible-inventory scope; then independent delta review.
+- Blocker: V002 FAIL; F001 verification route remains unsupported and correction budget2/2 exhausted. Product/one-cycle extension decision pending.
+- Next step: Operator decides installed-package version semantics versus certified full-release-only identity and permits one additional bounded correction if desired.
 
 ### Acceptance
 
@@ -112,3 +112,9 @@ Current operator "si" explicitly accepts coordinator recommendation to compare o
 Continuatione917e7c5-d4d7-4a6c-9d4f-d06d07bc9aff terminal complete observed. A003 consumed fully: BLOCKED, no final commit/checks from continuation; uncommitted skill wording retained and inspected by coordinator. F001/F002 addressed only as author claim, not closed. Coordinator focused host-portability/docs/whitespace PASS on partial wording. No new implementation edits by coordinator. Archive this partial candidate and perform committed-source packaging checks plus independent delta review within remaining review budget, not a replacement worker or extra correction. Last worker continuation2/2 consumed; reviews1/3 consumed, round2 allocated. No active writer.
 
 Known review focus: trusted verifier bootstrap and return types (verifyPackage returns root path, not version object); source-activation receipt vs full release receipt; retained loaded text vs current receipt identity; bounded inventory and unknown fallbacks. No new supported route may be invented. V001 adverse verdicts remain until independently resolved. If blocking findings remain after this review, exhausted correction budget requires a concrete operator decision before further edits/calls; do not substitute coordinator implementation or reset counts.
+
+## V002 result and required reconsideration
+
+Reviewerabda8f7f-4dca-4bdd-abfe-6407588380d5 terminal complete observed; V002 fully consumed. Standards/Spec FAIL, MEDIUM risk. F002 RESOLVED against approved bounded inventory; F001 OPEN/CHANGED: verifyPackage returns path and its source-integrity receipt has no release version, so source-materialization alternative is not the advertised release-verification route. F003 information: independently trusted verifier bootstrap not established for ordinary host installations. Full quality PASS does not close semantic failure. V001 FAIL, A003 BLOCKED retained. Budgets spent worker1+continuations2/2, reviews2/3, one review remains; no active actors. No further correction/call authorized automatically.
+
+Decision package: recommendation is an explicitly informational installed-package version advisory (including manager-installed Git packages), not certification of published-release identity. Preserve source-checkout exclusion, loaded-text capture, bounded manager inventory, unknown inputs, no candidate execution/install/update/delete; distinguish trusted managed installation metadata from publication authenticity rather than equate the two. This changes accepted provenance interpretation and requires operator decision; not yet adopted. Alternative retain full-release-only support, explicitly unknown for ordinary Git/source resources, with independently trusted verifier route still to ground. Ask whether to select informational installed-package semantics and allow exactly one extra correction continuation (25min) plus the remaining independent review; preserve cumulative counts, no reset. No new helper/runtime architecture proposed, no publication while failed.
