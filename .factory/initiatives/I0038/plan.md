@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
-- Blocker: None for bounded advisory work.
-- Next step: Worker implements J002 with unknown/unsupported cases explicit.
+- Blocker: Decide advisory inventory boundary: host-visible user/current-project installations, or all projects on the machine.
+- Next step: Operator chooses inventory boundary; then fix F001 provenance and F002 completeness within remaining correction budget.
 
 ### Acceptance
 
@@ -96,3 +96,9 @@ Worker continuation3eff876e-2e1d-4624-9e61-6aea7a42037e terminal complete observ
 Worker selected TDD for cheap metadata/source invariant only, RED72a1c3f65500f6931e7076235a3fce42c2c44706 tests-only; GREEN6a21db64b2d5631375e80a7372d3375ae393d6fe changes coordinator skill only. Coordinator replayed host-portability from exact archived RED: exit1 expected Coordinator skill must carry its release version in loaded text; exact GREEN overlay (sole delta skill) PASS. Fixture retained /tmp/isswf-j002-red-green-I52NqF, logs retained; source commit identities reconstruct it. Worker release-package RED/GREEN and full quality evidence attributed, not coordinator rerun. Coordinator current focused/docs/whitespace PASS. No runtime newer/same/older tests claimed; these are semantic instruction walkthroughs.
 
 Allocate combined independent semantic/static review1/3, no prior J002 reviews, REVIEW.md absent. Specific risks: literal maintenance/release coupling, manager Git/root provenance, first-load text versus reread, configured inventory versus installed release, once/session marker under compaction and unknown source handling. Static tests prove metadata/receipt invariant only; do not equate it to actual host/model adherence. Reviewer must decide whether accepted advisory is genuinely supported or merely always-unknown. Budget one worker + continuation1/2, review1/3 allocated, no active writer; freeze plan until review stops. No publication until required judgment/gates pass.
+
+## J002 V001 adverse result and bounded product question
+
+Reviewer9b7d21da-2915-4620-b1bf-0b07c7f29cc3 terminal complete observed; full V001 consumed. Standards FAIL, Spec FAIL, risk MEDIUM, introduced blocking F001/F002. F001 accepted technical fix: managed Git root/package number do not prove release provenance; require supported local release evidence or unknown for both running/candidate. F002 accepted: pi list inventories current user/project, not other projects' local installations; cannot claim global newest installed from visible subset. No new call dispatched; budget worker1+continuation1/2, review1/3, remaining continuation1 and reviews2. No active actors. REVIEW.md discrepancy: reviewer found readable file contrary to coordinator's earlier absence; inspect actual current file before next review, preserve finding provenance.
+
+Exact product question: Should the advisory compare only host-visible user/current-project installations (recommended bounded option), or all installations across projects on this machine (requires explicit project inventory/registry with unknown-project treatment, not arbitrary disk scanning)? Resume condition: explicit choice recorded, refine accepted scope/brief revision before last worker continuation; never silently narrow global newest claim. J003 registry/host-retention feasibility remains open independently; no update/delete done. Prior user ambiguous nO remains uninterpreted, not a permission change. Candidate not publishable as J002 complete.
