@@ -38,8 +38,14 @@ assert.match(attemptTemplate, /distinguish reading\/receipt from application[\s\
 assert.match(reviewGuidance, /### Selected-method evidence[\s\S]*under \*\*Standards\*\*[\s\S]*missing and no deviation is declared[\s\S]*inconclusive[\s\S]*unselected methods/u);
 assert.match(briefTemplate, /TDD red result before implementation[\s\S]*debug reproduction[\s\S]*E2E journey/u);
 assert.match(reviewTemplate, /Selected-method evidence assessment[\s\S]*never silent pass[\s\S]*does not waive/u);
+assert.match(reviewTemplate, /Exact diff source and consumed[\s\S]*Candidate paths reviewed/u);
 assert.match(reviewerRole, /selected-method evidence[\s\S]*separately from Spec/u);
+assert.match(reviewerRole, /unbound Agent-tool review without the exact diff[\s\S]*exact diff not supplied[\s\S]*Bound Pi\/Claude/u);
+assert.match(reviewerRole, /record its source, base, candidate, and reviewed path scope as consumed evidence/u);
 const coordinatorSkill = await readFile(join(source, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
 assert.match(coordinatorSkill, /For each selected method[\s\S]*observed failing regression before implementation[\s\S]*disclosure does not waive/u);
+assert.match(coordinatorSkill, /For an unbound Agent-tool review, the handoff must contain the exact base\/candidate diff[\s\S]*reject any complete pass or fail report[\s\S]*exact diff not supplied/u);
+const claudeHost = await readFile(join(source, '.agents/hosts/claude-code.md'), 'utf8');
+assert.match(claudeHost, /An Agent-tool reviewer is unbound[\s\S]*exact diff not supplied[\s\S]*coordinator rejects a complete verdict[\s\S]*bound Pi and Claude reviews/u);
 assert.match(actualWorker, /For each selected method[\s\S]*required observed evidence[\s\S]*retrospective red-first proof/u);
 console.log('PASS worker instructions and brief/attempt/review contracts distinguish selected-method evidence from consumption, deviations and unselected methods; assertions are static contract checks, not live reviewer behavior');

@@ -10,6 +10,7 @@
 - Brief path and exact revision:
 - Base commit SHA:
 - Candidate commit SHA, or reproducible snapshot identity:
+- Exact diff source and consumed (unbound reviews; identify supplied diff, base and candidate):
 - Candidate paths reviewed:
 - Trusted authorization reference (operator conversation or record ID, or external path; if tracked in Git, full Git SHA):
 - Reviewer profile, model, and effort:
