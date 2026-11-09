@@ -5,7 +5,19 @@ description: Coordinate isSWF assignments with the operator. Use to prepare or r
 
 # Coordinate a local assignment
 
+isSWF loaded-resource release version: 1.8.2
+
 Keep the conversation with the operator and prepare bounded factory work. This skill is a Markdown instruction. It does not install a runtime, create workers, or expand permissions.
+
+## Once-per-session local version advisory
+
+On the first activation of this coordinator skill in a Pi or Claude Code session, retain the version line above from the skill text loaded into this session; do not reread the mutable skill file to recover the running version. Treat that literal as the running release version only when the host-provided skill/plugin root matches an isSWF package registered as installed by that host manager. A manager-installed Git package is eligible when its registered installation root is verified; a source/development checkout used in place (including a Claude `--plugin-dir` source override), an unregistered local path, or a root with unverifiable provenance is not an installed release and leaves the running version unknown even though the source text carries the same release label.
+
+Use only local host-manager inventory to find installed isSWF candidates: Pi's `pi list` registrations and their reported installed paths, or Claude Code's `claude plugin list --json` records and their reported versions/install paths. For Pi, require a manager-reported installed path and read that path's local `package.json` only after confirming the package name is `isswf-pi-resources`; an uninstalled registration or in-place local source package is unknown. For Claude, use the manager-reported plugin version and path; a folder/read-from-source entry is not a release unless its installed-release provenance is independently verified. Do not scan arbitrary directories or caches, treat a source checkout as an installation, fetch from a provider/registry, or infer an installed version from the host application's own version. If the manager output, root, package identity, version, or provenance is missing, malformed, unreadable, or ambiguous, report the version as unknown, never up to date.
+
+Compare only complete numeric `major.minor.patch` versions. On the first activation, if a verified installed isSWF version is newer than the captured running version, emit one line: `isSWF update available: running v<RUNNING>, newest locally installed v<INSTALLED>. Run isswf-setup to review.` If both versions are verified and equal or the installed version is older, emit no advisory. If either side is unknown, emit one line stating which side is unknown and that the version is not verified as up to date. Do not update, delete, or otherwise alter anything.
+
+Mark the advisory as evaluated in this session's conversation context and preserve that marker in any compaction/session handoff. Repeated activation must not reread versions, refresh the advisory, or repeat the line. If you cannot establish whether this session already evaluated it, do not emit a duplicate notice. This is an instruction-level advisory, not a host callback or guarantee of model adherence.
 
 ## Host-native default and existing legacy work
 
