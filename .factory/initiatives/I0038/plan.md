@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-review
+- Status: awaiting-human
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
-- Blocker: None for explicitly approved fresh worker; repository tool preflight required before edits.
-- Next step: Fresh worker implements r4 informational semantics after read/bash preflight; independent review3, with expressly approved review4 available if needed.
+- Blocker: V003 F004 candidate eligibility still admits registered local development override; no further correction edit/call granted.
+- Next step: Request explicit bounded F004 wording correction authorization, then use remaining V004 independent review.
 
 ### Acceptance
 
@@ -142,3 +142,9 @@ Zero-model native agent get confirmed project profile .agents/hosts/pi/agents/is
 Fresh workerc32d3bbd-010a-4b32-a91c-94fe10c3a9df terminal complete observed. Full A005 consumed: actual read/bash preflight passed; one skill wording repair uncommitted. Coordinator inspected exact diff and reran host-portability/docs/whitespace PASS. Worker full quality ran while source uncommitted, so committed-source artifact portion tested previous HEAD, not new skill; coordinator commits new candidate then reruns full suite before claiming exact-candidate packaging PASS. No false retroactive worker/trace claim: A005 consumption is author self-report, not independently host-trace verified.
 
 Revised informational semantics remove receipt/helper bootstrap and no longer claim publication authenticity, preserve root/actual installed identity and source overrides; loaded literal and bounded inventory/unknown remain. V001/V002 FAIL and A003/A004 BLOCKED preserved; F001 still awaits independent disposition. REVIEW.md present and applied. Round3/4 allocated, no other calls; worker initial1+continuations3+fresh1 consumed, no active writers. Review4 remains only if affected additional judgment is useful; no new correction actor automatically granted. No publication before judgment/gates.
+
+## V003 result and F004 disposition
+
+Reviewer760eb992-3d1c-4698-9e1c-2b5ad37b2174 terminal complete observed; V003 consumed in full. Standards/Spec FAIL limited to new introduced blocking F004, risk MEDIUM. Previous F001/F003 superseded by approved informational scope, F002 resolved. F004 accepted: running-identity paragraph excludes local source overrides, but installed-candidate paragraph must explicitly apply same managed-ownership/source-override rule. Pi list includes existing local paths, so registered development9.0.0 could contaminate maximum for installed1.8.2. This is a concrete bounded textual eligibility defect, not release authenticity or Windows evidence expansion. Claude readFromFolder alone is not development proof because installed local artifact may load in place.
+
+Cumulative initialworker1+continuations3+fresh1 and reviews3/4 consumed; one review remains, no correction call/edit authorized automatically. No active actors, source unchanged after004fc8249ebfdd2e9b1c8b5eac8d3b66000a7fea. Request one narrowly bounded coordinator wording correction (no worker/model call) explicitly carrying source exclusion into candidate eligibility, focused/full relevant checks, then V004 independent exact delta. Do not change product scope, add runtime/helper or widen host authority. Prior V001/V002/V003 FAIL and A003/A004 BLOCKED preserved. No publication before pass/gates.
