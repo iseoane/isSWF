@@ -16,12 +16,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: Map where installed isSWF versions live and how the running version is identified, per host (Pi, Claude Code) and OS (Linux, Windows), native and legacy paths.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting an explicit operator start instruction.
-- Next step: Operator start decision.
+- Blocker: None for read-only grounding.
+- Next step: Dispatch read-only researcher; consume results before designing version notice/update/cleanup.
 
 ### Acceptance
 
@@ -60,3 +60,11 @@ The operator learns when a newer isSWF version is installed, updates through `is
 - Cleanup lists candidate versions and deletes only after confirmation, never the running, a registered-in-use or the immediately previous version; unknown projects block or ask.
 - Deletion uses the host manager where it owns the version; isSWF deletes only what it installed itself.
 - Tests cover a version in use, the previous version, an unknown project and a refused confirmation, on Linux and Windows CI.
+
+## Current execution grant and J001 handoff
+
+Operator current explicit start: after #247 and #222, implement I0038, then I0009/J030. #247 integrated807ee2782141eaf543a0ce6b9941b7577880f8d6. #222 PR249 headf60960f058b700c9d92ce286c8a6ac18ca1f639d independently PASS/LOW, exact-head CI42685652831 in progress. J001 read-only grounding is independent safe preparation while that technical wait runs; no installation/update/removal or version feature writer starts before reconciliation.
+
+This execution supplement supersedes historical prepare-only authority in J001 brief-r1, without changing its source questions/acceptance. Actual current base807ee2782141eaf543a0ce6b9941b7577880f8d6; branch feat/i0038-version-maintenance. Target/trusted factory /home/iseoane/Work/isSWF. Researcher uses approved openai-codex/gpt-6-luna high, current project override; one read-only researcher call, 25-minute bound, no nested delegation/provider probes/installations/mutations/remote machine access/secrets. Official public documentation and local host code/listings only; do not read auth/settings secrets or transcripts. Return durable A001 report via bound output. Remaining writers/reviews need per-unit finite allocation at dispatch, no implicit retries or unlimited actors. Verification-principles selected: cite code/path/current host/version or official source; mark Linux observation versus Windows verified/unverified. Researcher profile selected; no design yet. Any unavailable route remains an explicit unknown, not guessed safe deletion.
+
+Compact #222 handoff: canonical I0040 plan/brief and V001/V002 retained in PR249. Candidate63ba4c71dbe5bfc317df22841486e80b1d5e6df3 reviewed, final publication headf60960f058b700c9d92ce286c8a6ac18ca1f639d record-only delta. Budgets spent worker1+correction1/2, reviews2/3; no active actors. F001 resolved, Windows real-host proof deferred by explicit operator, CI does not replace live proof. Next read-only CI observation on researcher completion; merge #249 only if all exact-head gates pass, then reconcile local branch with integration before I0038 writers. No global cleanup/install/release grant. Existing I0038 per-operation update/deletion confirmations remain binding.
