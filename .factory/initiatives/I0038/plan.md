@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: blocked
+- Status: in-progress
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
-- Blocker: Authorized correction3 returned no repository tools/access; no changes applied. Additional fresh worker call requires explicit bounded extension.
-- Next step: Preserve A004 and request one fresh worker context with verified repository tools; use remaining review only after a concrete candidate exists.
+- Blocker: None for explicitly approved fresh worker; repository tool preflight required before edits.
+- Next step: Fresh worker implements r4 informational semantics after read/bash preflight; independent review3, with expressly approved review4 available if needed.
 
 ### Acceptance
 
@@ -130,3 +130,9 @@ Exactly one additional correction continuation3 authorized,25min, same existing 
 Run54b51aae-da27-49e0-800a-b6657bd11ce7 terminal complete observed. Full A004 consumed: no repository tools/access, required resources not read, no commands/changes; informational revision r4 not implemented. Native run state is complete but task outcome BLOCKED, not successful implementation. Current git status confirms only A004 report untracked, no source edits after34570998bb97dc272d3acbbebde5527e058c0044. Prior A003/FAILs retained; A004's stale uncommitted-work recollection superseded by coordinator's current clean-source observation. Cause of unavailable child tools not established; do not label harness root cause without trace evidence.
 
 Cumulative correction extensions spent3 (original2 plus explicit additional1); reviews2/3 spent, one remaining. No active actors. No automatic resume/replacement, no alternate launcher or coordinator implementation bypass. Request specific extension: one fresh isswf-worker execution using approved existing native mechanism/model, preflight actual read/bash tool mapping first,25min max; remaining independent review unchanged. Preserve installed-package semantics user already approved; no repeated product question needed. Technical blockage does not authorize publication or merge of failed candidate.
+
+## Explicit fresh-worker and extra-review extension
+
+Current operator: "si, y otra ronda extra que creo que vas a necesitar por el cambio de enfoque." Approves one FRESH isswf-worker call after A004 no-tool result and adds one review round, total4 (2 consumed,2 remaining). Preserve initial worker1+continuations3 consumed, including failed/unavailable A004; fresh worker is one additional actor/call, not a reset. No further correction actor/call granted implicitly. Fresh worker25min gpt-6-luna high, reviews25min gpt-6.1-sol medium; no paid APIs/model substitutions/nested delegation/installations. Existing informational host-visible package semantics of brief-r4 remain approved, not a new product question.
+
+Zero-model native agent get confirmed project profile .agents/hosts/pi/agents/isswf-worker.md resolves read,bash,edit,write and gpt-6-luna/high. This is declared mapping, not proof of child runtime availability; fresh worker must first perform actual read of canonical role and bash pwd/git status, report immediately if missing, no unsupported launcher substitution. Previous no-tool cause remains unconfirmed. No active actors at this checkpoint, checkout clean before coordinator receipt. Inputs freeze after checkpoint. Required reports A005, then review V003 on exact retained candidate; V004 available for affected extra judgment but no automatic correction beyond current fresh actor.
