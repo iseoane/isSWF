@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-progress
+- Status: blocked
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
-- Blocker: None for explicitly authorized informational advisory correction3; prior FAIL remains until independent review.
-- Next step: One additional worker correction for informational installed-package semantics, then remaining independent review3.
+- Blocker: Authorized correction3 returned no repository tools/access; no changes applied. Additional fresh worker call requires explicit bounded extension.
+- Next step: Preserve A004 and request one fresh worker context with verified repository tools; use remaining review only after a concrete candidate exists.
 
 ### Acceptance
 
@@ -124,3 +124,9 @@ Decision package: recommendation is an explicitly informational installed-packag
 Current operator "adelante!" approves the immediately preceding decision package: informational version of the package installed by the host manager, including managed Git installations, not certification that a version is a published release. Development/source overrides remain excluded; no execution of package code or receipt verifier for advisory. Visible host/user/current-project inventory only. This supersedes full-release receipt provenance as a prerequisite for this advisory, not any release/install/authority contract elsewhere. Publication/authenticity must not be claimed from manager metadata. Loaded-version capture, missing/ambiguous=>unknown and no mutation/network/provider remain binding.
 
 Exactly one additional correction continuation3 authorized,25min, same existing worker context/model gpt-6-luna high; remaining independent review3/3 available,25min gpt-6.1-sol medium. Cumulative worker initial1 + continuations2 already spent, reviews2 spent; no reset, no extra actors/nested delegates/installations/paid calls. Prior F001 open/V001,V002 FAIL/A003 BLOCKED remain history until new candidate verdict. Replan bounded wording/test repair only; fourth material acceptance revision not permitted without reconsideration. This decision resolves the explicit source versus installed-package scope, does not authorize runtime scanners/host wrappers.
+
+## A004 unavailable-tool execution boundary
+
+Run54b51aae-da27-49e0-800a-b6657bd11ce7 terminal complete observed. Full A004 consumed: no repository tools/access, required resources not read, no commands/changes; informational revision r4 not implemented. Native run state is complete but task outcome BLOCKED, not successful implementation. Current git status confirms only A004 report untracked, no source edits after34570998bb97dc272d3acbbebde5527e058c0044. Prior A003/FAILs retained; A004's stale uncommitted-work recollection superseded by coordinator's current clean-source observation. Cause of unavailable child tools not established; do not label harness root cause without trace evidence.
+
+Cumulative correction extensions spent3 (original2 plus explicit additional1); reviews2/3 spent, one remaining. No active actors. No automatic resume/replacement, no alternate launcher or coordinator implementation bypass. Request specific extension: one fresh isswf-worker execution using approved existing native mechanism/model, preflight actual read/bash tool mapping first,25min max; remaining independent review unchanged. Preserve installed-package semantics user already approved; no repeated product question needed. Technical blockage does not authorize publication or merge of failed candidate.
