@@ -82,6 +82,12 @@ try {
   assert.equal(resolve(serverPath), join(releaseA, 'tools/git-evidence-mcp.mjs'));
   for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.deepEqual(await readFile(join(releaseA, 'tools', name)), await readFile(join(source, 'tools', name)), `${name} ships in the release`);
   assert.equal(rootManifest.version, plugin.version);
+  const coordinatorSkill = await readFile(join(releaseA, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
+  const loadedReleaseVersion = coordinatorSkill.match(/^isSWF loaded-resource release version: (\d+\.\d+\.\d+)$/mu)?.[1];
+  assert.equal(loadedReleaseVersion, rootManifest.version, 'Release-loaded skill identity must match the packaged manifest version');
+  assert.equal(readReleaseSource(releaseA, revisionA, '.agents/skills/isswf-coordinator/SKILL.md').toString(), coordinatorSkill, 'Loaded skill identity must remain pinned to exact source bytes');
+  const materializedCoordinator = await readFile(join(markdownRoot, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
+  assert.equal(materializedCoordinator.match(/^isSWF loaded-resource release version: (\d+\.\d+\.\d+)$/mu)?.[1], rootManifest.version, 'Materialized Pi skill identity must match its package manifest');
   assert.equal(await readdir(releaseA).then(entries => entries.includes('.git')), false);
   assert.equal(Object.keys(receiptA.files).some(path => /^(?:tests|tooling|\.audit)\//u.test(path)), false);
   assert.equal(Object.keys(receiptA.files).some(path => path.startsWith('.factory/initiatives')), false);
