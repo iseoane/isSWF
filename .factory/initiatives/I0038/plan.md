@@ -29,6 +29,8 @@ The operator learns when a newer isSWF version is installed, updates through `is
 - Each claim cites a code path, official host documentation or an observed local listing; unverified Windows facts are marked unverified.
 - A recommendation of what isSWF may safely delete itself versus delegate to the host manager.
 
+### Evidence
+
 - Coordinator A002 records all host/version questions with code/official sources, Linux observations and explicit Windows unknowns; researcher A001 unavailable-tools result preserved.
 
 ## J002
@@ -76,3 +78,5 @@ Compact #222 handoff: canonical I0040 plan/brief and V001/V002 retained in PR249
 Researcher3b450d07-299b-4928-b94c-25d2e27ef4e8 terminal complete, A001 BLOCKED missing Git tools, no conclusions. Coordinator independently investigated without extra researcher call; A002 records source-backed answers and unsupported retention guarantee. J001 source-grounding complete with Windows unknowns explicitly permitted by acceptance. Initial assumption of common old-version directories disproved: Pi in-place manager and Claude aging require host-specific refusal; do not implement broad deletion. J002 is independent, read-only advisory. J003 previous-version retention has unresolved feasibility, not permission to silently narrow.
 
 J002 finite grant: one worker + up to two correction continuations, three independent reviews (six calls max), sequential checkout, 25min per actor. Approved worker gpt-6-luna high, reviewer gpt-6.1-sol medium; no paid API/install/update/delete or new model probes. Coordinator owns publication, LOW expected-head integration after exact gates. Writing + security + verification selected; design principles selected for loaded/installed identity contract. Existing static checks do not prove live host parity; combined independent semantic review. No TDD for wording-only change unless a real executable behavioral seam is selected and RED/GREEN budgeted before code. Source checkout must remain distinct from installed release. Current implementation target reconciles #222 merge before writer starts.
+
+Plan parser correction: initial J001 completion receipt omitted the required Evidence heading; status returned unknown and completion was not accepted. Fixed heading and revalidated before dispatch; no worker started from invalid plan.

@@ -4,7 +4,7 @@ Type: enhancement
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Deliver #222 native correction route and portable checkpoint inbox without expanding authority.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
@@ -43,3 +43,7 @@ Worker continuation91720ee0-7cbb-47f3-8a4d-6b10bf0bd991 terminal complete observ
 Independent reviewer5d4638be-1ac1-4b7c-be5f-4961780624a1 terminal complete observed. V002 consumed fully: F001 RESOLVED, Standards/Spec/aggregate PASS, zero new findings, LOW integration risk for documentation/static unit. Exact bound delta consumed at63ba4c71dbe5bfc317df22841486e80b1d5e6df3, digest3c8ab4f65406e739ea9254f75205b103b2c28658993b9a3cb54b7c5aa288fb78. Required resources self-reported consumed, none missing. V001 FAIL preserved. No active actors. Budgets spent initial worker1, correction1/2, review2/3. Functional bytes unchanged by these retained review receipts.
 
 Coordinator integration assessment LOW: parent/coordinator evidence and ownership procedures only, no new commands/runtime/permission grants. Plausible failure is a stranded correction or incorrect belief of consumption; explicit sender retention, safe checkpoint handoff, blocked prepublication outcome, focused checks and semantic review address it. Detection is absent receipt or provenance; revert restores prior wording but cannot undo already consumed guidance. No rollback run. Live transport/adherence remains unproved; Windows actual-run follow-up explicitly deferred by operator, not a delivery blocker. Existing Windows CI checks mechanics without models. Publication and exact-head CI pending; LOW expected-head merge authorized after gates. Next unit I0038 then I0009/J030, preserving their own bounded preflight.
+
+## Integration receipt
+
+PR249 merged2026-11-09T19:45:02Z atca755a6d173b5f12efddafeb1a6e7536f453a606. Exact headf60960f058b700c9d92ce286c8a6ac18ca1f639d Quality42685652831 SUCCESS all3 (portable/Linux/Windows). F001 resolved, V002 PASS/LOW; explicit LOW integration permission used with expected-head guard. Windows live model follow-up deferred, nonblocking and unclaimed. No active actors. Proceed I0038 then I0009/J030.
