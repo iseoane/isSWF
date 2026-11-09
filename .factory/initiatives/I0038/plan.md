@@ -35,11 +35,11 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-progress
+- Status: in-review
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J002/brief-r3.md)
-- Blocker: None; operator accepted host-visible user/current-project inventory.
+- Blocker: Last worker continuation returned BLOCKED with unverified partial wording; coordinator checks and independent verdict pending.
 - Next step: Last budgeted worker continuation repairs F001/F002 against accepted visible-inventory scope; then independent delta review.
 
 ### Acceptance
@@ -106,3 +106,9 @@ Exact product question: Should the advisory compare only host-visible user/curre
 ## Accepted J002 inventory scope revision
 
 Current operator "si" explicitly accepts coordinator recommendation to compare only installations visible to the host/user/current project, without machine-wide scanning. Material J002 acceptance revision: advisory says newest within that bounded inventory, never global newest installed. Source provenance separation remains binding. Preserve all prior FAIL/BLOCKED records; this decision does not resolve findings by itself. Brief-r3 supersedes r2 for final worker continuation2/2; review1/3 consumed, two independent reviews remain. No new actors, retries or budget reset. REVIEW.md read in full by coordinator at current checkout: person-required paths include host boundaries and packaging code. Current J002 repair must stay in skill/tests and records; if it touches listed paths record person gate rather than infer LOW merge permission overrides it. Prior source-root absence statements remain historical errors, not current evidence.
+
+## A003 partial candidate reconciliation
+
+Continuatione917e7c5-d4d7-4a6c-9d4f-d06d07bc9aff terminal complete observed. A003 consumed fully: BLOCKED, no final commit/checks from continuation; uncommitted skill wording retained and inspected by coordinator. F001/F002 addressed only as author claim, not closed. Coordinator focused host-portability/docs/whitespace PASS on partial wording. No new implementation edits by coordinator. Archive this partial candidate and perform committed-source packaging checks plus independent delta review within remaining review budget, not a replacement worker or extra correction. Last worker continuation2/2 consumed; reviews1/3 consumed, round2 allocated. No active writer.
+
+Known review focus: trusted verifier bootstrap and return types (verifyPackage returns root path, not version object); source-activation receipt vs full release receipt; retained loaded text vs current receipt identity; bounded inventory and unknown fallbacks. No new supported route may be invented. V001 adverse verdicts remain until independently resolved. If blocking findings remain after this review, exhausted correction budget requires a concrete operator decision before further edits/calls; do not substitute coordinator implementation or reset counts.
