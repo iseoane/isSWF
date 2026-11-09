@@ -35,7 +35,7 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-progress
+- Status: in-review
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
@@ -136,3 +136,9 @@ Cumulative correction extensions spent3 (original2 plus explicit additional1); r
 Current operator: "si, y otra ronda extra que creo que vas a necesitar por el cambio de enfoque." Approves one FRESH isswf-worker call after A004 no-tool result and adds one review round, total4 (2 consumed,2 remaining). Preserve initial worker1+continuations3 consumed, including failed/unavailable A004; fresh worker is one additional actor/call, not a reset. No further correction actor/call granted implicitly. Fresh worker25min gpt-6-luna high, reviews25min gpt-6.1-sol medium; no paid APIs/model substitutions/nested delegation/installations. Existing informational host-visible package semantics of brief-r4 remain approved, not a new product question.
 
 Zero-model native agent get confirmed project profile .agents/hosts/pi/agents/isswf-worker.md resolves read,bash,edit,write and gpt-6-luna/high. This is declared mapping, not proof of child runtime availability; fresh worker must first perform actual read of canonical role and bash pwd/git status, report immediately if missing, no unsupported launcher substitution. Previous no-tool cause remains unconfirmed. No active actors at this checkpoint, checkout clean before coordinator receipt. Inputs freeze after checkpoint. Required reports A005, then review V003 on exact retained candidate; V004 available for affected extra judgment but no automatic correction beyond current fresh actor.
+
+## A005 complete and review3 allocation
+
+Fresh workerc32d3bbd-010a-4b32-a91c-94fe10c3a9df terminal complete observed. Full A005 consumed: actual read/bash preflight passed; one skill wording repair uncommitted. Coordinator inspected exact diff and reran host-portability/docs/whitespace PASS. Worker full quality ran while source uncommitted, so committed-source artifact portion tested previous HEAD, not new skill; coordinator commits new candidate then reruns full suite before claiming exact-candidate packaging PASS. No false retroactive worker/trace claim: A005 consumption is author self-report, not independently host-trace verified.
+
+Revised informational semantics remove receipt/helper bootstrap and no longer claim publication authenticity, preserve root/actual installed identity and source overrides; loaded literal and bounded inventory/unknown remain. V001/V002 FAIL and A003/A004 BLOCKED preserved; F001 still awaits independent disposition. REVIEW.md present and applied. Round3/4 allocated, no other calls; worker initial1+continuations3+fresh1 consumed, no active writers. Review4 remains only if affected additional judgment is useful; no new correction actor automatically granted. No publication before judgment/gates.
