@@ -4,7 +4,7 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Deliver #222 native correction route and portable checkpoint inbox without expanding authority.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
@@ -33,3 +33,13 @@ Combined independent semantic/static review round 1, no prior review IDs, REVIEW
 ## V001 and correction cycle 1
 
 Reviewer c67db580-f685-4139-a028-c7053599a096 terminal complete observed; V001 Standards FAIL, Spec FAIL, risk MEDIUM, blocking introduced F001. Accepted: no defined sender/producer for pending correction when recipient cannot receive it. Correct sender retention and safe serialized recording/handoff, recipient reconciliation and affected summaries/template/assertions. No new transport or scope. Preserve V001 and missing Windows proof. Allocate same worker continuation correction1/2; one review1/3 consumed; no active writer before continuation. Report A002, then independent delta review. No actor/model/cost reset.
+
+## Correction 1 completion and review round 2
+
+Worker continuation91720ee0-7cbb-47f3-8a4d-6b10bf0bd991 terminal complete observed; A002 consumed. F001 claimed fixed with explicit sender retention, safe exclusive/stopped-writer recording, exact checkpoint handoff and recipient reconciliation. Candidate63ba4c71dbe5bfc317df22841486e80b1d5e6df3 includes A002 only after functionalc728dd4344441fed3543e55b610a918bc0aba272. Coordinator focused/docs/whitespace rerun PASS; worker full quality PASS on functional candidate including packaged template, native model behavior NOT_RUN. Allocate independent round2 delta review of F001 and affected risk; prior V001 FAIL retained until independent resolution. Budgets one worker + one continuation1/2, review2/3 allocated. No active writers. Windows live verification remains deferred nonblocking.
+
+## V002 delivery receipt
+
+Independent reviewer5d4638be-1ac1-4b7c-be5f-4961780624a1 terminal complete observed. V002 consumed fully: F001 RESOLVED, Standards/Spec/aggregate PASS, zero new findings, LOW integration risk for documentation/static unit. Exact bound delta consumed at63ba4c71dbe5bfc317df22841486e80b1d5e6df3, digest3c8ab4f65406e739ea9254f75205b103b2c28658993b9a3cb54b7c5aa288fb78. Required resources self-reported consumed, none missing. V001 FAIL preserved. No active actors. Budgets spent initial worker1, correction1/2, review2/3. Functional bytes unchanged by these retained review receipts.
+
+Coordinator integration assessment LOW: parent/coordinator evidence and ownership procedures only, no new commands/runtime/permission grants. Plausible failure is a stranded correction or incorrect belief of consumption; explicit sender retention, safe checkpoint handoff, blocked prepublication outcome, focused checks and semantic review address it. Detection is absent receipt or provenance; revert restores prior wording but cannot undo already consumed guidance. No rollback run. Live transport/adherence remains unproved; Windows actual-run follow-up explicitly deferred by operator, not a delivery blocker. Existing Windows CI checks mechanics without models. Publication and exact-head CI pending; LOW expected-head merge authorized after gates. Next unit I0038 then I0009/J030, preserving their own bounded preflight.
