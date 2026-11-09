@@ -4,7 +4,7 @@ Type: enhancement
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Require exact candidate diff evidence before completing an unbound Claude Code review (#247).
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
@@ -56,3 +56,7 @@ V002 reviewer fe249832-5842-4a5e-8744-633d048f7365 terminal complete observed; r
 Coordinator assessment LOW: scope is evidence requirements for unbound review, no new commands/permissions/runtime or data mutation. Plausible failure is unnecessary blocked review or an agent ignoring wording; bound-path preservation, focused contracts and independent semantic review mitigate. Missing-evidence reports expose the failure. Revert can restore wording but cannot undo reviews already performed; no rollback executed. Residual model noncompliance remains explicit. Publication and exact-head CI pending; merge only after current gates under explicit operator LOW-risk integration authorization.
 
 Next boundary: retain these record-only review receipts, publish PR and verify exact-head CI. Unchanged functional bytes preserve V002 applicability; receipt delta checked mechanically. After integration, proceed #222, then I0038, then I0009/J030 in fresh bounded contexts; no budget reset within this unit.
+
+## Integration receipt
+
+PR248 merged 2026-11-09T19:12:35Z at 807ee2782141eaf543a0ce6b9941b7577880f8d6. Exact PR head 4c70926595fe0b6d0d7ece7eee519bd423d8aa07: Quality42679218569 all three checks SUCCESS (portable, Ubuntu, Windows). LOW risk independently assessed; explicit current operator integration grant used with expected-head protection. No actors remain. Next authorized unit #222, then I0038, then I0009/J030.
