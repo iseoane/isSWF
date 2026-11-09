@@ -35,16 +35,16 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
-- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
-- Blocker: Decide advisory inventory boundary: host-visible user/current-project installations, or all projects on the machine.
-- Next step: Operator chooses inventory boundary; then fix F001 provenance and F002 completeness within remaining correction budget.
+- Brief: [brief-r3.md](jobs/J002/brief-r3.md)
+- Blocker: None; operator accepted host-visible user/current-project inventory.
+- Next step: Last budgeted worker continuation repairs F001/F002 against accepted visible-inventory scope; then independent delta review.
 
 ### Acceptance
 
-- At its first activation in a session, the coordinator reports in one line the running and the newest installed version when they differ, and suggests `isswf-setup`; nothing is updated or deleted.
+- At its first activation in a session, the coordinator reports in one line the running and the newest host-visible user/current-project installed version when they differ, and suggests `isswf-setup`; nothing is updated or deleted.
 - No provider or network call; a missing or unreadable version source is reported as unknown, never as up to date.
 - Works for Pi and Claude Code on Linux and Windows, with shared evidence where the behavior is shared.
 
@@ -102,3 +102,7 @@ Allocate combined independent semantic/static review1/3, no prior J002 reviews, 
 Reviewer9b7d21da-2915-4620-b1bf-0b07c7f29cc3 terminal complete observed; full V001 consumed. Standards FAIL, Spec FAIL, risk MEDIUM, introduced blocking F001/F002. F001 accepted technical fix: managed Git root/package number do not prove release provenance; require supported local release evidence or unknown for both running/candidate. F002 accepted: pi list inventories current user/project, not other projects' local installations; cannot claim global newest installed from visible subset. No new call dispatched; budget worker1+continuation1/2, review1/3, remaining continuation1 and reviews2. No active actors. REVIEW.md discrepancy: reviewer found readable file contrary to coordinator's earlier absence; inspect actual current file before next review, preserve finding provenance.
 
 Exact product question: Should the advisory compare only host-visible user/current-project installations (recommended bounded option), or all installations across projects on this machine (requires explicit project inventory/registry with unknown-project treatment, not arbitrary disk scanning)? Resume condition: explicit choice recorded, refine accepted scope/brief revision before last worker continuation; never silently narrow global newest claim. J003 registry/host-retention feasibility remains open independently; no update/delete done. Prior user ambiguous nO remains uninterpreted, not a permission change. Candidate not publishable as J002 complete.
+
+## Accepted J002 inventory scope revision
+
+Current operator "si" explicitly accepts coordinator recommendation to compare only installations visible to the host/user/current project, without machine-wide scanning. Material J002 acceptance revision: advisory says newest within that bounded inventory, never global newest installed. Source provenance separation remains binding. Preserve all prior FAIL/BLOCKED records; this decision does not resolve findings by itself. Brief-r3 supersedes r2 for final worker continuation2/2; review1/3 consumed, two independent reviews remain. No new actors, retries or budget reset. REVIEW.md read in full by coordinator at current checkout: person-required paths include host boundaries and packaging code. Current J002 repair must stay in skill/tests and records; if it touches listed paths record person gate rather than infer LOW merge permission overrides it. Prior source-root absence statements remain historical errors, not current evidence.

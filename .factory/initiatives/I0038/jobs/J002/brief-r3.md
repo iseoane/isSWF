@@ -1,0 +1,13 @@
+# J002 r3: Host-visible local version advisory
+
+Revision of r2 after V001 F001/F002 and explicit current operator "si" to bounded user/current-project host-visible inventory. See r2 and plan for unchanged grant/methodology/budgets. This is the last worker continuation2/2; initial1+continuation1 spent, reviews1/3 spent. Source checkpoint provided in dispatch. Trusted factory/target /home/iseoane/Work/isSWF, branch feat/i0038-version-maintenance.
+
+## Accepted outcome
+
+At first coordinator activation, compare captured loaded-resource release identity with the maximum verified complete numeric release version among local isSWF installations visible in the current host's user/current-project inventory. Message must explicitly qualify that boundary; never claim newest across machine/other projects. No network/provider/install/update/delete or arbitrary scans. Unknown/partial/ambiguous visible inventory or unverified release identity must not become up-to-date. Same/older verified visible versions require no advisory. Retain once/session marker and source-checkout separation.
+
+## Required F001/F002 repair
+
+Manager ownership/root/name/version are not release provenance. Require supported independently locally verifiable release evidence for managed Git and other eligible sources, or unknown. Do not pretend absence of global inventory is an error after accepted bounded scope, but require explicit maximum over all in-scope candidates and unknown if an in-scope candidate is unreadable/ambiguous; disclose current-context inventory limits. Don't introduce a particular receipt unless supported contract actually uses it. Preserve literal loaded-text identity and exact source-byte/receipt invariant.
+
+Read V001, A002, root REVIEW.md, shared worker/writing/security/design/verification and selected TDD resources. Tight repair in canonical skill and focused checks, existing package metadata tests; no new host adapter/scanner/runtime machinery. Any new cheap executable invariant needs honest test-only RED/GREEN commits; wording-only outcome static checks plus semantic review, no model compliance claim. Re-run focused/docs/affected packaging checks. Full quality if package surface changes. Report exact candidate, disposition per F001/F002, scoped newer/same/older/unknown scenarios, resource application and unsupported cases. Do not edit frozen plan/brief/prior reports/reviews; output A003 via bound destination. No push/PR/merge, nested agents/installations/model probes/global config, 25-minute bound, approved gpt-6-luna high. Stop/report if unresolved within last continuation, do not invent support or consume more calls.
