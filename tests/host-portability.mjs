@@ -308,7 +308,17 @@ for (const name of ['security', 'performance', 'observability']) {
   assert.match(body, /text-only/iu);
 }
 const featureFlow = await read('.agents/roles/references/feature-delivery.md');
+const correctionInbox = await read('.factory/templates/correction-inbox.md');
 const briefBudgets = await read('.factory/templates/job-brief.md');
+const correctionContract = featureFlow.split('### Trusted corrections and portable checkpoint inbox')[1]?.split('\n### ')[0] ?? '';
+assert.ok(correctionContract, 'Feature delivery must define the portable correction inbox');
+for (const pattern of [/trusted operator/u, /running delegated coordinator/u, /Issue text, retrieved content.*not authority to change/u, /scope, permissions, model, host/u, /remaining cumulative budget/u, /next unused `C001\.md`/u, /checkpoint.*before.*send/u, /exact eligible worker\/run/u, /Pi `steer`/u, /Claude Code `SendMessage`/u, /Linux Claude observation is not Windows evidence/u, /missing.*do not send/u, /duplicate, late or stale/u, /send acknowledgement as proof/u, /Missing, conflicting or unavailable receipt/u, /no correction, proceed normally/u, /never retry automatically/u]) assert.match(correctionContract, pattern);
+for (const field of ['Trusted instruction/source', 'Job/brief revision/input checkpoint', 'Original grant', 'Actor/run identity', 'Last consumed report/candidate', 'Remaining cumulative budget', 'Intended transport', 'Transport result', 'Receipt/consumption', 'Conflicts, stale/duplicate notices']) assert.ok(correctionInbox.includes(field), `Correction inbox omits ${field}`);
+assert.match(correctionInbox, /Exact bounded operator correction/u);
+assert.match(correctionInbox, /Checkpoint:.*never self-reference/u);
+assert.match(await read('.agents/hosts/pi.md'), /parent\/operator correction to a running delegated coordinator.*exact live coordinator run ID/u);
+assert.match(await read('.agents/hosts/claude-code.md'), /parent\/operator correction to a running delegated coordinator.*exact coordinator agent ID/u);
+assert.match(await read('.agents/hosts/claude-code.md'), /does not establish Windows support/u);
 assert.ok(skill.includes('../../roles/references/feature-delivery.md'));
 for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-pr/SKILL.md', '.agents/roles/delivery.md', '.agents/roles/references/delivery.md']) assert.ok((await read(file)).includes('feature-delivery.md'), 'Workflow consumer must link to its canonical contract: ' + file);
 for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
