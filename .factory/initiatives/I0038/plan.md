@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
-- Brief: [brief-r3.md](jobs/J002/brief-r3.md)
-- Blocker: V002 FAIL; F001 verification route remains unsupported and correction budget2/2 exhausted. Product/one-cycle extension decision pending.
-- Next step: Operator decides installed-package version semantics versus certified full-release-only identity and permits one additional bounded correction if desired.
+- Brief: [brief-r4.md](jobs/J002/brief-r4.md)
+- Blocker: None for explicitly authorized informational advisory correction3; prior FAIL remains until independent review.
+- Next step: One additional worker correction for informational installed-package semantics, then remaining independent review3.
 
 ### Acceptance
 
@@ -118,3 +118,9 @@ Known review focus: trusted verifier bootstrap and return types (verifyPackage r
 Reviewerabda8f7f-4dca-4bdd-abfe-6407588380d5 terminal complete observed; V002 fully consumed. Standards/Spec FAIL, MEDIUM risk. F002 RESOLVED against approved bounded inventory; F001 OPEN/CHANGED: verifyPackage returns path and its source-integrity receipt has no release version, so source-materialization alternative is not the advertised release-verification route. F003 information: independently trusted verifier bootstrap not established for ordinary host installations. Full quality PASS does not close semantic failure. V001 FAIL, A003 BLOCKED retained. Budgets spent worker1+continuations2/2, reviews2/3, one review remains; no active actors. No further correction/call authorized automatically.
 
 Decision package: recommendation is an explicitly informational installed-package version advisory (including manager-installed Git packages), not certification of published-release identity. Preserve source-checkout exclusion, loaded-text capture, bounded manager inventory, unknown inputs, no candidate execution/install/update/delete; distinguish trusted managed installation metadata from publication authenticity rather than equate the two. This changes accepted provenance interpretation and requires operator decision; not yet adopted. Alternative retain full-release-only support, explicitly unknown for ordinary Git/source resources, with independently trusted verifier route still to ground. Ask whether to select informational installed-package semantics and allow exactly one extra correction continuation (25min) plus the remaining independent review; preserve cumulative counts, no reset. No new helper/runtime architecture proposed, no publication while failed.
+
+## Explicit extra cycle and informational version decision
+
+Current operator "adelante!" approves the immediately preceding decision package: informational version of the package installed by the host manager, including managed Git installations, not certification that a version is a published release. Development/source overrides remain excluded; no execution of package code or receipt verifier for advisory. Visible host/user/current-project inventory only. This supersedes full-release receipt provenance as a prerequisite for this advisory, not any release/install/authority contract elsewhere. Publication/authenticity must not be claimed from manager metadata. Loaded-version capture, missing/ambiguous=>unknown and no mutation/network/provider remain binding.
+
+Exactly one additional correction continuation3 authorized,25min, same existing worker context/model gpt-6-luna high; remaining independent review3/3 available,25min gpt-6.1-sol medium. Cumulative worker initial1 + continuations2 already spent, reviews2 spent; no reset, no extra actors/nested delegates/installations/paid calls. Prior F001 open/V001,V002 FAIL/A003 BLOCKED remain history until new candidate verdict. Replan bounded wording/test repair only; fourth material acceptance revision not permitted without reconsideration. This decision resolves the explicit source versus installed-package scope, does not authorize runtime scanners/host wrappers.
