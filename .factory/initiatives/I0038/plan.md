@@ -16,12 +16,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: Map where installed isSWF versions live and how the running version is identified, per host (Pi, Claude Code) and OS (Linux, Windows), native and legacy paths.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: None for read-only grounding.
-- Next step: Dispatch read-only researcher; consume results before designing version notice/update/cleanup.
+- Blocker: None; Windows observations remain explicitly unverified.
+- Next step: Implement bounded J002 advisory from verified loaded/local identities; resolve J003 host-owned retention constraints separately.
 
 ### Acceptance
 
@@ -29,14 +29,16 @@ The operator learns when a newer isSWF version is installed, updates through `is
 - Each claim cites a code path, official host documentation or an observed local listing; unverified Windows facts are marked unverified.
 - A recommendation of what isSWF may safely delete itself versus delegate to the host manager.
 
+- Coordinator A002 records all host/version questions with code/official sources, Linux observations and explicit Windows unknowns; researcher A001 unavailable-tools result preserved.
+
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Depends on J001.
-- Next step: Refine the brief from J001 findings.
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
+- Blocker: None for bounded advisory work.
+- Next step: Worker implements J002 with unknown/unsupported cases explicit.
 
 ### Acceptance
 
@@ -68,3 +70,9 @@ Operator current explicit start: after #247 and #222, implement I0038, then I000
 This execution supplement supersedes historical prepare-only authority in J001 brief-r1, without changing its source questions/acceptance. Actual current base807ee2782141eaf543a0ce6b9941b7577880f8d6; branch feat/i0038-version-maintenance. Target/trusted factory /home/iseoane/Work/isSWF. Researcher uses approved openai-codex/gpt-6-luna high, current project override; one read-only researcher call, 25-minute bound, no nested delegation/provider probes/installations/mutations/remote machine access/secrets. Official public documentation and local host code/listings only; do not read auth/settings secrets or transcripts. Return durable A001 report via bound output. Remaining writers/reviews need per-unit finite allocation at dispatch, no implicit retries or unlimited actors. Verification-principles selected: cite code/path/current host/version or official source; mark Linux observation versus Windows verified/unverified. Researcher profile selected; no design yet. Any unavailable route remains an explicit unknown, not guessed safe deletion.
 
 Compact #222 handoff: canonical I0040 plan/brief and V001/V002 retained in PR249. Candidate63ba4c71dbe5bfc317df22841486e80b1d5e6df3 reviewed, final publication headf60960f058b700c9d92ce286c8a6ac18ca1f639d record-only delta. Budgets spent worker1+correction1/2, reviews2/3; no active actors. F001 resolved, Windows real-host proof deferred by explicit operator, CI does not replace live proof. Next read-only CI observation on researcher completion; merge #249 only if all exact-head gates pass, then reconcile local branch with integration before I0038 writers. No global cleanup/install/release grant. Existing I0038 per-operation update/deletion confirmations remain binding.
+
+## Grounding reconciliation and J002 grant
+
+Researcher3b450d07-299b-4928-b94c-25d2e27ef4e8 terminal complete, A001 BLOCKED missing Git tools, no conclusions. Coordinator independently investigated without extra researcher call; A002 records source-backed answers and unsupported retention guarantee. J001 source-grounding complete with Windows unknowns explicitly permitted by acceptance. Initial assumption of common old-version directories disproved: Pi in-place manager and Claude aging require host-specific refusal; do not implement broad deletion. J002 is independent, read-only advisory. J003 previous-version retention has unresolved feasibility, not permission to silently narrow.
+
+J002 finite grant: one worker + up to two correction continuations, three independent reviews (six calls max), sequential checkout, 25min per actor. Approved worker gpt-6-luna high, reviewer gpt-6.1-sol medium; no paid API/install/update/delete or new model probes. Coordinator owns publication, LOW expected-head integration after exact gates. Writing + security + verification selected; design principles selected for loaded/installed identity contract. Existing static checks do not prove live host parity; combined independent semantic review. No TDD for wording-only change unless a real executable behavioral seam is selected and RED/GREEN budgeted before code. Source checkout must remain distinct from installed release. Current implementation target reconciles #222 merge before writer starts.
