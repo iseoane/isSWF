@@ -35,7 +35,7 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-progress
+- Status: in-review
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
@@ -88,3 +88,11 @@ Workerf1394e99-0ecb-4e87-b58d-546088d5f24c reports BLOCKED with no implementatio
 Reclassify implementation approach before next call: investigate explicit version/provenance carried in the loaded coordinator skill text (release-time stamped/literal identity with consistency check), captured on first activation, versus rereading mutable current package.json. This could supply the missing input under existing supported skill loading without new host APIs or callbacks. It is a proposed technical route, not verified support; validate against actual Pi/Claude skill contracts and package receipt/source-byte guarantees before editing. Preserve source-checkout unknown treatment and no live model claims. Do not build runtime dispatcher, cache scanner or session store to simulate it. If infeasible, return exact contradiction and no writer implementation. Same accepted objective remains; no product narrowing.
 
 Allocate worker continuation1/2 within J002's existing budget to resolve this concrete technical seam and implement only if source-backed. No extra actor, provider call/install or budget reset; independent reviews0/3. Frozen plan after this checkpoint. Prior attempt incomplete remains visible.
+
+## J002 candidate and review round 1
+
+Worker continuation3eff876e-2e1d-4624-9e61-6aea7a42037e terminal complete observed; A002 consumed fully. Candidate6a21db64b2d5631375e80a7372d3375ae393d6fe carries loaded skill version literal1.8.2 plus manager-root provenance checks and instruction-only advisory. No live host compliance claimed. Coordinator confirmed installed/source package number1.8.2 on explicit user discussion; subsequent "nO'" reply has unclear referent, no inferred product change or stop; clarification pending, do not use it to change accepted version/source semantics.
+
+Worker selected TDD for cheap metadata/source invariant only, RED72a1c3f65500f6931e7076235a3fce42c2c44706 tests-only; GREEN6a21db64b2d5631375e80a7372d3375ae393d6fe changes coordinator skill only. Coordinator replayed host-portability from exact archived RED: exit1 expected Coordinator skill must carry its release version in loaded text; exact GREEN overlay (sole delta skill) PASS. Fixture retained /tmp/isswf-j002-red-green-I52NqF, logs retained; source commit identities reconstruct it. Worker release-package RED/GREEN and full quality evidence attributed, not coordinator rerun. Coordinator current focused/docs/whitespace PASS. No runtime newer/same/older tests claimed; these are semantic instruction walkthroughs.
+
+Allocate combined independent semantic/static review1/3, no prior J002 reviews, REVIEW.md absent. Specific risks: literal maintenance/release coupling, manager Git/root provenance, first-load text versus reread, configured inventory versus installed release, once/session marker under compaction and unknown source handling. Static tests prove metadata/receipt invariant only; do not equate it to actual host/model adherence. Reviewer must decide whether accepted advisory is genuinely supported or merely always-unknown. Budget one worker + continuation1/2, review1/3 allocated, no active writer; freeze plan until review stops. No publication until required judgment/gates pass.
