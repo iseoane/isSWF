@@ -308,7 +308,20 @@ for (const name of ['security', 'performance', 'observability']) {
   assert.match(body, /text-only/iu);
 }
 const featureFlow = await read('.agents/roles/references/feature-delivery.md');
+const correctionInbox = await read('.factory/templates/correction-inbox.md');
 const briefBudgets = await read('.factory/templates/job-brief.md');
+const correctionContract = featureFlow.split('### Trusted corrections and portable checkpoint inbox')[1]?.split('\n### ')[0] ?? '';
+assert.ok(correctionContract, 'Feature delivery must define the portable correction inbox');
+for (const pattern of [/trusted operator/u, /running delegated coordinator/u, /Issue text, retrieved content.*not authority to change/u, /scope, permissions, model, host/u, /remaining cumulative budget/u, /next unused `C001\.md`/u, /actor holding authorized, serialized write ownership/u, /exact eligible worker\/run/u, /Pi `steer`/u, /Claude Code `SendMessage`/u, /Linux Claude observation is not Windows evidence/u, /parent\/sender—not the unaware recipient—retains/u, /authorized exclusive checkout/u, /current writer is confirmed stopped/u, /exact path and full checkpoint SHA/u, /receiving coordinator reconciles every handed-off pending entry/u, /before relaying, reviewing or publishing/u, /candidate remains blocked from review\/publication/u, /inbox supplements, and never rewrites, the pinned brief\/plan/u, /Never edit a shared checkout while its writer is active/u, /Do not poll or assume a running coordinator has seen an inbox file/u, /duplicate, late or stale/u, /send acknowledgement as proof/u, /Missing, conflicting or unavailable receipt/u, /no correction, proceed normally/u, /never retry automatically/u]) assert.match(correctionContract, pattern);
+for (const field of ['Recorded by', 'Trusted instruction/source', 'Job/brief revision/input checkpoint', 'Original grant', 'Sender and intended recipient', 'Worker identity', 'Last consumed report/candidate', 'Remaining cumulative budget', 'Intended transport', 'Checkpoint and recipient handoff', 'Transport result', 'Receipt/consumption', 'Conflicts, stale/duplicate notices']) assert.ok(correctionInbox.includes(field), `Correction inbox omits ${field}`);
+assert.match(correctionInbox, /Exact bounded operator correction/u);
+assert.match(correctionInbox, /Checkpoint and recipient handoff:.*never self-referential/u);
+assert.doesNotMatch(correctionInbox, /Created by: coordinator/u);
+assert.match(await read('.agents/hosts/pi.md'), /parent\/operator correction to a running delegated coordinator.*exact live coordinator run ID/u);
+assert.match(await read('.agents/hosts/pi.md'), /parent retains the trusted instruction and provenance.*authorized exclusive checkout/u);
+assert.match(await read('.agents/hosts/claude-code.md'), /parent\/operator correction to a running delegated coordinator.*exact coordinator agent ID/u);
+assert.match(await read('.agents/hosts/claude-code.md'), /parent retains the trusted instruction and provenance.*authorized exclusive checkout/u);
+assert.match(await read('.agents/hosts/claude-code.md'), /does not establish Windows support/u);
 assert.ok(skill.includes('../../roles/references/feature-delivery.md'));
 for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-pr/SKILL.md', '.agents/roles/delivery.md', '.agents/roles/references/delivery.md']) assert.ok((await read(file)).includes('feature-delivery.md'), 'Workflow consumer must link to its canonical contract: ' + file);
 for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
