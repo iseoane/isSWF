@@ -11,9 +11,9 @@ Quality areas: lint, tests, build/package, dead-code and duplication are configu
 - Status: pending
 - Objective: Close the methodology handoff gap across native coordinator, worker and reviewer boundaries without making optional methods universally mandatory.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: No blocker to proposed preparation; implementation requires a separate explicit start.
-- Next step: Use coordinator analysis jobs/J001/A001.md to choose the narrow shared-validator/native-gate solution before a separately authorized implementation. Existing template plus reminders alone do not mechanically enforce selection; verify each supported dispatch route and fail-closed behavior.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: No blocker to current authorized bounded diagnosis; select implementation after reconciling the expanded symptom.
+- Next step: Operator explicitly prioritizes #254 before I0042. Reconcile A001 with the clarified defect: coordinator evaluation, justified selection/decline, application of its own resources throughout preparation/execution/delivery, child resource handoff and concrete application verification. A brief-field validator alone is insufficient. Diagnose observed omissions before choosing a bounded repair; preserve conditional methodology rather than mandatory blanket loading. Finish #255 exact-head CI boundary first; do not start I0042 ahead of this unit.
 
 ### Acceptance
 
