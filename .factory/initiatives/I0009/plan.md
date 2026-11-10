@@ -362,12 +362,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J030
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
 - Brief: [brief-r3.md](jobs/J030/brief-r3.md)
-- Blocker: None for bounded read-only route readiness; live execution requires verified supported path/model/effort/auth-cost and safe executable.
-- Next step: Read-only planner grounds installed adapter readiness and minimum supported directional slices; no live call/install or dispatcher fallback.
+- Blocker: Need explicit current use of native Claude account/settings and one private direct-executable profile for bounded live probe; no live model call authorized by previous read-only dispatch.
+- Next step: Ask one bounded native Claude Opus medium probe with existing subscription, trusted current user settings, private profile/direct binary, no paid-key fallback; recheck auth/route before launch.
 
 ### Acceptance
 
@@ -445,3 +445,11 @@ Reclassify next step one bounded route-contract worker with safe no-model fixtur
 Unit budget one fresh worker25min gpt-6-luna high + max2 corrections and3 independent reviews25min gpt-6.1-sol medium (six calls total); planner1 already spent, no reset. Scope host methodology and focused existing host tests, no new executable/dependency/global or actual local host-profile registration. Existing profile shape may be documented/template only with explicit user-chosen safe native path. Tests may inspect/import available installed/locked public adapter sources only as no-network fixtures, distinguish inspected version versus exact contract and actual execution. If needed capability absent, retain concrete gap rather than ship unsupported advice. Do not update external extension to manufacture availability.
 
 Methods selected writing for shared agent/human guidance, security for executable/environment/evidence trust, design/execution/verification principles for directional ownership/stop/result contracts and mechanical controls; cheap real behavioral fixture seam may select TDD before implementation. Live E2E deferred until supported route/auth-cost and finite native call allocated. Combined independent semantic+fixture verification, no live model/platform claim from fakes. REVIEW.md host-guide touched-path requires human integration approval; do not assume automatic LOW integration waives it. No provider probes/costs/install/delete/global config or actual custom-profile creation on operator machine. Inputs freeze after checkpoint; A002 worker result.
+
+## J030 A002 and safe passive coordinator observations
+
+Worker2dbc9547-562d-4ea4-af42-9f3df10723c0 terminal complete observed, full A002 consumed: PARTIAL, no source/docs/tests/profile changes, no live route established. Reports safe shape but account/environment/native executable and reverse process contracts remain unverified. One planner+one worker consumed; correction0/2/review0/3, no active actors. Don't represent inspected code as implemented Windows/native interop.
+
+Coordinator independently performed sanitized PASSIVE assessment only: existing direct2.1.322/claude file is regular nonsymlink executable ELF, digestbfb3703ad5380242328459bc62ada4bde8ae7ba57c6e1eeadb9c00e08874c478, not mise launch shim. No execution/model/auth request. Presence-only environment check found no Anthropic API key/auth token/base URL/OAuth-token override, Bedrock/Vertex/Foundry selectors, cloud identity overrides or CLAUDE_CONFIG_DIR override among checked keys; no secret values read/logged. User settings parsed locally for flags only: no apiKeyHelper, no hooks, no env overrides; one enabled plugin identified as this project's isSWF, no unrelated plugin information retained. This is current observation, not immutable credential filtering or subscription proof; recheck immediately before any live call, never print credentials/auth contents.
+
+Exact missing authorization/trust question: one bounded native Claude Opus medium read-only supplied-evidence review using the existing subscription/login and current user settings/project plugin; create only an ignored private project-local override of the existing claude-code profile with verified absolute native executable, no new role/launcher/global config/PATH change. Establish local auth route using a safely supported no-model status mechanism first; if not subscription-backed or uncertain refuse. Limit one live call, no retries/paid API/alternate endpoint; retain only sanitized result/model-effort/candidate evidence, not raw private transcripts. Budget and concrete candidate/full methodology prepared before launch after operator answer. If denied, live Pi->Claude remains blocked; reverse/Linux+Windows-CI acceptance still not complete. This is not another product interview or permission to install/update.
