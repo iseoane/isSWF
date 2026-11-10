@@ -127,9 +127,24 @@ The launcher verifies the retained package and selects the project's pinned runt
 
 Execution still requires the existing native job contracts, external grants, SDK/authentication, supported routes, and Linux isolation where applicable. Installing every caller does not make every route or host capability available.
 
-## Update the installation, then migrate a project
+## Explicitly update an installed host package
 
-Update the Pi package with `pi update <configured-source>`, or install a newly built version. Fixed Git/npm references remain fixed until you explicitly select another reference. For Claude, refresh its marketplace and update the installed plugin with `claude plugin update isswf@isswf`. A marketplace pointing at an immutable local release must first be switched to the intended new release through Claude's manager.
+A development request or version notice does not update the host. First inspect the manager-owned package, exact source/plugin, current and proposed version, and its scope. Show those effects and any projects affected, then require explicit confirmation. Refuse application if affected work is active or unknown. User/global scope may affect other projects; local project status does not establish that they are idle. A source checkout or Claude `--plugin-dir` override is not an installed package and must not be used as a shortcut.
+
+Use only the package-specific command after confirmation:
+
+```sh
+pi update --extension <exact-configured-source>
+claude plugin update --scope <user|project|local|managed> <exact-plugin-id>
+```
+
+Confirm the arguments against current local host help. Pi's bare `pi update` updates Pi itself by default, not the isSWF package. For Claude, use the observed registration scope, not ambiguous auto-detection; refreshing or switching a marketplace is a separate confirmed operation. Do not update unrelated packages or alter project pins, model choices or other settings.
+
+Manager success does not prove the current session loaded the new package. Reload/restart or a new session is a separate reconciliation step. The manager-owned package update does not guarantee retention of the immediately previous version; cleanup and previous-version retention are unsupported/deferred. Do not run `pi remove`, Claude uninstall, copy caches, or delete old versions as cleanup. The existing current-project setup record may note only locally observed package usage; it is not a native project pin or shared registry.
+
+## Update the legacy installation, then migrate a project
+
+The following migration procedure applies only when the operator explicitly selects the existing legacy runtime path. For legacy work, update the Pi package with `pi update --extension <configured-source>`, or install a newly built version. Fixed Git/npm references remain fixed until you explicitly select another reference. For Claude, refresh its marketplace and update the installed plugin with `claude plugin update --scope <observed-scope> isswf@isswf`. A marketplace pointing at an immutable local release must first be switched to the intended new release through Claude's manager as a separately confirmed operation.
 
 Restart or reload the host to load updated skills. Neither package update nor host reload writes `.isswf/install.json`.
 

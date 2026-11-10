@@ -96,15 +96,28 @@ The Claude Code reviewer can use `identity`, `diff` and `content` tools that rea
 
 Claude Code cuts off long MCP output beyond its token limit (default 25,000 tokens), so the no-partial-evidence guarantee holds only when the coordinator sets `MAX_MCP_OUTPUT_TOKENS=100000` in the same review process. The server itself refuses results over 98,304 bytes and delivers a diff as numbered chunks, each with the whole patch's byte count and SHA-256. The patch is complete only when the chunks concatenate to that digest. Any `[OUTPUT TRUNCATED` marker or incomplete read is a failure. Both the server and the Pi tools check every successful result's bound repository, commits and binding digest, and for diff and content its byte count and SHA-256, before returning it; a refusal may omit these fields but must not contradict them. Like the Pi tools, this is an operational read-only boundary, not an operating-system sandbox. The [Claude Code host guide](../../.agents/hosts/claude-code-review-launch.md) has the launch command and limits.
 
-## Update without changing every repository
+## Explicitly update an installed host package
 
-First update the package or plugin using your host's manager. For local releases, replace the old registration with the new prepared release folder. A fixed version stays fixed until you select another one.
+A development request or version notice does not update the host. First inspect the manager-owned package, exact source/plugin, current and proposed version, and its scope. Show those effects and any projects affected, then require explicit confirmation. Refuse application if affected work is active or unknown. User/global scope may affect other projects; local project status does not establish that they are idle. A source checkout or Claude `--plugin-dir` override is not an installed package and must not be used as a shortcut.
 
-Then ask setup:
+After confirmation, use only the package-specific command:
+
+```sh
+pi update --extension <exact-configured-source>
+claude plugin update --scope <user|project|local|managed> <exact-plugin-id>
+```
+
+Confirm the arguments against current local host help. Bare `pi update` updates Pi itself by default, not the isSWF package. For Claude, use the observed registration scope, not ambiguous auto-detection; refreshing or switching a marketplace is a separate confirmed operation. Do not update unrelated packages or alter project pins, model choices or other settings.
+
+Manager success does not prove the current session loaded the new package. Reload/restart or a new session is a separate reconciliation step. Host-managed updates do not guarantee retention of the immediately previous version; previous-version retention and cleanup are unsupported/deferred. Do not run `pi remove`, Claude uninstall, copy caches, or delete old versions as cleanup. The current project's existing setup record may note only locally observed package usage; it is not a native project pin or shared registry.
+
+## Update the legacy path, then migrate a project
+
+The migration procedure below applies only when the operator explicitly selects the existing legacy runtime path. For that work, update the package/plugin through the host manager first. Then ask setup:
 
 > Check what would change if I updated this project. Do not apply it yet.
 
-Updating the installed package does not update every project's records. Each project keeps its selected version until you explicitly migrate it.
+Updating the installed package does not update every project's records. Each project keeps its selection until you explicitly migrate it.
 
 Before migrating, save the affected files in Git and finish or reconcile running work. The migration checks the proposed change, keeps the previous version, and records how to recover. Do not delete retained versions or interrupted-operation records to force an update.
 

@@ -96,15 +96,28 @@ El revisor de Claude Code dispone de las herramientas `identity`, `diff` y `cont
 
 Claude Code corta la salida MCP que supera su límite de tokens (25.000 por defecto), así que la garantía de no devolver evidencia parcial solo se cumple si el coordinador define `MAX_MCP_OUTPUT_TOKENS=100000` en ese mismo proceso de revisión. El propio servidor rechaza resultados de más de 98.304 bytes y entrega el diff en fragmentos numerados, cada uno con el tamaño total del parche y su SHA-256. El parche está completo solo cuando los fragmentos concatenados coinciden con ese resumen. Cualquier marcador `[OUTPUT TRUNCATED` o lectura incompleta es un fallo. Tanto el servidor como las herramientas de Pi comprueban en cada resultado correcto el repositorio, los commits y el resumen de la vinculación y, en diff y contenido, el número de bytes y el SHA-256, antes de devolverlo; un rechazo puede omitir esos campos, pero no contradecirlos. Igual que las herramientas de Pi, es un límite operativo de solo lectura, no un sandbox del sistema operativo. La [guía de host de Claude Code](../../.agents/hosts/claude-code-review-launch.md) incluye el comando de lanzamiento y los límites.
 
-## Actualizar sin cambiar todos los repositorios
+## Actualizar explícitamente un paquete instalado del host
 
-Primero actualiza el paquete o el plugin mediante el gestor de tu asistente. Para versiones locales, sustituye el registro anterior por la nueva carpeta de versión preparada. Una versión fijada no cambia hasta que selecciones otra.
+Una petición de desarrollo o un aviso de versión no actualiza el host. Primero inspecciona el paquete que administra el host, su fuente/plugin exacto, las versiones actual y propuesta, y su ámbito. Muestra esos efectos y los proyectos afectados; después exige confirmación explícita. Rechaza la aplicación si hay trabajo activo o desconocido en el ámbito afectado. Un ámbito de usuario/global puede afectar otros proyectos; el estado local del proyecto no demuestra que estén inactivos. Un checkout de código fuente o una anulación de Claude `--plugin-dir` no es un paquete instalado y no debe usarse como atajo.
 
-Después pide a la skill de configuración:
+Después de confirmar, utiliza únicamente el comando específico del paquete:
+
+```sh
+pi update --extension <exact-configured-source>
+claude plugin update --scope <user|project|local|managed> <exact-plugin-id>
+```
+
+Confirma los argumentos con la ayuda local y actual del host. El comando básico `pi update` actualiza Pi por defecto, no el paquete isSWF. Para Claude, usa el ámbito observado en el registro; no dependas de la detección automática ambigua. Actualizar o cambiar un marketplace es una operación separada que también requiere confirmación. No actualices paquetes ajenos ni cambies pins, modelos u otros ajustes del proyecto.
+
+Que el gestor termine correctamente no demuestra que la sesión actual haya cargado el paquete nuevo. Recargar/reiniciar o iniciar una sesión nueva es una reconciliación aparte. La actualización administrada por el host no garantiza conservar la versión inmediatamente anterior; la retención de versiones anteriores y la limpieza están fuera de alcance y se aplazan. No ejecutes `pi remove`, la desinstalación de Claude, no copies cachés ni elimines versiones antiguas como limpieza. El registro de configuración del proyecto actual puede anotar solo el uso del paquete observado localmente; no es un pin nativo del proyecto ni un registro compartido.
+
+## Actualizar la ruta heredada y después migrar un proyecto
+
+El procedimiento de migración siguiente solo se aplica cuando el operador selecciona explícitamente la ruta del runtime heredado existente. Para ese trabajo, actualiza el paquete o plugin mediante el gestor del host. Después pide a la skill de configuración:
 
 > Comprueba qué cambiaría si actualizase este proyecto. No lo apliques todavía.
 
-Actualizar el paquete instalado no actualiza los registros de todos los proyectos. Cada proyecto mantiene su versión elegida hasta que lo migres de forma explícita.
+Actualizar el paquete instalado no actualiza los registros de todos los proyectos. Cada proyecto mantiene su elección hasta que lo migres de forma explícita.
 
 Antes de migrar, guarda los archivos afectados en Git y termina o reconcilia el trabajo en ejecución. La migración comprueba el cambio propuesto, conserva la versión anterior y registra cómo recuperarse. No borres versiones conservadas ni registros de operaciones interrumpidas para forzar una actualización.
 
