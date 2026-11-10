@@ -54,7 +54,7 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J003
 
-- Status: in-progress
+- Status: in-review
 - Objective: `isswf-setup` updates with confirmation and removes only versions that no known project uses, keeping the immediately previous one.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
@@ -201,3 +201,9 @@ Coordinator separately ran host-portability/check-docs/documentation/package-met
 Reviewer941b3913-e442-4b91-aff7-41304445d8db terminal complete observed; full V001 consumed. Standards/Spec FAIL, MEDIUM, introduced blocking F001/F002 accepted. F001 safe inspection must not execute unverified launch shims merely for help/inventory; prefer installed version-matched docs/source and refuse unavailable safe path. F002 Pi --extension source selector matches package identity across user+project settings ignoring Git refs/npm versions; --local rejected for update. Resolve full matching registration/ref/mutation set and affected projects, confirm actual operation or refuse; no invented flag/config changes. Mirror canonical skill/guides/static coverage consistently. Incidental mise mutation remains visible/unreverted, no more host commands authorized.
 
 Allocate same worker correction1/2,25min, approved gpt-6-luna high. One planner+initial worker and review1/3 already spent; no new actor/retry/model substitution, nested delegation or host lifecycle actions. First verify read/bash tools, then only source/docs reads and existing pure repository checks. No wrapper/help/version/inventory command executions at all this correction; use known installed source/doc paths. Inputs frozen after checkpoint; report A003, independent delta review follows.
+
+## J003 A003 and review2
+
+Continuation957b43c1-5ce4-4181-9de5-ce9c21880180 terminal complete observed; A003 consumed. Functional candidate27936c5a578ee12d6743777794bae70338bf7dd1 claims F001/F002 fixed in all skill/EN/ES/root consumers and static assertions. Coordinator focused host-portability/docs/documentation/package-metadata/whitespace rerun PASS. No more host wrappers invoked per report; original mise incident remains uncorrected/retained. Resources self-reported consumed, no independently inspected host trace. Author disclosed repeated regex-wording assertion corrections without timely premise checkpoint; static/live limits remain explicit. No new product acceptance or runtime behavior claim.
+
+Allocate independent delta review2/3 against first candidatecfeafb7a4952f4b55a4aab8af875ebb4f18a0fb8; prior V001 FAIL retained until new verdict. Main risks: safe nonexecuting inspection path and Pi identity-match set across scopes/refs before exact confirmation. No active writer; budgets planner1+worker1+correction1/2 spent, review2/3 allocated. No update/delete/revert/cleanup allowed, version-matched source only. Exact touched-path person gate to assess from REVIEW.md. Documentation-only focused verification per canonical development policy; CI full suite required later.
