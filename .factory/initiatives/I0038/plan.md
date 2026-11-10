@@ -54,20 +54,21 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J003
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: `isswf-setup` updates with confirmation and removes only versions that no known project uses, keeping the immediately previous one.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Native host previous-version retention is unsupported; shared registry/legacy cleanup and rollback policy need explicit decisions.
-- Next step: Operator selects safe confirmed-update subset versus original retention guarantee; preserve unmet cleanup criteria.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: None for approved confirmed-update subset; shared registry/cleanup and previous-version guarantee explicitly deferred.
+- Next step: Worker implements confirmed-update procedure/refusals and project-local observed-usage receipt; independent review and PR/CI.
 
 ### Acceptance
 
-- Update is proposed, not applied, while any job is in progress; with no active jobs it applies only after operator confirmation.
-- A usage registry records which project uses which version; setup refreshes it on every run.
-- Cleanup lists candidate versions and deletes only after confirmation, never the running, a registered-in-use or the immediately previous version; unknown projects block or ask.
-- Deletion uses the host manager where it owns the version; isSWF deletes only what it installed itself.
-- Tests cover a version in use, the previous version, an unknown project and a refused confirmation, on Linux and Windows CI.
+- Setup shows host/source/scope/effect before confirmation; active or unknown affected work prevents update application.
+- An idle, explicitly confirmed update uses the existing supported host manager; refusal or no confirmation leaves installations, pins/models and unrelated settings unchanged.
+- Reload/new-session reconciliation is separate from manager success; project-local observed usage may be recorded without claiming a shared global registry or project pin.
+- Host-owned cleanup and guaranteed immediately-previous retention are explicitly unsupported/deferred; no automatic deletion, cache copy or custom manager.
+- Focused refusal/confirmation and source-scope contracts are checked in existing Linux/Windows CI; actual live update/model behavior remains honestly unverified unless actually executed.
+
 
 ## Current execution grant and J001 handoff
 
@@ -180,3 +181,11 @@ PR250 merged2026-11-10T04:45:10Z under prior explicit LOW-risk integration autho
 Initial assumption of prunable native version archives invalid: Pi updates in place, Claude owns/ages old caches, no supported keep-previous guarantee. Shared-store legacy deletion additionally needs cross-project lifecycle serialization and historical rollback-retention decision. Do not implement cleanup daemon/manager or silently weaken guarantees. Product recommendation: first deliver confirmed native update procedure and explicit unsupported-retention/no-cleanup disclosure; record project-local observed usage only, not fictitious complete global registry; defer shared registry and actual cleanup with original unmet acceptance visible. Alternative keep original retention guarantee and block unsupported native update. Exact question: accept the recommended bounded subset and defer registry/cleanup, or retain original all-in scope? Resume condition explicit selection, refine J003 brief and finite budgets before writer.
 
 No installation/update/delete performed or implied by feature development. Queue remains J030 Linux+Windows-CI then I0014 evaluation, but do not pretend I0038 cleanup complete. Local feature branch prepared from integrated main, prior branch preserved; no cleanup/reset/force push.
+
+## J003 accepted bounded outcome and worker grant
+
+Current operator "ok" explicitly accepts preceding recommendation: confirmed update only, no automatic cleanup now; shared registry and deletion deferred. This supersedes original J003 all-in completion criteria, not retroactive completion of those features. Previous guaranteed retention is not provided by this unit, disclosed before update. Project-local observed usage is evidence, not global completeness or legacy pin. Original accepted initiative ambition preserved in prior Git/brief and planner proposal; do not claim garbage collection shipped.
+
+Functional scope: canonical setup procedure, minimal existing record/template and required bilingual current installation guide updates plus focused static contract tests. No new executable, host adapter, registry service or destructive effect justified. One sequential worker (25min) plus max2 corrections and3 independent reviews (six calls total), approved worker gpt-6-luna high/reviewer gpt-6.1-sol medium; J003 planner1 already consumed separately, no reset. No nested calls/install/update/delete/provider/model probes/global configuration/push/PR/merge by worker; coordinator publication under current feature grant. Human touched-path gates of REVIEW.md remain binding, independent LOW risk doesn't waive them.
+
+Methods selected: writing for agent/human usage instructions (both canonical references if user guides change); security for explicit source/scope/permission distinction; execution principles for affected-work identity and unchanged budgets/no automatic retry; verification principles for criterion/case mapping and disclosed static/live limits. Design principles not selected unless implementation actually changes data contract, prefer existing setup record fields. TDD not selected for procedure-only wording; no fake model RED. E2E live update deliberately not selected: development grant doesn't authorize actual host maintenance; no standalone provider calls. Combined semantic/static review needed, existing tests cannot prove real host update or global inactivity.

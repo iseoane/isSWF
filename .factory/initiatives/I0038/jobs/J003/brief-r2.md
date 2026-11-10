@@ -1,0 +1,15 @@
+# J003 r2: Explicitly confirmed update, no automatic cleanup
+
+Supersedes placeholder r1 following planner A001 and explicit current operator "ok" to confirmed update/no automatic cleanup, shared registry/deletion deferred. Source/factory /home/iseoane/Work/isSWF; current branch feat/i0038-confirmed-maintenance, integration base5e36f57fc5a8f089a474e11e08d46a7dbcf69e6f. Read plan current grant for counters and exact scope.
+
+## Outcome
+
+Provide useful setup update procedure using actual supported manager source/scope, check affected jobs, propose explicit effects and require confirmation; no update on active/unknown work or absent/refused confirmation. Native manager success is not loaded-session success; reconcile reload/fresh session separately. Do not modify pin/model/legacy state as side effect. Record only current project's observed package usage in its existing setup record when justified, with source/version and known/unknown state; not new shared registry or native pin. Refresh after actual confirmed lifecycle observation, not from a mere request. Explicitly disclose host-owned cleanup/previous-version retention unsupported; never use pi remove/Claude uninstall as garbage collection, no cache copying/registry daemon.
+
+## Scope, proof and methods
+
+Canonical .agents/skills/isswf-setup/SKILL.md and existing installation guide/mirrors plus focused tests; thin integrations remain thin. Verify current commands from actual supported host docs/version/help, not planner's illustrative command spelling alone; no install/update/remove execution in development. Inspect exact package manager update options (Pi default may update host itself unless package-specific extension command syntax selected); legacy explicit maintenance remains pinned existing contract, not normal native path.
+
+Read shared worker/comments/code-quality; full setup skill; writing skill and required agent/human references; security skill; execution-principles and verification-principles; REVIEW.md and development Quality checks. Report consumed/missing self-reported vs host trace and concrete application map. Static walkthrough/test cases: confirmed idle, active/unknown, decline/no confirmation, pinned source, user scope affecting others, source checkout exclusion, manager succeeded but reload unverified, no deletion. Full quality if packaging changes otherwise focused/docs; no runtime/liveness/model compliance claim from regex. Both host/OS supported native routes considered; missing live evidence remains limitation, not invented behavior.
+
+Budget one initial worker + max2 correction continuations +3 reviews,25min/actor; planner1 consumed already, model gpt-6-luna high approved. Exclusive checkout, no nested agents/network/model probes/install/update/delete/global config, no plan/brief/prior report edits. Scoped commits allowed, coordinator owns push/PR/CI/integration. Return A002 via bound output (A001 is planner-authored), candidate/checks/acceptance map/resources/risk and unresolved feasibility. If real behavioral executable need emerges stop and justify before expanding machinery. No deferred cleanup/registry implementation.
