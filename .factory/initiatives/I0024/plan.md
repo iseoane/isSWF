@@ -81,9 +81,9 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 - Status: completed
 - Objective: Verify and document the complete flow: Retain exact-candidate independent review and equivalent host/platform evidence for the complete responsive coordination journey.
 - Depends on: J003
-- Brief: [brief-r14.md](jobs/J004/brief-r14.md)
+- Brief: [brief-r16.md](jobs/J004/brief-r16.md)
 - Blocker: None.
-- Next step: None.
+- Next step: None for verification. Operator accepted the retained r16 outcome on 2026-11-10. The operator separately requested GitHub publication and normal protected PR integration of these closure records; exact-head CI and conflict checks remain delivery gates, not another verification tranche.
 
 ### Acceptance
 
@@ -96,6 +96,9 @@ Finite cumulative assignment ceiling: two initial read-only researchers (Pi and 
 ### Evidence
 
 - Existing Pi SDK synthetic11/11 PASS in jobs/J004/A001.md; temporary Windows prerequisites in A002.md; actual Linux Pi/Claude observations and precise gaps in A003.md.
+- R15 Windows native observations: jobs/J004/A013.md worker partial checkpoint, A014.md supervisor Pi pause/resume/checkpoint-stop receipt, A015.md Claude native background/completed-context continuation/live TaskStop receipt and exact remaining limits. R15 full-verification outcome PARTIAL is preserved.
+- R16 actual Windows Pi interrupted-context recall/hash and wrong-value negative control in jobs/J004/A020.md; actual Windows Claude timestamped question/response overlap, native interruption, eligible same-ID continuation, equal challenge hashes and terminal reconciliation in jobs/J004/A021.md. All four native Claude assertion gates PASS; sensitivity controls reject wrong recall, late response and missing native stop. Supervisor completion wake was absent and consumption occurred on operator question; no full autonomous monitoring or broader crash/race/cross-platform guarantee claimed.
+- On 2026-11-10 the operator explicitly accepted the reported Windows verification outcome: “aceptado!”. J004 and I0024 are closed within the retained evidence limits, preserving all prior adverse findings and the disclosed completion-notification failure. Acceptance does not relabel untested guarantees or authorize commit, publication, installation, cleanup or further actors.
 
 ## Grounding and bounded re-plan (historical checkpoint observation)
 
@@ -387,4 +390,4 @@ Disposition: bounded Linux Claude technical verification complete under V011's s
 
 ## Operator acceptance and closure
 
-On 2026-11-04 the operator accepted I0024 as fully verified: “del I0024 esta todo probado, dejemos de insistir!”. J001–J004 are closed on the retained Linux and Windows Pi/Claude receipts (including A011/A012, PR197 CI run 41799487968 SUCCESS 3/3) within their stated limits. No further model calls or verification are planned.
+On 2026-11-04 the operator accepted I0024 as fully verified: “del I0024 esta todo probado, dejemos de insistir!”. J001–J004 are closed on the retained Linux and Windows Pi/Claude receipts (including A011/A012, PR197 CI run 41799487968 SUCCESS 3/3) within their stated limits. No further model calls or verification were planned at that closure checkpoint. On 2026-11-10 the operator explicitly reopened verification: “coordinador, I0024 completa las pruebas.” J004/r15 preserves that acceptance and reconciles the remaining Windows live-evidence gaps. At that reopening checkpoint additional actor allowances were awaiting a concrete decision, not automatically renewed. The operator subsequently approved both finite r15 and corrective r16 tranches. R15's partial evidence and collection defects remain preserved; r16's bounded native Windows outcomes and limitations are retained in A020/A021. On 2026-11-10 the operator accepted the completed outcome with “aceptado!”. I0024 is closed within those retained limits. The operator then explicitly requested GitHub publication and merge of the closure update; this grants normal protected expected-head integration after exact-head CI and conflict checks, not bypass, installation, cleanup or further model calls.
