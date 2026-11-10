@@ -362,12 +362,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J030
 
-- Status: awaiting-human
+- Status: in-progress
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
 - Brief: [brief-r3.md](jobs/J030/brief-r3.md)
-- Blocker: Need explicit current use of native Claude account/settings and one private direct-executable profile for bounded live probe; no live model call authorized by previous read-only dispatch.
-- Next step: Ask one bounded native Claude Opus medium probe with existing subscription, trusted current user settings, private profile/direct binary, no paid-key fallback; recheck auth/route before launch.
+- Blocker: None for exactly one explicitly approved forward native probe after verified auth; reverse/platform acceptance remains pending.
+- Next step: Prepare exact supplied evidence/full methodology and private direct-binary profile, launch one native opus:medium review through existing adapter; no retries.
 
 ### Acceptance
 
@@ -453,3 +453,11 @@ Worker2dbc9547-562d-4ea4-af42-9f3df10723c0 terminal complete observed, full A002
 Coordinator independently performed sanitized PASSIVE assessment only: existing direct2.1.322/claude file is regular nonsymlink executable ELF, digestbfb3703ad5380242328459bc62ada4bde8ae7ba57c6e1eeadb9c00e08874c478, not mise launch shim. No execution/model/auth request. Presence-only environment check found no Anthropic API key/auth token/base URL/OAuth-token override, Bedrock/Vertex/Foundry selectors, cloud identity overrides or CLAUDE_CONFIG_DIR override among checked keys; no secret values read/logged. User settings parsed locally for flags only: no apiKeyHelper, no hooks, no env overrides; one enabled plugin identified as this project's isSWF, no unrelated plugin information retained. This is current observation, not immutable credential filtering or subscription proof; recheck immediately before any live call, never print credentials/auth contents.
 
 Exact missing authorization/trust question: one bounded native Claude Opus medium read-only supplied-evidence review using the existing subscription/login and current user settings/project plugin; create only an ignored private project-local override of the existing claude-code profile with verified absolute native executable, no new role/launcher/global config/PATH change. Establish local auth route using a safely supported no-model status mechanism first; if not subscription-backed or uncertain refuse. Limit one live call, no retries/paid API/alternate endpoint; retain only sanitized result/model-effort/candidate evidence, not raw private transcripts. Budget and concrete candidate/full methodology prepared before launch after operator answer. If denied, live Pi->Claude remains blocked; reverse/Linux+Windows-CI acceptance still not complete. This is not another product interview or permission to install/update.
+
+## Explicit forward native probe grant
+
+Current operator "ok" approves preceding specific proposal: ONE native Claude Opus medium read-only review, using existing login/subscription and current user settings, one ignored private project-local override of existing claude-code profile with direct verified native binary, no install/paid API/alternate endpoint or retry. Cumulative planner1+worker1 consumed; native Claude live probe0 ->1 on dispatch, timeout180000ms. This call does not authorize reverse native actor or other provider calls. No model substitution if unavailable; stop at known failed/uncertain outcome. User settings/project plugin trust covers this bounded call only, no new global settings/PATH/profile distribution.
+
+Coordinator invoked ONLY previously hashed regular native ELF at known absolute2.1.322 path with auth status, not PATH/mise wrapper; official CLI command reference documents status as no-model JSON. Captured stdout parsed locally and only allowed flags retained: loggedIn=true, authMethod=claude.ai, apiProvider=firstParty, subscriptionType=team, exit0. No email/account/token/config-directory values retained. Process-only auto-update/nonessential-traffic suppression applied to this auth-status invocation; adapter does not forward those flags, no claim otherwise. Rechecked relevant alternate API/route env presence absent; no API helper/user hooks/env overrides in sanitized settings observation, sole enabled plugin is isSWF. Authentication can change: recheck before launch and refuse deviation, don't claim immutable credential containment. No host install/update/remove or config mutation from status observed.
+
+Probe candidate is historical exact reviewed docs correction, separate from J030 implementation: basec9d423cd2b668a812e9f5cffdddb7fc2e4e5c1d4 ->b4aabc8418940a907ab7997f11e2f0acb9203db0, stopped author. Purpose one real supplied-evidence cross-host review of supported generic Git ref example and untouched refusal rules, not proof of bound tools or complete J030 product acceptance. Full canonical reviewer methodology/selected resources, exact diff and relevant actual source evidence supplied inline via supported native pi-subagents workflow; no file paths as substitute for no-tools child. Bounded output requested; host terminal/result/model metadata assessed on return, model self-report not effective-selection proof. Native CLI logs remain private harness artifacts; retain only curated sanitized evidence.
