@@ -2,39 +2,40 @@
 
 Type: maintenance
 
-Current operator cancels I0014 evaluation and requests triage and resolution proposals for the open issues in iseoane/isSWF. Original triage was preparation only: no implementation, model actors, commits of these intake briefs, remote writes, labels, installation or cleanup. Current operator start “adelante, coordinador” supersedes that boundary for bounded implementation in the agreed order #255 → #254 → I0042 under the default feature-to-PR contract; no merge, installation or cleanup is selected. J002 r2 records the first unit's concrete scope and budget. Historical intake and r1 briefs stay unchanged. Live observation 2026-11-10T16:59:19.362Z. Target implementation base 72390daf612e3abd5273c0eea3012d3c2689b63b. Existing source checkout differs from origin/main only in initiative records; the examined shared methodology sources are unchanged. No open PRs observed.
+Historical triage context (superseded by the closure evidence below): operator cancels I0014 evaluation and requests triage and resolution proposals for the open issues in iseoane/isSWF. Original triage was preparation only: no implementation, model actors, commits of these intake briefs, remote writes, labels, installation or cleanup. Current operator start “adelante, coordinador” supersedes that boundary for bounded implementation in the agreed order #255 → #254 → I0042 under the default feature-to-PR contract; no merge, installation or cleanup is selected. J002 r2 records the first unit's concrete scope and budget. Historical intake and r1 briefs stay unchanged. Live observation 2026-11-10T16:59:19.362Z. Target implementation base 72390daf612e3abd5273c0eea3012d3c2689b63b. Existing source checkout differs from origin/main only in initiative records; the examined shared methodology sources are unchanged. No open PRs observed.
 
 Quality areas: lint, tests, build/package, dead-code and duplication are configuration evidence only, not execution results in this triage. Existing quality tooling and focused methodology tests are available; no clone detector or agent-compliance probe was run. No runtime reproduction of the reporters’ sessions, native webview journey or OS-isolation experiment occurred.
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Close the methodology handoff gap across native coordinator, worker and reviewer boundaries without making optional methods universally mandatory.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
-- Blocker: Exact-head CI and publication receipt pending; PR256 remains open and this branch contains its unchanged ancestor. No confirmed private-session runtime cause.
-- Next step: Operator explicitly prioritizes #254 before I0042. Reconcile A001 with the clarified defect: coordinator evaluation, justified selection/decline, application of its own resources throughout preparation/execution/delivery, child resource handoff and concrete application verification. A brief-field validator alone is insufficient. Diagnose observed omissions before choosing a bounded repair; preserve conditional methodology rather than mandatory blanket loading. PR256 head1eca2203215fd110f99baf366c81270593c2f3b9 CI Quality42871231436 observed SUCCESS3/3. Functional candidate d8fd4e8dbfffe26ca03aa1f10d2879faead2514a has independent Standards/Spec PASS in J001/V001; focused worker-methodology/host-portability/docs/diff checks PASS. Publish #254 branch targeting main, explicitly dependent on PR256 (unchanged ancestor); no merge or history rewrite. Calls spent3/6, reviews1/3, corrections0/2; researcher5306dc9b terminal partial, worker e977735f and reviewer1206546a terminal complete. No runtime mechanical gate or live compliance claim. Retain exact-head CI receipt and compact unit handoff before I0042.
+- Blocker: None for operator-approved bounded r3 repair; actual adherence remains to be assessed through use, not a completed empirical claim.
+- Next step: Operator approved integration and evaluation through real use. No further implementation in this unit. Complete administrative closure, then patch release, I0042, and I0009/J030 in that order. Calls spent3/6, reviews1/3, corrections0/2; researcher5306dc9b terminal partial, worker e977735f and reviewer1206546a terminal complete. Do not reset budgets or claim a runtime gate/live compliance.
 
 ### Acceptance
 
-- An empty/missing methodology block has an explicit pre-edit return path for native workers; a valid selected/declined block proceeds within authority.
-- Both Pi and Claude review handoffs identify pinned selection and coordinator-observed checks; missing required brief evidence cannot silently produce a complete Standards pass.
-- Shared source/tests show valid/absent/empty/declined cases and preserve the distinction between missing block and individual unassessed trigger; tests do not claim live-agent compliance.
-- Document supported enforcement honestly: no assertion of mechanically blocking all native dispatches unless an actual supported runtime check is implemented and exercised.
+- Effective r3 scope supersedes original gate-centric intake acceptance (retained unchanged in r1/A001): coordinator evaluates applicable resources for its own lifecycle and child assignments, consumes or supplies selected content, and verifies candidate-linked application evidence.
+- Reuse the single conditional trigger catalog and existing records; preserve justified declines and minor/nonblocking individual unassessed triggers.
+- Cover child input/tool capability, missing or stale application evidence, changed candidates and coordinator-owned PR/delivery in six static scenarios and focused contract assertions.
+- Explicitly distinguish instruction-level responsibilities/static verification from runtime enforcement or proven live adherence. No mechanical native gate is delivered.
 
 ### Evidence
 
-- Live issue https://github.com/iseoane/isSWF/issues/254; body/state/labels/updatedAt observed unchanged in native intake source.
-- Coordinator triage only; source gaps and recommendations are distinguished from reporter claims and unrun behavior checks.
+- Original immutable intake observed issue254 open; current remote readback confirms CLOSED after PR257 integration.
+- Functional candidate d8fd4e8dbfffe26ca03aa1f10d2879faead2514a, independent Standards/Spec PASS in J001/V001; focused worker-methodology/host-portability/docs/diff PASS, no live adherence proof. Partial researcher limitation retained in A002.
+- PR257 head5720db1aaa754d2fdf6e8c966e0d7de87412e7ad: exact-head Quality42877066474 SUCCESS3/3. Operator explicitly authorized both merges and chose to evaluate through use. Expected-head protected merge read back MERGED at9ecbed1caa7d999dfe6599c9abe00cbd63fbbf78. No bypass or history rewrite.
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: Define a feasible no-visible-desktop E2E selection path for webview applications, with honest separation of browser frontend coverage and native webview integration.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None for bounded shared guidance; no project-specific driver or native support claim is authorized.
-- Next step: Publish feat/255-headless-guidance to iseoane/isSWF targeting main and verify exact-head CI; no merge selected. Functional candidate 7b65f863a89f4e0c2c1e026545dc6c308bea64a2 has independent Standards/Spec PASS in V001. Worker e9e75137 and reviewer 3e231f9f are terminal complete; calls spent 2/6, reviews 1/3, corrections 0/2. Preserve J030 on original branch and untracked I0042. After delivery use compact handoff/fresh context before #254, then I0042; load coordinator, debug/design/verification and relevant host resources, reconcile supported native gate feasibility before writer start.
+- Next step: No further work in this bounded guidance unit. Preserve native/frontend limits and project-owned adapters/fixtures; no live webview coverage claim. Worker e9e75137 and reviewer3e231f9f terminal complete; calls spent2/6, reviews1/3, corrections0/2. Follow administrative closure, patch release, I0042 then parked J030.
 
 ### Acceptance
 
@@ -45,8 +46,9 @@ Quality areas: lint, tests, build/package, dead-code and duplication are configu
 
 ### Evidence
 
-- Live issue https://github.com/iseoane/isSWF/issues/255; body/state/labels/updatedAt observed unchanged in native intake source.
-- Coordinator triage only; source gaps and recommendations are distinguished from reporter claims and unrun behavior checks.
+- Original immutable intake observed issue255 open; current remote readback confirms CLOSED after PR256 integration.
+- Functional candidate7b65f863a89f4e0c2c1e026545dc6c308bea64a2 independently reviewed Standards/Spec PASS in J002/V001. Focused host-portability/docs/diff PASS; no live browser/native-driver/adherence certification.
+- PR256 head1eca2203215fd110f99baf366c81270593c2f3b9: exact-head Quality42871231436 SUCCESS3/3. Operator explicitly authorized integration; expected-head protected merge read back MERGED atdc6102478d2ca3c5b57cf7b67f8ad8f6f62dc395. Its tree matched the verified PR head before dependent PR257 integration.
 
 ## J003
 
@@ -67,7 +69,9 @@ Quality areas: lint, tests, build/package, dead-code and duplication are configu
 - Current operator condition: if no existing isolation initiative, close219 and prepare a worktree initiative. Current plans contain no dedicated active native OS-isolation initiative; I0009/PR87 is parked legacy history. Closure read back CLOSED/NOT_PLANNED and exact explanatory comment verified; I0042 prepared locally. No claim of OS implementation or global rejection of future isolation.
 
 
-## Triage assessment and proposed order
+## Historical triage assessment and proposed order
+
+The following is the original triage assessment, not current work or authority. Effective r3 scope and verified integration receipts above/below supersede its gate proposal, pending states and initial order.
 
 1. **#254 / J001 — highest priority, factory defect; ready for bounded agent grounding.** Observed source gap, not a reproduction of the reporter’s long session: existing `.factory/templates/job-brief.md:26-29` already contains selection/evidence fields; `.agents/roles/worker.md:7-17` does not explicitly list the methodology block as a required pre-edit input; `.agents/hosts/claude-code-review-launch.md:13-29` carries a review task but does not require the full pinned selection block. Existing review guidance already makes an omitted individual trigger a minor finding. Fix the handoff, not just another reminder: reuse the shared template, make missing/empty block return before edits, pass the pinned selection/checks into both host review paths, and preserve explicit selected/declined choices. A deterministic structural validator is justified only after verifying its actual supported pre-dispatch attachment in each native host; a manual command or an LLM refusal is not universal mechanical enforcement. Do not build a new dispatcher to obtain that claim. First functional unit includes valid/missing/empty/declined controls plus the resulting worker/reviewer outcome. PR244/I0036 J002 established the existing rule; #247 fixed exact-diff omission, not this selection handoff, so neither closes #254.
 
