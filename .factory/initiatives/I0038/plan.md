@@ -54,12 +54,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J003
 
-- Status: in-review
+- Status: completed
 - Objective: `isswf-setup` updates with confirmation and removes only versions that no known project uses, keeping the immediately previous one.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: None for approved confirmed-update subset; shared registry/cleanup and previous-version guarantee explicitly deferred.
-- Next step: Worker implements confirmed-update procedure/refusals and project-local observed-usage receipt; independent review and PR/CI.
+- Blocker: None for approved delivered subset; deferred maintenance tracked separately below.
+- Next step: No automatic cleanup or shared registry; separate future assignment required for deferred scope.
 
 ### Acceptance
 
@@ -69,6 +69,10 @@ The operator learns when a newer isSWF version is installed, updates through `is
 - Host-owned cleanup and guaranteed immediately-previous retention are explicitly unsupported/deferred; no automatic deletion, cache copy or custom manager.
 - Focused refusal/confirmation and source-scope contracts are checked in existing Linux/Windows CI; actual live update/model behavior remains honestly unverified unless actually executed.
 
+
+### Evidence
+
+- PR251 mergedeb0d3a268695d5b11013b2910d9cb8fce714db98; exact head75ccf28e5ae7cfc1cdf4fbd6b78ee105a46ad811 Quality42774541926 all3 SUCCESS (portable/Linux/Windows). V003 PASS/LOW; prior FAIL/incident retained.
 
 ## Current execution grant and J001 handoff
 
@@ -223,3 +227,7 @@ Reviewerdc427222-d9a4-41da-99fa-70e2355a73b1 terminal complete observed, full V0
 Coordinator LOW integration assessment: instruction/translation/static contract delta, no manager executable/runtime/grant implementation changed. Plausible failures wrong update scope or unsafe inspection mitigated by source-backed full match set, no unverified launcher execution, exact confirmation and unknown/active refusal. Source-syntax example traced directly; static tests do not establish live host obedience. Misleading result detected by scope/receipt mismatch; revert restores instructions but does not undo host actions. No rollback run. Original unintended Claude CLI2.1.322 installation remains disclosed/unreverted; no further host maintenance. This is development delivery, not operator-machine update acceptance. Cleanup/registry/guaranteed retention still deferred by explicit operator.
 
 Publish this confirmed-update unit, exact-head full CI then LOW expected-head integration under existing explicit grant. Record-only receipt delta leaves functional reviewed bytes unchanged. Next independent grounding may prepare J030 Linux+Windows-CI while CI runs, never execute an unverified host shim. I0014 evaluation follows J030. No release publication/install/delete grant.
+
+## Deferred follow-up, not completed or authorized
+
+Explicit operator request confirms future tracking of automatic old-version cleanup, shared project-usage registry and guaranteed previous-version retention. These are not part of delivered J003 subset and require separate scope/authority; host ownership, unknown projects, store serialization and rollback references remain unresolved constraints. No automatic maintenance or project pin/model change follows from this record. PR250 and251 complete revised I0038 only; continue J030 Linux+Windows-CI then I0014 evaluation.

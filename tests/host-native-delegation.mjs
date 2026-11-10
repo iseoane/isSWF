@@ -7,6 +7,7 @@ import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { runClaudeCodeAdapterContract } from './claude-code-adapter-contract.mjs';
 
 const source=resolve(process.argv[2]??'.'),dependencies=resolve(process.env.ISSWF_HOST_DEPS??join(source,'tooling/host-tests/node_modules')),piSubagents=resolve(process.env.ISSWF_PI_SUBAGENTS??join(dependencies,'pi-subagents'));
 if(process.argv[3]!=='--child'){
@@ -38,6 +39,7 @@ if(process.argv[3]!=='--child'){
  }
  const result=spawnSync(process.execPath,[fileURLToPath(import.meta.url),artifact,'--child',root],{env,cwd:root,encoding:'utf8',timeout:60000,maxBuffer:1024*1024});
  await writeFile(join(root,'host-output.log'),result.stdout+'\n'+result.stderr);assert.ifError(result.error);assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
+ await runClaudeCodeAdapterContract(piSubagents, { emit: false });
  console.log(JSON.stringify({status:'PASS',platform:process.platform,root,artifact,hostCoverage:piOnly?'Pi SDK/subagent only':'Pi SDK/subagent plus Claude plugin inventory',limits:'Pi child invocation uses a loopback synthetic provider; no real models, live reviewer acceptance or OS sandbox claim'}));
  }
 }else{
