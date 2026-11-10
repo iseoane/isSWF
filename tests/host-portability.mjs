@@ -472,7 +472,7 @@ for (const pattern of [
   /Pi 1\.5\.0, the installed `@earendil-works\/pi-coding-agent` source gathers matching entries from both personal\/user and project settings/u,
   /npm identity ignores package version and its Git identity ignores ref/u,
   /`--local` is rejected for update, not a supported scope selector/u,
-  /`git:example\.invalid\/team\/isswf#stable`[\s\S]*`git:example\.invalid\/team\/isswf#preview`/u,
+  /`git:example\.invalid\/team\/isswf@stable`[\s\S]*`git:example\.invalid\/team\/isswf@preview`/u,
   /Because repository identity ignores the ref, an update selected by either source identity matches both records/u,
   /manager cannot isolate the confirmed scope or its full mutation set is unknown, refuse/u,
   /claude plugin update --scope <user\|project\|local\|managed> <exact-plugin-id>/u,
