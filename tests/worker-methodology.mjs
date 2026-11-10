@@ -45,6 +45,12 @@ assert.match(reviewerRole, /record its source, base, candidate, and reviewed pat
 const coordinatorSkill = await readFile(join(source, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
 assert.match(coordinatorSkill, /For each selected method[\s\S]*observed failing regression before implementation[\s\S]*disclosure does not waive/u);
 assert.match(coordinatorSkill, /For an unbound Agent-tool review, the handoff must contain the exact base\/candidate diff[\s\S]*reject any complete pass or fail report[\s\S]*exact diff not supplied/u);
+assert.match(coordinatorSkill, /### Apply methodology across the coordinator lifecycle[\s\S]*grounding\/design, assignment, consuming a result, review, PR\/delivery, or resuming/u);
+assert.match(coordinatorSkill, /evaluate the existing trigger table for both the coordinator's action and any child action[\s\S]*unassessed optional trigger remains minor/u);
+assert.match(coordinatorSkill, /For a selected resource governing the coordinator's own action, consume its canonical content before acting[\s\S]*selection, reading, a checklist, or an unrelated passing test is not application/u);
+assert.match(coordinatorSkill, /provide each child the selected canonical path and pinned version or full content[\s\S]*confirm the child's available tools can actually consume it/u);
+assert.match(coordinatorSkill, /On return, compare required method evidence with the current candidate[\s\S]*missing or stale application evidence[\s\S]*Do not begin dependent review or delivery/u);
+assert.match(coordinatorSkill, /For coordinator-owned PR\/delivery, apply the existing feature-delivery and isswf-pr contracts[\s\S]*including risk and verification evidence[\s\S]*not a dispatch gate or proof of universal adherence/u);
 const claudeHost = await readFile(join(source, '.agents/hosts/claude-code.md'), 'utf8');
 assert.match(claudeHost, /An Agent-tool reviewer is unbound[\s\S]*exact diff not supplied[\s\S]*coordinator rejects a complete verdict[\s\S]*bound Pi and Claude reviews/u);
 assert.match(actualWorker, /For each selected method[\s\S]*required observed evidence[\s\S]*retrospective red-first proof/u);

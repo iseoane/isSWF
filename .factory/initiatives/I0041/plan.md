@@ -8,12 +8,12 @@ Quality areas: lint, tests, build/package, dead-code and duplication are configu
 
 ## J001
 
-- Status: pending
+- Status: in-review
 - Objective: Close the methodology handoff gap across native coordinator, worker and reviewer boundaries without making optional methods universally mandatory.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: No blocker to proposed preparation; implementation requires a separate explicit start.
-- Next step: Use coordinator analysis jobs/J001/A001.md to choose the narrow shared-validator/native-gate solution before a separately authorized implementation. Existing template plus reminders alone do not mechanically enforce selection; verify each supported dispatch route and fail-closed behavior.
+- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
+- Blocker: Exact-head CI and publication receipt pending; PR256 remains open and this branch contains its unchanged ancestor. No confirmed private-session runtime cause.
+- Next step: Operator explicitly prioritizes #254 before I0042. Reconcile A001 with the clarified defect: coordinator evaluation, justified selection/decline, application of its own resources throughout preparation/execution/delivery, child resource handoff and concrete application verification. A brief-field validator alone is insufficient. Diagnose observed omissions before choosing a bounded repair; preserve conditional methodology rather than mandatory blanket loading. PR256 head1eca2203215fd110f99baf366c81270593c2f3b9 CI Quality42871231436 observed SUCCESS3/3. Functional candidate d8fd4e8dbfffe26ca03aa1f10d2879faead2514a has independent Standards/Spec PASS in J001/V001; focused worker-methodology/host-portability/docs/diff checks PASS. Publish #254 branch targeting main, explicitly dependent on PR256 (unchanged ancestor); no merge or history rewrite. Calls spent3/6, reviews1/3, corrections0/2; researcher5306dc9b terminal partial, worker e977735f and reviewer1206546a terminal complete. No runtime mechanical gate or live compliance claim. Retain exact-head CI receipt and compact unit handoff before I0042.
 
 ### Acceptance
 
