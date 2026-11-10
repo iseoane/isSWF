@@ -6,12 +6,12 @@ Current operator requests a worktree initiative after reporting workers operatin
 
 ## J001
 
-- Status: in-progress
+- Status: in-review
 - Objective: Diagnose native writer checkout/branch assignment and interruption-related work loss, then propose a supported worktree/checkpoint contract without reviving the legacy isolated executor.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
 - Blocker: None for approved r3 instruction-policy unit. Operator approves setup choice between supported per-writing-assignment worktree (recommended) and explicit shared-sequential mode; reuses existing WT location. Original incident cause remains inconclusive; no native binding/runtime-loss repair claimed.
-- Next step: Dispatch one native worker on r3 conditional setup/coordinator/worker policy plus tests, then exact-candidate independent review/PR/CI. Researcher d9dfbde9 terminal complete/partial; calls spent1/6 before writer, reviews0/3, corrections0/2. Pi explicit cwd documented, Claude prepared-root binding remains pending where unverified; no bridge/new runtime or fallback. Preserve existing root/settings and do not apply factory-development changes to operator setup. Branch topology reconciled by normal merge fe6cd743 with no reset/rebase. Release v1.8.3 immutable; PR260 merged4fb82c6 CI3/3. I0009/J030 follows this unit.
+- Next step: Publish the reviewed I0042 source branch/PR to iseoane/isSWF main and observe exact-head CI; then request human integration decision (MEDIUM risk, hosts/worker touched). Functional candidate549335e37ff99b90f5d9bc15590fae1a13b22fe9 against75d7c44d86f7ab70fa932ee9644642cb4d5342d3; independent V001 PASS both axes, zero findings. Reviewer95781a29 terminal complete/process terminal observed. Calls3/6, reviews1/3, corrections0/2; no active native actors. Retain original root/settings/release and J030 branch/evidence. J030 follows this boundary in fresh coordinator context with original budget.
 
 ### Acceptance
 
@@ -30,3 +30,7 @@ Current operator requests a worktree initiative after reporting workers operatin
 - Current worktrees reference and host guides explicitly permit sequential writers in the assigned checkout; mandatory separate worktrees for every writer are not the current universal contract. This makes policy mismatch a competing explanation to forgotten instructions.
 - I0010/J007 delivered the #89 capability-disclosure/binding boundary; I0028 concerns source object-store support from linked worktrees, not assigning every native worker to one.
 - No dedicated active native OS-isolation initiative found in current initiative plans; legacy isolation is parked under I0009/PR87 and tag archive/pr87-windows-isolation at1c7e898ca1eb4e8e35c455aeadbb1f39832caed7. #219 disposition is separate from implementing this initiative.
+
+- r3 implementation retained in candidate `549335e37ff99b90f5d9bc15590fae1a13b22fe9`; [A002](jobs/J001/A002.md) preserves worker self-report and six static scenarios. Coordinator reran focused worktree-location, host-portability, worker-methodology, check-docs, ESLint and diff checks successfully on matching bytes; no live Windows/Claude binding or adherence claim.
+- [V001](jobs/J001/V001.md) retains independent round1 Standards/Spec/aggregate PASS with no findings on exact candidate against75d7c44; all required methodology consumed. Historical sequential-policy statements above describe diagnosis inputs, superseded for new consumer setups by the approved explicit two-mode policy. Actual operator setup remains unchanged under this development grant.
+- Current trusted operator requests continuation and explicitly asks the coordinator to take charge. Coordinator consumed feature-delivery, isswf-pr, risk/description and delivery references; inspected full PR delta including historical preparation records, selected MEDIUM risk for shared workflow/readiness consequences, and retained exact review/CI boundaries. New delivery records are coordinator-owned receipts only; unchanged functional review is reused under affected-delta rules.
