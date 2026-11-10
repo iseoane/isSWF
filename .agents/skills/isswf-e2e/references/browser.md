@@ -8,7 +8,13 @@ Inspect the installed framework version, configuration, existing specs and appli
 
 Use a disposable browser context and test account, never the person's daily authenticated profile. Keep credentials out of versioned storage state, screenshots, traces and reports. A localhost URL does not by itself prove that the backend uses test data or cannot send external messages.
 
-Start an owned application instance on a distinct port or use a separately authorized test environment. Verify the actual expected screen and readiness conditions, not just that the port accepts a connection. Keep its identity and teardown command.
+Start an owned application instance on a distinct port or use a separately authorized test environment. Verify the actual expected screen and readiness conditions, not just that the port accepts a connection. Keep its identity and teardown command. Use disposable profiles and fixtures, bounded waits, and only processes owned by the run; never use the operator's user data or capture their desktop.
+
+### Headless browser versus native webview
+
+A headless browser can cover the actual frontend when its bridge boundary is deliberately substituted. Report that result as frontend/browser coverage and name the substitute. It does not establish coverage of the real bridge, native host, operating system, focus behavior, native dialogs, or native drag-and-drop. Browser headless flags are not evidence that the application's embedded webview can run headlessly.
+
+For native isolated/off-screen automation, first establish support for the actual application stack, version, and platform, then execute an authorized journey before claiming coverage. If support or a suitable driver is unavailable, report the concrete missing capability and uncovered journey instead of proposing an app-specific recipe here. The target project owns its adapters, launch/readiness/teardown commands, fixtures, and stack-specific investigation.
 
 ## Drive the user interface
 

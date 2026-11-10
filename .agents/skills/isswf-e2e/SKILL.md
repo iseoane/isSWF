@@ -44,11 +44,19 @@ Installing a framework, browser binary or service needs a current installation/n
 
 This step ends with an existing driver or an approved addition and an exact execution command.
 
+### No visible desktop or desktop capture
+
+When the task prohibits a visible window or desktop capture, do not silently omit E2E consideration or ask the operator to find a driver. Inspect the target application's existing interfaces and automation capabilities, then select a feasible route or record the specific technical blocker and the unavailable coverage.
+
+For a browser frontend, a headless browser may exercise the actual frontend with a controlled bridge substitute. Label that as frontend/browser coverage only: it does not verify the real bridge, native host, operating-system behavior, focus, native dialogs, or native drag-and-drop. Headless browser flags do not establish that an embedded/native webview supports headless operation.
+
+Claim native isolated/off-screen automation only when the actual application stack, version, and platform support it and the authorized journey was executed. Do not promise support from a framework name or browser flag. The target project owns stack-specific investigation, adapters, launch/readiness/teardown commands, and fixtures; this skill supplies selection and reporting criteria, not app-specific recipes. If no feasible authorized driver exists, state what could not be covered and stop before attempting an unsupported route.
+
 ## 4. Build isolated, meaningful tests
 
 Read [test design and delivery](references/test-quality.md) when creating, changing or retaining a journey. Use disposable data, distinct ports/profiles and bounded waits. Launch from a documented starting state, verify readiness at the user boundary, perform the public actions, and assert the resulting behavior.
 
-Use real application components wherever the journey claims coverage. A stub at an external boundary narrows that claim; record it. Keep provider-enabled or destructive journeys separate and opt-in. Authentication, spending and external writes require their own grant. Protect credentials in fixtures, traces and logs.
+Use real application components wherever the journey claims coverage. A stub at an external boundary narrows that claim; record it. Keep provider-enabled or destructive journeys separate and opt-in. Authentication, spending and external writes require their own grant. Protect credentials in fixtures, traces and logs. Preserve disposable fixtures and profiles, identify owned processes, and use bounded waits. Record the candidate, driver, and platform actually exercised, along with missing coverage; never capture the operator's desktop or use their user data.
 
 For a new test, demonstrate sensitivity to a relevant wrong result when feasible, using a controlled fixture or disposable copy. A setup failure is not a regression demonstration. Existing working behavior need not be broken in the production checkout merely to claim TDD; report sensitivity checks that were not performed.
 
