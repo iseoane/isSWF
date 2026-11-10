@@ -7,6 +7,7 @@ import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { runClaudeCodeAdapterContract } from './claude-code-adapter-contract.mjs';
 
 const source=resolve(process.argv[2]??'.'),dependencies=resolve(process.env.ISSWF_HOST_DEPS??join(source,'tooling/host-tests/node_modules')),piSubagents=resolve(process.env.ISSWF_PI_SUBAGENTS??join(dependencies,'pi-subagents'));
 if(process.argv[3]!=='--child'){
@@ -22,6 +23,7 @@ if(process.argv[3]!=='--child'){
  else{
  const artifact=process.env.ISSWF_PLATFORM_ROOT ? JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT,'platform-report.json'),'utf8')).installed : source;
  assert.equal(typeof artifact,'string','Platform report must identify its actual installed package');
+ await runClaudeCodeAdapterContract(piSubagents, { emit: false });
  const root=await realpath(await mkdtemp(join(tmpdir(),'isswf native roles ñ ')));await mkdir(join(root,'temp'));
  const env=Object.fromEntries(Object.entries(process.env).filter(([k])=>['SYSTEMROOT','SYSTEMDRIVE','WINDIR','COMSPEC','PATH','PATHEXT'].includes(k.toUpperCase())));
  Object.assign(env,{ISSWF_HOST_DEPS:dependencies,ISSWF_PI_SUBAGENTS:piSubagents,HOME:join(root,'home'),USERPROFILE:join(root,'home'),APPDATA:join(root,'appdata'),LOCALAPPDATA:join(root,'localappdata'),TEMP:join(root,'temp'),TMP:join(root,'temp'),PI_CODING_AGENT_DIR:join(root,'profile'),PI_OFFLINE:'1',PI_SKIP_VERSION_CHECK:'1',PI_TELEMETRY:'0'});
