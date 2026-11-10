@@ -98,7 +98,9 @@ Claude Code cuts off long MCP output beyond its token limit (default 25,000 toke
 
 ## Explicitly update an installed host package
 
-A development request or version notice does not update the host. First inspect the manager-owned package, exact source/plugin, current and proposed version, and its scope. Show those effects and any projects affected, then require explicit confirmation. Refuse application if affected work is active or unknown. User/global scope may affect other projects; local project status does not establish that they are idle. A source checkout or Claude `--plugin-dir` override is not an installed package and must not be used as a shortcut.
+A development request or version notice does not update the host. Inspect only already-installed, version-matched host documentation/source and directly read relevant registration/configuration files. Never execute an unverified shim, wrapper, auto-provisioning launcher or host command merely for inspection—not even `--help`, `--version`, `list` or package inventory. Run an inspection command only when its pre-existing direct executable path and version-matched source/docs establish it is side-effect-free. If that safe path or evidence is unavailable, leave inspection pending and refuse the update. A source checkout or Claude `--plugin-dir` override is not an installed package and must not be used as a shortcut.
+
+Identify the exact package/plugin, manager-owned source, current/proposed version, every matching registration and source/ref, full mutation set, and all projects affected before confirmation. Refuse if affected work is active or unknown, or if scope/mutation effects cannot be fully established. User/global scope can affect other projects; local project status does not prove they are idle.
 
 After confirmation, use only the package-specific command:
 
@@ -107,7 +109,9 @@ pi update --extension <exact-configured-source>
 claude plugin update --scope <user|project|local|managed> <exact-plugin-id>
 ```
 
-Confirm the arguments against current local host help. Bare `pi update` updates Pi itself by default, not the isSWF package. For Claude, use the observed registration scope, not ambiguous auto-detection; refreshing or switching a marketplace is a separate confirmed operation. Do not update unrelated packages or alter project pins, model choices or other settings.
+Determine supported syntax from already-installed, version-matched documentation/source; do not launch an unverified command to obtain help. Bare `pi update` updates Pi itself by default, not the isSWF package. For Claude, use the observed registration scope, not ambiguous auto-detection; refreshing or switching a marketplace is a separate confirmed operation. Do not update unrelated packages or alter project pins, model choices or other settings.
+
+Pi 1.5.0's installed package-manager source shows that `pi update --extension <source>` matches package identity across both user and project settings; npm identity ignores package version and Git identity ignores ref. The argument does not select one registration. Enumerate all matching records, scopes, exact sources/refs and resulting mutation effects. Pi rejects `--local` for update; do not invent a scope flag or change settings to narrow the selection. For example, user `git:example.invalid/team/isswf#stable` and project `git:example.invalid/team/isswf#preview` are the same repository identity: a matching update can include both. If the request covered only the project entry, refuse; proceed only after presenting both registration effects and obtaining explicit confirmation plus affected-work evidence for both. If version-matched source, a match, or the mutation set cannot be safely verified, refuse.
 
 Manager success does not prove the current session loaded the new package. Reload/restart or a new session is a separate reconciliation step. Host-managed updates do not guarantee retention of the immediately previous version; previous-version retention and cleanup are unsupported/deferred. Do not run `pi remove`, Claude uninstall, copy caches, or delete old versions as cleanup. The current project's existing setup record may note only locally observed package usage; it is not a native project pin or shared registry.
 
