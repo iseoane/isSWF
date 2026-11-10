@@ -29,12 +29,12 @@ Quality areas: lint, tests, build/package, dead-code and duplication are configu
 
 ## J002
 
-- Status: pending
+- Status: in-review
 - Objective: Define a feasible no-visible-desktop E2E selection path for webview applications, with honest separation of browser frontend coverage and native webview integration.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None for bounded shared guidance; no project-specific driver or native support claim is authorized.
-- Next step: Current operator explicitly starts #255 then #254 then I0042. Checkpoint r2 and dispatch one native worker on feat/255-headless-guidance; coordinator retains publication and freezes shared records during writing. Initial calls spent 0; ceiling six calls, three reviews, two correction cycles; no automatic retries.
+- Next step: Publish feat/255-headless-guidance to iseoane/isSWF targeting main and verify exact-head CI; no merge selected. Functional candidate 7b65f863a89f4e0c2c1e026545dc6c308bea64a2 has independent Standards/Spec PASS in V001. Worker e9e75137 and reviewer 3e231f9f are terminal complete; calls spent 2/6, reviews 1/3, corrections 0/2. Preserve J030 on original branch and untracked I0042. After delivery use compact handoff/fresh context before #254, then I0042; load coordinator, debug/design/verification and relevant host resources, reconcile supported native gate feasibility before writer start.
 
 ### Acceptance
 
