@@ -23,7 +23,6 @@ if(process.argv[3]!=='--child'){
  else{
  const artifact=process.env.ISSWF_PLATFORM_ROOT ? JSON.parse(await readFile(join(process.env.ISSWF_PLATFORM_ROOT,'platform-report.json'),'utf8')).installed : source;
  assert.equal(typeof artifact,'string','Platform report must identify its actual installed package');
- await runClaudeCodeAdapterContract(piSubagents, { emit: false });
  const root=await realpath(await mkdtemp(join(tmpdir(),'isswf native roles ñ ')));await mkdir(join(root,'temp'));
  const env=Object.fromEntries(Object.entries(process.env).filter(([k])=>['SYSTEMROOT','SYSTEMDRIVE','WINDIR','COMSPEC','PATH','PATHEXT'].includes(k.toUpperCase())));
  Object.assign(env,{ISSWF_HOST_DEPS:dependencies,ISSWF_PI_SUBAGENTS:piSubagents,HOME:join(root,'home'),USERPROFILE:join(root,'home'),APPDATA:join(root,'appdata'),LOCALAPPDATA:join(root,'localappdata'),TEMP:join(root,'temp'),TMP:join(root,'temp'),PI_CODING_AGENT_DIR:join(root,'profile'),PI_OFFLINE:'1',PI_SKIP_VERSION_CHECK:'1',PI_TELEMETRY:'0'});
@@ -40,6 +39,7 @@ if(process.argv[3]!=='--child'){
  }
  const result=spawnSync(process.execPath,[fileURLToPath(import.meta.url),artifact,'--child',root],{env,cwd:root,encoding:'utf8',timeout:60000,maxBuffer:1024*1024});
  await writeFile(join(root,'host-output.log'),result.stdout+'\n'+result.stderr);assert.ifError(result.error);assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
+ await runClaudeCodeAdapterContract(piSubagents, { emit: false });
  console.log(JSON.stringify({status:'PASS',platform:process.platform,root,artifact,hostCoverage:piOnly?'Pi SDK/subagent only':'Pi SDK/subagent plus Claude plugin inventory',limits:'Pi child invocation uses a loopback synthetic provider; no real models, live reviewer acceptance or OS sandbox claim'}));
  }
 }else{
