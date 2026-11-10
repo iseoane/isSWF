@@ -6,12 +6,12 @@ Current operator requests a worktree initiative after reporting workers operatin
 
 ## J001
 
-- Status: in-review
+- Status: completed
 - Objective: Diagnose native writer checkout/branch assignment and interruption-related work loss, then propose a supported worktree/checkpoint contract without reviving the legacy isolated executor.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
-- Blocker: None for approved r3 instruction-policy unit. Operator approves setup choice between supported per-writing-assignment worktree (recommended) and explicit shared-sequential mode; reuses existing WT location. Original incident cause remains inconclusive; no native binding/runtime-loss repair claimed.
-- Next step: Publish the reviewed I0042 source branch/PR to iseoane/isSWF main and observe exact-head CI; then request human integration decision (MEDIUM risk, hosts/worker touched). Functional candidate549335e37ff99b90f5d9bc15590fae1a13b22fe9 against75d7c44d86f7ab70fa932ee9644642cb4d5342d3; independent V001 PASS both axes, zero findings. Reviewer95781a29 terminal complete/process terminal observed. Calls3/6, reviews1/3, corrections0/2; no active native actors. Retain original root/settings/release and J030 branch/evidence. J030 follows this boundary in fresh coordinator context with original budget.
+- Blocker: None for the approved r3 policy unit: PR261 integrated under explicit current operator approval after exact-head CI3/3 PASS. Original incident cause and live Claude binding remain outside the delivered claims.
+- Next step: Retain this bounded integration receipt under existing coordinator commit authority; then resume I0009/J030 in a fresh coordinator context after reconciling its parked branch25282b36, forward integrated evidence and reverse/effective-effort/Windows/error-cancellation gaps. Preserve original budgets (reverse2/3 pairs consumed), private evidence and actual settings. No new model probe, release, installation or cleanup selected by this merge approval.
 
 ### Acceptance
 
@@ -34,3 +34,7 @@ Current operator requests a worktree initiative after reporting workers operatin
 - r3 implementation retained in candidate `549335e37ff99b90f5d9bc15590fae1a13b22fe9`; [A002](jobs/J001/A002.md) preserves worker self-report and six static scenarios. Coordinator reran focused worktree-location, host-portability, worker-methodology, check-docs, ESLint and diff checks successfully on matching bytes; no live Windows/Claude binding or adherence claim.
 - [V001](jobs/J001/V001.md) retains independent round1 Standards/Spec/aggregate PASS with no findings on exact candidate against75d7c44; all required methodology consumed. Historical sequential-policy statements above describe diagnosis inputs, superseded for new consumer setups by the approved explicit two-mode policy. Actual operator setup remains unchanged under this development grant.
 - Current trusted operator requests continuation and explicitly asks the coordinator to take charge. Coordinator consumed feature-delivery, isswf-pr, risk/description and delivery references; inspected full PR delta including historical preparation records, selected MEDIUM risk for shared workflow/readiness consequences, and retained exact review/CI boundaries. New delivery records are coordinator-owned receipts only; unchanged functional review is reused under affected-delta rules.
+
+- Publication read back OPEN PR261, head76f4232de725d602ad2118555414137a24ca2071, main base4fb82c632d79a6893756489b2e2d36f53b523edd; exact English body/risk/testing observed. CI rollup empty at publication readback; no merge/acceptance claim. Local receipt is pending a later bounded checkpoint rather than recursively publishing a receipt of itself.
+
+- Current operator explicitly requests integration ("ok pues.integra.no?"). Verified PR261 exact76f4232 CI Quality42909987264 SUCCESS3/3 including Windows, then merged with expected-head guard. Readback MERGED at2026-11-10T22:01:34Z, merge b8fea8daac933598b59597200e66db39f993c5f0. Prior pending-CI/publication statements are historical, superseded by this receipt. Approved r3 instruction-policy unit completed; no live host-adherence or incident-repair claim. GitHub live readback found zero open PRs and zero open issues.

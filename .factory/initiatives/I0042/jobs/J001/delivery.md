@@ -56,7 +56,7 @@ Interruption left the completed working-tree policy change without source commit
 
 - Technical closure: source checks/review complete; exact-head PR CI pending.
 - Operator product acceptance: pending.
-- Publication state: not yet published at this record checkpoint.
+- Publication state: observed OPEN [PR261](https://github.com/iseoane/isSWF/pull/261), head `76f4232de725d602ad2118555414137a24ca2071`, main base `4fb82c632d79a6893756489b2e2d36f53b523edd`. Publication readback had empty statusCheckRollup: CI pending/unobserved, not green. This local receipt is not yet committed; retain at the next bounded receipt checkpoint, not as a recursive PR-head claim.
 - Human decision: integration requires a separate operator decision after exact-head CI, because risk is MEDIUM and host/worker paths require a person under REVIEW.md.
 - Integration boundary: no merge, auto-merge or direct-main push.
 
@@ -66,4 +66,8 @@ Interruption left the completed working-tree policy change without source commit
 
 ## Blockers and next action
 
-Publish branch/PR and observe CI on exact head; do not continuously poll. Budget: calls3/6, reviews1/3, corrections0/2, no active actors. Preserve J030 original branch/private evidence and its original budgets; continue at the next unit boundary in fresh coordinator context. The current record does not claim CI or integration.
+Observe CI on published exact PR head; do not continuously poll. No verified native CI completion event/deferred checker is available in this session, so CI needs a later bounded read-only revisit. Budget: calls3/6, reviews1/3, corrections0/2, no active actors. Preserve J030 original branch/private evidence and its original budgets; continue at the next unit boundary in fresh coordinator context. The current record does not claim CI or integration.
+
+## Integration receipt — supersedes pending CI/integration above
+
+Current operator explicitly requested integration. Exact PR head `76f4232de725d602ad2118555414137a24ca2071` passed all three required Quality checks in run42909987264, including Windows. Coordinator merged with expected-head protection and read back MERGED, merge `b8fea8daac933598b59597200e66db39f993c5f0`, at2026-11-10T22:01:34Z. Technical closure and authorized integration complete for r3 policy unit; no claim of live binding/adherence or reproduced incident repair. No release, installation, setup mutation or cleanup. Remaining J030/J029 work stays separate with its original scope and budgets. This receipt awaits its own bounded checkpoint; it does not change the reviewed/tested source identity.
