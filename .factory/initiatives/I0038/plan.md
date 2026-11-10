@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: awaiting-human
+- Status: in-review
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
-- Blocker: V003 F004 candidate eligibility still admits registered local development override; no further correction edit/call granted.
-- Next step: Request explicit bounded F004 wording correction authorization, then use remaining V004 independent review.
+- Blocker: F004 coordinator wording correction applied under explicit operator yes; independent V004 pending.
+- Next step: Verify exact committed correction and obtain final independent V004.
 
 ### Acceptance
 
@@ -148,3 +148,9 @@ Revised informational semantics remove receipt/helper bootstrap and no longer cl
 Reviewer760eb992-3d1c-4698-9e1c-2b5ad37b2174 terminal complete observed; V003 consumed in full. Standards/Spec FAIL limited to new introduced blocking F004, risk MEDIUM. Previous F001/F003 superseded by approved informational scope, F002 resolved. F004 accepted: running-identity paragraph excludes local source overrides, but installed-candidate paragraph must explicitly apply same managed-ownership/source-override rule. Pi list includes existing local paths, so registered development9.0.0 could contaminate maximum for installed1.8.2. This is a concrete bounded textual eligibility defect, not release authenticity or Windows evidence expansion. Claude readFromFolder alone is not development proof because installed local artifact may load in place.
 
 Cumulative initialworker1+continuations3+fresh1 and reviews3/4 consumed; one review remains, no correction call/edit authorized automatically. No active actors, source unchanged after004fc8249ebfdd2e9b1c8b5eac8d3b66000a7fea. Request one narrowly bounded coordinator wording correction (no worker/model call) explicitly carrying source exclusion into candidate eligibility, focused/full relevant checks, then V004 independent exact delta. Do not change product scope, add runtime/helper or widen host authority. Prior V001/V002/V003 FAIL and A003/A004 BLOCKED preserved. No publication before pass/gates.
+
+## Explicit coordinator F004 correction
+
+Current operator "si" authorizes exactly the proposed coordinator wording repair, checks and remaining independent V004, no extra worker call. Coordinator changed only candidate-eligibility paragraph: same managed/source distinction as running identity; Pi npm/Git eligible, positively identified local development excluded, ambiguous relevant ownership unknown; Claude readFromFolder alone not sufficient to classify source versus installed artifact. No product scope change, code/verifier execution or host APIs added. V003 FAIL remains until V004 verdict. Static walkthrough: managed1.8.2 plus registered development9.0.0 excludes development; ambiguous candidate unknown; installed in-place Claude artifact requires positive evidence, not blanket exclusion. This is instruction semantics, not live model behavior.
+
+Budgets unchanged except explicitly allowed coordinator edit: worker calls initial1+continuations3+fresh1 spent; reviews3/4 spent, final4 allocated after exact checks. No active writer. Metadata invariant tests unchanged; no new wording RED claim. Preserve source/version identity and no-network/mutation boundaries.
