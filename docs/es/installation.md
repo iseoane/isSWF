@@ -96,15 +96,32 @@ El revisor de Claude Code dispone de las herramientas `identity`, `diff` y `cont
 
 Claude Code corta la salida MCP que supera su límite de tokens (25.000 por defecto), así que la garantía de no devolver evidencia parcial solo se cumple si el coordinador define `MAX_MCP_OUTPUT_TOKENS=100000` en ese mismo proceso de revisión. El propio servidor rechaza resultados de más de 98.304 bytes y entrega el diff en fragmentos numerados, cada uno con el tamaño total del parche y su SHA-256. El parche está completo solo cuando los fragmentos concatenados coinciden con ese resumen. Cualquier marcador `[OUTPUT TRUNCATED` o lectura incompleta es un fallo. Tanto el servidor como las herramientas de Pi comprueban en cada resultado correcto el repositorio, los commits y el resumen de la vinculación y, en diff y contenido, el número de bytes y el SHA-256, antes de devolverlo; un rechazo puede omitir esos campos, pero no contradecirlos. Igual que las herramientas de Pi, es un límite operativo de solo lectura, no un sandbox del sistema operativo. La [guía de host de Claude Code](../../.agents/hosts/claude-code-review-launch.md) incluye el comando de lanzamiento y los límites.
 
-## Actualizar sin cambiar todos los repositorios
+## Actualizar explícitamente un paquete instalado del host
 
-Primero actualiza el paquete o el plugin mediante el gestor de tu asistente. Para versiones locales, sustituye el registro anterior por la nueva carpeta de versión preparada. Una versión fijada no cambia hasta que selecciones otra.
+Una petición de desarrollo o un aviso de versión no actualiza el host. Inspecciona solo documentación/código fuente instalados y de la misma versión del host; lee directamente los archivos pertinentes de registros y configuración. No ejecutes un shim, wrapper, lanzador de aprovisionamiento automático ni comando del host sin verificar solo para inspeccionar, ni siquiera `--help`, `--version`, `list` o el inventario de paquetes. Ejecuta un comando de inspección únicamente si la ruta directa del ejecutable ya instalado y la documentación/código fuente de esa versión demuestran que no tiene efectos secundarios. Si no se puede confirmar esa vía segura, deja la inspección pendiente y rechaza la actualización. Un checkout de código fuente o una anulación de Claude `--plugin-dir` no es un paquete instalado ni debe usarse como atajo.
 
-Después pide a la skill de configuración:
+Antes de confirmar, identifica el paquete/plugin exacto, la fuente administrada por el host, las versiones actual y propuesta, cada registro coincidente con su fuente/referencia, el conjunto completo de mutaciones y todos los proyectos afectados. Rechaza si hay trabajo activo/desconocido o si no pueden determinarse el ámbito o los efectos. Un ámbito de usuario/global puede afectar otros proyectos; el estado local no demuestra que estén inactivos.
+
+Después de confirmar, utiliza únicamente el comando específico del paquete:
+
+```sh
+pi update --extension <exact-configured-source>
+claude plugin update --scope <user|project|local|managed> <exact-plugin-id>
+```
+
+Determina la sintaxis admitida mediante documentación/código fuente instalados y de la misma versión; no ejecutes un comando sin verificar para obtener ayuda. El comando básico `pi update` actualiza Pi por defecto, no el paquete isSWF. Para Claude, usa el ámbito observado en el registro; no dependas de la detección automática ambigua. Actualizar o cambiar un marketplace es una operación separada que también requiere confirmación. No actualices paquetes ajenos ni cambies pins, modelos u otros ajustes del proyecto.
+
+El código fuente instalado de Pi 1.5.0 muestra que `pi update --extension <source>` compara la identidad del paquete tanto en los ajustes de usuario como en los del proyecto; para npm ignora la versión y para Git ignora la referencia. El argumento no selecciona un solo registro. Enumera todos los registros coincidentes, ámbitos, fuentes/referencias exactas y efectos de mutación. Pi rechaza `--local` para actualizar; no inventes un selector de ámbito ni cambies ajustes para limitar la selección. Por ejemplo, `git:example.invalid/team/isswf@stable` en el usuario y `git:example.invalid/team/isswf@preview` en el proyecto identifican el mismo repositorio: una actualización coincidente puede incluir ambos. Si la petición solo cubría el registro del proyecto, recházala; continúa únicamente después de presentar los efectos de ambos registros y obtener confirmación explícita y evidencia del trabajo afectado para los dos. Si no se pueden verificar de forma segura el código fuente de la versión, una coincidencia o el conjunto de mutaciones, rechaza la operación.
+
+Que el gestor termine correctamente no demuestra que la sesión actual haya cargado el paquete nuevo. Recargar/reiniciar o iniciar una sesión nueva es una reconciliación aparte. La actualización administrada por el host no garantiza conservar la versión inmediatamente anterior; la retención de versiones anteriores y la limpieza están fuera de alcance y se aplazan. No ejecutes `pi remove`, la desinstalación de Claude, no copies cachés ni elimines versiones antiguas como limpieza. El registro de configuración del proyecto actual puede anotar solo el uso del paquete observado localmente; no es un pin nativo del proyecto ni un registro compartido.
+
+## Actualizar la ruta heredada y después migrar un proyecto
+
+El procedimiento de migración siguiente solo se aplica cuando el operador selecciona explícitamente la ruta del runtime heredado existente. Para ese trabajo, actualiza el paquete o plugin mediante el gestor del host. Después pide a la skill de configuración:
 
 > Comprueba qué cambiaría si actualizase este proyecto. No lo apliques todavía.
 
-Actualizar el paquete instalado no actualiza los registros de todos los proyectos. Cada proyecto mantiene su versión elegida hasta que lo migres de forma explícita.
+Actualizar el paquete instalado no actualiza los registros de todos los proyectos. Cada proyecto mantiene su elección hasta que lo migres de forma explícita.
 
 Antes de migrar, guarda los archivos afectados en Git y termina o reconcilia el trabajo en ejecución. La migración comprueba el cambio propuesto, conserva la versión anterior y registra cómo recuperarse. No borres versiones conservadas ni registros de operaciones interrumpidas para forzar una actualización.
 

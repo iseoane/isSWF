@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
-- Blocker: F004 coordinator wording correction applied under explicit operator yes; independent V004 pending.
-- Next step: Verify exact committed correction and obtain final independent V004.
+- Blocker: None; PR250 merged after V004 PASS/LOW and exact-head CI success.
+- Next step: J003 lifecycle product decision; no further J002 work.
 
 ### Acceptance
 
@@ -48,22 +48,27 @@ The operator learns when a newer isSWF version is installed, updates through `is
 - No provider or network call; a missing or unreadable version source is reported as unknown, never as up to date.
 - Works for Pi and Claude Code on Linux and Windows, with shared evidence where the behavior is shared.
 
+### Evidence
+
+- PR250 merged at5e36f57fc5a8f089a474e11e08d46a7dbcf69e6f, V004 PASS/LOW; exact head6bfa342a55f971ace14ace0f418f27a715b0b3f5 Quality42757452058 SUCCESS all3 portable/Linux/Windows. No live model-compliance claim.
+
 ## J003
 
-- Status: pending
+- Status: in-review
 - Objective: `isswf-setup` updates with confirmation and removes only versions that no known project uses, keeping the immediately previous one.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Depends on J001.
-- Next step: Refine the brief from J001 findings.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: None for approved confirmed-update subset; shared registry/cleanup and previous-version guarantee explicitly deferred.
+- Next step: Worker implements confirmed-update procedure/refusals and project-local observed-usage receipt; independent review and PR/CI.
 
 ### Acceptance
 
-- Update is proposed, not applied, while any job is in progress; with no active jobs it applies only after operator confirmation.
-- A usage registry records which project uses which version; setup refreshes it on every run.
-- Cleanup lists candidate versions and deletes only after confirmation, never the running, a registered-in-use or the immediately previous version; unknown projects block or ask.
-- Deletion uses the host manager where it owns the version; isSWF deletes only what it installed itself.
-- Tests cover a version in use, the previous version, an unknown project and a refused confirmation, on Linux and Windows CI.
+- Setup shows host/source/scope/effect before confirmation; active or unknown affected work prevents update application.
+- An idle, explicitly confirmed update uses the existing supported host manager; refusal or no confirmation leaves installations, pins/models and unrelated settings unchanged.
+- Reload/new-session reconciliation is separate from manager success; project-local observed usage may be recorded without claiming a shared global registry or project pin.
+- Host-owned cleanup and guaranteed immediately-previous retention are explicitly unsupported/deferred; no automatic deletion, cache copy or custom manager.
+- Focused refusal/confirmation and source-scope contracts are checked in existing Linux/Windows CI; actual live update/model behavior remains honestly unverified unless actually executed.
+
 
 ## Current execution grant and J001 handoff
 
@@ -162,3 +167,59 @@ Reviewera4674135-8f4a-42a3-b044-6283d01296cf terminal complete observed. V004 fu
 Coordinator LOW assessment for final advisory: canonical instruction/metadata invariant only, no runtime execution, updates/deletion or global state. Plausible failure is misleading informational notice or missed notice if host identity/inventory unclear; managed-source eligibility, fail-to-unknown, bounded scope and independent scenario review mitigate. Version-header/package consistency and exact-source tests detect drift. User notices unknown/missing evidence; revert restores instructions but cannot undo notices already read. No rollback test or live model compliance claim. Publication/full platform CI pending; expected-head LOW integration already explicitly approved. These receipt-only changes do not alter reviewed functional bytes; check plan/docs/whitespace.
 
 Next functional unit: after exact-head CI/integration of J002, refine J003 from J001 host-ownership constraints; no host update/delete action authorized by implementation request alone, retain explicit confirmations. Queue thereafter I0009/J030 Linux plus Windows CI feasible checks, then I0014 evaluation only. Record remaining actual-Windows limitations, not fictitious parity.
+
+## J003 bounded planning authorization
+
+While J002 PR250 head6bfa342a55f971ace14ace0f418f27a715b0b3f5 CI runs, read-only J003 planning is independent; no update/deletion implementation starts before J002 reconciliation. Current operator already selected I0038 implementation, not actual machine maintenance. J001 findings require planning judgment: Pi in-place manager/Claude host-aged caches versus retain-previous rule, global usage unknowns, and no factory-owned deletion outside proved ownership. One planner call approved within assignment role selection,25min, model gpt-6.1-sol low verified native profile; actual tools read/grep/find/ls only. Coordinator supplies exact Git-archive snapshot so no Git tool requirement or substitution of working-tree bytes. Planner returns proposal via bound A001, no source changes or nested delegation.
+
+Selected methods: design-principles for ownership/usage contract; execution-principles for updates/serialized maintenance; verification-principles for negative/refusal tests and honest host limits; security for bounded destructive candidates; writing for setup methodology. Planner must read canonical role/planning references and selected resources, report consumed/missing and concrete proposed evidence. No actual install/update/delete/global config/provider calls or API costs. No guessing host-root ownership or retention controls. Keep original product acceptance visible; identify which facts constrain feasibility and minimal safe alternatives, not silently narrow it. One planner consumed on dispatch; any later worker/review gets separate finite budget within J003, no automatic reset. No new runtime/registry unless demonstrated need for acceptance; no structural-overkill cleanup daemon.
+
+## Integration and J003 decision handoff
+
+PR250 merged2026-11-10T04:45:10Z under prior explicit LOW-risk integration authorization and expected-head guard; confirmed MERGED. J002 technical delivery complete, no active actors; all four reviews consumed. J003 planner3384cda3-5cb9-4387-949e-f12fae5955d6 terminal complete, full A001 proposal consumed. Supplied exact archive inputs avoided previous missing-Git limitation; proposal source-backed, no runtime effects/tests claimed. One planner call consumed; no writer/reviewer J003 calls allocated yet.
+
+Initial assumption of prunable native version archives invalid: Pi updates in place, Claude owns/ages old caches, no supported keep-previous guarantee. Shared-store legacy deletion additionally needs cross-project lifecycle serialization and historical rollback-retention decision. Do not implement cleanup daemon/manager or silently weaken guarantees. Product recommendation: first deliver confirmed native update procedure and explicit unsupported-retention/no-cleanup disclosure; record project-local observed usage only, not fictitious complete global registry; defer shared registry and actual cleanup with original unmet acceptance visible. Alternative keep original retention guarantee and block unsupported native update. Exact question: accept the recommended bounded subset and defer registry/cleanup, or retain original all-in scope? Resume condition explicit selection, refine J003 brief and finite budgets before writer.
+
+No installation/update/delete performed or implied by feature development. Queue remains J030 Linux+Windows-CI then I0014 evaluation, but do not pretend I0038 cleanup complete. Local feature branch prepared from integrated main, prior branch preserved; no cleanup/reset/force push.
+
+## J003 accepted bounded outcome and worker grant
+
+Current operator "ok" explicitly accepts preceding recommendation: confirmed update only, no automatic cleanup now; shared registry and deletion deferred. This supersedes original J003 all-in completion criteria, not retroactive completion of those features. Previous guaranteed retention is not provided by this unit, disclosed before update. Project-local observed usage is evidence, not global completeness or legacy pin. Original accepted initiative ambition preserved in prior Git/brief and planner proposal; do not claim garbage collection shipped.
+
+Functional scope: canonical setup procedure, minimal existing record/template and required bilingual current installation guide updates plus focused static contract tests. No new executable, host adapter, registry service or destructive effect justified. One sequential worker (25min) plus max2 corrections and3 independent reviews (six calls total), approved worker gpt-6-luna high/reviewer gpt-6.1-sol medium; J003 planner1 already consumed separately, no reset. No nested calls/install/update/delete/provider/model probes/global configuration/push/PR/merge by worker; coordinator publication under current feature grant. Human touched-path gates of REVIEW.md remain binding, independent LOW risk doesn't waive them.
+
+Methods selected: writing for agent/human usage instructions (both canonical references if user guides change); security for explicit source/scope/permission distinction; execution principles for affected-work identity and unchanged budgets/no automatic retry; verification principles for criterion/case mapping and disclosed static/live limits. Design principles not selected unless implementation actually changes data contract, prefer existing setup record fields. TDD not selected for procedure-only wording; no fake model RED. E2E live update deliberately not selected: development grant doesn't authorize actual host maintenance; no standalone provider calls. Combined semantic/static review needed, existing tests cannot prove real host update or global inactivity.
+
+## J003 A002 and unintended host-side effect
+
+Workerb641c934-1e45-4d4c-bd47-c1c0e1cd7cc5 terminal complete observed; A002 consumed in full. Candidate five modified files (setup skill, EN/ES/root installation guides, host-portability assertions), no runtime logic. Worker actual Claude help invocation through mise wrapper unexpectedly installed Claude CLI2.1.322. This violated no-install boundary; user informed immediately on consuming report. Do not claim clean no-side-effect help validation. Worker later help occurred after mutation; no plugin update/deletion or repository modification by mise reported. Do not invoke wrapper again, revert/delete automatically or conceal environment change. Underlying mise cause/version resolution not independently established. No further host operations or recovery actors authorized; preserve evidence, no credentials/transcripts retained. Author self-reported resources consumed; no host read trace independently inspected.
+
+Coordinator separately ran host-portability/check-docs/documentation/package-metadata/whitespace PASS on retained candidate. These static checks do not prove global inactivity, actual manager-update path or live Linux/Windows behavior. No full portable suite at author step per focused docs-only policy; exact platform CI remains required before integration. Review round1/3 allocated, no prior J003 reviews, correction0/2. Combined semantic/static mode for authority-sensitive procedure and translated guides; required selected methods writing agent/human, security, execution, verification; no behavioral TDD/live E2E selected. REVIEW.md present; new source paths are not its person-required packaging/host/workflow code, but reviewer must assess actual touched paths. Required review includes command syntax source-backed without invoking mutable launch shims, version/scope confirmation and refusal coherence, source/pin separation, registry/deletion deferment. No active actors after worker cessation; checkpoint before reviewer call.
+
+## J003 V001 correction1
+
+Reviewer941b3913-e442-4b91-aff7-41304445d8db terminal complete observed; full V001 consumed. Standards/Spec FAIL, MEDIUM, introduced blocking F001/F002 accepted. F001 safe inspection must not execute unverified launch shims merely for help/inventory; prefer installed version-matched docs/source and refuse unavailable safe path. F002 Pi --extension source selector matches package identity across user+project settings ignoring Git refs/npm versions; --local rejected for update. Resolve full matching registration/ref/mutation set and affected projects, confirm actual operation or refuse; no invented flag/config changes. Mirror canonical skill/guides/static coverage consistently. Incidental mise mutation remains visible/unreverted, no more host commands authorized.
+
+Allocate same worker correction1/2,25min, approved gpt-6-luna high. One planner+initial worker and review1/3 already spent; no new actor/retry/model substitution, nested delegation or host lifecycle actions. First verify read/bash tools, then only source/docs reads and existing pure repository checks. No wrapper/help/version/inventory command executions at all this correction; use known installed source/doc paths. Inputs frozen after checkpoint; report A003, independent delta review follows.
+
+## J003 A003 and review2
+
+Continuation957b43c1-5ce4-4181-9de5-ce9c21880180 terminal complete observed; A003 consumed. Functional candidate27936c5a578ee12d6743777794bae70338bf7dd1 claims F001/F002 fixed in all skill/EN/ES/root consumers and static assertions. Coordinator focused host-portability/docs/documentation/package-metadata/whitespace rerun PASS. No more host wrappers invoked per report; original mise incident remains uncorrected/retained. Resources self-reported consumed, no independently inspected host trace. Author disclosed repeated regex-wording assertion corrections without timely premise checkpoint; static/live limits remain explicit. No new product acceptance or runtime behavior claim.
+
+Allocate independent delta review2/3 against first candidatecfeafb7a4952f4b55a4aab8af875ebb4f18a0fb8; prior V001 FAIL retained until new verdict. Main risks: safe nonexecuting inspection path and Pi identity-match set across scopes/refs before exact confirmation. No active writer; budgets planner1+worker1+correction1/2 spent, review2/3 allocated. No update/delete/revert/cleanup allowed, version-matched source only. Exact touched-path person gate to assess from REVIEW.md. Documentation-only focused verification per canonical development policy; CI full suite required later.
+
+## J003 V002 and correction2 coordinator repair
+
+Reviewerd14684ca-1e8a-4ef1-ac6f-c0f43fd52a8e terminal complete observed; full V002 consumed. F001/F002 RESOLVED, introduced blocking F003 generic-host Git ref syntax example wrong (# not @), Standards/Spec FAIL, MEDIUM. Accepted exact narrow correction under remaining authorized correction2/2; coordinator performs mechanical replacement rather than consumes another worker/model call. This uses existing correction budget, not a substitute after exhaustion. No product/authority change.
+
+Coordinator read installed Pi1.5.0 dist/utils/git.js:2-59 directly without executing it: generic refs split on @; generic-host # stays path. Replaced only example stable/preview separators in canonical skill, three guides and matching assertions. Writing skill and both audience references read; supported-example rule applied consistently, translations preserve identical example. Ordinary same-repo different-ref path now reaches intended identity-match scenario; conditional incomplete scope/refusal unchanged; missing evidence still pending/refused. Static source walkthrough, no live manager/update/provider or executable parser behavior claimed.
+
+Budgets planner1+worker1+worker correction1 plus coordinator correction2/2, reviews2/3 consumed; final review3 allocated after checks. No active actors. Prior V001/V002 FAIL/incident remain unchanged. Scope remains confirmed-update only, no cleanup/registry/previous guarantee. No host-wrapper calls/install/update/delete or automatic recovery. No more corrections or reviews without explicit extension if final verdict fails.
+
+## J003 V003 technical delivery receipt
+
+Reviewerdc427222-d9a4-41da-99fa-70e2355a73b1 terminal complete observed, full V003 consumed: Standards/Spec/aggregate PASS, F003 RESOLVED, no new findings, LOW risk. Bound exact candidateb4aabc8418940a907ab7997f11e2f0acb9203db0 digest182fcde30ee03132d452d9fc8a278abea47743cac8e621856437ece3ae29d70a. V001/V002 FAIL and mise incident retained. Required resources self-reported consumed, none missing, no touched-path person gate. No active actors; planner1+worker1+corrections2/2, reviews3/3 exhausted. No more calls/corrections without explicit extension.
+
+Coordinator LOW integration assessment: instruction/translation/static contract delta, no manager executable/runtime/grant implementation changed. Plausible failures wrong update scope or unsafe inspection mitigated by source-backed full match set, no unverified launcher execution, exact confirmation and unknown/active refusal. Source-syntax example traced directly; static tests do not establish live host obedience. Misleading result detected by scope/receipt mismatch; revert restores instructions but does not undo host actions. No rollback run. Original unintended Claude CLI2.1.322 installation remains disclosed/unreverted; no further host maintenance. This is development delivery, not operator-machine update acceptance. Cleanup/registry/guaranteed retention still deferred by explicit operator.
+
+Publish this confirmed-update unit, exact-head full CI then LOW expected-head integration under existing explicit grant. Record-only receipt delta leaves functional reviewed bytes unchanged. Next independent grounding may prepare J030 Linux+Windows-CI while CI runs, never execute an unverified host shim. I0014 evaluation follows J030. No release publication/install/delete grant.

@@ -459,6 +459,31 @@ assert.equal((setup.match(/`CLAUDE\.md` bridge/giu) ?? []).length, 1, 'Setup doc
 assert.doesNotMatch(setup, /automatic host hook/u);
 assert.doesNotMatch(setup, /\binstall (?:Engram|Codegraph)/iu);
 assert.doesNotMatch(entrySetup, /optional|Verify project identity/u, 'Setup entry must require available Engram/Codegraph without contrast checks');
+const hostUpdate = setup.slice(setup.indexOf('### Explicit host-native package update'), setup.indexOf('An explicit setup request permits recording approved decisions'));
+for (const pattern of [
+  /A development request, version notice, setup inspection, or request to show a proposal is not permission/u,
+  /Never execute an unverified shim, wrapper, auto-provisioning launcher or host command merely to inspect/u,
+  /not even `--help`, `--version`, `list` or package inventory/u,
+  /If no safe inspection path or version-matched evidence is available, mark inventory\/version\/scope unknown/u,
+  /Refuse to apply while any affected job is active or its state is unknown/u,
+  /local status, an operator attestation, or an unregistered project list does not establish global inactivity/u,
+  /Require an explicit confirmation covering that complete proposal/u,
+  /every matching registration and source\/ref, actual mutation set/u,
+  /Pi 1\.5\.0, the installed `@earendil-works\/pi-coding-agent` source gathers matching entries from both personal\/user and project settings/u,
+  /npm identity ignores package version and its Git identity ignores ref/u,
+  /`--local` is rejected for update, not a supported scope selector/u,
+  /`git:example\.invalid\/team\/isswf@stable`[\s\S]*`git:example\.invalid\/team\/isswf@preview`/u,
+  /Because repository identity ignores the ref, an update selected by either source identity matches both records/u,
+  /manager cannot isolate the confirmed scope or its full mutation set is unknown, refuse/u,
+  /claude plugin update --scope <user\|project\|local\|managed> <exact-plugin-id>/u,
+  /Manager success does not prove the current session has reloaded the package/u,
+  /Previous-version retention and cleanup are unsupported\/deferred/u,
+  /do not copy caches, run `pi remove`, Claude uninstall/u,
+  /not a native project pin or a shared registry/u,
+  /Development must not alter any operator setup records/u,
+]) assert.match(hostUpdate, pattern);
+assert.match(hostUpdate, /Never invoke a broad\/self update \(`pi update`, `pi update --all`\)/u);
+assert.match(hostUpdate, /Never use `claude plugin uninstall` to remove an older version/u);
 const claudeSetup = await read('skills/isswf-setup/SKILL.md');
 assert.match(claudeSetup, /\$\{CLAUDE_PLUGIN_ROOT\}\/\.agents\/skills\/isswf-setup\/SKILL\.md/);
 assert.match(host, /## Setup model choices/);

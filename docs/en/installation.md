@@ -96,15 +96,32 @@ The Claude Code reviewer can use `identity`, `diff` and `content` tools that rea
 
 Claude Code cuts off long MCP output beyond its token limit (default 25,000 tokens), so the no-partial-evidence guarantee holds only when the coordinator sets `MAX_MCP_OUTPUT_TOKENS=100000` in the same review process. The server itself refuses results over 98,304 bytes and delivers a diff as numbered chunks, each with the whole patch's byte count and SHA-256. The patch is complete only when the chunks concatenate to that digest. Any `[OUTPUT TRUNCATED` marker or incomplete read is a failure. Both the server and the Pi tools check every successful result's bound repository, commits and binding digest, and for diff and content its byte count and SHA-256, before returning it; a refusal may omit these fields but must not contradict them. Like the Pi tools, this is an operational read-only boundary, not an operating-system sandbox. The [Claude Code host guide](../../.agents/hosts/claude-code-review-launch.md) has the launch command and limits.
 
-## Update without changing every repository
+## Explicitly update an installed host package
 
-First update the package or plugin using your host's manager. For local releases, replace the old registration with the new prepared release folder. A fixed version stays fixed until you select another one.
+A development request or version notice does not update the host. Inspect only already-installed, version-matched host documentation/source and directly read relevant registration/configuration files. Never execute an unverified shim, wrapper, auto-provisioning launcher or host command merely for inspection—not even `--help`, `--version`, `list` or package inventory. Run an inspection command only when its pre-existing direct executable path and version-matched source/docs establish it is side-effect-free. If that safe path or evidence is unavailable, leave inspection pending and refuse the update. A source checkout or Claude `--plugin-dir` override is not an installed package and must not be used as a shortcut.
 
-Then ask setup:
+Identify the exact package/plugin, manager-owned source, current/proposed version, every matching registration and source/ref, full mutation set, and all projects affected before confirmation. Refuse if affected work is active or unknown, or if scope/mutation effects cannot be fully established. User/global scope can affect other projects; local project status does not prove they are idle.
+
+After confirmation, use only the package-specific command:
+
+```sh
+pi update --extension <exact-configured-source>
+claude plugin update --scope <user|project|local|managed> <exact-plugin-id>
+```
+
+Determine supported syntax from already-installed, version-matched documentation/source; do not launch an unverified command to obtain help. Bare `pi update` updates Pi itself by default, not the isSWF package. For Claude, use the observed registration scope, not ambiguous auto-detection; refreshing or switching a marketplace is a separate confirmed operation. Do not update unrelated packages or alter project pins, model choices or other settings.
+
+Pi 1.5.0's installed package-manager source shows that `pi update --extension <source>` matches package identity across both user and project settings; npm identity ignores package version and Git identity ignores ref. The argument does not select one registration. Enumerate all matching records, scopes, exact sources/refs and resulting mutation effects. Pi rejects `--local` for update; do not invent a scope flag or change settings to narrow the selection. For example, user `git:example.invalid/team/isswf@stable` and project `git:example.invalid/team/isswf@preview` are the same repository identity: a matching update can include both. If the request covered only the project entry, refuse; proceed only after presenting both registration effects and obtaining explicit confirmation plus affected-work evidence for both. If version-matched source, a match, or the mutation set cannot be safely verified, refuse.
+
+Manager success does not prove the current session loaded the new package. Reload/restart or a new session is a separate reconciliation step. Host-managed updates do not guarantee retention of the immediately previous version; previous-version retention and cleanup are unsupported/deferred. Do not run `pi remove`, Claude uninstall, copy caches, or delete old versions as cleanup. The current project's existing setup record may note only locally observed package usage; it is not a native project pin or shared registry.
+
+## Update the legacy path, then migrate a project
+
+The migration procedure below applies only when the operator explicitly selects the existing legacy runtime path. For that work, update the package/plugin through the host manager first. Then ask setup:
 
 > Check what would change if I updated this project. Do not apply it yet.
 
-Updating the installed package does not update every project's records. Each project keeps its selected version until you explicitly migrate it.
+Updating the installed package does not update every project's records. Each project keeps its selection until you explicitly migrate it.
 
 Before migrating, save the affected files in Git and finish or reconcile running work. The migration checks the proposed change, keeps the previous version, and records how to recover. Do not delete retained versions or interrupted-operation records to force an update.
 
