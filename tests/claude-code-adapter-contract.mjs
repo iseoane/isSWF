@@ -49,6 +49,14 @@ export async function runClaudeCodeAdapterContract(packageRoot, { emit = true } 
       () => adapter.resolveClaudeCodeOverride({ model: 'invalid model:medium', agent, agentName: 'claude-code' }),
       /Invalid Claude Code model/u,
     );
+    assert.throws(
+      () => adapter.resolveClaudeCodeOverride({ model: 'opus:high', thinkingCeiling: 'medium', agent, agentName: 'claude-code' }),
+      /exceeds configured maximum/u,
+    );
+    assert.throws(
+      () => adapter.assertClaudeCodeModelScope({ agent: 'claude-code', model: 'opus', scopes: [{ enforce: true, allow: ['claude-sonnet'] }] }),
+      /outside the configured subagent model scope/u,
+    );
 
     const launch = adapter.resolveClaudeCodeLaunch({
       adapter: agent.runner.adapter,
@@ -100,6 +108,20 @@ export async function runClaudeCodeAdapterContract(packageRoot, { emit = true } 
     assert.equal(runResult.parserTerminal.state, 'completed');
     assert.deepEqual(JSON.parse(runResult.output), { cwd: runnerCwd, input: prompt });
 
+    const outputLimitResult = await runner.runExternalCli({
+      command: process.execPath,
+      args: ['-e', "process.stdout.write(JSON.stringify({type:'result',subtype:'success',is_error:false,result:'long terminal output'})+'\\n')"],
+      cwd: runnerCwd,
+      prompt,
+      asyncDir: join(fixtureRoot, 'runner-limit-output'),
+      stepIndex: 0,
+      environment: { allowlist: ['PATH'] },
+      parser: adapter.createClaudeCodeJsonlParser(),
+      limits: { parserOutputBytes: 3 },
+    });
+    assert.match(outputLimitResult.error, /terminal output exceeded its byte limit/u);
+    assert.notEqual(outputLimitResult.exitCode, 0);
+
     let stopTimer;
     const stopResult = await runner.runExternalCli({
       command: process.execPath,
@@ -149,7 +171,7 @@ export async function runClaudeCodeAdapterContract(packageRoot, { emit = true } 
     const result = {
       status: 'PASS',
       packageVersion: manifest.version,
-      cases: ['project custom profile discovery and direct command', 'Opus/medium argv translation and invalid model refusal', 'no-tools/empty-MCP/user-settings launch contract', 'inherited provider-route visibility', 'adapter argv and Pi-only profile refusal', 'runner override refusal', 'UTF-8 stdin, cwd, and terminal output through a synthetic Node process', 'stop result through a synthetic Node process', 'terminal success/failure/duplicate/malformed/missing parser states'],
+      cases: ['project custom profile discovery and direct command', 'Opus/medium argv translation, invalid model, ceiling, and scope refusals', 'no-tools/empty-MCP/user-settings launch contract', 'inherited provider-route visibility', 'adapter argv and Pi-only profile refusal', 'runner override refusal', 'UTF-8 stdin, cwd, terminal output and output-limit refusal through synthetic Node processes', 'stop result through a synthetic Node process', 'terminal success/failure/duplicate/malformed/missing parser states'],
       limits: 'Direct imports of public installed pi-subagents source; no plugin startup, Pi/Claude host process, model/provider call, or preflight. Bounded Node helper processes exercise runner transport and stop result. Descendant cessation and effective effort are not proven.'
     };
     if (emit) console.log(JSON.stringify(result));
