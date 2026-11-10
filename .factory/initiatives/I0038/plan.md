@@ -35,12 +35,12 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: The coordinator notifies once per session when a newer isSWF version is installed than the one running, without changing anything.
 - Depends on: J001
 - Brief: [brief-r4.md](jobs/J002/brief-r4.md)
-- Blocker: F004 coordinator wording correction applied under explicit operator yes; independent V004 pending.
-- Next step: Verify exact committed correction and obtain final independent V004.
+- Blocker: None; PR250 merged after V004 PASS/LOW and exact-head CI success.
+- Next step: J003 lifecycle product decision; no further J002 work.
 
 ### Acceptance
 
@@ -48,14 +48,18 @@ The operator learns when a newer isSWF version is installed, updates through `is
 - No provider or network call; a missing or unreadable version source is reported as unknown, never as up to date.
 - Works for Pi and Claude Code on Linux and Windows, with shared evidence where the behavior is shared.
 
+### Evidence
+
+- PR250 merged at5e36f57fc5a8f089a474e11e08d46a7dbcf69e6f, V004 PASS/LOW; exact head6bfa342a55f971ace14ace0f418f27a715b0b3f5 Quality42757452058 SUCCESS all3 portable/Linux/Windows. No live model-compliance claim.
+
 ## J003
 
-- Status: pending
+- Status: awaiting-human
 - Objective: `isswf-setup` updates with confirmation and removes only versions that no known project uses, keeping the immediately previous one.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Depends on J001.
-- Next step: Refine the brief from J001 findings.
+- Blocker: Native host previous-version retention is unsupported; shared registry/legacy cleanup and rollback policy need explicit decisions.
+- Next step: Operator selects safe confirmed-update subset versus original retention guarantee; preserve unmet cleanup criteria.
 
 ### Acceptance
 
@@ -168,3 +172,11 @@ Next functional unit: after exact-head CI/integration of J002, refine J003 from 
 While J002 PR250 head6bfa342a55f971ace14ace0f418f27a715b0b3f5 CI runs, read-only J003 planning is independent; no update/deletion implementation starts before J002 reconciliation. Current operator already selected I0038 implementation, not actual machine maintenance. J001 findings require planning judgment: Pi in-place manager/Claude host-aged caches versus retain-previous rule, global usage unknowns, and no factory-owned deletion outside proved ownership. One planner call approved within assignment role selection,25min, model gpt-6.1-sol low verified native profile; actual tools read/grep/find/ls only. Coordinator supplies exact Git-archive snapshot so no Git tool requirement or substitution of working-tree bytes. Planner returns proposal via bound A001, no source changes or nested delegation.
 
 Selected methods: design-principles for ownership/usage contract; execution-principles for updates/serialized maintenance; verification-principles for negative/refusal tests and honest host limits; security for bounded destructive candidates; writing for setup methodology. Planner must read canonical role/planning references and selected resources, report consumed/missing and concrete proposed evidence. No actual install/update/delete/global config/provider calls or API costs. No guessing host-root ownership or retention controls. Keep original product acceptance visible; identify which facts constrain feasibility and minimal safe alternatives, not silently narrow it. One planner consumed on dispatch; any later worker/review gets separate finite budget within J003, no automatic reset. No new runtime/registry unless demonstrated need for acceptance; no structural-overkill cleanup daemon.
+
+## Integration and J003 decision handoff
+
+PR250 merged2026-11-10T04:45:10Z under prior explicit LOW-risk integration authorization and expected-head guard; confirmed MERGED. J002 technical delivery complete, no active actors; all four reviews consumed. J003 planner3384cda3-5cb9-4387-949e-f12fae5955d6 terminal complete, full A001 proposal consumed. Supplied exact archive inputs avoided previous missing-Git limitation; proposal source-backed, no runtime effects/tests claimed. One planner call consumed; no writer/reviewer J003 calls allocated yet.
+
+Initial assumption of prunable native version archives invalid: Pi updates in place, Claude owns/ages old caches, no supported keep-previous guarantee. Shared-store legacy deletion additionally needs cross-project lifecycle serialization and historical rollback-retention decision. Do not implement cleanup daemon/manager or silently weaken guarantees. Product recommendation: first deliver confirmed native update procedure and explicit unsupported-retention/no-cleanup disclosure; record project-local observed usage only, not fictitious complete global registry; defer shared registry and actual cleanup with original unmet acceptance visible. Alternative keep original retention guarantee and block unsupported native update. Exact question: accept the recommended bounded subset and defer registry/cleanup, or retain original all-in scope? Resume condition explicit selection, refine J003 brief and finite budgets before writer.
+
+No installation/update/delete performed or implied by feature development. Queue remains J030 Linux+Windows-CI then I0014 evaluation, but do not pretend I0038 cleanup complete. Local feature branch prepared from integrated main, prior branch preserved; no cleanup/reset/force push.
