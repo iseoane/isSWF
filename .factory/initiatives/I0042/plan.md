@@ -6,12 +6,12 @@ Current operator requests a worktree initiative after reporting workers operatin
 
 ## J001
 
-- Status: pending
+- Status: awaiting-human
 - Objective: Diagnose native writer checkout/branch assignment and interruption-related work loss, then propose a supported worktree/checkpoint contract without reviving the legacy isolated executor.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
-- Blocker: Actual lost-work cause remains unverified without sanitized incident refs/actions; this does not block safe current-source/host-contract diagnosis. No implementation selected before feasibility reconciliation.
-- Next step: Dispatch one native read-only researcher using complete coordinator-exported pinned resource packet (child lacks Git); source e4bd1f2 and input checkpoint supplied separately. Compare policy, actual supported binding and checkpoint retention, recommend bounded correction/controls, preserve incident uncertainty. Calls spent0/6 before launch, reviews0/3, corrections0/2. Release v1.8.3 verified published; record-only receipt PR260 pending independently. I0009/J030 remains next only after I0042.
+- Blocker: Product decision: must every ordinary writer use a separate worktree, including sequential work, or may sequential work remain in primary checkout on a dedicated feature branch with checkpoint/retention checks? Original incident cause remains inconclusive; native Claude prepared-checkout binding requires technical investigation if selected, not operator discovery.
+- Next step: Await the exact worktree-policy choice above, then investigate supported host mechanisms for the selected capability and prepare bounded implementation; do not silently impose universal worktrees or claim data-loss cause. A001 retains attributed partial diagnosis/options/test seams. Researcher d9dfbde9 terminal complete/partial; calls spent1/6, reviews0/3, corrections0/2. Release v1.8.3 verified published, PR260 receipt merged4fb82c6 with CI3/3. I0042 branch diverges normally from main merge; no forced update, reconcile before publication. I0009/J030 remains after I0042.
 
 ### Acceptance
 

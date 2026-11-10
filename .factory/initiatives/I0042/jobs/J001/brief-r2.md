@@ -42,6 +42,10 @@ Evaluate existing supported host binding (Pi explicit cwd, Claude native supplie
 - TDD not selected yet: diagnostic-only, choose honest regression seam after evidence; E2E weighed but no live journey/installation/provider grant, propose only smallest useful authorized future journey.
 - Interview not selected: investigate technical facts; ask only a genuinely unresolved policy/product decision after grounded options.
 
+## Current product wait after initial diagnosis
+
+Researcher d9dfbde9 terminal complete with partial incident diagnosis, retained by coordinator in A001; calls spent1/6, reviews0/3, corrections0/2. Required operator choice before implementing a new universal policy: separate worktree for every writer (including sequential), or allow sequential primary-checkout work on a dedicated feature branch with explicit checkpoint/retention checks? Coordinator recommends preserving supported sequential use plus required-worktree refusal until policy selected. Host mechanism investigation is coordinator work, not a question asking the operator to discover capability. No confirmed private-incident cause, no live host proof, no worktree created or actor writing.
+
 ## Handoff and stopping boundary
 
 Return bound report only, naming consumed/missing resources and concrete application maps, source identities, actual observations, no writes/tests/model metadata claims not observed. Coordinator transcribes attributed conclusions, does not claim researcher wrote records. Retain release evidence; record-only PR260 may await CI independently and must not mutate release source/tag. J030 remains parked last with original2/3 reverse pairs already consumed; no reset of that budget.
