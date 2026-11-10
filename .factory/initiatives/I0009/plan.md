@@ -362,17 +362,17 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J030
 
-- Status: blocked
+- Status: in-progress
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
-- Brief: [brief-r1.md](jobs/J030/brief-r1.md)
-- Blocker: Existing external-CLI candidate is discoverable, but native reviewer/model/effort/cwd/cost contract and reverse route are not verified.
-- Next step: Verify supported-route readiness without inventing a dispatcher; future directional live reviews and maintained both-OS journeys require their own finite scope/budget.
+- Brief: [brief-r2.md](jobs/J030/brief-r2.md)
+- Blocker: None for bounded read-only route readiness; live execution requires verified supported path/model/effort/auth-cost and safe executable.
+- Next step: Read-only planner grounds installed adapter readiness and minimum supported directional slices; no live call/install or dispatcher fallback.
 
 ### Acceptance
 
 - Native Pi→Claude Opus MEDIUM and reverse direction each bind exact candidate, cwd, shared read-only review methodology, effective selection and returned independent judgment; no direct Anthropic API use in Pi.
-- Native Linux/Windows direction-specific checks, errors/cancellation limits and scoped update/reload/remove preserve project state, pins/models, unrelated settings and unique work.
+- Current operator scope: real Linux journeys plus every supported Windows mechanical/native-no-model check achievable in CI; actual Windows model journey remains explicitly deferred, not claimed. Errors/cancellation and scoped maintenance preserve state/pins/models/settings.
 - Missing route/effort capability stays blocked; no silent substitution, new isolation engine or J023 duplication. Directional contracts integrate before dependent journeys.
 
 ### Evidence
@@ -425,3 +425,13 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 ## PR87 closure (2026-11-04)
 
 Operator chose to close PR87 without merge and keep only the parked Windows isolation engine, archived at tag `archive/pr87-windows-isolation` (1c7e898) with follow-up #219. Branches `feature/native-windows-factory`, `backup/native-windows-local` and the related local stash were removed. J029 and J030 stay as independent work on main; they never depended on PR87 code.
+
+## Current J030 start and route-readiness budget
+
+Trusted operator explicitly orders J030 after I0038, then I0014 evaluation; revises platform scope to Linux plus all Windows checks possible in CI. I0038 PR251 merged after exact-head3/3 and independent PASS/LOW; no active actors. Actual Windows model journey remains deferred. Work branch feat/i0009-native-interop, target/trusted factory /home/iseoane/Work/isSWF, integration baseeb0d3a268695d5b11013b2910d9cb8fce714db98.
+
+Current installed pi-subagents builtin claude-code is external-cli adapter, command claude, no-tools mode, async, trusted user settings/hooks prerequisite. Installed source claude-code-adapter.js now implements explicit model/effort overrides and parser; documentation warns model options unsupported unless implemented, so inspect actual code/version instead of treating historical blocker as current fact. No live call launched. Native external provider route must preserve no direct Anthropic API from Pi, no paid API fallback. Adapter environment allows credentials/endpoints; verify safe account/route without reading secrets before any live call. No remembered grant/config substitutes for actual coverage.
+
+A002 mise incident prohibits relying on PATH claude wrapper as harmless preflight: direct existing executable candidate is ~/.local/share/mise/installs/claude/2.1.322/claude (directory listing only), not yet approved/probed/invoked. Need supported adapter command selection without global PATH/config mutation or new dispatcher. Existing installed adapters first, no silently custom launcher.
+
+Budget now one READ-ONLY planner25min gpt-6.1-sol low, actual native profile read/grep/find/ls confirmed. Supply exact repository archive and bounded installed adapter source/docs copies to avoid missing Git tools. No installs/update/delete/global config/live host/model/auth calls/nested delegation. Select design/execution/verification principles, security, writing resources, actual host docs. Return supported-route evidence, minimum viable outcome, Linux and Windows-CI limits, reverse-direction feasibility and exact missing facts before worker/model dispatch. Later worker/review/live call totals allocated only after findings; no implicit external-CLI Opus call yet. Existing historical J030 has zero interoperability live actors consumed; J032 and I0038 budgets don't reset here.
