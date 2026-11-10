@@ -52,6 +52,12 @@ The dispatch grant comes from a trusted operator conversation or record identifi
 
 The plan links to the job and its current brief revision. The attempt records the brief, spec, plan, profile, and skills it used, plus its input checkpoint and target base. The reviewer records the exact base and candidate. Do not put a would-be commit SHA in the document that is itself being committed. Record that checkpoint in the dispatch or a later artifact.
 
+## Workspace policy and retained evidence
+
+The project's approved writing-workspace policy and the readiness of its native binding are separate facts. Carry both into each assignment; an existing `isswf.worktreeRoot` is only the location choice. Before edits, verify the feature branch, assigned cwd, base/HEAD and exclusive writer owner. Separate-worktree mode requires a host-supported binding to the approved checkout; shared-sequential mode permits only one writer at a time on its dedicated feature branch. Missing required binding blocks the writer without an implicit checkout, root, host, dispatcher or serialization fallback.
+
+Checkpoint and report retention apply in either mode. Stop or interruption does not prove that bytes or reports were saved; inspect and preserve dirty, untracked and ignored unique work before any continuation or replacement. A Git checkpoint references committed files but is not a full backup, process recovery or proof of report retention. Do not automatically clean, reset, stash, move, remove or commit all work. Unknown ownership or discrepancies block destructive recovery. Record where candidate work and reports remain, observed checkpoint/ref state, and any pending persistence/authority; do not promise backup or live adherence to instructions.
+
 ## Record results and limits
 
 A saved status is the latest report with its time and evidence. It does not prove that a process is alive, stopped, or recoverable. Use available tools and checkout evidence for process state. Do not infer liveness from a Markdown status.

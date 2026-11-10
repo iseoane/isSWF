@@ -16,6 +16,8 @@ Do not start until the brief identifies:
 
 If a required field is missing, inspect what is safely knowable. Ask the coordinator only for a decision or authorization you cannot infer. Do not expand scope or self-authorize.
 
+Before ordinary edits, verify the effective writing-workspace policy and actual assigned cwd, feature branch, baseline/HEAD and exclusive writer ownership. Follow [project worktree locations](references/worktrees.md): separate-worktree policy requires verified host binding to its assigned checkout; missing binding blocks the writer without fallback. Shared-sequential policy permits one writer at a time on its dedicated feature branch, not concurrent writers. A location setting, instructions or post-hoc path check is not binding evidence.
+
 ## Execution
 
 1. Confirm the checkout and baseline match the brief. Check the current code, contracts, consumers, and relevant tests. The brief describes desired behavior; source code shows current behavior. Reconcile material differences with the coordinator before changing the objective.

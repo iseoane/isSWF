@@ -23,6 +23,16 @@ try {
   git(project, 'commit', '-qm', 'baseline');
   const base = git(project, 'rev-parse', 'HEAD');
   const reference = await readFile(join(source, '.agents/roles/references/worktrees.md'), 'utf8');
+  assert.match(reference, /## Select the project writing-workspace policy/u);
+  assert.match(reference, /Separate worktree per writing assignment/u);
+  assert.match(reference, /Shared checkout, sequential writers/u);
+  assert.match(reference, /old choice of worktree location is not acceptance/u);
+  assert.match(reference, /block the affected writer; do not substitute the primary checkout/u);
+  assert.match(reference, /## Verify the assignment before writing/u);
+  const setup = await readFile(join(source, '.agents/skills/isswf-setup/SKILL.md'), 'utf8');
+  assert.match(setup, /Select the writing-workspace policy and local location/u);
+  assert.match(setup, /Never add another root\/key\/store or repeat a settled location prompt/u);
+  assert.match(setup, /Record the approved policy in the existing selected-state `project-setup.md`/u);
   const commands = [...reference.matchAll(/```sh\n([\s\S]*?)\n```/gu)].map(match => match[1]);
   assert.equal(commands.length, 2, 'Configuration and creation recipes must remain executable');
   const assignment = { ...env, PROJECT: project, WORKTREE_ROOT: worktreeRoot, WORKTREE_ID: 'worker-one', WORKTREE_BRANCH: 'worker-one', BASE_SHA: base };

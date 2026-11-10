@@ -2,6 +2,15 @@
 
 Use this procedure during explicit setup and before creating a Git worktree for an authorized assignment. This is a coordinator procedure using Git, not a host hook or a runtime sandbox. It does not change Pi task snapshots under `<runs-store>/<attempt-id>/workspace` or make worktrees valid for callers that require standalone repositories.
 
+## Select the project writing-workspace policy
+
+During explicit project setup, resolve the writing policy separately from the worktree location. Offer both choices and reuse a settled policy without asking again for each job:
+
+- **Separate worktree per writing assignment** is recommended when the actual host can bind each writer to its assigned prepared checkout. Read-only actors need no worktree. Record the approved preference separately from host binding readiness. If binding is unavailable or unverified, keep the preference pending for writer use and block that writer; do not fall back to the primary checkout, another root, host-managed checkout or dispatcher. The operator may explicitly revise the project policy to shared-sequential.
+- **Shared checkout, sequential writers** is an explicit alternative for a dedicated feature branch. Allow only one writer at a time in that checkout. Never reinterpret it as parallel capacity or silently serialize a project whose approved policy requires separate concurrent worktrees.
+
+An old choice of worktree location is not acceptance of either writing policy. Resolve missing policy during setup; do not repeat the decision for every assignment once settled. Carry the effective policy into each job handoff, while still checking current checkout, branch, baseline, ownership, host binding and capacity before writing. Neither policy promises OS isolation, backup, complete retention, or that instructions enforce host adherence.
+
 ## Resolve the local choice
 
 Resolve the canonical primary project root and common Git directory. Use the primary root even when invoked from a linked worktree. Inspect `git worktree list --porcelain` to distinguish them; ambiguous ownership blocks configuration.
@@ -21,7 +30,11 @@ The value stays in the common repository's local Git configuration, outside trac
 
 ## Bind the assigned checkout before dispatch
 
-A configured external root is a location choice, not proof that a host can bind a child to a prepared checkout. Before parallel dispatch, verify the actual host's supported child working-directory interface can select each approved checkout. If it cannot be verified, disclose parallel binding as unavailable or unverified in the selected setup record and plan sequential writers in the assigned checkout when parallelism is not required. If the assignment explicitly requires parallel writers, block that dispatch; do not silently serialize it. Instructions, isolation labels, host-managed worktrees and post-hoc path checks do not prove the required binding. This gap does not block unrelated authorized work. Do not install/configure hooks or change the approved root as a workaround.
+A configured external root is a location choice, not proof that a host can bind a child to a prepared checkout. Before offering separate worktrees as ready or dispatching a writer in that mode, verify the actual host's supported child working-directory interface can select each approved checkout. If it cannot be verified, keep the preference distinct from readiness and block the affected writer; do not substitute the primary checkout, another root, host, dispatcher or automatic serialization. An explicit operator policy revision may select the supported shared-sequential mode, but setup must not make that revision silently. Instructions, isolation labels, host-managed worktrees and post-hoc path checks do not prove the required binding. This gap does not block unrelated authorized work. Do not install/configure hooks or change the approved root as a workaround.
+
+## Verify the assignment before writing
+
+For either selected mode, the coordinator and writer verify the full base SHA, feature branch (not the integration branch), assigned checkout/cwd and exclusive writer owner before ordinary edits. Record the policy and readiness in the handoff without copying the private absolute root into tracked records. A branch or cwd assertion in instructions is not host enforcement. If the observed branch, base, cwd, ownership or required binding is missing or inconsistent, stop that writer and preserve its existing state; do not repair by switching checkouts or discarding work.
 
 ## Create and delegate
 
