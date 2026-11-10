@@ -54,7 +54,7 @@ The operator learns when a newer isSWF version is installed, updates through `is
 
 ## J003
 
-- Status: in-review
+- Status: in-progress
 - Objective: `isswf-setup` updates with confirmation and removes only versions that no known project uses, keeping the immediately previous one.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
@@ -195,3 +195,9 @@ Methods selected: writing for agent/human usage instructions (both canonical ref
 Workerb641c934-1e45-4d4c-bd47-c1c0e1cd7cc5 terminal complete observed; A002 consumed in full. Candidate five modified files (setup skill, EN/ES/root installation guides, host-portability assertions), no runtime logic. Worker actual Claude help invocation through mise wrapper unexpectedly installed Claude CLI2.1.322. This violated no-install boundary; user informed immediately on consuming report. Do not claim clean no-side-effect help validation. Worker later help occurred after mutation; no plugin update/deletion or repository modification by mise reported. Do not invoke wrapper again, revert/delete automatically or conceal environment change. Underlying mise cause/version resolution not independently established. No further host operations or recovery actors authorized; preserve evidence, no credentials/transcripts retained. Author self-reported resources consumed; no host read trace independently inspected.
 
 Coordinator separately ran host-portability/check-docs/documentation/package-metadata/whitespace PASS on retained candidate. These static checks do not prove global inactivity, actual manager-update path or live Linux/Windows behavior. No full portable suite at author step per focused docs-only policy; exact platform CI remains required before integration. Review round1/3 allocated, no prior J003 reviews, correction0/2. Combined semantic/static mode for authority-sensitive procedure and translated guides; required selected methods writing agent/human, security, execution, verification; no behavioral TDD/live E2E selected. REVIEW.md present; new source paths are not its person-required packaging/host/workflow code, but reviewer must assess actual touched paths. Required review includes command syntax source-backed without invoking mutable launch shims, version/scope confirmation and refusal coherence, source/pin separation, registry/deletion deferment. No active actors after worker cessation; checkpoint before reviewer call.
+
+## J003 V001 correction1
+
+Reviewer941b3913-e442-4b91-aff7-41304445d8db terminal complete observed; full V001 consumed. Standards/Spec FAIL, MEDIUM, introduced blocking F001/F002 accepted. F001 safe inspection must not execute unverified launch shims merely for help/inventory; prefer installed version-matched docs/source and refuse unavailable safe path. F002 Pi --extension source selector matches package identity across user+project settings ignoring Git refs/npm versions; --local rejected for update. Resolve full matching registration/ref/mutation set and affected projects, confirm actual operation or refuse; no invented flag/config changes. Mirror canonical skill/guides/static coverage consistently. Incidental mise mutation remains visible/unreverted, no more host commands authorized.
+
+Allocate same worker correction1/2,25min, approved gpt-6-luna high. One planner+initial worker and review1/3 already spent; no new actor/retry/model substitution, nested delegation or host lifecycle actions. First verify read/bash tools, then only source/docs reads and existing pure repository checks. No wrapper/help/version/inventory command executions at all this correction; use known installed source/doc paths. Inputs frozen after checkpoint; report A003, independent delta review follows.
