@@ -362,12 +362,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J030
 
-- Status: in-progress
+- Status: in-review
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
 - Brief: [brief-r3.md](jobs/J030/brief-r3.md)
-- Blocker: None for exactly one explicitly approved forward native probe after verified auth; reverse/platform acceptance remains pending.
-- Next step: Prepare exact supplied evidence/full methodology and private direct-binary profile, launch one native opus:medium review through existing adapter; no retries.
+- Blocker: Forward contract candidate awaiting independent review/locked-source Linux+Windows CI and person host-guide integration approval; reverse/effective-effort acceptance still pending.
+- Next step: Review exact forward guide/no-model test candidate; retain one-call evidence, no more Claude calls, then publish gated forward unit.
 
 ### Acceptance
 
@@ -483,3 +483,11 @@ Current operator "si" approves reattempt of corrected native workflow after pre-
 Workflowe701d6d1-7ac7-4af9-b11e-bd4c633a424e/childc1ab57c1-c591-4847-917f-ca2862963c90 terminal complete, A003 consumed and canonical bytes verified. Coordinator A004 retains sanitized host evidence: actualclaude-opus-5-5, plan, tools0/MCP0, apiKeySourcenone, terminalsuccess, one turn61.089s; requestedopus:medium mapping verified, effective-effort telemetry UNKNOWN. One actual Claude call1/1 spent, no retry; prior malformed pre-child workflow preserved. Real Linux forward supplied-evidence review works, not bound-tool or reverse/Windows proof. No active actors, no install/update/delete/global changes. Private existing-agent profile remains authorized, ignored.
 
 Reclassify previous worker blocker: safe direct native command/account path now operationally verified under specific current grant, so implement the source+live-backed forward contract and no-model fixture coverage without more provider calls. Original J030 reverse and platform scope still unmet; do not claim whole feature delivered. Same worker continuation1/2 within route-contract unit,25min gpt-6-luna high; planner1+worker1+nativeprobe1 spent, reviews0/3. No new role/dispatcher/executable or actual profile/config edit by worker; reuse existing supported mechanisms, keep private path out of distribution. Host-guide person integration gate remains. Freeze records during writer.
+
+## A005 forward-unit candidate and review1
+
+Worker continuationc03c509b-7797-45b6-a3c5-8ab5ecf096a5 terminal complete observed, A005 consumed fully. Partial overall J030: forward Pi guide and tests implemented, reverse/Windows/effective-effort proof still pending. Functional commits8f178797f40c1f89892f416425954a74b13931bf,ba5bf256ebc0cd5ff6291a550bcb71d2da114409. Native A003 PASS applies historical docs candidate only, not this new unit. No new live model calls or actual profile mutation. Author resources/application self-reported, no independent trace; characterization tests not fabricated TDD RED.
+
+Coordinator reran actual adapter contract fixture with explicit existing installed pi-subagents root, host-portability, check-docs and whitespace PASS on committed source. Tests exercise actual discovered profiles/override/parser and deterministic Node runner processes; not Claude host, Windows native or provider/model execution. Local locked host node_modules lacks pi-subagents; installed root nominal0.83 only, do not claim exact locked package equality. Existing CI host-native-delegation entry now invokes fixture on its locked dependency in both Ubuntu/Windows, so CI failure remains blocker. Test-value assessed scoped asynchronous/double/source assertion tradeoffs: important boundary failures caught by real adapter functions/Node transport, avoid duplicating matrix or claiming process-tree proof; source regex only guards documented trust distinction. No arbitrary host commands or deps installed.
+
+Combined independent semantic+fixture review1/3, no prior J030 unit reviews, REVIEW.md PRESENT. Risk focuses on source/version support, source imports/fixtures cost and portability, safe command/account/env/handoff/unknown effective effort, documentation reverse not supported, actual host-guide person gate. Required selected writing/security/design/execution/verification resources plus scoped test-value skill/examples for test changes. TDD unselected justified existing-behavior characterization; no product-runtime change/cheap honest behavioral RED. Observer/candidate/resource provenance required, no live claims from fixtures. Budget planner1+worker1+continuation1/2+nativeprobe1/1 spent; reviews1/3 allocated. No active actors before reviewer; plan/briefs frozen. No actual updater/wrapper/model call authorized by new review.
