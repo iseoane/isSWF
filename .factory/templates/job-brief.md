@@ -16,6 +16,7 @@
 
 - Observable outcome:
 - Why this work is needed:
+- Size (S/M/L) and one-line reason, judged by verification cost:
 
 ## Scope and acceptance
 

@@ -20,6 +20,8 @@ Before proposing a change to `AGENTS.md` or a skill, inspect the actual current 
 
 Check known local proposals and issue records in the authorized project artifacts for duplicates. Do not query a tracker or create/update an actual issue unless the grant explicitly authorizes that action. A factory improvement issue may be drafted locally for later triage. Label it `DRAFT`; it is not an issue, authorization, or executable job.
 
+Record a sizing miss when a job needed more than one correction round or its reviewer left parts of the change uninspected. Compare the recorded S/M/L size and reason with what happened, and propose a different size or split only when the evidence supports it.
+
 Do not convert one preference or isolated event into a general rule without evidence. Preserve rejected and deferred proposals with their reason when needed to prevent repeated work. An empty finding is valid when the review found no supported improvement.
 
 ## Return
