@@ -72,7 +72,7 @@ Tú decides el objetivo de producto y lo que está permitido. El coordinador man
 | --- | --- |
 | Worker | Implementa un cambio acotado y lo comprueba. |
 | Researcher | Investiga una cuestión técnica y devuelve evidencias. |
-| Planner | Propone unidades de trabajo útiles y sus dependencias. |
+| Planner | Propone unidades de trabajo útiles, cada una con un tamaño S/M/L según lo costoso que sea verificarla, y sus dependencias. |
 | Diagnostician | Investiga un error cuya causa no está clara. |
 | Reviewer | Evalúa el cambio y sus evidencias de forma independiente cuando hace falta ese juicio. |
 

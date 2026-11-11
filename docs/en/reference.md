@@ -72,7 +72,7 @@ You decide the product goal and what is permitted. The coordinator owns the plan
 | --- | --- |
 | Worker | Implements a bounded change and checks it. |
 | Researcher | Investigates a technical question and returns evidence. |
-| Planner | Proposes useful units of work and their dependencies. |
+| Planner | Proposes useful units of work, each sized S/M/L by how costly it is to verify, and their dependencies. |
 | Diagnostician | Investigates a defect whose cause is unclear. |
 | Reviewer | Assesses the chosen change and its evidence independently when that judgment is required. |
 
