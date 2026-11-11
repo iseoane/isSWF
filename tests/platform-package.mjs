@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, realpath, stat, unlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve, isAbsolute, relative, sep } from 'node:path';
 import { verifyRelease } from '../tools/release-source.mjs';
@@ -137,10 +137,50 @@ const nativeJourney = await planJourney('installed project spaces ñ', binary);
 const nodeRelease = join(root, 'node release spaces ñ');
 run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', source, '--revision', revision, '--output', nodeRelease, '--runtime', 'node']);
 const nodeJourney = await planJourney('node development project spaces ñ', join(nodeRelease, 'tools/isswf.mjs'), true);
+async function stateMigrationJourney(name, launcher, nodeLauncher = false) {
+  const target = join(root, name), targetStore = join(root, name + ' store');
+  await mkdir(join(target, '.factory/initiatives/I0007/jobs/J002'), { recursive: true });
+  const payloadPath = join(target, '.factory/initiatives/I0007/jobs/J002/brief-r1.md');
+  const payloads = new Map([
+    [payloadPath, Buffer.from('Historical .factory reference remains unchanged: ñ\n')],
+    [join(target, '.factory/models.json'), Buffer.from('{"models":{"worker":"fixture-model"}}\n')],
+    [join(target, '.factory/project-setup.md'), Buffer.from('Pinned setup choice: fixture\n')],
+  ]);
+  for (const [path, bytes] of payloads) await writeFile(path, bytes);
+  if (process.platform !== 'win32') await chmod(payloadPath, 0o640);
+  run('git', ['init', '-q', target]);
+  run('git', ['-C', target, 'add', '-f', '.factory']);
+  run('git', ['-C', target, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'legacy state fixture']);
+  const invoke = (args, expectedStatus = 0) => nodeLauncher ? run(process.execPath, [launcher, ...args], root, expectedStatus) : run(launcher, args, root, expectedStatus);
+  const inspectArgs = ['inspect', '--project', target, '--store', targetStore];
+  const inspect = JSON.parse(invoke(inspectArgs));
+  assert.equal(inspect.status, 'legacy-state');
+  await writeFile(join(target, '.factory/untracked-note'), 'uncheckpointed bytes');
+  const migrationArgs = expected => ['migrate-state', '--project', target, '--store', targetStore, '--id', 'S0007', '--expected', expected, '--quiescent-ref', 'Disposable fixture; no external writers'];
+  const dirtyInventory = JSON.parse(invoke(inspectArgs)).stateMigration.expected;
+  assert.match(invoke(migrationArgs(dirtyInventory), 1), /Checkpoint legacy \.factory files/u);
+  for (const [path, bytes] of payloads) assert.deepEqual(await readFile(path), bytes, 'dirty refusal must retain every legacy payload');
+  assert.equal(await readFile(join(target, '.factory/untracked-note'), 'utf8'), 'uncheckpointed bytes');
+  await unlink(join(target, '.factory/untracked-note'));
+  const migrateArgs = migrationArgs(JSON.parse(invoke(inspectArgs)).stateMigration.expected);
+  const before = new Map(await Promise.all([...payloads.keys()].map(async path => [relative(join(target, '.factory'), path), await readFile(path)]))), mode = (await stat(payloadPath)).mode & 0o777;
+  const moved = JSON.parse(invoke(migrateArgs));
+  assert.equal(moved.status, 'state-migrated');
+  for (const [path, bytes] of before) assert.deepEqual(await readFile(join(target, '.isswf', path)), bytes, `moved payload bytes changed: ${path}`);
+  await assert.rejects(readFile(join(target, '.factory')), { code: 'ENOENT' });
+  if (process.platform !== 'win32') assert.equal((await stat(join(target, '.isswf/initiatives/I0007/jobs/J002/brief-r1.md'))).mode & 0o777, mode);
+  assert.equal(JSON.parse(invoke(migrateArgs)).status, 'unchanged');
+  await mkdir(join(target, '.factory'));
+  assert.match(invoke(inspectArgs, 1), /Both \.isswf and \.factory exist/u);
+  for (const [path, bytes] of before) assert.deepEqual(await readFile(join(target, '.isswf', path)), bytes, `dual-root refusal changed active payload: ${path}`);
+  return name;
+}
+const nativeStateMigration = await stateMigrationJourney('installed migration project spaces ñ', binary);
+const nodeStateMigration = await stateMigrationJourney('node migration project spaces ñ', join(nodeRelease, 'tools/isswf.mjs'), true);
 assert.equal(nativeJourney.pin.runtimeFormat, 2, 'Native journey must select the compiled Bun artifact');
 assert.equal(nodeJourney.pin.runtimeFormat, 1, 'Node journey must select a genuine Node development release');
 assert.notEqual(nativeJourney.pin.runtimeId, nodeJourney.pin.runtimeId, 'Each journey must use its own immutable runtime pin');
 for (const test of ['host-portability', 'worktree-location']) run(process.execPath, [join(source, 'tests', test + '.mjs'), source]);
-const report = { status: 'PASS', platform: process.platform, arch: process.arch, revision, version: manifest.version, artifactId: built.artifactId, installed, checks: ['native Bun build', 'npm tarball installation and exact receipt', 'executable version and usage refusal', 'read-only inspect/status', 'native Bun installed init→pinned plan prepare/repeat/uncertain-claim refusal', 'Node release-launcher init→pinned plan prepare/repeat/uncertain-claim refusal', 'native owner evidence shape and unknown-owner recovery refusal', 'space and Unicode paths', 'native Git worktree recipes', 'static resource contracts'], planJourneys: { native: { project: nativeJourney.target, runtimeId: nativeJourney.pin.runtimeId }, node: { project: nodeJourney.target, runtimeId: nodeJourney.pin.runtimeId } }, limits: 'Plan journey only; migration/recovery and worker execution are not certified. Windows omits unsupported directory fsync and does not claim equivalent power-loss persistence. No host discovery in this script; run host-discovery separately. No provider execution or Linux sandbox equivalence is established.' };
+const report = { status: 'PASS', platform: process.platform, arch: process.arch, revision, version: manifest.version, artifactId: built.artifactId, installed, checks: ['native Bun build', 'npm tarball installation and exact receipt', 'executable version and usage refusal', 'read-only inspect/status', 'native Bun installed init→pinned plan prepare/repeat/uncertain-claim refusal', 'Node release-launcher init→pinned plan prepare/repeat/uncertain-claim refusal', 'installed Bun and Node migration inspect→dirty refusal→move→identical repeat→dual-root refusal with exact bytes and native modes', 'native owner evidence shape and unknown-owner recovery refusal', 'space and Unicode paths', 'native Git worktree recipes', 'static resource contracts'], planJourneys: { native: { project: nativeJourney.target, runtimeId: nativeJourney.pin.runtimeId }, node: { project: nodeJourney.target, runtimeId: nodeJourney.pin.runtimeId } }, migrationJourneys: { bun: nativeStateMigration, node: nodeStateMigration }, limits: 'Migration is the normal installed path only; actual interrupted-owner recovery is not certified. Windows omits directory flushes and does not claim equivalent power-loss persistence. No host discovery in this script; run host-discovery separately. No provider execution or Linux sandbox equivalence is established.' };
 await writeFile(join(root, 'platform-report.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify(report, null, 2));
