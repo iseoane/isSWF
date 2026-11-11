@@ -30,16 +30,22 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 
 ## J002
 
-- Status: in-progress
+- Status: in-review
 - Objective: Apply the two non-blocking J001 review suggestions: a sizing-miss prompt in the retrospective template, and the brief size line naming the plan as its source.
 - Size: S (two template lines, one review pass, no special risk).
 - Depends on: J001
 - Brief: Small local request; this plan entry is the curated brief (operator request 2026-11-11: apply both suggestions, close everything, patch release).
 - Blocker: None.
-- Next step: Native worker, review, PR, merge, patch release v1.8.6.
+- Next step: PR exact-head CI, merge, patch release v1.8.6.
 
 ### Acceptance
 
 - `.factory/templates/retrospective.md` findings section prompts for a sizing miss (recorded size vs correction rounds or review coverage).
 - `.factory/templates/job-brief.md` size line states it is copied from the plan, which is the source.
 - check-docs and focused template tests pass; no other scope.
+
+### Evidence
+
+- Worker commit dd0197e (two template lines). Worker self-reported it did not read its required role profiles; compensated by independent review, recorded here as a method deviation.
+- Coordinator-observed on dd0197e: check-docs PASS; worker-method-evidence, worker-methodology, host-portability, release-package exit 0; diff check clean.
+- Independent semantic review round 1 on supplied exact diff 08c209b..dd0197e: PASS, no findings.
