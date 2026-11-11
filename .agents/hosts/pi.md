@@ -54,9 +54,9 @@ For an authorized launch, set `cwd` explicitly and request `model: "opus:medium"
 
 Accept only one successful nonempty terminal result with no parser/exit error. Malformed or absent terminal state, duplicate results, nonzero exit, output-limit failure, timeout, or stop is not success. Stop/cancellation is not proof of process-tree cessation; preserve unknown cleanup state and never retry or replace a failed call without new explicit authority. This route demonstrates supplied-evidence judgment only, not bound-tool invocation, host filesystem isolation, Windows live-model behavior, or effective effort unless separately observed.
 
-## Reverse direction
+## Reverse direction: Claude coordinator to Pi reviewer
 
-Pi's documented one-shot CLI/JSON mode can be considered only as a separately authorized coordinator-owned Pi process. It is not evidence of a supported Claude-native Agent→Pi bridge. A Claude reviewer must not receive shell or a new dispatcher/launcher to simulate one. Until a shared host contract grants and verifies the owning process permission, selection, bounded I/O, final `agent_settled` interpretation, error/stop behavior and effective model/effort, report reverse delegation as unsupported or pending.
+The currently authorized reverse direction is an explicitly authorized Claude coordinator consuming a separate no-tools Pi reviewer report for supplied evidence. It is not a Claude-native Agent→Pi bridge. The coordinator owns the synchronous Linux CLI/Bash launch, exact candidate and cwd, selection and resource packet, bounded transport, and result reconciliation. The Pi reviewer receives no shell or launch authority. Do not confuse this with the separate Pi coordinator→Claude reviewer procedure above. For the canonical filter, full preflight, terminal contract and failure controls, see [Claude Code: Reverse supplied-evidence contract](claude-code.md#reverse-supplied-evidence-contract). Tests and historical journey evidence do not establish current host adherence or Windows support; native Windows reverse evidence remains deliberately deferred.
 
 ## Apply the selected writing-workspace policy
 
