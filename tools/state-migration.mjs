@@ -15,7 +15,8 @@ async function publish(path, value) {
 }
 async function sync(path) {
   // Windows does not provide the directory-entry flush contract promised on Linux.
-  if (process.platform === 'win32' && (await lstat(path)).isDirectory()) return;
+  const directory = (await lstat(path)).isDirectory();
+  if (directory && process.platform === 'win32') return;
   const file = await open(path, 'r');
   try { await file.sync(); } finally { await file.close(); }
 }

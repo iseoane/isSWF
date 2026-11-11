@@ -50,3 +50,11 @@ Source behavior verified for scoped normal Linux unit; one method deviation expl
 ## Blockers and next action
 
 Publish this bounded unit, inspect exact-head native CI without polling/watch/model waits, diagnose any actual failure within remaining authority, then request human merge decision. Calls3/6 reviews1/3 corrections1/2 spent; no new actor needed for accepted historical deviation. Keep Windows follow-up and actual interrupted-owner phase visible. Do not include or commit I0045 triage under J029 authority.
+
+## Publication receipt (local, pending next bounded checkpoint)
+
+Observed OPEN PR266 https://github.com/iseoane/isSWF/pull/266, head `a9269f6b81e91062ada7e421ea29f88dfa380010`, base `3c0cf20526dc3d707f30032dc6ca0dd8c93c9a50`. Exact body/risk/head/base/state read back after push/create. Rollup empty at publication: CI pending/unobserved, not green. This receipt does not change the published/tested source head and will be retained at the next authorized boundary. Original V001 FAIL, one-off operator acceptance and Windows follow-up are explicit in the PR. No merge, release or cleanup performed.
+
+## CI correction (correction 2/2)
+
+Exact-head CI run 42993033539 on `a9269f6` failed Portable checks only: `tests/directory-sync-portability.mjs` reported `tools/state-migration.mjs:20` (static guard form not recognized; behavior already skipped win32 directory flush). Coordinator rewrote the guard into the recognized `process.platform === 'win32') return` form without changing behavior. Local Linux: directory-sync-portability ok, state-migration-publication PASS, check-docs PASS, eslint ok, `node tools/check-quality.mjs` exit 0. Mechanical correction; no new semantic review selected because behavior and reviewed tests are unchanged. Corrections budget now exhausted (2/2).
