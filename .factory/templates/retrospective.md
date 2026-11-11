@@ -23,7 +23,7 @@ For each completed job, summarize the intended result, observed outcome, checks,
 
 ## Findings
 
-Record failures, decisions, friction, and outcomes. Separate observed facts from inference and unknowns. An empty list is valid.
+Record failures, decisions, friction, and outcomes. Separate observed facts from inference and unknowns. An empty list is valid. When a job needed more than one correction round or its reviewer left parts uninspected, record a sizing miss comparing the recorded S/M/L size and reason with what happened.
 
 | Finding | Evidence | Impact | Fact, inference, or unknown |
 | --- | --- | --- | --- |
