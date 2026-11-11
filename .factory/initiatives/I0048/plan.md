@@ -6,12 +6,12 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 
 ## J001
 
-- Status: pending
+- Status: in-review
 - Objective: Planner and coordinator classify each job S/M/L by verification cost with a one-line reason, split or justify L jobs, and the retrospective records sizing misses.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Dispatch a native worker on branch feat/i0048-job-sizing.
+- Next step: PR exact-head CI, operator merge approval (role profile change), then patch release.
 
 ### Acceptance
 
@@ -23,3 +23,5 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 ### Evidence
 
 - Triage verified: roles/planner.md forbids LOC quotas without asking for size; coordinator re-plan treats signals as "not thresholds"; retrospective has no sizing evidence. No duplicate among closed issues.
+- Worker commit 1d9a0d3 (planner.md, planning.md, retrospective.md, coordinator SKILL.md, job-brief template, docs en/es reference). Coordinator-observed on 1d9a0d3: check-docs PASS; host-portability, worker-method-evidence, worker-methodology, planner-task, release-package exit 0; diff check clean.
+- Independent semantic review round 1 on supplied exact diff c4d25f4..1d9a0d3: PASS, 0 blocking, 2 non-blocking suggestions (retrospective template hint; brief size line copied from plan). Role-profile change needs operator approval before merge per REVIEW.md.
