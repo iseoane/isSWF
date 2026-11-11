@@ -342,12 +342,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J029
 
-- Status: awaiting-human
+- Status: in-review
 - Objective: Preserve state through native migration and actual interrupted-owner public recovery.
 - Depends on: J027, J032
 - Brief: [brief-r2.md](jobs/J029/brief-r2.md)
-- Blocker: V001 Standards FAIL / scoped Spec PASS / aggregate FAIL: introduced blocking J029-R1-01, selected TDD sequence lacks claimed following GREEN (124a605 full command failed). No production defect found; explicit operator disposition required. Native Windows CI and later actual interrupted-owner recovery remain pending.
-- Next step: Ask whether operator accepts the documented one-off TDD-sequence deviation for candidate8efee1ee523be8b01a23400b1031da10f4b27125 (functional467d4f2) and authorizes continuing PR/CI, or holds the unit. Preserve V001 FAIL/A001/A002 and exact replay; never relabel124a605 PASS or fabricate RED/GREEN. Reviewer5436f9ca terminal complete/process terminal observed, full report retained V001; bound patch51474bytes SHA256a833717dc7d3f99bbc26e307cae7bb868e4ad6e09149fa6a02732f412ee60262. Calls3/6 reviews1/3 corrections1/2; no active author/reviewer. No unnecessary model call or production repair for historical methodology. I0045 read-only grounding can proceed independently; its uncommitted records remain excluded from J029 commits/PR. Integration remains a separate decision after required CI.
+- Blocker: Publication and exact-head CI pending; native Windows and later actual interrupted-owner recovery not yet verified. V001 Standards/aggregate FAIL on historical TDD sequence remains, with explicit operator one-off acceptance for this candidate; scoped source Spec PASS.
+- Next step: Publish reviewed normal-migration source PR and inspect required exact-head CI. Operator explicitly accepts historical J029-R1-01 deviation and requests Windows follow-up note; preserve original V001 FAIL and failed124a605, no retrospective GREEN. Functional467d4f25e32da9951448f87c0f15f6b1ca1a1724 unchanged since reviewed8efee1ee523be8b01a23400b1031da10f4b27125; delivery.md retains checks/risk/acceptance. Windows follow-up: rerun native checks and revisit current harness/report accuracy, repairing any current defect without rewriting past evidence. Calls3/6 reviews1/3 corrections1/2, actors terminal complete. Integration remains separate human decision after CI; uncommitted I0045 excluded from commits/PR.
 
 ### Acceptance
 
