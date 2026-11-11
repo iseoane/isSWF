@@ -346,8 +346,8 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Objective: Preserve state through native migration and actual interrupted-owner public recovery.
 - Depends on: J027, J032
 - Brief: [brief-r1.md](jobs/J029/brief-r1.md)
-- Blocker: Current directory publication needs native policy assessment; actual owner-loss public migration recovery is unproved. No implementation or interruption test selected now.
-- Next step: Select a future normal installed migration slice, followed after its integrated contract by real interrupted-owner recovery; no J028 or parked-engine dependency.
+- Blocker: Native directory publication policy and actual interrupted migration-owner recovery remain unproved; existing APIs and injected recovery fixtures do not close those criteria.
+- Next step: Use jobs/J029/analysis-20261111.md to prepare normal portable installed state-migration unit, then actual interrupted-owner public recovery. No real project migration, new implementation or live-model call selected.
 
 ### Acceptance
 
@@ -359,6 +359,7 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 - Planner/current source map: tools/state-migration.mjs inspectStateMigration/moveState/recoverState and tools/isswf.mjs public owner/dispatch paths; historical injected ceased predicates are not real loss evidence.
 - jobs/J029/brief-r1.md; shared state behavior is independent of the parked worker engine and does not imply native-agent crash recovery.
+- Current analysis/tests retained in [analysis-20261111.md](jobs/J029/analysis-20261111.md). Linux tests/release-package.mjs PASS, with direct source inspection identifying injected deadOwner/bootstrap recovery versus actual owner-loss evidence. Strict Windows/Linux identity and native verification requirements preserved.
 
 ## J030
 
@@ -366,8 +367,8 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
 - Brief: [brief-r3.md](jobs/J030/brief-r3.md)
-- Blocker: Forward contract candidate awaiting independent review/locked-source Linux+Windows CI and person host-guide integration approval; reverse/effective-effort acceptance still pending.
-- Next step: Review exact forward guide/no-model test candidate; retain one-call evidence, no more Claude calls, then publish gated forward unit.
+- Blocker: Full J030 remains incomplete: shared reverse guidance, effective-effort acceptance, native reverse Windows and error/cancellation scope. Forward integrated and Linux reverse report return already verified; do not repeat completed probes.
+- Next step: Use jobs/J030/analysis-20261111.md to select a bounded shared reverse contract/no-model protocol unit. Resolve requested-versus-effective effort honestly; preserve original reverse2/3 pairs and pinned25282b36 records. No implementation/live-model pair dispatched by current analysis.
 
 ### Acceptance
 
@@ -379,6 +380,7 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 - Planner found no verified bridge in factory guides/manifests; coordinator discovery adds existing builtin claude-code read-only external-CLI route candidate, async-only with unsupported Pi model overrides unless runner implements them.
 - jobs/J030/brief-r1.md; no Claude actor, provider experiment, install or host configuration change occurred.
+- Current operator-authorized analysis and tests retained in [analysis-20261111.md](jobs/J030/analysis-20261111.md). Existing installed0.83.0 adapter contract and static host tests PASS; initial missing test-dependency ENOENT disclosed, no installation. Synthetic forward stop/error tests are not reverse Windows/effort evidence.
 
 ## J031
 
