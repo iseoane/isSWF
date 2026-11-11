@@ -37,7 +37,8 @@ const accepts = (rows) => {
   const adverse = rows.some(row => /retry|compaction|error/u.test(row.type));
   if (sessions.length !== 1 || sessions[0].cwd !== '/candidate' || finals.length !== 1 || settledRows.length !== 1 || settledRows[0].aborted !== false || adverse) return false;
   const final = finals[0].message;
-  const text = final.content.filter(block => block.type === 'text').map(block => block.text).join('');
+  if (!Array.isArray(final.content) || final.content.some(block => !block || typeof block !== 'object' || block.type !== 'text' || typeof block.text !== 'string')) return false;
+  const text = final.content.map(block => block.text).join('');
   return final.role === 'assistant' && final.provider === 'openai-codex' && final.model === 'gpt-6.1-sol' && final.stopReason === 'stop' && final.errorMessage === null && text === report;
 };
 
@@ -50,6 +51,8 @@ assert.equal(success.stdout.includes('privatePayload'), false, 'event payloads a
 assert.equal(projected.find(row => row.type === 'message_end').cwd, undefined, 'final message does not fabricate cwd');
 assert.equal(projected.find(row => row.type === 'message_end').message.content.map(block => block.text).join(''), report);
 assert.equal(projected.find(row => row.type === 'session').cwd, '/candidate');
+const coerciveContent = projected.map(row => row.type === 'message_end' ? { ...row, message: { ...row.message, content: [{ type: 'text', text: [report] }] } } : row);
+assert.equal(accepts(coerciveContent), false, 'positive acceptance predicate rejects array-valued text without coercion');
 
 const adversarialCases = [
   ['missing final', [session, settled]],
@@ -69,6 +72,22 @@ for (const [label, records] of adversarialCases) {
   const result = pipeline(jsonl(records));
   assert.equal(result.status, 0, `${label} remains parseable`);
   assert.equal(accepts(parseOutput(result.stdout)), false, `${label} must not be accepted`);
+}
+const malformedContentCases = [
+  ['object content shape', { type: 'text', text: report }],
+  ['array-valued text', [{ type: 'text', text: [report] }]],
+  ['scalar content block', [{ type: 'text', text: report }, null]],
+  ['missing block type', [{ text: report }]],
+  ['non-string text', [{ type: 'text', text: { report } }]],
+  ['malformed thinking block', [{ type: 'thinking', thinking: ['private'] }]],
+];
+for (const [label, content] of malformedContentCases) {
+  const malformed = { ...terminal, message: { ...terminal.message, content } };
+  const result = pipeline(jsonl([session, malformed, settled]));
+  assert.notEqual(result.status, 0, `${label} makes the exact jq filter fail`);
+  let partialRows = [];
+  try { partialRows = parseOutput(result.stdout); } catch { partialRows = []; }
+  assert.equal(accepts(partialRows), false, `${label} must not be accepted by the positive predicate`);
 }
 
 const producerScript = `{ printf '%s' ${shellQuote(jsonl(goodRecords))}; exit 7; }`;
