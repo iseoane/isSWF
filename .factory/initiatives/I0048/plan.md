@@ -34,7 +34,7 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 - Objective: Apply the two non-blocking J001 review suggestions: a sizing-miss prompt in the retrospective template, and the brief size line naming the plan as its source.
 - Size: S (two template lines, one review pass, no special risk).
 - Depends on: J001
-- Brief: Small local request; this plan entry is the curated brief (operator request 2026-11-11: apply both suggestions, close everything, patch release).
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
 - Next step: PR exact-head CI, merge, patch release v1.8.6.
 
@@ -49,3 +49,4 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 - Worker commit dd0197e (two template lines). Worker self-reported it did not read its required role profiles; compensated by independent review, recorded here as a method deviation.
 - Coordinator-observed on dd0197e: check-docs PASS; worker-method-evidence, worker-methodology, host-portability, release-package exit 0; diff check clean.
 - Independent semantic review round 1 on supplied exact diff 08c209b..dd0197e: PASS, no findings.
+- Coordinator deviation: J002 was dispatched with the plan entry as an inline brief and no brief file; CI plan-records check failed (unsafe-brief-reference) on PR273 head eb5989d. Brief file added afterwards to match the dispatched scope; plan-records PASS locally.
