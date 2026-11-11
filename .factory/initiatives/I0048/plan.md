@@ -30,13 +30,13 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: Apply the two non-blocking J001 review suggestions: a sizing-miss prompt in the retrospective template, and the brief size line naming the plan as its source.
 - Size: S (two template lines, one review pass, no special risk).
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: PR exact-head CI, merge, patch release v1.8.6.
+- Next step: None. I0048 complete.
 
 ### Acceptance
 
@@ -50,3 +50,5 @@ Source: https://github.com/iseoane/isSWF/issues/270. Operator decisions on 2026-
 - Coordinator-observed on dd0197e: check-docs PASS; worker-method-evidence, worker-methodology, host-portability, release-package exit 0; diff check clean.
 - Independent semantic review round 1 on supplied exact diff 08c209b..dd0197e: PASS, no findings.
 - Coordinator deviation: J002 was dispatched with the plan entry as an inline brief and no brief file; CI plan-records check failed (unsafe-brief-reference) on PR273 head eb5989d. Brief file added afterwards to match the dispatched scope; plan-records PASS locally.
+- Receipt: PR273 head 85dda901ff8e8f65011c4242bfaa8747d933b435, exact-head Quality SUCCESS 3/3 incl. Windows; expected-head merge 8004ffa on 2026-11-11 under operator request.
+- Release: PR274 version bump merged f6c97706f6f38d48e8691a1c4fcb7f3c57fdcc87; main Quality run 43085835289 SUCCESS 3/3; v1.8.6 published with Linux/Windows archives, evidence and SHA256SUMS, re-downloaded and checksum-verified.
