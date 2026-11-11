@@ -64,6 +64,8 @@ assert.match(durableWork, /Source checkout: from the repository root, `node tool
 assert.match(durableWork, /Claude Code plugin or Pi resource package: `node <trusted-package-root>\/tools\/isswf-status\.mjs/u);
 assert.match(durableWork, /Exit code 0 is not a pass.*Only `status: observed`/u);
 assert.doesNotMatch(durableWork, /source-checkout CLI, not part of the Markdown resource package/u);
+for (const path of ['docs/issue-intake.md', '.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-coordinator/SKILL.md']) assert.doesNotMatch(await read(path), /not the Markdown resource package|Markdown resource package does not contain|Markdown package alone supplies no executable/u, path);
+assert.match(await read('docs/issue-intake.md'), /node <trusted-package-root>\/tools\/isswf-intake\.mjs/u);
 const coordinatorDispatch = await read('.agents/skills/isswf-coordinator/SKILL.md');
 assert.doesNotMatch(coordinatorDispatch, /through the pinned launcher in installed projects/u);
 assert.match(coordinatorDispatch, /### Pre-dispatch refusal conditions/u);
