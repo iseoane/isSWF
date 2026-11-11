@@ -49,12 +49,12 @@ Type: bug
 
 ## J003
 
-- Status: in-review
+- Status: completed
 - Objective: Remove the remaining false "not in the resource package" claims for shipped intake and project-quality tools.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Exact-head CI on the PR, then integration under the repository's LOW standing permission.
+- Next step: None. I0045 complete.
 
 ### Acceptance
 
@@ -64,3 +64,4 @@ Type: bug
 ### Evidence
 
 - Coordinator, Linux: host-portability PASS; negative control (docs reverted, test kept) fails with AssertionError on docs/issue-intake.md; issue-intake, factory-tools-install, check-docs PASS; eslint and diff check clean.
+- Receipt: PR269 head fef8d5927144598d920f7ab42cd89f2090cb2fe2, exact-head Quality SUCCESS 3/3 incl. Windows; expected-head merge 3284bfee148af655ab246d4d94b57c10caa5fde6 on 2026-11-11 under the LOW standing permission after operator go.
