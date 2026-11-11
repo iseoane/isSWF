@@ -16,7 +16,7 @@
 
 - Observable outcome:
 - Why this work is needed:
-- Size (S/M/L) and one-line reason, judged by verification cost:
+- Size (S/M/L) and one-line reason, copied from the plan (the plan is the source):
 
 ## Scope and acceptance
 
