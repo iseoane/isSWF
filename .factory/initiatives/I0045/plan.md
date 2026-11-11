@@ -28,12 +28,12 @@ Type: bug
 
 ## J002
 
-- Status: in-review
+- Status: completed
 - Objective: Make status invocation supported per distribution and pre-dispatch refusal conditions explicit for host-native coordinators, with setup surfacing ignored-state conflicts.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Publish PR for aeba2fc with V001 PASS and observe exact-head CI; integration is a human decision (MEDIUM). Follow-up: remaining 'not in resource package' claims (V001 finding 2).
+- Next step: None for J002. Issue #265 closed by operator decision; live Pi/Claude adherence unverified. Optional follow-up: remaining 'not in resource package' claims (V001 finding 2), not started.
 
 ### Acceptance
 
@@ -45,3 +45,4 @@ Type: bug
 ### Evidence
 
 - Worker A001 commits a78094d, aeba2fc; review V001 PASS; delivery in jobs/J002/delivery.md.
+- Receipt: PR267 head 07679a2ff8cf5358b02a89ac7f4aaa041a6515f2, exact-head Quality SUCCESS 3/3 incl. Windows; operator-approved expected-head merge df5409c905992da6058297a349cfcf4d61b2b149 on 2026-11-11.

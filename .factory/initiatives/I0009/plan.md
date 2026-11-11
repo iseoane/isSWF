@@ -342,12 +342,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J029
 
-- Status: in-review
+- Status: blocked
 - Objective: Preserve state through native migration and actual interrupted-owner public recovery.
 - Depends on: J027, J032
 - Brief: [brief-r2.md](jobs/J029/brief-r2.md)
-- Blocker: Publication and exact-head CI pending; native Windows and later actual interrupted-owner recovery not yet verified. V001 Standards/aggregate FAIL on historical TDD sequence remains, with explicit operator one-off acceptance for this candidate; scoped source Spec PASS.
-- Next step: PR266 exact-head CI on a9269f6 failed Portable checks: tests/directory-sync-portability.mjs flagged tools/state-migration.mjs:20 because its win32 directory skip (`win32 && isDirectory()) return`) did not match the static guard form. Correction 2/2 (coordinator, no new actor) rewrites the guard as `if (directory && process.platform === 'win32') return;` with identical behavior; local directory-sync-portability, state-migration-publication, check-docs, eslint and full check-quality exit 0 on Linux. Observe exact-head CI for the corrected head; then person merge decision (MEDIUM/workflow). V001 FAIL one-off acceptance, Windows follow-up and source scope otherwise unchanged. Calls3/6 reviews1/3 corrections2/2 spent. I0045 uncommitted/excluded.
+- Blocker: Linux normal migration integrated (PR266); native Windows checks/harness-report accuracy follow-up and actual interrupted-owner recovery remain unverified. V001 historical TDD FAIL remains, accepted once by operator.
+- Next step: Native Windows session for J029 and J030 (operator handoff prompt prepared 2026-11-11): rerun J029 checks, review harness/report accuracy, and assess interrupted-owner recovery evidence; no new machinery without authorization.
 
 ### Acceptance
 
@@ -360,6 +360,7 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Planner/current source map: tools/state-migration.mjs inspectStateMigration/moveState/recoverState and tools/isswf.mjs public owner/dispatch paths; historical injected ceased predicates are not real loss evidence.
 - jobs/J029/brief-r1.md; shared state behavior is independent of the parked worker engine and does not imply native-agent crash recovery.
 - Current analysis/tests retained in [analysis-20261111.md](jobs/J029/analysis-20261111.md). Linux tests/release-package.mjs PASS, with direct source inspection identifying injected deadOwner/bootstrap recovery versus actual owner-loss evidence. Strict Windows/Linux identity and native verification requirements preserved.
+- Receipt: CI correction 99dc65cc01cfde9058ee43d4aafee26914e8d372 (directory-sync guard form, behavior unchanged). Exact-head Quality SUCCESS 3/3 (Portable, Package and host discovery ubuntu/windows). Operator-approved expected-head merge of PR266 as bb2216bdf809cc0350a9720f529812204956d1af on 2026-11-11. Branch not deleted.
 
 ## J030
 
