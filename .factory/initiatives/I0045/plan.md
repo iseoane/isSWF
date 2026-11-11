@@ -46,3 +46,21 @@ Type: bug
 
 - Worker A001 commits a78094d, aeba2fc; review V001 PASS; delivery in jobs/J002/delivery.md.
 - Receipt: PR267 head 07679a2ff8cf5358b02a89ac7f4aaa041a6515f2, exact-head Quality SUCCESS 3/3 incl. Windows; operator-approved expected-head merge df5409c905992da6058297a349cfcf4d61b2b149 on 2026-11-11.
+
+## J003
+
+- Status: in-review
+- Objective: Remove the remaining false "not in the resource package" claims for shipped intake and project-quality tools.
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Exact-head CI on the PR, then integration under the repository's LOW standing permission.
+
+### Acceptance
+
+- The three false claims are replaced by trusted-factory-root invocation wording.
+- Static assertions fail without the change and pass with it; local checks pass; exact-head CI passes.
+
+### Evidence
+
+- Coordinator, Linux: host-portability PASS; negative control (docs reverted, test kept) fails with AssertionError on docs/issue-intake.md; issue-intake, factory-tools-install, check-docs PASS; eslint and diff check clean.
