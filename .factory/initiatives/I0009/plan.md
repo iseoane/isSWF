@@ -363,12 +363,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J030
 
-- Status: in-review
+- Status: in-progress
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
-- Brief: [brief-r3.md](jobs/J030/brief-r3.md)
-- Blocker: Full J030 remains incomplete: shared reverse guidance, effective-effort acceptance, native reverse Windows and error/cancellation scope. Forward integrated and Linux reverse report return already verified; do not repeat completed probes.
-- Next step: Use jobs/J030/analysis-20261111.md to select a bounded shared reverse contract/no-model protocol unit. Resolve requested-versus-effective effort honestly; preserve original reverse2/3 pairs and pinned25282b36 records. No implementation/live-model pair dispatched by current analysis.
+- Brief: [brief-r6.md](jobs/J030/brief-r6.md)
+- Blocker: None for approved Linux shared reverse contract/test unit. Native Windows evidence deferred explicitly; effective effort reported unknown where unobserved, no measured-effort claim. Full J030 remains incomplete.
+- Next step: Dispatch worker on brief-r6 then exact-candidate review/PR/CI; current explicit operator start approves Linux-first, Windows-last sequence. Unit calls0/6 reviews0/3 corrections0/2; historical reverse2/3 pairs preserved, no new live-model pair. Integration needs person because host paths touched. PR263 administrative/analysis MERGED d1f8c788 after exact76f083f Quality42972021739 SUCCESS3/3; all prior source/evidence preserved.
 
 ### Acceptance
 
@@ -381,6 +381,7 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Planner found no verified bridge in factory guides/manifests; coordinator discovery adds existing builtin claude-code read-only external-CLI route candidate, async-only with unsupported Pi model overrides unless runner implements them.
 - jobs/J030/brief-r1.md; no Claude actor, provider experiment, install or host configuration change occurred.
 - Current operator-authorized analysis and tests retained in [analysis-20261111.md](jobs/J030/analysis-20261111.md). Existing installed0.83.0 adapter contract and static host tests PASS; initial missing test-dependency ENOENT disclosed, no installation. Synthetic forward stop/error tests are not reverse Windows/effort evidence.
+- Current operator explicitly approves Linux-first reverse instructions/protocol/error/cancellation unit with effort requested/unknown disclosure. [brief-r6.md](jobs/J030/brief-r6.md) supplies accepted partial scope; Windows and full J030 closure remain pending. No new model probe, root/settings update or dispatcher.
 
 ## J031
 
