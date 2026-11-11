@@ -139,7 +139,7 @@ Before every new dispatch on either host, run the initiative status command for 
 - The job's brief is uncommitted, untracked or Git-ignored at the document-input checkpoint. A brief the status command reports as `recorded` can still be untracked; check it with Git.
 - The dispatch does not name the brief path, the full Git SHA of the document-input checkpoint, and the target base SHA.
 
-Fix the record or the dispatch and rerun the check; do not dispatch around a failed condition. A pinned resumption checks its retained full-SHA inputs the same way. A small task's inline handoff does not waive these conditions for its minimal canonical plan and curated brief.
+Fix the record or the dispatch and rerun the check; do not dispatch around a failed condition. A pinned resumption checks its retained full-SHA inputs the same way. The "no committed job JSON" allowance below covers only JSON job records: a small task carrying its brief inline still needs its minimal canonical plan and curated Markdown brief committed, and these conditions apply to them.
 
 Use the guide for the actual host selected above. For a Claude writer, apply that guide's writer permission preflight before dispatch; respect its refusal/no-verdict handling without assuming that filesystem access or available tools grant edit approval. Supply the shared role, trusted factory root, objective, acceptance, scope/exclusions, explicit working directory and baseline/candidate, chosen model/effort, available tools, finite budget and checks. Preserve assigned document checkpoints; a small task may carry a complete brief in the handoff rather than requiring committed job JSON. Inspect current code and references before acting.
 
