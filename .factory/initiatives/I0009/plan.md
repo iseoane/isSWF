@@ -342,12 +342,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J029
 
-- Status: in-progress
+- Status: in-review
 - Objective: Preserve state through native migration and actual interrupted-owner public recovery.
 - Depends on: J027, J032
 - Brief: [brief-r2.md](jobs/J029/brief-r2.md)
 - Blocker: No current normal-migration dispatch blocker; native Windows evidence and subsequent actual interrupted-owner recovery remain incomplete until independently verified. Source policy must not weaken identity or data preservation.
-- Next step: Consume same-context correction1/2 from completed worker82b78d11 under unchanged brief-r2. Original functional21207c4 and reportc7b80be passed reported Linux Node/Bun journeys; coordinator reran focused publication/docs/diff PASS but found acceptance2 public refusal coverage incomplete (stale/wrong digest, unsafe entries, uncertain transitions/journals/active claims), pin payload preservation and per-file write/close controls absent. Correction adds these existing accepted checks before independent review, not new scope. Calls2/6 reserved for eligible resume; reviews0/3, corrections1/2, max20min/call. Native Windows and actual interrupted-owner acceptance remain pending. I0045 issue265 triage local/uncommitted and excluded; do not sweep into J029 commits.
+- Next step: Independent combined review round1/3 of corrected functional467d4f25e32da9951448f87c0f15f6b1ca1a1724 and retained A001/A002/coordinator-checks-r2. Author57058035 terminal complete/process terminal observed, calls2/6 reviews0/3 corrections1/2 before review. Current focused publication/docs/lint/diff PASS; supplied actual Linux installed Node/Bun report retained. Coordinator exact historical replay contradicts claimed GREEN124a605: later empty-stdout harness assertion FAIL; real behavioral REDe52c192 retained, harness output fix21207c4 and final467d4f2 PASS. Disclosed selected-method deviation needs independent Standards assessment, not historical relabeling. Native Windows CI and actual interrupted-owner acceptance remain pending. Preserve uncommitted I0045 triage, exclude it from all J029 commits/PR. No integration/cleanup authorization inferred.
 
 ### Acceptance
 
