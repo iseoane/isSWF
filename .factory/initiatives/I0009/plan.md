@@ -342,12 +342,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J029
 
-- Status: pending
+- Status: in-review
 - Objective: Preserve state through native migration and actual interrupted-owner public recovery.
 - Depends on: J027, J032
-- Brief: [brief-r1.md](jobs/J029/brief-r1.md)
-- Blocker: Native directory publication policy and actual interrupted migration-owner recovery remain unproved; existing APIs and injected recovery fixtures do not close those criteria.
-- Next step: Use jobs/J029/analysis-20261111.md to prepare normal portable installed state-migration unit, then actual interrupted-owner public recovery. No real project migration, new implementation or live-model call selected.
+- Brief: [brief-r2.md](jobs/J029/brief-r2.md)
+- Blocker: Publication and exact-head CI pending; native Windows and later actual interrupted-owner recovery not yet verified. V001 Standards/aggregate FAIL on historical TDD sequence remains, with explicit operator one-off acceptance for this candidate; scoped source Spec PASS.
+- Next step: PR266 exact-head CI on a9269f6 failed Portable checks: tests/directory-sync-portability.mjs flagged tools/state-migration.mjs:20 because its win32 directory skip (`win32 && isDirectory()) return`) did not match the static guard form. Correction 2/2 (coordinator, no new actor) rewrites the guard as `if (directory && process.platform === 'win32') return;` with identical behavior; local directory-sync-portability, state-migration-publication, check-docs, eslint and full check-quality exit 0 on Linux. Observe exact-head CI for the corrected head; then person merge decision (MEDIUM/workflow). V001 FAIL one-off acceptance, Windows follow-up and source scope otherwise unchanged. Calls3/6 reviews1/3 corrections2/2 spent. I0045 uncommitted/excluded.
 
 ### Acceptance
 
@@ -363,12 +363,12 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 
 ## J030
 
-- Status: in-review
+- Status: blocked
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
 - Brief: [brief-r6.md](jobs/J030/brief-r6.md)
-- Blocker: Linux r6 source verified and independently approved; PR publication/exact-head CI and human integration remain gates. Native Windows reverse evidence deliberately deferred; full J030 incomplete.
-- Next step: Publish Linux r6 branch/PR, observe exact-head CI, then request human integration approval (MEDIUM host-procedure risk). Candidate80925c103543c2884c9cd1d58ed4d3e7f899469e, V005 Standards/Spec PASS0findings resolves V004 F1; original FAIL retained. Unit calls5/6 reviews2/3 corrections2/2 exhausted, all native actors terminal complete. After Linux delivery, prepare J029 Linux under current selected sequence, then native Windows of both; retain exact handoff and original reverse2/3pairs budget. No extra correction without operator if blocker emerges.
+- Blocker: Linux r6 integrated via PR264; full J030 still requires deliberately deferred native Windows reverse evidence.
+- Next step: Continue selected J029 Linux in a fresh coordinator context, then native Windows for both jobs. Operator explicitly approved PR264 integration; protected expected-head merge of9a7c75f5c4bbaff5844c4ea43ddaaec3e4adced9 verified MERGED at3c0cf20526dc3d707f30032dc6ca0dd8c93c9a50. Pre-merge Quality42979983835 SUCCESS3/3; post-merge CI not observed. V005 PASS/function80925c1 and original V004 FAIL retained. J030 unit calls5/6 reviews2/3 corrections2/2 exhausted; no active async actors. Preserve local plan/delivery receipts before branch switch; no cleanup or Windows/full-job closure. J029 scope/budget requires reconciliation from its analysis and brief before dispatch; original reverse2/3pairs unchanged.
 
 ### Acceptance
 

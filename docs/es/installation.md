@@ -82,7 +82,7 @@ La configuración también ofrece una carpeta externa para los worktrees de Git 
 
 La configuración crea `.isswf/` y registra la versión de la factoría elegida para el proyecto. Las nuevas referencias Bun identifican el código y la versión del motor compartidos, mientras cada máquina conserva y verifica su artefacto de plataforma. La referencia no incluye un hash de binario nativo que los colaboradores deban cambiar al usar otra plataforma. Conserva los ajustes de modelos y las decisiones de configuración existentes salvo que apruebes cambios de forma explícita. La autenticación y los permisos de ejecución deberán seguir siendo válidos para el trabajo que solicites después.
 
-Si el repositorio ya utiliza `.factory/`, pide inspeccionar y migrar ese estado existente. No crees una segunda carpeta de la factoría a su lado.
+Si el repositorio ya utiliza `.factory/`, pide inspeccionar y migrar ese estado existente. No crees una segunda carpeta de la factoría a su lado. La migración normal conserva los bytes y los permisos compatibles, y rechaza el estado sucio o dos raíces activas. Windows omite la sincronización de directorios y, por tanto, no promete la misma persistencia de las entradas de directorio que Linux ante un corte de alimentación; los fallos de escritura, sincronización y cierre de archivos normales siguen siendo fatales. Esta ruta de migración normal no demuestra la recuperación real tras la interrupción del proceso propietario en Windows.
 
 ## Evidencia Git vinculada para revisiones de Pi
 
