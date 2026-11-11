@@ -38,7 +38,9 @@ async function injected(label, code) {
 }
 let passed = false;
 try {
+  await injected('file-write', `const original=fs.open;fs.open=async(...args)=>{const handle=await original(...args);if(args[1]==='wx')handle.writeFile=async()=>{throw Error('injected file-write failure');};return handle;};`);
   await injected('file-sync', `const original=fs.open;fs.open=async(...args)=>{const handle=await original(...args);if(args[1]==='wx')handle.sync=async()=>{throw Error('injected file-sync failure');};return handle;};`);
+  await injected('file-close', `const original=fs.open;fs.open=async(...args)=>{const handle=await original(...args);if(args[1]==='wx'){const close=handle.close.bind(handle);handle.close=async()=>{await close();throw Error('injected file-close failure');};}return handle;};`);
   if (process.platform === 'linux') {
     await injected('directory-open', `const original=fs.open;fs.open=async(path,...args)=>{if(args[0]==='r'&&String(path).includes('.isswf-transition-stage-'))throw Error('injected directory-open failure');return original(path,...args);};`);
     await injected('directory-sync', `const original=fs.open;fs.open=async(...args)=>{const handle=await original(...args);if(args[1]==='r'&&(await handle.stat()).isDirectory())handle.sync=async()=>{throw Error('injected directory-sync failure');};return handle;};`);
@@ -58,7 +60,7 @@ try {
   assert.match(repeated.stdout, /"status":"unchanged"/u);
   assert.equal(await readFile(join(test.project, '.isswf/initiatives/I0001/jobs/J001/brief-r1.md'), 'utf8'), test.bytes.toString());
   passed = true;
-  console.log(`PASS ${process.platform} state-migration publication: mandatory file flush failure, Linux directory open/sync/close refusal, installed-source migration bytes and identical repeat; fault injections are not native Windows or power-loss evidence`);
+  console.log(`PASS ${process.platform} state-migration publication: mandatory file write/sync/close failures, Linux directory open/sync/close refusal, installed-source migration bytes and identical repeat; fault injections are not native Windows or power-loss evidence`);
 } finally {
   if (passed) await rm(root, { recursive: true, force: true });
   else console.error(`Retained migration publication fixture: ${root}`);
