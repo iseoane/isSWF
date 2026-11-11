@@ -25,3 +25,23 @@ Type: bug
 - Source package.json includes tools/*.mjs; durable-work and issue-intake call these CLIs source-only/not packaged. Exported exact-main helper probe without runtime receipt or project pin returns observed for canonical plan and unknown invalid-or-changing-plan for narrative plan, both exit0. This verifies helper behavior on Linux exported source, not installed Claude/Windows adherence or cause.
 - Raw supplied observation and bounded probe retained outside project at /tmp/isswf-265-triage-re1gs01x pending native intake, with no private project/session content. No commit, labels, public comment or implementation authorized.
 - Triage disposition recorded in jobs/J001/disposition.md: requirement unconditional but unenforced (status exit0 for unknown; untracked brief reported recorded); verified packaging/doc inconsistency for status invocation; setup does not flag ignored state vs checkpoints. Cause undemonstrated.
+
+## J002
+
+- Status: in-progress
+- Objective: Make status invocation supported per distribution and pre-dispatch refusal conditions explicit for host-native coordinators, with setup surfacing ignored-state conflicts.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Blocker: None.
+- Next step: Worker implements in primary checkout on fix/265-durable-predispatch; then independent review, PR and exact-head CI; merge is a human decision (MEDIUM).
+
+### Acceptance
+
+- Documents agree on one status invocation per distribution and drop unshipped/launcher-only claims.
+- Coordinator states refusal on non-observed status, uncommitted brief, or missing brief path/full input SHA; exit 0 is not a pass.
+- Setup surfaces an ignored state root and preserves operator choice.
+- Mirrors equivalent, check-docs PASS, focused tests with negative control, Windows via native CI.
+
+### Evidence
+
+None.
