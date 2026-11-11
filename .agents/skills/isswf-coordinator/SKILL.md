@@ -5,7 +5,7 @@ description: Coordinate isSWF assignments with the operator. Use to prepare or r
 
 # Coordinate a local assignment
 
-isSWF loaded-resource release version: 1.8.4
+isSWF loaded-resource release version: 1.8.5
 
 Keep the conversation with the operator and prepare bounded factory work. This skill is a Markdown instruction. It does not install a runtime, create workers, or expand permissions.
 
