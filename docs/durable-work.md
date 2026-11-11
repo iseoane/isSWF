@@ -72,11 +72,17 @@ At closure, inventory relevant canonical tracked changes and untracked files. Un
 
 ## Read an initiative status snapshot
 
-From an authorized source checkout, run `node tools/isswf-status.mjs --project /absolute/project --initiative I0001`. The command reads the existing canonical plan and the brief/report/intake artifacts under each named job. It creates no records and follows no external evidence links. It reports declared status, dependencies, blockers, next step, acceptance, evidence references and per-file hashes/modification times. A missing brief is `not-prepared`; malformed or unsafe artifacts are `unknown`. Reported attempt completion does not overwrite the plan's status or establish product acceptance.
+Run the initiative status command with the invocation for your distribution:
+
+- Source checkout: from the repository root, `node tools/isswf-status.mjs --project /absolute/project --initiative I0001`.
+- Claude Code plugin or Pi resource package: `node <trusted-package-root>/tools/isswf-status.mjs --project /absolute/project --initiative I0001`, where `<trusted-package-root>` is the loaded package's trusted factory root. The package ships `tools/*.mjs`.
+- Receipt-pinned legacy runtime: through that project's pinned launcher, `RELEASE/bin/isswf exec --project /absolute/project -- isswf-status --initiative I0001` (see [installation](installation.md)).
+
+Exit code 0 is not a pass: the command also exits 0 for unknown, invalid or absent records. Only `status: observed` means the plan was read and parsed. The command reads the existing canonical plan and the brief/report/intake artifacts under each named job. It creates no records and follows no external evidence links. It reports declared status, dependencies, blockers, next step, acceptance, evidence references and per-file hashes/modification times. A missing brief is `not-prepared`; malformed or unsafe artifacts are `unknown`. Reported attempt completion does not overwrite the plan's status or establish product acceptance.
 
 The result includes `initiative` as the stable ID, `title` from the canonical plan heading, and a derived `label` such as `I0001 · Factory v1`. Use a concise plan title for readable lists; no separate editable label or renamed directory is needed. A missing or malformed heading is unknown. The panel consumes this same display contract.
 
-The result includes query time and file provenance, but `processState: not-inspected` and `freshness: not-verified` remain explicit. A file timestamp is not a heartbeat. The coordinator must not describe a worker as running, stopped or fresh from this snapshot. The files are not one atomic runtime snapshot. This snapshot does not inspect live processes, current remote PR state, or automatically satisfy dependencies. This first consumer is a source-checkout CLI, not part of the Markdown resource package.
+The result includes query time and file provenance, but `processState: not-inspected` and `freshness: not-verified` remain explicit. A file timestamp is not a heartbeat. The coordinator must not describe a worker as running, stopped or fresh from this snapshot. The files are not one atomic runtime snapshot. This snapshot does not inspect live processes, current remote PR state, or automatically satisfy dependencies.
 
 ## Open the local project panel
 
