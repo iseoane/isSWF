@@ -97,6 +97,24 @@ claude -p --permission-mode acceptEdits --settings '{"permissions":{"allow":["Ed
 
 These flags are per-process arguments, not a host configuration change. Do not use permission bypass modes.
 
+## Reverse supplied-evidence contract
+
+This is the currently authorized reverse direction: a Claude coordinator consumes an independent no-tools Pi reviewer report for supplied evidence. The coordinator—not the Pi reviewer—owns one explicitly authorized synchronous Linux Bash pipeline invoking the approved existing Pi CLI in JSON mode. This is not a Claude-native Agent→Pi bridge. The Pi reviewer receives no shell, launch authority, or other new dispatcher. The coordinator binds the exact candidate/cwd, supplies the complete diff and required canonical review resources inline, requests the approved Pi reviewer selection, and consumes the exact terminal report. Existing Pi→Claude supplied-evidence review is the opposite direction and must not be described as this reverse path.
+
+Before any hypothetical live launch, independently verify the current explicit permission, actual existing safe executable/host route, current selection and bounded budget; do not discover an unsafe PATH wrapper by invoking version/help. Verify the route/account is the approved one without reading credential values; if that cannot be established, block. The historical A009 selection does not establish current availability or authorization. The producer argv/request, requested model/effort, host-reported identity and effective effort are separate facts; leave effective effort unknown unless attested. Bind explicit candidate cwd and bounded stdin, stdout, stderr and timeout. No host/tool/provider fallback or automatic retry is permitted.
+
+Require successful producer and filter exits under `pipefail`, exactly one session with the expected cwd, exactly one complete final assistant report with expected provider/model, nonempty concatenated text blocks, `stopReason: stop`, no error, and exactly one `agent_settled` with `aborted: false`. Missing/duplicate/malformed/truncated terminal, retry/compaction/error events (including suffixed event names), identity mismatch, output/stderr truncation, nonzero exit, timeout and cancellation are failure or inconclusive, never success. Cancellation is not proof of cessation; reconcile the actor before any further action. No descendant, real-provider cancellation, Windows, native bridge, isolation or general recovery claim is made.
+
+### Canonical Linux JSONL projection
+
+This filter follows the public Pi JSONL shape: final `message.content` is an array, and only its `text` blocks are preserved; thinking blocks are dropped. Before projection, it requires each source block to have a recognized shape and all text to be a string; malformed content halts the jq process nonzero rather than being normalized or silently dropped. `cwd` comes only from the whitelisted session event, never inferred from the message. Session and settlement payloads are whitelisted, and adverse event type suffixes are retained. The focused test extracts these exact bytes and tests synthetic transport/failure controls; tests do not enforce runtime behavior. Capture combined pipeline stdout with a 16,000-byte limit; emit any success marker only after producer and filter succeed. Truncation, including loss of settlement, cannot be accepted.
+
+```sh
+jq -c 'select(.type == "session" or .type == "agent_settled" or (.type == "message_end" and .message.role == "assistant") or (.type | tostring | test("retry|compaction|error"))) | if .type == "session" then {type, cwd} elif .type == "agent_settled" then {type, aborted} elif .type == "message_end" then (.message.content as $content | if ($content | type) != "array" then "assistant content must be an array" | halt_error(5) elif (all($content[]; type == "object" and ((.type == "text" and (.text | type) == "string") or (.type == "thinking" and (.thinking | type) == "string"))) | not) then "malformed assistant content block" | halt_error(5) else {type, message: (.message | {role, provider, model, stopReason, errorMessage, content: [$content[] | select(.type == "text") | {type, text}]})} end) else {type} end'
+```
+
+The unchanged A009 Linux run records the historical reverse journey and proves only that earlier supplied-evidence scope; it does not verify this changed projection. This task adds synthetic no-model controls only. Native Windows evidence remains deliberately deferred.
+
 ## Existing legacy runtime assignments
 
 Explicitly retained legacy assignments keep their original launcher, runtime pin, release identity and checkpointed inputs under `docs/installation.md` and `docs/local-worker-lifecycle.md`. Read those guides from their retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.

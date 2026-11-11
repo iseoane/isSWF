@@ -366,9 +366,9 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Status: in-review
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
-- Brief: [brief-r3.md](jobs/J030/brief-r3.md)
-- Blocker: Full J030 remains incomplete: shared reverse guidance, effective-effort acceptance, native reverse Windows and error/cancellation scope. Forward integrated and Linux reverse report return already verified; do not repeat completed probes.
-- Next step: Use jobs/J030/analysis-20261111.md to select a bounded shared reverse contract/no-model protocol unit. Resolve requested-versus-effective effort honestly; preserve original reverse2/3 pairs and pinned25282b36 records. No implementation/live-model pair dispatched by current analysis.
+- Brief: [brief-r6.md](jobs/J030/brief-r6.md)
+- Blocker: Linux r6 source verified and independently approved; PR publication/exact-head CI and human integration remain gates. Native Windows reverse evidence deliberately deferred; full J030 incomplete.
+- Next step: Publish Linux r6 branch/PR, observe exact-head CI, then request human integration approval (MEDIUM host-procedure risk). Candidate80925c103543c2884c9cd1d58ed4d3e7f899469e, V005 Standards/Spec PASS0findings resolves V004 F1; original FAIL retained. Unit calls5/6 reviews2/3 corrections2/2 exhausted, all native actors terminal complete. After Linux delivery, prepare J029 Linux under current selected sequence, then native Windows of both; retain exact handoff and original reverse2/3pairs budget. No extra correction without operator if blocker emerges.
 
 ### Acceptance
 
@@ -381,6 +381,8 @@ J019 observations supersede its retained pre-publication brief. J018/J020 histor
 - Planner found no verified bridge in factory guides/manifests; coordinator discovery adds existing builtin claude-code read-only external-CLI route candidate, async-only with unsupported Pi model overrides unless runner implements them.
 - jobs/J030/brief-r1.md; no Claude actor, provider experiment, install or host configuration change occurred.
 - Current operator-authorized analysis and tests retained in [analysis-20261111.md](jobs/J030/analysis-20261111.md). Existing installed0.83.0 adapter contract and static host tests PASS; initial missing test-dependency ENOENT disclosed, no installation. Synthetic forward stop/error tests are not reverse Windows/effort evidence.
+- Current operator explicitly approves Linux-first reverse instructions/protocol/error/cancellation unit with effort requested/unknown disclosure. [brief-r6.md](jobs/J030/brief-r6.md) supplies accepted partial scope; Windows and full J030 closure remain pending. No new model probe, root/settings update or dispatcher.
+- Linux r6 candidate80925c1 passed focused protocol, host-portability, worker-methodology, docs, lint and diff checks. V004 failed originalb7545ed on malformed-content coercion; V005 delta review PASS and F1 resolved on80925c1, with exact-example jqexit5 coordinator reproduction. Synthetic protocol/timeout/cancel controls are not real-provider/Windows/descendant evidence. New record-only delivery delta reuses unchanged functional review under affected-delta guidance.
 
 ## J031
 
