@@ -65,7 +65,7 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Active initiatives (dot) are those whose records the session touched, plus `/initiatives pin <ID>` and unpin.
 - Refresh on relevant tool results with debounce and a slow fallback timer; plugin tests cover activation and pin.
 - Bottom card "No activas" lists non-active initiatives: started ones with a distinct mark and a short blocked/pending count, unopened ones with number and name only.
-- Jobs completed during this session are listed individually; jobs already completed before collapse to one summary line with their count. "During this session" means not completed in a baseline snapshot taken when the coordinator activates the pane (kept in session state across reloads); no timestamps are inferred.
+- Completed jobs inside a card collapse to one summary line with their count, so a long initiative does not fill the pane.
 
 ## J004
 
