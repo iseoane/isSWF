@@ -74,6 +74,7 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Operator correction 2026-11-12 (coordinator-direct): inactive card counted only blocked and pending, hiding in-progress/in-review/awaiting-human jobs; now shows `N sin cerrar` (all non-completed) plus `M bloqueados`. Test expectations updated (the old pin test had hidden an in-progress job); plugin test 4/4, node --test 12/12.
 - Operator request 2026-11-12 (coordinator-direct): pane title is `isSWF · <repo folder name>` from the session cwd (both separators handled); validate passes, plugin test 4/4; title not asserted by tests.
 - Operator review of the live pane 2026-11-12 (coordinator-direct): title drawn inside the pane with a full-width double rule (the pane frame showed no title); job lines truncated to one line with an ellipsis; coordinator wrote A001.md transcriptions for J001-J003 so rounds show pills. validate passes, plugin test 4/4, node --test 12/12.
+- Second live review 2026-11-12 (coordinator-direct): blocked and other open jobs counted exclusively (`N bloqueados · M sin cerrar`); card header uses `sin cerrar`; round label and pills center-aligned; pill shows role only, id and kind moved to hover. validate passes, plugin test 4/4, node --test 12/12.
 - Limits: not observed live; Windows not run; pin and touch share one list (a later touch re-activates an unpinned ID); blocked count from Status only; records re-read on each redraw.
 
 ## J004
