@@ -72,6 +72,7 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Worker A001 (native isswf-worker, model inherited, effort not observed) changed hooks/register.tsx, hooks/register.test.tsx, hooks/hooks.json, .claude-plugin/plugin.json and added types/index.d.ts; about 187 lines; no repository writes.
 - Coordinator rerun on Linux 2026-11-12: claude plugin validate passed with catalog-only warnings; claude plugin test 4/4 (gating, touched initiative and grouping, pin/unpin, no state dir); node --test 12/12.
 - Operator correction 2026-11-12 (coordinator-direct): inactive card counted only blocked and pending, hiding in-progress/in-review/awaiting-human jobs; now shows `N sin cerrar` (all non-completed) plus `M bloqueados`. Test expectations updated (the old pin test had hidden an in-progress job); plugin test 4/4, node --test 12/12.
+- Operator request 2026-11-12 (coordinator-direct): pane title is `isSWF · <repo folder name>` from the session cwd (both separators handled); validate passes, plugin test 4/4; title not asserted by tests.
 - Limits: not observed live; Windows not run; pin and touch share one list (a later touch re-activates an unpinned ID); blocked count from Status only; records re-read on each redraw.
 
 ## J004
