@@ -30,18 +30,24 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J002
 
 - Size: S
-- Status: pending
+- Status: awaiting-human
 - Objective: Render the J001 snapshot as a Claude Code mod pane with static layout: one card per open initiative, rounds with pills, one card for unopened initiatives.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Awaiting J001 and explicit operator start.
-- Next step: Operator starts J002.
+- Blocker: None.
+- Next step: Operator views the live pane and accepts the layout or asks for changes.
 
 ### Acceptance
 
 - Cards, jobs, rounds and pills (passed, changes requested, running, unknown) match the approved mockup; completed initiatives hidden; unopened listed by number and name.
 - Hover detail shows whatever the snapshot carries and unknown otherwise; hover is style-only, so all values are precomputed.
 - `claude plugin validate` and `claude plugin test` pass; no model calls, no prompt/context change, no writes to the repository or state directories.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited, effort not observed) added .claude-plugin/plugin.json, hooks/hooks.json, hooks/register.tsx, hooks/register.test.tsx and lib/node-fs.mjs; reader now async over an injected file interface. About 280 lines; no repository writes.
+- Coordinator rerun on Linux 2026-11-12: claude plugin validate passed with catalog-only warnings; claude plugin test 3/3; node --test 12/12.
+- Limits: Windows not run; live hover not observed; usage always unknown until J006; re-reads records on each redraw until J003.
 
 ## J003
 
