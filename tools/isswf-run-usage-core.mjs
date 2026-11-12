@@ -95,22 +95,32 @@ function finish(collected, counters, model, finished, invalid) {
   return invalid ? { ...usage, tokensPartial: true, reason: invalid } : usage;
 }
 
-function claudeUsage(text, kind, invalid) {
+// `claude -p` writes cost-state when it exits, and a resumed session appends after it, so only a trailing
+// cost-state marks a session finished; a native agent's transcript ends on an end_turn reply. Scanning the
+// full text keeps this right when an oversized transcript sums only its prefix.
+function tailFinished(text, kind) {
+  const lines = text.split('\n');
+  for (let i = lines.length - 1; i >= 0; i--) {
+    let entry;
+    try { entry = JSON.parse(lines[i]); } catch { continue; }
+    if (entry?.type === 'user') return false;
+    if (kind === 'session' && entry?.type === 'cost-state') return true;
+    if (entry?.type === 'assistant') return kind === 'session' ? false : entry.message?.stop_reason === 'end_turn';
+  }
+  return false;
+}
+
+// `full` is the untruncated text of an oversized transcript; only `text` is summed.
+function claudeUsage(text, kind, invalid, full) {
   const collected = collector();
-  let lastStop = null, costState = false;
   // A request's top-level usage sums only its `message` iterations; server-side sub-inferences such as
   // `advisor_message` are billed as extra iterations, repeated on every entry of that request.
   const extra = new Map();
   const parsed = parseTranscript(text, { entries: 0 }, entry => {
     collected.time(entry.timestamp);
-    if (entry.type === 'cost-state') costState = true;
-    // A resumed session appends after its earlier cost-state, so only a trailing one marks it finished.
-    if (entry.type === 'user' || entry.type === 'assistant') costState = false;
-    if (entry.type === 'user') lastStop = null;
     if (entry.type !== 'assistant') return;
     const iterations = entry.message?.usage?.iterations;
     if (Array.isArray(iterations)) extra.set(entry.requestId, iterations.filter(i => i?.type !== 'message'));
-    lastStop = entry.message?.stop_reason ?? null;
     for (const block of Array.isArray(entry.message?.content) ? entry.message.content : []) {
       if (block?.type !== 'tool_use') continue;
       if (block.name === 'Skill') collected.skill(block.input?.skill);
@@ -131,9 +141,7 @@ function claudeUsage(text, kind, invalid) {
       parsed.models.add(safe(iteration.model) ?? UNKNOWN);
     }
   }
-  // `claude -p` writes cost-state when it exits; a native agent's transcript ends on an end_turn reply.
-  const finished = kind === 'session' ? costState : lastStop === 'end_turn';
-  return finish(collected, counters, single(parsed.models), finished, invalid);
+  return finish(collected, counters, single(parsed.models), tailFinished(full ?? text, kind), invalid);
 }
 
 function piTranscriptUsage(text, finished, invalid) {
@@ -176,9 +184,9 @@ async function readFile(fs, path) {
   const { size } = await fs.stat(path);
   const text = (await fs.read(path)).replace(/\r\n/g, '\n');
   if (size <= LIMITS.file) return { size, text };
-  // Oversized transcripts keep only their complete lines within the limit, summed as partial usage.
+  // Oversized transcripts sum only their complete lines within the first LIMITS.file UTF-16 code units.
   const kept = text.slice(0, LIMITS.file);
-  return { size, text: kept.slice(0, kept.lastIndexOf('\n') + 1), invalid: 'file-size-limit' };
+  return { size, text: kept.slice(0, kept.lastIndexOf('\n') + 1), full: text, invalid: 'file-size-limit' };
 }
 
 async function piFinished(fs, meta) {
@@ -208,7 +216,7 @@ export async function resolveRunUsage({ host, kind, id }, { fs, claudeDir, piDir
   let read, usage;
   try {
     read = await readFile(fs, located.path);
-    usage = host === 'claude' ? claudeUsage(read.text, kind, read.invalid) : piTranscriptUsage(read.text, await piFinished(fs, located.meta), read.invalid);
+    usage = host === 'claude' ? claudeUsage(read.text, kind, read.invalid, read.full) : piTranscriptUsage(read.text, await piFinished(fs, located.meta), read.invalid);
   } catch {
     return { ...unknownUsage('unreadable-transcript'), found: true };
   }

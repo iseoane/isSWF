@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
 const source = resolve(process.argv[2] || '.');
 const tool = join(source, 'tools/isswf-snapshot.mjs');
 const { nodeFs } = await import(pathToFileURL(tool).href);
+const { LIMITS } = await import(pathToFileURL(join(source, 'tools/token-native-transcript-core.mjs')).href);
 const { resolveRunUsage } = await import(pathToFileURL(join(source, 'tools/isswf-run-usage-core.mjs')).href);
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-run-usage-test-')));
 
@@ -119,6 +120,24 @@ try {
   assert.equal((await resolveRunUsage({ host: 'claude', kind: 'agent', id: 'a1b2c3' }, options)).finished, false);
   assert.equal(reads.filter(p => p === agentPath).length, 2);
   assert.equal((await resolveRunUsage({ host: 'claude', kind: 'session', id: RESUMED_SESSION }, options)).finished, false, 'a resumed session is running again');
+  // An oversized finished session: tokens come from the truncated prefix, `finished` from the full tail.
+  const sessionPath = join(root, `claude/projects/-other/${SESSION}.jsonl`);
+  const [head, tail] = [sessionTranscript.split('\n').slice(0, 2).join('\n'), sessionTranscript.split('\n').slice(2).join('\n')];
+  const oversized = `${head}\n${' '.repeat(LIMITS.file)}\n${tail}`;
+  const bigReads = [];
+  const big = {
+    ...nodeFs,
+    stat: async path => path === sessionPath ? { ...(await nodeFs.stat(path)), size: oversized.length } : nodeFs.stat(path),
+    read: async path => { bigReads.push(path); return path === sessionPath ? oversized : nodeFs.read(path); },
+  };
+  const bigOptions = { ...options, fs: big, cache: new Map() };
+  for (let i = 0; i < 2; i++) {
+    const usage = await resolveRunUsage({ host: 'claude', kind: 'session', id: SESSION }, bigOptions);
+    assert.equal(usage.finished, true, 'an oversized finished session is finished');
+    assert.equal(usage.tokensPartial, true);
+    assert.equal(usage.reason, 'file-size-limit');
+  }
+  assert.equal(bigReads.filter(p => p === sessionPath).length, 1, 'an oversized finished session is cached');
   console.log('run usage tests passed');
 } finally {
   await rm(root, { recursive: true, force: true });
