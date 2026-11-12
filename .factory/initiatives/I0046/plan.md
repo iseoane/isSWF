@@ -80,17 +80,24 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J004
 
 - Size: M
-- Status: awaiting-human
+- Status: completed
 - Objective: Move the snapshot reader into isSWF as a packaged host-neutral tool with a versioned JSON contract.
 - Depends on: J003
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
-- Blocker: None. Operator approved the packaging change 2026-11-12.
-- Next step: Operator accepts J004 on PR #276 (head 9b0d70e, CI green on Linux and Windows incl. initiative-snapshot test).
+- Blocker: None.
+- Next step: None. Accepted by the operator 2026-11-12; PR #276 merge needs a separate operator decision. J005 needs an explicit operator start.
 
 ### Acceptance
 
 - Documented snapshot contract with schema version; unknown or malformed records degrade to explicit unknown fields.
 - Focused tests with fixtures pass on Linux and Windows CI; packaging allowlist and en/es docs updated together.
+
+### Evidence
+
+- PR #276, head 9b0d70e (r3 f69e980 after rebase): reviews V001 FAIL, V002 PASS; attempts A002, A003.
+- CI run 43212022106 green on Linux and Windows, including tests/initiative-snapshot.mjs on windows-latest.
+- Operator approved the tools/factory-package.mjs and .github/workflows/quality.yml changes.
+- Not verified: loading the core inside the Claude Code hooks runtime (J008).
 
 ## J005
 
