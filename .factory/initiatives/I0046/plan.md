@@ -122,12 +122,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J006
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Resolve `Run:` identities to model, tokens, duration and counts of skill loads and `.agents/` reads with the existing token-native readers.
 - Depends on: J005
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: None.
-- Next step: Worker A001 in worktree feat/i0046-j006-run-usage; chained PR on feat/i0046-j005-run-line.
+- Brief: [brief-r3.md](jobs/J006/brief-r3.md)
+- Blocker: None. Operator authorized a second correction.
+- Next step: Review V003 PASS on fe6e45a; chained PR on feat/i0046-j005-run-line for Linux and Windows CI.
 
 ### Acceptance
 
