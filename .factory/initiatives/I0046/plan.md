@@ -164,12 +164,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J008
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Ship the Claude Code pane inside the isswf plugin as an opt-in view consuming the packaged snapshot.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Worker A001 in worktree feat/i0046-j008-plugin-pane; chained PR on feat/i0046-j007-usd. The operator reviews the whole mod live before closing J008.
+- Next step: Review V001 PASS; chained PR on feat/i0046-j007-usd for CI; operator reviews the whole mod live and approves the packaging changes before acceptance.
 
 ### Acceptance
 
