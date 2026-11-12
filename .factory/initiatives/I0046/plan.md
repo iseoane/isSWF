@@ -80,12 +80,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J004
 
 - Size: M
-- Status: awaiting-human
+- Status: in-review
 - Objective: Move the snapshot reader into isSWF as a packaged host-neutral tool with a versioned JSON contract.
 - Depends on: J003
-- Brief: [brief-r2.md](jobs/J004/brief-r2.md)
-- Blocker: Candidate e9b186a touches tools/factory-package.mjs; REVIEW.md requires operator approval. Windows CI not yet run.
-- Next step: Review V002 PASS on e9b186a. Operator approves the packaging change; then push/PR for Linux and Windows CI.
+- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
+- Blocker: None. Operator approved the packaging change 2026-11-12.
+- Next step: Candidate 2c3a4d765267cc4bba2f36bfc6617d067e78c2a6 (r3: V002 suggestions and Spanish verdicts, coordinator-checked) pushed for Linux and Windows CI; operator acceptance after CI.
 
 ### Acceptance
 
