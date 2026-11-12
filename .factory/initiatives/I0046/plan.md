@@ -144,12 +144,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J007
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Add cost in USD from a versioned price table.
 - Depends on: J006
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Worker A001 in worktree feat/i0046-j007-usd; chained PR on feat/i0046-j006-run-usage.
+- Next step: Review V001 PASS; chained PR on feat/i0046-j006-run-usage for CI; operator approval needed for tools/factory-package.mjs.
 
 ### Acceptance
 
