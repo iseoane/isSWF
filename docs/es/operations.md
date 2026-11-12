@@ -32,6 +32,7 @@ El panel puede guardar notas locales si las evidencias mostradas siguen coincidi
 - Las demás iniciativas tienen `id`, `title`, `type`, `status` (`parsed` o `unparsed`) y `jobs`. Un plan que rechaza el analizador de planes queda como `unparsed` y sin trabajos.
 - Cada trabajo tiene `id`, `status`, `objective`, `dependsOn`, `issues` y `prs` (números citados en su siguiente paso, sus evidencias o `delivery.md`), `recordCount` y `rounds`. Las rondas siguen los archivos `brief-r<n>.md`; cada registro va a la ronda del brief que cita; si no cita ninguno, a la última, y si no hay ninguna, a la ronda `unknown`.
 - Cada registro `A<nnn>`/`V<nnn>` tiene `id`, `kind` (`attempt` o `review`), `role`, `model`, `modelSource` (`actual`, `requested`, `approved` o `stated`), `effort`, `verdict` (`passed`, `changes-requested` o `running`), `round` y `roundSource` (`stated` o `latest`). Los valores que el registro no indica explícitamente son `unknown`.
+- Los veredictos de revisión se leen de etiquetas en inglés o en español (`aggregate`/`agregado`, `verdict`/`veredicto`, `changes requested`/`cambios pedidos` o `cambios solicitados`).
 - Los archivos de más de 1 MB o ilegibles se enumeran en `skipped`; un registro defectuoso nunca interrumpe la instantánea. Que existan ambos directorios de estado o ninguno, o que falte el directorio `initiatives`, es un error.
 
 ## Desde una instalación preparada

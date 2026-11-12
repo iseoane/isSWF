@@ -49,13 +49,14 @@ function issueRefs(text) {
   return { issues: [...issues].sort((a, b) => a - b), prs: [...prs].sort((a, b) => a - b) };
 }
 
+// Review records are written in English or Spanish; labels are matched in both.
 function parseVerdict(text, kind) {
   if (/^\W*(?:reported )?status\W{0,4}running\b/im.test(text)) return 'running';
   if (kind === 'attempt') return UNKNOWN;
-  const aggregate = text.match(/\baggregate\W{0,4}(pass|fail)/i);
+  const aggregate = text.match(/\b(?:aggregate|agregado)\W{0,4}(pass|fail)/i);
   if (aggregate) return aggregate[1].toLowerCase() === 'pass' ? 'passed' : 'changes-requested';
-  if (/\bchanges[ -]requested\b/i.test(text)) return 'changes-requested';
-  const verdicts = [...text.matchAll(/^\W*verdict\W{0,4}(pass|fail)/gim)].map(m => m[1].toLowerCase());
+  if (/\bchanges[ -]requested\b|\bcambios (?:pedidos|solicitados)\b/i.test(text)) return 'changes-requested';
+  const verdicts = [...text.matchAll(/^\W*(?:verdict|veredicto)\W{0,4}(pass|fail)/gim)].map(m => m[1].toLowerCase());
   if (verdicts.length === 0) return UNKNOWN;
   return verdicts.includes('fail') ? 'changes-requested' : 'passed';
 }

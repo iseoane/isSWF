@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
@@ -124,11 +124,41 @@ try {
   assert.equal((await core.readSnapshot('C:\\absent', windowsMemory)).initiatives[0].title, 'Windows');
   await assert.rejects(core.readSnapshot('/absent', memoryFs({ '/absent/.isswf/x': '', '/absent/.factory/x': '' })), /Both \.isswf and \.factory/);
 
-  // Both cores import only sibling modules and never touch Node globals.
+  // Spanish verdict labels, with markdown emphasis between label and value.
+  const verdictOf = async text => (await core.readSnapshot('/es', memoryFs({
+    '/es/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Es', job('J001', 'in-progress')),
+    '/es/.isswf/initiatives/I0001/jobs/J001/V001.md': text,
+  }))).initiatives[0].jobs[0].rounds[0].entries[0].verdict;
+  for (const [text, expected] of [
+    ['# Revisión\n\nAgregado **FAIL** (Standards PASS).\n', 'changes-requested'],
+    ['- AGREGADO: **pass**\n', 'passed'],
+    ['**Veredicto:** PASS\n', 'passed'],
+    ['Veredicto PASS\nveredicto **FAIL**\n', 'changes-requested'],
+    ['Cambios pedidos en la redacción.\n', 'changes-requested'],
+    ['Hay cambios solicitados.\n', 'changes-requested'],
+  ]) assert.equal(await verdictOf(text), expected, text);
+
+  // The Node wrapper keeps project-state.mjs's guard and refuses a core selection that disagrees with it.
+  if (process.platform !== 'win32') {
+    const linked = join(root, 'linked');
+    await mkdir(join(root, 'linked-target/initiatives'), { recursive: true });
+    await mkdir(linked);
+    await symlink(join(root, 'linked-target'), join(linked, '.factory'));
+    await assert.rejects(readSnapshot(linked), /Regular directory required/);
+  }
+  const claimsIsswf = memoryFs({ [join(project, '.isswf/initiatives/I0001/plan.md')]: plan('I0001', 'Claimed', job('J001', 'pending')) });
+  await assert.rejects(readSnapshot(project, claimsIsswf), /disagrees/);
+
+  // Both cores import only sibling modules and never touch Node globals; the scan covers every static,
+  // bare and dynamic import or re-export form with any quote style, since node:vm cannot load ES
+  // modules without --experimental-vm-modules.
   for (const name of ['isswf-snapshot-core.mjs', 'isswf-plan-core.mjs']) {
-    const text = readFileSync(join(source, 'tools', name), 'utf8');
-    assert.deepEqual([...text.matchAll(/\bfrom\s+'([^']+)'|\bimport\s*\(/g)].map(m => m[1]).filter(s => !s?.startsWith('./')), [], name);
-    assert.doesNotMatch(text, /\bprocess\s*\.|\brequire\s*\(/, name);
+    const text = readFileSync(join(source, 'tools', name), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+    assert.deepEqual(moduleSpecifiers(text).filter(s => !/^\.\/[\w.-]+\.mjs$/.test(s)), [], name);
+    assert.doesNotMatch(text, /\bprocess\b|\bBuffer\b|\brequire\s*\(|\b__(?:dir|file)name\b/, name);
+  }
+  for (const [label, text] of [['double quotes', 'import { x } from "node:fs";'], ['bare', "import 'node:fs';"], ['re-export', 'export * from `node:path`;'], ['dynamic', 'await import(name);']]) {
+    assert.equal(moduleSpecifiers(text).length, 1, label);
   }
 
   const cli = args => spawnSync(process.execPath, [tool, ...args], { encoding: 'utf8', timeout: 15000 });
@@ -158,6 +188,10 @@ function memoryFs(entries) {
     stat: async path => ({ size: entries[path].length }),
     read: async path => entries[path],
   };
+}
+
+function moduleSpecifiers(text) {
+  return [...text.matchAll(/\b(?:import|export)\b[^;'"`]*?\bfrom\s*(['"`])([^'"`]+)\1|\bimport\s*(['"`])([^'"`]+)\3|\bimport\s*\(\s*(['"`]?)([^'"`)]*)\5/g)].map(m => m[2] ?? m[4] ?? m[6]);
 }
 
 function pick(e) {
