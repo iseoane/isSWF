@@ -330,16 +330,16 @@ export const register: Register = (on, options) => {
         <Text bold color="claude">{title}</Text>
         <Text color="claude">{'═'.repeat(Math.max(1, e.props.bodyColumns ?? 40))}</Text>
         {unopenedCards.map((u: any) => (
-          <Box borderStyle="round" borderColor="subtle" flexDirection="column">
-            <Text bold>● {u.id} · {u.title}</Text>
+          <Box backgroundColor="#000000" paddingX={1} paddingY={1} marginBottom={1} flexDirection="column">
+            <Text bold color="merged">● {u.id} · {u.title}</Text>
             <Text dimColor>{t.noWork}</Text>
           </Box>
         ))}
         {cards.map((initiative: any) => {
           const closed = initiative.jobs.filter((j: any) => j.status === 'completed').length
           return (
-            <Box borderStyle="round" borderColor="subtle" flexDirection="column">
-              <Text bold>● {initiative.id} · {initiative.title}</Text>
+            <Box backgroundColor="#000000" paddingX={1} paddingY={1} marginBottom={1} flexDirection="column">
+              <Text bold color="merged">● {initiative.id} · {initiative.title}</Text>
               {initiative.status === 'unparsed' && <Text dimColor>{t.unparsed}</Text>}
               <Text dimColor>jobs {closed}/{initiative.jobs.length} ✓ · {initiative.jobs.length - closed} {t.open}</Text>
               {closed > 0 && <Text color="success">✓ {closed} {t.completed}</Text>}
@@ -364,7 +364,7 @@ export const register: Register = (on, options) => {
             </Box>
           )
         })}
-        <Box borderStyle="round" borderColor="subtle" flexDirection="column">
+        <Box backgroundColor="#000000" paddingX={1} paddingY={1} marginBottom={1} flexDirection="column">
           <Text bold>{t.inactive} {started.length + unopened.length}</Text>
           {started.map((i: any) => {
             const count = countLabel(i.jobs, t)
