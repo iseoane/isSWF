@@ -2,10 +2,11 @@
 
 Type: enhancement
 
-Design approved by the operator on 2026-11-11 in the Claude Code session (mockup artifact since deleted; local copy outside the repo). Roadmap: Claude Code mod, shared host-neutral snapshot, plugin integration. The Pi sidebar and loopback panel retirement live in I0047. Sizing rule: each job is one concern, about 30-45 worker minutes and a diff a reviewer can assess in one sitting (roughly 300 changed lines or less, excluding fixtures). Supersedes I0032 (earlier unstarted plan for the same mod, removed 2026-11-12 by operator decision; retrievable from commit b1161ad). Plan approval is preparation only; each job needs an explicit operator start.
+Design approved by the operator on 2026-11-11 in the Claude Code session (mockup artifact since deleted; local copy outside the repo). Roadmap: Claude Code mod, shared host-neutral snapshot, plugin integration. The Pi sidebar and loopback panel retirement live in I0047. Sizing rule: each job has a Size line. S = up to about 20 worker minutes and 100 changed lines; M = about 30-45 minutes and up to 300 changed lines (fixtures excluded). L is not allowed: a job estimated L is split before start, and a job that grows past M during work stops and is re-planned. Supersedes I0032 (earlier unstarted plan for the same mod, removed 2026-11-12 by operator decision; retrievable from commit b1161ad). Plan approval is preparation only; each job needs an explicit operator start.
 
 ## J001
 
+- Size: M
 - Status: completed
 - Objective: Write a host-independent reader that turns initiative records into one JSON snapshot, inside the prototype mod folder outside the isSWF repository.
 - Depends on: None
@@ -28,38 +29,41 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 
 ## J002
 
+- Size: S
 - Status: pending
-- Objective: Render the J001 snapshot as the Claude Code mod pane, shown only in coordinator sessions.
+- Objective: Render the J001 snapshot as a Claude Code mod pane with static layout: one card per open initiative, rounds with pills, one card for unopened initiatives.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: Awaiting J001 and explicit operator start.
-- Next step: Operator starts J002 after J001.
+- Next step: Operator starts J002.
 
 ### Acceptance
 
-- One card per active initiative (touched by the coordinator in this session, plus `/initiatives pin`) with dot, total time, closed/total jobs, pending count; coordinator row; rounds with pills; one card for unopened initiatives by number and name; completed initiatives hidden.
+- Cards, jobs, rounds and pills (passed, changes requested, running, unknown) match the approved mockup; completed initiatives hidden; unopened listed by number and name.
 - Hover detail shows whatever the snapshot carries and unknown otherwise; hover is style-only, so all values are precomputed.
-- Appears only after the isswf-coordinator skill loads; no prompt/context change, no model calls; event-driven refresh with debounce and a slow fallback timer.
-- `claude plugin validate` and `claude plugin test` pass; no writes to the isSWF repository or state directories.
+- `claude plugin validate` and `claude plugin test` pass; no model calls, no prompt/context change, no writes to the repository or state directories.
 
 ## J003
 
+- Size: S
 - Status: pending
-- Objective: Move the snapshot reader into isSWF as a packaged host-neutral tool with a versioned JSON contract.
+- Objective: Show the pane only in coordinator sessions and mark active initiatives, with event-driven refresh.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: Awaiting J002 and explicit operator start.
-- Next step: Decide from J001-J002 findings whether it extends isswf-status or is a separate tool.
+- Next step: Operator starts J003.
 
 ### Acceptance
 
-- Documented snapshot contract with schema version; unknown or malformed records degrade to explicit unknown fields.
-- Focused tests with fixtures pass on Linux and Windows CI; packaging allowlist and en/es docs updated together.
+- Pane appears only after the isswf-coordinator skill loads in the session.
+- Active initiatives (dot) are those whose records the session touched, plus `/initiatives pin <ID>` and unpin.
+- Refresh on relevant tool results with debounce and a slow fallback timer; plugin tests cover activation and pin.
 
 ## J004
 
+- Size: M
 - Status: pending
-- Objective: Make the coordinator record one fixed `Run:` line with the host launch identity in each A/V record.
+- Objective: Move the snapshot reader into isSWF as a packaged host-neutral tool with a versioned JSON contract.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: Awaiting J003 and explicit operator start.
@@ -67,33 +71,63 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 
 ### Acceptance
 
-- Coordinator skill and Pi/Claude host guides state the line (`claude agent=<id>`, `claude session=<id>`, `pi child=<id>`), copied literally from the launch tool result; no interpretation or extra model calls.
-- Snapshot reader parses the line; records without it keep working with unknown usage.
-- en/es docs equivalent; check-docs and focused tests pass.
+- Documented snapshot contract with schema version; unknown or malformed records degrade to explicit unknown fields.
+- Focused tests with fixtures pass on Linux and Windows CI; packaging allowlist and en/es docs updated together.
 
 ## J005
 
+- Size: S
 - Status: pending
-- Objective: Resolve `Run:` identities to usage with the existing token-native readers, including cost in USD.
-- Depends on: J003
+- Objective: Make the coordinator record one fixed `Run:` line with the host launch identity in each A/V record.
+- Depends on: J004
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Awaiting J003 and explicit operator start.
-- Next step: Operator starts J005; may run in parallel with J004 in an exclusive workspace.
+- Blocker: Awaiting J004 and explicit operator start.
+- Next step: Operator starts J005.
 
 ### Acceptance
 
-- Readers report model, tokens, duration and counts of skill loads and `.agents/` reads per run; results cached once per finished run.
-- USD from a versioned price table with source and date; unpriced models show unknown; tokens always shown.
-- Fixture tests for Claude and Pi inputs pass on Linux and Windows CI.
+- Coordinator skill and Pi/Claude host guides state the line (`claude agent=<id>`, `claude session=<id>`, `pi child=<id>`), copied literally from the launch tool result; no interpretation or extra model calls.
+- Snapshot reader parses the line; records without it keep working with unknown usage; en/es docs equivalent; check-docs and focused tests pass.
 
 ## J006
 
+- Size: M
+- Status: pending
+- Objective: Resolve `Run:` identities to model, tokens, duration and counts of skill loads and `.agents/` reads with the existing token-native readers.
+- Depends on: J005
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: Awaiting J005 and explicit operator start.
+- Next step: Operator starts J006.
+
+### Acceptance
+
+- Per-run results cached once per finished run; tokens always shown.
+- Fixture tests for Claude and Pi inputs pass on Linux and Windows CI.
+
+## J007
+
+- Size: S
+- Status: pending
+- Objective: Add cost in USD from a versioned price table.
+- Depends on: J006
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
+- Blocker: Awaiting J006 and explicit operator start.
+- Next step: Operator starts J007.
+
+### Acceptance
+
+- Price table records source and date; unpriced models show unknown.
+- Focused tests pass; en/es docs updated.
+
+## J008
+
+- Size: M
 - Status: pending
 - Objective: Ship the Claude Code pane inside the isswf plugin as an opt-in view consuming the packaged snapshot.
-- Depends on: J003
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: Awaiting J003 and explicit operator start.
-- Next step: Define the opt-in setting.
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Blocker: Awaiting J004 and explicit operator start.
+- Next step: Operator starts J008.
 
 ### Acceptance
 
