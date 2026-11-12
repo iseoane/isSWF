@@ -2,16 +2,16 @@
 
 Type: enhancement
 
-Design approved by the operator on 2026-11-11 in the Claude Code session (mockup artifact since deleted; local copy outside the repo). Roadmap: Claude Code mod, shared host-neutral snapshot, plugin integration. The Pi sidebar and loopback panel retirement live in I0047. Sizing rule: each job is one concern, about 30-45 worker minutes and a diff a reviewer can assess in one sitting (roughly 300 changed lines or less, excluding fixtures). Plan approval is preparation only; each job needs an explicit operator start.
+Design approved by the operator on 2026-11-11 in the Claude Code session (mockup artifact since deleted; local copy outside the repo). Roadmap: Claude Code mod, shared host-neutral snapshot, plugin integration. The Pi sidebar and loopback panel retirement live in I0047. Sizing rule: each job is one concern, about 30-45 worker minutes and a diff a reviewer can assess in one sitting (roughly 300 changed lines or less, excluding fixtures). Supersedes I0032 (earlier unstarted plan for the same mod, removed 2026-11-12 by operator decision; retrievable from commit b1161ad). Plan approval is preparation only; each job needs an explicit operator start.
 
 ## J001
 
-- Status: pending
+- Status: completed
 - Objective: Write a host-independent reader that turns initiative records into one JSON snapshot, inside the prototype mod folder outside the isSWF repository.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J001.
+- Blocker: None.
+- Next step: None for J001. J002 needs an explicit operator start.
 
 ### Acceptance
 
@@ -19,6 +19,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Data comes only from records regardless of when or in which session the work ran; no transcript or launch-event correlation; reads .isswf/ and legacy .factory/ without writing.
 - Values the records do not state are explicit unknown, never inferred.
 - Pure module with no Claude or Pi dependency; fixture tests built from real I0045 records pass.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited, effort not observed) wrote lib/snapshot.mjs, bin/snapshot.mjs and node:test fixtures (real I0045, I0009 J029/J030; synthetic in-progress, unopened, malformed) in the session dev-mods isswf-pane folder outside the repository; no repository writes.
+- Coordinator rerun on Linux 2026-11-12: node --test 12/12 pass; CLI against this repository lists I0009 and I0046 as open and I0014, I0032, I0047 as unopened, I0045 excluded.
+- Limits: model/role often unknown because records lack labelled lines (addressed by J004/J005); Windows not run; 1 MB skip untested; no A001 record written because the brief forbade state writes, report transcribed here.
 
 ## J002
 
