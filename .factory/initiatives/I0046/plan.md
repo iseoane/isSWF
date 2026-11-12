@@ -52,12 +52,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J003
 
 - Size: M
-- Status: awaiting-human
+- Status: completed
 - Objective: Show the pane only in coordinator sessions, give cards only to active initiatives, group the rest, compact completed jobs and refresh on events.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Operator reloads the coordinator skill (or opens a new session) and accepts the live pane or asks for changes.
+- Next step: None. Live pane accepted by the operator 2026-11-12. J004 needs an explicit operator start.
 
 ### Acceptance
 
