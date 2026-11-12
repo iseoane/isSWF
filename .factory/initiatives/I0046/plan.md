@@ -102,17 +102,22 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J005
 
 - Size: S
-- Status: awaiting-human
+- Status: completed
 - Objective: Make the coordinator record one fixed `Run:` line with the host launch identity in each A/V record.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Operator approves the .agents/hosts changes and accepts J005 on chained PR #277 (CI green on Linux and Windows, run 43245231189).
+- Next step: None. Accepted by the operator 2026-11-12, with approval of the .agents/hosts changes; merge stays out of main per operator. J006 needs an explicit operator start.
 
 ### Acceptance
 
 - Coordinator skill and Pi/Claude host guides state the line (`claude agent=<id>`, `claude session=<id>`, `pi child=<id>`), copied literally from the launch tool result; no interpretation or extra model calls.
 - Snapshot reader parses the line; records without it keep working with unknown usage; en/es docs equivalent; check-docs and focused tests pass.
+
+### Evidence
+
+- Chained PR #277 (base feat/i0046-j004-snapshot): review V001 Aggregate PASS (Run: claude session=cbeeed94-35ba-4fcc-a037-08e76d9ed5cf); suggestions applied by the coordinator.
+- CI run 43245231189 green on Linux and Windows.
 
 ## J006
 
