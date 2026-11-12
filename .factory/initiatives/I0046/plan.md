@@ -52,12 +52,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J003
 
 - Size: M
-- Status: pending
+- Status: awaiting-human
 - Objective: Show the pane only in coordinator sessions, give cards only to active initiatives, group the rest, compact completed jobs and refresh on events.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Awaiting J002 and explicit operator start.
-- Next step: Operator starts J003.
+- Blocker: None.
+- Next step: Operator reloads the coordinator skill (or opens a new session) and accepts the live pane or asks for changes.
 
 ### Acceptance
 
@@ -66,6 +66,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Refresh on relevant tool results with debounce and a slow fallback timer; plugin tests cover activation and pin.
 - Bottom card "No activas" lists non-active initiatives: started ones with a distinct mark and a short blocked/pending count, unopened ones with number and name only.
 - Completed jobs inside a card collapse to one summary line with their count, so a long initiative does not fill the pane.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited, effort not observed) changed hooks/register.tsx, hooks/register.test.tsx, hooks/hooks.json, .claude-plugin/plugin.json and added types/index.d.ts; about 187 lines; no repository writes.
+- Coordinator rerun on Linux 2026-11-12: claude plugin validate passed with catalog-only warnings; claude plugin test 4/4 (gating, touched initiative and grouping, pin/unpin, no state dir); node --test 12/12.
+- Limits: not observed live; Windows not run; pin and touch share one list (a later touch re-activates an unpinned ID); blocked count from Status only; records re-read on each redraw.
 
 ## J004
 
