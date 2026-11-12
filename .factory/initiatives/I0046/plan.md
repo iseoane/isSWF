@@ -144,27 +144,32 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J007
 
 - Size: S
-- Status: in-review
+- Status: completed
 - Objective: Add cost in USD from a versioned price table.
 - Depends on: J006
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Review V001 PASS; chained PR on feat/i0046-j006-run-usage for CI; operator approval needed for tools/factory-package.mjs.
+- Next step: None. Accepted by the operator 2026-11-12, with approval of the tools/factory-package.mjs change; merge stays out of main. J008 needs an explicit operator start.
 
 ### Acceptance
 
 - Price table records source and date; unpriced models show unknown.
 - Focused tests pass; en/es docs updated.
 
+### Evidence
+
+- Chained PR #280: review V001 Aggregate PASS; doc suggestions applied; two informational findings kept as known limits (I0049 J003 pilot).
+- Full check-quality PASS (coordinator); CI run 43299988793 green on Linux and Windows.
+
 ## J008
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Ship the Claude Code pane inside the isswf plugin as an opt-in view consuming the packaged snapshot.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: Awaiting J004 and explicit operator start.
-- Next step: Operator starts J008.
+- Blocker: None.
+- Next step: Worker A001 in worktree feat/i0046-j008-plugin-pane; chained PR on feat/i0046-j007-usd. The operator reviews the whole mod live before closing J008.
 
 ### Acceptance
 

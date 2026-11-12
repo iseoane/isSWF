@@ -44,7 +44,7 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: Awaiting J002 and explicit operator start.
-- Next step: Operator starts J003.
+- Next step: Pilot running in this repository first (from I0046 J007, 2026-11-12): the coordinator records extremely unlikely, low-impact findings as known limits. Operator decides on default adoption after observing it.
 
 ### Acceptance
 
