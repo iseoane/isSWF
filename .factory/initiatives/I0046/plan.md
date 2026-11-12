@@ -102,12 +102,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J005
 
 - Size: S
-- Status: pending
+- Status: in-review
 - Objective: Make the coordinator record one fixed `Run:` line with the host launch identity in each A/V record.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Awaiting J004 and explicit operator start.
-- Next step: Operator starts J005.
+- Blocker: None.
+- Next step: Review V001 PASS; suggestions applied (ee06a2e). Chained PR on feat/i0046-j004-snapshot for CI; operator approval needed for .agents/hosts changes.
 
 ### Acceptance
 
