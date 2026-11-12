@@ -1,0 +1,4 @@
+{
+  "description": "Opt-in isSWF initiatives pane: opens once the isswf-coordinator skill loads, and on /isswf-initiatives",
+  "modules": ["./register.tsx"]
+}
