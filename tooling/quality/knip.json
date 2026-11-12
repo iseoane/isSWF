@@ -6,6 +6,7 @@
     "tools/isswf-intake.mjs",
     "tools/isswf-plan.mjs",
     "tools/isswf-status.mjs",
+    "tools/isswf-snapshot.mjs",
     "tools/isswf-panel.mjs",
     "tools/git-evidence.mjs",
     "tools/git-evidence-pi-extension.mjs",

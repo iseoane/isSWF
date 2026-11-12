@@ -16,12 +16,23 @@ Ejecuta desde la raíz del repositorio de isSWF:
 
 ```bash
 node tools/isswf-status.mjs --project /absolute/project --initiative I0001
+node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
-El primer comando lee el plan de una iniciativa y sus registros de apoyo. El segundo inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
+El primer comando lee el plan de una iniciativa y sus registros de apoyo. El segundo muestra una instantánea JSON de todas las iniciativas abiertas; consulta [instantánea de iniciativas](#instantánea-de-iniciativas). El tercero inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
 
 El panel puede guardar notas locales si las evidencias mostradas siguen coincidiendo. Una nota no se aplica automáticamente, no autentica la aceptación del operador ni permite despachar trabajo. No expongas el panel públicamente ni incluyas secretos en sus registros.
+
+## Instantánea de iniciativas
+
+`tools/isswf-snapshot.mjs` lee todas las iniciativas del directorio de estado activo que selecciona `tools/project-state.mjs` y muestra un único objeto JSON con `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` y `skipped`. Es de solo lectura y no llama a ningún modelo ni a la red. Quien lo importe llama a `readSnapshot(project, fs)`; `fs` es Node por defecto y puede ser cualquier objeto con `exists`, `list`, `stat` y `read` asíncronos, que entonces rige la lectura de los registros.
+
+- Se omiten las iniciativas cuyos trabajos están todos en `completed`. Las que tienen todos sus trabajos en `pending` y sin registros aparecen en `unopened` solo con `id` y `title`.
+- Las demás iniciativas tienen `id`, `title`, `type`, `status` (`parsed` o `unparsed`) y `jobs`. Un plan que rechaza el analizador de planes queda como `unparsed` y sin trabajos.
+- Cada trabajo tiene `id`, `status`, `objective`, `dependsOn`, `issues` y `prs` (números citados en su siguiente paso, sus evidencias o `delivery.md`), `recordCount` y `rounds`. Las rondas siguen los archivos `brief-r<n>.md`; cada registro va a la ronda del brief que cita; si no cita ninguno, a la última, y si no hay ninguna, a la ronda `unknown`.
+- Cada registro `A<nnn>`/`V<nnn>` tiene `id`, `kind` (`attempt` o `review`), `role`, `model`, `modelSource` (`actual`, `requested`, `approved` o `stated`), `effort`, `verdict` (`passed`, `changes-requested` o `running`), `round` y `roundSource` (`stated` o `latest`). Los valores que el registro no indica explícitamente son `unknown`.
+- Los archivos de más de 1 MB o ilegibles se enumeran en `skipped`; un registro defectuoso nunca interrumpe la instantánea. Que existan ambos directorios de estado o ninguno, o que falte el directorio `initiatives`, es un error.
 
 ## Desde una instalación preparada
 

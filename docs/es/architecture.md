@@ -21,7 +21,7 @@ Estas herramientas se conservan para el flujo heredado con ejecutor compilado y 
 | Preparar y verificar un paquete | `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
 | Inicializar, seleccionar, actualizar y recuperar la instalación de un proyecto | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Preparar planes y recibir issues | `tools/isswf-plan.mjs`, `tools/isswf-intake.mjs` |
-| Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
+| Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
 | Preparar y observar un worker | `tools/isswf-job.mjs`, `tools/pi-worker-task.mjs`, `tools/worker-lifecycle.mjs` |
 | Investigación, planificación, diagnóstico y revisión | `tools/researcher-task.mjs`, `tools/planner-task.mjs`, `tools/diagnostic-task.mjs`, `tools/reviewer-task.mjs` |
 | Capacidad, recuperación y registros de efectos externos | `tools/execution-capacity.mjs`, `tools/native-recovery.mjs`, `tools/recovery-review.mjs`, `tools/job-successor.mjs`, `tools/external-effect-journal.mjs` |

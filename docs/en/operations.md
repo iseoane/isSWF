@@ -16,12 +16,23 @@ Run from the isSWF repository root:
 
 ```bash
 node tools/isswf-status.mjs --project /absolute/project --initiative I0001
+node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
-The first command reads an initiative's plan and supporting records. The second starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
+The first command reads an initiative's plan and supporting records. The second prints a JSON snapshot of every open initiative; see [initiative snapshot](#initiative-snapshot). The third starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
 
 The panel can record local notes when the displayed evidence still matches. A note is not automatically applied, authenticated operator acceptance, or permission to dispatch work. Do not expose the panel publicly or put secrets in its records.
+
+## Initiative snapshot
+
+`tools/isswf-snapshot.mjs` reads every initiative under the active state directory selected by `tools/project-state.mjs` and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. Importers call `readSnapshot(project, fs)`; `fs` defaults to Node and may be any object with async `exists`, `list`, `stat` and `read`, which then governs record reads.
+
+- Initiatives whose jobs are all `completed` are omitted. Those whose jobs are all `pending` without records appear in `unopened` with `id` and `title` only.
+- Each other initiative has `id`, `title`, `type`, `status` (`parsed` or `unparsed`) and `jobs`. A plan rejected by the plan parser is `unparsed` with no jobs.
+- Each job has `id`, `status`, `objective`, `dependsOn`, `issues` and `prs` (numbers cited in its next step, evidence or `delivery.md`), `recordCount` and `rounds`. Rounds follow `brief-r<n>.md` files; records go to the brief they cite, otherwise the latest round, otherwise round `unknown`.
+- Each `A<nnn>`/`V<nnn>` record entry has `id`, `kind` (`attempt` or `review`), `role`, `model`, `modelSource` (`actual`, `requested`, `approved` or `stated`), `effort`, `verdict` (`passed`, `changes-requested` or `running`), `round` and `roundSource` (`stated` or `latest`). Values not stated explicitly in the record are `unknown`.
+- Files over 1 MB or unreadable are listed in `skipped`; one bad record never aborts the snapshot. Both or no state directory, or a missing `initiatives` directory, is an error.
 
 ## From a prepared installation
 
