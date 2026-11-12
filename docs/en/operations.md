@@ -32,6 +32,7 @@ The panel can record local notes when the displayed evidence still matches. A no
 - Each other initiative has `id`, `title`, `type`, `status` (`parsed` or `unparsed`) and `jobs`. A plan rejected by the plan parser is `unparsed` with no jobs.
 - Each job has `id`, `status`, `objective`, `dependsOn`, `issues` and `prs` (numbers cited in its next step, evidence or `delivery.md`), `recordCount` and `rounds`. Rounds follow `brief-r<n>.md` files; records go to the brief they cite, otherwise the latest round, otherwise round `unknown`.
 - Each `A<nnn>`/`V<nnn>` record entry has `id`, `kind` (`attempt` or `review`), `role`, `model`, `modelSource` (`actual`, `requested`, `approved` or `stated`), `effort`, `verdict` (`passed`, `changes-requested` or `running`), `round` and `roundSource` (`stated` or `latest`). Values not stated explicitly in the record are `unknown`.
+- Each entry also has `runs`: one `{ host, kind, id }` per [`Run:` line](../durable-work.md#record-the-launch-identity) in the record (`claude`/`agent`, `claude`/`session` or `pi`/`child`), or an empty array. Malformed lines are ignored. This field was added without changing `schemaVersion: 1`, because existing fields are unchanged.
 - Review verdicts are read from English or Spanish labels (`aggregate`/`agregado`, `verdict`/`veredicto`, `changes requested`/`cambios pedidos` or `cambios solicitados`).
 - Files over 1 MB or unreadable are listed in `skipped`; one bad record never aborts the snapshot. Both or no state directory, or a missing `initiatives` directory, is an error.
 

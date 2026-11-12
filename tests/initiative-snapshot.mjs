@@ -42,9 +42,9 @@ try {
     'I0001/jobs/J002/brief-r1.md': '# r1\n',
     'I0001/jobs/J002/brief-r2.md': '# r2\n',
     'I0001/jobs/J002/brief-r10.md': '# r10\n',
-    'I0001/jobs/J002/A001.md': '# Attempt\r\n\r\n- Reported status: running\r\n- Brief path: `.factory\\initiatives\\I0001\\jobs\\J002\\brief-r2.md`\r\n- Requested model/effort: `gpt-6-luna`, high; actual model `claude-opus-5-5`, effort unknown.\r\n- Profile: `.agents\\roles\\worker.md`\r\n',
-    'I0001/jobs/J002/V001.md': '# Review\n\n- Brief: `.factory/initiatives/I0001/jobs/J002/brief-r1.md`\n- Approved model/effort: `openai-codex/gpt-6.1-sol`, medium.\n\nStandards PASS / Spec PASS / aggregate PASS.\n',
-    'I0001/jobs/J002/V002.md': '# Review\n\nObserver: native `isswf:isswf-reviewer`, model inherited.\n\nChanges requested on wording.\n',
+    'I0001/jobs/J002/A001.md': '# Attempt\r\n\r\n- Reported status: running\r\n- Brief path: `.factory\\initiatives\\I0001\\jobs\\J002\\brief-r2.md`\r\n- Requested model/effort: `gpt-6-luna`, high; actual model `claude-opus-5-5`, effort unknown.\r\n- Profile: `.agents\\roles\\worker.md`\r\n- Run: claude agent=a1b2c3\r\n',
+    'I0001/jobs/J002/V001.md': '# Review\n\n- Brief: `.factory/initiatives/I0001/jobs/J002/brief-r1.md`\n- Approved model/effort: `openai-codex/gpt-6.1-sol`, medium.\n- Run: claude session=0f9e-77\n- Run: pi child=run_42\n\nStandards PASS / Spec PASS / aggregate PASS.\n',
+    'I0001/jobs/J002/V002.md': '# Review\n\nObserver: native `isswf:isswf-reviewer`, model inherited.\n- Run: claude agent=\n- Run: pi agent=x1\n- Run: claude agent=a b\n\nChanges requested on wording.\n',
     'I0001/jobs/J003/V001.md': '\u0000\u0001 garbage without structure',
     'I0002/plan.md': plan('I0002', 'Not started', job('J001', 'pending')),
     'I0003/plan.md': 'Not a canonical plan.\n',
@@ -82,11 +82,16 @@ try {
   assert.deepEqual(pick(entry('J002', 'V001')), ['review', 'unknown', 'openai-codex/gpt-6.1-sol', 'approved', 'medium', 'passed']);
   assert.equal(roundOf('J002', 'V002'), 10);
   assert.equal(entry('J002', 'V002').roundSource, 'latest');
+
+  // Run lines: each host form, several per record, CRLF tolerated, malformed lines ignored.
+  assert.deepEqual(entry('J002', 'A001').runs, [{ host: 'claude', kind: 'agent', id: 'a1b2c3' }]);
+  assert.deepEqual(entry('J002', 'V001').runs, [{ host: 'claude', kind: 'session', id: '0f9e-77' }, { host: 'pi', kind: 'child', id: 'run_42' }]);
+  assert.deepEqual(entry('J002', 'V002').runs, []);
   assert.deepEqual(pick(entry('J002', 'V002')), ['review', 'reviewer', 'unknown', 'unknown', 'unknown', 'changes-requested']);
 
   // A malformed record with no brief degrades to unknown fields; a directory named like a record is ignored.
   assert.equal(jobOf('J003').recordCount, 1);
-  assert.deepEqual(jobOf('J003').rounds, [{ round: 'unknown', entries: [{ id: 'V001', kind: 'review', role: 'unknown', model: 'unknown', modelSource: 'unknown', effort: 'unknown', verdict: 'unknown', round: 'unknown', roundSource: 'unknown' }] }]);
+  assert.deepEqual(jobOf('J003').rounds, [{ round: 'unknown', entries: [{ id: 'V001', kind: 'review', role: 'unknown', model: 'unknown', modelSource: 'unknown', effort: 'unknown', verdict: 'unknown', runs: [], round: 'unknown', roundSource: 'unknown' }] }]);
 
   // An injected fs that fails one read records it in `skipped` instead of throwing.
   const failing = { ...nodeFs, read: path => path.endsWith('V001.md') && path.includes('J003') ? Promise.reject(Error('denied')) : nodeFs.read(path) };

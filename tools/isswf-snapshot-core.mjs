@@ -90,6 +90,15 @@ function parseRole(text) {
   return match ? (match[1] ?? match[2] ?? match[3]) : UNKNOWN;
 }
 
+const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
+
+function parseRuns(text) {
+  return text.split('\n').map(line => line.replace(/\r$/, '').match(RUN_LINE)).filter(Boolean).map(m => {
+    const [host, kind] = m[1].split(' ');
+    return { host, kind, id: m[2] };
+  });
+}
+
 function parseRecord(file, text, initiativeId, jobId) {
   // Records written on Windows may cite their brief with backslashes.
   const own = new RegExp(`${initiativeId}[\\\\/]jobs[\\\\/]${jobId}[\\\\/]brief-r(\\d+)\\.md`);
@@ -100,6 +109,7 @@ function parseRecord(file, text, initiativeId, jobId) {
     kind,
     role: parseRole(text),
     ...parseModel(text),
+    runs: parseRuns(text),
     verdict: parseVerdict(text, kind),
     statedRound: briefLine ? Number(briefLine.match(own)[1]) : null,
   };
