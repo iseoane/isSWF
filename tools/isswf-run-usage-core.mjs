@@ -1,6 +1,7 @@
 // No Node imports and no Node globals: hook runtimes that only offer an injected fs (the Claude Code
 // pane's `$.fs`) load this module. tools/isswf-snapshot.mjs --usage is the Node entry point.
 import { joiner } from './isswf-snapshot-core.mjs';
+import { PRICES } from './isswf-prices.mjs';
 import { LIMITS, USAGE_KEYS, integer, parseTranscript, piUsage, safe, single } from './token-native-transcript-core.mjs';
 
 const UNKNOWN = 'unknown';
@@ -11,7 +12,7 @@ const ID = {
 };
 const COUNTERS = ['input', 'output', 'cacheRead', 'cacheWrite'];
 
-const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN });
+const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, costUsd: UNKNOWN });
 
 async function listDirs(fs, dir) {
   try {
@@ -88,11 +89,19 @@ function collector() {
   };
 }
 
+// A mixed run is unknown because its tokens are not split by model.
+function costUsd(tokens, model) {
+  const rates = Object.hasOwn(PRICES.models, model) ? PRICES.models[model] : null;
+  if (!rates) return UNKNOWN;
+  const micro = COUNTERS.reduce((sum, key) => sum + tokens[key] * rates[key], 0);
+  return Math.round(micro) / 1e6;
+}
+
 // `invalid` names the first failing check of a found transcript whose valid entries were still summed.
 function finish(collected, counters, model, finished, invalid) {
   const { first, last, skills, agentsReads } = collected.state;
-  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads };
-  return invalid ? { ...usage, tokensPartial: true, reason: invalid } : usage;
+  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, costUsd: costUsd(counters, model) };
+  return invalid ? { ...usage, tokensPartial: true, ...(usage.costUsd !== UNKNOWN && { costPartial: true }), reason: invalid } : usage;
 }
 
 // `claude -p` writes cost-state when it exits, and a resumed session appends after it, so only a trailing

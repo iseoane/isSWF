@@ -17,7 +17,7 @@ const OPEN_SESSION = '66666666-7777-4888-8999-aaaaaaaaaaaa';
 const RESUMED_SESSION = '77777777-8888-4999-8aaa-bbbbbbbbbbbb';
 const jsonl = entries => entries.map(e => JSON.stringify(e)).join('\n') + '\n';
 const claudeUsage = (input, output, read, write) => ({ input_tokens: input, output_tokens: output, cache_read_input_tokens: read, cache_creation_input_tokens: write });
-const assistant = (requestId, timestamp, usage, content, stop = 'tool_use') => ({ type: 'assistant', requestId, timestamp, version: '2.1.300', message: { model: 'claude-test-1', usage, content, stop_reason: stop } });
+const assistant = (requestId, timestamp, usage, content, stop = 'tool_use', model = 'claude-test-1') => ({ type: 'assistant', requestId, timestamp, version: '2.1.300', message: { model, usage, content, stop_reason: stop } });
 const user = timestamp => ({ type: 'user', timestamp, message: { role: 'user', content: 'go' } });
 
 // Synthetic Claude agent: Skill tool, .agents reads (POSIX and Windows separators), a repeated request id.
@@ -81,22 +81,22 @@ try {
     found: true, finished: true, model: 'claude-test-1',
     tokens: { input: 11, output: 22, cacheRead: 33, cacheWrite: 44 }, durationMs: 5000,
     skills: { 'isswf-review': 1, 'isswf-tdd': 1 },
-    agentsReads: { '.agents/roles/worker.md': 2, '.agents/skills/isswf-tdd/SKILL.md': 1 },
+    agentsReads: { '.agents/roles/worker.md': 2, '.agents/skills/isswf-tdd/SKILL.md': 1 }, costUsd: 'unknown',
   });
   // The advisor iteration is billed on top of the request's top-level usage.
-  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {} });
+  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, costUsd: 'unknown' });
   assert.deepEqual(pi, {
     found: true, finished: true, model: 'pi-test-1',
     tokens: { input: 101, output: 12, cacheRead: 53, cacheWrite: 9 }, durationMs: 3000,
-    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 },
+    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, costUsd: 'unknown',
   });
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
-  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown' };
+  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', costUsd: 'unknown' };
   assert.deepEqual(missing, { found: false, reason: 'transcript-not-found', ...unknown });
   // Valid entries of a found transcript are still summed and the result is marked partial.
   assert.deepEqual(broken, {
     found: true, finished: true, model: 'claude-test-1', tokens: { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 },
-    durationMs: 1000, skills: {}, agentsReads: {}, tokensPartial: true, reason: 'malformed-line',
+    durationMs: 1000, skills: {}, agentsReads: {}, costUsd: 'unknown', tokensPartial: true, reason: 'malformed-line',
   });
   assert.deepEqual(escape, { found: false, reason: 'invalid-id', ...unknown });
   assert.equal(openPi.finished, false, 'a Pi child without its meta file is unfinished');
@@ -138,6 +138,15 @@ try {
     assert.equal(usage.reason, 'file-size-limit');
   }
   assert.equal(bigReads.filter(p => p === sessionPath).length, 1, 'an oversized finished session is cached');
+  // Cost: an exact priced model, and a partial run whose cost covers only its valid entries.
+  const million = claudeUsage(1e6, 1e6, 1e6, 1e6);
+  await writeFile(join(root, 'claude/projects/-p/9d9d/subagents/agent-priced1.jsonl'), jsonl([assistant('req_p1', '2026-01-01T00:00:01.000Z', million, [], 'end_turn', 'claude-opus-5-5')]));
+  await writeFile(join(root, 'claude/projects/-p/9d9d/subagents/agent-priced2.jsonl'), `not json\n${jsonl([assistant('req_p2', '2026-01-01T00:00:01.000Z', million, [], 'end_turn', 'claude-haiku-4-5')])}`);
+  const priced = await resolveRunUsage({ host: 'claude', kind: 'agent', id: 'priced1' }, options);
+  assert.equal(priced.costUsd, 29.2);
+  assert.equal('costPartial' in priced, false);
+  const partial = await resolveRunUsage({ host: 'claude', kind: 'agent', id: 'priced2' }, options);
+  assert.deepEqual([partial.costUsd, partial.costPartial, partial.tokensPartial], [7.35, true, true]);
   console.log('run usage tests passed');
 } finally {
   await rm(root, { recursive: true, force: true });
