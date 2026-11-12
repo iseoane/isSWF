@@ -6,7 +6,7 @@ import { lstat, open, readdir, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FormatError, LIMITS, parseTranscript, safe } from './token-native-transcript-core.mjs';
+import { FormatError, LIMITS, parseTranscript, safe, single } from './token-native-transcript-core.mjs';
 
 export { LIMITS, parseTranscript };
 
@@ -34,8 +34,6 @@ async function readBounded(path, budget) {
   const handle = await open(path, 'r');
   try { return (await handle.readFile()).toString('utf8'); } finally { await handle.close(); }
 }
-
-const single = values => values.size === 1 ? [...values][0] : values.size === 0 ? 'unknown' : 'mixed';
 
 async function latestSession(dir) {
   let best = null, names;

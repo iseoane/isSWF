@@ -1,7 +1,7 @@
 // No Node imports and no Node globals: hook runtimes that only offer an injected fs (the Claude Code
 // pane's `$.fs`) load this module. tools/isswf-snapshot.mjs --usage is the Node entry point.
 import { joiner } from './isswf-snapshot-core.mjs';
-import { FormatError, LIMITS, parseTranscript, piUsage, safe } from './token-native-transcript-core.mjs';
+import { LIMITS, USAGE_KEYS, integer, parseTranscript, piUsage, safe, single } from './token-native-transcript-core.mjs';
 
 const UNKNOWN = 'unknown';
 const ID = {
@@ -10,7 +10,6 @@ const ID = {
   'pi child': /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u,
 };
 const COUNTERS = ['input', 'output', 'cacheRead', 'cacheWrite'];
-const CLAUDE_KEYS = [['input', 'input_tokens'], ['output', 'output_tokens'], ['cacheRead', 'cache_read_input_tokens'], ['cacheWrite', 'cache_creation_input_tokens']];
 
 const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN });
 
@@ -89,14 +88,14 @@ function collector() {
   };
 }
 
-function finish(collected, counters, model, finished) {
+// `invalid` names the first failing check of a found transcript whose valid entries were still summed.
+function finish(collected, counters, model, finished, invalid) {
   const { first, last, skills, agentsReads } = collected.state;
-  return { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads };
+  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads };
+  return invalid ? { ...usage, tokensPartial: true, reason: invalid } : usage;
 }
 
-const single = values => values.size === 1 ? [...values][0] : values.size === 0 ? UNKNOWN : 'mixed';
-
-function claudeUsage(text, kind) {
+function claudeUsage(text, kind, invalid) {
   const collected = collector();
   let lastStop = null, costState = false;
   // A request's top-level usage sums only its `message` iterations; server-side sub-inferences such as
@@ -105,6 +104,8 @@ function claudeUsage(text, kind) {
   const parsed = parseTranscript(text, { entries: 0 }, entry => {
     collected.time(entry.timestamp);
     if (entry.type === 'cost-state') costState = true;
+    // A resumed session appends after its earlier cost-state, so only a trailing one marks it finished.
+    if (entry.type === 'user' || entry.type === 'assistant') costState = false;
     if (entry.type === 'user') lastStop = null;
     if (entry.type !== 'assistant') return;
     const iterations = entry.message?.usage?.iterations;
@@ -115,61 +116,75 @@ function claudeUsage(text, kind) {
       if (block.name === 'Skill') collected.skill(block.input?.skill);
       if (block.name === 'Read') collected.read(block.input?.file_path);
     }
-  });
+  }, true);
+  invalid ??= parsed.invalid;
   const counters = Object.fromEntries(COUNTERS.map(key => [key, 0]));
   for (const usage of parsed.requests.values()) for (const key of COUNTERS) counters[key] += usage[key];
   for (const [requestId, iterations] of extra) {
     if (!parsed.requests.has(requestId)) continue;
     for (const iteration of iterations) {
-      for (const [key, source] of CLAUDE_KEYS) {
-        if (!Number.isSafeInteger(iteration[source]) || iteration[source] < 0) throw new FormatError('invalid-usage-counter');
-        counters[key] += iteration[source];
+      if (!USAGE_KEYS.every(([, source]) => integer(iteration?.[source]))) {
+        invalid ??= 'invalid-usage-counter';
+        continue;
       }
+      for (const [key, source] of USAGE_KEYS) counters[key] += iteration[source];
       parsed.models.add(safe(iteration.model) ?? UNKNOWN);
     }
   }
   // `claude -p` writes cost-state when it exits; a native agent's transcript ends on an end_turn reply.
   const finished = kind === 'session' ? costState : lastStop === 'end_turn';
-  return finish(collected, counters, single(parsed.models), finished);
+  return finish(collected, counters, single(parsed.models), finished, invalid);
 }
 
-function piTranscriptUsage(text, finished) {
+function piTranscriptUsage(text, finished, invalid) {
   const collected = collector();
   const counters = Object.fromEntries(COUNTERS.map(key => [key, 0]));
   const lines = text.split('\n');
   const trailing = lines.pop();
-  if (lines.length + 1 > LIMITS.entries) throw new FormatError('entry-limit');
+  if (lines.length + 1 > LIMITS.entries) {
+    invalid ??= 'entry-limit';
+    lines.length = LIMITS.entries;
+  }
   for (const [index, line] of [...lines, trailing].entries()) {
     if (!line) continue;
     let record;
     try { record = JSON.parse(line); } catch {
-      if (index === lines.length) continue;
-      throw new FormatError('malformed-line');
+      if (index !== lines.length) invalid ??= 'malformed-line';
+      continue;
     }
-    if (!record || typeof record !== 'object' || Array.isArray(record)) throw new FormatError('entry-not-object');
+    if (!record || typeof record !== 'object' || Array.isArray(record)) {
+      invalid ??= 'entry-not-object';
+      continue;
+    }
     collected.time(record.ts);
     if (record.recordType !== 'message' || record.role !== 'assistant') continue;
     let usage;
-    try { usage = piUsage(record.usage); } catch { throw new FormatError('invalid-usage-counter'); }
+    try { usage = piUsage(record.usage); } catch {
+      invalid ??= 'invalid-usage-counter';
+      continue;
+    }
     for (const key of COUNTERS) counters[key] += usage[key];
     collected.state.models.add(safe(record.model) ?? UNKNOWN);
     for (const block of Array.isArray(record.message?.content) ? record.message.content : []) {
       if (block?.type === 'toolCall' && block.name === 'read') collected.read(block.arguments?.path);
     }
   }
-  return finish(collected, counters, single(collected.state.models), finished);
+  return finish(collected, counters, single(collected.state.models), finished, invalid);
 }
 
 async function readFile(fs, path) {
   const { size } = await fs.stat(path);
-  if (size > LIMITS.file) throw new FormatError('file-size-limit');
-  return { size, text: (await fs.read(path)).replace(/\r\n/g, '\n') };
+  const text = (await fs.read(path)).replace(/\r\n/g, '\n');
+  if (size <= LIMITS.file) return { size, text };
+  // Oversized transcripts keep only their complete lines within the limit, summed as partial usage.
+  const kept = text.slice(0, LIMITS.file);
+  return { size, text: kept.slice(0, kept.lastIndexOf('\n') + 1), invalid: 'file-size-limit' };
 }
 
 async function piFinished(fs, meta) {
   try {
-    const { text } = await readFile(fs, meta);
-    return Number.isInteger(JSON.parse(text).exitCode);
+    const { text, invalid } = await readFile(fs, meta);
+    return !invalid && Number.isInteger(JSON.parse(text).exitCode);
   } catch {
     return false;
   }
@@ -193,9 +208,9 @@ export async function resolveRunUsage({ host, kind, id }, { fs, claudeDir, piDir
   let read, usage;
   try {
     read = await readFile(fs, located.path);
-    usage = host === 'claude' ? claudeUsage(read.text, kind) : piTranscriptUsage(read.text, await piFinished(fs, located.meta));
-  } catch (error) {
-    return { ...unknownUsage(error instanceof FormatError ? error.message : 'unreadable-transcript'), found: true };
+    usage = host === 'claude' ? claudeUsage(read.text, kind, read.invalid) : piTranscriptUsage(read.text, await piFinished(fs, located.meta), read.invalid);
+  } catch {
+    return { ...unknownUsage('unreadable-transcript'), found: true };
   }
   if (usage.finished && cache) cache.set(`${key} ${id}`, { path: located.path, size: read.size, usage });
   return usage;

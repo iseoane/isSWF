@@ -13,6 +13,7 @@ const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-run-usage-test-'
 
 const SESSION = '11111111-2222-4333-8444-555555555555';
 const OPEN_SESSION = '66666666-7777-4888-8999-aaaaaaaaaaaa';
+const RESUMED_SESSION = '77777777-8888-4999-8aaa-bbbbbbbbbbbb';
 const jsonl = entries => entries.map(e => JSON.stringify(e)).join('\n') + '\n';
 const claudeUsage = (input, output, read, write) => ({ input_tokens: input, output_tokens: output, cache_read_input_tokens: read, cache_creation_input_tokens: write });
 const assistant = (requestId, timestamp, usage, content, stop = 'tool_use') => ({ type: 'assistant', requestId, timestamp, version: '2.1.300', message: { model: 'claude-test-1', usage, content, stop_reason: stop } });
@@ -47,9 +48,11 @@ const fixture = {
   'project/.factory/initiatives/I0001/jobs/J001/A001.md': record(['claude agent=a1b2c3', `claude session=${SESSION}`, 'pi child=run-pi-1']),
   'project/.factory/initiatives/I0001/jobs/J001/V001.md': record(['claude agent=missing99', 'pi child=run-pi-open', 'claude agent=broken1', 'claude agent=../escape']),
   'claude/projects/-p/9d9d/subagents/agent-a1b2c3.jsonl': agentTranscript,
-  'claude/projects/-p/9d9d/subagents/agent-broken1.jsonl': `${jsonl([user('2026-01-01T00:00:00.000Z')])}not json\n${jsonl([user('2026-01-01T00:00:01.000Z')])}`,
+  'claude/projects/-p/9d9d/subagents/agent-broken1.jsonl': `${jsonl([user('2026-01-01T00:00:00.000Z')])}not json\n${jsonl([assistant('req_b1', '2026-01-01T00:00:01.000Z', claudeUsage(1, 2, 3, 4), [], 'end_turn')])}`,
   [`claude/projects/-other/${SESSION}.jsonl`]: sessionTranscript,
   [`claude/projects/-other/${OPEN_SESSION}.jsonl`]: openSession,
+  // A resumed `claude -p` session appends after the cost-state of its first exit.
+  [`claude/projects/-other/${RESUMED_SESSION}.jsonl`]: sessionTranscript + openSession,
   'pi/sessions/--p--/subagent-artifacts/run-pi-1_isswf-worker_transcript.jsonl': piTranscript,
   'pi/sessions/--p--/subagent-artifacts/run-pi-1_isswf-worker_meta.json': JSON.stringify({ runId: 'run-pi-1', exitCode: 0 }),
   'project/.pi/subagents/artifacts/run-pi-open_isswf-worker_transcript.jsonl': jsonl([piRecord(1, { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 }, [])]),
@@ -89,7 +92,11 @@ try {
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
   const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown' };
   assert.deepEqual(missing, { found: false, reason: 'transcript-not-found', ...unknown });
-  assert.deepEqual(broken, { found: true, reason: 'malformed-line', ...unknown });
+  // Valid entries of a found transcript are still summed and the result is marked partial.
+  assert.deepEqual(broken, {
+    found: true, finished: true, model: 'claude-test-1', tokens: { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 },
+    durationMs: 1000, skills: {}, agentsReads: {}, tokensPartial: true, reason: 'malformed-line',
+  });
   assert.deepEqual(escape, { found: false, reason: 'invalid-id', ...unknown });
   assert.equal(openPi.finished, false, 'a Pi child without its meta file is unfinished');
   assert.deepEqual(openPi.tokens, { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 });
@@ -111,6 +118,7 @@ try {
   await writeFile(agentPath, agentTranscript + jsonl([user('2026-01-01T00:01:00.000Z')]));
   assert.equal((await resolveRunUsage({ host: 'claude', kind: 'agent', id: 'a1b2c3' }, options)).finished, false);
   assert.equal(reads.filter(p => p === agentPath).length, 2);
+  assert.equal((await resolveRunUsage({ host: 'claude', kind: 'session', id: RESUMED_SESSION }, options)).finished, false, 'a resumed session is running again');
   console.log('run usage tests passed');
 } finally {
   await rm(root, { recursive: true, force: true });
