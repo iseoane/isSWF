@@ -9,14 +9,60 @@ const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
 const PINNED = { plugin: 'isswf', key: 'pinned' } as const
 const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
 const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
-const NOT_ACTIVE = 'El coordinador isSWF no está activo en esta sesión.'
 const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
-const UNKNOWN = 'desconocido'
 const RECENT_COMPLETED = 2
-const VERDICTS: Record<string, string> = {
-  passed: 'aprobado',
-  'changes-requested': 'cambios pedidos',
-  running: 'en curso',
+const LABELS = {
+  es: {
+    notActive: 'El coordinador isSWF no está activo en esta sesión.',
+    unknown: 'desconocido',
+    verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', running: 'en curso' } as Record<string, string>,
+    blocked: 'bloqueados',
+    open: 'sin cerrar',
+    usage: 'consumo',
+    partial: 'parcial',
+    duration: 'duración',
+    cost: 'coste',
+    model: 'modelo',
+    effort: 'esfuerzo',
+    verdict: 'veredicto',
+    pinned: 'fijada',
+    unpinned: 'desfijada',
+    usageHelp: 'Uso: /isswf-initiatives [pin <ID> | unpin <ID>]',
+    opened: 'Panel de iniciativas abierto.',
+    noWork: 'sin trabajo iniciado',
+    unparsed: 'plan no legible',
+    completed: 'completados',
+    inactive: 'No activas',
+  },
+  en: {
+    notActive: 'The isSWF coordinator is not active in this session.',
+    unknown: 'unknown',
+    verdicts: { passed: 'passed', 'changes-requested': 'changes requested', running: 'running' } as Record<string, string>,
+    blocked: 'blocked',
+    open: 'open',
+    usage: 'usage',
+    partial: 'partial',
+    duration: 'duration',
+    cost: 'cost',
+    model: 'model',
+    effort: 'effort',
+    verdict: 'verdict',
+    pinned: 'pinned',
+    unpinned: 'unpinned',
+    usageHelp: 'Usage: /isswf-initiatives [pin <ID> | unpin <ID>]',
+    opened: 'Initiatives pane opened.',
+    noWork: 'no work started',
+    unparsed: 'plan unreadable',
+    completed: 'completed',
+    inactive: 'Inactive',
+  },
+}
+type Labels = typeof LABELS.en
+
+// Claude Code's `language` setting is free text, so any Spanish spelling selects Spanish; English is the default.
+async function labelsFor($: EngineInterface): Promise<Labels> {
+  const language = await $.settings.read({ key: 'language' })
+  return typeof language === 'string' && /^(es\b|españ|espan|spanish|castellano)/i.test(language.trim()) ? LABELS.es : LABELS.en
 }
 const PILL_COLORS: Record<string, string> = {
   passed: 'success',
@@ -113,20 +159,20 @@ function touchedIds(e: { tool: string; file_path?: unknown; command?: unknown })
   return [...text.replace(/\\/g, '/').matchAll(RECORD_PATH)].map(m => m[1])
 }
 
-function countLabel(jobs: any[]) {
+function countLabel(jobs: any[], t: Labels) {
   const blocked = jobs.filter(j => j.status === 'blocked').length
   const open = jobs.filter(j => j.status !== 'completed' && j.status !== 'blocked').length
-  return [blocked && `${blocked} bloqueados`, open && `${open} sin cerrar`].filter(Boolean).join(' · ')
+  return [blocked && `${blocked} ${t.blocked}`, open && `${open} ${t.open}`].filter(Boolean).join(' · ')
 }
 
-const known = (value: string) => (value === 'unknown' ? UNKNOWN : value)
+const known = (value: string, t: Labels) => (value === 'unknown' ? t.unknown : value)
 const sum = (values: any[]) => (values.some(v => typeof v !== 'number') ? undefined : values.reduce((a, b) => a + b, 0))
 const countKeys = (maps: any[]) => sum(maps.map(m => (m && typeof m === 'object' ? Object.values(m).reduce((a: number, b: any) => a + b, 0) : m)))
 
 // One entry may cite several runs; any unresolved run makes the sum unknown.
-function usageLines(entry: any) {
+function usageLines(entry: any, t: Labels) {
   const found = entry.runs.map((run: any) => usage.get(runKey(run)))
-  if (!found.length || found.some((u: any) => !u?.found)) return { model: undefined, lines: [`consumo: ${UNKNOWN}`] }
+  if (!found.length || found.some((u: any) => !u?.found)) return { model: undefined, lines: [`${t.usage}: ${t.unknown}`] }
   const tokens = sum(found.map((u: any) => (typeof u.tokens === 'object' ? sum(Object.values(u.tokens)) : u.tokens)))
   const duration = sum(found.map((u: any) => u.durationMs))
   const cost = sum(found.map((u: any) => u.costUsd))
@@ -135,20 +181,19 @@ function usageLines(entry: any) {
   return {
     model: models.length === 1 && models[0] !== 'unknown' ? models[0] : undefined,
     lines: [
-      `tokens: ${tokens ?? UNKNOWN}${partial ? ' (parcial)' : ''}`,
-      `duración: ${duration === undefined ? UNKNOWN : `${Math.round(duration / 1000)} s`}`,
-      `coste: ${cost === undefined ? UNKNOWN : `$${cost.toFixed(2)}${partial ? ' (parcial)' : ''}`}`,
-      `skills: ${countKeys(found.map((u: any) => u.skills)) ?? UNKNOWN} · .agents: ${countKeys(found.map((u: any) => u.agentsReads)) ?? UNKNOWN}`,
+      `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''}`,
+      `${t.duration}: ${duration === undefined ? t.unknown : `${Math.round(duration / 1000)} s`}`,
+      `${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
+      `skills: ${countKeys(found.map((u: any) => u.skills)) ?? t.unknown} · .agents: ${countKeys(found.map((u: any) => u.agentsReads)) ?? t.unknown}`,
     ],
   }
 }
 
-// Hover is style-only, so every card line is computed before drawing.
-function pillView(initiativeId: string, jobId: string, entry: any) {
-  const resolved = usageLines(entry)
+function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
+  const resolved = usageLines(entry, t)
   const model = resolved.model
-    ? `modelo: ${resolved.model} (transcript)`
-    : `modelo: ${known(entry.model)}${entry.modelSource === 'unknown' ? '' : ` (${entry.modelSource})`}`
+    ? `${t.model}: ${resolved.model} (transcript)`
+    : `${t.model}: ${known(entry.model, t)}${entry.modelSource === 'unknown' ? '' : ` (${entry.modelSource})`}`
   return {
     key: `${initiativeId}-${jobId}-${entry.id}`,
     label: entry.role === 'unknown' ? entry.id : entry.role,
@@ -157,8 +202,8 @@ function pillView(initiativeId: string, jobId: string, entry: any) {
     details: [
       `${entry.id} · ${entry.kind}`,
       model,
-      `esfuerzo: ${known(entry.effort)}`,
-      `veredicto: ${VERDICTS[entry.verdict] ?? UNKNOWN}`,
+      `${t.effort}: ${known(entry.effort, t)}`,
+      `${t.verdict}: ${t.verdicts[entry.verdict] ?? t.unknown}`,
       ...resolved.lines,
     ],
   }
@@ -205,25 +250,27 @@ export const register: Register = (on, options) => {
   })
 
   on('command.run', { command: 'isswf-initiatives' }, async ($, e) => {
-    if (!(await $.state.get(IS_ACTIVATED)).value) return { text: NOT_ACTIVE }
+    const t = await labelsFor($)
+    if (!(await $.state.get(IS_ACTIVATED)).value) return { text: t.notActive }
     ensureFallback($)
     const [verb, id] = e.args.trim().split(/\s+/)
     if ((verb === 'pin' || verb === 'unpin') && /^I\d+$/.test(id ?? '')) {
       if (verb === 'pin') await update($, PINNED, adding([id]))
       else await Promise.all([update($, PINNED, removing(id)), update($, TOUCHED, removing(id))])
       $.ui.invalidate('ui.render')
-      return { text: `${id} ${verb === 'pin' ? 'fijada' : 'desfijada'}.` }
+      return { text: `${id} ${verb === 'pin' ? t.pinned : t.unpinned}.` }
     }
-    if (verb) return { text: 'Uso: /isswf-initiatives [pin <ID> | unpin <ID>]' }
+    if (verb) return { text: t.usageHelp }
     await $.ui.open(await paneSpec($))
     $.ui.invalidate('ui.render')
 
-    return { text: 'Panel de iniciativas abierto.' }
+    return { text: t.opened }
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Text } = $.ui.resolve(e)
-    if (!(await $.state.get(IS_ACTIVATED)).value) return <Text dimColor>{NOT_ACTIVE}</Text>
+    const t = await labelsFor($)
+    if (!(await $.state.get(IS_ACTIVATED)).value) return <Text dimColor>{t.notActive}</Text>
     const { value: touched = [] } = await $.state.get(TOUCHED)
     const { value: pinned = [] } = await $.state.get(PINNED)
     const { value: expanded = [] } = await $.state.get(EXPANDED)
@@ -251,21 +298,31 @@ export const register: Register = (on, options) => {
     resolveUsage($, cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status !== 'completed' || isExpanded(i, j)))
       .flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries.flatMap((x: any) => x.runs))), snapshot.project)
 
+    const toggle = (key: string) => () => update($, EXPANDED, expanded.includes(key) ? removing(key) : adding([key])).then(() => $.ui.invalidate('ui.render'))
+    // A pressed pill opens its detail in normal flow below its round, so it pushes later lines down instead of covering them.
     const pill = (p: ReturnType<typeof pillView>) => (
       <Box key={p.key} borderStyle={p.isRunning ? 'dashed' : 'round'} borderColor={p.color} borderDimColor={!p.color}>
-        <Text color={p.color} dimColor={!p.color}>{p.label}</Text>
-        <Box position="absolute" top={-(p.details.length + 2)} left={0} height={p.details.length + 2} flexShrink={0} display="none" hover={{ display: 'flex' }} borderStyle="round" borderColor="claude" backgroundColor="inverseText" flexDirection="column">
-          {p.details.map(line => <Text>{line}</Text>)}
-        </Box>
+        <Button key={p.key} plain onPress={toggle(p.key)}>
+          <Text color={p.color} dimColor={!p.color}>{p.label}</Text>
+        </Button>
       </Box>
     )
-    const rounds = (initiative: any, job: any) => job.rounds.map((round: any) => (
-      <Box flexDirection="row" gap={1} alignItems="center">
-        <Text dimColor>{round.round === 'unknown' ? 'R?' : `R${round.round}`}</Text>
-        {round.entries.map((entry: any) => pill(pillView(initiative.id, job.id, entry)))}
-      </Box>
-    ))
-    const toggle = (key: string) => () => update($, EXPANDED, expanded.includes(key) ? removing(key) : adding([key])).then(() => $.ui.invalidate('ui.render'))
+    const rounds = (initiative: any, job: any) => job.rounds.map((round: any) => {
+      const pills = round.entries.map((entry: any) => pillView(initiative.id, job.id, entry, t))
+      return (
+        <Box flexDirection="column">
+          <Box flexDirection="row" gap={1} alignItems="center">
+            <Text dimColor>{round.round === 'unknown' ? 'R?' : `R${round.round}`}</Text>
+            {pills.map(pill)}
+          </Box>
+          {pills.filter((p: ReturnType<typeof pillView>) => expanded.includes(p.key)).map((p: ReturnType<typeof pillView>) => (
+            <Box key={`${p.key}-detail`} borderStyle="round" borderColor="claude" flexDirection="column">
+              {p.details.map(line => <Text>{line}</Text>)}
+            </Box>
+          ))}
+        </Box>
+      )
+    })
 
     const { title } = await paneSpec($)
     return (
@@ -275,7 +332,7 @@ export const register: Register = (on, options) => {
         {unopenedCards.map((u: any) => (
           <Box borderStyle="round" borderColor="subtle" flexDirection="column">
             <Text bold>● {u.id} · {u.title}</Text>
-            <Text dimColor>sin trabajo iniciado</Text>
+            <Text dimColor>{t.noWork}</Text>
           </Box>
         ))}
         {cards.map((initiative: any) => {
@@ -283,9 +340,9 @@ export const register: Register = (on, options) => {
           return (
             <Box borderStyle="round" borderColor="subtle" flexDirection="column">
               <Text bold>● {initiative.id} · {initiative.title}</Text>
-              {initiative.status === 'unparsed' && <Text dimColor>plan no legible</Text>}
-              <Text dimColor>jobs {closed}/{initiative.jobs.length} ✓ · {initiative.jobs.length - closed} sin cerrar</Text>
-              {closed > 0 && <Text color="success">✓ {closed} completados</Text>}
+              {initiative.status === 'unparsed' && <Text dimColor>{t.unparsed}</Text>}
+              <Text dimColor>jobs {closed}/{initiative.jobs.length} ✓ · {initiative.jobs.length - closed} {t.open}</Text>
+              {closed > 0 && <Text color="success">✓ {closed} {t.completed}</Text>}
               {recentOf(initiative).map((job: any) => (
                 <Box flexDirection="column">
                   <Button key={`${initiative.id}-${job.id}`} plain onPress={toggle(`${initiative.id}-${job.id}`)}>
@@ -308,9 +365,9 @@ export const register: Register = (on, options) => {
           )
         })}
         <Box borderStyle="round" borderColor="subtle" flexDirection="column">
-          <Text bold>No activas {started.length + unopened.length}</Text>
+          <Text bold>{t.inactive} {started.length + unopened.length}</Text>
           {started.map((i: any) => {
-            const count = countLabel(i.jobs)
+            const count = countLabel(i.jobs, t)
             return <Text>◐ {i.id} · {i.title}{count && ` · ${count}`}</Text>
           })}
           {unopened.map((u: any) => <Text dimColor>○ {u.id} · {u.title}</Text>)}

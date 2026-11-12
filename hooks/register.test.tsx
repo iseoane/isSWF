@@ -41,6 +41,8 @@ function engine(on: any, cwd: string, records = RECORDS) {
   const plugin = (path: string) => path.endsWith(`.claude-plugin${sep}plugin.json`) || path.endsWith('.claude-plugin/plugin.json')
   const isDir = (path: string) => Object.keys(files).some(f => f.startsWith(`${path}${sep}`))
   on('session.cwd', () => ({ value: cwd }))
+  const settings: { language?: string } = { language: 'Español' }
+  on('settings.read', () => ({ value: { ...settings } }))
   on('env.get', (_: unknown, e: { name: string }) => ({ value: { [sep === '\\' ? 'USERPROFILE' : 'HOME']: home }[e.name] }))
   const seen: string[] = []
   // A Linux test host resolves `C:\p` against its own directory; the mock keeps the path from the drive on.
@@ -68,7 +70,7 @@ function engine(on: any, cwd: string, records = RECORDS) {
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
-  return { clock: mock.clock(on), seen }
+  return { clock: mock.clock(on), seen, settings }
 }
 
 const activate = ($: any) => $.skill.prompt({ skill: 'isswf:isswf-coordinator', text: '' })
@@ -92,15 +94,16 @@ test('nothing opens or reads before the coordinator skill loads', ON, async ($, 
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
   on('session.cwd', () => (reads++, { value: '/p' }))
+  on('settings.read', () => ({ value: {} }))
   on('fs.exists', () => (reads++, { value: false }))
   on('fs.read', () => (reads++, { value: '{}' }))
   await $.skill.prompt({ skill: 'other-skill', text: '' })
   await $.tool.call({ tool: 'Read', file_path: '/p/.factory/initiatives/I0046/plan.md' })
-  expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'El coordinador isSWF no está activo en esta sesión.' })
+  expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'The isSWF coordinator is not active in this session.' })
   expect([opened, reads]).toEqual([0, 0])
   await activate($)
-  expect(await $.command.run({ command: 'isswf-initiatives', args: 'pin' })).toEqual({ text: 'Uso: /isswf-initiatives [pin <ID> | unpin <ID>]' })
-  expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'Panel de iniciativas abierto.' })
+  expect(await $.command.run({ command: 'isswf-initiatives', args: 'pin' })).toEqual({ text: 'Usage: /isswf-initiatives [pin <ID> | unpin <ID>]' })
+  expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'Initiatives pane opened.' })
   expect(opened).toBe(2)
 })
 
@@ -120,7 +123,7 @@ for (const cwd of ['/p', 'C:\\p']) {
       expect(await text(ui, /completados/)).toBe('✓ 3 completados')
       expect(await text(ui, /J005/)).toBe('○ J005 docs')
       expect(await text(ui, /^R1$/)).toBe('R1')
-      expect(await text(ui, /cambios pedidos/)).toBe('veredicto: cambios pedidos')
+      expect(await text(ui, /cambios pedidos/)).toBe(undefined)
       for (const [id, style, color] of [['V001', 'round', 'warning'], ['V002', 'round', 'success'], ['A002', 'dashed', 'inactive']]) {
         const box: any = await ui.find({ type: 'Box', key: `I0046-J004-${id}` })
         expect([box?.props?.borderStyle, box?.props?.borderColor]).toEqual([style, color])
@@ -163,19 +166,40 @@ test('the two last completed jobs in plan order expand and collapse on press', O
   await ui.unmount()
 })
 
-test('a hover shows usage resolved from the run transcript after the draw', ON, async ($, on) => {
-  const { clock, seen } = engine(on, '/p')
+test('a pressed pill expands its usage detail resolved after the draw and collapses on a second press', ON, async ($, on) => {
+  engine(on, '/p')
   await activate($)
   await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
-  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
-  expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe('modelo: claude-opus-5-5 (actual)')
-  await ui.unmount()
-  await clock.advance(1000)
-  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe(undefined)
+  await ui.press({ key: 'I0046-J004-A001' })
+  expect(await text(ui, /^A001 ·/)).toBe('A001 · attempt')
   expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe('modelo: claude-opus-5-5 (transcript)')
   expect(await text(ui, /^tokens/)).toBe('tokens: 1000000')
   expect(await text(ui, /^duración/)).toBe('duración: 90 s')
   expect(await text(ui, /^coste/)).toBe('coste: $4.00')
   expect(await text(ui, /^skills/)).toBe('skills: 0 · .agents: 1')
+  await ui.press({ key: 'I0046-J004-A001' })
+  expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe(undefined)
   await ui.unmount()
+})
+
+test('labels follow the session language: Spanish when set, English without a setting', ON, async ($, on) => {
+  const { clock, settings } = engine(on, '/p')
+  await activate($)
+  await $.tool.call({ tool: 'Read', file_path: '/p/.factory/initiatives/I0046/plan.md' })
+  await clock.advance(1000)
+  for (const [language, inactive, verdict, reply] of [
+    ['es', 'No activas 2', 'veredicto: cambios pedidos', 'Uso: /isswf-initiatives [pin <ID> | unpin <ID>]'],
+    [undefined, 'Inactive 2', 'verdict: changes requested', 'Usage: /isswf-initiatives [pin <ID> | unpin <ID>]'],
+  ] as const) {
+    settings.language = language
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /No activas|Inactive/)).toBe(inactive)
+    await ui.press({ key: 'I0046-J004-V001' })
+    expect(await text(ui, /^ver/)).toBe(verdict)
+    await ui.press({ key: 'I0046-J004-V001' })
+    await ui.unmount()
+    expect(await $.command.run({ command: 'isswf-initiatives', args: 'pin' })).toEqual({ text: reply })
+  }
 })
