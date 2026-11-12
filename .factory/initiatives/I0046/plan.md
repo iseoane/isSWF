@@ -30,12 +30,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J002
 
 - Size: S
-- Status: awaiting-human
+- Status: completed
 - Objective: Render the J001 snapshot as a Claude Code mod pane with static layout: one card per open initiative, rounds with pills, one card for unopened initiatives.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Operator views the live pane and accepts the layout or asks for changes.
+- Next step: None. Layout accepted by the operator 2026-11-12; follow-ups moved to J003.
 
 ### Acceptance
 
@@ -51,9 +51,9 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 
 ## J003
 
-- Size: S
+- Size: M
 - Status: pending
-- Objective: Show the pane only in coordinator sessions and mark active initiatives, with event-driven refresh.
+- Objective: Show the pane only in coordinator sessions, give cards only to active initiatives, group the rest, compact completed jobs and refresh on events.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: Awaiting J002 and explicit operator start.
@@ -64,6 +64,8 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Pane appears only after the isswf-coordinator skill loads in the session.
 - Active initiatives (dot) are those whose records the session touched, plus `/initiatives pin <ID>` and unpin.
 - Refresh on relevant tool results with debounce and a slow fallback timer; plugin tests cover activation and pin.
+- Bottom card "No activas" lists non-active initiatives: started ones with a distinct mark and a short blocked/pending count, unopened ones with number and name only.
+- Completed jobs inside a card collapse to one summary line with their count, so a long initiative does not fill the pane.
 
 ## J004
 
