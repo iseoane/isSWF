@@ -35,3 +35,19 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - A new test must cover a behavior or risk named in the acceptance criteria or brief; duplicate or self-referential tests are not added.
 - Mutation experiments run only when the brief asks or a reviewer proposes one for a concrete doubt (review.md); workers do not add them on their own.
 - Coordinator briefs name the risks to test rather than only listing cases; Pi and Claude Code parity; check-docs and focused methodology tests pass.
+
+## J003
+
+- Size: S
+- Status: pending
+- Objective: Fix review findings in proportion to their likelihood and impact.
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: Awaiting J002 and explicit operator start.
+- Next step: Operator starts J003.
+
+### Acceptance
+
+- Independent review stays as selected today; it is not removed or weakened.
+- Findings in extremely unlikely cases with low impact are recorded as known limits, not turned into corrections; acceptance criteria are written proportionally (no absolutes such as "always" for edge cases) — operator decision 2026-11-12 after I0046 J006 needed three rounds for oversized transcripts.
+- Pi and Claude Code parity; check-docs and focused methodology tests pass.

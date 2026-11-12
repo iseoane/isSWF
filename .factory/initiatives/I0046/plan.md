@@ -122,27 +122,34 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J006
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Resolve `Run:` identities to model, tokens, duration and counts of skill loads and `.agents/` reads with the existing token-native readers.
 - Depends on: J005
 - Brief: [brief-r3.md](jobs/J006/brief-r3.md)
 - Blocker: None. Operator authorized a second correction.
-- Next step: Review V003 PASS on fe6e45a; chained PR on feat/i0046-j005-run-line for Linux and Windows CI.
+- Next step: None. Accepted by the operator 2026-11-12 ("adelante con el siguiente job"); merge stays out of main.
 
 ### Acceptance
 
 - Per-run results cached once per finished run; tokens always shown.
 - Fixture tests for Claude and Pi inputs pass on Linux and Windows CI.
 
+### Evidence
+
+- Chained PR #279 (base feat/i0046-j005-run-line): reviews V001 FAIL, V002 FAIL, V003 Aggregate PASS on fe6e45a; attempts A001-A003.
+- Full check-quality PASS on the final candidate (coordinator); CI run 43297538181 green on Linux and Windows.
+- Operator approved the packaging, CI and token-native changes and chose partial token sums.
+- Known limits: shell reads of .agents not counted; Pi parallel runs ambiguous; oversized unfinished transcripts re-read; token-native-claude-transcript CLI still omits advisor iterations.
+
 ## J007
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Add cost in USD from a versioned price table.
 - Depends on: J006
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
-- Blocker: Awaiting J006 and explicit operator start.
-- Next step: Operator starts J007.
+- Blocker: None.
+- Next step: Worker A001 in worktree feat/i0046-j007-usd; chained PR on feat/i0046-j006-run-usage.
 
 ### Acceptance
 
