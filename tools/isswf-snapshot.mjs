@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { existsSync } from 'node:fs';
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { basename, dirname, isAbsolute, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { addRunUsage } from './isswf-run-usage-core.mjs';
 import { readSnapshot as readSnapshotCore } from './isswf-snapshot-core.mjs';
 import { stateDirectory } from './project-state.mjs';
 
@@ -25,12 +27,20 @@ export async function readSnapshot(project, fs = nodeFs) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [flag, project, ...rest] = process.argv.slice(2);
-  if (flag !== '--project' || !project || rest.length || !isAbsolute(project)) {
-    console.error('Usage: node tools/isswf-snapshot.mjs --project /absolute/project');
+  const usage = rest.length === 1 && rest[0] === '--usage';
+  if (flag !== '--project' || !project || (rest.length && !usage) || !isAbsolute(project)) {
+    console.error('Usage: node tools/isswf-snapshot.mjs --project /absolute/project [--usage]');
     process.exitCode = 2;
   } else {
     try {
-      console.log(JSON.stringify(await readSnapshot(project), null, 2));
+      const snapshot = await readSnapshot(project);
+      if (usage) {
+        // Same roots the hosts use: CLAUDE_CONFIG_DIR (as token-native-claude-transcript.mjs) and PI_CODING_AGENT_DIR.
+        const claudeDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+        const piDir = process.env.PI_CODING_AGENT_DIR || join(homedir(), '.pi', 'agent');
+        await addRunUsage(snapshot, { fs: nodeFs, claudeDir, piDir, cache: new Map() });
+      }
+      console.log(JSON.stringify(snapshot, null, 2));
     } catch (error) {
       console.error(error.message);
       process.exitCode = 1;

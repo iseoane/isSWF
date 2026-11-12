@@ -154,10 +154,10 @@ try {
   const claimsIsswf = memoryFs({ [join(project, '.isswf/initiatives/I0001/plan.md')]: plan('I0001', 'Claimed', job('J001', 'pending')) });
   await assert.rejects(readSnapshot(project, claimsIsswf), /disagrees/);
 
-  // Both cores import only sibling modules and never touch Node globals; the scan covers every static,
+  // The cores import only sibling modules and never touch Node globals; the scan covers every static,
   // bare and dynamic import or re-export form with any quote style, since node:vm cannot load ES
   // modules without --experimental-vm-modules.
-  for (const name of ['isswf-snapshot-core.mjs', 'isswf-plan-core.mjs']) {
+  for (const name of ['isswf-snapshot-core.mjs', 'isswf-plan-core.mjs', 'isswf-run-usage-core.mjs', 'token-native-transcript-core.mjs']) {
     const text = readFileSync(join(source, 'tools', name), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
     assert.deepEqual(moduleSpecifiers(text).filter(s => !/^\.\/[\w.-]+\.mjs$/.test(s)), [], name);
     assert.doesNotMatch(text, /\bprocess\b|\bBuffer\b|\brequire\s*\(|\b__(?:dir|file)name\b/, name);

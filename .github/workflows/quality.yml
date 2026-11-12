@@ -98,6 +98,8 @@ jobs:
         run: node tests/initiative-status.mjs .
       - name: Verify readonly initiative snapshot
         run: node tests/initiative-snapshot.mjs .
+      - name: Verify run usage resolution
+        run: node tests/run-usage.mjs .
       - name: Verify readonly malformed-plan panel
         run: node tests/initiative-panel.mjs .
       - name: Verify repository plan records parse

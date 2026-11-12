@@ -8,6 +8,7 @@
     "tools/isswf-status.mjs",
     "tools/isswf-snapshot.mjs",
     "tools/isswf-snapshot-core.mjs",
+    "tools/isswf-run-usage-core.mjs",
     "tools/isswf-panel.mjs",
     "tools/git-evidence.mjs",
     "tools/git-evidence-pi-extension.mjs",

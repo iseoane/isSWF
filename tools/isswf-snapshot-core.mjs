@@ -5,7 +5,7 @@ import { parsePlan } from './isswf-plan-core.mjs';
 export const SCHEMA_VERSION = 1;
 
 // Paths are joined as strings with the separator the caller's project path already uses.
-function joiner(path) {
+export function joiner(path) {
   const sep = path.includes('\\') ? '\\' : '/';
   return (...parts) => parts.join(sep);
 }

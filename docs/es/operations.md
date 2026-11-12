@@ -36,6 +36,25 @@ El panel puede guardar notas locales si las evidencias mostradas siguen coincidi
 - Los veredictos de revisión se leen de etiquetas en inglés o en español (`aggregate`/`agregado`, `verdict`/`veredicto`, `changes requested`/`cambios pedidos` o `cambios solicitados`).
 - Los archivos de más de 1 MB o ilegibles se enumeran en `skipped`; un registro defectuoso nunca interrumpe la instantánea. Que existan ambos directorios de estado o ninguno, o que falte el directorio `initiatives`, es un error.
 
+### Consumo de cada ejecución
+
+`--usage` añade `usage` a cada entrada de `runs`; sin esa opción, la instantánea no abre ninguna transcripción:
+
+```bash
+node tools/isswf-snapshot.mjs --project /absolute/project --usage
+```
+
+Lee las transcripciones locales que ya escriben los hosts, en solo lectura y sin llamar a modelos. La lógica está en `tools/isswf-run-usage-core.mjs`, que no importa nada de Node; los entornos sin módulos integrados de Node llaman a `addRunUsage(snapshot, { fs, claudeDir, piDir, cache })` o a `resolveRunUsage(run, { fs, claudeDir, piDir, project, cache })` con su propio `fs`. El envoltorio usa `CLAUDE_CONFIG_DIR` o `~/.claude`, y `PI_CODING_AGENT_DIR` o `~/.pi/agent`.
+
+- `claude agent=<id>`: `projects/*/*/subagents/agent-<id>.jsonl` dentro del directorio de Claude. `claude session=<id>`: `projects/*/<id>.jsonl`. Se buscan todos los directorios de proyecto, así que también se encuentran las ejecuciones lanzadas desde un worktree.
+- `pi child=<id>`: el único `<id>_*_transcript.jsonl` de `sessions/*/subagent-artifacts` dentro del directorio de Pi o de `.pi/subagents/artifacts` del proyecto. No se encuentran los hijos escritos en el directorio temporal de artefactos de Pi.
+- `usage` tiene `found`, `finished`, `model` (`mixed` si hay varios), `tokens` (`input`, `output`, `cacheRead`, `cacheWrite`), `durationMs` (de la primera a la última marca de tiempo de la transcripción), `skills` y `agentsReads` (recuentos por nombre de skill y por ruta desde `.agents/`).
+- Los tokens de Claude salen del mismo analizador de transcripciones que `tools/token-native-claude-transcript.mjs`, cuentan cada petición una vez y suman las iteraciones adicionales que una petición registra por llamadas del servidor, como el advisor (su modelo se añade a `model`). Cubren solo la transcripción propia de esa ejecución: una sesión no incluye sus subagentes, y faltan las llamadas auxiliares de Claude que no escriben ninguna entrada en la transcripción (por ejemplo, llamadas pequeñas a Haiku). Los de Pi suman el consumo de cada mensaje de la transcripción del hijo.
+- Una carga de skill es una llamada a la herramienta `Skill` (sin su prefijo `<plugin>:`) o una lectura de un archivo `SKILL.md` (con el nombre de su directorio). `agentsReads` cuenta solo las llamadas a las herramientas de lectura de archivos de los hosts; las lecturas por shell no se ven.
+- Una ejecución ha terminado cuando su sesión `claude -p` tiene `cost-state`, su agente de Claude acaba en una respuesta `end_turn` o su hijo de Pi tiene un `_meta.json` con `exitCode`.
+- Si no se encuentra la transcripción, el id no es válido o coinciden varias transcripciones de Pi, `found` es `false`, `reason` es `transcript-not-found`, `invalid-id` o `ambiguous-transcript`, y todos los demás campos son `unknown`. Una transcripción encontrada pero mal formada, de más de 64 MB o ilegible tiene `found: true`, la comprobación fallida en `reason` y todos los demás campos `unknown`. Se ignora una última línea incompleta.
+- `cache` es un `Map` que pertenece a quien llama y que conserva entre llamadas; no se escribe nada en disco ni en los registros de la iniciativa. Una ejecución terminada se guarda por host, tipo e id junto con el tamaño de su transcripción, y se reutiliza mientras ese tamaño no cambie, porque continuar una ejecución añade líneas a su transcripción. Las ejecuciones sin terminar se leen siempre. La línea de comandos empieza con la caché vacía.
+
 ## Desde una instalación preparada
 
 Aquí, `RELEASE` representa la ruta absoluta de un paquete ya preparado y de confianza. No es una dirección de descarga. No se presupone que exista una release pública.

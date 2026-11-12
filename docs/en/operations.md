@@ -36,6 +36,25 @@ The panel can record local notes when the displayed evidence still matches. A no
 - Review verdicts are read from English or Spanish labels (`aggregate`/`agregado`, `verdict`/`veredicto`, `changes requested`/`cambios pedidos` or `cambios solicitados`).
 - Files over 1 MB or unreadable are listed in `skipped`; one bad record never aborts the snapshot. Both or no state directory, or a missing `initiatives` directory, is an error.
 
+### Run usage
+
+`--usage` adds `usage` to every `runs` entry; without it the snapshot does not open any transcript:
+
+```bash
+node tools/isswf-snapshot.mjs --project /absolute/project --usage
+```
+
+It reads the local transcripts the hosts already write, read-only and without model calls. `tools/isswf-run-usage-core.mjs` holds the logic with no Node imports; runtimes without Node built-ins call `addRunUsage(snapshot, { fs, claudeDir, piDir, cache })` or `resolveRunUsage(run, { fs, claudeDir, piDir, project, cache })` with their own `fs`. The wrapper uses `CLAUDE_CONFIG_DIR` or `~/.claude`, and `PI_CODING_AGENT_DIR` or `~/.pi/agent`.
+
+- `claude agent=<id>`: `projects/*/*/subagents/agent-<id>.jsonl` under the Claude directory. `claude session=<id>`: `projects/*/<id>.jsonl`. Every project directory is searched, so runs launched from a worktree are found too.
+- `pi child=<id>`: the single `<id>_*_transcript.jsonl` in `sessions/*/subagent-artifacts` under the Pi directory or in the project's `.pi/subagents/artifacts`. Children written to Pi's temporary artifact directory are not found.
+- `usage` has `found`, `finished`, `model` (`mixed` when several), `tokens` (`input`, `output`, `cacheRead`, `cacheWrite`), `durationMs` (first to last transcript timestamp), `skills` and `agentsReads` (counts per skill name and per path from `.agents/`).
+- Claude tokens come from the same transcript parser as `tools/token-native-claude-transcript.mjs`, each request counted once, plus the extra iterations a request records for server-side calls such as the advisor (their model joins `model`). They cover only that run's own transcript: a session excludes its subagents, and Claude's auxiliary calls that write no transcript entry (for example small Haiku calls) are missing. Pi tokens add the per-message usage of the child transcript.
+- A skill load is a `Skill` tool call (without its `<plugin>:` prefix), or a read of a `SKILL.md` file (named after its directory). `agentsReads` counts the hosts' file-read tool calls only; shell reads are not seen.
+- A run is finished when its `claude -p` session has `cost-state`, its Claude agent ends on an `end_turn` reply, or its Pi child has a `_meta.json` with an `exitCode`.
+- When the transcript is not found, the id is invalid, or several Pi transcripts match, `found` is `false`, `reason` is `transcript-not-found`, `invalid-id` or `ambiguous-transcript`, and every other field is `unknown`. A transcript that is found but malformed, over 64 MB or unreadable has `found: true`, the failing check in `reason`, and every other field `unknown`. An incomplete last line is ignored.
+- `cache` is a `Map` the caller owns and keeps between calls; nothing is written to disk or to the initiative records. A finished run is stored under host, kind and id with its transcript size and reused while the size is unchanged, because continuing a run appends to its transcript. Unfinished runs are read every time. The command line starts with an empty cache.
+
 ## From a prepared installation
 
 `RELEASE` below means the absolute directory of an already prepared, trusted package. It is not a download address. No public release is assumed.

@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { link, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
+import { piUsage as usage } from './token-native-transcript-core.mjs';
 
 const REQUEST = 'subagents:rpc:v1:request';
 const REPLY = 'subagents:rpc:v1:reply:';
@@ -8,17 +9,6 @@ const MAX_RECEIPT = 1024 * 1024;
 const MAX_AUTO_ROWS = 100;
 const STATE_ROOTS = ['.isswf', '.factory'];
 const digest = value => createHash('sha256').update(String(value)).digest('hex').slice(0, 24);
-const integer = value => Number.isSafeInteger(value) && value >= 0;
-
-function usage(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('invalid native usage');
-  const counters = {};
-  for (const [source, target] of [['input', 'input'], ['output', 'output'], ['cacheRead', 'cacheRead'], ['cacheWrite', 'cacheWrite']]) {
-    if (!integer(value[source])) throw Error('native usage counter unavailable');
-    counters[target] = value[source];
-  }
-  return counters;
-}
 
 export function normalizePiCost(data, identity, branch) {
   if (!data || data.version !== 1 || !data.parent || !Array.isArray(data.children) || data.children.length > 99 || !Number.isSafeInteger(data.unresolvedAsyncChildren) || data.unresolvedAsyncChildren < 0) throw Error('unsupported Pi cost reply');
