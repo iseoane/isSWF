@@ -26,7 +26,7 @@ The panel can record local notes when the displayed evidence still matches. A no
 
 ## Initiative snapshot
 
-`tools/isswf-snapshot.mjs` reads every initiative under the active state directory selected by `tools/project-state.mjs` and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. Importers call `readSnapshot(project, fs)`; `fs` defaults to Node and may be any object with async `exists`, `list`, `stat` and `read`, which then governs record reads.
+`tools/isswf-snapshot.mjs` reads every initiative under the active state directory (`.isswf` or `.factory`) and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. It wraps `tools/isswf-snapshot-core.mjs`, which has no Node imports and does every read, including the state-directory choice, through an injected object with async `exists`, `list`, `stat` and `read`. Runtimes without Node built-ins import the core and call `readSnapshot(project, fs)` with their own `fs`. The Node wrapper's `readSnapshot(project, fs)` defaults `fs` to Node and also applies the regular-directory check from `tools/project-state.mjs`, which the core cannot do.
 
 - Initiatives whose jobs are all `completed` are omitted. Those whose jobs are all `pending` without records appear in `unopened` with `id` and `title` only.
 - Each other initiative has `id`, `title`, `type`, `status` (`parsed` or `unparsed`) and `jobs`. A plan rejected by the plan parser is `unparsed` with no jobs.

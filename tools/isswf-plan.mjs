@@ -5,12 +5,12 @@ import { lstat, readFile, realpath, mkdir, open, link, unlink, rename, rmdir } f
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
+import { hasEvidence, planStates, validateDependencyGraph } from './isswf-plan-core.mjs';
+export { parsePlan, planStates } from './isswf-plan-core.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
 const text = value => typeof value === 'string' && value.trim() && value.length <= 4000 && !/[\x00-\x1f\x7f]/u.test(value);
-export const planStates = Object.freeze(['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed']);
-const hasEvidence = values => values.some(item => item.trim() && item.trim() !== 'None.');
 async function regular(path) {
   const stat = await lstat(path);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 256000) throw Error('bounded regular file required');
@@ -29,54 +29,6 @@ async function checkpoint(root, path, old) {
   const result = spawnSync('git', ['-C', root, 'show', 'HEAD:' + relative(root, path).split('\\').join('/')], { timeout: 10000, maxBuffer: 256001, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
   const bytes = await readFile(path);
   if (result.error || result.status !== 0 || !bytes.equals(Buffer.from(old)) || !result.stdout.equals(bytes)) throw Error('Git checkpoint required: commit the exact current plan before revise');
-}
-function validateDependencyGraph(jobs) {
-  const byId = new Map(jobs.map(job => [job.id, job])), visiting = new Set(), visited = new Set();
-  function visit(job) {
-    if (visiting.has(job.id)) throw Error('cyclic job dependencies');
-    if (visited.has(job.id)) return;
-    visiting.add(job.id);
-    for (const dep of job.dependencies) visit(byId.get(dep));
-    visiting.delete(job.id); visited.add(job.id);
-  }
-  for (const job of jobs) visit(job);
-}
-export function parsePlan(markdown) {
-  const jobs = [], seen = new Set(); let current, section, type;
-  for (const line of markdown.replaceAll('\r\n', '\n').split('\n')) {
-    if (!current && line.startsWith('Type:')) {
-      if (type !== undefined) throw Error('invalid-plan-type');
-      type = line.slice('Type:'.length).trim();
-      if (!['bug', 'enhancement', 'maintenance', 'research'].includes(type)) throw Error('invalid-plan-type');
-    }
-    const header = /^## ([A-Z][A-Z0-9-]{0,63})$/u.exec(line);
-    if (header) {
-      if (seen.has(header[1])) throw Error('duplicate-job');
-      seen.add(header[1]); current = { id: header[1], acceptance: [], evidence: [] }; jobs.push(current); section = null;
-    } else if (current) {
-      const field = section ? null : /^- (Status|Objective|Depends on|Brief|Blocker|Next step): (.+)$/u.exec(line);
-      if (field) {
-        if (Object.hasOwn(current, field[1])) throw Error('duplicate-field');
-        current[field[1]] = field[2];
-      } else if (line === '### Acceptance') section = 'acceptance';
-      else if (line === '### Evidence') section = 'evidence';
-      else if (section && line.startsWith('- ')) current[section].push(line.slice(2));
-    }
-  }
-  if (type === undefined) throw Error('invalid-plan-type');
-  if (!jobs.length || jobs.length > 100) throw Error('invalid-plan');
-  const parsed = jobs.map(job => {
-    if (!planStates.includes(job.Status) || ['Objective', 'Depends on', 'Brief', 'Blocker', 'Next step'].some(field => !job[field]) || !job.acceptance.length) throw Error('invalid-job');
-    const brief = /^\[brief-r([1-9][0-9]*)\.md\]\(jobs\/([A-Z][A-Z0-9-]{0,63})\/brief-r\1\.md\)(?: \(pending until prepared\))?$/u.exec(job.Brief);
-    if (!brief || brief[2] !== job.id) throw Error('unsafe-brief-reference');
-    const dependencies = job['Depends on'] === 'None' ? [] : job['Depends on'].split(', ');
-    if (new Set(dependencies).size !== dependencies.length || dependencies.some(dep => !seen.has(dep) || dep === job.id)) throw Error('invalid-dependency');
-    const evidence = job.evidence.filter(item => item.trim() !== 'None.');
-    if (job.Status === 'completed' && !hasEvidence(evidence)) throw Error('completed jobs require evidence');
-    return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence, briefName: `brief-r${brief[1]}.md` };
-  });
-  validateDependencyGraph(parsed);
-  return parsed;
 }
 function render(value, initiative) {
   if (value.version !== 1 || value.initiative !== initiative || !text(value.title) || !['bug', 'enhancement', 'maintenance', 'research'].includes(value.type) || !Array.isArray(value.jobs) || !value.jobs.length || value.jobs.length > 100) throw Error('invalid initiative plan');

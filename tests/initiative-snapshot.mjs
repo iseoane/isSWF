@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
@@ -104,7 +105,31 @@ try {
   await assert.rejects(readSnapshot(both), /Both \.isswf and \.factory/);
   const none = join(root, 'none');
   await mkdir(none);
+  await assert.rejects(readSnapshot(none), /no \.isswf or \.factory state directory/);
+  await mkdir(join(none, '.isswf'));
   await assert.rejects(readSnapshot(none), /no initiatives directory/);
+
+  // The core reads only through the injected fs: an in-memory project absent from disk.
+  const core = await import(pathToFileURL(join(source, 'tools/isswf-snapshot-core.mjs')).href);
+  const memory = memoryFs({
+    '/absent/.isswf/initiatives/I0001/plan.md': plan('I0001', 'In memory', job('J001', 'in-progress')),
+    '/absent/.isswf/initiatives/I0001/jobs/J001/brief-r1.md': '# r1\n',
+    '/absent/.isswf/initiatives/I0001/jobs/J001/A001.md': '- Brief: `.isswf/initiatives/I0001/jobs/J001/brief-r1.md`\n- Profile: `isswf-worker`\n',
+  });
+  const fromMemory = await core.readSnapshot('/absent', memory);
+  assert.equal(fromMemory.schemaVersion, core.SCHEMA_VERSION);
+  assert.equal(fromMemory.stateDir, '/absent/.isswf/initiatives');
+  assert.deepEqual(fromMemory.initiatives.map(i => [i.id, i.title, i.jobs[0].recordCount, i.jobs[0].rounds[0].entries[0].role]), [['I0001', 'In memory', 1, 'worker']]);
+  const windowsMemory = memoryFs({ 'C:\\absent\\.factory\\initiatives\\I0001\\plan.md': plan('I0001', 'Windows', job('J001', 'in-progress')) });
+  assert.equal((await core.readSnapshot('C:\\absent', windowsMemory)).initiatives[0].title, 'Windows');
+  await assert.rejects(core.readSnapshot('/absent', memoryFs({ '/absent/.isswf/x': '', '/absent/.factory/x': '' })), /Both \.isswf and \.factory/);
+
+  // Both cores import only sibling modules and never touch Node globals.
+  for (const name of ['isswf-snapshot-core.mjs', 'isswf-plan-core.mjs']) {
+    const text = readFileSync(join(source, 'tools', name), 'utf8');
+    assert.deepEqual([...text.matchAll(/\bfrom\s+'([^']+)'|\bimport\s*\(/g)].map(m => m[1]).filter(s => !s?.startsWith('./')), [], name);
+    assert.doesNotMatch(text, /\bprocess\s*\.|\brequire\s*\(/, name);
+  }
 
   const cli = args => spawnSync(process.execPath, [tool, ...args], { encoding: 'utf8', timeout: 15000 });
   const printed = cli(['--project', project]);
@@ -115,6 +140,24 @@ try {
   console.log('initiative snapshot tests passed');
 } finally {
   await rm(root, { recursive: true, force: true });
+}
+
+function memoryFs(entries) {
+  const isDir = path => Object.keys(entries).some(file => file.startsWith(path + (path.includes('\\') ? '\\' : '/')));
+  return {
+    exists: async path => path in entries || isDir(path),
+    list: async path => {
+      const sep = path.includes('\\') ? '\\' : '/';
+      const names = new Map();
+      for (const file of Object.keys(entries).filter(f => f.startsWith(path + sep))) {
+        const [name, ...more] = file.slice(path.length + 1).split(sep);
+        names.set(name, more.length ? 'dir' : 'file');
+      }
+      return [...names].map(([name, kind]) => ({ name, kind }));
+    },
+    stat: async path => ({ size: entries[path].length }),
+    read: async path => entries[path],
+  };
 }
 
 function pick(e) {
