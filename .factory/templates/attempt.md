@@ -5,7 +5,7 @@
 ## Identity and pinned inputs
 
 - Job ID and attempt ID:
-- Run: `<one line per host launch, as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown>`
+- Run: claude agent=<id> (plain text, no backticks; one line per host launch as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown)
 - Reported status:
 - Report timestamp and timezone:
 - Brief path, revision, and input checkpoint (full Git SHA):

@@ -5,7 +5,7 @@
 ## Candidate identity
 
 - Job ID and review ID:
-- Run: `<one line per host launch, as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown>`
+- Run: claude agent=<id> (plain text, no backticks; one line per host launch as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown)
 - Review round in this job, and prior review IDs:
 - Project `REVIEW.md` consumed (path and revision), or absent:
 - Brief path and exact revision:

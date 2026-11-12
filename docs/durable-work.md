@@ -54,7 +54,7 @@ The plan links to the job and its current brief revision. The attempt records th
 
 ### Record the launch identity
 
-The coordinator adds one fixed `Run:` line to each attempt (`A<nnn>`) and review (`V<nnn>`) record for the host launch that produced it: `- Run: claude agent=<id>` for a native Claude Code Agent call, `- Run: claude session=<id>` for a `claude -p` process (the session ID from its output), or `- Run: pi child=<id>` for a `pi-subagents` child. Copy the ID literally from the launch tool result; when it is unknown, omit the line rather than guess. A record produced by several runs has one line per run. The line is provenance only: do not interpret it or make extra model calls to obtain it.
+After the writer stops, the coordinator adds one fixed `Run:` line to each attempt (`A<nnn>`) and review (`V<nnn>`) record for the host launch that produced it: `- Run: claude agent=<id>` for a native Claude Code Agent call, `- Run: claude session=<id>` for a `claude -p` process (the session ID from its output), or `- Run: pi child=<id>` for a `pi-subagents` child. Copy the ID literally from the launch tool result; when it is unknown, omit the line rather than guess. A record produced by several runs has one line per run. The line is provenance only: do not interpret it or make extra model calls to obtain it.
 
 ## Workspace policy and retained evidence
 
