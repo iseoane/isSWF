@@ -36,7 +36,7 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None
-- Next step: Worker on branch feat/i0014-j002-legacy-seeding; then independent review, PR and exact-head CI. No merge.
+- Next step: V001 passed; push branch, open PR, wait exact-head CI. Integration needs operator approval (installation code).
 
 ### Acceptance
 
