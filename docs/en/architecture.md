@@ -33,7 +33,7 @@ New target repositories use `.isswf/`. Existing repositories may use `.factory/`
 
 Plans, briefs, and review records describe the work. The installation pin selects its runtime. Bun receipt format 2 separates the portable source/engine identity from the locally anchored native artifact hash. Legacy format-1 identities and stores remain valid. Private runtime stores retain execution records and exact released code separately from shared project files. A saved status is not proof of a live process.
 
-The development repository's `.factory/models.json` and `.factory/templates/` are also source defaults distributed by explicit allowlists. Its initiatives are project records, not package contents. The `isswf/` Python code and `examples/` belong to earlier intake prototypes; the native installed flow does not depend on SQLite.
+The development repository's `.factory/templates/` are record templates distributed by explicit allowlists. Its `.factory/models.json` is kept only as this checkout's historical legacy state and is not packaged. Its initiatives are project records, not package contents. The `isswf/` Python code and `examples/` belong to earlier intake prototypes; the native installed flow does not depend on SQLite.
 
 ## Tests and documentation
 

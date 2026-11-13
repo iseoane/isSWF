@@ -14,7 +14,7 @@
 | `.agents/roles/`, `.agents/hosts/` | Role profiles, methodology references and host-specific boundaries. |
 | `tools/` | Executable planning, observation, dispatch, release and recovery code. |
 | `skills/`, `agents/`, `.claude-plugin/` | Thin Claude integration; shared methodology stays under `.agents/`. |
-| `.factory/models.json`, `.factory/templates/` | Source defaults and record templates included through explicit package allowlists. |
+| `.factory/templates/` | Record templates included through explicit package allowlists. `.factory/models.json` is only this checkout's historical legacy state and is not packaged. |
 | `.factory/initiatives/` | This repository's legacy work records, not installed package contents. New target projects use `.isswf/`. |
 | `tests/` | Portable runtime tests and historical test fixtures. |
 | `tooling/quality/`, `.github/workflows/` | Locked development-only analysis tools and CI checks. |

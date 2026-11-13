@@ -33,7 +33,7 @@ Los repositorios nuevos utilizan `.isswf/`. Los existentes pueden seguir utiliza
 
 Los planes, briefs y revisiones describen el trabajo. La referencia de instalación selecciona su runtime. Los recibos Bun de formato 2 separan la identidad portable del código y motor del hash del artefacto nativo verificado localmente. Las identidades y almacenes de formato 1 siguen siendo válidos. Los almacenes privados conservan los registros de ejecución y el código exacto de las versiones separados de los archivos compartidos del proyecto. Un estado guardado no demuestra que haya un proceso vivo.
 
-En el repositorio de desarrollo, `.factory/models.json` y `.factory/templates/` también contienen valores iniciales que se distribuyen mediante listas explícitas de archivos. Sus iniciativas son registros del proyecto, no contenido del paquete. El código Python de `isswf/` y `examples/` pertenece a los prototipos anteriores de recepción de issues; el flujo nativo instalado no depende de SQLite.
+En el repositorio de desarrollo, `.factory/templates/` contiene plantillas de registros que se distribuyen mediante listas explícitas de archivos. Su `.factory/models.json` se conserva solo como estado heredado histórico de este checkout y no se empaqueta. Sus iniciativas son registros del proyecto, no contenido del paquete. El código Python de `isswf/` y `examples/` pertenece a los prototipos anteriores de recepción de issues; el flujo nativo instalado no depende de SQLite.
 
 ## Pruebas y documentación
 
