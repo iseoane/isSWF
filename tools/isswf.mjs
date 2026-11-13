@@ -188,6 +188,26 @@ async function lock(project, id, transaction = null) {
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
   return () => retireClaim(path);
 }
+// Legacy PR effects live store-wide under effects/<key>/ and belong to an attempt through its
+// binding's logicalJobRef. The original pin owns their semantics, so its runtime inspects them.
+async function openEffects(runtime, record) {
+  const effects = join(record.store, 'effects');
+  if (!await exists(effects)) return [];
+  await directory(effects);
+  const { logicalJobRef } = await json(join(record.store, record.attemptId + '.job.json'));
+  if (typeof logicalJobRef !== 'string' || !logicalJobRef) fail('Attempt binding lacks logicalJobRef');
+  const { externalEffect } = await import(pathToFileURL(join(runtime, 'tools/external-effect-journal.mjs')));
+  const open = [];
+  for (const key of await readdir(effects)) {
+    if (!/^[0-9a-f]{64}$/u.test(key)) fail('Ambiguous effect journal entry');
+    const { intent } = await json(join(effects, key, 'intent.json'));
+    if (intent?.key !== key) fail('Corrupt effect intent');
+    if (intent.logicalJobRef !== logicalJobRef) continue;
+    const observed = await externalEffect({ action: 'inspect', store: record.store, intent });
+    if (observed.state === 'submitted-unknown') open.push(key);
+  }
+  return open;
+}
 async function activity(project, store) {
   const local = join(project, '.isswf/local'), blockers = [];
   for (const name of ['leases', 'workers']) {
@@ -197,17 +217,21 @@ async function activity(project, store) {
     for (const entry of await readdir(dir)) {
       const record = await json(join(dir, entry));
       if (name === 'leases') { blockers.push({ lease: entry, state: 'active-or-unreconciled' }); continue; }
+      const action = `Reconcile under the original pin ${record.pin?.version ?? 'unknown'} (${record.pin?.runtimeId ?? 'unknown'}) before changing versions`;
       try {
         if (record.project !== project || !isAbsolute(record.store || '') || !idPattern.test(record.attemptId || '')) fail('Invalid worker registration');
         const runtime = await retained(store, record.pin);
+        try {
+          for (const effect of await openEffects(runtime, record)) blockers.push({ worker: entry, effect, state: 'open-external-effect', action });
+        } catch (error) { blockers.push({ worker: entry, state: 'unknown', reason: 'External effect journal: ' + error.message, action }); }
         const attemptDir = join(record.store, record.attemptId);
         await directory(attemptDir);
         const dispatch = await json(join(attemptDir, 'dispatch.json'));
         if (dispatch.repo !== project || dispatch.attemptId !== record.attemptId) fail('Worker dispatch binding mismatch');
         const { inspectWorkerCessation } = await import(pathToFileURL(join(runtime, 'tools/native-recovery.mjs')));
         const observation = await inspectWorkerCessation({ attemptDir, dispatch });
-        if (observation.status !== 'ceased') blockers.push({ worker: entry, state: 'unknown-or-not-ceased', reason: observation.reason });
-      } catch (error) { blockers.push({ worker: entry, state: 'unknown', reason: error.message }); }
+        if (observation.status !== 'ceased') blockers.push({ worker: entry, state: 'unknown-or-not-ceased', reason: observation.reason, action });
+      } catch (error) { blockers.push({ worker: entry, state: 'unknown', reason: error.message, action }); }
     }
   }
   return blockers;
@@ -276,7 +300,7 @@ function trackingRecord(mode, repository) {
   if (!['local', 'github'].includes(mode)) fail('init requires --tracking local|github');
   if (mode === 'github' && !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u.test(repository || '')) fail('GitHub tracking requires explicit --repository owner/repo');
   if (mode === 'local' && repository) fail('Local tracking has no GitHub repository');
-  return `# Project setup\n\nTracking: ${mode}\n${repository ? `Repository: ${repository}\n` : ''}\nRemote permissions: none. Tracking selection grants no remote actions.\n\nLegacy runtime model routes: .isswf/models.json (legacy assignments only). Ordinary Pi/Claude selections belong to host-native configuration. Availability and effort support remain pending verification.\nChecks and delivery boundary: pending project-specific assessment.\nTechnical isolation: not verified. Client-use gate: blocked.\n\nInitialization installs resources only. It does not grant execution, provider calls, push, merge, or deployment.\n`;
+  return `# Project setup\n\nTracking: ${mode}\n${repository ? `Repository: ${repository}\n` : ''}\nRemote permissions: none. Tracking selection grants no remote actions.\n\nOrdinary Pi/Claude selections belong to host-native configuration. Availability and effort support remain pending verification.\nChecks and delivery boundary: pending project-specific assessment.\nTechnical isolation: not verified. Client-use gate: blocked.\n\nInitialization installs resources only. It does not grant execution, provider calls, push, merge, or deployment.\n`;
 }
 async function initialize(project, store, opts) {
   const target = release(ownRoot), current = await readPin(project);
@@ -292,7 +316,6 @@ async function initialize(project, store, opts) {
   const setup = '.isswf/project-setup.md';
   if (!await exists(join(project, setup))) changes[setup] = trackingRecord(opts.tracking, opts.repository);
   else if (opts.tracking || opts.repository) fail('Existing project setup is preserved; reconcile tracking separately');
-  if (!await exists(join(project, '.isswf/models.json'))) changes['.isswf/models.json'] = await regular(join(ownRoot, '.factory/models.json'));
   if (!await exists(join(project, '.isswf/.gitignore'))) changes['.isswf/.gitignore'] = 'local/\n';
   const files = Object.entries(changes).map(([path, after]) => ({ path, before: null, after: Buffer.from(after).toString('base64') }));
   await retain(store, ownRoot);
@@ -304,7 +327,7 @@ async function inspect(project, store) {
   if (stateMigration) return { status: 'legacy-state', available: pinFor(target), stateMigration, transition: await exists(join(project, '.isswf-transition')), writes: false };
   if (current) await retained(store, current.pin);
   const changed = current?.pin.runtimeId === target.runtimeId ? [] : [pinPath];
-  if (!current) for (const path of ['.isswf/project-setup.md', '.isswf/models.json', '.isswf/.gitignore']) if (!await exists(join(project, path))) changed.push(path);
+  if (!current) for (const path of ['.isswf/project-setup.md', '.isswf/.gitignore']) if (!await exists(join(project, path))) changed.push(path);
   const claim = join(project, '.isswf/local/operation');
   return { status: current ? current.pin.runtimeId === target.runtimeId ? 'current' : 'update-available' : 'not-initialized', current: current?.pin || null, available: pinFor(target), expected: current ? hash(current.bytes) : null, changed, migrationRequired: Boolean(current && current.pin.runtimeId !== target.runtimeId), operation: await exists(claim) ? await json(join(claim, 'owner.json')) : null, blockers: await activity(project, store), writes: false, limits: 'Only registered CLI activity is inspected. Reconcile external/native host writers separately; saved statuses are not liveness evidence.' };
 }
