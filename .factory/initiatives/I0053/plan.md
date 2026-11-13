@@ -1,8 +1,10 @@
-# I0053: Coordinator use of Engram and Codegraph
+# I0053: Project memory and code index (Engram, Codegraph, Graphify)
 
 Type: enhancement
 
 Operator decision 2026-11-13: make the coordinator session actually use Engram and Codegraph when they are available, following the gentle-ai pattern (session-start reminder plus explicit coordinator guidance). Subagent prompt injection is out of scope: isSWF agents already grant the Codegraph and Engram tools in their frontmatter.
+
+Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a code index (Codegraph or Graphify), use what is present, recommend what is missing without requiring it, and initialise the index the operator chooses for the repository. isSWF never installs these tools; their own installers add their hooks and instructions.
 
 ## J001
 
@@ -61,4 +63,25 @@ Operator decision 2026-11-13: make the coordinator session actually use Engram a
 
 ### Evidence
 
-- None.
+- 2026-11-13: after the operator's install, a Codegraph UserPromptSubmit hook injected context into this session; MCP connection not yet probed.
+
+## J004
+
+- Status: pending
+- Objective: isSWF setup and update detect Engram, Codegraph and Graphify for the project, use what is wired, recommend what is missing, and initialise the code index the operator chooses.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: Needs an explicit operator start.
+- Next step: Operator start; then implementation with focused tests and PR.
+
+### Acceptance
+
+- Setup and update report, per tool, one of: wired and used; installed but not wired for this host; installed but this repository not initialised; not installed (recommended, optional). Detection only reads configuration and project markers; it never installs, wires or reindexes by itself.
+- Engram: when present it is used under the project's explicit identity; when absent it is recommended once, never required.
+- Code index: when Codegraph or Graphify is installed but neither is initialised for the repository, the operator is asked which to use; only the chosen one is initialised and recorded in the project setup record. An existing index is preserved.
+- The chosen index's freshness strategy is applied and documented (Codegraph: its own sync; Graphify: see brief), and the coordinator's navigation rule names whichever index the project recorded.
+- Linux and Windows, Claude Code and Pi are covered, or a gap is documented.
+
+### Evidence
+
+- 2026-11-13: research summary in the J004 brief.
