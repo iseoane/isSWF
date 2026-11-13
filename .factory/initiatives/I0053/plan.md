@@ -28,17 +28,19 @@ Operator decision 2026-11-13: make the coordinator session actually use Engram a
 
 ## J002
 
-- Status: pending
-- Objective: Talk through the coordinator tools note and Codegraph with the operator and record decisions.
+- Status: in-progress
+- Objective: Retire the plugin's session-tools note: Engram and Codegraph install their own hooks and instructions; isSWF keeps only the coordinator skill step.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Needs the operator conversation.
-- Next step: Operator discussion after J001 merges; keeps I0053 open as requested.
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
+- Blocker: None.
+- Next step: Coordinator removes the note in worktree isSWF-worktrees/i0053-j002-retire-hook (base 6616b43); then review, PR and merge; keep I0053 open.
 
 ### Acceptance
 
-- The operator's decisions on the hook and Codegraph are recorded, with any follow-up jobs planned.
+- hooks/coordinator-tools.tsx, its test, its register.tsx handler and its packaging entries are removed; the pane behaves as before J001.
+- The coordinator skill step no longer refers to a plugin note; user docs say Engram and Codegraph are set up with their own installers.
+- The operator's decisions are recorded below.
 
 ### Evidence
 
-- None.
+- 2026-11-13: operator decisions: generic Engram behaviour belongs to Engram (its plugin/server instructions), Codegraph's to its own installer (`codegraph install`); the operator is fixing agent-depot because the local Codegraph install never wired Claude. Remove the plugin hook entirely (operator: "si elimina el hook tambien"), including the packaging allowlist entries.
