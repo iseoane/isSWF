@@ -272,6 +272,11 @@ try {
   assert.equal(effectBlocker?.effect, effectKey, 'inspect reports the open legacy effect');
   assert.match(effectBlocker.action, new RegExp(`original pin ${JSON.parse(pinA).version} \\(${receiptL.runtimeId}\\)`, 'u'));
   assert.match(cli(releaseB, 'migrate', migration, false).stderr, /open-external-effect/u);
+  // The reconciliation route the blocker names: the retained legacy runtime's own tool, run directly; its launcher refuses a store containing itself.
+  assert.match(effectBlocker.action, /retained tools directly/u);
+  assert.match(run(process.execPath, [join(location.runtimeRoot, 'tools/isswf.mjs'), 'locate', '--project', project, '--store', store], false).stderr, /Runtime store must be outside/u);
+  const retainedJob = run(process.execPath, [join(location.runtimeRoot, 'tools/isswf-job.mjs'), 'reconcile', '--runs-store', legacyRuns, '--attempt-id', 'legacy-attempt']);
+  assert.equal(JSON.parse(retainedJob.stdout).attemptId, 'legacy-attempt', 'The retained legacy tool runs and inspects the registered attempt');
   await mkdir(join(legacyRuns, 'effects', 'not-a-key'));
   assert.ok(JSON.parse(cli(releaseB, 'inspect').stdout).blockers.some(blocker => blocker.state === 'unknown' && /External effect journal/u.test(blocker.reason)), 'Unreadable effect state blocks');
   await rm(dirname(workerRegistration), { recursive: true });

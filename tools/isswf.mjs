@@ -217,7 +217,7 @@ async function activity(project, store) {
     for (const entry of await readdir(dir)) {
       const record = await json(join(dir, entry));
       if (name === 'leases') { blockers.push({ lease: entry, state: 'active-or-unreconciled' }); continue; }
-      const action = `Reconcile under the original pin ${record.pin?.version ?? 'unknown'} (${record.pin?.runtimeId ?? 'unknown'}) before changing versions, using that retained runtime's own launcher`;
+      const action = `Reconcile under the original pin ${record.pin?.version ?? 'unknown'} (${record.pin?.runtimeId ?? 'unknown'}) before changing versions: run that runtime's retained tools directly from <store>/releases/${record.pin?.runtimeId ?? 'unknown'} (the current launcher no longer runs legacy tools)`;
       try {
         if (record.project !== project || !isAbsolute(record.store || '') || !idPattern.test(record.attemptId || '')) fail('Invalid worker registration');
         const runtime = await retained(store, record.pin);
