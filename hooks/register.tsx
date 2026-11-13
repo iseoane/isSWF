@@ -91,6 +91,9 @@ const usage = new Map<string, any>()
 const finishedRuns = new Map()
 const resolving = new Set<string>()
 let homes: Promise<{ claudeDir?: string; piDir?: string }> | undefined
+// The coordinator's own counts, refreshed after each Agents draw so drawing never waits on the transcript.
+let ownCounts: { skills: any; agentsReads: any } | undefined
+let countingOwn = false
 
 function scheduleRefresh($: EngineInterface) {
   debounce?.cancel()
@@ -379,7 +382,20 @@ export const register: Register = (on, options) => {
     )
     if (tab === 'agents') {
       // The coordinator is this session; delegated agents are the runs cited by the visible cards' records.
-      const own = countToolUses((await $.session.messages()).flatMap((m: any) => (m.role === 'assistant' ? m.toolUses : [])))
+      if (!countingOwn) {
+        countingOwn = true
+        void $.session.messages()
+          .then((messages: any[]) => {
+            const next = countToolUses(messages.flatMap((m: any) => (m.role === 'assistant' ? m.toolUses : [])))
+            if (JSON.stringify(next) !== JSON.stringify(ownCounts)) {
+              ownCounts = next
+              scheduleRefresh($)
+            }
+          })
+          .catch(() => {})
+          .finally(() => { countingOwn = false })
+      }
+      const own = ownCounts ?? { skills: undefined, agentsReads: undefined }
       const agents = cards.flatMap((i: any) => i.jobs.flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries
         .filter((x: any) => x.runs.length)
         .map((x: any) => ({ key: `${i.id}-${j.id}-${x.id}`, label: `${x.role === 'unknown' ? x.id : x.role} · ${i.id}/${j.id}/${x.id}`, runs: x.runs, found: x.runs.map((run: any) => usage.get(runKey(run))) })))))

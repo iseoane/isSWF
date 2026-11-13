@@ -307,7 +307,8 @@ test('review rounds within one brief are drawn separately; the brief revision sh
 })
 
 test('the agents tab lists the coordinator and each delegated run with skill and reference counts', ON, async ($, on) => {
-  const { clock } = engine(on, '/p')
+  // A completed job's run whose transcript is gone stays unknown rather than zero.
+  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J003/V001.md': '- Brief: I0046/jobs/J003/brief-r1.md\n- Verdict: pass\n- Run: claude agent=gone1\n' })
   await activate($)
   await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
   let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
@@ -317,6 +318,9 @@ test('the agents tab lists the coordinator and each delegated run with skill and
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /Agentes/)).toBe('[Agentes]')
   expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión)')
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /^skills: isswf-coordinator/)).toBe('skills: isswf-coordinator ×1')
   expect(await text(ui, /review\.md/)).toBe('referencias: .agents/roles/references/review.md ×2')
   expect(await text(ui, /^worker · I0046\/J004\/A001$/)).toBe('worker · I0046/J004/A001')
@@ -324,6 +328,8 @@ test('the agents tab lists the coordinator and each delegated run with skill and
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /worker\.md/)).toBe('referencias: .agents/roles/worker.md ×1')
+  expect(await text(ui, /^V001 · I0046\/J003\/V001$/)).toBe('V001 · I0046/J003/V001')
+  expect(await text(ui, /^skills: desconocido$/)).toBe('skills: desconocido')
   await ui.press({ key: 'tab-initiatives' })
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
