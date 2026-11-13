@@ -50,12 +50,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J003
 
 - Size: S
-- Status: in-review
+- Status: completed
 - Objective: Turn the J001 and J002 evidence into prioritized correction jobs by area.
 - Depends on: J001, J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Operator approves the correction jobs J004-J011 before any correction starts; started by the operator 2026-11-13 ("dale").
+- Next step: None. Operator approved J004-J011 on 2026-11-13 ("Adelante").
 
 ### Acceptance
 
@@ -71,12 +71,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J004
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Make isswf-setup's host-native path complete and route the Claude setup entry to it.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Worker implements J004; started by the operator 2026-11-13.
 
 ### Acceptance
 
@@ -92,8 +92,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Make every Claude plugin skill entry carry its shared skill's activation description.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
@@ -108,8 +108,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Make the repository instructions short, consistent and actionable.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
@@ -125,8 +125,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Make the coordinator skill findable and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
@@ -142,8 +142,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Make the review chain usable for every review shape and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
@@ -158,8 +158,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Make the worker and the other role profiles consistent and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
@@ -174,8 +174,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Make the host guides single-sourced, complete for bound reviews and equal for Pi and Claude.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
@@ -191,8 +191,8 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Objective: Give triage, interview and writing explicit inputs and consistent walkthroughs.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
-- Blocker: Awaiting operator approval of the job list and explicit start.
-- Next step: Operator approves J004-J011 and starts them.
+- Blocker: None.
+- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
 
 ### Acceptance
 
