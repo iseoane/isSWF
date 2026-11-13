@@ -9,6 +9,9 @@ Grounding (2026-11-13, origin/main 061d1c6):
   - Output in `graphify-out/` (`graph.json`, `graph.html`, `GRAPH_REPORT.md`); commit policy undocumented.
   - Freshness is not automatic. `graphify update .` re-extracts changed code with tree-sitter (no model cost). `graphify hook install` adds git post-commit/post-checkout hooks that run that update; re-run after upgrading (embedded interpreter path). A `--watch` mode rebuilds code instantly and only notifies for docs.
   - Non-code files (Markdown, PDFs, images) need a model re-pass (`--update`), which costs tokens and is not done by the git hooks.
+- Operator intent (2026-11-13): the index is chosen per repository, not globally. Setup recommends by content: documentation-heavy repositories such as isSWF (mostly Markdown) suit Graphify; code-centred ones such as agent-depot suit Codegraph. The operator decides.
+- Graphify first build: installing does not build a graph; one `graphify .` (or `/graphify .` in Claude) is required per repository. Code is parsed locally without a model; Markdown, PDFs and images go through the session's model and cost tokens.
+- Proposed Graphify default: initial build plus `graphify hook install` (code kept current for free on commit/checkout; re-run after upgrades); at coordinator activation, report Markdown changed since the last model pass and offer `--update` rather than running it. Watch mode is optional and only notifies for docs.
 - Decision to settle at start: for Graphify, which freshness strategy isSWF applies by default (proposed: git hooks for code, plus a coordinator check at activation that reports a stale docs graph and offers the model re-pass instead of running it), and whether `graphify-out/` is committed or ignored.
 - Out of scope: installing or upgrading any of these tools; host-global configuration changes without operator approval.
 Checks: focused setup tests, check-docs, Linux+Windows CI; Pi parity or documented gap.
