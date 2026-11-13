@@ -12,7 +12,7 @@ Read this quick reference for ordinary assignments. Inspect effective host setti
 | Worktree root | Read `git config --local --get isswf.worktreeRoot` in the canonical repository. Approved convention: sibling `<parent>/<repo>-worktrees/<feature>`, with a unique direct feature child. Validate the root and existing worktrees before authorized creation; bind the child's working directory explicitly. No global absolute root. |
 | Current objective, acceptance and budget | The selected initiative's canonical plan and current brief, or a bounded operator handoff. Prior grants and spent budgets do not restart. |
 
-`.factory/models.json` is legacy-only: it applies to explicitly selected legacy-executor assignments. Current Pi and Claude selections belong to their respective host-native configuration owners above. Do not copy native role defaults into JSON or treat offered presets/historical decisions as a second current selection. Preserve explicit project choices and unrelated settings.
+`.factory/models.json` is this checkout's historical legacy state only; it is not packaged and no legacy executor work can be selected (I0014). Legacy attempts are reconciled under their original pinned runtime. Current Pi and Claude selections belong to their respective host-native configuration owners above. Do not copy native role defaults into JSON or treat offered presets/historical decisions as a second current selection. Preserve explicit project choices and unrelated settings.
 
 ## Project choices and boundaries
 
