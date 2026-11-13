@@ -35,10 +35,15 @@
 - Findings against the objective and each acceptance criterion:
 - Evidence and checks:
 
+## Aggregate
+
+- Aggregate verdict, copied verbatim from the reviewer's report header:
+
 ## Limits and return
 
 - Unreviewed areas and evidence limits:
 - Required corrections or unresolved questions:
 - Return this artifact to the coordinator. Do not edit the candidate or disposition your own findings.
+- Coordinator override, recorded afterwards by the coordinator and never written into the verdicts above: `<decision, reason, evidence and authority, or None.>`
 - Finding resolutions, recorded afterwards by the coordinator: `<finding ID → fixed, wrong, intentional or not material, with the reason>`.
 - A changed candidate requires a new review identifying its exact base and candidate.
