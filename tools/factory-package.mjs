@@ -102,7 +102,7 @@ const expectedSkills = [
   "./.agents/skills/isswf-setup",
 ];
 
-const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "hooks/hooks.json", "hooks/register.tsx", "hooks/coordinator-tools.tsx", "types/index.d.ts", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/host-portability.md", "docs/source-activation.md", "docs/issue-intake.md"];
+const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "hooks/hooks.json", "hooks/register.tsx", "types/index.d.ts", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/host-portability.md", "docs/source-activation.md", "docs/issue-intake.md"];
 
 function fail(message) {
   throw new Error(message);

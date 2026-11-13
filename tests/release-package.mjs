@@ -85,8 +85,8 @@ try {
   for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.deepEqual(await readFile(join(releaseA, 'tools', name)), await readFile(join(source, 'tools', name)), `${name} ships in the release`);
   assert.equal(rootManifest.version, plugin.version);
   // The opt-in Claude pane ships its hooks module and state contract at the plugin version; its tests stay out.
-  for (const path of ['hooks/hooks.json', 'hooks/register.tsx', 'hooks/coordinator-tools.tsx', 'types/index.d.ts']) assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), `${path} ships in the release`);
-  for (const path of ['hooks/register.test.tsx', 'hooks/coordinator-tools.test.tsx']) assert.equal(receiptA.files[path], undefined, `${path} is not packaged`);
+  for (const path of ['hooks/hooks.json', 'hooks/register.tsx', 'types/index.d.ts']) assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), `${path} ships in the release`);
+  assert.equal(receiptA.files['hooks/register.test.tsx'], undefined, 'Pane tests are not packaged');
   const coordinatorSkill = await readFile(join(releaseA, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
   const loadedReleaseVersion = coordinatorSkill.match(/^isSWF loaded-resource release version: (\d+\.\d+\.\d+)$/mu)?.[1];
   assert.equal(loadedReleaseVersion, rootManifest.version, 'Release-loaded skill identity must match the packaged manifest version');
