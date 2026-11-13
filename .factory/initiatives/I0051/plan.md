@@ -71,29 +71,35 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J004
 
 - Size: M
-- Status: in-progress
+- Status: completed
 - Objective: Make isswf-setup's host-native path complete and route the Claude setup entry to it.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J004; started by the operator 2026-11-13.
+- Next step: None.
 
 ### Acceptance
 
 - The normal host-native path contains (or links within the normal path) the worktree policy, tracking and Git-ignore check, readiness and the `configured`/`partial`/`blocked` report; all legacy material sits under one explicit legacy heading; state paths use the selected state directory.
 - `skills/isswf-setup/SKILL.md` uses the shared description and routes to host-native setup unless the operator explicitly selects a legacy runtime installation.
-- The telemetry opt-in states its dirty-state rule once; maintainer-only rules move to AGENTS.md or development.md; the Engram/Codegraph template keeps a single summary line.
+- The telemetry opt-in states its dirty-state rule once; maintainer-only rules are reworded in place as rules for developing isSWF itself (moving them to AGENTS.md or development.md is handed to J006, coordinator decision 2026-11-13 after review R1); the Engram/Codegraph template keeps a single summary line.
 - Tests: host-portability, worktree-location, host-discovery (CI), release-package; check-docs.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited): commit e40cde6; check-docs, host-portability, worktree-location, release-package pass (coordinator rerun); host-discovery left to CI.
+- Review R1 (native isswf-reviewer, model inherited, diff eb38579..e40cde6 supplied inline): verdict as reported: "Aggregate: inconclusive. Standards passes. Spec is inconclusive only because the "maintainer-only rules" acceptance clause wasn't met as the plan words it". Findings: 1 blocking (acceptance clause 3b unmet and unrecorded), 1 suggestion (legacy template source).
+- Coordinator decision (not a verdict change): clause 3b amended above, moving the relocation of maintainer-only rules to J006; suggestion applied (templates come from the pinned source in legacy mode). No re-review: the amendment changes no candidate text, and the applied fix is one parenthetical.
 
 ## J005
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Make every Claude plugin skill entry carry its shared skill's activation description.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J005.
 
 ### Acceptance
 
@@ -113,7 +119,7 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 
 ### Acceptance
 
-- AGENTS.md: delegation rule conditioned on the coordinator trigger; one Engram/Codegraph copy; check commands state the focused-first condition before the commands; delegation, verification and role-selection restatements reduced to pointers; a path for requests with no initiative; operator-only and filler lines removed. Token cost reported before and after.
+- AGENTS.md: delegation rule conditioned on the coordinator trigger; one Engram/Codegraph copy; check commands state the focused-first condition before the commands; delegation, verification and role-selection restatements reduced to pointers; a path for requests with no initiative; operator-only and filler lines removed; rules for developing isSWF itself that isswf-setup states in place (handed over from J004) are moved here or to development.md when they are not needed in the distributed skill. Token cost reported before and after.
 - REVIEW.md: the wording-finding cap excludes changes whose objective is documentation or instructions; the person-approval list names feature-delivery.md and project-release.
 - project-release: a stop row for a verified candidate without a publication grant; the Windows extraction note inside the extraction step; each reference paired with its operation; the local host-checks command named.
 - Tests: documentation, host-portability, platform-package; check-docs.
