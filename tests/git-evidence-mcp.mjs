@@ -148,7 +148,7 @@ try {
       assert.deepEqual(result.tools.map(tool => tool.name), ['identity', 'diff', 'content']);
       assert.deepEqual(result.tools[0].inputSchema, { type: 'object', properties: {}, additionalProperties: false });
       assert.deepEqual(result.tools[1].inputSchema, { type: 'object', properties: { chunk: { type: 'integer', minimum: 1 } }, additionalProperties: false });
-      assert.deepEqual(result.tools[2].inputSchema, { type: 'object', properties: { slot: { type: 'string', enum: ['base', 'candidate'] }, path: { type: 'string' } }, required: ['slot', 'path'], additionalProperties: false });
+      assert.deepEqual(result.tools[2].inputSchema, { type: 'object', properties: { slot: { type: 'string', enum: ['base', 'candidate'] }, path: { type: 'string' }, offset: { type: 'integer', minimum: 0 }, length: { type: 'integer', minimum: 1 } }, required: ['slot', 'path'], additionalProperties: false });
       for (const tool of result.tools) assert.equal(typeof tool.description, 'string');
     });
   });
@@ -201,6 +201,12 @@ try {
       assert.equal(JSON.parse(binary.content[0].text).contentTextEncoding, 'unavailable-non-utf8');
       assert.equal(JSON.parse(binary.content[0].text).content, 'AP8K');
       assert.equal(binary.content.length, 1);
+      const ranged = await client.call('content', { slot: 'candidate', path: 'tracked.txt', offset: 7, length: 4 });
+      assert.equal(JSON.parse(ranged.content[0].text).contentIntegrity, 'verified');
+      assert.deepEqual(JSON.parse(ranged.content[0].text).range, { offset: 7, length: 4 });
+      assert.equal(ranged.content[1].text, 'this', 'a byte range returns exactly those committed bytes');
+      const halfRange = await client.call('content', { slot: 'candidate', path: 'tracked.txt', offset: 7 });
+      assert.equal(halfRange.isError, true, 'offset and length must be given together');
       const absent = await client.call('content', { slot: 'candidate', path: 'absent.txt' });
       assert.equal(absent.isError, undefined);
       assert.equal(JSON.parse(absent.content[0].text).status, 'absent');
