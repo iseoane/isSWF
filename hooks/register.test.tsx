@@ -73,6 +73,10 @@ function engine(on: any, cwd: string, records = RECORDS) {
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
+  on('session.messages', () => ({ value: [
+    { role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Skill', input: { skill: 'isswf:isswf-coordinator' } }, { tool_use_id: 't2', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }, { tool_use_id: 't3', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }] },
+    { role: 'user', text: 'x', toolUses: [{ tool_use_id: 't4', tool: 'Skill', input: { skill: 'not-counted' } }] },
+  ] }))
   return { clock: mock.clock(on), seen, settings }
 }
 
@@ -299,5 +303,30 @@ test('review rounds within one brief are drawn separately; the brief revision sh
   expect(await text(ui, /^coordinator$/)).toBe('coordinator')
   expect(await text(ui, /^r1·R1$/)).toBe('r1·R1')
   expect(await text(ui, /^r2·R1$/)).toBe('r2·R1')
+  await ui.unmount()
+})
+
+test('the agents tab lists the coordinator and each delegated run with skill and reference counts', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /Iniciativas/)).toBe('[Iniciativas]')
+  await ui.press({ key: 'tab-agents' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /Agentes/)).toBe('[Agentes]')
+  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión)')
+  expect(await text(ui, /^skills: isswf-coordinator/)).toBe('skills: isswf-coordinator ×1')
+  expect(await text(ui, /review\.md/)).toBe('referencias: .agents/roles/references/review.md ×2')
+  expect(await text(ui, /^worker · I0046\/J004\/A001$/)).toBe('worker · I0046/J004/A001')
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /worker\.md/)).toBe('referencias: .agents/roles/worker.md ×1')
+  await ui.press({ key: 'tab-initiatives' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
   await ui.unmount()
 })

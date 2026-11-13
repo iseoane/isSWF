@@ -2,13 +2,14 @@ import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import { joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
-import { resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
+import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
 const PINNED = { plugin: 'isswf', key: 'pinned' } as const
 const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
 const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
+const TAB = { plugin: 'isswf', key: 'tab' } as const
 const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
@@ -36,6 +37,9 @@ const LABELS = {
     unparsed: 'plan no legible',
     completed: 'completados',
     inactive: 'No activas',
+    tabs: { initiatives: 'Iniciativas', agents: 'Agentes' } as Record<string, string>,
+    coordinator: 'coordinador (esta sesión)',
+    noAgents: 'sin agentes delegados en las iniciativas visibles',
   },
   en: {
     notActive: 'The isSWF coordinator is not active in this session.',
@@ -59,6 +63,9 @@ const LABELS = {
     unparsed: 'plan unreadable',
     completed: 'completed',
     inactive: 'Inactive',
+    tabs: { initiatives: 'Initiatives', agents: 'Agents' } as Record<string, string>,
+    coordinator: 'coordinator (this session)',
+    noAgents: 'no delegated agents in the visible initiatives',
   },
 }
 type Labels = typeof LABELS.en
@@ -202,6 +209,13 @@ function usageLines(entry: any, t: Labels) {
       `skills: ${countKeys(found.map((u: any) => u.skills)) ?? t.unknown} · ${t.references}: ${countKeys(found.map((u: any) => u.agentsReads)) ?? t.unknown}`,
     ],
   }
+}
+
+// `name ×n` pairs, most used first; unknown when the run's transcript could not be read.
+function tally(map: any, t: Labels) {
+  if (!map || typeof map !== 'object') return t.unknown
+  const pairs = Object.entries(map).sort((a: any, b: any) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  return pairs.length ? pairs.map(([name, n]) => `${name} ×${n}`).join(', ') : '0'
 }
 
 // Review rounds are numbered within a brief revision; the revision is shown only when the job has several.
@@ -349,10 +363,48 @@ export const register: Register = (on, options) => {
     })
 
     const { title } = await paneSpec($)
-    return (
+    const { value: tab = 'initiatives' } = await $.state.get(TAB)
+    const header = (
       <Box flexDirection="column">
         <Text bold color="merged">{title}</Text>
+        <Box flexDirection="row" gap={1}>
+          {['initiatives', 'agents'].map(name => (
+            <Button key={`tab-${name}`} plain onPress={() => $.state.set(TAB, name).then(() => $.ui.invalidate('ui.render'))}>
+              <Text bold={tab === name} color={tab === name ? 'claude' : undefined} dimColor={tab !== name}>{tab === name ? `[${t.tabs[name]}]` : ` ${t.tabs[name]} `}</Text>
+            </Button>
+          ))}
+        </Box>
         <Text color="merged">{'═'.repeat(Math.max(1, e.props.bodyColumns ?? 40))}</Text>
+      </Box>
+    )
+    if (tab === 'agents') {
+      // The coordinator is this session; delegated agents are the runs cited by the visible cards' records.
+      const own = countToolUses((await $.session.messages()).flatMap((m: any) => (m.role === 'assistant' ? m.toolUses : [])))
+      const agents = cards.flatMap((i: any) => i.jobs.flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries
+        .filter((x: any) => x.runs.length)
+        .map((x: any) => ({ key: `${i.id}-${j.id}-${x.id}`, label: `${x.role === 'unknown' ? x.id : x.role} · ${i.id}/${j.id}/${x.id}`, runs: x.runs, found: x.runs.map((run: any) => usage.get(runKey(run))) })))))
+      // Every listed run is resolved here, including completed jobs the initiatives tab leaves folded.
+      resolveUsage($, agents.flatMap((a: any) => a.runs), snapshot.project)
+      const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
+      const row = (key: string, label: string, skills: any, reads: any) => (
+        <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
+          <Text bold color="claude">{label}</Text>
+          <Text wrap="wrap">skills: {tally(skills, t)}</Text>
+          <Text wrap="wrap">{t.references}: {tally(reads, t)}</Text>
+        </Box>
+      )
+      return (
+        <Box flexDirection="column">
+          {header}
+          {row('coordinator', t.coordinator, own.skills, own.agentsReads)}
+          {agents.length === 0 && <Text dimColor>{t.noAgents}</Text>}
+          {agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.skills : undefined)), merge(a.found.map((u: any) => u?.found ? u.agentsReads : undefined))))}
+        </Box>
+      )
+    }
+    return (
+      <Box flexDirection="column">
+        {header}
         {unopenedCards.map((u: any) => (
           <Box borderStyle="round" borderColor="subtle" flexDirection="column">
             <Text bold color="claude">● {u.id} · {u.title}</Text>
