@@ -204,6 +204,14 @@ function usageLines(entry: any, t: Labels) {
   }
 }
 
+// Review rounds are numbered within a brief revision; the revision is shown only when the job has several.
+function roundLabel(job: any, round: any) {
+  const briefs = new Set(job.rounds.map((r: any) => r.round))
+  const review = `R${round.reviewRound}`
+  if (round.round === 'unknown') return `r?·${review}`
+  return briefs.size > 1 ? `r${round.round}·${review}` : review
+}
+
 function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
   const resolved = usageLines(entry, t)
   const model = resolved.model
@@ -328,7 +336,7 @@ export const register: Register = (on, options) => {
       return (
         <Box flexDirection="column">
           <Box flexDirection="row" gap={1} alignItems="center">
-            <Text dimColor>{round.round === 'unknown' ? 'R?' : `R${round.round}`}</Text>
+            <Text dimColor>{roundLabel(job, round)}</Text>
             {pills.map(pill)}
           </Box>
           {pills.filter((p: ReturnType<typeof pillView>) => expanded.includes(p.key)).map((p: ReturnType<typeof pillView>) => (

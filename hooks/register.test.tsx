@@ -279,3 +279,25 @@ for (const command of [
     await ui.unmount()
   })
 }
+
+test('review rounds within one brief are drawn separately; the brief revision shows only when a job has several', ON, async ($, on) => {
+  engine(on, '/p', {
+    ...RECORDS,
+    'I0046/jobs/J004/A006.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: complete\n',
+    'I0048/jobs/J001/brief-r1.md': 'brief',
+    'I0048/jobs/J001/brief-r2.md': 'brief',
+    'I0048/jobs/J001/V001.md': '- Brief: I0048/jobs/J001/brief-r1.md\n- Verdict: fail\n',
+    'I0048/jobs/J001/V002.md': '- Brief: I0048/jobs/J001/brief-r2.md\n- Verdict: pass\n',
+  })
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0048' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^R1$/)).toBe('R1')
+  expect(await text(ui, /^R2$/)).toBe('R2')
+  expect(await text(ui, /^R6$/)).toBe('R6')
+  expect(await text(ui, /^coordinator$/)).toBe('coordinator')
+  expect(await text(ui, /^r1·R1$/)).toBe('r1·R1')
+  expect(await text(ui, /^r2·R2$/)).toBe('r2·R2')
+  await ui.unmount()
+})
