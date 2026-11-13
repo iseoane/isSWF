@@ -10,6 +10,9 @@ const PINNED = { plugin: 'isswf', key: 'pinned' } as const
 const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
 const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
 const TAB = { plugin: 'isswf', key: 'tab' } as const
+const RESUME = { plugin: 'isswf', key: 'resumeOnQuota' } as const
+const RESUME_THRESHOLD = 90
+const RESUME_DELAY_MS = 5 * 60_000
 const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
@@ -38,6 +41,10 @@ const LABELS = {
     completed: 'completados',
     inactive: 'No activas',
     tabs: { initiatives: 'Iniciativas', agents: 'Agentes' } as Record<string, string>,
+    resume: 'retomar tras cuota',
+    on: 'sí',
+    off: 'no',
+    resumeAt: 'a las',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'sin agentes delegados en las iniciativas visibles',
   },
@@ -64,6 +71,10 @@ const LABELS = {
     completed: 'completed',
     inactive: 'Inactive',
     tabs: { initiatives: 'Initiatives', agents: 'Agents' } as Record<string, string>,
+    resume: 'resume after quota',
+    on: 'on',
+    off: 'off',
+    resumeAt: 'at',
     coordinator: 'coordinator (this session)',
     noAgents: 'no delegated agents in the visible initiatives',
   },
@@ -94,6 +105,37 @@ let homes: Promise<{ claudeDir?: string; piDir?: string }> | undefined
 // The coordinator's own counts, refreshed after each Agents draw so drawing never waits on the transcript.
 let ownCounts: { skills: any; agentsReads: any } | undefined
 let countingOwn = false
+// One resume per usage window: the timer lives only in this session, and `resumeFor` is the window's reset time.
+let resumeTimer: Timer | undefined
+let resumeFor: string | undefined
+let resumeAtMs: number | undefined
+
+function cancelResume() {
+  resumeTimer?.cancel()
+  resumeTimer = resumeFor = resumeAtMs = undefined
+}
+
+// Runs after the draw: at 90% or more of the five-hour window with a job in progress, schedule one resume
+// prompt for the window's reset plus five minutes. The prompt asks the coordinator to reconcile, not to act.
+function checkResume($: EngineInterface, cards: any[]) {
+  void (async () => {
+    const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
+    const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status === 'in-progress').map((j: any) => `${i.id}/${j.id}`))
+    if (!window?.resetsAt || window.percentUsed < RESUME_THRESHOLD || !work.length || resumeFor === window.resetsAt) return
+    const at = Date.parse(window.resetsAt) + RESUME_DELAY_MS
+    if (!Number.isFinite(at)) return
+    cancelResume()
+    resumeFor = window.resetsAt
+    resumeAtMs = at
+    resumeTimer = $.clock.after(Math.max(0, at - (await $.clock.now())), () => {
+      resumeTimer = undefined
+      void $.prompt.submit({
+        text: `isSWF: the five-hour usage window has reset. Work was in progress on ${work.join(', ')}. Load the isswf-coordinator skill, reconcile state first (isswf-status, open PRs, running reviews), then continue only the work already authorised; do not start new jobs without the operator's go.`,
+      })
+    })
+    scheduleRefresh($)
+  })().catch(() => {})
+}
 
 function scheduleRefresh($: EngineInterface) {
   debounce?.cancel()
@@ -367,9 +409,19 @@ export const register: Register = (on, options) => {
 
     const { title } = await paneSpec($)
     const { value: tab = 'initiatives' } = await $.state.get(TAB)
+    const { value: resumeOn = false } = await $.state.get(RESUME)
+    if (resumeOn) checkResume($, cards)
+    else if (resumeTimer || resumeFor) cancelResume()
+    const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
+    const resumeText = `⏰ ${t.resume}: ${resumeOn ? t.on : t.off}${resumeOn && resumeAtMs !== undefined ? ` · ${t.resumeAt} ${new Date(resumeAtMs).toTimeString().slice(0, 5)}` : ''}`
     const header = (
       <Box flexDirection="column">
-        <Text bold color="merged">{title}</Text>
+        <Box flexDirection="row" gap={2}>
+          <Text bold color="merged">{title}</Text>
+          <Button key="resume-toggle" plain onPress={toggleResume}>
+            <Text color={resumeOn ? 'success' : undefined} dimColor={!resumeOn}>{resumeText}</Text>
+          </Button>
+        </Box>
         <Box flexDirection="row" gap={1}>
           {['initiatives', 'agents'].map(name => (
             <Button key={`tab-${name}`} plain onPress={() => $.state.set(TAB, name).then(() => $.ui.invalidate('ui.render'))}>

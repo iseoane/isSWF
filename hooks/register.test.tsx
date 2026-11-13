@@ -336,3 +336,50 @@ test('the agents tab lists the coordinator and each delegated run with skill and
   expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
   await ui.unmount()
 })
+
+for (const [percentUsed, expected] of [[92, 1], [50, 0]] as const) {
+  test(`resume after quota: ${percentUsed}% of the five-hour window ${expected ? 'schedules one' : 'schedules no'} resume prompt`, ON, async ($, on) => {
+    const { clock } = engine(on, '/p')
+    const prompts: string[] = []
+    on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed, resetsAt: new Date(10 * 60_000).toISOString() }] } }))
+    on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /^⏰/)).toBe('⏰ retomar tras cuota: no')
+    await ui.press({ key: 'resume-toggle' })
+    await ui.unmount()
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    await clock.advance(1000)
+    await ui.unmount()
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /^⏰/)).toMatch(expected ? /^⏰ retomar tras cuota: sí · a las \d\d:\d\d$/ : /^⏰ retomar tras cuota: sí$/)
+    await ui.unmount()
+    // Repeated draws in the same window schedule nothing more.
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    await ui.unmount()
+    await clock.advance(20 * 60_000)
+    expect(prompts.length).toBe(expected)
+    if (expected) expect(prompts[0]).toContain('I0046/J004')
+  })
+}
+
+test('switching resume off cancels a scheduled prompt', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95, resetsAt: new Date(10 * 60_000).toISOString() }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'resume-toggle' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await clock.advance(1000)
+  await ui.press({ key: 'resume-toggle' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.unmount()
+  await clock.advance(20 * 60_000)
+  expect(prompts.length).toBe(0)
+})
