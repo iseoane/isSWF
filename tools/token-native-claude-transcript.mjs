@@ -6,24 +6,18 @@ import { lstat, open, readdir, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { FormatError, LIMITS, parseTranscript, safe, single } from './token-native-transcript-core.mjs';
+
+export { LIMITS, parseTranscript };
 
 export const ISSUE_URL = 'https://github.com/iseoane/isSWF/issues';
-const MAX_LINE = 4 * 1024 * 1024;
-export const LIMITS = Object.freeze({ file: 64 * 1024 * 1024, total: 256 * 1024 * 1024, entries: 200_000, subagents: 99 });
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
 const AGENT_FILE = /^agent-([A-Za-z0-9_-]{1,128})\.jsonl$/u;
 const SAFE = /^[A-Za-z0-9][A-Za-z0-9._:+-]{0,127}$/u;
 const RECOGNISED_VERSION = /^2\.1\.\d+$/u;
-const USAGE_KEYS = [['input', 'input_tokens'], ['output', 'output_tokens'], ['cacheRead', 'cache_read_input_tokens'], ['cacheWrite', 'cache_creation_input_tokens']];
 const hash = value => createHash('sha256').update(String(value)).digest('hex').slice(0, 16);
-const safe = value => typeof value === 'string' && SAFE.test(value) ? value : null;
-const integer = value => Number.isSafeInteger(value) && value >= 0;
 // Checks that indicate an unrecognised transcript format (as opposed to local file or size problems).
 const FORMAT_CHECKS = new Set(['malformed-line', 'entry-not-object', 'missing-message', 'missing-usage', 'missing-request-id', 'invalid-usage-counter', 'conflicting-duplicate-request', 'cross-file-conflicting-request']);
-
-class FormatError extends Error {
-  constructor(check, versions = new Set()) { super(check); this.versions = versions; }
-}
 const fail = check => { throw new FormatError(check); };
 
 /** Claude stores each project under its absolute path with every non-alphanumeric character replaced by '-'. */
@@ -40,56 +34,6 @@ async function readBounded(path, budget) {
   const handle = await open(path, 'r');
   try { return (await handle.readFile()).toString('utf8'); } finally { await handle.close(); }
 }
-
-/** Parses one transcript into per-request usage. Throws FormatError carrying a fixed check name only. */
-export function parseTranscript(content, budget = { entries: 0 }) {
-  const versions = new Set();
-  try { return parseLines(content, budget, versions); } catch (error) {
-    if (error instanceof FormatError) throw new FormatError(error.message, versions);
-    throw error;
-  }
-}
-
-function parseLines(content, budget, versions) {
-  const lines = content.split('\n');
-  const trailing = lines.pop();
-  const requests = new Map(), models = new Set(), efforts = new Set();
-  let trailingIncomplete = false;
-  const handle = (line, last) => {
-    if (line.length === 0) return;
-    if (Buffer.byteLength(line) > MAX_LINE) fail('line-size-limit');
-    if (++budget.entries > (budget.maxEntries ?? LIMITS.entries)) fail('entry-limit');
-    let entry;
-    try { entry = JSON.parse(line); } catch {
-      if (last) { trailingIncomplete = true; return; }
-      fail('malformed-line');
-    }
-    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) fail('entry-not-object');
-    if (typeof entry.version === 'string') versions.add(entry.version);
-    if (entry.type !== 'assistant') return;
-    const message = entry.message;
-    if (!message || typeof message !== 'object' || Array.isArray(message)) fail('missing-message');
-    if (message.model === '<synthetic>') return;
-    const usage = message.usage;
-    if (!usage || typeof usage !== 'object' || Array.isArray(usage)) fail('missing-usage');
-    if (typeof entry.requestId !== 'string' || entry.requestId.length === 0 || entry.requestId.length > 256) fail('missing-request-id');
-    const counters = {};
-    for (const [target, source] of USAGE_KEYS) {
-      if (!integer(usage[source])) fail('invalid-usage-counter');
-      counters[target] = usage[source];
-    }
-    const previous = requests.get(entry.requestId);
-    if (previous && USAGE_KEYS.some(([key]) => previous[key] !== counters[key])) fail('conflicting-duplicate-request');
-    requests.set(entry.requestId, counters);
-    models.add(safe(message.model) ?? 'unknown');
-    efforts.add(safe(entry.effort) ?? 'unknown');
-  };
-  for (const line of lines) handle(line, false);
-  if (trailing !== undefined) handle(trailing, true);
-  return { requests, models, efforts, versions, trailingIncomplete };
-}
-
-const single = values => values.size === 1 ? [...values][0] : values.size === 0 ? 'unknown' : 'mixed';
 
 async function latestSession(dir) {
   let best = null, names;

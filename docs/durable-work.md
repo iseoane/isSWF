@@ -52,6 +52,10 @@ The dispatch grant comes from a trusted operator conversation or record identifi
 
 The plan links to the job and its current brief revision. The attempt records the brief, spec, plan, profile, and skills it used, plus its input checkpoint and target base. The reviewer records the exact base and candidate. Do not put a would-be commit SHA in the document that is itself being committed. Record that checkpoint in the dispatch or a later artifact.
 
+### Record the launch identity
+
+After the writer stops, the coordinator adds one fixed `Run:` line to each attempt (`A<nnn>`) and review (`V<nnn>`) record for the host launch that produced it: `- Run: claude agent=<id>` for a native Claude Code Agent call, `- Run: claude session=<id>` for a `claude -p` process (the session ID from its output), or `- Run: pi child=<id>` for a `pi-subagents` child. Copy the ID literally from the launch tool result; when it is unknown, omit the line rather than guess. A record produced by several runs has one line per run. The line is provenance only: do not interpret it or make extra model calls to obtain it.
+
 ## Workspace policy and retained evidence
 
 The project's approved writing-workspace policy and the readiness of its native binding are separate facts. Carry both into each assignment; an existing `isswf.worktreeRoot` is only the location choice. Before edits, verify the feature branch, assigned cwd, base/HEAD and exclusive writer owner. Separate-worktree mode requires a host-supported binding to the approved checkout; shared-sequential mode permits only one writer at a time on its dedicated feature branch. Missing required binding blocks the writer without an implicit checkout, root, host, dispatcher or serialization fallback.

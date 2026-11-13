@@ -95,14 +95,14 @@ const taskPayloadPaths = {
   interview: [".agents/skills/isswf-interview/SKILL.md"],
   howto: [".agents/skills/isswf-howto/SKILL.md"],
 };
-const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
+const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-snapshot.mjs", "isswf-snapshot-core.mjs", "isswf-run-usage-core.mjs", "isswf-prices.mjs", "token-native-transcript-core.mjs", "isswf-plan-core.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
   "./.agents/skills/isswf-coordinator",
   "./.agents/skills/isswf-setup",
 ];
 
-const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/models.json", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/model-routing.md", "docs/host-portability.md", "docs/source-activation.md", "docs/local-worker-lifecycle.md", "docs/issue-intake.md"];
+const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/models.json", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "hooks/hooks.json", "hooks/register.tsx", "types/index.d.ts", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/model-routing.md", "docs/host-portability.md", "docs/source-activation.md", "docs/local-worker-lifecycle.md", "docs/issue-intake.md"];
 
 function fail(message) {
   throw new Error(message);

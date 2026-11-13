@@ -60,6 +60,8 @@ For Engram or Codegraph use, follow the coordinator's canonical scoped guidance;
 
 For every setup running in Pi, check `pi-subagents` before declaring native delegation ready. If it is missing, explain that it must be installed for native isSWF delegation and show the exact pinned command under [install and verify the prerequisite](../../hosts/pi.md#install-and-verify-the-prerequisite). Install only when the operator's current authorization covers it; otherwise leave that capability pending. Verify package registration, session loading and role discovery separately, without launching a model. Do not omit the requirement or its installation instructions because role defaults already exist.
 
+For every setup running in Claude Code, when reporting plugin readiness, tell the operator that the optional initiatives pane is off by default: they can turn it on by enabling **Initiatives pane** for the `isswf` plugin in `/config` and reopen it with `/isswf-initiatives`. Point to "Install in Claude Code" in the isSWF installation guide (`docs/en/installation.md`) for details instead of copying them. Do not enable it on the operator's behalf.
+
 ### Explicit host-native package update
 
 This procedure applies only when the operator explicitly asks to update the installed isSWF host package/plugin. A development request, version notice, setup inspection, or request to show a proposal is not permission to run the host manager. Do not install, update, remove or delete anything during development or while only preparing a proposal.

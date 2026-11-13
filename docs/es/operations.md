@@ -16,12 +16,45 @@ Ejecuta desde la raíz del repositorio de isSWF:
 
 ```bash
 node tools/isswf-status.mjs --project /absolute/project --initiative I0001
+node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
-El primer comando lee el plan de una iniciativa y sus registros de apoyo. El segundo inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
+El primer comando lee el plan de una iniciativa y sus registros de apoyo. El segundo muestra una instantánea JSON de todas las iniciativas abiertas; consulta [instantánea de iniciativas](#instantánea-de-iniciativas). El tercero inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
 
 El panel puede guardar notas locales si las evidencias mostradas siguen coincidiendo. Una nota no se aplica automáticamente, no autentica la aceptación del operador ni permite despachar trabajo. No expongas el panel públicamente ni incluyas secretos en sus registros.
+
+## Instantánea de iniciativas
+
+`tools/isswf-snapshot.mjs` lee todas las iniciativas del directorio de estado activo (`.isswf` o `.factory`) y muestra un único objeto JSON con `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` y `skipped`. Es de solo lectura y no llama a ningún modelo ni a la red. Envuelve `tools/isswf-snapshot-core.mjs`, que no importa nada de Node y hace todas las lecturas, incluida la elección del directorio de estado, a través de un objeto inyectado con `exists`, `list`, `stat` y `read` asíncronos. Los entornos sin módulos integrados de Node importan el núcleo y llaman a `readSnapshot(project, fs)` con su propio `fs`. El `readSnapshot(project, fs)` del envoltorio de Node usa Node como `fs` por defecto y además aplica la comprobación de directorio regular de `tools/project-state.mjs`, que el núcleo no puede hacer.
+
+- Se omiten las iniciativas cuyos trabajos están todos en `completed`. Las que tienen todos sus trabajos en `pending` y sin registros aparecen en `unopened` solo con `id` y `title`.
+- Las demás iniciativas tienen `id`, `title`, `type`, `status` (`parsed` o `unparsed`) y `jobs`. Un plan que rechaza el analizador de planes queda como `unparsed` y sin trabajos.
+- Cada trabajo tiene `id`, `status`, `objective`, `dependsOn`, `issues` y `prs` (números citados en su siguiente paso, sus evidencias o `delivery.md`), `recordCount` y `rounds`. Las rondas siguen los archivos `brief-r<n>.md`; cada registro va a la ronda del brief que cita; si no cita ninguno, a la última, y si no hay ninguna, a la ronda `unknown`.
+- Cada registro `A<nnn>`/`V<nnn>` tiene `id`, `kind` (`attempt` o `review`), `role`, `model`, `modelSource` (`actual`, `requested`, `approved` o `stated`), `effort`, `verdict` (`passed`, `changes-requested` o `running`), `round` y `roundSource` (`stated` o `latest`). Los valores que el registro no indica explícitamente son `unknown`.
+- Cada entrada tiene además `runs`: un `{ host, kind, id }` por cada [línea `Run:`](../durable-work.md#record-the-launch-identity) del registro (`claude`/`agent`, `claude`/`session` o `pi`/`child`), o una lista vacía. Las líneas mal formadas se ignoran. Este campo se añadió sin cambiar `schemaVersion: 1`, porque los campos existentes no cambian.
+- Los veredictos de revisión se leen de etiquetas en inglés o en español (`aggregate`/`agregado`, `verdict`/`veredicto`, `changes requested`/`cambios pedidos` o `cambios solicitados`).
+- Los archivos de más de 1 MB o ilegibles se enumeran en `skipped`; un registro defectuoso nunca interrumpe la instantánea. Que existan ambos directorios de estado o ninguno, o que falte el directorio `initiatives`, es un error.
+
+### Consumo de cada ejecución
+
+`--usage` añade `usage` a cada entrada de `runs`; sin esa opción, la instantánea no abre ninguna transcripción:
+
+```bash
+node tools/isswf-snapshot.mjs --project /absolute/project --usage
+```
+
+Lee las transcripciones locales que ya escriben los hosts, en solo lectura y sin llamar a modelos. La lógica está en `tools/isswf-run-usage-core.mjs`, que no importa nada de Node; los entornos sin módulos integrados de Node llaman a `addRunUsage(snapshot, { fs, claudeDir, piDir, cache })` o a `resolveRunUsage(run, { fs, claudeDir, piDir, project, cache })` con su propio `fs`. El envoltorio usa `CLAUDE_CONFIG_DIR` o `~/.claude`, y `PI_CODING_AGENT_DIR` o `~/.pi/agent`.
+
+- `claude agent=<id>`: `projects/*/*/subagents/agent-<id>.jsonl` dentro del directorio de Claude. `claude session=<id>`: `projects/*/<id>.jsonl`. Se buscan todos los directorios de proyecto, así que también se encuentran las ejecuciones lanzadas desde un worktree.
+- `pi child=<id>`: el único `<id>_*_transcript.jsonl` de `sessions/*/subagent-artifacts` dentro del directorio de Pi o de `.pi/subagents/artifacts` del proyecto. No se encuentran los hijos escritos en el directorio temporal de artefactos de Pi.
+- `usage` tiene `found`, `finished`, `model` (`mixed` si hay varios), `tokens` (`input`, `output`, `cacheRead`, `cacheWrite`), `durationMs` (de la primera a la última marca de tiempo de la transcripción), `skills` y `agentsReads` (recuentos por nombre de skill y por ruta desde `.agents/`).
+- `costUsd` valora `tokens` con `tools/isswf-prices.mjs` (precios de la API propia de Anthropic que figuran en la referencia claude-api de Claude Code, con fecha 2026-11-03; escrituras de caché de 5 minutos; Claude Haiku 5.5 a su tarifa para prompts de hasta 100K tokens, por lo que los más largos quedan infravalorados). Es `unknown` cuando `model` no es una entrada exacta de esa tabla, lo que incluye los modelos de Pi y los que no son de Anthropic, `mixed` y `unknown`. Una ejecución con `tokensPartial` y coste conocido añade `costPartial: true`. Es una estimación a partir de los contadores registrados, no facturación.
+- Los tokens de Claude salen del mismo analizador de transcripciones que `tools/token-native-claude-transcript.mjs`, cuentan cada petición una vez y suman las iteraciones adicionales que una petición registra por llamadas del servidor, como el advisor (su modelo se añade a `model`). Cubren solo la transcripción propia de esa ejecución: una sesión no incluye sus subagentes, y faltan las llamadas auxiliares de Claude que no escriben ninguna entrada en la transcripción (por ejemplo, llamadas pequeñas a Haiku). Los de Pi suman el consumo de cada mensaje de la transcripción del hijo.
+- Una carga de skill es una llamada a la herramienta `Skill` (sin su prefijo `<plugin>:`) o una lectura de un archivo `SKILL.md` (con el nombre de su directorio). `agentsReads` cuenta solo las llamadas a las herramientas de lectura de archivos de los hosts; las lecturas por shell no se ven.
+- Una ejecución ha terminado cuando su sesión `claude -p` tiene una entrada `cost-state` sin entradas `user` ni `assistant` posteriores, la respuesta final de su agente de Claude es `end_turn` o su hijo de Pi tiene un `_meta.json` con `exitCode`. En una transcripción demasiado grande, `finished` se decide igualmente a partir del fichero completo.
+- Si no se encuentra la transcripción, el id no es válido o coinciden varias transcripciones de Pi, `found` es `false`, `reason` es `transcript-not-found`, `invalid-id` o `ambiguous-transcript`, y todos los demás campos son `unknown`. Una transcripción encontrada con líneas no válidas o de más de 64 MB sigue sumando sus entradas válidas (si los supera, solo sus líneas completas dentro de aproximadamente los primeros 64 MB; el límite cuenta caracteres, no bytes) y añade `tokensPartial: true` con la primera comprobación fallida en `reason`. Una transcripción encontrada pero ilegible tiene `found: true`, `reason` `unreadable-transcript` y todos los demás campos `unknown`. Se ignora una última línea incompleta.
+- `cache` es un `Map` que pertenece a quien llama y que conserva entre llamadas; no se escribe nada en disco ni en los registros de la iniciativa. Una ejecución terminada se guarda por host, tipo e id junto con el tamaño de su transcripción, y se reutiliza mientras ese tamaño no cambie, porque continuar una ejecución añade líneas a su transcripción. Las ejecuciones sin terminar se leen siempre. La línea de comandos empieza con la caché vacía.
 
 ## Desde una instalación preparada
 

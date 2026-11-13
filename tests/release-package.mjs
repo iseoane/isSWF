@@ -48,7 +48,7 @@ const checkpoint = () => { run('git', ['-C', project, 'add', '.']); run('git', [
 let keep = false;
 try {
   run('git', ['clone', '-q', '--shared', source, fixture]);
-  for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
+  for (const path of ['tools', '.agents', 'agents', 'skills', 'hooks', 'types', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
   const revisionA = commit('Fixture installable release A');
   const releaseA = join(temp, 'release-a');
   run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', fixture, '--revision', revisionA, '--output', releaseA, '--runtime', 'node']);
@@ -82,6 +82,9 @@ try {
   assert.equal(resolve(serverPath), join(releaseA, 'tools/git-evidence-mcp.mjs'));
   for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.deepEqual(await readFile(join(releaseA, 'tools', name)), await readFile(join(source, 'tools', name)), `${name} ships in the release`);
   assert.equal(rootManifest.version, plugin.version);
+  // The opt-in Claude pane ships its hooks module and state contract at the plugin version; its tests stay out.
+  for (const path of ['hooks/hooks.json', 'hooks/register.tsx', 'types/index.d.ts']) assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), `${path} ships in the release`);
+  assert.equal(receiptA.files['hooks/register.test.tsx'], undefined, 'Pane tests are not packaged');
   const coordinatorSkill = await readFile(join(releaseA, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
   const loadedReleaseVersion = coordinatorSkill.match(/^isSWF loaded-resource release version: (\d+\.\d+\.\d+)$/mu)?.[1];
   assert.equal(loadedReleaseVersion, rootManifest.version, 'Release-loaded skill identity must match the packaged manifest version');

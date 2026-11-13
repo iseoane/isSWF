@@ -85,7 +85,7 @@ if (available.error || available.status !== 0) {
   let passed = false, installation, newerBuild, legacyCheck;
   try {
     run('git', ['clone', '-q', '--shared', source, fixture]);
-    for (const path of ['tools', '.agents', 'agents', 'skills', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
+    for (const path of ['tools', '.agents', 'agents', 'skills', 'hooks', 'types', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
     const revisionA = commit('Bun release candidate A'), releaseA = join(temp, 'release-a');
     const builder = join(source, 'tools/build-release.mjs');
     run(process.execPath, [builder, '--source', fixture, '--revision', revisionA, '--output', releaseA, '--runtime', 'bun', '--bun', compiler]);

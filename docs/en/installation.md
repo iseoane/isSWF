@@ -61,6 +61,8 @@ Restart or reload Claude Code after installation. Project configuration does not
 
 The plugin uses Claude's own delegation. It does not provide the same execution and recovery features as Pi. See [current support](reference.md#current-support) before using it for important work. These commands are documented here; no Claude execution was used to verify this documentation change.
 
+The plugin also includes an optional initiatives pane, which is off by default. To turn it on, enable **Initiatives pane** for the `isswf` plugin in `/config`; the setting is stored under `pluginConfigs` in your Claude settings. While it is off, the pane reads no files and starts no timers, and it registers no command or UI. When it is on, the pane opens once the `isswf-coordinator` skill loads. It shows a card for each initiative whose records the session touched, or that a command named with `--initiative`, and that already has started work, plus every pinned initiative; the rest are grouped under "Inactive". In a card, select one of the last two completed jobs in plan order to show or hide its review rounds. Select a record in a round to show or hide, below that round, its model, effort, verdict and, when the run's transcript can be read, tokens, duration, USD cost and skill and reference (`.agents`) reads. Run `/isswf-initiatives` to reopen the pane, or `/isswf-initiatives pin <ID>` and `/isswf-initiatives unpin <ID>` to keep an initiative's card or remove it. The pane's labels and command replies follow Claude Code's `language` setting: Spanish when it names Spanish (for example `Español`, `Spanish` or `es`), English otherwise.
+
 ## Initialise a project
 
 Open the target repository and invoke the setup skill:

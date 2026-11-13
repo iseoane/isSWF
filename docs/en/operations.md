@@ -16,12 +16,45 @@ Run from the isSWF repository root:
 
 ```bash
 node tools/isswf-status.mjs --project /absolute/project --initiative I0001
+node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
-The first command reads an initiative's plan and supporting records. The second starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
+The first command reads an initiative's plan and supporting records. The second prints a JSON snapshot of every open initiative; see [initiative snapshot](#initiative-snapshot). The third starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
 
 The panel can record local notes when the displayed evidence still matches. A note is not automatically applied, authenticated operator acceptance, or permission to dispatch work. Do not expose the panel publicly or put secrets in its records.
+
+## Initiative snapshot
+
+`tools/isswf-snapshot.mjs` reads every initiative under the active state directory (`.isswf` or `.factory`) and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. It wraps `tools/isswf-snapshot-core.mjs`, which has no Node imports and does every read, including the state-directory choice, through an injected object with async `exists`, `list`, `stat` and `read`. Runtimes without Node built-ins import the core and call `readSnapshot(project, fs)` with their own `fs`. The Node wrapper's `readSnapshot(project, fs)` defaults `fs` to Node and also applies the regular-directory check from `tools/project-state.mjs`, which the core cannot do.
+
+- Initiatives whose jobs are all `completed` are omitted. Those whose jobs are all `pending` without records appear in `unopened` with `id` and `title` only.
+- Each other initiative has `id`, `title`, `type`, `status` (`parsed` or `unparsed`) and `jobs`. A plan rejected by the plan parser is `unparsed` with no jobs.
+- Each job has `id`, `status`, `objective`, `dependsOn`, `issues` and `prs` (numbers cited in its next step, evidence or `delivery.md`), `recordCount` and `rounds`. Rounds follow `brief-r<n>.md` files; records go to the brief they cite, otherwise the latest round, otherwise round `unknown`.
+- Each `A<nnn>`/`V<nnn>` record entry has `id`, `kind` (`attempt` or `review`), `role`, `model`, `modelSource` (`actual`, `requested`, `approved` or `stated`), `effort`, `verdict` (`passed`, `changes-requested` or `running`), `round` and `roundSource` (`stated` or `latest`). Values not stated explicitly in the record are `unknown`.
+- Each entry also has `runs`: one `{ host, kind, id }` per [`Run:` line](../durable-work.md#record-the-launch-identity) in the record (`claude`/`agent`, `claude`/`session` or `pi`/`child`), or an empty array. Malformed lines are ignored. This field was added without changing `schemaVersion: 1`, because existing fields are unchanged.
+- Review verdicts are read from English or Spanish labels (`aggregate`/`agregado`, `verdict`/`veredicto`, `changes requested`/`cambios pedidos` or `cambios solicitados`).
+- Files over 1 MB or unreadable are listed in `skipped`; one bad record never aborts the snapshot. Both or no state directory, or a missing `initiatives` directory, is an error.
+
+### Run usage
+
+`--usage` adds `usage` to every `runs` entry; without it the snapshot does not open any transcript:
+
+```bash
+node tools/isswf-snapshot.mjs --project /absolute/project --usage
+```
+
+It reads the local transcripts the hosts already write, read-only and without model calls. `tools/isswf-run-usage-core.mjs` holds the logic with no Node imports; runtimes without Node built-ins call `addRunUsage(snapshot, { fs, claudeDir, piDir, cache })` or `resolveRunUsage(run, { fs, claudeDir, piDir, project, cache })` with their own `fs`. The wrapper uses `CLAUDE_CONFIG_DIR` or `~/.claude`, and `PI_CODING_AGENT_DIR` or `~/.pi/agent`.
+
+- `claude agent=<id>`: `projects/*/*/subagents/agent-<id>.jsonl` under the Claude directory. `claude session=<id>`: `projects/*/<id>.jsonl`. Every project directory is searched, so runs launched from a worktree are found too.
+- `pi child=<id>`: the single `<id>_*_transcript.jsonl` in `sessions/*/subagent-artifacts` under the Pi directory or in the project's `.pi/subagents/artifacts`. Children written to Pi's temporary artifact directory are not found.
+- `usage` has `found`, `finished`, `model` (`mixed` when several), `tokens` (`input`, `output`, `cacheRead`, `cacheWrite`), `durationMs` (first to last transcript timestamp), `skills` and `agentsReads` (counts per skill name and per path from `.agents/`).
+- `costUsd` prices `tokens` with `tools/isswf-prices.mjs` (Anthropic first-party API prices listed in Claude Code's claude-api reference, dated 2026-11-03; 5-minute cache writes; Claude Haiku 5.5 at its rate for prompts up to 100K tokens, so longer prompts are underestimated). It is `unknown` when `model` is not an exact entry of that table, which covers Pi and non-Anthropic models, `mixed` and `unknown`. A run with `tokensPartial` and a known cost adds `costPartial: true`. It is an estimate from recorded counters, not billing.
+- Claude tokens come from the same transcript parser as `tools/token-native-claude-transcript.mjs`, each request counted once, plus the extra iterations a request records for server-side calls such as the advisor (their model joins `model`). They cover only that run's own transcript: a session excludes its subagents, and Claude's auxiliary calls that write no transcript entry (for example small Haiku calls) are missing. Pi tokens add the per-message usage of the child transcript.
+- A skill load is a `Skill` tool call (without its `<plugin>:` prefix), or a read of a `SKILL.md` file (named after its directory). `agentsReads` counts the hosts' file-read tool calls only; shell reads are not seen.
+- A run is finished when its `claude -p` session has a `cost-state` entry with no later `user` or `assistant` entry, its Claude agent's final reply is `end_turn`, or its Pi child has a `_meta.json` with an `exitCode`. For an oversized transcript, `finished` is still decided from the whole file.
+- When the transcript is not found, the id is invalid, or several Pi transcripts match, `found` is `false`, `reason` is `transcript-not-found`, `invalid-id` or `ambiguous-transcript`, and every other field is `unknown`. A transcript that is found but has invalid lines or exceeds 64 MB still sums its valid entries (only its complete lines within roughly the first 64 MB when oversized; the limit counts characters, not bytes) and adds `tokensPartial: true` with the first failing check in `reason`. A found but unreadable transcript has `found: true`, `reason` `unreadable-transcript`, and every other field `unknown`. An incomplete last line is ignored.
+- `cache` is a `Map` the caller owns and keeps between calls; nothing is written to disk or to the initiative records. A finished run is stored under host, kind and id with its transcript size and reused while the size is unchanged, because continuing a run appends to its transcript. Unfinished runs are read every time. The command line starts with an empty cache.
 
 ## From a prepared installation
 
