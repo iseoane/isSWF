@@ -52,6 +52,6 @@ Mention state in the answer only when it matters. Reading these files is allowed
 
 Every answer ends with one copyable prompt, in the operator's language, that the operator can send to the coordinator. It states the goal, the target (issue, path or initiative), the delivery scope the operator wants, and any limit such as local-only or prepare-only. Take only the scope the operator has stated; a prompt that asks for work does not grant more than its words say. Mark anything you could not verify as an assumption.
 
-The coordinator prompt is the default ending. Offer direct use only when the routed skill's opening says it can be used directly, in any project or on an explicit operator request (re-read its opening lines first): `/skill:isswf-<name>` in Pi or `/isswf:isswf-<name>` in Claude Code. Never offer it for the coordinator, triage or the feature-to-PR flow; they go through the coordinator.
+The coordinator prompt is the default ending. Offer direct use only when the routed skill's opening says it can be used directly, in any project, for any subject, or on an explicit operator request (re-read its opening lines first): `/skill:isswf-<name>` in Pi or `/isswf:isswf-<name>` in Claude Code. Never offer it for the coordinator, triage or the feature-to-PR flow; they go through the coordinator.
 
 Complete when you have answered the question, linked each file you relied on, and given the prompt. If a file is unreadable or the state is ambiguous, say what is missing and give the prompt that resolves it.

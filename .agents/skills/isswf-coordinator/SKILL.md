@@ -21,7 +21,7 @@ Existing explicitly selected legacy runtime jobs remain on their original pinned
 
 ## 1. Establish the assignment and boundaries
 
-Read references on demand: open only the plan job, brief and methodology section the current stage needs, once per session unless it changed, instead of loading every role, host and reference file before acting.
+Read references on demand: open only the plan job, brief and methodology section the current stage needs, once per session unless it changed or is no longer in context (for example after compaction), instead of loading every role, host and reference file before acting.
 
 When resuming work, start from the initiative status command (`isswf-status`, using the invocation for the actual distribution in [durable work](../../../docs/durable-work.md#read-an-initiative-status-snapshot)), then apply that rule to the plan and brief instead of reading the whole plan narrative. Consult pending executions, artifacts, and PR/CI state before dispatching another unit. Use the conversation summary as a verification map, not as current state or new authorization.
 
@@ -59,7 +59,7 @@ This table is the single place that says when an optional resource applies. The 
 | Resource | Trigger |
 | --- | --- |
 | [isswf-writing](../isswf-writing/SKILL.md) | The work creates, revises or reviews documentation, including technical guides, skills or agent instructions. |
-| [isswf-interview](../isswf-interview/SKILL.md) | The specification has gaps: a new feature, user-visible behavior change, concept missing from the glossary or unwritten acceptance. An [interview](../isswf-interview/SKILL.md) is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself. |
+| [isswf-interview](../isswf-interview/SKILL.md) | The specification has gaps: a new feature, user-visible behavior change, concept missing from the glossary or unwritten acceptance. An interview is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself. |
 | [researcher](../../roles/researcher.md) | A technical fact that affects the solution needs research beyond reading the target code. |
 | [design principles](../../roles/references/design-principles.md) | The work changes data shapes, contracts, module boundaries or responsibilities. |
 | [execution principles](../../roles/references/execution-principles.md) | The work involves parallel ownership, retries, migrations or repeated operations. |
