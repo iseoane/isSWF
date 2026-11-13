@@ -104,4 +104,4 @@ The confirmation says recorded, not applied. The same status reader exposes note
 
 ## Model routing
 
-For explicitly selected legacy-executor assignments only, use the pinned legacy `models.json` as the route input and [`model-routing.md`](model-routing.md) for preflight, precedence, availability and transition rules. Current Pi and Claude model selections belong to each host's native configuration; do not copy them into legacy JSON or resolve a pinned legacy attempt against native defaults. Neither legacy document grants work or guarantees runtime support; pin the legacy config path and full input Git SHA in each legacy attempt.
+Current Pi and Claude model selections belong to each host's native configuration. The legacy executor and its route contract are no longer shipped; an existing legacy `models.json` stays unchanged for attempts reconciled with their original pinned runtime. Do not copy native selections into it or resolve a pinned legacy attempt against native defaults.

@@ -5606,8 +5606,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="fine" x="433.6" y="903.9" class="t-database" font-size="7" text-anchor="middle">REF · Cuando afecta al diseño</text>
         </g>
 
-        <g id="node-admit" data-node-id="admit" data-node-label="Preflight de ejecución" tabindex="0" role="button" aria-label="Enfocar Preflight de ejecución, Grant, ruta, esfuerzo y capacidad, 05 · Coordinador · admisión y límites de ejecución" aria-pressed="false" data-node-kind="security" data-node-sublabel="Grant, ruta, esfuerzo y capacidad" data-node-tag="model-routing.md" data-node-context="05 · Coordinador · admisión y límites de ejecución">
-          <title>Preflight de ejecución · Grant, ruta, esfuerzo y capacidad · 05 · Coordinador · admisión y límites de ejecución · model-routing.md</title>
+        <g id="node-admit" data-node-id="admit" data-node-label="Preflight de ejecución" tabindex="0" role="button" aria-label="Enfocar Preflight de ejecución, Grant, ruta, esfuerzo y capacidad, 05 · Coordinador · admisión y límites de ejecución" aria-pressed="false" data-node-kind="security" data-node-sublabel="Grant, ruta, esfuerzo y capacidad" data-node-tag="guía del host" data-node-context="05 · Coordinador · admisión y límites de ejecución">
+          <title>Preflight de ejecución · Grant, ruta, esfuerzo y capacidad · 05 · Coordinador · admisión y límites de ejecución · guía del host</title>
           <rect x="361.6" y="968" width="144" height="68" rx="8" class="c-mask"/>
           <rect x="361.6" y="968" width="144" height="68" rx="8" class="c-security" data-animate="node" style="--step:12" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(367.6 974) scale(0.6875)">
@@ -5616,7 +5616,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           </g>
           <text data-node-label="" data-detail-anchor="" x="433.6" y="1001.4" class="t-primary" font-size="10.3" font-weight="600" text-anchor="middle">Preflight de ejecución</text>
           <text data-detail="context" x="433.6" y="1014.7" class="t-muted" font-size="6.8" text-anchor="middle">Grant, ruta, esfuerzo y capacidad</text>
-        <text data-detail="fine" x="433.6" y="1027.2" class="t-security" font-size="7" text-anchor="middle">model-routing.md</text>
+        <text data-detail="fine" x="433.6" y="1027.2" class="t-security" font-size="7" text-anchor="middle">guía del host</text>
         </g>
 
         <g id="node-blocked" data-node-id="blocked" data-node-label="Bloqueo técnico" tabindex="0" role="button" aria-label="Enfocar Bloqueo técnico, Estado desconocido o recurso ausente, 05 · Coordinador · admisión y límites de ejecución" aria-pressed="false" data-node-kind="security" data-node-sublabel="Estado desconocido o recurso ausente" data-node-tag="blocked ≠ awaiting-human" data-node-context="05 · Coordinador · admisión y límites de ejecución">
@@ -6556,7 +6556,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </div>
         <ul>
           <li>Los perfiles Markdown no prueban capacidad ejecutable. Cada dispatch exige inputs fijados, grant finito, ruta y esfuerzo disponibles, espacio exclusivo y presupuesto.</li>
-          <li>Consultar docs/model-routing.md y docs/local-worker-lifecycle.md. En Pi, el worker usa isswf-job.mjs; researcher-task.mjs, planner-task.mjs, diagnostic-task.mjs y reviewer-task.mjs tienen contratos propios.</li>
+          <li>Consultar la guía del host real en .agents/hosts/. El ejecutor heredado ya no se distribuye; un intento heredado existente se concilia con su runtime fijado original antes de migrar el proyecto.</li>
           <li>La configuración de un rol no demuestra que un caller pueda ejecutarlo. Si falta capacidad, se informa del límite; no se sustituye por otro dispatcher.</li>
           <li>Un actor activo o desconocido no se reemplaza. Reconciliar identidad, proceso y trabajo parcial antes de un sucesor. La rama de bloqueo vuelve a preflight únicamente con evidencia y autorización suficientes.</li>
         </ul>

@@ -56,7 +56,7 @@ Keep this development checkout separate from any installed release. Follow `docs
 ## Execution and delegation
 
 - When the coordinator is active (see "isSWF coordinator" below), it owns delegation: follow its skill and the actual host guide under `.agents/hosts/`. If native dispatch is unavailable or not granted, report that limit; do not substitute advisory agents or another dispatcher.
-- Read `docs/model-routing.md` and `docs/local-worker-lifecycle.md` before an explicitly selected legacy executor assignment; its pins, grants and recovery guards remain binding.
+- The legacy executor is no longer shipped. An existing legacy attempt is reconciled with its original pinned runtime before the project migrates (`docs/installation.md`); its pins, grants and recovery guards remain binding.
 - Continue reversible work within the current grant without routine reconfirmation; ask only for missing product decisions or uncovered actions, costs or access. A remembered grant is not a current grant, and implementation alone does not imply publication, push, merge, deployment, installation or cleanup. For a trusted current feature-to-PR start, apply `.agents/roles/references/feature-delivery.md`.
 
 ## Keep the factory proportional

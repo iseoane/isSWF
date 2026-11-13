@@ -14,7 +14,7 @@ Pi discovers the skills declared in `package.json`. The `skills/`, `agents/`, an
 
 ## Executable tools
 
-These retained tools support the legacy compiled-executor workflow and historical records. They are not prerequisites for new host-native assignments. Keeping them does not complete old readiness objectives or migrate installed projects.
+These tools package the factory, manage a project's installation and read or prepare its records. They are not prerequisites for new host-native assignments, which the host executes. The legacy executor tools are no longer shipped; a project with legacy attempts reconciles them with its original pinned runtime before migrating, and the launcher's migration gate loads that runtime's own effect and recovery modules.
 
 | Area | Source |
 | --- | --- |
@@ -22,11 +22,8 @@ These retained tools support the legacy compiled-executor workflow and historica
 | Initialise, select, update, and recover a project's installation | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Prepare plans and issue intake | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-intake.mjs` |
 | Read records and show the local panel | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
-| Prepare and observe a worker | `tools/isswf-job.mjs`, `tools/pi-worker-task.mjs`, `tools/worker-lifecycle.mjs` |
-| Research, planning, diagnosis, and review | `tools/researcher-task.mjs`, `tools/planner-task.mjs`, `tools/diagnostic-task.mjs`, `tools/reviewer-task.mjs` |
-| Capacity, recovery, and external-effect records | `tools/execution-capacity.mjs`, `tools/native-recovery.mjs`, `tools/recovery-review.mjs`, `tools/job-successor.mjs`, `tools/external-effect-journal.mjs` |
 
-The release compiler bundles tool entrypoints into one Bun executable and supplies each module's original identity and package-root paths. Original source files remain verified provenance, dynamic helpers, and immutable task snapshots. Source development still runs on Node.js. `tools/sdk-package.mjs` resolves SDK dependency metadata without relying on a Node-only API.
+The release compiler bundles tool entrypoints into one Bun executable and supplies each module's original identity and package-root paths. Original source files remain verified provenance. Source development still runs on Node.js.
 
 These callers have different contracts. Do not assume one role's command, model support, recovery, or permissions apply to another.
 

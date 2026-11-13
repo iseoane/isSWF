@@ -292,7 +292,7 @@ assert.match(await read('docs/es/operations.md'), /consume su resultado antes de
 assert.match(docs, /--plugin-dir/);
 assert.match(docs, /\/isswf:isswf-coordinator/);
 assert.match(docs, /static contract check, not proof of live delegation/i);
-assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
+assert.match(docs, /Native host sessions and tool restrictions are not OS filesystem\/network containment/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
 const loadedReleaseVersion = coordinatorFlow.match(/^isSWF loaded-resource release version: (\d+\.\d+\.\d+)$/mu)?.[1];
@@ -477,7 +477,7 @@ assert.match(setup, /initial setup, existing setup to reconcile, available runti
 assert.match(setup, /pi --offline --list-models/);
 assert.match(setup, /For an initial model selection, ask/);
 assert.match(setup, /host availability is not executor support/);
-assert.match(setup, /source-checkout mode must leave a missing config pending/);
+assert.match(setup, /preserve it unchanged and never create, edit or use it as current Pi or Claude model selection/);
 assert.match(setup, /Persist Claude-native role\/model\/effort decisions/);
 assert.doesNotMatch(setup, /full input checkpoint named in the trusted grant/);
 const entrySetup = setup.slice(setup.indexOf('### Setup-managed coordinator entry'), setup.indexOf('For every setup running in Pi'));

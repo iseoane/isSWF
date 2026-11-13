@@ -50,7 +50,7 @@ Los workers instalados reciben las skills fijadas de depuración y TDD como meto
 
 Seguridad, rendimiento y observabilidad son procedimientos especializados opcionales, no etapas adicionales para todos los trabajos. Usa `/skill:isswf-security`, `/skill:isswf-performance` o `/skill:isswf-observability` en Pi, o los mismos nombres bajo `/isswf:` en Claude Code. Seguridad parte de los activos, las fronteras de confianza y los abusos plausibles; no autoriza ataques ni certifica cumplimiento normativo. Rendimiento requiere una línea base con resultados correctos y mediciones comparables antes de afirmar una aceleración. Observabilidad parte de preguntas operativas y limita los campos sensibles, la cardinalidad de métricas, la exportación y la retención. No convierte la telemetría en prueba del estado actual de un proceso.
 
-El coordinador y los perfiles correspondientes seleccionan estos recursos según la tarea. Los nuevos workers instalados los reciben como metodología fijada de solo lectura; los callers de diagnóstico y revisión de solo texto reciben los recursos seleccionados desde el mismo checkpoint que su perfil, y los planificadores reciben la referencia de diseño seleccionada. Los checkpoints históricos conservan sus recursos originales. Recibir una skill no añade herramientas, acceso a producción ni permiso para llamar a proveedores.
+El coordinador y los perfiles correspondientes seleccionan estos recursos según la tarea. El coordinador entrega a cada agente los recursos seleccionados desde el mismo checkpoint que su perfil. Los checkpoints históricos conservan sus recursos originales. Recibir una skill no añade herramientas, acceso a producción ni permiso para llamar a proveedores.
 
 La referencia compartida de diseño también cubre el lenguaje del dominio, las interfaces útiles, la complejidad resultante y los registros de decisiones significativas. Conserva el glosario y el mecanismo de decisiones de cada proyecto; no exige otra skill de arquitectura, un ADR para cada elección ni renombrar campos persistidos.
 
@@ -124,7 +124,5 @@ No incluyas credenciales en encargos, notas ni evidencias compartidas. Un panel 
 Empieza por [consultar el trabajo](operations.md) para los comandos habituales. Los recursos detallados en inglés siguientes son contratos de implementación; consúltalos solo cuando hagan falta:
 
 - [Instalación, migración y recuperación](../installation.md).
-- [Ejecución de encargos e interrupciones](../local-worker-lifecycle.md).
-- [Selección de modelos y presupuestos](../model-routing.md).
 - [Planes, registros y conservación de evidencias](../durable-work.md).
 - [Selección de revisión](../../.agents/roles/references/review.md).

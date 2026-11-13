@@ -33,9 +33,9 @@ The coordinator entry is `/isswf:isswf-coordinator`. Follow [.agents/hosts/claud
 
 The coordinator supplies the objective, scope, working directory, shared resources, model/effort, finite budget, relevant checks and exact review candidate. Small tasks do not need committed job JSON. Parallel writers need exclusive workspaces; unknown execution blocks a replacement writer. Independent review, when required, stays separate from implementation. Do not enable nested agents, missions, schedules or correction loops merely because an extension offers them.
 
-Native host sessions and tool restrictions are not OS filesystem/network containment or durable crash recovery. Bash is not a sandbox; the Pi extension also adds a `contact_supervisor` communication tool to children. This path does not establish Pi-equivalent sandboxing to the retained LPAC/Bubblewrap executors. Missing models or capabilities are reported, never silently replaced. A response is not a passing check, acceptance, publication or merge.
+Native host sessions and tool restrictions are not OS filesystem/network containment or durable crash recovery. Bash is not a sandbox; the Pi extension also adds a `contact_supervisor` communication tool to children. Missing models or capabilities are reported, never silently replaced. A response is not a passing check, acceptance, publication or merge.
 
-Explicitly selected legacy runtime jobs retain their original pins, grants, claims and [lifecycle](local-worker-lifecycle.md), [routing](model-routing.md) and [installation](installation.md) contracts. The host-native path does not migrate or complete them. Never erase an inconclusive verdict or use a new host to bypass an unresolved old writer.
+The legacy executor is no longer shipped. Existing legacy runtime jobs retain their original pins, grants and claims, and are reconciled with their original pinned runtime before the project migrates under the [installation](installation.md) contract. The host-native path does not migrate or complete them. Never erase an inconclusive verdict or use a new host to bypass an unresolved old writer.
 
 ## Verify the integration
 

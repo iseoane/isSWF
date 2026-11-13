@@ -23,7 +23,7 @@ node tools/factory-package.mjs materialize \
 
 The command reads committed Git blobs at that exact SHA. It does not inspect `HEAD`, resolve a branch or tag, fetch, or use the working tree. It resolves the source and the store's existing path components before checking that their canonical trees do not overlap. The resulting package directory is `/absolute/path/to/shared-iswf-store/<full-commit-sha>`. It contains the package manifest, exactly the selected regular resource files, and a receipt containing the revision and SHA-256 payload hashes. A repeat verifies the receipt and every payload hash before returning without rewriting. Missing blobs, non-regular selected entries, an invalid manifest, tampering, or a conflicting destination fail without replacing it.
 
-The package manifest exposes exactly the `isswf-coordinator` and `isswf-setup` skills. Their supporting role instructions, references, durable-work and legacy-routing guides, and three templates are included. The packaged `.factory/models.json` is route data for explicitly selected legacy-executor assignments only. Other skills, extensions, prompts, themes, audit material, Python code, and project files are not exported. This retained payload does not configure current Pi or Claude choices and is never copied into host settings.
+The package manifest exposes exactly the `isswf-coordinator` and `isswf-setup` skills. Their supporting role instructions, references, durable-work guide, and three templates are included. Other skills, extensions, prompts, themes, audit material, Python code, and project files are not exported. The package does not configure current Pi or Claude choices.
 
 ## Activate in one project
 
@@ -58,7 +58,7 @@ This subset does not install the SDK role callers or job runtime. Those still re
 
 ## Git checkpoint boundary
 
-A materialized resource package is not a Git checkout. Its full-SHA directory name and receipt identify the packaged resource version; neither is the target job's document-input checkpoint. When a trusted grant requires checkpoint-pinned reads, it must still name the source checkout and full Git SHA. Read checkpoint files from that source with the existing Git workflow (for example, `git show <full-sha>:<path>`). Do not treat the extracted package as a Git source. For authorized native jobs, the source checkout's [normal job entry](local-worker-lifecycle.md#run-a-job-from-an-activated-project) verifies the active package receipt and source runtime bytes before using the existing preparer and runner. It does not add executable files to the resource package or start a coordinator model.
+A materialized resource package is not a Git checkout. Its full-SHA directory name and receipt identify the packaged resource version; neither is the target job's document-input checkpoint. When a trusted grant requires checkpoint-pinned reads, it must still name the source checkout and full Git SHA. Read checkpoint files from that source with the existing Git workflow (for example, `git show <full-sha>:<path>`). Do not treat the extracted package as a Git source. The resource package contains no executable files and starts no coordinator model.
 
 ## Operational limits
 

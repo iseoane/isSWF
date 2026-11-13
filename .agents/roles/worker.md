@@ -61,4 +61,4 @@ Before handing back, write this report to the next unused `<state>/initiatives/<
 
 ## Dispatch configuration
 
-Use the actual host's role configuration and the coordinator's approved model and effort. Read the supplied Pi or Claude Code host guide when needed. Report requested and observed metadata separately, labeling unknown values as unknown; availability is not permission or subscription evidence. Never silently substitute a model or another host. Missing capability blocks this delegation rather than authorizing installation or another dispatcher. An explicitly assigned legacy runtime job still follows its pinned `docs/model-routing.md` and `.factory/models.json`; do not reinterpret or modify its selection.
+Use the actual host's role configuration and the coordinator's approved model and effort. Read the supplied Pi or Claude Code host guide when needed. Report requested and observed metadata separately, labeling unknown values as unknown; availability is not permission or subscription evidence. Never silently substitute a model or another host. Missing capability blocks this delegation rather than authorizing installation or another dispatcher.

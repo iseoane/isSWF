@@ -1,6 +1,6 @@
 # Pi host-native delegation
 
-Use this guide when coordinating in Pi on native Windows or Linux. The factory owns methodology; Pi and its approved subagent extension own execution. Do not use a Claude launcher or the legacy isSWF executor as an automatic fallback.
+Use this guide when coordinating in Pi on native Windows or Linux. The factory owns methodology; Pi and its approved subagent extension own execution. Do not use a Claude launcher as an automatic fallback.
 
 ## Prerequisite and configuration
 
@@ -156,6 +156,6 @@ Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#clo
 
 ## Boundaries
 
-Use only the extension's verified capabilities. Do not claim OS filesystem/network containment, descendant-process cessation or durable crash recovery from a foreground session, tool list or separate context window. These are not the guarantees of the retained LPAC/Bubblewrap executors. Host settings and extensions execute trusted code; do not load project resources without the host's trust decision or copy credentials between profiles.
+Use only the extension's verified capabilities. Do not claim OS filesystem/network containment, descendant-process cessation or durable crash recovery from a foreground session, tool list or separate context window. Host settings and extensions execute trusted code; do not load project resources without the host's trust decision or copy credentials between profiles.
 
-For an explicitly selected existing legacy assignment, use its original runtime and `docs/local-worker-lifecycle.md` plus `docs/model-routing.md`. Preserve its pins, grants, reservations and failures. Never reinterpret it as a new host-native task to bypass an unresolved claim.
+The legacy executor is no longer shipped. An existing legacy attempt is reconciled with its original pinned runtime, which retains its own contracts, before the project migrates. Preserve its pins, grants, reservations and failures. Never reinterpret it as a new host-native task to bypass an unresolved claim.

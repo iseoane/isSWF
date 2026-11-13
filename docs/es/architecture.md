@@ -14,7 +14,7 @@ Pi descubre las skills declaradas en `package.json`. Las carpetas `skills/`, `ag
 
 ## Herramientas ejecutables
 
-Estas herramientas se conservan para el flujo heredado con ejecutor compilado y sus registros históricos. No son requisitos de las tareas nuevas con delegación del host. Conservarlas no completa los objetivos antiguos de preparación ni migra los proyectos instalados.
+Estas herramientas empaquetan la fábrica, gestionan la instalación de un proyecto y leen o preparan sus registros. No son requisitos de las tareas nuevas con delegación del host, que las ejecuta el propio host. Las herramientas del ejecutor heredado ya no se distribuyen; un proyecto con intentos heredados los concilia con su runtime fijado original antes de migrar, y la protección de migración del lanzador carga los módulos de efectos y recuperación de ese runtime.
 
 | Área | Código |
 | --- | --- |
@@ -22,13 +22,10 @@ Estas herramientas se conservan para el flujo heredado con ejecutor compilado y 
 | Inicializar, seleccionar, actualizar y recuperar la instalación de un proyecto | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Preparar planes y recibir issues | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-intake.mjs` |
 | Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
-| Preparar y observar un worker | `tools/isswf-job.mjs`, `tools/pi-worker-task.mjs`, `tools/worker-lifecycle.mjs` |
-| Investigación, planificación, diagnóstico y revisión | `tools/researcher-task.mjs`, `tools/planner-task.mjs`, `tools/diagnostic-task.mjs`, `tools/reviewer-task.mjs` |
-| Capacidad, recuperación y registros de efectos externos | `tools/execution-capacity.mjs`, `tools/native-recovery.mjs`, `tools/recovery-review.mjs`, `tools/job-successor.mjs`, `tools/external-effect-journal.mjs` |
 
 Estas herramientas tienen contratos distintos. No des por hecho que los comandos, modelos compatibles, recuperación o permisos de un rol se aplican a otro.
 
-El compilador de releases integra las entradas de herramientas en un ejecutable Bun y proporciona a cada módulo su identidad original y las rutas de la raíz del paquete. Los archivos fuente se conservan como procedencia verificada, helpers dinámicos y snapshots inmutables de tareas. El desarrollo fuente sigue ejecutándose con Node.js. `tools/sdk-package.mjs` resuelve metadatos de dependencias del SDK sin depender de una API exclusiva de Node.
+El compilador de releases integra las entradas de herramientas en un ejecutable Bun y proporciona a cada módulo su identidad original y las rutas de la raíz del paquete. Los archivos fuente se conservan como procedencia verificada. El desarrollo fuente sigue ejecutándose con Node.js.
 
 ## Registros del proyecto y datos privados
 

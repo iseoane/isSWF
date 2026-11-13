@@ -505,8 +505,8 @@
           }
         ],
         "tag": {
-          "en": "model-routing.md",
-          "es": "model-routing.md"
+          "en": "host guide",
+          "es": "guía del host"
         }
       },
       {
@@ -2324,8 +2324,8 @@
             "es": "Los perfiles Markdown no prueban capacidad ejecutable. Cada dispatch exige inputs fijados, grant finito, ruta y esfuerzo disponibles, espacio exclusivo y presupuesto."
           },
           {
-            "en": "Consult docs/model-routing.md and docs/local-worker-lifecycle.md. On Pi, the worker uses isswf-job.mjs. researcher-task.mjs, planner-task.mjs, diagnostic-task.mjs and reviewer-task.mjs have separate contracts.",
-            "es": "Consultar docs/model-routing.md y docs/local-worker-lifecycle.md. En Pi, el worker usa isswf-job.mjs; researcher-task.mjs, planner-task.mjs, diagnostic-task.mjs y reviewer-task.mjs tienen contratos propios."
+            "en": "Consult the actual host guide under .agents/hosts/. The legacy executor is no longer shipped; an existing legacy attempt is reconciled with its original pinned runtime before the project migrates.",
+            "es": "Consultar la guía del host real en .agents/hosts/. El ejecutor heredado ya no se distribuye; un intento heredado existente se concilia con su runtime fijado original antes de migrar el proyecto."
           },
           {
             "en": "A configured role does not prove a caller can execute it. Missing capability is reported rather than bypassed with another dispatcher.",

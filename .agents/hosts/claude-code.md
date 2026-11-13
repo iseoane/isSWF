@@ -151,4 +151,4 @@ Evidence note: a historical Linux live run proved only an earlier supplied-evide
 
 ## Existing legacy runtime assignments
 
-Explicitly retained legacy assignments keep their original launcher, runtime pin, release identity and checkpointed inputs under `docs/installation.md` and `docs/local-worker-lifecycle.md`. Read those guides from their retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.
+The legacy executor is no longer shipped. An existing legacy assignment keeps its original launcher, runtime pin, release identity and checkpointed inputs, and is reconciled with that retained runtime before the project migrates under `docs/installation.md`. Read its contracts from that retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.
