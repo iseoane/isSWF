@@ -171,7 +171,10 @@ try {
     ...Object.fromEntries(Object.entries(files).map(([f, t]) => [`/o/.isswf/initiatives/I0001/jobs/J001/${f}`, t])),
   }))).initiatives[0].jobs[0].rounds.map(r => [r.round, r.reviewRound, r.entries.map(e => e.id)]);
   assert.deepEqual(await roundsOf({ 'A001.md': '- Outcome: complete\n', 'V001.md': 'Aggregate: FAIL\n', 'V002.md': 'Aggregate: PASS\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['V002']]]);
-  assert.deepEqual(await roundsOf({ 'A001.md': 'x\n', 'A002.md': '- Review round: 1\n', 'V001.md': 'x\n' }), [[1, 1, ['A001', 'A002', 'V001']]]);
+  // A coordinator-owned planner attempt shifts the worker's number; both stay with the first review.
+  assert.deepEqual(await roundsOf({ 'A001.md': '- Profile: .agents/roles/planner.md\n', 'A002.md': 'x\n', 'V001.md': 'x\n' }), [[1, 1, ['A001', 'A002', 'V001']]]);
+  // A correction states its round; the template's review field is read as the explicit round.
+  assert.deepEqual(await roundsOf({ 'A001.md': 'x\n', 'V001.md': 'x\n', 'A002.md': '- Review round: 2\n', 'V002.md': '- Review round in this job, and prior review IDs: 2 (V001)\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['A002', 'V002']]]);
   // Roles: the shared role file wins over the host agent that ran it.
   for (const [text, role] of [
     ['- Profile: isswf:isswf-worker; shared role .agents/roles/diagnostician.md\n', 'diagnostician'],
@@ -180,6 +183,7 @@ try {
     ['- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n', 'coordinator'],
     ['- Profile path: coordinator acting as writer\n', 'coordinator'],
     ['- Profile: .agents/roles/worker.md\nNotes: the coordinator skill .agents/skills/isswf-coordinator/SKILL.md dispatched it.\n', 'worker'],
+    ['- Profile: isswf:isswf-worker; skills .agents/skills/isswf-coordinator/SKILL.md\n', 'worker'],
     ['- Agent: isswf-worker\n', 'worker'],
     // A review citing another role's file in its body stays a review.
     ['- Observer: isswf:isswf-reviewer\n\nFinding: .agents\\roles\\worker.md:12 drifts.\nSee roles/reviewer.md.\n', 'reviewer'],

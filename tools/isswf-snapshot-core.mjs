@@ -106,11 +106,11 @@ const COORDINATOR = /isswf-coordinator[\\/]SKILL\.md|\bcoordinator acting as wri
 // the isswf-worker agent. Elsewhere the first mention wins, since reports also cite other roles' files.
 function parseRole(text) {
   const identity = text.split('\n').filter(line => IDENTITY_LINE.test(line)).join('\n');
-  const file = identity.match(ROLE_FILE);
-  if (file) return file[1];
+  const match = identity.match(ROLE_FILE) ?? identity.match(ROLE_ANY);
+  if (match) return match[1] ?? match[2];
   if (COORDINATOR.test(identity)) return 'coordinator';
-  const match = identity.match(ROLE_ANY) ?? text.match(ROLE_ANY);
-  return match ? (match[1] ?? match[2]) : UNKNOWN;
+  const any = text.match(ROLE_ANY);
+  return any ? (any[1] ?? any[2]) : UNKNOWN;
 }
 
 const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
@@ -137,9 +137,8 @@ function parseRecord(file, text, initiativeId, jobId) {
     verdict: parseVerdict(text, kind, outcome),
     outcome,
     statedRound: briefLine ? Number(briefLine.match(own)[1]) : null,
-    // Review round within the brief: an explicit `Review round: N` line, else the record's own number,
-    // so attempt A00k and review V00k share round k and a delta review after a fix opens the next one.
-    reviewRound: Number(text.match(/^\W*review round\W{0,4}(\d+)\b/im)?.[1] ?? file.slice(1, 4)),
+    // An explicit review round, as the review template's "Review round in this job, ...: N" or `Review round: N`.
+    statedReviewRound: Number(text.match(/^\W*review round\b[^:\n]*:\W{0,4}(\d+)/im)?.[1]) || null,
   };
 }
 
@@ -157,8 +156,18 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
   }
   const known = new Set(briefRounds);
   const rounds = [];
-  for (const { statedRound: _, reviewRound, ...entry } of records) {
+  // Without a stated round, the k-th review of a brief is round k and attempts belong to round 1:
+  // record numbers run across the whole job, so they cannot pair an attempt with its review.
+  const reviewsSeen = new Map();
+  for (const { statedRound: _, statedReviewRound, ...entry } of records) {
     const round = known.has(entry.round) ? entry.round : UNKNOWN;
+    let reviewRound = statedReviewRound;
+    if (entry.kind === 'review') {
+      const seen = (reviewsSeen.get(round) ?? 0) + 1;
+      reviewsSeen.set(round, seen);
+      reviewRound ??= seen;
+    }
+    reviewRound ??= 1;
     let bucket = rounds.find(r => r.round === round && r.reviewRound === reviewRound);
     if (!bucket) rounds.push((bucket = { round, reviewRound, entries: [] }));
     bucket.entries.push(entry);

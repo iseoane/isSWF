@@ -5,13 +5,14 @@
 ## Identity and pinned inputs
 
 - Job ID and attempt ID:
+- Review round (only for a correction after a review of the same brief; the first review is round 1):
 - Run: claude agent=<id> (plain text, no backticks; one line per host launch as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown)
 - Reported status:
 - Report timestamp and timezone:
 - Brief path, revision, and input checkpoint (full Git SHA):
 - Initiative spec path and revision, if used:
 - Plan path and revision, if used:
-- Profile path and revision, if available (an attempt the coordinator writes itself names `.agents/skills/isswf-coordinator/SKILL.md`):
+- Profile path and revision, if available:
 - Skills and revisions, if available:
 - Method application report: `<for each selected method, state applied/not applied and identify observed evidence; distinguish reading/receipt from application. Cite observer, command/action and result, exact candidate/base and attempt or artifact path when applicable. For each selected TDD behavioral contract, name the test-only RED commit and subsequent GREEN commit, exact command, and failing assertion (path:line/message); reviewer/coordinator reruns the named command at both commits. A syntax/setup failure is not RED. If an honest RED is impossible, disclose the requirement, reason, and consequence; disclosure does not waive a required method or criterion. Do not claim a retrospective red-first cycle. State explicitly when no method was selected>`.
 - Retained substitute evidence, when sensitivity/mutation results substitute for missing RED: `<retain the harness and run log in committed tests/ evidence or ignored tooling/.local/<job>/; link both paths in this attempt/review record, name the archived commit and an unmutated baseline run, injected change and result. Retrospective evidence is not red-first proof>`.
