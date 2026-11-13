@@ -525,7 +525,7 @@ for (const pattern of [
   /Previous-version retention and cleanup are unsupported\/deferred/u,
   /do not copy caches, run `pi remove`, Claude uninstall/u,
   /not a native project pin or a shared registry/u,
-  /Development must not alter any operator setup records/u,
+  /Development of isSWF itself must not alter any operator setup records/u,
 ]) assert.match(hostUpdate, pattern);
 assert.match(hostUpdate, /Never invoke a broad\/self update \(`pi update`, `pi update --all`\)/u);
 assert.match(hostUpdate, /Never use `claude plugin uninstall` to remove an older version/u);
