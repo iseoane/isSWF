@@ -7,12 +7,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J001
 
 - Size: S
-- Status: in-progress
+- Status: completed
 - Objective: Audit the in-scope agent-facing Markdown against isswf-writing's agent-document criteria, read-only, and record the findings.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Four read-only reviewers audit by area; started by the operator 2026-11-13 ("adelante").
+- Next step: None. Findings feed J003.
 
 ### Acceptance
 
@@ -20,20 +20,32 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Findings name path, line, criterion, likelihood and impact, and mark contradictions and duplicated rules across files; no file is edited.
 - The coordinator records the consolidated findings in the job evidence, attributed to each reviewer.
 
+### Evidence
+
+- Four native isswf-reviewer audits (model inherited, read-only, committed files at df5f66b; findings transcribed by the coordinator, self-reported reads): skills 16 findings (3 blocking: isswf-setup host-native path reaches only legacy-scoped procedures and has no report state; Claude setup wrapper routes to the legacy install path; Claude wrapper descriptions drop or change activation triggers), roles 18, host guides 20, repository instructions 15; none blocking outside skills.
+- Cross-area pattern: the same rule copied in several files with drifting wording (workspace policy, exact-diff rule, pre-dispatch paragraph, Engram/Codegraph policy, checkpoint pinning, TDD commit rule).
+- Limits: two reviewers did not read review-convergence.md in full (formally incomplete; no effect on a document audit). Full reports are in the coordinator session; J003 carries the selected findings into correction jobs.
+
 ## J002
 
 - Size: S
-- Status: in-progress
+- Status: completed
 - Objective: Gather empirical evidence of which factory instructions fail in practice, using the operator's doctor skills on recent sessions.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Operator runs /doctor-md-skill and /doctor-md-agents in the coordinator session; started by the operator 2026-11-13.
+- Next step: None. Findings feed J003.
 
 ### Acceptance
 
 - The operator runs `doctor-md-skill` and `doctor-md-agents` with the arguments the coordinator proposes; the coordinator records only their verdicts and cited rules, not transcripts or private content.
 - Each empirical finding is cross-referenced with J001 findings (confirmed, new, or not observed).
+
+### Evidence
+
+- doctor-md-skill (operator-invoked, this repository, project skills; 11 of 12 sampled sessions scored, this session excluded; machine-session flags overridden by operator decision as false positives from coordinator skill injection): overall 0.91, efficiency 0.83, coverage 1.0, code quality from 1 session only. Findings: Pi coordinator sessions read many full methodology files serially (3 sessions at 0.4); Pi sessions lost tools mid-work (4 sessions); coordinator did not engage on first request once (claude-e33d9593). Proposals: read references on demand; add "coordinator"/"coordinador" to the coordinator description.
+- doctor-md-agents (grade, repo, global and repo files, 14-day corrections): 50 rules, 5,756 tokens per prompt; 42 rules (3,754 tokens) without evidence in 19 judged sessions; 6 correction candidates, none reaching 2 occurrences; 0 unverified findings. Improve: AGENTS.md check commands (full suite listed before its condition; correction d9c79ff9), #58 contradiction with the coordinator trigger, duplicated Engram paragraph, oversized global walky-talky rule (operator's personal file, outside this repository).
+- Cross-reference with J001: confirmed (AGENTS.md contradiction and duplication, coordinator length); new (Pi tool loss, first-request activation); not observed (most host and role findings, which the sample could not exercise).
 
 ## J003
 
