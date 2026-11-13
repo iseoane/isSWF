@@ -50,15 +50,153 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J003
 
 - Size: S
-- Status: pending
+- Status: in-review
 - Objective: Turn the J001 and J002 evidence into prioritized correction jobs by area.
 - Depends on: J001, J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Awaiting J001, J002 and explicit operator start.
-- Next step: Operator starts J003 after J001 and J002.
+- Blocker: None.
+- Next step: Operator approves the correction jobs J004-J011 before any correction starts; started by the operator 2026-11-13 ("dale").
 
 ### Acceptance
 
 - New S/M correction jobs are added to this plan, each with its files, findings, likelihood-based priority and planned review; extremely unlikely, low-impact findings are recorded as known limits.
 - Corrections preserve meaning, canonical homes, persisted names and Pi/Claude parity; tests that assert edited text are listed per job.
 - The operator approves the job list before any correction starts.
+
+### Evidence
+
+- Correction jobs J004-J011 drafted from J001 and J002 evidence, in priority order (blocking skill findings first). Each job: one worker (host-native Agent, bypass permission mode), focused checks, one independent semantic review with isswf-writing, plus the tests listed.
+- Known limits (not corrected): PowerShell 5.1 encoding note; headless `Write(path)` host detail; inline jq filter in the reverse contract; `.factory/templates` root not named; `diagnostician` lacks the `isswf-` prefix (the naming rule covers skills); consistent restatements of the second-failed-fix and do-one-by-hand rules; shared tdd/debug/review/retrospective boilerplate; release-skill bare "release" trigger with model invocation disabled; Pi frontmatter `disable-model-invocation` unverified; `.factory/project-setup.md` hardcoded in this repository's generated block; the operator's Codex `~/.codex/AGENTS.md` (Collie-managed, outside the factory).
+
+## J004
+
+- Size: M
+- Status: pending
+- Objective: Make isswf-setup's host-native path complete and route the Claude setup entry to it.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- The normal host-native path contains (or links within the normal path) the worktree policy, tracking and Git-ignore check, readiness and the `configured`/`partial`/`blocked` report; all legacy material sits under one explicit legacy heading; state paths use the selected state directory.
+- `skills/isswf-setup/SKILL.md` uses the shared description and routes to host-native setup unless the operator explicitly selects a legacy runtime installation.
+- The telemetry opt-in states its dirty-state rule once; maintainer-only rules move to AGENTS.md or development.md; the Engram/Codegraph template keeps a single summary line.
+- Tests: host-portability, worktree-location, host-discovery (CI), release-package; check-docs.
+
+## J005
+
+- Size: S
+- Status: pending
+- Objective: Make every Claude plugin skill entry carry its shared skill's activation description.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- Each `skills/*/SKILL.md` description equals its shared `.agents/skills/*/SKILL.md` description byte for byte; the coordinator description names the operator's address words ("coordinator", "coordinador").
+- A focused test fails when a wrapper description differs from its shared skill (negative control recorded).
+- Tests: the new check, host-portability, release-package; check-docs.
+
+## J006
+
+- Size: M
+- Status: pending
+- Objective: Make the repository instructions short, consistent and actionable.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- AGENTS.md: delegation rule conditioned on the coordinator trigger; one Engram/Codegraph copy; check commands state the focused-first condition before the commands; delegation, verification and role-selection restatements reduced to pointers; a path for requests with no initiative; operator-only and filler lines removed. Token cost reported before and after.
+- REVIEW.md: the wording-finding cap excludes changes whose objective is documentation or instructions; the person-approval list names feature-delivery.md and project-release.
+- project-release: a stop row for a verified candidate without a publication grant; the Windows extraction note inside the extraction step; each reference paired with its operation; the local host-checks command named.
+- Tests: documentation, host-portability, platform-package; check-docs.
+
+## J007
+
+- Size: M
+- Status: pending
+- Objective: Make the coordinator skill findable and single-sourced.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- The long reclassification paragraph is split into labelled subsections with the condition first (reclassify, size and split, churn checkpoint, cross-host feasibility).
+- The version advisory moves to a coordinator reference with a one-line first-activation trigger; references are read on demand per stage; command safety for host inventories is stated once.
+- The five quality areas are named or linked; the interview trigger keeps one home; state-directory, Brief-ready and Status terms are unified; howto drops its hard-coded direct-use list.
+- Tests: worker-methodology, worker-method-evidence, host-portability, release-package; check-docs.
+
+## J008
+
+- Size: M
+- Status: pending
+- Objective: Make the review chain usable for every review shape and single-sourced.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- reviewer.md: model and effort are reported values, not start conditions; a document-audit branch (commit and paths, no diff) exists; the snapshot digest has a path when the reviewer cannot compute it; `inconclusive` is the only axis outcome term.
+- `agents/isswf-reviewer.md` and reviewer.md require review-convergence.md; isswf-review points to the canonical findings format (severity, likelihood, origin); the exact-diff rule keeps one home with pointers elsewhere.
+- Tests: reviewer-task, review-guidance, claude-reviewer-tools, host-portability; check-docs.
+
+## J009
+
+- Size: M
+- Status: pending
+- Objective: Make the worker and the other role profiles consistent and single-sourced.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- worker.md: start inputs split into blocking and inspectable; an explicit exception for the attempt-record path; steps 2 and 5 split into one rule per bullet; the TDD commit rule and mutation-evidence retention point to their canonical homes.
+- Role references point to the coordinator trigger table instead of restating triggers; checkpoint pinning has one canonical paragraph and delivery uses the same conditional wording; delivery's duplicate text removed; researcher coordinator actions moved; memory-save permission stated for planner and researcher; diagnostician and retrospective say how they are dispatched.
+- Tests: worker-methodology, worker-method-evidence, planner-task, diagnostic-task, host-portability, release-package; check-docs.
+
+## J010
+
+- Size: M
+- Status: pending
+- Objective: Make the host guides single-sourced, complete for bound reviews and equal for Pi and Claude.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- A shared host-neutral bound-review reference holds the binding namespaces and candidate-bound checks; both host guides link to it with a read-when line.
+- The Claude bound review launches with stream-json, records the `Run:` session id and observes tool calls; the Claude content `outputBytes` limit is stated; a linked worktree has a next step; a missing approved effort has a path.
+- Pre-dispatch and workspace-policy text reduced to pointers; child acknowledgement and post-launch return of control stated for both hosts; host-capability claims tagged observed or documented; the Pi review uses the approved selection; the reverse contract opens with its trigger; a Claude plugin-loaded check added; Pi tool-loss recovery stated.
+- Tests: host-portability, j030-reverse-protocol, worker-method-evidence, worker-methodology, release-package; check-docs.
+
+## J011
+
+- Size: S
+- Status: pending
+- Objective: Give triage, interview and writing explicit inputs and consistent walkthroughs.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md)
+- Blocker: Awaiting operator approval of the job list and explicit start.
+- Next step: Operator approves J004-J011 and starts them.
+
+### Acceptance
+
+- isswf-triage lists required inputs (factory root, operator decision, query access, initiative/job) with a stop when one is missing, and uses factory-root paths.
+- isswf-interview uses the project's glossary files and returns the outcome to the coordinator when no plan exists.
+- isswf-writing names the same walkthrough set as agent-documents.md.
+- Tests: host-discovery (CI), host-portability, release-package; check-docs.
