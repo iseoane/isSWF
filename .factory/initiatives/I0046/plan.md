@@ -164,14 +164,34 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J008
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Ship the Claude Code pane inside the isswf plugin as an opt-in view consuming the packaged snapshot.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Review V001 PASS; chained PR on feat/i0046-j007-usd for CI; operator reviews the whole mod live and approves the packaging changes before acceptance.
+- Next step: None. Accepted by the operator 2026-11-12 after live review, with approval of the packaging changes; merge stays out of main. The initiative stays open (J009).
 
 ### Acceptance
 
 - Opt-in per installation; disabled state has no reads, timers or UI.
 - Packaged at the plugin release version; validate/test pass; Windows path handling verified; en/es docs updated.
+
+### Evidence
+
+- Chained PR #281 (base feat/i0046-j007-usd): review V001 Aggregate PASS; coordinator applied review suggestions and operator styling; plugin validate and test 8/8.
+- Full check-quality PASS (coordinator); CI run 43305493925 green on Linux and Windows.
+- Operator reviewed the pane live and accepted it.
+
+## J009
+
+- Size: S
+- Status: pending
+- Objective: Make isswf-setup tell Claude Code users how to turn on the initiatives pane.
+- Depends on: J008
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
+- Blocker: Awaiting explicit operator start.
+- Next step: Operator starts J009.
+
+### Acceptance
+
+- The setup flow mentions the opt-in pane for Claude Code (/config, Initiatives pane, /isswf-initiatives) by linking the installation guide rather than copying it; Pi unaffected; check-docs and focused tests pass.
