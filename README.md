@@ -31,7 +31,7 @@ The site is published at [https://iseoane.github.io/isSWF/](https://iseoane.gith
 
 ## Retained compiled release (legacy path)
 
-The older compiled-executor installation is a separate path, not a prerequisite for new native-host tasks. Its documented release evidence targets Linux x64; it has different runtime, isolation and migration constraints and does not certify native Windows/macOS execution. Existing installations are not migrated by adopting the native workflow. Consult [installation and legacy-runtime limits](docs/en/installation.md) and the exact release evidence before selecting that path. The package manifest version is not evidence of a published release; do not infer a latest release or package-registry publication from it.
+The compiled release installation is a separate path, not a prerequisite for new native-host tasks. It no longer ships the legacy executor tools. Its documented release evidence targets Linux x64; it has different runtime and migration constraints and does not certify native Windows/macOS execution. Existing installations are not migrated by adopting the native workflow. Consult [installation and legacy-runtime limits](docs/en/installation.md) and the exact release evidence before selecting that path. The package manifest version is not evidence of a published release; do not infer a latest release or package-registry publication from it.
 
 ## More
 

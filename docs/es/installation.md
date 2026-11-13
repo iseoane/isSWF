@@ -125,7 +125,7 @@ El procedimiento de migración siguiente solo se aplica cuando el operador selec
 
 Actualizar el paquete instalado no actualiza los registros de todos los proyectos. Cada proyecto mantiene su elección hasta que lo migres de forma explícita.
 
-Antes de migrar, guarda los archivos afectados en Git y termina o reconcilia el trabajo en ejecución. Los intentos heredados que siguen abiertos, como una pull request enviada sin resultado confirmado o una revisión de recuperación pendiente, bloquean la migración. Ciérralos primero con la versión que los inició; el resultado de la inspección indica esa versión. La migración comprueba el cambio propuesto, conserva la versión anterior y registra cómo recuperarse. No borres versiones conservadas ni registros de operaciones interrumpidas para forzar una actualización.
+Antes de migrar, guarda los archivos afectados en Git y termina o reconcilia el trabajo en ejecución. Los intentos heredados que siguen abiertos, como una pull request enviada sin resultado confirmado o una revisión de recuperación pendiente, bloquean la migración. Ciérralos primero con la versión que los inició; el resultado de la inspección indica esa versión. Ejecuta directamente las herramientas conservadas de esa versión, como describe el [contrato de instalación](../installation.md), porque el lanzador actual ya no las ejecuta. La migración comprueba el cambio propuesto, conserva la versión anterior y registra cómo recuperarse. No borres versiones conservadas ni registros de operaciones interrumpidas para forzar una actualización.
 
 La [guía técnica de instalación](../installation.md), en inglés, incluye los comandos exactos, la vuelta a una versión anterior y la recuperación.
 
