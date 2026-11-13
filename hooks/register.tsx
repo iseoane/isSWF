@@ -15,6 +15,7 @@ const LABELS = {
   es: {
     notActive: 'El coordinador isSWF no está activo en esta sesión.',
     unknown: 'desconocido',
+    references: 'referencias',
     verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', running: 'en curso' } as Record<string, string>,
     blocked: 'bloqueados',
     open: 'sin cerrar',
@@ -37,6 +38,7 @@ const LABELS = {
   en: {
     notActive: 'The isSWF coordinator is not active in this session.',
     unknown: 'unknown',
+    references: 'references',
     verdicts: { passed: 'passed', 'changes-requested': 'changes requested', running: 'running' } as Record<string, string>,
     blocked: 'blocked',
     open: 'open',
@@ -184,7 +186,7 @@ function usageLines(entry: any, t: Labels) {
       `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''}`,
       `${t.duration}: ${duration === undefined ? t.unknown : `${Math.round(duration / 1000)} s`}`,
       `${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
-      `skills: ${countKeys(found.map((u: any) => u.skills)) ?? t.unknown} · .agents: ${countKeys(found.map((u: any) => u.agentsReads)) ?? t.unknown}`,
+      `skills: ${countKeys(found.map((u: any) => u.skills)) ?? t.unknown} · ${t.references}: ${countKeys(found.map((u: any) => u.agentsReads)) ?? t.unknown}`,
     ],
   }
 }
