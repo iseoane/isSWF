@@ -7,12 +7,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J001
 
 - Size: S
-- Status: pending
+- Status: completed
 - Objective: Make workers run only the checks their change affects and leave the full suite to the coordinator once, when needed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J001.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: None.
+- Next step: None. Merge into main awaits the operator (PR for I0049).
 
 ### Acceptance
 
@@ -20,15 +20,21 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Worker reports name the checks not run; the coordinator runs the full suite at most once on the final candidate, only when the rule requires it, and otherwise relies on PR CI.
 - Same outcome for Pi and Claude Code; en/es docs equivalent if user guides change; check-docs and focused methodology tests pass.
 
+### Evidence
+
+- Review R1 (native isswf-reviewer, model inherited, diff 91196e8..1ed3414 without `.factory`, supplied inline): Aggregate PASS, Standards pass, Spec pass; 0 blocking.
+- Coordinator applied S1 (no documented rule or no CI: run the full suite once or report it as not run), S2 (a selected skill may also ask for a sensitivity experiment), I1 (Status passage keeps Blocker/Next step fields) and I2 (J003 brief r2 records the operator start).
+- Focused checks after corrections: check-docs, host-portability, worker-method-evidence, worker-methodology, review-guidance, reviewer-task, diagnostic-task. Full suite left to PR CI.
+
 ## J002
 
 - Size: S
-- Status: pending
+- Status: completed
 - Objective: Make new tests and mutation experiments earn their place.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Awaiting J001 and explicit operator start.
-- Next step: Operator starts J002.
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
+- Blocker: None.
+- Next step: None. Merge into main awaits the operator (PR for I0049).
 
 ### Acceptance
 
@@ -36,18 +42,30 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Mutation experiments run only when the brief asks or a reviewer proposes one for a concrete doubt (review.md); workers do not add them on their own.
 - Coordinator briefs name the risks to test rather than only listing cases; Pi and Claude Code parity; check-docs and focused methodology tests pass.
 
+### Evidence
+
+- Review R1 (native isswf-reviewer, model inherited, diff 91196e8..1ed3414 without `.factory`, supplied inline): Aggregate PASS, Standards pass, Spec pass; 0 blocking.
+- Coordinator applied S1 (no documented rule or no CI: run the full suite once or report it as not run), S2 (a selected skill may also ask for a sensitivity experiment), I1 (Status passage keeps Blocker/Next step fields) and I2 (J003 brief r2 records the operator start).
+- Focused checks after corrections: check-docs, host-portability, worker-method-evidence, worker-methodology, review-guidance, reviewer-task, diagnostic-task. Full suite left to PR CI.
+
 ## J003
 
 - Size: S
-- Status: pending
+- Status: completed
 - Objective: Fix review findings in proportion to their likelihood and impact.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Awaiting J002 and explicit operator start.
-- Next step: Pilot running in this repository first (from I0046 J007, 2026-11-12): the coordinator records extremely unlikely, low-impact findings as known limits. Operator decides on default adoption after observing it.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: None.
+- Next step: None. Merge into main awaits the operator (PR for I0049).
 
 ### Acceptance
 
 - Independent review stays as selected today; it is not removed or weakened.
 - Findings in extremely unlikely cases with low impact are recorded as known limits, not turned into corrections; acceptance criteria are written proportionally (no absolutes such as "always" for edge cases) — operator decision 2026-11-12 after I0046 J006 needed three rounds for oversized transcripts.
 - Pi and Claude Code parity; check-docs and focused methodology tests pass.
+
+### Evidence
+
+- Review R1 (native isswf-reviewer, model inherited, diff 91196e8..1ed3414 without `.factory`, supplied inline): Aggregate PASS, Standards pass, Spec pass; 0 blocking.
+- Coordinator applied S1 (no documented rule or no CI: run the full suite once or report it as not run), S2 (a selected skill may also ask for a sensitivity experiment), I1 (Status passage keeps Blocker/Next step fields) and I2 (J003 brief r2 records the operator start).
+- Focused checks after corrections: check-docs, host-portability, worker-method-evidence, worker-methodology, review-guidance, reviewer-task, diagnostic-task. Full suite left to PR CI.
