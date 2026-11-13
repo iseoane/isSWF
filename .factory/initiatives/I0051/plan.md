@@ -165,12 +165,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J008
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Make the review chain usable for every review shape and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Review R1 of 3b42626.
+- Next step: None.
 
 ### Acceptance
 
@@ -178,15 +178,22 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - `agents/isswf-reviewer.md` and reviewer.md require review-convergence.md; isswf-review points to the canonical findings format (severity, likelihood, origin); the exact-diff rule keeps one home with pointers elsewhere.
 - Tests: reviewer-task, review-guidance, claude-reviewer-tools, host-portability; check-docs.
 
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited): commit 3b42626; reviewer shapes (commit, snapshot, document audit), model/effort reported, `inconclusive` only, review-convergence required in reviewer.md and both reviewer profiles, exact-diff rule single home; worker-methodology regexes updated to the pointer wording.
+- Coordinator checks on 3b42626: worker-methodology, reviewer-task, review-guidance, host-portability pass.
+- Review R1 (native isswf-reviewer, model inherited, diff ddd90ed..3b42626): verdict as reported: "I recommend pass for I0051 J008 R1. Both axes pass and nothing blocks; there are two non-blocking suggestions." Both applied in c3d0a9a (audit-shape trigger; inconclusive when no digest can be computed or supplied).
+- Integration needs a person's approval (`.agents/hosts/**`, `.agents/roles/*.md`).
+
 ## J009
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Make the worker and the other role profiles consistent and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J009.
+- Next step: Review R1 of 3d76c65. Coordinator decision: delivery input checkpoints follow the conditional pinned-input wording; the coordinator pre-dispatch refusal still requires a full input SHA for dispatched jobs.
 
 ### Acceptance
 
@@ -197,12 +204,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J010
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Make the host guides single-sourced, complete for bound reviews and equal for Pi and Claude.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J010.
 
 ### Acceptance
 
