@@ -1,4 +1,4 @@
-# I0053/J004 r2: Detect and recommend Engram and Codegraph (prepared, not started)
+# I0053/J004 r2: Detect and recommend Engram and Codegraph (started 2026-11-13)
 
 Supersedes r1 after the Graphify trial (see plan evidence): Graphify and GitNexus are out of scope.
 

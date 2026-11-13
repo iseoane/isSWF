@@ -68,12 +68,12 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 
 ## J004
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: isSWF setup and update detect Engram and Codegraph for the project, use what is wired, recommend what is missing, and offer to initialise Codegraph for the repository.
 - Depends on: J003
 - Brief: [brief-r2.md](jobs/J004/brief-r2.md)
 - Blocker: None.
-- Next step: Coordinator implements in worktree isSWF-worktrees/i0053-j004 (branch feat/i0053-j004-setup-detection); then bound review, PR and merge.
+- Next step: Implementation merged; the operator asked to keep I0053 open, so confirm whether to close it (mark J004 completed) or add follow-up work.
 
 ### Acceptance
 
@@ -88,3 +88,4 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 - 2026-11-13: Graphify trial on this repository (82 methodology docs plus code, `.factory/initiatives` excluded): about 438k tokens for the build and 50k for an 8-file incremental update; no path between docs and the code that implements them (e.g. bound review evidence to tools/git-evidence-mcp.mjs); incremental updates dropped cross-file nodes on ID collisions. Grep answered the same questions without noise. Decision: Graphify is not supported by setup nor used here.
 - 2026-11-13: GitNexus not tried: code-only overlap with Codegraph and more intrusive (PreToolUse hooks on grep/glob/bash, writes AGENTS.md and CLAUDE.md). Not supported.
 - 2026-11-13: Codegraph's UserPromptSubmit prompt hook is not installed (noisy, unrequested context); the agent-depot recipe handles that. The operator uninstalled Codegraph pending a hook-free reinstall.
+- 2026-11-13: A001 complete at 0a4cc66; bound review V001 FAIL (F1 Engram identity not recorded; fixed), V002 PASS. Accepted under delegated acceptance (low risk, methodology text and a static test).

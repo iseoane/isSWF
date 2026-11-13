@@ -67,6 +67,8 @@ The plugin also includes an optional initiatives pane, which is off by default. 
 
 ## Initialise a project
 
+Setup reports Engram and Codegraph: for each, whether it is wired and used, installed but not wired, not initialised for the repository (Codegraph), or not installed, and recommends the missing ones as optional. When Codegraph is installed but the repository has no index, setup asks whether to run `codegraph init` and runs it only if you agree.
+
 Open the target repository and invoke the setup skill:
 
 | Host | Command |
