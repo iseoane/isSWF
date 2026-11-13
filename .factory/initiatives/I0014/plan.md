@@ -4,6 +4,8 @@ Type: maintenance
 
 Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do not start further units automatically or expand current I0013. This is an independent future outcome, not another item under I0009.
 
+Standing grant (operator, 2026-11-13): within I0014 the coordinator merges verified PRs (required review passed, exact-head CI green, expected-head protection) without per-PR approval; ask only when a decision is mandatory for the operator or risk is HIGH.
+
 ## J001
 
 - Status: completed
@@ -51,12 +53,12 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 
 ## J003
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Remove the legacy executor tools, SDK callers, their tests, package entries and legacy contracts (EN/ES), keeping history retrievable.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: Integration of PR #289 into main needs operator approval (MEDIUM risk: packaging, CI workflow, host guides).
-- Next step: V002 passed; push, PR, exact-head CI. Integration needs operator approval (workflows, packaging, host guides). Then realign I0009 J029/J030.
+- Blocker: None
+- Next step: None; realign I0009 J029/J030 to the removal (separate initiative).
 
 ### Acceptance
 
@@ -67,3 +69,4 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 ### Evidence
 
 - 2026-11-13: worker A001 + correction C001 (end-to-end journeys); review V001 fail, correction cycle 1 (50b502e), review V002 pass; PR #289 head 06cbb6e, CI run 43421119487 passed on that exact head (portable checks, package and host discovery on ubuntu and windows).
+- 2026-11-13: merged as 1c22a21 with expected-head protection under the operator's standing I0014 grant.
