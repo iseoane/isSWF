@@ -256,7 +256,7 @@ try {
   const preview = JSON.parse(cli(releaseB, 'inspect').stdout);
   assert.equal(preview.status, 'update-available'); assert.deepEqual(preview.changed, ['.isswf/install.json']);
   assert.deepEqual(await inventory(project), beforeUpdate); assert.deepEqual(await inventory(store), beforeStore);
-  assert.equal(JSON.parse(cli(releaseB, 'locate').stdout).pin.runtimeId, receiptA.runtimeId, 'Updating host package does not update project');
+  assert.equal(JSON.parse(cli(releaseB, 'locate').stdout).pin.runtimeId, receiptL.runtimeId, 'Updating host package does not update project');
   const migration = ['--id', 'M0001', '--expected', preview.expected, '--quiescent-ref', 'Synthetic operator-confirmed fixture has no external writers'];
   assert.match(cli(releaseB, 'migrate', migration.map(value => value === preview.expected ? '0'.repeat(64) : value), false).stderr, /expected/u);
   // A registered legacy attempt whose PR submission has no confirmed outcome must be reconciled under its original pin.
@@ -392,6 +392,6 @@ ${raceError}`);
   assert.equal(JSON.parse(cli(releaseB, 'recover-state', ['--id', 'S0001']).stdout).activeDirectory, '.isswf', 'Recovery reconciles an already completed rename');
   assert.equal(JSON.parse(cli(releaseB, 'init', ['--tracking', 'local']).stdout).status, 'initialized');
   assert.deepEqual(await readFile(join(project, '.isswf/initiatives/I0002/jobs/J001/brief-r1.md')), legacyBytes);
-  console.log('PASS actual committed release, offline npm tarball install, own-source pins, shared versions, .isswf init, retained runtime selection, preview no writes, explicit migration, active/dirty/tamper/symlink guards, rollback, interrupted recovery and byte-preserving .factory move; no Claude or provider invocation');
+  console.log('PASS actual committed release, offline npm tarball install, own-source pins, shared versions, .isswf init, retained runtime selection, preview no writes, explicit migration, active/dirty/tamper/symlink guards, rollback, interrupted recovery, migration from a legacy-executor release with its retained gate, retired legacy paths absent from the package and byte-preserving .factory move; no Claude or provider invocation');
 } catch (error) { keep = true; console.error('Retained failing fixture: ' + temp); throw error; }
 finally { if (!keep) await rm(temp, { recursive: true, force: true }); }
