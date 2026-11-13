@@ -68,21 +68,21 @@ For every setup running in Claude Code, when reporting plugin readiness, tell th
 
 ### Report project memory and code index
 
-On setup, and again after an observed host package update, report Engram and Codegraph for this project. isSWF never installs, wires, upgrades or reindexes them; their own installers add their hooks and instructions. Read only configuration and project markers: make no model call and start no server.
+On setup, and again after an observed host package update, report Engram and Codegraph for this project. isSWF never installs, upgrades or reindexes them and never registers their servers with a host; their own installers add their hooks and instructions. Pi role tool overrides for detected providers still follow [factory defaults](#confirm-portable-factory-defaults). Read only configuration and project markers: make no model call and start no server.
 
-For each tool, report exactly one state:
+For each tool, report exactly one state. A wired Codegraph in a repository without `.codegraph/` reports "Installed, repository not initialised"; a Codegraph that is neither wired nor initialised reports "Installed, not wired for this host" and still gets the init offer below.
 
 | State | Evidence |
 | --- | --- |
 | Wired and used | The current session lists the server and its tools (Claude Code: `engram` or `codegraph` in the connected MCP servers; Pi: the tools that [Pi setup](../../hosts/pi.md#add-codegraph-and-engram-tools-when-installed) detects as loaded). |
-| Installed, not wired for this host | The executable is on the path (`command -v` on Linux, `Get-Command` on Windows), but the session does not list the server. Point to the tool's own installer (Codegraph: `codegraph install --target <host>`); do not edit host configuration. |
+| Installed, not wired for this host | The executable is on the path (`command -v` on Linux, `Get-Command` on Windows), but the session does not list the server. Point to the tool's own installer (Codegraph on Claude Code: `codegraph install --target claude`; on Pi, see [Pi setup](../../hosts/pi.md#add-codegraph-and-engram-tools-when-installed)); do not register servers yourself. |
 | Installed, repository not initialised | Codegraph only: wired or installed, but the primary checkout has no `.codegraph/` directory. |
 | Not installed | Neither the server nor the executable is found. Recommend it once as optional; never require it. |
 
-- **Engram.** Use it under the project's explicit identity recorded in setup; never derive one from a directory or worktree name. When absent, recommend it once for project memory.
-- **Codegraph.** When the repository is not initialised, ask once: **Initialise Codegraph for this repository?** Only on an explicit yes, run `codegraph init` at the primary checkout root, never in a linked worktree, and record the decision. Preserve an existing index and never re-run init or reindex as a side effect. Codegraph's MCP server watcher keeps the index current. Linked worktrees have no index of their own: the coordinator queries the primary checkout's index (Codegraph `projectPath`) or reports the gap.
+- **Engram.** Ask the operator for the project's Engram identity, or confirm an existing recorded one, and record it; never derive it from a directory or worktree name. Until it is recorded the coordinator skips Engram lookups. When Engram is absent, recommend it once for project memory.
+- **Codegraph.** When the repository is not initialised, ask once: **Initialise Codegraph for this repository?** Only on an explicit yes, run `codegraph init` at the primary checkout root, never in a linked worktree, and record the decision. Preserve an existing index and never re-run init or reindex as a side effect. Codegraph's MCP server watcher keeps the index current. Linked worktrees have no index of their own: on Claude Code the coordinator queries the primary checkout's index (Codegraph `projectPath`); where a host's Codegraph tool cannot select it, report the gap.
 
-Record each state, the Codegraph decision and the date in `<selected-state>/project-setup.md`. Repeat setup with no change is a no-op.
+Record each state, the Engram project identity, the Codegraph decision and the date in `<selected-state>/project-setup.md`. Repeat setup with no change is a no-op.
 
 ### Select the writing-workspace policy and local location
 

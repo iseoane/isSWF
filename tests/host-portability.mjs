@@ -274,9 +274,10 @@ for (const role of ['worker', 'researcher', 'planner', 'reviewer']) assert.doesN
 assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /\[CodeGraph and Engram tools\]\(.*hosts\/pi\.md#add-codegraph-and-engram-tools-when-installed/u);
 const indexSetup = (await read('.agents/skills/isswf-setup/SKILL.md')).split('### Report project memory and code index')[1]?.split('\n### ')[0] ?? '';
 for (const state of ['Wired and used', 'Installed, not wired for this host', 'Installed, repository not initialised', 'Not installed']) assert.match(indexSetup, new RegExp(`\\| ${state} \\|`, 'u'), state);
-assert.match(indexSetup, /never installs, wires, upgrades or reindexes/u);
+assert.match(indexSetup, /never installs, upgrades or reindexes them and never registers their servers/u);
 assert.match(indexSetup, /Only on an explicit yes, run `codegraph init` at the primary checkout root, never in a linked worktree/u);
-assert.match(indexSetup, /never derive one from a directory or worktree name/u);
+assert.match(indexSetup, /Ask the operator for the project's Engram identity.*never derive it from a directory or worktree name/u);
+assert.match(indexSetup, /Record each state, the Engram project identity, the Codegraph decision/u);
 assert.match(piHost, /async: false/);
 assert.match(piHost, /contact_supervisor/);
 assert.match(piHost, /does not install.*automatically/i);
