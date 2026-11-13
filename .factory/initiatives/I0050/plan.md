@@ -7,12 +7,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J001
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Hand coordinator-observed checks to bound reviewers in a block bound to the candidate SHA.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements r2; started by the operator 2026-11-13.
+- Next step: Semantic review of the whole I0050 candidate after J002. Coordinator-owned implementation (worker A001 blocked by auto-mode no-verdict; operator chose coordinator implementation 2026-11-13).
 
 ### Acceptance
 
@@ -22,12 +22,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J002
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Let bound reviewers read a line or byte range of a large file at the bound revision.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J002.
+- Blocker: None.
+- Next step: Coordinator implements ranged content reads; started by the operator 2026-11-13.
 
 ### Acceptance
 
