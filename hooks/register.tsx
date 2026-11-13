@@ -3,7 +3,6 @@ import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import { joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
-import { withCoordinatorTools } from './coordinator-tools.tsx'
 
 const PANE = 'isswf-initiatives'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
@@ -227,28 +226,24 @@ function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
 }
 
 export const register: Register = (on, options) => {
-  const isPaneOn = options?.initiativesPane === true
-
-  // Always on: the coordinator skill learns which of Engram and Codegraph this session has.
-  on('skill.prompt', async ($, e, next) => {
-    const result = await next(e)
-    if (!e.skill.endsWith('isswf-coordinator')) return result
-    if (isPaneOn) {
-      await $.state.set(IS_ACTIVATED, true)
-      ensureFallback($)
-      void paneSpec($).then(spec => $.ui.open(spec))
-    }
-    return { ...result, text: await withCoordinatorTools($, result.text) }
-  })
-
-  // Opt-in: with the option off no pane hook is added, so the pane reads, schedules, registers and draws nothing.
-  if (!isPaneOn) return
+  // Opt-in: with the option off no hook is added, so nothing reads, schedules, registers or draws.
+  if (options?.initiativesPane !== true) return
 
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'isswf-initiatives',
       description: 'Open or refresh the isSWF initiatives pane; pin or unpin <ID>',
     })
+
+    return next(e)
+  })
+
+  on('skill.prompt', async ($, e, next) => {
+    if (e.skill.endsWith('isswf-coordinator')) {
+      await $.state.set(IS_ACTIVATED, true)
+      ensureFallback($)
+      void paneSpec($).then(spec => $.ui.open(spec))
+    }
 
     return next(e)
   })

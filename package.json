@@ -36,7 +36,6 @@
     "skills",
     "hooks/hooks.json",
     "hooks/register.tsx",
-    "hooks/coordinator-tools.tsx",
     "types/index.d.ts",
     "tools/*.mjs",
     "docs/installation.md",

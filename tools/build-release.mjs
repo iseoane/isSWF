@@ -42,7 +42,6 @@ const fixedInventoryPaths = [
   '.claude-plugin/marketplace.json',
   'hooks/hooks.json',
   'hooks/register.tsx',
-  'hooks/coordinator-tools.tsx',
   'types/index.d.ts',
   '.agents/hosts/claude-code.md',
   '.agents/hosts/claude-code-review-launch.md',
