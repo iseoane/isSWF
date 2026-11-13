@@ -24,6 +24,7 @@ const featureDeliveryLink = "../../roles/references/feature-delivery.md";
 export const nativePiResources = [
   ".agents/hosts/pi.md",
   "tools/git-evidence.mjs",
+  "tools/review-checks.mjs",
   "tools/git-evidence-pi-extension.mjs",
   "tools/git-evidence-invoke.mjs",
   "tools/git-evidence-mcp.mjs",

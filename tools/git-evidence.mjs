@@ -38,7 +38,7 @@ export function validateBinding(value) {
   return binding;
 }
 
-function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
+export function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
   const remaining = deadline - Date.now();
   if (remaining <= 0) throw Error('identity-timeout');
   const env = {

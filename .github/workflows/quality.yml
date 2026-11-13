@@ -116,6 +116,8 @@ jobs:
         run: node tests/git-evidence.mjs .
       - name: Verify exact committed Git content CLI
         run: node tests/git-content.mjs .
+      - name: Verify candidate-bound review checks block
+        run: node tests/review-checks.mjs .
       - name: Install locked host test dependencies without lifecycle scripts
         run: npm ci --prefix tooling/host-tests --ignore-scripts --no-audit --no-fund
       - name: Verify native Pi bound identity, diff and content invokers
