@@ -14,6 +14,8 @@ J019's five-file methodology correction is integrated through PR93. J020's six-f
 
 J019 observations supersede its retained pre-publication brief. J018/J020 historical pre-publication evidence remains intact; current status below reconciles integrated PR98/99/96 using retained delivery and local ancestry, without claiming fresh remote CI. Current operator decisions keep native Pi/Claude, park the custom isolated executor, require interoperability and rescue only independently needed current-main improvements. J027 reuses reconciliation; J028–J031 own residual portability, state recovery, interoperability and conditional PR87 closure. Historical J027 planning grant authorized records and exactly one Sol 6.1 LOW planner only, without implementation, other actors, installations, publication or remote closure; that allocation is consumed. Its earlier J023 freeze is superseded only by the latest J023 feature start above. Unique work/backups stay preserved and J023's product scope remains the read-only Git CLI.
 
+I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289): `isswf-job`, its callers and `docs/model-routing.md`/`docs/local-worker-lifecycle.md` are gone from current source, new installs no longer receive `.isswf/models.json`, and migration blocks while registered legacy attempts stay open. For J029, "legacy" means the `.factory/` state root, and preserving "pins/models" means existing `.isswf/models.json` bytes, which remain preserved. J030 is unaffected. Remaining J029/J030 work is unchanged: the native Windows session. Historical references in this plan resolve at their original checkpoints.
+
 ## J008
 
 - Status: completed
