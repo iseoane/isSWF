@@ -17,13 +17,13 @@ For every triage:
 
 If any is missing, stop and report which; do not prepare.
 
-Before a grant-bound step (`prepare`, `reconcile`, `link-duplicate`, or `read` with `--grant`), you also need the outside-project grant path the coordinator supplies. If none is supplied, for example on direct invocation, stop that step and ask for it.
+Before a grant-bound step (`prepare`, `reconcile`, or `read` with `--grant`), you also need the outside-project grant path the coordinator supplies; before `link-duplicate`, you need the outside-project duplicate decision path instead (see `<factory-root>/docs/issue-intake.md`). If none is supplied, for example on direct invocation, stop that step and ask for it.
 
 Before a new `prepare` or `read` in step 4, you also need the initiative ID and the job ID that its canonical plan already names. If either is missing, leave the issue unprepared and return to the coordinator to create or extend the plan; observation, classification, duplicate detection, authorized labelling and the report still proceed. `reconcile` and `link-duplicate` on an existing record use that record's identity.
 
 ## 1. Bind the authorization
 
-Confirm that the operator's request names the same repository and issue, or an explicit list of issues, and that it asks for triage or preparation. Record that decision as the `reference` of a prepare-only grant stored outside the project, at the path the coordinator supplies (see [Required inputs](#required-inputs)): `version: 1`, `project` (the canonical Git root exactly as the platform resolves it, for example with backslashes on Windows), `repository`, `issue` and `permissions: ["prepare"]`. If the decision is missing or ambiguous, stop and ask for it. A grant file does not authenticate itself, and a triage grant never authorizes implementation, commits or publication.
+Confirm that the operator's request names the same repository and issue, or an explicit list of issues, and that it asks for triage or preparation. When a grant-bound step will follow, record that decision as the `reference` of a prepare-only grant stored outside the project; for assessment only, confirm the decision without writing a grant. The grant is stored at the path the coordinator supplies (see [Required inputs](#required-inputs)): `version: 1`, `project` (the canonical Git root exactly as the platform resolves it, for example with backslashes on Windows), `repository`, `issue` and `permissions: ["prepare"]`. If the decision is missing or ambiguous, stop and ask for it. A grant file does not authenticate itself, and a triage grant never authorizes implementation, commits or publication.
 
 ## 2. Observe the source
 
