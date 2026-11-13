@@ -141,12 +141,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J007
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Make the coordinator skill findable and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Review R1.
+- Next step: None.
 
 ### Acceptance
 
@@ -155,15 +155,22 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - The five quality areas are named or linked; the interview trigger keeps one home; state-directory, Brief-ready and Status terms are unified; howto drops its hard-coded direct-use list.
 - Tests: worker-methodology, worker-method-evidence, host-portability, release-package; check-docs.
 
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited, two rounds): commit 8db0655; coordinator paragraph split into five subsections, version advisory moved to references/version-advisory.md (added to build-release, factory-package and the release-package list after the worker found the packaging gap), read-on-demand rule, terms unified, howto list removed; host-portability assertion updated to `<selected-state>/project-setup.md` (coordinator decision).
+- Coordinator checks on 8db0655: release-package and worker-capacity pass.
+- Review R1 (native isswf-reviewer, model inherited, diff 3ac72bb..8db0655 without J006 paths): verdict as reported: "I recommend pass for I0051 J007 R1: both axes pass and none of the findings blocks." Applied S1 (reread after compaction) and S2 (howto matches "for any subject"); S3 partly: advisory duplicate trimmed, the interview-row double link kept because host-portability asserts it.
+- Integration needs a person's approval (tools/build-release.mjs, tools/factory-package.mjs).
+
 ## J008
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Make the review chain usable for every review shape and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J008.
+- Next step: Review R1 of 3b42626.
 
 ### Acceptance
 
@@ -174,12 +181,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J009
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Make the worker and the other role profiles consistent and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J009.
 
 ### Acceptance
 
