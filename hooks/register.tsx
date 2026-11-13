@@ -18,7 +18,7 @@ const LABELS = {
     notActive: 'El coordinador isSWF no está activo en esta sesión.',
     unknown: 'desconocido',
     references: 'referencias',
-    verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', failed: 'fallido', running: 'en curso' } as Record<string, string>,
+    verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', failed: 'fallido', partial: 'parcial', running: 'en curso' } as Record<string, string>,
     blocked: 'bloqueados',
     open: 'sin cerrar',
     usage: 'consumo',
@@ -41,7 +41,7 @@ const LABELS = {
     notActive: 'The isSWF coordinator is not active in this session.',
     unknown: 'unknown',
     references: 'references',
-    verdicts: { passed: 'passed', 'changes-requested': 'changes requested', failed: 'failed', running: 'running' } as Record<string, string>,
+    verdicts: { passed: 'passed', 'changes-requested': 'changes requested', failed: 'failed', partial: 'partial', running: 'running' } as Record<string, string>,
     blocked: 'blocked',
     open: 'open',
     usage: 'usage',
@@ -72,6 +72,7 @@ const PILL_COLORS: Record<string, string> = {
   passed: 'success',
   'changes-requested': 'warning',
   failed: 'error',
+  partial: 'warning',
   running: 'inactive',
 }
 
@@ -160,13 +161,14 @@ function resolveUsage($: EngineInterface, runs: any[], project: string) {
 
 // Heredoc bodies and quoted text with spaces, such as commit messages or scripts, only mention paths;
 // a quoted single path is still an operand.
-const HEREDOC = /<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?(?:\n\s*\2\s*(?:\n|$)|$)/g
-const QUOTED_PROSE = /(["'])(?:(?!\1)[^\n])*?\s(?:(?!\1)[\s\S])*?\1/g
+// The rest of a heredoc's opening line, such as its output redirection, is kept.
+const HEREDOC = /<<-?\s*(['"]?)(\w+)\1([^\n]*)\n[\s\S]*?(?:\n\s*\2\s*(?:\n|$)|$)/g
+const QUOTED = /(["'])(?:(?!\1)[\s\S])*\1/g
 
 function touchedIds(e: { tool: string; file_path?: unknown; command?: unknown }) {
   const raw = e.tool === 'Bash' ? e.command : ['Read', 'Edit', 'Write'].includes(e.tool) ? e.file_path : undefined
   if (typeof raw !== 'string') return []
-  const text = e.tool === 'Bash' ? raw.replace(HEREDOC, '\n').replace(QUOTED_PROSE, '""') : raw
+  const text = e.tool === 'Bash' ? raw.replace(HEREDOC, '$3\n').replace(QUOTED, q => (/\s/.test(q) ? '""' : q)) : raw
   const ids = [...text.replace(/\\/g, '/').matchAll(RECORD_PATH)].map(m => m[1])
   if (e.tool === 'Bash') ids.push(...[...text.matchAll(INITIATIVE_FLAG)].map(m => m[1]))
   return ids
@@ -216,7 +218,8 @@ function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
       `${entry.id} · ${entry.kind}`,
       model,
       `${t.effort}: ${known(entry.effort, t)}`,
-      `${t.verdict}: ${t.verdicts[entry.verdict] ?? t.unknown}`,
+      // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
+      `${t.verdict}: ${entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict] ?? t.unknown}`,
       ...resolved.lines,
     ],
   }

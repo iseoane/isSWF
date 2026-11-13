@@ -91,7 +91,7 @@ try {
 
   // A malformed record with no brief degrades to unknown fields; a directory named like a record is ignored.
   assert.equal(jobOf('J003').recordCount, 1);
-  assert.deepEqual(jobOf('J003').rounds, [{ round: 'unknown', entries: [{ id: 'V001', kind: 'review', role: 'unknown', model: 'unknown', modelSource: 'unknown', effort: 'unknown', verdict: 'unknown', runs: [], round: 'unknown', roundSource: 'unknown' }] }]);
+  assert.deepEqual(jobOf('J003').rounds, [{ round: 'unknown', entries: [{ id: 'V001', kind: 'review', role: 'unknown', model: 'unknown', modelSource: 'unknown', effort: 'unknown', verdict: 'unknown', outcome: 'unknown', runs: [], round: 'unknown', roundSource: 'unknown' }] }]);
 
   // An injected fs that fails one read records it in `skipped` instead of throwing.
   const failing = { ...nodeFs, read: path => path.endsWith('V001.md') && path.includes('J003') ? Promise.reject(Error('denied')) : nodeFs.read(path) };
@@ -154,13 +154,14 @@ try {
     ['A001.md', '- Reported status: complete (technical; independent review pending)\n', 'passed'],
     ['A001.md', '## Technical result\n\n- Outcome: complete\n', 'passed'],
     ['A001.md', '- **Outcome:** blocked. Missing fixture.\n', 'failed'],
-    ['A001.md', '- Outcome: partial\n', 'failed'],
+    ['A001.md', '- Outcome: partial\n', 'partial'],
     ['A001.md', '- Reported status: cancelled\n', 'failed'],
     ['A001.md', '- Resultado: fallido\n- Estado: failed\n', 'failed'],
     ['A001.md', '- Outcome: complete, partial, blocked, failed, or cancelled:\n', 'unknown'],
     ['A001.md', '- Reported status: running\n- Outcome: complete\n', 'running'],
     ['V001.md', '- Reported status: blocked\n- Verdict: pass\n', 'failed'],
   ]) assert.equal((await recordOf(file, text)).rounds[0].entries[0].verdict, expected, text);
+  assert.equal((await recordOf('A001.md', '- Reported status: cancelled\n')).rounds[0].entries[0].outcome, 'cancelled');
   // Only rounds with records are drawn: r1 has none, the record lands in the latest round.
   assert.deepEqual((await recordOf('A001.md', '- Outcome: complete\n')).rounds.map(r => r.round), [2]);
   // Roles: the shared role file wins over the host agent that ran it.
@@ -169,6 +170,9 @@ try {
     ['- Profile: `.agents\\roles\\researcher.md`\n', 'researcher'],
     ['- Agent: isswf:isswf-planner\n', 'planner'],
     ['- Agent: isswf-worker\n', 'worker'],
+    // A review citing another role's file in its body stays a review.
+    ['- Observer: isswf:isswf-reviewer\n\nFinding: .agents\\roles\\worker.md:12 drifts.\nSee roles/reviewer.md.\n', 'reviewer'],
+    ['Notes: read .agents/roles/worker.md\n', 'worker'],
   ]) assert.equal((await recordOf('A001.md', text)).rounds[0].entries[0].role, role, text);
 
   // The Node wrapper keeps project-state.mjs's guard and refuses a core selection that disagrees with it.
