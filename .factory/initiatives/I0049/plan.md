@@ -7,12 +7,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J001
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Make workers run only the checks their change affects and leave the full suite to the coordinator once, when needed.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements r2 on feat/i0049-proportional-verification; started by the operator 2026-11-13.
+- Next step: Semantic review of the whole I0049 candidate after J003.
 
 ### Acceptance
 
@@ -23,12 +23,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J002
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Make new tests and mutation experiments earn their place.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Awaiting J001 and explicit operator start.
-- Next step: Operator starts J002.
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
+- Blocker: None.
+- Next step: Worker implements r2; started by the operator 2026-11-13.
 
 ### Acceptance
 
