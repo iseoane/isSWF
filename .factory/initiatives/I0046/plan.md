@@ -185,13 +185,19 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J009
 
 - Size: S
-- Status: in-progress
+- Status: completed
 - Objective: Make isswf-setup tell Claude Code users how to turn on the initiatives pane.
 - Depends on: J008
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Started by the operator 2026-11-13; exact-head CI on PR #281, then merge the I0046 PR chain #276..#281 into main.
+- Next step: None. The I0046 PR chain merges into main through PR #281 by operator request 2026-11-13.
 
 ### Acceptance
 
 - The setup flow mentions the opt-in pane for Claude Code (/config, Initiatives pane, /isswf-initiatives) by linking the installation guide rather than copying it; Pi unaffected; check-docs and focused tests pass.
+
+### Evidence
+
+- Setup skill tells Claude Code users how to turn on the initiatives pane, naming the installation guide (a link failed the packaged-link check, CI run 43367147112, and was replaced).
+- Operator request in session: pane labels `.agents` reads as references (`referencias` in Spanish); docs en/es updated; coordinator skill now keeps job status current for status readers.
+- Local: check-quality PASS, check-docs PASS, plugin validate and test 8/8; CI run 43367778061 green on Linux and Windows at 3405931. No independent review (mechanical selection in brief).
