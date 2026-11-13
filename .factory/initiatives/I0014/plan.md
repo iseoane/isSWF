@@ -51,11 +51,11 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 
 ## J003
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Remove the legacy executor tools, SDK callers, their tests, package entries and legacy contracts (EN/ES), keeping history retrievable.
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
-- Blocker: None
+- Blocker: Integration of PR #289 into main needs operator approval (MEDIUM risk: packaging, CI workflow, host guides).
 - Next step: V002 passed; push, PR, exact-head CI. Integration needs operator approval (workflows, packaging, host guides). Then realign I0009 J029/J030.
 
 ### Acceptance
@@ -63,3 +63,7 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 - Legacy executor tools, SDK callers, their tests and package entries are removed; launcher, status and migration still work.
 - Legacy contracts removed from current EN/ES docs and remain retrievable in Git history.
 - CI green on Linux and Windows.
+
+### Evidence
+
+- 2026-11-13: worker A001 + correction C001 (end-to-end journeys); review V001 fail, correction cycle 1 (50b502e), review V002 pass; PR #289 head 06cbb6e, CI run 43421119487 passed on that exact head (portable checks, package and host discovery on ubuntu and windows).
