@@ -31,12 +31,12 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 
 ## J002
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Stop seeding the legacy route file in new installations and block version migration while registered legacy attempts remain unreconciled.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Integration of PR #287 into main needs operator approval (MEDIUM risk, installation code).
-- Next step: Operator decides merge of #287; then prepare the J003 start.
+- Blocker: None
+- Next step: None; J003 continues the retirement.
 
 ### Acceptance
 
@@ -47,6 +47,7 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 ### Evidence
 
 - 2026-11-13: worker A001 (commits ec3c60f..10b8fc3); review V001 pass; PR #287 head 60c22e1, CI run 43415983829 passed on that exact head (portable checks, package and host discovery on ubuntu and windows).
+- 2026-11-13: operator approved; PR #287 merged into main as c8259b9 with expected-head protection.
 
 ## J003
 
@@ -55,7 +56,7 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: Needs an explicit start.
-- Next step: Start after J002 delivery; confirm no external use of the SDK callers first. Then realign I0009 J029/J030.
+- Next step: Operator start. SDK callers checked 2026-11-13: no use outside this repo (only a historical mention in another local project's diagnosis; that project has no registered legacy workers or leases). Then realign I0009 J029/J030.
 
 ### Acceptance
 
