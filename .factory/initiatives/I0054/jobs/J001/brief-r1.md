@@ -1,4 +1,4 @@
-# I0054/J001 r1: Review rounds and coordinator role in the pane (prepared, not started)
+# I0054/J001 r1: Review rounds and coordinator role in the pane (started 2026-11-13)
 
 Grounding (2026-11-13, origin/main a993b66):
 - Rounds are brief revisions: tools/isswf-snapshot-core.mjs readJob builds rounds from `brief-r<n>.md` and assigns each A/V record to the brief it cites (else the latest). A correction plus delta review inside one brief therefore shares a round.
