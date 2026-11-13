@@ -167,7 +167,7 @@ assert.match(workerContract, /trusted-root-resolved paths or full canonical cont
 assert.match(workerContract, /actually consumed \(read or supplied in full\)/u);
 assert.match(workerContract, /missing\/unreadable required resource/u);
 assert.match(workerContract, /selection alone is not evidence/u);
-assert.ok(skill.includes('`<state>/project-setup.md`'), 'Tracking choice must use the single selected state root');
+assert.ok(skill.includes('`<selected-state>/project-setup.md`'), 'Tracking choice must use the single selected state root');
 assert.ok(!skill.includes('`.factory/project-setup.md`'), 'Coordinator must not hard-code the legacy setup path');
 for (const file of ['.agents/hosts/pi.md', '.agents/hosts/claude-code.md']) {
   const hostGuide = await read(file);

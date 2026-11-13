@@ -35,6 +35,7 @@ export const nativePiResources = [
 ];
 const payloadPaths = [
   ".agents/skills/isswf-coordinator/SKILL.md",
+  ".agents/skills/isswf-coordinator/references/version-advisory.md",
   ".agents/skills/isswf-setup/SKILL.md",
   ".agents/roles/worker.md",
   ".agents/roles/diagnostician.md",
