@@ -9,16 +9,21 @@ Assess an issue that already exists and record the result through the native int
 
 ## Required inputs
 
+For every triage:
+
 - The trusted factory root, which resolves the intake guide and tool paths.
 - The operator's decision naming the repository and issue, or an explicit list of issues, and asking for triage or preparation.
 - Authorized query access to each issue.
-- The initiative ID and the job ID that its canonical plan already names.
 
-If any is missing, stop and report which; do not prepare. If you were invoked directly and no plan job exists, stop with the issue unprepared and return to the coordinator to create or extend the plan.
+If any is missing, stop and report which; do not prepare.
+
+Before a grant-bound step (`prepare`, `reconcile`, `link-duplicate`, or `read` with `--grant`), you also need the outside-project grant path the coordinator supplies. If none is supplied, for example on direct invocation, stop that step and ask for it.
+
+Before a new `prepare` or `read` in step 4, you also need the initiative ID and the job ID that its canonical plan already names. If either is missing, leave the issue unprepared and return to the coordinator to create or extend the plan; observation, classification, duplicate detection, authorized labelling and the report still proceed. `reconcile` and `link-duplicate` on an existing record use that record's identity.
 
 ## 1. Bind the authorization
 
-Confirm that the operator's request names the same repository and issue, or an explicit list of issues, and that it asks for triage or preparation. Record that decision as the `reference` of a prepare-only grant stored outside the project, at the path the coordinator supplies: `version: 1`, `project` (the canonical Git root exactly as the platform resolves it, for example with backslashes on Windows), `repository`, `issue` and `permissions: ["prepare"]`. If the decision is missing or ambiguous, stop and ask for it. A grant file does not authenticate itself, and a triage grant never authorizes implementation, commits or publication.
+Confirm that the operator's request names the same repository and issue, or an explicit list of issues, and that it asks for triage or preparation. Record that decision as the `reference` of a prepare-only grant stored outside the project, at the path the coordinator supplies (see [Required inputs](#required-inputs)): `version: 1`, `project` (the canonical Git root exactly as the platform resolves it, for example with backslashes on Windows), `repository`, `issue` and `permissions: ["prepare"]`. If the decision is missing or ambiguous, stop and ask for it. A grant file does not authenticate itself, and a triage grant never authorizes implementation, commits or publication.
 
 ## 2. Observe the source
 
@@ -37,7 +42,7 @@ Group issues that share a probable cause, but prepare each issue separately; a s
 
 ## 4. Prepare or reconcile the brief
 
-Prepare new work under an initiative: the canonical initiative plan must already name the job, and both `prepare` and `read` receive `--initiative <ID> --job <JNNN> --type <bug|enhancement|maintenance|research>`, so the brief lives under `<state>/initiatives/<ID>/jobs/<JNNN>/`. If no initiative or job exists yet, stop as [Required inputs](#required-inputs) states. The no-initiative form is only for existing legacy records; never use it for new triage.
+Prepare new work under an initiative: the canonical initiative plan must already name the job, and both `prepare` and `read` receive `--initiative <ID> --job <JNNN> --type <bug|enhancement|maintenance|research>`, so the brief lives under `<state>/initiatives/<ID>/jobs/<JNNN>/`. If no initiative or job exists yet, leave the issue unprepared as [Required inputs](#required-inputs) states. The no-initiative form is only for existing legacy records; never use it for new triage.
 
 Write the proposal with exactly `objective`, `scope`, `exclusions`, `acceptance`, `questions`, `nextStep` and `targetBase` (the full SHA of the base the work would start from). Then run `prepare`. With no questions, the brief is `ready-for-agent`; with questions, it is `needs-info`. Repeating identical inputs returns `reused`.
 
