@@ -7,12 +7,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J001
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Audit the in-scope agent-facing Markdown against isswf-writing's agent-document criteria, read-only, and record the findings.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J001.
+- Blocker: None.
+- Next step: Four read-only reviewers audit by area; started by the operator 2026-11-13 ("adelante").
 
 ### Acceptance
 
@@ -23,12 +23,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J002
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Gather empirical evidence of which factory instructions fail in practice, using the operator's doctor skills on recent sessions.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Awaiting explicit operator start; the operator runs the doctor skills, which the coordinator cannot invoke.
-- Next step: Operator starts J002; the coordinator then gives the exact commands and arguments to run.
+- Blocker: None.
+- Next step: Operator runs /doctor-md-skill and /doctor-md-agents in the coordinator session; started by the operator 2026-11-13.
 
 ### Acceptance
 
