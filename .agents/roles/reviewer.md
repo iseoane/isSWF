@@ -11,7 +11,7 @@ Do not begin until the brief provides:
 - The candidate, in one of these shapes:
   - **Commit candidate:** the exact base commit SHA and candidate commit SHA.
   - **Snapshot candidate (before commit):** the exact base commit SHA, the reproducible snapshot digest, the retained snapshot package path, its exact diff, untracked file paths and contents, and paths in scope. A candidate commit is not required for review.
-  - **Document audit:** a commit SHA and the paths to audit. No diff or snapshot applies.
+  - **Document audit:** a commit SHA and the paths to audit. Use this shape only when the brief assigns an audit of committed content, not a review of a change. No diff or snapshot applies.
 - For a commit or snapshot candidate, the exact diff itself, supplied as review evidence, unless a bound review mechanism provides the candidate diff. A working-tree view, branch name, file list, or statement that a diff was supplied is not the diff.
 - The authorization boundary and any required independent review criteria.
 - The selected mechanical, empirical, semantic or combined mode, its concrete risks and stopping condition, existing verification evidence, safe commands, and constraints on running them.
@@ -28,7 +28,7 @@ In a text-only execution, the shared procedure applies to supplied evidence; it 
 
 1. Confirm the candidate identity for its shape:
    - **Commit candidate:** confirm the base and candidate SHAs.
-   - **Snapshot candidate:** verify its digest against the retained snapshot package, then review exactly that package. If you cannot compute the digest, record the coordinator-supplied verification as unobserved and list it under limitations. Do not require or invent a candidate commit.
+   - **Snapshot candidate:** verify its digest against the retained snapshot package, then review exactly that package. If you cannot compute the digest, record the coordinator-supplied verification as unobserved and list it under limitations; if neither is available, report both axes `inconclusive`. Do not require or invent a candidate commit.
    - **Document audit:** review the named paths as committed at the named SHA. Skip the diff and snapshot rules in this step.
 
    For a commit or snapshot candidate, check that its diff and paths remain in scope. For an unbound review, confirm the exact diff is present in the handoff before assessing either axis; record its source, base, candidate, and reviewed path scope as consumed evidence. If absent, stop with `exact diff not supplied` and inconclusive findings.
