@@ -64,6 +64,13 @@ try {
   assert.deepEqual([noisy.stderr.bytes, noisy.stderr.truncated, noisy.stderr.tail.length], [1 << 20, true, 256]);
   assert.equal(missing.error, 'ENOENT');
 
+  // Risk: a timed-out check whose child keeps the pipes open must not hold the block past its timeout.
+  const started = Date.now();
+  const slow = await runReviewChecks({ ...spec([['node', '-e', 'require("child_process").spawn(process.execPath, ["-e", "setTimeout(() => {}, 20000)"], { stdio: "inherit" }); setTimeout(() => {}, 20000)']]), timeoutMs: 1000 });
+  assert.equal(slow.checks[0].timedOut, true);
+  assert.equal(slow.passed, false);
+  assert.ok(Date.now() - started < 10000, 'the block returns soon after the timeout');
+
   const passed = await runReviewChecks(spec([['node', '-e', '']]));
   assert.equal(passed.passed, true);
 

@@ -68,7 +68,12 @@ function runCommand(spec, argv) {
       return;
     }
     let timedOut = false;
-    const timer = setTimeout(() => { timedOut = true; child.kill(); }, spec.timeoutMs);
+    // A timed-out check may leave grandchildren holding its pipes, so finish on the child's exit instead of waiting for close.
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.once('exit', (exitCode, signal) => { child.stdout.destroy(); child.stderr.destroy(); resolve(outcome({ exitCode, signal, timedOut })); });
+      child.kill();
+    }, spec.timeoutMs);
     child.stdout.on('data', chunk => out.add(chunk));
     child.stderr.on('data', chunk => err.add(chunk));
     child.on('error', error => { clearTimeout(timer); resolve(outcome({ timedOut, error: error.code ?? 'spawn-failed' })); });

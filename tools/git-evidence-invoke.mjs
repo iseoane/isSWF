@@ -74,11 +74,11 @@ const decodeUtf8 = bytes => { try { return new TextDecoder('utf-8', { fatal: tru
 
 // A successful result must carry the bound provenance and the operation's own fields; a refusal may omit fields
 // (the CLI bounds its error output) but must not report any that contradict the binding.
-function checkProvenance(operation, evidence, binding, { slot, path, offset }) {
+function checkProvenance(operation, evidence, binding, { slot, path, offset, length }) {
   const expected = { repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256: createHash('sha256').update(JSON.stringify(binding)).digest('hex') };
   if (operation === 'identity') expected.gitExecutable = binding.gitExecutable;
   if (operation === 'content') Object.assign(expected, { commitSha: slot === 'base' ? binding.baseSha : binding.candidateSha, path });
-  if (operation === 'content' && evidence.status === 'ok' && (offset === undefined ? evidence.range !== undefined : evidence.range?.offset !== offset)) throw Error('Content CLI returned a range that was not requested.');
+  if (operation === 'content' && evidence.status === 'ok' && (offset === undefined ? evidence.range !== undefined : evidence.range?.offset !== offset || evidence.range.length !== evidence.contentBytes || evidence.contentBytes > length)) throw Error('Content CLI returned a range that was not requested.');
   const entries = Object.entries(expected);
   const consistent = evidence.status === 'error' ? entries.every(([key, value]) => evidence[key] === undefined || evidence[key] === value) : entries.every(([key, value]) => evidence[key] === value);
   if (!consistent) throw Error(`${specifications[operation].label} CLI returned mismatched bound provenance.`);
@@ -103,7 +103,7 @@ export function invokeEvidence({ cli, operation, binding, slot, path, offset, le
   catch { throw Error(`${spec.label} CLI returned invalid bounded output.`); }
   if (!evidence || !spec.statuses.includes(evidence.status) || evidence.version !== 1 || (operation !== 'identity' && evidence.operation !== operation)) throw Error(`${spec.label} CLI returned an invalid result.`);
   const failed = !(result.status === 0 && (operation === 'identity' ? evidence.status === 'ok' : evidence.status !== 'error'));
-  checkProvenance(operation, evidence, binding, { slot, path, offset });
+  checkProvenance(operation, evidence, binding, { slot, path, offset, length });
   if (operation === 'identity') return { content: [{ type: 'text', text: JSON.stringify(evidence) }], details: evidence, ...(failed ? { isError: true } : {}) };
 
   const serialized = JSON.stringify(evidence);
