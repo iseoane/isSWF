@@ -154,7 +154,7 @@ try {
 
 // The coordinator's own tool uses count as a transcript does: plugin prefix dropped, `.agents/` reads relative.
 {
-  const { countToolUses } = await import('../tools/isswf-run-usage-core.mjs');
+  const { countToolUses } = await import(pathToFileURL(join(source, 'tools/isswf-run-usage-core.mjs')).href);
   assert.deepEqual(countToolUses([
     { tool: 'Skill', input: { skill: 'isswf:isswf-review' } },
     { tool: 'Read', input: { file_path: 'C:\\p\\.agents\\skills\\isswf-tdd\\SKILL.md' } },
