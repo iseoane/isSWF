@@ -219,3 +219,22 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ### Evidence
 
 - Commit 1966778: `INITIATIVE_FLAG` in `touchedIds`; new test passes and fails with the flag branch disabled (negative control); plugin test 9/9; check-docs PASS. Exact-head CI recorded on PR #281.
+
+## J011
+
+- Size: S
+- Status: in-progress
+- Objective: Apply the post-merge review R1 suggestions for J009/J010.
+- Depends on: J010
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md)
+- Blocker: None.
+- Next step: Implement, PR against main, CI; merge awaits the operator.
+
+### Acceptance
+
+- The usage-detail test asserts exactly `skills: 0 · referencias: 1`.
+- `--initiative` also matches `=`, quoted and tab-separated IDs; a test covers the `=` and quoted forms.
+
+### Evidence
+
+- Review R1 (native isswf-reviewer, model inherited, post-merge on eda66ae..808cd27 without `.factory`): Aggregate PASS, Standards pass, Spec pass; 2 suggestions (this job), info: PowerShell tool not counted by touchedIds (pre-existing), J009 names the guide instead of linking (accepted). An earlier R1 attempt was inconclusive because the coordinator did not supply the diff.
