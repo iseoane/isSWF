@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFile, spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { existsSync } from 'node:fs';
 import { promisify } from 'node:util';
@@ -188,11 +188,15 @@ try {
   assert.deepEqual(await inventory(releaseA), packageFiles, 'Packing does not modify release');
   await mkdir(project); run('git', ['init', '-q', project]);
   const beforeInspect = await inventory(project);
-  assert.equal(JSON.parse(cli(installed, 'inspect').stdout).status, 'not-initialized');
+  const fresh = JSON.parse(cli(installed, 'inspect').stdout);
+  assert.equal(fresh.status, 'not-initialized');
+  assert.deepEqual(fresh.changed, ['.isswf/install.json', '.isswf/project-setup.md', '.isswf/.gitignore'], 'New projects receive no legacy route file');
   assert.deepEqual(await inventory(project), beforeInspect);
   await assert.rejects(readdir(store), { code: 'ENOENT' });
   const initialized = JSON.parse(cli(installed, 'init', ['--tracking', 'local']).stdout);
   assert.equal(initialized.status, 'initialized');
+  assert.deepEqual(initialized.changed, ['.isswf/install.json', '.isswf/project-setup.md', '.isswf/.gitignore']);
+  await assert.rejects(readFile(join(project, '.isswf/models.json')), { code: 'ENOENT' });
   const pinFile = join(project, '.isswf/install.json'), pinA = await readFile(pinFile);
   assert.equal((await readJSON(pinFile)).runtimeId, receiptA.runtimeId);
   await assert.rejects(readdir(join(project, '.factory')), { code: 'ENOENT' });
@@ -208,6 +212,8 @@ try {
   assert.deepEqual(await readFile(pinFile), pinA);
   checkpoint();
   const sdk = join(temp, 'sdk'); await mkdir(sdk);
+  // Existing projects keep their operator-owned legacy route file; init no longer creates one.
+  await writeFile(join(project, '.isswf/models.json'), await readFile(join(installed, '.factory/models.json')));
   await writeFile(join(project, 'brief.md'), 'Committed target brief, not package provenance.\n');
   checkpoint();
   const briefSha = run('git', ['-C', project, 'rev-parse', 'HEAD']).stdout.trim();
@@ -237,7 +243,7 @@ try {
   }
   const setupBytes = await readFile(join(project, '.isswf/project-setup.md'));
   const generatedSetup = setupBytes.toString('utf8');
-  assert.match(generatedSetup, /legacy runtime model routes: \.isswf\/models\.json \(legacy assignments only\)/iu);
+  assert.doesNotMatch(generatedSetup, /models\.json|legacy runtime model routes/iu);
   assert.match(generatedSetup, /Ordinary Pi\/Claude selections belong to host-native configuration/iu);
   const models = await readJSON(join(project, '.isswf/models.json'));
   models.operatorField = 'preserve'; await writeJSON(join(project, '.isswf/models.json'), models); checkpoint();
@@ -259,6 +265,23 @@ try {
   assert.equal(JSON.parse(cli(releaseB, 'locate').stdout).pin.runtimeId, receiptA.runtimeId, 'Updating host package does not update project');
   const migration = ['--id', 'M0001', '--expected', preview.expected, '--quiescent-ref', 'Synthetic operator-confirmed fixture has no external writers'];
   assert.match(cli(releaseB, 'migrate', migration.map(value => value === preview.expected ? '0'.repeat(64) : value), false).stderr, /expected/u);
+  // A registered legacy attempt whose PR submission has no confirmed outcome must be reconciled under its original pin.
+  const legacyRuns = join(temp, 'legacy-runs'), effectKey = 'a'.repeat(64), effectDir = join(legacyRuns, 'effects', effectKey);
+  const effectIntent = { intent: { key: effectKey, logicalJobRef: 'release/legacy-effect', repository: 'owner/repo' }, authority: null };
+  await mkdir(effectDir, { recursive: true });
+  await writeJSON(join(legacyRuns, 'legacy-attempt.job.json'), { logicalJobRef: 'release/legacy-effect' });
+  await writeJSON(join(effectDir, 'intent.json'), effectIntent);
+  await writeJSON(join(effectDir, 'submitted.json'), { version: 1, key: effectKey, intentSha256: hash(JSON.stringify(effectIntent)) });
+  const workerRegistration = join(project, '.isswf/local/workers/legacy.json');
+  await mkdir(dirname(workerRegistration), { recursive: true });
+  await writeJSON(workerRegistration, { format: 1, project: await realpath(project), store: legacyRuns, attemptId: 'legacy-attempt', pin: JSON.parse(pinA) });
+  const effectBlocker = JSON.parse(cli(releaseB, 'inspect').stdout).blockers.find(blocker => blocker.state === 'open-external-effect');
+  assert.equal(effectBlocker?.effect, effectKey, 'inspect reports the open legacy effect');
+  assert.match(effectBlocker.action, new RegExp(`original pin ${JSON.parse(pinA).version} \\(${receiptA.runtimeId}\\)`, 'u'));
+  assert.match(cli(releaseB, 'migrate', migration, false).stderr, /open-external-effect/u);
+  await mkdir(join(legacyRuns, 'effects', 'not-a-key'));
+  assert.ok(JSON.parse(cli(releaseB, 'inspect').stdout).blockers.some(blocker => blocker.state === 'unknown' && /External effect journal/u.test(blocker.reason)), 'Unreadable effect state blocks');
+  await rm(dirname(workerRegistration), { recursive: true });
   await mkdir(join(project, '.isswf/local/leases'), { recursive: true });
   await writeJSON(join(project, '.isswf/local/leases/unknown.json'), { owner: 'unknown' });
   assert.match(cli(releaseB, 'migrate', migration, false).stderr, /uncertain execution/u);
@@ -281,13 +304,14 @@ try {
   const windowsIdentity = pid => JSON.parse(spawnSync(join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', `$p = Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}'; @{bootId=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o'); startTime=$p.CreationDate.ToUniversalTime().ToString('o')} | ConvertTo-Json -Compress`], { encoding: 'utf8', windowsHide: true }).stdout.replace(/^\uFEFF/u, '').trim());
   const selfWindows = process.platform === 'win32' ? windowsIdentity(process.pid) : null;
   const deadOwner = selfWindows ? { platform: 'win32', pid: 2147483644, startTime: selfWindows.startTime, bootId: selfWindows.bootId } : { pid: 2147483647, startTicks: '1', bootId: (await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() };
-  await writeJSON(join(recoveryDir, 'record.json'), { format: 1, id: 'interrupted', kind: 'migrate', owner: deadOwner, files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }] });
+  await writeJSON(join(recoveryDir, 'record.json'), { format: 1, id: 'interrupted', kind: 'migrate', owner: deadOwner, files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }, { path: '.isswf/models.json', before: modelBytes.toString('base64'), after: modelBytes.toString('base64') }] });
   await writeFile(pinFile, pinB);
   await mkdir(join(project, '.isswf/local/operation'));
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'interrupted', owner: deadOwner });
   assert.match(cli(releaseB, 'migrate', migration, false).stderr, /Interrupted/u);
-  assert.equal(JSON.parse(cli(releaseB, 'recover', ['--id', 'interrupted']).stdout).status, 'recovered');
+  assert.equal(JSON.parse(cli(releaseB, 'recover', ['--id', 'interrupted']).stdout).status, 'recovered', 'Journals listing an existing legacy route file stay recoverable');
   assert.deepEqual(await readFile(pinFile), pinA);
+  assert.deepEqual(await readFile(join(project, '.isswf/models.json')), modelBytes);
   const bootstrap = { format: 1, id: 'bootstrap', kind: 'migrate', owner: deadOwner, reference: 'Fixture', files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }] };
   await mkdir(join(project, '.isswf/local/operation'));
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'bootstrap', owner: deadOwner, transaction: bootstrap });

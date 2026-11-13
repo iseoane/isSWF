@@ -87,7 +87,8 @@ async function planJourney(name, launcher, nodeLauncher = false) {
     assert.match(transaction.owner.startTicks, /^\d+$/u);
     assert.match(transaction.owner.bootId, /^[a-f0-9-]{36}$/u);
   }
-  const protectedPaths = ['.isswf/install.json', '.isswf/project-setup.md', '.isswf/models.json', '.isswf/.gitignore'];
+  await assert.rejects(readFile(join(target, '.isswf/models.json')), { code: 'ENOENT' }, 'init seeds no legacy route file');
+  const protectedPaths = ['.isswf/install.json', '.isswf/project-setup.md', '.isswf/.gitignore'];
   const before = new Map(await Promise.all(protectedPaths.map(async path => [path, await readFile(join(target, path))])));
   const planArgs = ['exec', '--project', target, '--store', targetStore, '--', 'isswf-plan', 'prepare', '--initiative', plan.initiative, '--proposal', proposal, '--grant', grant];
   const created = JSON.parse(invoke(planArgs));

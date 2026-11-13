@@ -125,7 +125,7 @@ The migration procedure below applies only when the operator explicitly selects 
 
 Updating the installed package does not update every project's records. Each project keeps its selection until you explicitly migrate it.
 
-Before migrating, save the affected files in Git and finish or reconcile running work. The migration checks the proposed change, keeps the previous version, and records how to recover. Do not delete retained versions or interrupted-operation records to force an update.
+Before migrating, save the affected files in Git and finish or reconcile running work. Legacy attempts that are still open, such as a submitted pull request without a confirmed result or a pending recovery review, block the migration. Close them with the version that started them first; the inspection result names that version. The migration checks the proposed change, keeps the previous version, and records how to recover. Do not delete retained versions or interrupted-operation records to force an update.
 
 For exact commands, rollback, and recovery, use the [technical installation guide](../installation.md).
 
