@@ -137,8 +137,9 @@ function parseRecord(file, text, initiativeId, jobId) {
     verdict: parseVerdict(text, kind, outcome),
     outcome,
     statedRound: briefLine ? Number(briefLine.match(own)[1]) : null,
-    // An explicit review round, as the review template's "Review round in this job, ...: N" or `Review round: N`.
-    statedReviewRound: Number(text.match(/^\W*review round\b[^:\n]*:\W{0,4}(\d+)/im)?.[1]) || null,
+    // A correction attempt states its round as `Review round: N` (per brief). The review template's
+    // "Review round in this job" field counts across the whole job, so reviews are numbered by position.
+    statedReviewRound: Number(text.match(/^\W*review round\W{0,4}:\W{0,4}(\d+)/im)?.[1]) || null,
   };
 }
 
@@ -156,18 +157,16 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
   }
   const known = new Set(briefRounds);
   const rounds = [];
-  // Without a stated round, the k-th review of a brief is round k and attempts belong to round 1:
-  // record numbers run across the whole job, so they cannot pair an attempt with its review.
+  // The k-th review of a brief is round k; an attempt is round 1 unless it states its round. Record
+  // numbers run across the whole job, so they cannot pair an attempt with its review.
   const reviewsSeen = new Map();
   for (const { statedRound: _, statedReviewRound, ...entry } of records) {
     const round = known.has(entry.round) ? entry.round : UNKNOWN;
-    let reviewRound = statedReviewRound;
+    let reviewRound = statedReviewRound ?? 1;
     if (entry.kind === 'review') {
-      const seen = (reviewsSeen.get(round) ?? 0) + 1;
-      reviewsSeen.set(round, seen);
-      reviewRound ??= seen;
+      reviewRound = (reviewsSeen.get(round) ?? 0) + 1;
+      reviewsSeen.set(round, reviewRound);
     }
-    reviewRound ??= 1;
     let bucket = rounds.find(r => r.round === round && r.reviewRound === reviewRound);
     if (!bucket) rounds.push((bucket = { round, reviewRound, entries: [] }));
     bucket.entries.push(entry);
