@@ -71,8 +71,8 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 - Objective: isSWF setup and update detect Engram, Codegraph and Graphify for the project, use what is wired, recommend what is missing, and initialise the code index the operator chooses.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: Needs an explicit operator start.
-- Next step: Operator start; then implementation with focused tests and PR.
+- Blocker: Waits for the operator to install Graphify and for the Graphify trial on this repository.
+- Next step: After the operator installs Graphify, run the trial (build the graph here, ask 3-4 real methodology questions, compare with grep/Codegraph, note token cost); then the operator decides whether Graphify enters isSWF setup and is used in this repository. No implementation without an explicit start.
 
 ### Acceptance
 
@@ -85,3 +85,4 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 ### Evidence
 
 - 2026-11-13: research summary in the J004 brief.
+- 2026-11-13: operator decision: trial Graphify on this repository first; its result decides whether Graphify is supported by setup and used here. The Codegraph UserPromptSubmit hook (`codegraph prompt-hook`) was removed from the operator's Claude settings as noisy; the MCP server's watcher keeps the index current. The agent-depot coordinator was asked to drop that hook from its Codegraph recipe.
