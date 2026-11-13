@@ -24,6 +24,7 @@ test('the coordinator skill notes each connected tool and only those', async ($,
   expect(text.startsWith('COORDINATOR\n\n## Session tools detected by the isSWF plugin')).toBe(true)
   expect(text.includes('Engram is connected (`plugin:engram:engram`)')).toBe(true)
   expect(text.includes('Codegraph')).toBe(false)
+  expect(text.includes('mem_current_project')).toBe(false)
 })
 
 test('both tools are noted when both are connected, deferred or loaded', async ($, on) => {

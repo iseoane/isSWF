@@ -4,7 +4,7 @@ import type { EngineInterface } from 'claude-code'
 const TOOLS = [
   {
     tool: /__mem_search$/,
-    line: (server: string) => `- Engram is connected (\`${server}\`): before planning, recover this project's context with \`mem_current_project\`, then \`mem_context\` or \`mem_search\` under its explicit project identity; save decisions, discoveries and fixes as they happen.`,
+    line: (server: string) => `- Engram is connected (\`${server}\`): before planning, recover context with \`mem_context\` or \`mem_search\` under the project identity the trusted assignment supplies (skip the lookup when it is unknown; never derive it from the directory); save decisions, discoveries and fixes as they happen.`,
   },
   {
     tool: /__codegraph_explore$/,

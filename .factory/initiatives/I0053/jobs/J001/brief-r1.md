@@ -1,4 +1,4 @@
-# I0053/J001 r1: Coordinator use of Engram and Codegraph (prepared, not started)
+# I0053/J001 r1: Coordinator use of Engram and Codegraph (started 2026-11-13)
 
 Grounding (2026-11-13, origin/main a038066):
 - The plugin already ships a hook module (hooks/hooks.json -> hooks/register.tsx) with `session.start`, but it is the opt-in initiatives pane and returns early when the option is off. The reminder must not depend on that option; decide between a separate module or an always-on branch in the module.
