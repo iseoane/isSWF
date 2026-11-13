@@ -118,12 +118,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J006
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Make the repository instructions short, consistent and actionable.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Review R1.
+- Next step: None.
 
 ### Acceptance
 
@@ -132,15 +132,21 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - project-release: a stop row for a verified candidate without a publication grant; the Windows extraction note inside the extraction step; each reference paired with its operation; the local host-checks command named.
 - Tests: documentation, host-portability, platform-package; check-docs.
 
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited): commit fc71374; AGENTS.md about 3,328 -> 2,749 tokens (chars/4); generated coordinator block byte-identical; check-docs, documentation, host-portability pass (coordinator rerun); platform-package pass on e36c8ef.
+- Review R1 (native isswf-reviewer, model inherited, diff 3d32535..fc71374 supplied inline): verdict as reported: "Aggregate: pass. Standards pass, Spec pass. Two minor suggestions, neither blocking." Both applied in e36c8ef (restored "shared behavior needs shared evidence, not unnecessary duplicate model calls" and "permission ... and never resume work by themselves").
+- Under the new REVIEW.md, `.claude/skills/project-release/**` needs a person's approval at integration.
+
 ## J007
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Make the coordinator skill findable and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J007.
+- Next step: Review R1.
 
 ### Acceptance
 
@@ -152,12 +158,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J008
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Make the review chain usable for every review shape and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J008.
 
 ### Acceptance
 
