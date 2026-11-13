@@ -66,6 +66,24 @@ For every setup running in Pi, check `pi-subagents` before declaring native dele
 
 For every setup running in Claude Code, when reporting plugin readiness, tell the operator that the optional initiatives pane is off by default: they can turn it on by enabling **Initiatives pane** for the `isswf` plugin in `/config` and reopen it with `/isswf-initiatives`. Point to "Install in Claude Code" in the isSWF installation guide (`docs/en/installation.md`) for details instead of copying them. Do not enable it on the operator's behalf.
 
+### Report project memory and code index
+
+On setup, and again after an observed host package update, report Engram and Codegraph for this project. isSWF never installs, wires, upgrades or reindexes them; their own installers add their hooks and instructions. Read only configuration and project markers: make no model call and start no server.
+
+For each tool, report exactly one state:
+
+| State | Evidence |
+| --- | --- |
+| Wired and used | The current session lists the server and its tools (Claude Code: `engram` or `codegraph` in the connected MCP servers; Pi: the tools that [Pi setup](../../hosts/pi.md#add-codegraph-and-engram-tools-when-installed) detects as loaded). |
+| Installed, not wired for this host | The executable is on the path (`command -v` on Linux, `Get-Command` on Windows), but the session does not list the server. Point to the tool's own installer (Codegraph: `codegraph install --target <host>`); do not edit host configuration. |
+| Installed, repository not initialised | Codegraph only: wired or installed, but the primary checkout has no `.codegraph/` directory. |
+| Not installed | Neither the server nor the executable is found. Recommend it once as optional; never require it. |
+
+- **Engram.** Use it under the project's explicit identity recorded in setup; never derive one from a directory or worktree name. When absent, recommend it once for project memory.
+- **Codegraph.** When the repository is not initialised, ask once: **Initialise Codegraph for this repository?** Only on an explicit yes, run `codegraph init` at the primary checkout root, never in a linked worktree, and record the decision. Preserve an existing index and never re-run init or reindex as a side effect. Codegraph's MCP server watcher keeps the index current. Linked worktrees have no index of their own: the coordinator queries the primary checkout's index (Codegraph `projectPath`) or reports the gap.
+
+Record each state, the Codegraph decision and the date in `<selected-state>/project-setup.md`. Repeat setup with no change is a no-op.
+
 ### Select the writing-workspace policy and local location
 
 During explicit setup, resolve whether writing assignments use a separate worktree per writer (recommended only when the actual host binding is supported) or a shared checkout with strictly sequential writers on a dedicated feature branch. Read-only actors need no worktree. Record the approved policy in the existing selected-state `project-setup.md`, reusing it on later assignments; an old `isswf.worktreeRoot` choice does not establish policy acceptance. Keep preference separate from readiness. If required binding is unavailable or unverified, mark the worktree policy pending and block the affected writer. Do not fall back to the primary checkout, another root, a host-managed checkout, another host or dispatcher, or silently serialize; only an explicit operator policy revision can select shared-sequential instead. Preserve custom choices and permissions.
