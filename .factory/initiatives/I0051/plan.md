@@ -94,12 +94,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J005
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Make every Claude plugin skill entry carry its shared skill's activation description.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J005.
+- Next step: Review R1 of commit 7e7cdf7.
 
 ### Acceptance
 
@@ -110,12 +110,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J006
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Make the repository instructions short, consistent and actionable.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J006.
 
 ### Acceptance
 
