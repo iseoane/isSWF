@@ -2,7 +2,7 @@
 
 Type: enhancement
 
-Design approved by the operator on 2026-11-11 in the Claude Code session (mockup artifact since deleted; local copy outside the repo). Roadmap: Claude Code mod, shared host-neutral snapshot, plugin integration. The Pi sidebar and loopback panel retirement live in I0047. Sizing rule: each job has a Size line. S = up to about 20 worker minutes and 100 changed lines; M = about 30-45 minutes and up to 300 changed lines (fixtures excluded). L is not allowed: a job estimated L is split before start, and a job that grows past M during work stops and is re-planned. Supersedes I0032 (earlier unstarted plan for the same mod, removed 2026-11-12 by operator decision; retrievable from commit b1161ad). Plan approval is preparation only; each job needs an explicit operator start.
+Design approved by the operator on 2026-11-11 in the Claude Code session (mockup artifact since deleted; local copy outside the repo). Roadmap: Claude Code mod, shared host-neutral snapshot, plugin integration. The Pi sidebar and loopback panel retirement live in I0047. Sizing rule: each job has a Size line. S = up to about 20 worker minutes and 100 changed lines; M = about 30-45 minutes and up to 300 changed lines (fixtures excluded). L is not allowed: a job estimated L is split before start, and a job that grows past M during work stops and is re-planned. Supersedes I0032 (earlier unstarted plan for the same mod, removed 2026-11-12 by operator decision; retrievable from commit b1161ad). Plan approval is preparation only; each job needs an explicit operator start. Closed by the operator on 2026-11-13: all jobs completed and merged into main.
 
 ## J001
 
@@ -223,12 +223,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J011
 
 - Size: S
-- Status: in-review
+- Status: completed
 - Objective: Apply the post-merge review R1 suggestions for J009/J010.
 - Depends on: J010
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: CI on the J011 PR; merge into main awaits the operator.
+- Next step: None. Merged into main through PR #282 by operator decision 2026-11-13.
 
 ### Acceptance
 
@@ -239,3 +239,4 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 
 - Review R1 (native isswf-reviewer, model inherited, post-merge on eda66ae..808cd27 without `.factory`): Aggregate PASS, Standards pass, Spec pass; 2 suggestions (this job), info: PowerShell tool not counted by touchedIds (pre-existing), J009 names the guide instead of linking (accepted). An earlier R1 attempt was inconclusive because the coordinator did not supply the diff.
 - Fix commit: plugin test 12/12; negative control with the old pattern fails the quoted and tab cases; exact Spanish label assertion restored.
+- PR #282: CI run 43370296245 green on Linux and Windows at 9c7fd8d.
