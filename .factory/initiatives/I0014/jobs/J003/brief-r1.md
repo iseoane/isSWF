@@ -1,0 +1,3 @@
+# I0014/J003 r1: Remove the legacy executor (prepared, not started)
+
+Not started; needs an explicit operator start after J002 delivery. Scope per plan J001 evidence (U2): remove `isswf-job`, the `pi-worker-task`/`worker-lifecycle` pair, the SDK researcher/reviewer/planner/diagnostic callers and their legacy-only modules, their tests, check-quality/knip/REVIEW.md entries, `.factory/models.json` from the package, and the legacy contracts in EN/ES docs, keeping history retrievable. First confirm that nothing outside the repo uses the SDK callers. Keep `native-recovery` only if `activity()` still needs it. Then realign I0009 J029/J030.
