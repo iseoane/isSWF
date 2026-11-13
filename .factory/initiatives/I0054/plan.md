@@ -27,12 +27,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Objective: The pane has two tabs: Initiatives (current view) and Agents, which lists for each agent of the session, including the coordinator, the skills and references it used and how many times.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Needs an explicit operator start.
-- Next step: Operator start; then implementation with focused tests and PR.
+- Blocker: None.
+- Next step: Coordinator implements in worktree isSWF-worktrees/i0054-j002; then bound review, PR and merge.
 
 ### Acceptance
 
@@ -43,6 +43,7 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 ### Evidence
 
 - 2026-11-13: operator request.
+- 2026-11-13: started by the operator ("continua coordinador con el resto de jobs").
 
 ## J003
 
