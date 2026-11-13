@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
@@ -91,7 +91,7 @@ try {
 
   // A malformed record with no brief degrades to unknown fields; a directory named like a record is ignored.
   assert.equal(jobOf('J003').recordCount, 1);
-  assert.deepEqual(jobOf('J003').rounds, [{ round: 'unknown', entries: [{ id: 'V001', kind: 'review', role: 'unknown', model: 'unknown', modelSource: 'unknown', effort: 'unknown', verdict: 'unknown', outcome: 'unknown', runs: [], round: 'unknown', roundSource: 'unknown' }] }]);
+  assert.deepEqual(jobOf('J003').rounds, [{ round: 'unknown', reviewRound: 1, entries: [{ id: 'V001', kind: 'review', role: 'unknown', model: 'unknown', modelSource: 'unknown', effort: 'unknown', verdict: 'unknown', outcome: 'unknown', runs: [], round: 'unknown', roundSource: 'unknown' }] }]);
 
   // An injected fs that fails one read records it in `skipped` instead of throwing.
   const failing = { ...nodeFs, read: path => path.endsWith('V001.md') && path.includes('J003') ? Promise.reject(Error('denied')) : nodeFs.read(path) };
@@ -164,11 +164,39 @@ try {
   assert.equal((await recordOf('A001.md', '- Reported status: cancelled\n')).rounds[0].entries[0].outcome, 'cancelled');
   // Only rounds with records are drawn: r1 has none, the record lands in the latest round.
   assert.deepEqual((await recordOf('A001.md', '- Outcome: complete\n')).rounds.map(r => r.round), [2]);
+  // Review rounds within one brief: A00k and V00k share round k; an explicit `Review round:` line wins.
+  const roundsOf = async files => (await core.readSnapshot('/o', memoryFs({
+    '/o/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Rounds', job('J001', 'in-progress')),
+    '/o/.isswf/initiatives/I0001/jobs/J001/brief-r1.md': 'brief',
+    ...Object.fromEntries(Object.entries(files).map(([f, t]) => [`/o/.isswf/initiatives/I0001/jobs/J001/${f}`, t])),
+  }))).initiatives[0].jobs[0].rounds.map(r => [r.round, r.reviewRound, r.entries.map(e => e.id)]);
+  assert.deepEqual(await roundsOf({ 'A001.md': '- Outcome: complete\n', 'V001.md': 'Aggregate: FAIL\n', 'V002.md': 'Aggregate: PASS\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['V002']]]);
+  // A coordinator-owned planner attempt shifts the worker's number; both stay with the first review.
+  assert.deepEqual(await roundsOf({ 'A001.md': '- Profile: .agents/roles/planner.md\n', 'A002.md': 'x\n', 'V001.md': 'x\n' }), [[1, 1, ['A001', 'A002', 'V001']]]);
+  // A correction attempt states its round; the review template's job-wide field is not read as one.
+  assert.deepEqual(await roundsOf({ 'A001.md': 'x\n', 'V001.md': 'x\n', 'A002.md': '- Review round: 2\n', 'V002.md': '- Review round in this job, and prior review IDs: 2 (V001)\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['A002', 'V002']]]);
+  // The attempt template's own line, filled as written, states the round.
+  const templateLine = (await readFile(join(process.argv[2] ?? '.', '.factory/templates/attempt.md'), 'utf8')).split('\n').find(l => /review round/i.test(l) && l.startsWith('- '));
+  assert.deepEqual(await roundsOf({ 'A001.md': 'x\n', 'V001.md': 'x\n', 'A002.md': `${templateLine} 2\n`, 'V002.md': 'x\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['A002', 'V002']]]);
+  // Two briefs: each brief's first review is its round 1, whatever the job-wide field says.
+  const twoBriefs = await core.readSnapshot('/t', memoryFs({
+    '/t/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Two', job('J001', 'in-progress')),
+    '/t/.isswf/initiatives/I0001/jobs/J001/brief-r1.md': 'b', '/t/.isswf/initiatives/I0001/jobs/J001/brief-r2.md': 'b',
+    '/t/.isswf/initiatives/I0001/jobs/J001/A001.md': '- Brief: I0001/jobs/J001/brief-r1.md\n',
+    '/t/.isswf/initiatives/I0001/jobs/J001/V001.md': '- Brief: I0001/jobs/J001/brief-r1.md\n- Review round in this job, and prior review IDs: 1\n',
+    '/t/.isswf/initiatives/I0001/jobs/J001/A002.md': '- Brief: I0001/jobs/J001/brief-r2.md\n',
+    '/t/.isswf/initiatives/I0001/jobs/J001/V002.md': '- Brief: I0001/jobs/J001/brief-r2.md\n- Review round in this job, and prior review IDs: 2 (V001)\n',
+  }));
+  assert.deepEqual(twoBriefs.initiatives[0].jobs[0].rounds.map(r => [r.round, r.reviewRound, r.entries.map(e => e.id)]), [[1, 1, ['A001', 'V001']], [2, 1, ['A002', 'V002']]]);
   // Roles: the shared role file wins over the host agent that ran it.
   for (const [text, role] of [
     ['- Profile: isswf:isswf-worker; shared role .agents/roles/diagnostician.md\n', 'diagnostician'],
     ['- Profile: `.agents\\roles\\researcher.md`\n', 'researcher'],
     ['- Agent: isswf:isswf-planner\n', 'planner'],
+    ['- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n', 'coordinator'],
+    ['- Profile path: coordinator acting as writer\n', 'coordinator'],
+    ['- Profile: .agents/roles/worker.md\nNotes: the coordinator skill .agents/skills/isswf-coordinator/SKILL.md dispatched it.\n', 'worker'],
+    ['- Profile: isswf:isswf-worker; skills .agents/skills/isswf-coordinator/SKILL.md\n', 'worker'],
     ['- Agent: isswf-worker\n', 'worker'],
     // A review citing another role's file in its body stays a review.
     ['- Observer: isswf:isswf-reviewer\n\nFinding: .agents\\roles\\worker.md:12 drifts.\nSee roles/reviewer.md.\n', 'reviewer'],

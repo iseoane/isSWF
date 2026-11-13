@@ -1,10 +1,11 @@
 # Attempt report
 
-> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from. Always fill the identity, base/candidate and pinned-input fields below with exact values, never a link in their place.
+> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from. Always fill the identity, base/candidate and pinned-input fields below with exact values, never a link in their place. Fill `Review round` only for a correction after a review of the same brief, with that brief's next round (its first review is round 1); otherwise delete the line.
 
 ## Identity and pinned inputs
 
 - Job ID and attempt ID:
+- Review round:
 - Run: claude agent=<id> (plain text, no backticks; one line per host launch as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown)
 - Reported status:
 - Report timestamp and timezone:

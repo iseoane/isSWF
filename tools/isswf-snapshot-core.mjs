@@ -99,13 +99,18 @@ const ROLES = 'worker|reviewer|researcher|planner|diagnostician';
 const ROLE_FILE = new RegExp(`roles[\\\\/](${ROLES})\\.md`);
 const ROLE_ANY = new RegExp(`roles[\\\\/](${ROLES})\\.md|\\bisswf-(${ROLES})\\b`);
 const IDENTITY_LINE = /^\W*(?:shared )?(?:profile|role|agent|observer|reviewer)\b[^:\n]*:/i;
+// An attempt the coordinator writes itself names its skill (or says so) on an identity line.
+const COORDINATOR = /isswf-coordinator[\\/]SKILL\.md|\bcoordinator acting as writer\b/i;
 
 // In the record's identity lines the shared role file wins over the host agent name: a diagnostician runs as
 // the isswf-worker agent. Elsewhere the first mention wins, since reports also cite other roles' files.
 function parseRole(text) {
   const identity = text.split('\n').filter(line => IDENTITY_LINE.test(line)).join('\n');
-  const match = identity.match(ROLE_FILE) ?? identity.match(ROLE_ANY) ?? text.match(ROLE_ANY);
-  return match ? (match[1] ?? match[2]) : UNKNOWN;
+  const match = identity.match(ROLE_FILE) ?? identity.match(ROLE_ANY);
+  if (match) return match[1] ?? match[2];
+  if (COORDINATOR.test(identity)) return 'coordinator';
+  const any = text.match(ROLE_ANY);
+  return any ? (any[1] ?? any[2]) : UNKNOWN;
 }
 
 const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
@@ -132,6 +137,9 @@ function parseRecord(file, text, initiativeId, jobId) {
     verdict: parseVerdict(text, kind, outcome),
     outcome,
     statedRound: briefLine ? Number(briefLine.match(own)[1]) : null,
+    // A correction attempt states its round as `Review round: N` (per brief). The review template's
+    // "Review round in this job" field counts across the whole job, so reviews are numbered by position.
+    statedReviewRound: Number(text.match(/^\W*review round\W{0,4}:\W{0,4}(\d+)/im)?.[1]) || null,
   };
 }
 
@@ -147,13 +155,25 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
     const record = parseRecord(file, text, initiativeId, job.id);
     records.push({ ...record, round: record.statedRound ?? latest ?? UNKNOWN, roundSource: record.statedRound !== null ? 'stated' : latest === null ? UNKNOWN : 'latest' });
   }
-  const rounds = briefRounds.map(n => ({ round: n, entries: [] }));
-  const unassigned = [];
-  for (const { statedRound: _, ...entry } of records) {
-    const bucket = rounds.find(r => r.round === entry.round);
-    (bucket ? bucket.entries : unassigned).push(entry);
+  const known = new Set(briefRounds);
+  const rounds = [];
+  // The k-th review of a brief is round k; an attempt is round 1 unless it states its round. Record
+  // numbers run across the whole job, so they cannot pair an attempt with its review.
+  const reviewsSeen = new Map();
+  for (const { statedRound: _, statedReviewRound, ...entry } of records) {
+    const round = known.has(entry.round) ? entry.round : UNKNOWN;
+    let reviewRound = statedReviewRound ?? 1;
+    if (entry.kind === 'review') {
+      reviewRound = (reviewsSeen.get(round) ?? 0) + 1;
+      reviewsSeen.set(round, reviewRound);
+    }
+    let bucket = rounds.find(r => r.round === round && r.reviewRound === reviewRound);
+    if (!bucket) rounds.push((bucket = { round, reviewRound, entries: [] }));
+    bucket.entries.push(entry);
   }
-  if (unassigned.length) rounds.push({ round: UNKNOWN, entries: unassigned });
+  // Brief revisions in order, review rounds in order within each, an unknown brief last.
+  const rank = r => (r.round === UNKNOWN ? Infinity : r.round);
+  rounds.sort((a, b) => rank(a) - rank(b) || a.reviewRound - b.reviewRound);
   const refText = [job.nextStep, ...job.evidence, (await readBounded(fs, join(dir, 'delivery.md'), skipped)) ?? ''].join('\n');
   return {
     id: job.id,
@@ -162,8 +182,8 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
     dependsOn: job.dependencies,
     ...issueRefs(refText),
     recordCount: records.length,
-    // A brief revision with no record yet is not a round anyone worked.
-    rounds: rounds.filter(r => r.entries.length),
+    // Only rounds with records: a brief revision nobody worked on yet is not drawn.
+    rounds,
   };
 }
 
