@@ -50,12 +50,12 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 
 ## J003
 
-- Status: pending
+- Status: completed
 - Objective: Confirm in a live session that Codegraph is connected and used once the operator's agent-depot fix lands.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Waits for the operator to reinstall Codegraph without its prompt hook.
-- Next step: Operator says Codegraph is reinstalled; then run the live probe.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -64,6 +64,7 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 ### Evidence
 
 - 2026-11-13: after the operator's install, a Codegraph UserPromptSubmit hook injected context into this session; MCP connection not yet probed.
+- 2026-11-13: A001 complete: Codegraph connected without prompt hook; in the primary checkout the coordinator answered a structural question with one codegraph_explore call; in a linked worktree without `.codegraph/` it fell back to Grep. Accepted under delegated acceptance (low risk, records only).
 
 ## J004
 
@@ -78,7 +79,7 @@ Scope extended 2026-11-13 (operator): isSWF setup and update detect Engram and a
 
 - Setup and update report, per tool, one of: wired and used; installed but not wired for this host; installed but this repository not initialised; not installed (recommended, optional). Detection only reads configuration and project markers; it never installs, wires or reindexes by itself.
 - Engram: when present it is used under the project's explicit identity; when absent it is recommended once, never required.
-- Codegraph: when installed but the repository has no `.codegraph/`, the operator is asked whether to initialise it; only on yes is `codegraph init` run and recorded in the project setup record. An existing index is preserved. Freshness relies on Codegraph's MCP server watcher.
+- Codegraph: linked worktrees have no index of their own (J003); the coordinator queries the primary checkout's index (`projectPath`) or reports the gap. When installed but the repository has no `.codegraph/`, the operator is asked whether to initialise it; only on yes is `codegraph init` run and recorded in the project setup record. An existing index is preserved. Freshness relies on Codegraph's MCP server watcher.
 - Linux and Windows, Claude Code and Pi are covered, or a gap is documented.
 
 ### Evidence
