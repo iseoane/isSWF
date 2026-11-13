@@ -185,12 +185,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J009
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Make isswf-setup tell Claude Code users how to turn on the initiatives pane.
 - Depends on: J008
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J009.
+- Blocker: None.
+- Next step: Started by the operator 2026-11-13; exact-head CI on PR #281, then merge the I0046 PR chain #276..#281 into main.
 
 ### Acceptance
 
