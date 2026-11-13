@@ -188,12 +188,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J009
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Make the worker and the other role profiles consistent and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Review R1 of 3d76c65. Coordinator decision: delivery input checkpoints follow the conditional pinned-input wording; the coordinator pre-dispatch refusal still requires a full input SHA for dispatched jobs.
+- Next step: None. Coordinator decision: delivery input checkpoints follow the conditional pinned-input wording; the pre-dispatch refusal still requires a full input SHA for dispatched jobs.
 
 ### Acceptance
 
@@ -201,15 +201,21 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Role references point to the coordinator trigger table instead of restating triggers; checkpoint pinning has one canonical paragraph and delivery uses the same conditional wording; delivery's duplicate text removed; researcher coordinator actions moved; memory-save permission stated for planner and researcher; diagnostician and retrospective say how they are dispatched.
 - Tests: worker-methodology, worker-method-evidence, planner-task, diagnostic-task, host-portability, release-package; check-docs.
 
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited): commit 3d76c65; blocking vs inspectable worker inputs, attempt-record exception, one rule per bullet, canonical checkpoint-pinned-inputs section in references/planning.md, trigger-table pointers, Engram memory permission for planner and researcher, diagnostician via isswf-worker and retrospective by the coordinator.
+- Coordinator checks on 3d76c65: planner-task, diagnostic-task, worker-methodology, worker-method-evidence, host-portability, release-package pass; check-docs pass after 45a3645.
+- Review R1 (native isswf-reviewer, model inherited, diff ba0f995..3d76c65 without reviewer.md): verdict as reported: "aggregate pass (Standards pass, Spec pass)". 3 information findings: delivery Return made conditional in 45a3645; known limits: mutation-evidence retention restated in worker.md because worker-method-evidence asserts it; the canonical checkpoint section sits in the planning reference.
+
 ## J010
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Make the host guides single-sourced, complete for bound reviews and equal for Pi and Claude.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J010.
+- Next step: Review R1 of 15b199e.
 
 ### Acceptance
 
@@ -221,12 +227,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J011
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Give triage, interview and writing explicit inputs and consistent walkthroughs.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J011.
 
 ### Acceptance
 
