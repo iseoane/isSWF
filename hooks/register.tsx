@@ -18,7 +18,7 @@ const LABELS = {
     notActive: 'El coordinador isSWF no está activo en esta sesión.',
     unknown: 'desconocido',
     references: 'referencias',
-    verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', running: 'en curso' } as Record<string, string>,
+    verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', failed: 'fallido', running: 'en curso' } as Record<string, string>,
     blocked: 'bloqueados',
     open: 'sin cerrar',
     usage: 'consumo',
@@ -41,7 +41,7 @@ const LABELS = {
     notActive: 'The isSWF coordinator is not active in this session.',
     unknown: 'unknown',
     references: 'references',
-    verdicts: { passed: 'passed', 'changes-requested': 'changes requested', running: 'running' } as Record<string, string>,
+    verdicts: { passed: 'passed', 'changes-requested': 'changes requested', failed: 'failed', running: 'running' } as Record<string, string>,
     blocked: 'blocked',
     open: 'open',
     usage: 'usage',
@@ -71,6 +71,7 @@ async function labelsFor($: EngineInterface): Promise<Labels> {
 const PILL_COLORS: Record<string, string> = {
   passed: 'success',
   'changes-requested': 'warning',
+  failed: 'error',
   running: 'inactive',
 }
 
@@ -157,9 +158,15 @@ function resolveUsage($: EngineInterface, runs: any[], project: string) {
   })().catch(() => {})
 }
 
+// Heredoc bodies and quoted text with spaces, such as commit messages or scripts, only mention paths;
+// a quoted single path is still an operand.
+const HEREDOC = /<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?(?:\n\s*\2\s*(?:\n|$)|$)/g
+const QUOTED_PROSE = /(["'])(?:(?!\1)[^\n])*?\s(?:(?!\1)[\s\S])*?\1/g
+
 function touchedIds(e: { tool: string; file_path?: unknown; command?: unknown }) {
-  const text = e.tool === 'Bash' ? e.command : ['Read', 'Edit', 'Write'].includes(e.tool) ? e.file_path : undefined
-  if (typeof text !== 'string') return []
+  const raw = e.tool === 'Bash' ? e.command : ['Read', 'Edit', 'Write'].includes(e.tool) ? e.file_path : undefined
+  if (typeof raw !== 'string') return []
+  const text = e.tool === 'Bash' ? raw.replace(HEREDOC, '\n').replace(QUOTED_PROSE, '""') : raw
   const ids = [...text.replace(/\\/g, '/').matchAll(RECORD_PATH)].map(m => m[1])
   if (e.tool === 'Bash') ids.push(...[...text.matchAll(INITIATIVE_FLAG)].map(m => m[1]))
   return ids

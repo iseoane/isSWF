@@ -52,7 +52,10 @@ function issueRefs(text) {
 // Review records are written in English or Spanish; labels are matched in both.
 function parseVerdict(text, kind) {
   if (/^\W*(?:reported )?status\W{0,4}running\b/im.test(text)) return 'running';
-  if (kind === 'attempt') return UNKNOWN;
+  // A filled value ends its line or clause; the unfilled template line, which lists every value, does not.
+  const status = text.match(/^\W*(?:reported status|status|outcome|estado|resultado)\W{0,4}(complete|completed|passed|partial|blocked|failed|cancell?ed)\W{0,2}(?:$|[.;(])/im);
+  if (status && /^(partial|blocked|failed|cancell?ed)$/i.test(status[1])) return 'failed';
+  if (kind === 'attempt') return status ? 'passed' : UNKNOWN;
   const aggregate = text.match(/\b(?:aggregate|agregado)\W{0,4}(pass|fail)/i);
   if (aggregate) return aggregate[1].toLowerCase() === 'pass' ? 'passed' : 'changes-requested';
   if (/\bchanges[ -]requested\b|\bcambios (?:pedidos|solicitados)\b/i.test(text)) return 'changes-requested';
@@ -85,9 +88,12 @@ function parseModel(text) {
   return best ?? { model: UNKNOWN, modelSource: UNKNOWN, effort: UNKNOWN };
 }
 
+const ROLES = 'worker|reviewer|researcher|planner|diagnostician';
+
+// The shared role file wins over the host agent name: a diagnostician runs as the isswf-worker agent.
 function parseRole(text) {
-  const match = text.match(/isswf[-:]isswf-(worker|reviewer|researcher|planner)\b|\bisswf-(worker|reviewer|researcher|planner)\b|roles[\\/](worker|reviewer|researcher|planner)\.md/);
-  return match ? (match[1] ?? match[2] ?? match[3]) : UNKNOWN;
+  const match = text.match(new RegExp(`roles[\\\\/](${ROLES})\\.md`)) ?? text.match(new RegExp(`\\bisswf-(${ROLES})\\b`));
+  return match ? match[1] : UNKNOWN;
 }
 
 const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
@@ -142,7 +148,8 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
     dependsOn: job.dependencies,
     ...issueRefs(refText),
     recordCount: records.length,
-    rounds,
+    // A brief revision with no record yet is not a round anyone worked.
+    rounds: rounds.filter(r => r.entries.length),
   };
 }
 

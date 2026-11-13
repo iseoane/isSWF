@@ -15,6 +15,8 @@ const RECORDS: Record<string, string> = {
   'I0046/jobs/J004/V001.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Verdict: fail\n',
   'I0046/jobs/J004/V002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Verdict: pass\n',
   'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Status: running\n',
+  'I0046/jobs/J004/A003.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/roles/researcher.md\n- Outcome: blocked\n',
+  'I0046/jobs/J004/A004.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/roles/planner.md\n- Outcome: complete\n',
   'I0047/plan.md': plan('I0047', 'Sidebar', [['J001', 'pending', 'x']]),
   'I0048/plan.md': plan('I0048', 'Docs', [['J001', 'blocked', 'a'], ['J002', 'pending', 'b']]),
 }
@@ -214,4 +216,47 @@ test('labels follow the session language: Spanish when set, English without a se
     await ui.unmount()
     expect(await $.command.run({ command: 'isswf-initiatives', args: 'pin' })).toEqual({ text: reply })
   }
+})
+
+test('attempt pills show their outcome: green complete, red blocked, dashed running, grey unknown', ON, async ($, on) => {
+  engine(on, '/p')
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  const box = (id: string) => ui.find({ type: 'Box', key: `I0046-J004-${id}` })
+  expect((await box('A004'))?.props?.borderColor).toBe('success')
+  expect((await box('A003'))?.props?.borderColor).toBe('error')
+  expect((await box('A002'))?.props?.borderStyle).toBe('dashed')
+  expect((await box('A001'))?.props?.borderColor).toBe(undefined)
+  expect(await text(ui, /^researcher$/)).toBe('researcher')
+  expect(await text(ui, /^planner$/)).toBe('planner')
+  await ui.press({ key: 'I0046-J004-A003' })
+  expect(await text(ui, /^veredicto/)).toBe('veredicto: fallido')
+  await ui.unmount()
+})
+
+for (const command of [
+  "git commit -m \"plan: see .factory/initiatives/I0048/plan.md\"",
+  "cat > /tmp/x.md <<'EOF'\nCompare .factory/initiatives/I0048/plan.md\nEOF\nwc -l /tmp/x.md",
+  'python3 - <<EOF\nopen(".factory/initiatives/I0048/plan.md")\nEOF',
+]) {
+  test(`a Bash command that only mentions a record path in prose touches nothing (${command.split(' ')[0]})`, ON, async ($, on) => {
+    const { clock } = engine(on, '/p')
+    await activate($)
+    await $.tool.call({ tool: 'Bash', command })
+    await clock.advance(1000)
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /I0048 · Docs/)).toBe('◐ I0048 · Docs · 1 bloqueados · 1 sin cerrar')
+    await ui.unmount()
+  })
+}
+
+test('a Bash command operating on a record path, quoted or not, touches it', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  await activate($)
+  await $.tool.call({ tool: 'Bash', command: "cat \".factory/initiatives/I0046/plan.md\" && git add .factory/initiatives/I0046 <<< ''" })
+  await clock.advance(1000)
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
+  await ui.unmount()
 })
