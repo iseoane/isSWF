@@ -29,4 +29,4 @@ Before drafting, also read the durable-record rules in `docs/durable-work.md` an
 
 ## Return
 
-Return the durable job and input checkpoint, target base, candidate identity and status, changed paths, summary or draft text, technical-closure state, independent-review evidence, operator-acceptance state, checks, risks, blockers, and next required action. Report only the candidate actually inspected. A delivery summary is not a review verdict or a product-acceptance decision. Use the copyable structure in `.factory/templates/delivery.md`.
+Return the durable job and any assigned input checkpoint, target base, candidate identity and status, changed paths, summary or draft text, technical-closure state, independent-review evidence, operator-acceptance state, checks, risks, blockers, and next required action. Report only the candidate actually inspected. A delivery summary is not a review verdict or a product-acceptance decision. Use the copyable structure in `.factory/templates/delivery.md`.
