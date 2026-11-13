@@ -56,7 +56,7 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None
-- Next step: Operator start. SDK callers checked 2026-11-13: no use outside this repo (only a historical mention in another local project's diagnosis; that project has no registered legacy workers or leases). Then realign I0009 J029/J030.
+- Next step: V002 passed; push, PR, exact-head CI. Integration needs operator approval (workflows, packaging, host guides). Then realign I0009 J029/J030.
 
 ### Acceptance
 
