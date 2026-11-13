@@ -15,7 +15,7 @@ const jsonBytes = value => Buffer.from(JSON.stringify(value, null, 2) + '\n');
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/u;
 const runtimePattern = /^[a-f0-9]{64}$/u;
 const pinPath = '.isswf/install.json';
-const executableTools = ['isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-response', 'isswf-intake', 'project-quality', 'isswf-job', 'researcher-task', 'reviewer-task', 'planner-task', 'diagnostic-task'];
+const executableTools = ['isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-response', 'isswf-intake', 'project-quality'];
 function fail(message) { throw Error(message); }
 function inside(parent, child) { const part = relative(parent, child); return part === '' || (!part.startsWith('..' + sep) && part !== '..' && !isAbsolute(part)); }
 async function exists(path) { try { await lstat(path); return true; } catch (error) { if (error.code === 'ENOENT') return false; throw error; } }
@@ -217,7 +217,7 @@ async function activity(project, store) {
     for (const entry of await readdir(dir)) {
       const record = await json(join(dir, entry));
       if (name === 'leases') { blockers.push({ lease: entry, state: 'active-or-unreconciled' }); continue; }
-      const action = `Reconcile under the original pin ${record.pin?.version ?? 'unknown'} (${record.pin?.runtimeId ?? 'unknown'}) before changing versions`;
+      const action = `Reconcile under the original pin ${record.pin?.version ?? 'unknown'} (${record.pin?.runtimeId ?? 'unknown'}) before changing versions, using that retained runtime's own launcher`;
       try {
         if (record.project !== project || !isAbsolute(record.store || '') || !idPattern.test(record.attemptId || '')) fail('Invalid worker registration');
         const runtime = await retained(store, record.pin);
@@ -398,37 +398,22 @@ async function execute(project, store, _opts, args) {
   if (forwarded.includes('--project') || forwarded.includes('--repo')) fail('Project is supplied by the launcher, not tool arguments');
   const id = randomUUID(), unlock = await lock(project, 'exec-' + id);
   const local = join(project, '.isswf/local'), lease = join(local, 'leases', id + '.json');
-  let workerRecord;
   try {
     const lockedPin = await readPin(project);
     if (!lockedPin || !lockedPin.bytes.equals(current.bytes)) fail('Project pin changed before execution registration; inspect and retry');
     await safeParents(project, lease, true);
     await writeExclusive(lease, jsonBytes({ format: 1, owner: await identity(), tool, runtimeId: current.pin.runtimeId }));
-    if (tool === 'isswf-job' && forwarded[0] === 'run') {
-      const values = Object.fromEntries(forwarded.slice(1).reduce((pairs, value, index, list) => index % 2 ? pairs : [...pairs, [value, list[index + 1]]], []));
-      if (!isAbsolute(values['--runs-store'] || '') || !idPattern.test(values['--attempt-id'] || '')) fail('Worker requires explicit absolute runs store and safe attempt ID');
-      const runs = resolve(values['--runs-store']);
-      if (inside(project, runs) || inside(runs, project)) fail('Worker runs store must be external');
-      workerRecord = join(local, 'workers', hash(runs + '\0' + values['--attempt-id']) + '.json');
-      await safeParents(project, workerRecord, true);
-      if (!await exists(workerRecord)) await writeExclusive(workerRecord, jsonBytes({ format: 1, project, store: runs, attemptId: values['--attempt-id'], pin: current.pin }));
-    }
     await unlock();
   } catch (error) {
     if (await exists(lease)) await unlink(lease);
     await unlock(); throw error;
   }
-  const withoutProject = tool === 'isswf-job' && forwarded[0] !== 'run';
-  const invocation = releaseInvocation(runtime, tool, [...forwarded, ...(withoutProject ? [] : ['--project', project])]);
+  const invocation = releaseInvocation(runtime, tool, [...forwarded, '--project', project]);
   const result = await new Promise((done, reject) => {
     const child = spawn(invocation.command, invocation.args, { stdio: 'inherit' });
     child.once('error', reject);
     child.once('exit', (code, signal) => done({ code, signal }));
   });
-  if (workerRecord && result.signal === null) {
-    const record = await json(workerRecord);
-    if (!await exists(join(record.store, record.attemptId + '.job.json')) && !await exists(join(record.store, record.attemptId))) await unlink(workerRecord);
-  }
   if (result.signal === null) await unlink(lease);
   process.exitCode = result.code ?? 1;
   return null;

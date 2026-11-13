@@ -51,11 +51,9 @@ const payloadPaths = [
   ".agents/roles/references/review.md",
   ".agents/roles/references/review-convergence.md",
   "docs/durable-work.md",
-  "docs/model-routing.md",
   ".factory/templates/job-brief.md",
   ".factory/templates/attempt.md",
   ".factory/templates/review.md",
-  ".factory/models.json",
   "package.json",
 ];
 const writingPayloadPaths = [
@@ -104,7 +102,7 @@ const expectedSkills = [
   "./.agents/skills/isswf-setup",
 ];
 
-const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/models.json", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "hooks/hooks.json", "hooks/register.tsx", "types/index.d.ts", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/model-routing.md", "docs/host-portability.md", "docs/source-activation.md", "docs/local-worker-lifecycle.md", "docs/issue-intake.md"];
+const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "hooks/hooks.json", "hooks/register.tsx", "types/index.d.ts", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/host-portability.md", "docs/source-activation.md", "docs/issue-intake.md"];
 
 function fail(message) {
   throw new Error(message);

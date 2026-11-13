@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 
 export const bunTargets = ['bun-linux-x64', 'bun-linux-arm64', 'bun-darwin-x64', 'bun-darwin-arm64', 'bun-windows-x64', 'bun-windows-arm64'];
-const toolNames = ['isswf', 'isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-response', 'isswf-intake', 'project-quality', 'isswf-job', 'researcher-task', 'reviewer-task', 'planner-task', 'diagnostic-task', 'pi-worker-task', 'worker-lifecycle'];
+const toolNames = ['isswf', 'isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-response', 'isswf-intake', 'project-quality'];
 const mainGuard = /if\s*\(process\.argv\[1\]\s*&&\s*resolve\(process\.argv\[1\]\)\s*===\s*fileURLToPath\(import\.meta\.url\)\)\s*\{/gu;
 function command(binary, args) {
   const result = spawnSync(binary, args, { encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });

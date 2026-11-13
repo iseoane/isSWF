@@ -16,10 +16,10 @@ Code owners maintain this file. Reviewers apply it under Standards as defined in
 When the candidate touches one of these paths, state under Limits that integration requires a person's approval.
 
 - `.github/workflows/**`
-- Packaging, release and installation: `tools/factory-package.mjs`, `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/sdk-package.mjs`
+- Packaging, release and installation: `tools/factory-package.mjs`, `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`
 - Host boundaries and role profiles: `.agents/hosts/**`, `.agents/roles/*.md`
 - Delivery grants and the release procedure: `.agents/roles/references/feature-delivery.md`, `.claude/skills/project-release/**`
-- Grant, capacity and authority code: `tools/execution-capacity.mjs` and any change to how grants are read or enforced
+- Grant and authority code: any change to how grants are read or enforced
 
 ## Skip unless the change targets them
 

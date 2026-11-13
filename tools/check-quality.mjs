@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url';
 import { verifyPackage } from './factory-package.mjs';
 
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
-// Windows process start and git costs make tests/reviewer-task.mjs take ~93 s there; keep fast failure elsewhere.
 function run(binary, args, win32Timeout = 300000) {
   const result = spawnSync(binary, args, {
     cwd: source, encoding: 'utf8', timeout: process.platform === 'win32' ? win32Timeout : 60000, maxBuffer: 4 * 1024 * 1024,
@@ -75,23 +74,14 @@ const tokenNativeClaudeTranscriptResult = run(process.execPath, [join(source, 't
 const tokenNativeAutoPiResult = run(process.execPath, [join(source, 'tests/token-native-auto-pi.mjs'), source]);
 const panelResult = run(process.execPath, [join(source, 'tests/initiative-panel.mjs'), source]);
 const nextActionResult = run(process.execPath, [join(source, 'tests/initiative-next-action.mjs'), source]);
-const diagnosticResult = run(process.execPath, [join(source, 'tests/diagnostic-task.mjs'), source]);
-const probeResult = run(process.execPath, [join(source, 'tests/diagnostic-probes.mjs'), source]);
-const plannerResult = run(process.execPath, [join(source, 'tests/planner-task.mjs'), source]);
 const gitFixtureResult = run(process.execPath, [join(source, 'tests/git-fixture-helper.mjs'), source]);
 const gitIdentityResult = run(process.execPath, [join(source, 'tests/git-evidence.mjs'), source]);
 const gitContentResult = run(process.execPath, [join(source, 'tests/git-content.mjs'), source]);
 const reviewChecksResult = run(process.execPath, [join(source, 'tests/review-checks.mjs'), source]);
 const gitMcpResult = run(process.execPath, [join(source, 'tests/git-evidence-mcp.mjs'), source]);
-const reviewerResult = run(process.execPath, [join(source, 'tests/reviewer-task.mjs'), source]);
-const callerRootBoundaryResult = run(process.execPath, [join(source, 'tests/caller-root-boundary.mjs'), source]);
-const callerDirectorySyncResult = run(process.execPath, [join(source, 'tests/caller-directory-sync.mjs'), source]);
 const planGrantBoundaryResult = run(process.execPath, [join(source, 'tests/plan-grant-boundary.mjs'), source]);
 const planPublicationResult = run(process.execPath, [join(source, 'tests/plan-publication.mjs'), source]);
 const reviewGuidanceResult = run(process.execPath, [join(source, 'tests/review-guidance.mjs'), source]);
-const originalEvidenceResult = run(process.execPath, [join(source, 'tests/reviewer-original-evidence.mjs'), source]);
-const contextHandoffResult = run(process.execPath, [join(source, 'tests/project-context-handoff.mjs'), source]);
- const reviewPanelCapacityResult = run(process.execPath, [join(source, 'tests/review-panel-capacity.mjs'), source]);
 const planResult = run(process.execPath, [join(source, 'tests/initiative-plan.mjs'), source]);
 const dependencyPlanResult = run(process.execPath, [join(source, 'tests/initiative-dependencies.mjs'), source]);
 const inventoryResult = run(process.execPath, [join(source, 'tests/project-quality.mjs'), source]);
@@ -103,15 +93,6 @@ const hostPortabilityResult = run(process.execPath, [join(source, 'tests/host-po
 const skillWrapperResult = run(process.execPath, [join(source, 'tests/skill-wrapper-descriptions.mjs'), source]);
 const hostPrerequisiteResult = run(process.execPath, [join(source, 'tests/host-prerequisites.mjs'), source]);
 const worktreeLocationResult = run(process.execPath, [join(source, 'tests/worktree-location.mjs'), source]);
-// release-package reruns the planner, diagnostic and reviewer suites inside an installed package; measured 309-328 s locally on Windows, 374 s reported in #217.
 const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source], 600000);
 const bunReleaseResult = run(process.execPath, [join(source, 'tests/bun-release.mjs'), source]);
-const workerDependencyResult = run(process.execPath, [join(source, 'tests/worker-dependencies.mjs'), source]);
-const workerCapacityResult = run(process.execPath, [join(source, 'tests/worker-capacity.mjs'), source]);
-const workerCapacityAPIResult = run(process.execPath, [join(source, 'tests/worker-capacity-api.mjs'), source]);
-const successorModelResult = run(process.execPath, [join(source, 'tests/successor-model-config.mjs'), source]);
-const successorLegacyResult = run(process.execPath, [join(source, 'tests/successor-model-config.mjs'), source, '--unchanged']);
-const routeResult = run(process.execPath, [join(source, 'tests/worker-route-admission.mjs'), source]);
-const sessionResult = run(process.execPath, [join(source, 'tests/researcher-session-affinity.mjs'), source]);
-const quotaResult = run(process.execPath, [join(source, 'tests/researcher-quota-fallback.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', docsResult, documentationResult, workflowDiagramsResult, releaseSourceBatchResult, toolsInstallResult, statusResult, snapshotResult, runUsageResult, pathContainmentResult, directorySyncResult, literalPathspecsResult, sourceObjectsResult, tokenReportResult, tokenNativeUsageResult, tokenNativeClaudeResult, tokenNativeClaudeTranscriptResult, tokenNativeAutoPiResult, panelResult, nextActionResult, diagnosticResult, probeResult, plannerResult, gitFixtureResult, gitIdentityResult, gitContentResult, reviewChecksResult, gitMcpResult, reviewerResult, callerRootBoundaryResult, callerDirectorySyncResult, planGrantBoundaryResult, planPublicationResult, reviewGuidanceResult, originalEvidenceResult, contextHandoffResult, reviewPanelCapacityResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, checkoutLineEndingsResult, hostPortabilityResult, skillWrapperResult, worktreeLocationResult, releasePackageResult, bunReleaseResult, workerDependencyResult, workerCapacityResult, workerCapacityAPIResult, sessionResult, quotaResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', successorModelResult, successorLegacyResult, routeResult, hostPrerequisiteResult, nativeHostDelegation: { status: 'NOT_RUN', reason: 'Required separate host-native CI check; not covered by portable quality run' }, limits: 'ESLint and Knip run separately. Native model catalog, real SDK sessions, providers, Python and external-service behavior are not checked. The required host-native delegation check is separate and NOT_RUN here; a BLOCKED result from that check is nonzero and is not a pass. When Bun is available, bunReleaseResult checks a real compiled artifact and Linux Bubblewrap with a synthetic SDK; otherwise that artifact check is explicitly skipped. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));
+console.log(JSON.stringify({ status: 'PASS', docsResult, documentationResult, workflowDiagramsResult, releaseSourceBatchResult, toolsInstallResult, statusResult, snapshotResult, runUsageResult, pathContainmentResult, directorySyncResult, literalPathspecsResult, sourceObjectsResult, tokenReportResult, tokenNativeUsageResult, tokenNativeClaudeResult, tokenNativeClaudeTranscriptResult, tokenNativeAutoPiResult, panelResult, nextActionResult, gitFixtureResult, gitIdentityResult, gitContentResult, reviewChecksResult, gitMcpResult, planGrantBoundaryResult, planPublicationResult, reviewGuidanceResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, checkoutLineEndingsResult, hostPortabilityResult, skillWrapperResult, worktreeLocationResult, releasePackageResult, bunReleaseResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', hostPrerequisiteResult, nativeHostDelegation: { status: 'NOT_RUN', reason: 'Required separate host-native CI check; not covered by portable quality run' }, limits: 'ESLint and Knip run separately. Providers, Python and external-service behavior are not checked. The required host-native delegation check is separate and NOT_RUN here; a BLOCKED result from that check is nonzero and is not a pass. When Bun is available, bunReleaseResult checks a real compiled artifact; otherwise that artifact check is explicitly skipped. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));

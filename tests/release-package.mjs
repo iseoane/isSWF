@@ -11,7 +11,8 @@ import { readReleaseSource, verifyRelease } from '../tools/release-source.mjs';
 
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 const temp = await mkdtemp(join(tmpdir(), 'isswf-release-'));
-const fixture = join(temp, 'source'), store = join(temp, 'store'), project = join(temp, 'project');
+const fixture = join(temp, 'source'), store = join(temp, 'store');
+let project = join(temp, 'project');
 const npm = [process.env.npm_execpath, join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), resolve(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js')].find(path => path && isAbsolute(path) && existsSync(path));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', npm_config_cache: join(temp, 'npm-cache') };
@@ -31,6 +32,8 @@ const git = (...args) => run('git', ['-C', fixture, ...args]).stdout.trim();
 const commit = message => { git('add', '-A'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', message); return git('rev-parse', 'HEAD'); };
 const readJSON = async path => JSON.parse(await readFile(path, 'utf8'));
 const writeJSON = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
+const legacyTools = ['isswf-job', 'pi-worker-task', 'worker-lifecycle', 'researcher-task', 'reviewer-task', 'planner-task', 'diagnostic-task'];
+const removedPaths = [...[...legacyTools, 'diagnostic-probes', 'execution-capacity', 'job-successor', 'recovery-review', 'external-effect-journal', 'native-recovery', 'sdk-package'].map(name => `tools/${name}.mjs`), '.factory/models.json', 'docs/model-routing.md', 'docs/local-worker-lifecycle.md'];
 async function inventory(root) {
   const entries = [];
   async function visit(path, prefix) {
@@ -99,7 +102,6 @@ try {
   for (const path of ['docs/s01-intake.md', 'docs/activacion-por-proyecto.md']) assert.equal(receiptA.files[path], undefined, `Retired guide path packaged: ${path}`);
   for (const [sha, entries] of Object.entries(receiptA.sources)) for (const path of Object.keys(entries)) assert.ok(readReleaseSource(releaseA, sha, path).length);
   assert.throws(() => readReleaseSource(releaseA, '0'.repeat(40), '.agents/roles/worker.md'), /missing/u);
-  for (const module of ['planner-task', 'reviewer-task', 'diagnostic-task', 'researcher-task', 'pi-worker-task']) await import(pathToFileURL(join(releaseA, 'tools', module + '.mjs')));
   for (const name of ['job-brief', 'delivery']) {
     const path = '.factory/templates/' + name + '.md';
     assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Current working-tree templates must be packaged, not silently taken from earlier HEAD');
@@ -112,6 +114,11 @@ try {
   const installed = join(consumer, 'node_modules/isswf-pi-resources');
   assert.equal(verifyRelease(installed).runtimeId, receiptA.runtimeId, 'Packed npm package must retain exact inventory');
   for (const name of ['git-evidence-mcp.mjs', 'git-evidence-invoke.mjs', 'git-evidence.mjs']) assert.ok(existsSync(join(installed, 'tools', name)), `${name} ships in the installed npm package`);
+  for (const path of removedPaths) {
+    assert.equal(receiptA.files[path], undefined, `Retired legacy path is not packaged: ${path}`);
+    assert.equal(existsSync(join(installed, path)), false, `Retired legacy path is absent from the installed npm package: ${path}`);
+  }
+  for (const name of ['isswf', 'isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-snapshot', 'isswf-response', 'isswf-intake', 'project-quality', 'state-migration', 'release-source']) assert.ok(receiptA.files[`tools/${name}.mjs`] && existsSync(join(installed, 'tools', name + '.mjs')), `Current tool ships: ${name}`);
   for (const path of [
     '.agents/skills/isswf-security/SKILL.md',
     'skills/isswf-security/SKILL.md',
@@ -178,13 +185,6 @@ try {
     await assert.rejects(readdir(join(managerProject, '.factory')), { code: 'ENOENT' });
     console.log('PASS real Pi manager global and project scopes in isolated temporary config; no project state initialized by package installation');
   }
-  // Each suite owns a different temporary project/store and only reads this artifact.
-  // Wait for ALL children before fixture teardown, including when one fails.
-  // Whole-suite wall-clock limit, not a product deadline: the reviewer suite alone takes about 92 s on Windows (#176).
-  const roleResults = await Promise.allSettled(['planner-task', 'reviewer-task', 'diagnostic-task'].map(test =>
-    promisify(execFile)(process.execPath, [join(source, 'tests', test + '.mjs'), installed], { cwd: temp, env, timeout: 240000, maxBuffer: 4 * 1024 * 1024 })
-  ));
-  for (const result of roleResults) assert.equal(result.status, 'fulfilled', result.reason?.stack);
   assert.deepEqual(await inventory(releaseA), packageFiles, 'Packing does not modify release');
   await mkdir(project); run('git', ['init', '-q', project]);
   const beforeInspect = await inventory(project);
@@ -197,50 +197,44 @@ try {
   assert.equal(initialized.status, 'initialized');
   assert.deepEqual(initialized.changed, ['.isswf/install.json', '.isswf/project-setup.md', '.isswf/.gitignore']);
   await assert.rejects(readFile(join(project, '.isswf/models.json')), { code: 'ENOENT' });
-  const pinFile = join(project, '.isswf/install.json'), pinA = await readFile(pinFile);
-  assert.equal((await readJSON(pinFile)).runtimeId, receiptA.runtimeId);
+  const freshPin = join(project, '.isswf/install.json'), freshPinBytes = await readFile(freshPin);
+  assert.equal((await readJSON(freshPin)).runtimeId, receiptA.runtimeId);
   await assert.rejects(readdir(join(project, '.factory')), { code: 'ENOENT' });
   const afterInit = await inventory(project);
   assert.equal(JSON.parse(cli(installed, 'init', ['--tracking', 'local']).stdout).status, 'unchanged');
   assert.deepEqual(await inventory(project), afterInit);
-  const location = JSON.parse(cli(installed, 'locate').stdout);
-  assert.equal(location.runtimeRoot, join(store, 'releases', receiptA.runtimeId));
+  const freshLocation = JSON.parse(cli(installed, 'locate').stdout);
+  assert.equal(freshLocation.runtimeRoot, join(store, 'releases', receiptA.runtimeId));
   assert.equal(JSON.parse(cli(installed, 'exec', ['--', 'isswf-status', '--initiative', 'I0001']).stdout).status, 'absent');
   assert.match(cli(installed, 'exec', ['--', 'isswf-status', '--project', fixture], false).stderr, /supplied by the launcher/u);
-  await rm(location.runtimeRoot, { recursive: true });
+  const planProposal = join(temp, 'plan-proposal.json'), planGrant = join(temp, 'plan-grant.json');
+  await writeJSON(planProposal, { version: 1, initiative: 'I0001', title: 'Current exec journey', type: 'maintenance', jobs: [{ id: 'J001', objective: 'Run current tools through the pinned runtime', status: 'pending', dependsOn: [], acceptance: ['Observed through exec'], blocker: 'None', nextStep: 'Inspect', evidence: [] }] });
+  await writeJSON(planGrant, { version: 1, project: await realpath(project), initiative: 'I0001', reference: 'Synthetic plan-only fixture', permissions: ['plan'] });
+  assert.equal(JSON.parse(cli(installed, 'exec', ['--', 'isswf-plan', 'prepare', '--initiative', 'I0001', '--proposal', planProposal, '--grant', planGrant]).stdout).status, 'prepared');
+  const observedPlan = JSON.parse(cli(installed, 'exec', ['--', 'isswf-status', '--initiative', 'I0001']).stdout);
+  assert.equal(observedPlan.status, 'observed'); assert.equal(observedPlan.jobs[0].id, 'J001');
+  for (const tool of legacyTools) assert.match(cli(installed, 'exec', ['--', tool, 'run'], false).stderr, /Unknown tool/u, `The current launcher no longer executes ${tool}`);
+  await rm(freshLocation.runtimeRoot, { recursive: true });
   assert.equal(JSON.parse(cli(installed, 'init').stdout).status, 'unchanged');
-  assert.deepEqual(await readFile(pinFile), pinA);
+  assert.deepEqual(await readFile(freshPin), freshPinBytes);
+  // An existing project pinned to a historical release that still shipped the legacy executor (J002 merge on main)
+  // must update to the current release; its gate loads the legacy effect and cessation modules from that retained runtime.
+  const legacyRevision = 'c8259b9b7699bf7afdf1be9895f97d6d69b39e38', legacySource = join(temp, 'legacy-source'), releaseL = join(temp, 'release-legacy');
+  run('git', ['clone', '-q', '--shared', '--no-checkout', source, legacySource]);
+  run('git', ['-C', legacySource, 'checkout', '-q', legacyRevision]);
+  run(process.execPath, [join(legacySource, 'tools/build-release.mjs'), '--source', legacySource, '--revision', legacyRevision, '--output', releaseL, '--runtime', 'node']);
+  const receiptL = verifyRelease(releaseL);
+  for (const path of removedPaths) assert.ok(receiptL.files[path], `Positive control: the historical release ships ${path}`);
+  project = join(temp, 'legacy-project');
+  await mkdir(project); run('git', ['init', '-q', project]);
+  assert.equal(JSON.parse(cli(releaseL, 'init', ['--tracking', 'local']).stdout).status, 'initialized');
+  const pinFile = join(project, '.isswf/install.json'), pinA = await readFile(pinFile);
+  assert.equal((await readJSON(pinFile)).runtimeId, receiptL.runtimeId);
+  const location = JSON.parse(cli(releaseL, 'locate').stdout);
+  assert.equal(JSON.parse(cli(installed, 'exec', ['--', 'isswf-status', '--initiative', 'I0001']).stdout).status, 'absent', 'The current launcher executes the older pinned runtime');
+  // Existing projects keep their operator-owned legacy route file; current init no longer creates one.
+  await writeFile(join(project, '.isswf/models.json'), await readFile(join(releaseL, '.factory/models.json')));
   checkpoint();
-  const sdk = join(temp, 'sdk'); await mkdir(sdk);
-  // Existing projects keep their operator-owned legacy route file; init no longer creates one.
-  await writeFile(join(project, '.isswf/models.json'), await readFile(join(installed, '.factory/models.json')));
-  await writeFile(join(project, 'brief.md'), 'Committed target brief, not package provenance.\n');
-  checkpoint();
-  const briefSha = run('git', ['-C', project, 'rev-parse', 'HEAD']).stdout.trim();
-  await writeFile(join(project, 'brief.md'), 'DIRTY target brief must not be used.\n');
-  const prepareConfig = join(temp, 'worker-prepare.json'), task = join(temp, 'prepared-worker.mjs');
-  const config = { version: 1, mode: 'offline', sdkPath: sdk, nodeBinary: process.execPath, authPath: join(temp, 'not-read-auth.json'), profile: { repo: installed, sha: receiptA.methodologySha, files: ['.agents/roles/worker.md', ...['bug-diagnosis', 'tdd', 'design-principles', 'execution-principles', 'verification-principles', 'code-quality', 'comments'].map(name => '.agents/roles/references/' + name + '.md'), ...['debug', 'tdd', 'security', 'performance', 'observability'].map(name => '.agents/skills/isswf-' + name + '/SKILL.md'), ...['SKILL.md', 'references/browser.md', 'references/cli-and-api.md', 'references/test-quality.md'].map(name => '.agents/skills/isswf-e2e/' + name)] }, brief: { repo: project, inputSha: briefSha, path: 'brief.md' }, expectedMutablePaths: ['app.mjs'], protectedCheckCommand: 'node --check app.mjs', checks: [] };
-  await writeJSON(prepareConfig, config);
-  const prepared = JSON.parse(run(process.execPath, [join(installed, 'tools/pi-worker-task.mjs'), 'prepare', '--config', prepareConfig, '--output', task]).stdout);
-  assert.equal(prepared.briefSha256, hash(Buffer.from('Committed target brief, not package provenance.\n')));
-  const taskText = await readFile(task, 'utf8');
-  assert.equal(taskText.includes('DIRTY target brief'), false);
-  const preparedConfig = JSON.parse(taskText.split('\n').find(line => line.startsWith('const CONFIG=')).slice('const CONFIG='.length, -1));
-  assert.match(preparedConfig.files['.agents/roles/references/design-principles.md'], /^# Design principles/u);
-  await writeJSON(prepareConfig, { ...config, profile: { ...config.profile, sha: legacyMethodology } });
-  assert.match(run(process.execPath, [join(installed, 'tools/pi-worker-task.mjs'), 'prepare', '--config', prepareConfig, '--output', task + '-wrong-pin'], false).stderr, /authorized baseline/u);
-  await writeJSON(prepareConfig, { ...config, profile: { ...config.profile, files: ['.agents/roles/not-packaged.md'] } });
-  assert.match(run(process.execPath, [join(installed, 'tools/pi-worker-task.mjs'), 'prepare', '--config', prepareConfig, '--output', task + '-missing'], false).stderr, /Pinned release source is missing/u);
-  await writeFile(join(project, 'brief.md'), 'Committed target brief, not package provenance.\n');
-  const admissionJob = { version: 1, logicalJobRef: 'release/native-admission', runtimeSha: receiptA.revision, targetBase: briefSha, methodologySha: receiptA.methodologySha, exclusiveAttempt: true, workerTotal: 1, models: { sha: briefSha, path: '.isswf/models.json', sha256: hash(await readFile(join(project, '.isswf/models.json'))) }, briefPath: 'brief.md', sdkPath: 'relative-sdk-path', expectedMutablePaths: ['app.mjs'], protectedCheckCommand: 'node --check app.mjs' };
-  const admissionStore = join(temp, 'admission-runs');
-  for (const [methodologySha, message] of [[legacyMethodology, 'job version/runtime/base/methodology pins invalid'], [receiptA.methodologySha, 'job.sdkPath must be absolute']]) {
-    await writeJSON(join(project, 'native-job.json'), { ...admissionJob, methodologySha }); checkpoint();
-    const inputSha = run('git', ['-C', project, 'rev-parse', 'HEAD']).stdout.trim();
-    const admitted = run(process.execPath, [join(installed, 'tools/isswf-job.mjs'), 'run', '--project', project, '--input-sha', inputSha, '--job', 'native-job.json', '--runs-store', admissionStore, '--attempt-id', 'language-admission', '--grant-ref', 'Synthetic fixture only', '--mode', 'offline'], false);
-    assert.ok(admitted.stderr.includes(message), admitted.stderr);
-    await assert.rejects(readdir(admissionStore), { code: 'ENOENT' });
-  }
   const setupBytes = await readFile(join(project, '.isswf/project-setup.md'));
   const generatedSetup = setupBytes.toString('utf8');
   assert.doesNotMatch(generatedSetup, /models\.json|legacy runtime model routes/iu);
@@ -277,7 +271,7 @@ try {
   await writeJSON(workerRegistration, { format: 1, project: await realpath(project), store: legacyRuns, attemptId: 'legacy-attempt', pin: JSON.parse(pinA) });
   const effectBlocker = JSON.parse(cli(releaseB, 'inspect').stdout).blockers.find(blocker => blocker.state === 'open-external-effect');
   assert.equal(effectBlocker?.effect, effectKey, 'inspect reports the open legacy effect');
-  assert.match(effectBlocker.action, new RegExp(`original pin ${JSON.parse(pinA).version} \\(${receiptA.runtimeId}\\)`, 'u'));
+  assert.match(effectBlocker.action, new RegExp(`original pin ${JSON.parse(pinA).version} \\(${receiptL.runtimeId}\\)`, 'u'));
   assert.match(cli(releaseB, 'migrate', migration, false).stderr, /open-external-effect/u);
   await mkdir(join(legacyRuns, 'effects', 'not-a-key'));
   assert.ok(JSON.parse(cli(releaseB, 'inspect').stdout).blockers.some(blocker => blocker.state === 'unknown' && /External effect journal/u.test(blocker.reason)), 'Unreadable effect state blocks');
@@ -291,7 +285,7 @@ try {
   assert.equal((await readJSON(pinFile)).runtimeId, receiptB.runtimeId);
   assert.deepEqual(await readFile(history), historyBytes); assert.deepEqual(await readFile(join(project, '.isswf/models.json')), modelBytes); assert.deepEqual(await readFile(join(project, '.isswf/project-setup.md')), setupBytes);
   assert.equal(JSON.parse(cli(releaseB, 'migrate', migration).stdout).status, 'unchanged');
-  assert.equal(verifyRelease(location.runtimeRoot).runtimeId, receiptA.runtimeId, 'Previous runtime retained');
+  assert.equal(verifyRelease(location.runtimeRoot).runtimeId, receiptL.runtimeId, 'Previous runtime retained');
   assert.match(cli(releaseB, 'rollback', ['--id', 'M0001', '--quiescent-ref', 'Fixture'], false).stderr, /Checkpoint/u);
   checkpoint();
   assert.equal(JSON.parse(cli(releaseB, 'rollback', ['--id', 'M0001', '--quiescent-ref', 'Fixture']).stdout).status, 'migrated');
