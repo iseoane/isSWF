@@ -93,7 +93,7 @@ Before each `subagent` launch, the coordinator prepares and freezes the canonica
 
 ### Recover from lost tools
 
-If the coordinator's own tools disappear mid-work, stop acting. Record the current state (live runs, consumed results, next step): in the plan only when no writer is active, because plan edits are frozen while a worker writes; otherwise, and when no write tool remains, in the message to the operator. Ask the operator to run `/reload`. After the reload, resume from the recorded state and reconcile live runs; do not repeat a dispatch that already happened.
+If the coordinator's own tools disappear mid-work, stop acting. Record the current state (live runs, consumed results, next step): in the plan only when no writer is active, because plan edits are frozen while a worker writes; otherwise, or when no write tool remains, in the message to the operator. Ask the operator to run `/reload`. After the reload, resume from the recorded state and reconcile live runs; do not repeat a dispatch that already happened.
 
 ## Bound identity, committed diff and file content for Pi reviewers
 

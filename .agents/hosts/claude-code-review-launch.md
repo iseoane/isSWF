@@ -19,7 +19,7 @@ claude -p --agent isswf:isswf-reviewer --plugin-dir /absolute/factory-root \
   --model <approved-model> --effort <approved-effort> \
   --output-format stream-json --verbose \
   --allowedTools "mcp__plugin_isswf_isswf_git_evidence__identity mcp__plugin_isswf_isswf_git_evidence__diff mcp__plugin_isswf_isswf_git_evidence__content" \
-  < review-task.md > review-trace.jsonl
+  < review-task.md > tooling/.local/<job>/review-trace.jsonl
 ```
 
 On Windows PowerShell, which has no inline environment prefix and rejects `<`, set the variables only for the one review and pipe the task on standard input:
@@ -32,7 +32,7 @@ try {
   Get-Content -Raw -Encoding UTF8 review-task.md | claude -p --agent isswf:isswf-reviewer --plugin-dir C:\absolute\factory-root `
     --model <approved-model> --effort <approved-effort> --output-format stream-json --verbose `
     --allowedTools "mcp__plugin_isswf_isswf_git_evidence__identity mcp__plugin_isswf_isswf_git_evidence__diff mcp__plugin_isswf_isswf_git_evidence__content" |
-    Out-File -Encoding utf8 review-trace.jsonl  # documented, unverified: 5.1 writes a UTF-8 BOM
+    Out-File -Encoding utf8 tooling/.local/<job>/review-trace.jsonl  # documented, unverified: 5.1 writes a UTF-8 BOM
 } finally {
   Remove-Item Env:ISSWF_GIT_EVIDENCE_BINDINGS, Env:MAX_MCP_OUTPUT_TOKENS -ErrorAction SilentlyContinue
 }
@@ -40,11 +40,11 @@ try {
 
 `$env:` assignments last for the whole PowerShell session, not one command, so run the block in a dedicated `powershell -NoProfile` process, keep the `finally` removal and start no other Claude session from it while the variables are set.
 
-Place `--output-format stream-json --verbose` before `--allowedTools`: that flag takes a variadic list and would consume later arguments as tool names. Without an approved effort for the reviewer, omit `--effort` only under approved parent inheritance; otherwise block the launch.
+Place `--output-format stream-json --verbose` before `--allowedTools`: that flag takes a variadic list and would consume later arguments as tool names. Without an approved effort for the reviewer, omit `--effort` only when the host's default effort is approved; otherwise block the launch.
 
 ### Record the run from the trace
 
-The trace is the child-call evidence; keep it outside tracked records and do not retain the transcript in the review record. From it, record:
+The trace is the child-call evidence; write it to an ignored local path such as `tooling/.local/<job>/` (in another project, its ignored scratch location), never to tracked records, and delete it or keep it private once the `Run:` line and observed calls are recorded. Windows PowerShell 5.1 may garble non-ASCII text in it; the session ID and tool names are ASCII. From it, record:
 
 - **Run line.** Take the session id from the first `system` event with subtype `init` (documented, unverified) and write `Run: claude session=<id>` in the review record, as the shared [`Run:` line](../../docs/durable-work.md#record-the-launch-identity) defines.
 - **Tool calls.** For each `identity`, `diff` and `content` call, find its `tool_use` block and the matching non-error `tool_result` in the trace, then mark it observed from the trace. For `diff`, the `chunk` arguments show whether every chunk 1 to `chunkCount` was fetched. A call claimed in the report but absent from the trace is self-reported, not observed.
