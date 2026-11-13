@@ -51,11 +51,11 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Objective: Remove the legacy executor tools, SDK callers, their tests, package entries and legacy contracts (EN/ES), keeping history retrievable.
 - Depends on: J002
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Needs an explicit start.
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Blocker: None
 - Next step: Operator start. SDK callers checked 2026-11-13: no use outside this repo (only a historical mention in another local project's diagnosis; that project has no registered legacy workers or leases). Then realign I0009 J029/J030.
 
 ### Acceptance
