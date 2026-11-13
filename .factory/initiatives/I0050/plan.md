@@ -36,12 +36,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J003
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Make the bound review launch include the review-policy files the brief cites in the content allowlist.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J003.
+- Blocker: None.
+- Next step: Coordinator-owned docs edit on feat/i0050-bound-review-evidence; started by the operator 2026-11-13 (order J003, J004, then J001, J002). PR against main; merge awaits the operator.
 
 ### Acceptance
 
@@ -50,12 +50,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J004
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Record the reviewer's verdict verbatim and any coordinator override separately.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J004.
+- Blocker: None.
+- Next step: Coordinator-owned docs edit on feat/i0050-bound-review-evidence; started by the operator 2026-11-13 (order J003, J004, then J001, J002). PR against main; merge awaits the operator.
 
 ### Acceptance
 
