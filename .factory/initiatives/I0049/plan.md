@@ -23,12 +23,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J002
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Make new tests and mutation experiments earn their place.
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements r2; started by the operator 2026-11-13.
+- Next step: Semantic review of the whole I0049 candidate after J003. Worker A001 was blocked by auto-mode no-verdict on .agents edits; the coordinator applied its prepared edits with operator authorization 2026-11-13 after reading isswf-writing.
 
 ### Acceptance
 
@@ -39,12 +39,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J003
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Fix review findings in proportion to their likelihood and impact.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Awaiting J002 and explicit operator start.
-- Next step: Pilot running in this repository first (from I0046 J007, 2026-11-12): the coordinator records extremely unlikely, low-impact findings as known limits. Operator decides on default adoption after observing it.
+- Blocker: None.
+- Next step: Coordinator applies r1 (operator start 2026-11-13); pilot from I0046 becomes the default rule.
 
 ### Acceptance
 
