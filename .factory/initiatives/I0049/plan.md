@@ -39,12 +39,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J003
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Fix review findings in proportion to their likelihood and impact.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Coordinator applies r1 (operator start 2026-11-13); pilot from I0046 becomes the default rule.
+- Next step: Semantic review of the whole I0049 candidate (coordinator-owned edits after reading isswf-writing).
 
 ### Acceptance
 
