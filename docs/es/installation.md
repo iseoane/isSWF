@@ -67,7 +67,7 @@ El plugin incluye también un panel de iniciativas opcional, desactivado por def
 
 ## Inicializar un proyecto
 
-El setup informa, para cada uno, de si está conectado y en uso, instalado pero no conectado, sin inicializar en el repositorio (Codegraph) o no instalado, y recomienda los que falten como opcionales. Si Codegraph está instalado pero el repositorio no tiene índice, el setup pregunta si ejecutar `codegraph init` y solo lo ejecuta si aceptas.
+El setup informa de Engram y Codegraph: para cada uno, si está conectado y en uso, instalado pero no conectado, sin inicializar en el repositorio (Codegraph) o no instalado, y recomienda los que falten como opcionales. Si Codegraph está instalado pero el repositorio no tiene índice, el setup pregunta si ejecutar `codegraph init` y solo lo ejecuta si aceptas.
 
 Abre el repositorio de destino e invoca la skill de configuración:
 
