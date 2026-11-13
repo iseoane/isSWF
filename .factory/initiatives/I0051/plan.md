@@ -2,13 +2,13 @@
 
 Type: enhancement
 
-Source: operator request in a Claude Code session, 2026-11-13, after reviewing that session: apply `isswf-writing` (agent documents) to the factory's own Markdown under `.agents/` (skills, roles, references, host guides), not to `docs/`, and use the operator's personal `doctor-md-skill` and `doctor-md-agents` skills for empirical evidence. Those two skills are operator-invoked only and stay outside this repository. Every job is S or M; L is split before start. Plan approval is preparation only; each job needs an explicit operator start.
+Source: operator request in a Claude Code session, 2026-11-13, after reviewing that session: apply `isswf-writing` (agent documents) to the factory's own agent-facing Markdown, not to `docs/`, and use the operator's personal `doctor-md-skill` and `doctor-md-agents` skills for empirical evidence. Those two skills are operator-invoked only and stay outside this repository. Scope: `.agents/**/*.md` (skills and their references, roles and role references, host guides), the Claude plugin entries `skills/*/SKILL.md` and agent definitions `agents/*.md`, the repository's `AGENTS.md` and `REVIEW.md`, and the project-only `project-release` skill (`.claude/skills/`, `.pi/skills/`). Excluded: `docs/`, README and GLOSSARY (human-facing), and the historical `.pi/agents/` launch files. Every job is S or M; L is split before start. Plan approval is preparation only; each job needs an explicit operator start.
 
 ## J001
 
 - Size: S
 - Status: pending
-- Objective: Audit the factory Markdown under `.agents/` against isswf-writing's agent-document criteria, read-only, and record the findings.
+- Objective: Audit the in-scope agent-facing Markdown against isswf-writing's agent-document criteria, read-only, and record the findings.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: Awaiting explicit operator start.
@@ -16,7 +16,7 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 
 ### Acceptance
 
-- One read-only reviewer per area (skills, roles, references, host guides) applies isswf-writing with references/agent-documents.md and a static walkthrough of ordinary, conditional and missing-input requests.
+- One read-only reviewer per area (skills with their references and plugin entries; roles, role references and agent definitions; host guides; repository instructions `AGENTS.md`, `REVIEW.md` and `project-release`) applies isswf-writing with references/agent-documents.md and a static walkthrough of ordinary, conditional and missing-input requests.
 - Findings name path, line, criterion, likelihood and impact, and mark contradictions and duplicated rules across files; no file is edited.
 - The coordinator records the consolidated findings in the job evidence, attributed to each reviewer.
 
