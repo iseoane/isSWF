@@ -9,7 +9,7 @@ Keep these identities distinct:
 | Record | Required value | What it identifies |
 | --- | --- | --- |
 | Durable job | Project-unique job ID and exact brief path/revision | Authorized work and accepted objective. |
-| Document-input checkpoint | Full Git SHA | Versions of the brief and referenced documents. |
+| Document-input checkpoint | Full Git SHA, if the assignment is checkpoint-pinned; otherwise no checkpoint is required | Versions of the brief and referenced documents, resolved as [checkpoint-pinned inputs](planning.md#checkpoint-pinned-inputs) describes. |
 | Target base | Full Git SHA | Code state on which the candidate is based. |
 | Candidate | Full commit SHA, or reproducible snapshot ID with retained package | Exact code and file content under review. |
 | Review | Artifact reference and verdict tied to the exact base and candidate | Independent evidence, not authority to accept or merge. |

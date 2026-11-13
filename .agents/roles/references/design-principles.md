@@ -1,6 +1,6 @@
 # Design principles
 
-Load this reference when an assignment changes models, contracts, boundaries, or structure; it is not a mandatory checklist for every edit.
+Use this reference when the coordinator supplies it; the coordinator's [trigger table](../../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) says when it applies. Apply only the relevant sections; it is not a mandatory checklist for every edit.
 
 ## Clarify domain language
 **Trigger:** overloaded terms, conflicting business rules, or a change to domain relationships. **Action:** read the target's glossary and existing decisions, compare the terms with actual code and contracts, and test the proposed model against concrete normal and edge-case scenarios. Investigate technical facts; ask the operator only for unresolved product meaning. Capture agreed terminology in the existing glossary when authorized. **Limit:** a glossary is vocabulary, not a specification or a backlog. Preserve context-specific meanings and persisted names; clarifying a word does not authorize a schema/key migration or impose another project's terminology.

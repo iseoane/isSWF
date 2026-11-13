@@ -48,6 +48,6 @@ This step ends when the text covers the requested result without unresolved audi
 
 Read the final document using the selected audience's checks. Check applicable frontmatter, referenced files, local links, examples, and project conventions. Run relevant existing checks when available and authorized. Distinguish inspected commands from executed commands and static checks from observed agent behavior.
 
-For agent instructions, inspect representative ordinary, conditional, and ambiguous requests to check that the intended branch and completion condition are explicit. Report this as a static walkthrough unless an actual agent evaluation ran.
+For agent instructions, walk through the requests listed under "Check representative requests" in [agent documents](references/agent-documents.md) to check that the intended branch and completion condition are explicit. Report this as a static walkthrough unless an actual agent evaluation ran.
 
 Deliver the requested text or files with any material uncertainty, unanswered question, or unrun check. Editing text does not grant installation, publication, remote updates, or other side effects. Do not add mandatory interviews, subagents, or review stages unless the task or project requires them.

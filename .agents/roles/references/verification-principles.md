@@ -1,6 +1,6 @@
 # Verification principles
 
-Load this reference according to the change and its risk; do not run every review or test by default.
+Use this reference when the coordinator supplies it; the coordinator's [trigger table](../../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) says when it applies. Apply only the relevant sections; do not run every review or test by default.
 
 ## Cause before patch
 **Trigger:** a defect, regression, or recovery failure. **Action:** establish expected and observed symptoms and a safe reproduction when possible; read what is needed to construct it before concluding a cause. Form testable hypotheses and confirm a cause only with evidence connecting mechanism and symptom. **Limit:** if reproduction fails or the surface is inaccessible, report attempts, evidence, and the concrete pending probe; do not invent a cause or attribute correlation. When two fixes sharing a premise fail the same gate, write that premise in one sentence and challenge it with evidence before starting another fix.

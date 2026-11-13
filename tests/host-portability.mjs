@@ -167,16 +167,16 @@ assert.match(workerContract, /trusted-root-resolved paths or full canonical cont
 assert.match(workerContract, /actually consumed \(read or supplied in full\)/u);
 assert.match(workerContract, /missing\/unreadable required resource/u);
 assert.match(workerContract, /selection alone is not evidence/u);
-assert.ok(skill.includes('`<state>/project-setup.md`'), 'Tracking choice must use the single selected state root');
+assert.ok(skill.includes('`<selected-state>/project-setup.md`'), 'Tracking choice must use the single selected state root');
 assert.ok(!skill.includes('`.factory/project-setup.md`'), 'Coordinator must not hard-code the legacy setup path');
+// Host guides point to the coordinator's durable-records step; the rules themselves are asserted on the skill and durable-work guide.
 for (const file of ['.agents/hosts/pi.md', '.agents/hosts/claude-code.md']) {
   const hostGuide = await read(file);
-  assert.match(hostGuide, /Before the first native dispatch for new work/u);
-  assert.match(hostGuide, /stop if both `\.isswf` and `\.factory` exist/u);
-  assert.match(hostGuide, /plan CLI is optional/u);
-  assert.match(hostGuide, /Do not stage worker\/reviewer artifacts until their writer is stopped/u);
+  assert.ok(hostGuide.includes('../skills/isswf-coordinator/SKILL.md#3-ground-the-work-in-verifiable-references-and-durable-records'), file);
   assert.match(hostGuide, /inline small-task handoff supplements, but does not replace|as a supplement to its minimal canonical plan and curated brief/u);
 }
+assert.match(skill, /If both exist or the selected entry is unsafe, stop and reconcile/u);
+assert.match(skill, /The source `tools\/isswf-plan\.mjs` is optional/u);
 const reviewSkill = await read('.agents/skills/isswf-review/SKILL.md');
 assert.ok(reviewSkill.includes('../../roles/references/review.md#required-methodology'));
 assert.match(skill, /check required methodology coverage/u);
@@ -319,7 +319,7 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
   assert.ok(coordinator.includes('An [interview](../isswf-interview/SKILL.md) is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself.'));
   assert.ok(coordinator.includes('propose it in one line that the operator accepts or skips; never make it mandatory. Always run it when the operator asks for it.'));
   const interview = await read('.agents/skills/isswf-interview/SKILL.md');
-  for (const phrase of ['Ask exactly one question', 'Give a recommended answer', 'There is no fixed question count.', 'Never ask what can be found locally', '"enough, decide"', '`confirmed by operator`', 'explicit `assumption`', '`GLOSSARY.es.md`', 'canonical plan (`<state>/initiatives/<ID>/plan.md`)']) assert.ok(interview.includes(phrase), phrase);
+  for (const phrase of ['Ask exactly one question', 'Give a recommended answer', 'There is no fixed question count.', 'Never ask what can be found locally', '"enough, decide"', '`confirmed by operator`', 'explicit `assumption`', "the project's glossary files named by its instructions", 'If no initiative plan exists, return the outcome to the coordinator to record.', 'canonical plan (`<state>/initiatives/<ID>/plan.md`)']) assert.ok(interview.includes(phrase), phrase);
 }
 for (const name of ['isswf-writing', 'isswf-understanding', 'isswf-pr', 'isswf-issue', 'isswf-e2e', 'isswf-debug', 'isswf-review', 'isswf-retrospective', 'isswf-tdd', 'isswf-security', 'isswf-performance', 'isswf-observability', 'isswf-triage', 'isswf-interview', 'isswf-howto']) {
   assert.ok(piManifest.files.includes(`.agents/skills/${name}`));
@@ -366,10 +366,9 @@ assert.match(correctionInbox, /Exact bounded operator correction/u);
 assert.match(correctionInbox, /Checkpoint and recipient handoff:.*never self-referential/u);
 assert.doesNotMatch(correctionInbox, /Created by: coordinator/u);
 assert.match(await read('.agents/hosts/pi.md'), /parent\/operator correction to a running delegated coordinator.*exact live coordinator run ID/u);
-assert.match(await read('.agents/hosts/pi.md'), /parent retains the trusted instruction and provenance.*authorized exclusive checkout/u);
 assert.match(await read('.agents/hosts/claude-code.md'), /parent\/operator correction to a running delegated coordinator.*exact coordinator agent ID/u);
-assert.match(await read('.agents/hosts/claude-code.md'), /parent retains the trusted instruction and provenance.*authorized exclusive checkout/u);
 assert.match(await read('.agents/hosts/claude-code.md'), /does not establish Windows support/u);
+for (const hostPath of ['.agents/hosts/pi.md', '.agents/hosts/claude-code.md']) assert.ok((await read(hostPath)).includes('feature-delivery.md#trusted-corrections-and-portable-checkpoint-inbox'), 'Host guide must point to the correction inbox: ' + hostPath);
 assert.ok(skill.includes('../../roles/references/feature-delivery.md'));
 for (const file of ['.agents/skills/isswf-setup/SKILL.md', '.agents/skills/isswf-pr/SKILL.md', '.agents/roles/delivery.md', '.agents/roles/references/delivery.md']) assert.ok((await read(file)).includes('feature-delivery.md'), 'Workflow consumer must link to its canonical contract: ' + file);
 for (const pattern of [/trusted operator request/u, /read-only, local-only/u, /prospective/u, /finite.*budget/u, /Definition questions|definition decision/u, /Do not merge/u, /auto-merge/u, /delivery helper may remain prepare-only/u]) assert.match(featureFlow, pattern);
@@ -525,7 +524,7 @@ for (const pattern of [
   /Previous-version retention and cleanup are unsupported\/deferred/u,
   /do not copy caches, run `pi remove`, Claude uninstall/u,
   /not a native project pin or a shared registry/u,
-  /Development must not alter any operator setup records/u,
+  /Development of isSWF itself must not alter any operator setup records/u,
 ]) assert.match(hostUpdate, pattern);
 assert.match(hostUpdate, /Never invoke a broad\/self update \(`pi update`, `pi update --all`\)/u);
 assert.match(hostUpdate, /Never use `claude plugin uninstall` to remove an older version/u);

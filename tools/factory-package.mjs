@@ -23,6 +23,7 @@ const featureDeliveryPath = ".agents/roles/references/feature-delivery.md";
 const featureDeliveryLink = "../../roles/references/feature-delivery.md";
 export const nativePiResources = [
   ".agents/hosts/pi.md",
+  ".agents/hosts/bound-review-evidence.md",
   "tools/git-evidence.mjs",
   "tools/git-evidence-pi-extension.mjs",
   "tools/git-evidence-invoke.mjs",
@@ -35,6 +36,7 @@ export const nativePiResources = [
 ];
 const payloadPaths = [
   ".agents/skills/isswf-coordinator/SKILL.md",
+  ".agents/skills/isswf-coordinator/references/version-advisory.md",
   ".agents/skills/isswf-setup/SKILL.md",
   ".agents/roles/worker.md",
   ".agents/roles/diagnostician.md",

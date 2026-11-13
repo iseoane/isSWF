@@ -70,7 +70,7 @@ try {
   await writeFile(join(markdownRoot, workflowPath), workflow, { mode: 0o444 });
   await verifyPackage(markdownRoot, revisionA);
   const rootManifest = await readJSON(join(releaseA, 'package.json'));
-  const nativePiResources = ['.agents/hosts/pi.md', 'tools/git-evidence.mjs', 'tools/git-evidence-pi-extension.mjs', 'tools/git-evidence-invoke.mjs', 'tools/git-evidence-mcp.mjs', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
+  const nativePiResources = ['.agents/hosts/pi.md', '.agents/hosts/bound-review-evidence.md', 'tools/git-evidence.mjs', 'tools/git-evidence-pi-extension.mjs', 'tools/git-evidence-invoke.mjs', 'tools/git-evidence-mcp.mjs', '.agents/roles/planner.md', '.agents/roles/researcher.md', '.agents/roles/references/planning.md', '.agents/roles/references/research.md', ...['worker', 'reviewer', 'planner', 'researcher'].map(role => `.agents/hosts/pi/agents/isswf-${role}.md`)];
   for (const path of nativePiResources) {
     assert.deepEqual(await readFile(join(releaseA, path)), await readFile(join(source, path)), 'Native Pi resources must survive committed-source construction');
     assert.deepEqual(await readFile(join(markdownRoot, path)), await readFile(join(source, path)), 'Native Pi resources must survive Markdown materialization');
@@ -157,6 +157,7 @@ try {
     'skills/isswf-interview/SKILL.md',
     '.agents/skills/isswf-howto/SKILL.md',
     'skills/isswf-howto/SKILL.md',
+    '.agents/skills/isswf-coordinator/references/version-advisory.md',
   ]) {
     assert.ok(receiptA.files[path], `Utility resource missing from release: ${path}`);
     assert.equal(await readFile(join(installed, path), 'utf8'), await readFile(join(source, path), 'utf8'));

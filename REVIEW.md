@@ -18,6 +18,7 @@ When the candidate touches one of these paths, state under Limits that integrati
 - `.github/workflows/**`
 - Packaging, release and installation: `tools/factory-package.mjs`, `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/sdk-package.mjs`
 - Host boundaries and role profiles: `.agents/hosts/**`, `.agents/roles/*.md`
+- Delivery grants and the release procedure: `.agents/roles/references/feature-delivery.md`, `.claude/skills/project-release/**`
 - Grant, capacity and authority code: `tools/execution-capacity.mjs` and any change to how grants are read or enforced
 
 ## Skip unless the change targets them
@@ -28,7 +29,7 @@ When the candidate touches one of these paths, state under Limits that integrati
 
 ## Findings
 
-- Report at most three `suggestion` findings about style or wording; drop the rest.
+- Report at most three `suggestion` findings about style or wording and drop the rest, unless the change's objective is documentation or instruction wording; then report each wording finding.
 - Every finding cites path and line and, for behavior, the command or test that shows it.
 - Mark a Windows-only or Linux-only defect with the platform and the observed error.
 - When there is nothing to fix, say so plainly.

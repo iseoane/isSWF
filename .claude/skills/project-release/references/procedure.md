@@ -1,6 +1,13 @@
 # isSWF release procedure
 
-This is a source-project procedure. Read [technical installation/build contracts](../../../../docs/installation.md), [development/publication checks](../../../../docs/en/development.md), [review guidance](../../../../.agents/roles/references/review.md) and [durable records](../../../../docs/durable-work.md) before their corresponding operation. Use actual current code where these contracts describe historical paths. These references own runtime semantics; do not copy them into release notes.
+This is a source-project procedure. Before each operation, read the contract that governs it:
+
+- Building or inspecting a release archive: [installation and build contracts](../../../../docs/installation.md), "Build a release before publication".
+- Running local checks and the pre-publication list: [development guide](../../../../docs/en/development.md), "Quality checks" and "Before publication".
+- Reviewing the candidate: [review guidance](../../../../.agents/roles/references/review.md).
+- Recording the brief, grants and evidence: [durable records](../../../../docs/durable-work.md).
+
+Use actual current code where these contracts describe historical paths. These references own runtime semantics; do not copy them into release notes.
 
 ## Resolve the candidate
 
@@ -23,9 +30,8 @@ Inspect existing CI artifacts first; missing local Bun is not permission to inst
 For each downloaded tarball:
 
 1. List entries and reject unexpected roots, path traversal, symlinks and private/development material. Preserve the entire `package` root; do not distribute only the executable.
-2. Extract in a fresh bounded external directory. Use `tools/release-source.mjs::verifyRelease()` to verify full inventory/source/blob hashes, version and source revision. Confirm `methodologySha` is the intended source, target OS/architecture correct, compiler equal on both platforms, shared runtime identity and distinct target artifact identities as appropriate.
+2. On Windows, GNU tar reads `C:/...` as a remote host: when listing (step 1) and extracting, pass `--force-local` (for example `tar --force-local -xzf`) or use a relative path. Extract in a fresh bounded external directory. Use `tools/release-source.mjs::verifyRelease()` to verify full inventory/source/blob hashes, version and source revision. Confirm the receipt in `package/.isswf-release.json` (`revision`, `methodologySha`, `runtimeId`, `artifactId`, and `runtime.version`/`runtime.target` for the compiler and target): `methodologySha` is the intended source, target OS/architecture correct, compiler equal on both platforms, shared runtime identity and distinct target artifact identities as appropriate.
 3. Match the corresponding platform report's revision/version/artifactId. Inspect host, native-delegation and source-isolation evidence. Keep static, synthetic, actual host discovery and live-model evidence separate. Verify the project-only release skill is not accidentally packaged; preserve the factory package allowlists.
-On Windows, GNU tar reads `C:/...` as a remote host: extract with `tar --force-local -xzf` or from a relative path. Confirm the receipt in `package/.isswf-release.json` (`revision`, `methodologySha`, `runtimeId`, `artifactId`, and `runtime.version`/`runtime.target` for the compiler and target).
 4. Compute SHA-256 of the exact archives intended for upload. Give them unambiguous version/target names, e.g. `isswf-VERSION-bun-linux-x64.tgz` and `isswf-VERSION-bun-windows-x64.tgz`. Renaming the outer archive must not change its bytes. Publish `isswf-VERSION-evidence.json` with `version`, `source`, `ciRun`, `observer` and, per runner, the `platform`, `host` and `sourceIsolation` reports. Write `SHA256SUMS.txt` in `sha256sum` text format (`<hash>  <name>`, two spaces, no `*`) covering both archives and the evidence file.
 5. Sanitize public reports for private absolute paths without removing actual result/source/artifact identity or limitations. Preserve original reports privately. Include a checksum manifest for public assets and concise provenance/review evidence. Never include credentials or raw private transcripts.
 
