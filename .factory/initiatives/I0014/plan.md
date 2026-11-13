@@ -31,18 +31,22 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 
 ## J002
 
-- Status: in-progress
+- Status: awaiting-human
 - Objective: Stop seeding the legacy route file in new installations and block version migration while registered legacy attempts remain unreconciled.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: None
-- Next step: V001 passed; push branch, open PR, wait exact-head CI. Integration needs operator approval (installation code).
+- Blocker: Integration of PR #287 into main needs operator approval (MEDIUM risk, installation code).
+- Next step: Operator decides merge of #287; then prepare the J003 start.
 
 ### Acceptance
 
 - New installs do not get .isswf/models.json; existing copies are preserved.
 - Version migration and inspect block while registered legacy attempts have open effects, pending recovery reviews or unknown state.
 - Focused tests with negative controls; EN/ES docs updated; CI green on Linux and Windows.
+
+### Evidence
+
+- 2026-11-13: worker A001 (commits ec3c60f..10b8fc3); review V001 pass; PR #287 head 60c22e1, CI run 43415983829 passed on that exact head (portable checks, package and host discovery on ubuntu and windows).
 
 ## J003
 
