@@ -17,7 +17,7 @@ Use only for an explicit isSWF repository release request. For preparation-only 
 - Preserve old tags, assets, installed pins, model choices and unique evidence. Never force or overwrite to fix a collision.
 - Do not install compilers, publish npm, deploy Pages or update consumer projects as a release side effect.
 - Require exact-candidate review, CI and inspected actual archives; green badges or platform reports alone are insufficient.
-- Some CI steps (for example `tests/source-host-isolation.mjs` and `tests/host-prerequisites.mjs`) are not part of `tools/check-quality.mjs`; a green local suite does not replace exact-head CI.
+- Some CI steps (`tests/source-host-isolation.mjs` and `tests/host-prerequisites.mjs`) are not part of `tools/check-quality.mjs`. Run them locally with `node tooling/quality/host-checks.mjs`; a `SKIPPED` line is not a pass, and a green local run does not replace exact-head CI.
 
 ## Decision Gates
 
@@ -26,6 +26,7 @@ Use only for an explicit isSWF repository release request. For preparation-only 
 | Existing release/tag collision | Reconcile identity; stop before changing it. |
 | Local compiler absent or mismatched | Use verified native CI packages with the pinned common compiler; otherwise report the exact missing capability. |
 | Failed checks, missing archive or stale source | Block publication; preserve the failure. |
+| Verified candidate without an explicit publication grant | Stop before tag or draft; report the candidate state and the exact grant needed. |
 | Verified candidate and actual publication grant | Publish new tag/release and checksum-verified assets; read them back. |
 
 ## Execution Steps
@@ -42,5 +43,5 @@ Return version, tag/source SHA, release URL/state, artifact identities/checksums
 
 ## References
 
-- [Release procedure and artifact checklist](references/procedure.md)
-- [Coordinator and durable ownership](../../../.agents/skills/isswf-coordinator/SKILL.md)
+- [Release procedure and artifact checklist](references/procedure.md): every step from candidate resolution to published-asset readback.
+- [Coordinator](../../../.agents/skills/isswf-coordinator/SKILL.md): recording the brief and grants, and any native delegation in step 2.
