@@ -7,12 +7,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J001
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Hand coordinator-observed checks to bound reviewers in a block bound to the candidate SHA.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J001.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: None.
+- Next step: Worker implements r2; started by the operator 2026-11-13.
 
 ### Acceptance
 
@@ -36,12 +36,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J003
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Make the bound review launch include the review-policy files the brief cites in the content allowlist.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Coordinator-owned docs edit on feat/i0050-bound-review-evidence; started by the operator 2026-11-13 (order J003, J004, then J001, J002). PR against main; merge awaits the operator.
+- Next step: Semantic review of the whole I0050 candidate after J002.
 
 ### Acceptance
 
@@ -50,12 +50,12 @@ Source: https://github.com/iseoane/isSWF/issues/278 (triaged 2026-11-12 in a Cla
 ## J004
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Record the reviewer's verdict verbatim and any coordinator override separately.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Coordinator-owned docs edit on feat/i0050-bound-review-evidence; started by the operator 2026-11-13 (order J003, J004, then J001, J002). PR against main; merge awaits the operator.
+- Next step: Semantic review of the whole I0050 candidate after J002.
 
 ### Acceptance
 
