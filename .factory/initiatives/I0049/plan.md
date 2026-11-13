@@ -7,12 +7,12 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 ## J001
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Make workers run only the checks their change affects and leave the full suite to the coordinator once, when needed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting explicit operator start.
-- Next step: Operator starts J001.
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Blocker: None.
+- Next step: Worker implements r2 on feat/i0049-proportional-verification; started by the operator 2026-11-13.
 
 ### Acceptance
 
