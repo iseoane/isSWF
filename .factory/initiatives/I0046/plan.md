@@ -223,12 +223,12 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J011
 
 - Size: S
-- Status: in-progress
+- Status: in-review
 - Objective: Apply the post-merge review R1 suggestions for J009/J010.
 - Depends on: J010
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Implement, PR against main, CI; merge awaits the operator.
+- Next step: CI on the J011 PR; merge into main awaits the operator.
 
 ### Acceptance
 
@@ -238,3 +238,4 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ### Evidence
 
 - Review R1 (native isswf-reviewer, model inherited, post-merge on eda66ae..808cd27 without `.factory`): Aggregate PASS, Standards pass, Spec pass; 2 suggestions (this job), info: PowerShell tool not counted by touchedIds (pre-existing), J009 names the guide instead of linking (accepted). An earlier R1 attempt was inconclusive because the coordinator did not supply the diff.
+- Fix commit: plugin test 12/12; negative control with the old pattern fails the quoted and tab cases; exact Spanish label assertion restored.
