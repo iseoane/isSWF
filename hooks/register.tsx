@@ -45,6 +45,7 @@ const LABELS = {
     on: 'sí',
     off: 'no',
     resumeAt: 'a las',
+    noReset: 'sin hora de renovación: no se programa',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'sin agentes delegados en las iniciativas visibles',
   },
@@ -75,6 +76,7 @@ const LABELS = {
     on: 'on',
     off: 'off',
     resumeAt: 'at',
+    noReset: 'no reset time: nothing scheduled',
     coordinator: 'coordinator (this session)',
     noAgents: 'no delegated agents in the visible initiatives',
   },
@@ -109,6 +111,8 @@ let countingOwn = false
 let resumeTimer: Timer | undefined
 let resumeFor: string | undefined
 let resumeAtMs: number | undefined
+// True while the threshold is met but the window gives no reset time, so nothing can be scheduled.
+let resumeNoReset = false
 
 function cancelResume() {
   resumeTimer?.cancel()
@@ -121,7 +125,12 @@ function checkResume($: EngineInterface, cards: any[]) {
   void (async () => {
     const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
     const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status === 'in-progress').map((j: any) => `${i.id}/${j.id}`))
-    if (!window?.resetsAt || window.percentUsed < RESUME_THRESHOLD || !work.length || resumeFor === window.resetsAt) return
+    const due = window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
+    if (due !== resumeNoReset && (!due || !window?.resetsAt)) {
+      resumeNoReset = due && !window?.resetsAt
+      scheduleRefresh($)
+    }
+    if (!due || !window?.resetsAt || resumeFor === window.resetsAt) return
     const at = Date.parse(window.resetsAt) + RESUME_DELAY_MS
     if (!Number.isFinite(at)) return
     cancelResume()
@@ -413,7 +422,8 @@ export const register: Register = (on, options) => {
     if (resumeOn) checkResume($, cards)
     else if (resumeTimer || resumeFor) cancelResume()
     const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
-    const resumeText = `⏰ ${t.resume}: ${resumeOn ? t.on : t.off}${resumeOn && resumeAtMs !== undefined ? ` · ${t.resumeAt} ${new Date(resumeAtMs).toTimeString().slice(0, 5)}` : ''}`
+    const resumeDetail = !resumeOn ? '' : resumeAtMs !== undefined ? ` · ${t.resumeAt} ${new Date(resumeAtMs).toTimeString().slice(0, 5)}` : resumeNoReset ? ` · ${t.noReset}` : ''
+    const resumeText = `⏰ ${t.resume}: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const header = (
       <Box flexDirection="column">
         <Box flexDirection="row" gap={2}>

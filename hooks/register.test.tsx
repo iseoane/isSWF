@@ -358,9 +358,15 @@ for (const [percentUsed, expected] of [[92, 1], [50, 0]] as const) {
     // Repeated draws in the same window schedule nothing more.
     ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
     await ui.unmount()
-    await clock.advance(20 * 60_000)
+    // The window resets at 10 min; the prompt is due five minutes later, not before.
+    await clock.advance(13 * 60_000)
+    expect(prompts.length).toBe(0)
+    await clock.advance(3 * 60_000)
     expect(prompts.length).toBe(expected)
-    if (expected) expect(prompts[0]).toContain('I0046/J004')
+    if (expected) {
+      expect(prompts[0]).toContain('I0046/J004')
+      expect(prompts[0]).toContain('reconcile state first')
+    }
   })
 }
 
@@ -376,10 +382,33 @@ test('switching resume off cancels a scheduled prompt', ON, async ($, on) => {
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^⏰/)).toMatch(/· a las \d\d:\d\d$/)
   await ui.press({ key: 'resume-toggle' })
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   await ui.unmount()
   await clock.advance(20 * 60_000)
+  expect(prompts.length).toBe(0)
+})
+
+test('without a reset time the switch says nothing is scheduled', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95 }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'resume-toggle' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^⏰/)).toBe('⏰ retomar tras cuota: sí · sin hora de renovación: no se programa')
+  await ui.unmount()
+  await clock.advance(60 * 60_000)
   expect(prompts.length).toBe(0)
 })
