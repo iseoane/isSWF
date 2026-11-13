@@ -70,7 +70,7 @@ try {
   assert.deepEqual(Object.keys(tool.parameters.properties ?? {}), [], 'Model schema exposes no binding arguments');
   const contentTool = loaded?.tools.get('isswf_git_content')?.definition;
   assert.ok(contentTool, 'Pi SDK must register the committed content tool');
-  assert.deepEqual(Object.keys(contentTool.parameters.properties ?? {}).sort(), ['path', 'slot'], 'content model schema exposes only bound selection');
+  assert.deepEqual(Object.keys(contentTool.parameters.properties ?? {}).sort(), ['length', 'offset', 'path', 'slot'], 'content model schema exposes only bound selection and an optional byte range');
   const diffTool = loaded?.tools.get('isswf_git_diff')?.definition;
   assert.ok(diffTool, 'Pi SDK must register the child-only committed diff tool');
   assert.deepEqual(Object.keys(diffTool.parameters.properties ?? {}), [], 'Diff model schema exposes no binding arguments');

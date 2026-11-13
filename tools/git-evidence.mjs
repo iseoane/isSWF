@@ -38,7 +38,7 @@ export function validateBinding(value) {
   return binding;
 }
 
-function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
+export function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
   const remaining = deadline - Date.now();
   if (remaining <= 0) throw Error('identity-timeout');
   const env = {
@@ -124,13 +124,18 @@ export function validateContentBinding(value) {
   return Object.freeze({ ...binding, paths: Object.freeze([...value.paths]) });
 }
 
-export async function content(input, slot, path) {
+// Whole blobs up to this size can be read for a byte range; larger files are refused rather than streamed.
+const maxRangedBlobBytes = 64 * 1024 * 1024;
+const rangeBound = value => Number.isSafeInteger(value) && value >= 0;
+
+export async function content(input, slot, path, range) {
   let binding;
   try {
     binding = validateContentBinding(input);
     if (!['base', 'candidate'].includes(slot)) throw Error('invalid-content-slot');
     if (!contentPath(path)) throw Error('invalid-content-path');
     if (!binding.paths.includes(path)) throw Error('content-path-not-allowed');
+    if (range !== undefined && !(rangeBound(range.offset) && rangeBound(range.length) && range.length >= 1 && range.length <= binding.outputBytes)) throw Error('invalid-content-range');
     const deadline = Date.now() + binding.timeoutMs;
     await assertSupportedRepository(binding, deadline);
     const expectedFormat = binding.baseSha.length === 64 ? 'sha256' : 'sha1';
@@ -150,12 +155,17 @@ export async function content(input, slot, path) {
     if (tab < 0 || Buffer.from(record.slice(tab + 1), 'utf8').compare(Buffer.from(path, 'utf8')) !== 0) throw Error('invalid-tree-entry');
     const [mode, type, object] = record.slice(0, tab).split(' ');
     if (!['100644', '100755'].includes(mode) || type !== 'blob' || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(object)) throw Error('content-entry-type-refused');
-    const bytes = runGit(binding, ['cat-file', 'blob', object], deadline, binding.outputBytes + 1);
+    const blob = runGit(binding, ['cat-file', 'blob', object], deadline, range ? maxRangedBlobBytes + 1 : binding.outputBytes + 1);
+    if (range && blob.length > maxRangedBlobBytes) throw Error('content-blob-limit');
+    if (range && range.offset >= blob.length && !(range.offset === 0 && blob.length === 0)) throw Error('content-range-out-of-bounds');
+    const bytes = range ? blob.subarray(range.offset, range.offset + range.length) : blob;
     if (bytes.length > binding.outputBytes) throw Error('content-output-limit');
     const result = {
       version: 1, status: 'ok', operation: 'content', repository: binding.repository,
       baseSha: binding.baseSha, candidateSha: binding.candidateSha, commitSha, path,
-      bindingSha256: digest(binding), contentEncoding: 'base64', contentBytes: bytes.length,
+      bindingSha256: digest(binding),
+      ...(range ? { range: { offset: range.offset, length: bytes.length }, blobBytes: blob.length, blobSha256: createHash('sha256').update(blob).digest('hex') } : {}),
+      contentEncoding: 'base64', contentBytes: bytes.length,
       contentSha256: createHash('sha256').update(bytes).digest('hex'), content: bytes.toString('base64'),
       limits: { timeoutMs: binding.timeoutMs, contentBytes: binding.outputBytes },
     };
@@ -239,7 +249,7 @@ export async function identity(input) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const operation = process.argv[2];
-    if (!['identity', 'diff', 'content'].includes(operation) || (operation === 'content' ? process.argv.length !== 5 : process.argv.length !== 3)) throw Error('supported-operation-required');
+    if (!['identity', 'diff', 'content'].includes(operation) || (operation === 'content' ? ![5, 7].includes(process.argv.length) : process.argv.length !== 3)) throw Error('supported-operation-required');
     const chunks = [];
     let size = 0;
     // The operation timeout is unavailable until JSON/EOF arrives, so input has its own fixed deadline.
@@ -256,7 +266,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     let binding;
     try { binding = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { throw Error('invalid-binding-json'); }
-    const result = operation === 'identity' ? await identity(binding) : operation === 'diff' ? await diff(binding) : await content(binding, process.argv[3], process.argv[4]);
+    const result = operation === 'identity' ? await identity(binding) : operation === 'diff' ? await diff(binding) : await content(binding, process.argv[3], process.argv[4], process.argv.length === 7 ? { offset: Number(process.argv[5]), length: Number(process.argv[6]) } : undefined);
     process.stdout.write(JSON.stringify(result) + '\n');
     if (result.status === 'error') process.exitCode = 2;
   } catch (error) {

@@ -12,7 +12,7 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: None. Merge into main awaits the operator (PR for I0049).
+- Next step: None. Merged into main through PR #283 by operator decision 2026-11-13.
 
 ### Acceptance
 
@@ -34,7 +34,7 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Depends on: J001
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None.
-- Next step: None. Merge into main awaits the operator (PR for I0049).
+- Next step: None. Merged into main through PR #283 by operator decision 2026-11-13.
 
 ### Acceptance
 
@@ -56,7 +56,7 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Depends on: J002
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: None. Merge into main awaits the operator (PR for I0049).
+- Next step: None. Merged into main through PR #283 by operator decision 2026-11-13.
 
 ### Acceptance
 
@@ -69,3 +69,4 @@ Source: operator observation during I0046 (Claude Code session, 2026-11-12): wor
 - Review R1 (native isswf-reviewer, model inherited, diff 91196e8..1ed3414 without `.factory`, supplied inline): Aggregate PASS, Standards pass, Spec pass; 0 blocking.
 - Coordinator applied S1 (no documented rule or no CI: run the full suite once or report it as not run), S2 (a selected skill may also ask for a sensitivity experiment), I1 (Status passage keeps Blocker/Next step fields) and I2 (J003 brief r2 records the operator start).
 - Focused checks after corrections: check-docs, host-portability, worker-method-evidence, worker-methodology, review-guidance, reviewer-task, diagnostic-task. Full suite left to PR CI.
+- Review R2 (native isswf-reviewer, model inherited, delta 1ed3414..8700760 supplied inline, post-merge at operator request): Aggregate PASS; R1 findings S1, S2, I1, I2 resolved. N1 (information): the no-rule/no-CI exception followed the instruction it overrides; the coordinator rewrote the sentence with its conditions first in the I0050 PR, operator decision 2026-11-13.

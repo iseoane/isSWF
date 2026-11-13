@@ -26,8 +26,8 @@ export default function (pi) {
   pi.registerTool({
     name: 'isswf_git_content',
     label: 'Bound committed file content',
-    description: 'Return exact bytes for one allowlisted regular file from the coordinator-bound base or candidate commit. Select only a bound path and slot; no repository or revision can be supplied.',
-    parameters: Type.Object({ slot: Type.String(), path: Type.String() }, { additionalProperties: false }),
+    description: 'Return exact bytes for one allowlisted regular file from the coordinator-bound base or candidate commit. Select only a bound path and slot, plus an optional byte `offset` and `length` (given together) to read part of a large file; no repository or revision can be supplied.',
+    parameters: Type.Object({ slot: Type.String(), path: Type.String(), offset: Type.Optional(Type.Integer({ minimum: 0 })), length: Type.Optional(Type.Integer({ minimum: 1 })) }, { additionalProperties: false }),
     async execute(_toolCallId, params) { return run('content', 'Committed content unavailable', params); },
   });
 

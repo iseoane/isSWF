@@ -62,6 +62,8 @@ try {
   const nestedBytes = Buffer.from('nested\r\n');
   await writeFile(join(root, 'dir', 'f.txt'), nestedBytes);
   await writeFile(join(root, 'large.bin'), Buffer.alloc(2048).fill(0x61));
+  const hugeBytes = Buffer.from(Array.from({ length: 160 * 1024 }, (_, index) => index % 251));
+  await writeFile(join(root, 'huge.bin'), hugeBytes);
   await writeFile(join(root, 'limit.bin'), Buffer.alloc(1024).fill(0x62));
   await writeFile(join(root, 'over-by-one.bin'), Buffer.alloc(1025).fill(0x63));
   const unicodeBytes = Buffer.from([0, 0xfe, 0x80, 10]);
@@ -80,7 +82,7 @@ try {
   gitRun(['update-index', '--add', '--cacheinfo', `160000,${baseSha},submodule-entry`]);
   gitRun(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'unsupported entry fixtures']);
   candidateSha = gitRun(['rev-parse', 'HEAD']);
-  const binding = { version: 1, repository: root, baseSha, candidateSha, gitExecutable: git, timeoutMs: 5000, outputBytes: 8192, paths: ['known file.txt', 'empty.bin', 'large.bin', 'naïve ñ.bin', 'added.txt', 'absent.txt', 'dir/f.txt', 'dir', 'limit.bin', 'over-by-one.bin', 'link-entry', 'submodule-entry'] };
+  const binding = { version: 1, repository: root, baseSha, candidateSha, gitExecutable: git, timeoutMs: 5000, outputBytes: 8192, paths: ['known file.txt', 'empty.bin', 'large.bin', 'naïve ñ.bin', 'added.txt', 'absent.txt', 'dir/f.txt', 'dir', 'limit.bin', 'over-by-one.bin', 'link-entry', 'submodule-entry', 'huge.bin'] };
   const protectedFiles = ['known file.txt', 'large.bin', 'naïve ñ.bin', 'added.txt', '.git/index', '.git/config'];
   const before = await Promise.all(protectedFiles.map(path => readFile(join(root, path))));
 
@@ -128,6 +130,19 @@ try {
   assert.notEqual(overByOne.status, 0);
   assert.equal(overByOne.output.reason, 'content-output-limit', 'a blob one byte over the bound is refused');
   assert.equal(Object.hasOwn(overByOne.output, 'content'), false);
+  // Risk: a reviewer cannot read a changed file of 150 KB or more within the response bound.
+  const whole = invoke(binding, ['content', 'base', 'huge.bin']);
+  assert.equal(whole.output.reason, 'content-output-limit', 'without a range a large blob is still refused whole');
+  const ranged = invoke(binding, ['content', 'base', 'huge.bin', String(150 * 1024), '4096']);
+  assert.equal(ranged.status, 0);
+  assert.deepEqual(ranged.output.range, { offset: 150 * 1024, length: 4096 });
+  assert.deepEqual(Buffer.from(ranged.output.content, 'base64'), hugeBytes.subarray(150 * 1024, 150 * 1024 + 4096), 'the range returns the exact committed bytes');
+  assert.equal(ranged.output.contentSha256, createHash('sha256').update(hugeBytes.subarray(150 * 1024, 150 * 1024 + 4096)).digest('hex'));
+  assert.deepEqual([ranged.output.blobBytes, ranged.output.blobSha256], [hugeBytes.length, createHash('sha256').update(hugeBytes).digest('hex')], 'the whole-blob size and digest identify what the range came from');
+  const tailRange = invoke(binding, ['content', 'base', 'huge.bin', String(hugeBytes.length - 10), '4096']);
+  assert.equal(tailRange.output.contentBytes, 10, 'a range past the end is shortened to the blob');
+  assert.equal(invoke(binding, ['content', 'base', 'huge.bin', String(hugeBytes.length), '1']).output.reason, 'content-range-out-of-bounds');
+  assert.equal(invoke(binding, ['content', 'base', 'huge.bin', '0', '8193']).output.reason, 'invalid-content-range', 'a range longer than the output bound is refused');
   for (const path of ['link-entry', 'submodule-entry']) {
     const unsupported = invoke(binding, ['content', 'candidate', path]);
     assert.notEqual(unsupported.status, 0);

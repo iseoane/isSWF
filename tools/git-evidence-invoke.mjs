@@ -41,7 +41,10 @@ export function checkArguments(operation, params, { chunked = false } = {}) {
     if (chunked && keys !== '' && keys !== 'chunk') throw Error('This diff tool accepts only a chunk number.');
     if (chunked && keys === 'chunk' && !(Number.isSafeInteger(params.chunk) && params.chunk >= 1)) throw Error('The diff chunk must be a positive integer.');
   }
-  if (operation === 'content' && (keys !== 'path,slot' || !['base', 'candidate'].includes(params.slot) || typeof params.path !== 'string')) throw Error('This content tool accepts only an allowlisted path and base/candidate slot.');
+  if (operation === 'content') {
+    if (!['path,slot', 'length,offset,path,slot'].includes(keys) || !['base', 'candidate'].includes(params.slot) || typeof params.path !== 'string') throw Error('This content tool accepts only an allowlisted path, a base/candidate slot and an optional byte offset and length.');
+    if (keys !== 'path,slot' && !(Number.isSafeInteger(params.offset) && params.offset >= 0 && Number.isSafeInteger(params.length) && params.length >= 1)) throw Error('The content offset must be a non-negative integer and the length a positive integer.');
+  }
 }
 
 const specifications = {
@@ -71,10 +74,11 @@ const decodeUtf8 = bytes => { try { return new TextDecoder('utf-8', { fatal: tru
 
 // A successful result must carry the bound provenance and the operation's own fields; a refusal may omit fields
 // (the CLI bounds its error output) but must not report any that contradict the binding.
-function checkProvenance(operation, evidence, binding, { slot, path }) {
+function checkProvenance(operation, evidence, binding, { slot, path, offset, length }) {
   const expected = { repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256: createHash('sha256').update(JSON.stringify(binding)).digest('hex') };
   if (operation === 'identity') expected.gitExecutable = binding.gitExecutable;
   if (operation === 'content') Object.assign(expected, { commitSha: slot === 'base' ? binding.baseSha : binding.candidateSha, path });
+  if (operation === 'content' && evidence.status === 'ok' && (offset === undefined ? evidence.range !== undefined : evidence.range?.offset !== offset || evidence.range.length !== evidence.contentBytes || evidence.contentBytes > length)) throw Error('Content CLI returned a range that was not requested.');
   const entries = Object.entries(expected);
   const consistent = evidence.status === 'error' ? entries.every(([key, value]) => evidence[key] === undefined || evidence[key] === value) : entries.every(([key, value]) => evidence[key] === value);
   if (!consistent) throw Error(`${specifications[operation].label} CLI returned mismatched bound provenance.`);
@@ -85,9 +89,9 @@ function checkProvenance(operation, evidence, binding, { slot, path }) {
  * Returns `{ content, details, isError? }` or throws a bounded Error. With `chunkBytes`, a verified diff is returned
  * as one numbered chunk (`chunk`, default 1) that repeats the whole-patch length and SHA-256.
  */
-export function invokeEvidence({ cli, operation, binding, slot, path, chunk = 1, chunkBytes }) {
+export function invokeEvidence({ cli, operation, binding, slot, path, offset, length, chunk = 1, chunkBytes }) {
   const spec = specifications[operation];
-  const result = spawnSync(process.execPath, [cli, operation, ...(operation === 'content' ? [slot, path] : [])], {
+  const result = spawnSync(process.execPath, [cli, operation, ...(operation === 'content' ? [slot, path, ...(offset === undefined ? [] : [String(offset), String(length)])] : [])], {
     input: JSON.stringify(binding), encoding: 'utf8', shell: false, windowsHide: true,
     timeout: binding.timeoutMs + 2000, maxBuffer: spec.maxBuffer(binding),
     env: { PATH: dirname(process.execPath), HOME: process.platform === 'win32' ? 'C:\\' : '/nonexistent', LC_ALL: 'C' },
@@ -99,7 +103,7 @@ export function invokeEvidence({ cli, operation, binding, slot, path, chunk = 1,
   catch { throw Error(`${spec.label} CLI returned invalid bounded output.`); }
   if (!evidence || !spec.statuses.includes(evidence.status) || evidence.version !== 1 || (operation !== 'identity' && evidence.operation !== operation)) throw Error(`${spec.label} CLI returned an invalid result.`);
   const failed = !(result.status === 0 && (operation === 'identity' ? evidence.status === 'ok' : evidence.status !== 'error'));
-  checkProvenance(operation, evidence, binding, { slot, path });
+  checkProvenance(operation, evidence, binding, { slot, path, offset, length });
   if (operation === 'identity') return { content: [{ type: 'text', text: JSON.stringify(evidence) }], details: evidence, ...(failed ? { isError: true } : {}) };
 
   const serialized = JSON.stringify(evidence);
