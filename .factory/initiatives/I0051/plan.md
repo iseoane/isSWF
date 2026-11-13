@@ -118,16 +118,16 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J006
 
 - Size: M
-- Status: in-progress
+- Status: in-review
 - Objective: Make the repository instructions short, consistent and actionable.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J006.
+- Next step: Review R1.
 
 ### Acceptance
 
-- AGENTS.md: delegation rule conditioned on the coordinator trigger; one Engram/Codegraph copy; check commands state the focused-first condition before the commands; delegation, verification and role-selection restatements reduced to pointers; a path for requests with no initiative; operator-only and filler lines removed; rules for developing isSWF itself that isswf-setup states in place (handed over from J004) are moved here or to development.md when they are not needed in the distributed skill. Token cost reported before and after.
+- AGENTS.md: delegation rule conditioned on the coordinator trigger; one Engram/Codegraph copy; check commands state the focused-first condition before the commands; delegation, verification and role-selection restatements reduced to pointers; a path for requests with no initiative; operator-only and filler lines removed; rules for developing isSWF itself that isswf-setup states in place (handed over from J004) stay in the distributed skill, because they guard every setup target including this repository and a test asserts them (coordinator decision 2026-11-13). Token cost reported before and after.
 - REVIEW.md: the wording-finding cap excludes changes whose objective is documentation or instructions; the person-approval list names feature-delivery.md and project-release.
 - project-release: a stop row for a verified candidate without a publication grant; the Windows extraction note inside the extraction step; each reference paired with its operation; the local host-checks command named.
 - Tests: documentation, host-portability, platform-package; check-docs.
@@ -135,12 +135,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J007
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Make the coordinator skill findable and single-sourced.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Runs after the previous correction job, one writer at a time, on feat/i0051-factory-md-writing.
+- Next step: Worker implements J007.
 
 ### Acceptance
 
