@@ -48,12 +48,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Objective: An opt-in switch in the pane title schedules a resume of the coordinator's work 5 minutes after the five-hour usage window resets, when usage reached 90% or more while work was in progress.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Needs an explicit operator start.
-- Next step: Operator start; then implementation with focused tests and PR.
+- Blocker: None.
+- Next step: Coordinator implements in worktree isSWF-worktrees/i0054-j003; then bound review, PR and merge. Keep I0054 open afterwards (operator has more ideas).
 
 ### Acceptance
 
@@ -64,3 +64,4 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 ### Evidence
 
 - 2026-11-13: operator request (threshold 90%).
+- 2026-11-13: started by the operator ("continua coordinador con el resto de jobs").
