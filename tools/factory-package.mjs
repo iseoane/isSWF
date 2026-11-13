@@ -23,6 +23,7 @@ const featureDeliveryPath = ".agents/roles/references/feature-delivery.md";
 const featureDeliveryLink = "../../roles/references/feature-delivery.md";
 export const nativePiResources = [
   ".agents/hosts/pi.md",
+  ".agents/hosts/bound-review-evidence.md",
   "tools/git-evidence.mjs",
   "tools/git-evidence-pi-extension.mjs",
   "tools/git-evidence-invoke.mjs",

@@ -45,6 +45,7 @@ const fixedInventoryPaths = [
   'types/index.d.ts',
   '.agents/hosts/claude-code.md',
   '.agents/hosts/claude-code-review-launch.md',
+  '.agents/hosts/bound-review-evidence.md',
   '.agents/skills/isswf-coordinator/SKILL.md',
   '.agents/skills/isswf-coordinator/references/version-advisory.md',
   '.agents/skills/isswf-setup/SKILL.md',
@@ -115,7 +116,7 @@ function isSourcePath(path) {
   if (path.startsWith('tools/') && path.endsWith('.mjs') && !path.slice('tools/'.length).includes('/')) return true;
   if (path.startsWith('.agents/roles/') || path.startsWith('agents/')) return true;
   if (path.startsWith('skills/') || path.startsWith('.agents/skills/isswf-writing/') || path.startsWith('.agents/skills/isswf-understanding/') || path.startsWith('.agents/skills/isswf-pr/') || path.startsWith('.agents/skills/isswf-issue/') || path.startsWith('.agents/skills/isswf-e2e/') || path.startsWith('.agents/skills/isswf-debug/') || path.startsWith('.agents/skills/isswf-review/') || path.startsWith('.agents/skills/isswf-retrospective/') || path.startsWith('.agents/skills/isswf-tdd/') || path.startsWith('.agents/skills/isswf-security/') || path.startsWith('.agents/skills/isswf-performance/') || path.startsWith('.agents/skills/isswf-observability/') || path.startsWith('.agents/skills/isswf-triage/') || path.startsWith('.agents/skills/isswf-interview/') || path.startsWith('.agents/skills/isswf-howto/')) return true;
-  if (['.agents/hosts/claude-code.md', '.agents/hosts/claude-code-review-launch.md', '.agents/skills/isswf-coordinator/SKILL.md', '.agents/skills/isswf-coordinator/references/version-advisory.md', '.agents/skills/isswf-setup/SKILL.md', 'docs/durable-work.md', 'docs/model-routing.md', 'docs/host-portability.md'].includes(path)) return true;
+  if (['.agents/hosts/claude-code.md', '.agents/hosts/claude-code-review-launch.md', '.agents/hosts/bound-review-evidence.md', '.agents/skills/isswf-coordinator/SKILL.md', '.agents/skills/isswf-coordinator/references/version-advisory.md', '.agents/skills/isswf-setup/SKILL.md', 'docs/durable-work.md', 'docs/model-routing.md', 'docs/host-portability.md'].includes(path)) return true;
   return false;
 }
 function parseArgs(argv) {
