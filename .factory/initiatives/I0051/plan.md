@@ -2,7 +2,7 @@
 
 Type: enhancement
 
-Source: operator request in a Claude Code session, 2026-11-13, after reviewing that session: apply `isswf-writing` (agent documents) to the factory's own agent-facing Markdown, not to `docs/`, and use the operator's personal `doctor-md-skill` and `doctor-md-agents` skills for empirical evidence. Those two skills are operator-invoked only and stay outside this repository. Scope: `.agents/**/*.md` (skills and their references, roles and role references, host guides), the Claude plugin entries `skills/*/SKILL.md` and agent definitions `agents/*.md`, the repository's `AGENTS.md` and `REVIEW.md`, and the project-only `project-release` skill (`.claude/skills/`, `.pi/skills/`). Excluded: `docs/`, README and GLOSSARY (human-facing), and the historical `.pi/agents/` launch files. Every job is S or M; L is split before start. Plan approval is preparation only; each job needs an explicit operator start.
+Source: operator request in a Claude Code session, 2026-11-13, after reviewing that session: apply `isswf-writing` (agent documents) to the factory's own agent-facing Markdown, not to `docs/`, and use the operator's personal `doctor-md-skill` and `doctor-md-agents` skills for empirical evidence. Those two skills are operator-invoked only and stay outside this repository. Scope: `.agents/**/*.md` (skills and their references, roles and role references, host guides), the Claude plugin entries `skills/*/SKILL.md` and agent definitions `agents/*.md`, the repository's `AGENTS.md` and `REVIEW.md`, and the project-only `project-release` skill (`.claude/skills/`, `.pi/skills/`). Excluded: `docs/`, README and GLOSSARY (human-facing), and the historical `.pi/agents/` launch files. Every job is S or M; L is split before start. Plan approval is preparation only; each job needs an explicit operator start. Closed by the operator on 2026-11-13: all jobs completed; merged into main through PR #285 with operator approval.
 
 ## J001
 
@@ -239,7 +239,7 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: None. Delivery of I0051 (push, PR, CI, merge) awaits the operator.
+- Next step: None. Merged into main through PR #285 by operator approval 2026-11-13.
 
 ### Acceptance
 
