@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
@@ -175,6 +175,9 @@ try {
   assert.deepEqual(await roundsOf({ 'A001.md': '- Profile: .agents/roles/planner.md\n', 'A002.md': 'x\n', 'V001.md': 'x\n' }), [[1, 1, ['A001', 'A002', 'V001']]]);
   // A correction attempt states its round; the review template's job-wide field is not read as one.
   assert.deepEqual(await roundsOf({ 'A001.md': 'x\n', 'V001.md': 'x\n', 'A002.md': '- Review round: 2\n', 'V002.md': '- Review round in this job, and prior review IDs: 2 (V001)\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['A002', 'V002']]]);
+  // The attempt template's own line, filled as written, states the round.
+  const templateLine = (await readFile(join(process.argv[2] ?? '.', '.factory/templates/attempt.md'), 'utf8')).split('\n').find(l => /review round/i.test(l) && l.startsWith('- '));
+  assert.deepEqual(await roundsOf({ 'A001.md': 'x\n', 'V001.md': 'x\n', 'A002.md': `${templateLine} 2\n`, 'V002.md': 'x\n' }), [[1, 1, ['A001', 'V001']], [1, 2, ['A002', 'V002']]]);
   // Two briefs: each brief's first review is its round 1, whatever the job-wide field says.
   const twoBriefs = await core.readSnapshot('/t', memoryFs({
     '/t/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Two', job('J001', 'in-progress')),
