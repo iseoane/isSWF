@@ -69,7 +69,7 @@ RELEASE/bin/isswf exec --project /absolute/project -- isswf-status --initiative 
 RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 ```
 
-`inspect` shows installation and migration information without changing the project or store. `locate` verifies and locates the selected retained runtime. `exec` uses that project's pinned runtime, not automatically the newest globally installed package. Missing or damaged retained code blocks the operation.
+`inspect` shows installation and migration information without changing the project or store. Its `blockers` list includes open legacy attempts, each with the original pin to reconcile them under before migrating. `locate` verifies and locates the selected retained runtime. `exec` uses that project's pinned runtime, not automatically the newest globally installed package. Missing or damaged retained code blocks the operation.
 
 ## Create an offline token summary
 

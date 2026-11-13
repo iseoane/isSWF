@@ -69,7 +69,7 @@ RELEASE/bin/isswf exec --project /absolute/project -- isswf-status --initiative 
 RELEASE/bin/isswf exec --project /absolute/project -- isswf-panel --port 0
 ```
 
-`inspect` muestra información de instalación y migración sin modificar el proyecto ni el almacén. `locate` verifica y localiza el runtime conservado que se ha seleccionado. `exec` utiliza el runtime fijado para ese proyecto, no necesariamente el paquete global más reciente. Si falta el código conservado o está dañado, la operación se bloquea.
+`inspect` muestra información de instalación y migración sin modificar el proyecto ni el almacén. Su lista `blockers` incluye los intentos heredados abiertos, cada uno con la versión fijada original con la que hay que reconciliarlo antes de migrar. `locate` verifica y localiza el runtime conservado que se ha seleccionado. `exec` utiliza el runtime fijado para ese proyecto, no necesariamente el paquete global más reciente. Si falta el código conservado o está dañado, la operación se bloquea.
 
 ## Crear un resumen local de tokens
 
