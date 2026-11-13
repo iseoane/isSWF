@@ -37,7 +37,7 @@
 
 ## Technical result
 
-- Outcome: complete, partial, or blocked:
+- Outcome: complete, partial, blocked, failed, or cancelled (one value):
 - Summary of work and unresolved decisions:
 - Changed paths:
 - Checks run and observed results:

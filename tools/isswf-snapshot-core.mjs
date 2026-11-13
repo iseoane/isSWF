@@ -50,9 +50,18 @@ function issueRefs(text) {
 }
 
 // Review records are written in English or Spanish; labels are matched in both.
-function parseVerdict(text, kind) {
+// A filled value ends its line or clause; the unfilled template line, which lists every value, does not.
+function parseOutcome(text) {
+  const match = text.match(/^\W*(?:reported status|status|outcome|estado|resultado)\W{0,4}(complete|completed|passed|partial|blocked|failed|cancell?ed)\W{0,2}(?:$|[.;(])/im);
+  return match ? match[1].toLowerCase() : UNKNOWN;
+}
+
+function parseVerdict(text, kind, outcome) {
   if (/^\W*(?:reported )?status\W{0,4}running\b/im.test(text)) return 'running';
-  if (kind === 'attempt') return UNKNOWN;
+  if (/^(blocked|failed|cancell?ed)$/.test(outcome)) return 'failed';
+  // Partial work is usually committed with acceptance still pending: not a failure.
+  if (outcome === 'partial') return 'partial';
+  if (kind === 'attempt') return outcome === UNKNOWN ? UNKNOWN : 'passed';
   const aggregate = text.match(/\b(?:aggregate|agregado)\W{0,4}(pass|fail)/i);
   if (aggregate) return aggregate[1].toLowerCase() === 'pass' ? 'passed' : 'changes-requested';
   if (/\bchanges[ -]requested\b|\bcambios (?:pedidos|solicitados)\b/i.test(text)) return 'changes-requested';
@@ -85,9 +94,18 @@ function parseModel(text) {
   return best ?? { model: UNKNOWN, modelSource: UNKNOWN, effort: UNKNOWN };
 }
 
+const ROLES = 'worker|reviewer|researcher|planner|diagnostician';
+
+const ROLE_FILE = new RegExp(`roles[\\\\/](${ROLES})\\.md`);
+const ROLE_ANY = new RegExp(`roles[\\\\/](${ROLES})\\.md|\\bisswf-(${ROLES})\\b`);
+const IDENTITY_LINE = /^\W*(?:shared )?(?:profile|role|agent|observer|reviewer)\b[^:\n]*:/i;
+
+// In the record's identity lines the shared role file wins over the host agent name: a diagnostician runs as
+// the isswf-worker agent. Elsewhere the first mention wins, since reports also cite other roles' files.
 function parseRole(text) {
-  const match = text.match(/isswf[-:]isswf-(worker|reviewer|researcher|planner)\b|\bisswf-(worker|reviewer|researcher|planner)\b|roles[\\/](worker|reviewer|researcher|planner)\.md/);
-  return match ? (match[1] ?? match[2] ?? match[3]) : UNKNOWN;
+  const identity = text.split('\n').filter(line => IDENTITY_LINE.test(line)).join('\n');
+  const match = identity.match(ROLE_FILE) ?? identity.match(ROLE_ANY) ?? text.match(ROLE_ANY);
+  return match ? (match[1] ?? match[2]) : UNKNOWN;
 }
 
 const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
@@ -104,13 +122,15 @@ function parseRecord(file, text, initiativeId, jobId) {
   const own = new RegExp(`${initiativeId}[\\\\/]jobs[\\\\/]${jobId}[\\\\/]brief-r(\\d+)\\.md`);
   const briefLine = text.split('\n').find(line => /^\W*brief\b/i.test(line) && own.test(line));
   const kind = file.startsWith('A') ? 'attempt' : 'review';
+  const outcome = parseOutcome(text);
   return {
     id: file.replace(/\.md$/, ''),
     kind,
     role: parseRole(text),
     ...parseModel(text),
     runs: parseRuns(text),
-    verdict: parseVerdict(text, kind),
+    verdict: parseVerdict(text, kind, outcome),
+    outcome,
     statedRound: briefLine ? Number(briefLine.match(own)[1]) : null,
   };
 }
@@ -142,7 +162,8 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
     dependsOn: job.dependencies,
     ...issueRefs(refText),
     recordCount: records.length,
-    rounds,
+    // A brief revision with no record yet is not a round anyone worked.
+    rounds: rounds.filter(r => r.entries.length),
   };
 }
 
