@@ -304,13 +304,14 @@ try {
   const windowsIdentity = pid => JSON.parse(spawnSync(join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', `$p = Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}'; @{bootId=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o'); startTime=$p.CreationDate.ToUniversalTime().ToString('o')} | ConvertTo-Json -Compress`], { encoding: 'utf8', windowsHide: true }).stdout.replace(/^\uFEFF/u, '').trim());
   const selfWindows = process.platform === 'win32' ? windowsIdentity(process.pid) : null;
   const deadOwner = selfWindows ? { platform: 'win32', pid: 2147483644, startTime: selfWindows.startTime, bootId: selfWindows.bootId } : { pid: 2147483647, startTicks: '1', bootId: (await readFile('/proc/sys/kernel/random/boot_id', 'utf8')).trim() };
-  await writeJSON(join(recoveryDir, 'record.json'), { format: 1, id: 'interrupted', kind: 'migrate', owner: deadOwner, files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }] });
+  await writeJSON(join(recoveryDir, 'record.json'), { format: 1, id: 'interrupted', kind: 'migrate', owner: deadOwner, files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }, { path: '.isswf/models.json', before: modelBytes.toString('base64'), after: modelBytes.toString('base64') }] });
   await writeFile(pinFile, pinB);
   await mkdir(join(project, '.isswf/local/operation'));
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'interrupted', owner: deadOwner });
   assert.match(cli(releaseB, 'migrate', migration, false).stderr, /Interrupted/u);
-  assert.equal(JSON.parse(cli(releaseB, 'recover', ['--id', 'interrupted']).stdout).status, 'recovered');
+  assert.equal(JSON.parse(cli(releaseB, 'recover', ['--id', 'interrupted']).stdout).status, 'recovered', 'Journals listing an existing legacy route file stay recoverable');
   assert.deepEqual(await readFile(pinFile), pinA);
+  assert.deepEqual(await readFile(join(project, '.isswf/models.json')), modelBytes);
   const bootstrap = { format: 1, id: 'bootstrap', kind: 'migrate', owner: deadOwner, reference: 'Fixture', files: [{ path: '.isswf/install.json', before: pinA.toString('base64'), after: pinB.toString('base64') }] };
   await mkdir(join(project, '.isswf/local/operation'));
   await writeJSON(join(project, '.isswf/local/operation/owner.json'), { id: 'bootstrap', owner: deadOwner, transaction: bootstrap });

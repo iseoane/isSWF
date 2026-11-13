@@ -222,7 +222,7 @@ async function activity(project, store) {
         if (record.project !== project || !isAbsolute(record.store || '') || !idPattern.test(record.attemptId || '')) fail('Invalid worker registration');
         const runtime = await retained(store, record.pin);
         try {
-          for (const effect of await openEffects(runtime, record)) blockers.push({ worker: entry, effect, state: 'open-external-effect', action });
+          for (const effect of await openEffects(runtime, record)) blockers.push({ worker: entry, effect, state: 'open-external-effect', reason: 'Submitted PR effect without a confirmed outcome', action });
         } catch (error) { blockers.push({ worker: entry, state: 'unknown', reason: 'External effect journal: ' + error.message, action }); }
         const attemptDir = join(record.store, record.attemptId);
         await directory(attemptDir);

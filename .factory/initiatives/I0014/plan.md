@@ -38,11 +38,23 @@ Scheduling priority: **ultra-low**, started by the operator on 2026-11-13. Do no
 - Blocker: None
 - Next step: Worker on branch feat/i0014-j002-legacy-seeding; then independent review, PR and exact-head CI. No merge.
 
+### Acceptance
+
+- New installs do not get .isswf/models.json; existing copies are preserved.
+- Version migration and inspect block while registered legacy attempts have open effects, pending recovery reviews or unknown state.
+- Focused tests with negative controls; EN/ES docs updated; CI green on Linux and Windows.
+
 ## J003
 
 - Status: pending
 - Objective: Remove the legacy executor tools, SDK callers, their tests, package entries and legacy contracts (EN/ES), keeping history retrievable.
 - Depends on: J002
-- Brief: None yet
-- Blocker: Needs its brief and an explicit start.
-- Next step: Prepare after J002 delivery; confirm no external use of the SDK callers first. Then realign I0009 J029/J030.
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: Needs an explicit start.
+- Next step: Start after J002 delivery; confirm no external use of the SDK callers first. Then realign I0009 J029/J030.
+
+### Acceptance
+
+- Legacy executor tools, SDK callers, their tests and package entries are removed; launcher, status and migration still work.
+- Legacy contracts removed from current EN/ES docs and remain retrievable in Git history.
+- CI green on Linux and Windows.
