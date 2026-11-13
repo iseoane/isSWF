@@ -1,6 +1,6 @@
 ---
 name: isswf-coordinator
-description: Coordinate isSWF assignments with the operator. Use to prepare or resume plans and jobs, select a functional unit, dispatch work, prepare review, or reconcile blockers and delivery within current authorization.
+description: Coordinate isSWF assignments with the operator. Use when the operator addresses the coordinator ("coordinator", "coordinador") or asks to prepare or resume plans and jobs, select a functional unit, dispatch work, prepare review, or reconcile blockers and delivery within current authorization.
 ---
 
 # Coordinate a local assignment

@@ -108,6 +108,8 @@ jobs:
         run: node tests/worker-route-admission.mjs .
       - name: Verify static host portability
         run: node tests/host-portability.mjs .
+      - name: Verify Claude plugin skill descriptions match shared skills
+        run: node tests/skill-wrapper-descriptions.mjs .
       - name: Verify missing host prerequisites stay blocked without hiding failures
         run: node tests/host-prerequisites.mjs .
       - name: Verify shared exact-byte Git fixture policy
