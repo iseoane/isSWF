@@ -136,15 +136,17 @@ for (const cwd of ['/p', 'C:\\p']) {
   })
 }
 
-test('a Bash command naming --initiative touches that initiative', ON, async ($, on) => {
-  const { clock } = engine(on, '/p')
-  await activate($)
-  await $.tool.call({ tool: 'Bash', command: 'node tools/isswf-status.mjs --project /p --initiative I0046' })
-  await clock.advance(1000)
-  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
-  await ui.unmount()
-})
+for (const flag of ['--initiative I0046', '--initiative=I0046', '--initiative "I0046"', "--initiative\t'I0046'"]) {
+  test(`a Bash command naming ${flag} touches that initiative`, ON, async ($, on) => {
+    const { clock } = engine(on, '/p')
+    await activate($)
+    await $.tool.call({ tool: 'Bash', command: `node tools/isswf-status.mjs --project /p ${flag}` })
+    await clock.advance(1000)
+    const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+    expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
+    await ui.unmount()
+  })
+}
 
 test('pin makes an unopened initiative a card and unpin returns it', ON, async ($, on) => {
   engine(on, '/p')
@@ -188,7 +190,7 @@ test('a pressed pill expands its usage detail resolved after the draw and collap
   expect(await text(ui, /^tokens/)).toBe('tokens: 1000000')
   expect(await text(ui, /^duración/)).toBe('duración: 90 s')
   expect(await text(ui, /^coste/)).toBe('coste: $4.00')
-  expect(await text(ui, /^skills/)).toMatch(/^skills: 0 · (references|referencias): 1$/)
+  expect(await text(ui, /^skills/)).toBe('skills: 0 · referencias: 1')
   await ui.press({ key: 'I0046-J004-A001' })
   expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe(undefined)
   await ui.unmount()

@@ -11,7 +11,7 @@ const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
 const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
 const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
-const INITIATIVE_FLAG = /--initiative[= ]+(I\d+)\b/g
+const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
 const RECENT_COMPLETED = 2
 const LABELS = {
   es: {
