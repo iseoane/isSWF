@@ -59,7 +59,7 @@ This table is the single place that says when an optional resource applies. The 
 | Resource | Trigger |
 | --- | --- |
 | [isswf-writing](../isswf-writing/SKILL.md) | The work creates, revises or reviews documentation, including technical guides, skills or agent instructions. |
-| [isswf-interview](../isswf-interview/SKILL.md) | The specification has gaps: a new feature, user-visible behavior change, concept missing from the glossary or unwritten acceptance. An interview is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself. |
+| [isswf-interview](../isswf-interview/SKILL.md) | The specification has gaps: a new feature, user-visible behavior change, concept missing from the glossary or unwritten acceptance. An [interview](../isswf-interview/SKILL.md) is not needed when the specification has no gaps, meaning the agent does not have to presume, infer or decide anything itself. |
 | [researcher](../../roles/researcher.md) | A technical fact that affects the solution needs research beyond reading the target code. |
 | [design principles](../../roles/references/design-principles.md) | The work changes data shapes, contracts, module boundaries or responsibilities. |
 | [execution principles](../../roles/references/execution-principles.md) | The work involves parallel ownership, retries, migrations or repeated operations. |
