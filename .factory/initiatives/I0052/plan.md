@@ -6,12 +6,12 @@ Operator feedback on the Claude Code initiatives pane (hooks/register.tsx, tools
 
 ## J001
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Make the pane show only real activity and an honest outcome for every delegated role.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Operator acceptance and merge authorization for PR #288.
+- Next step: None.
 
 ### Acceptance
 
@@ -26,3 +26,4 @@ Operator feedback on the Claude Code initiatives pane (hooks/register.tsx, tools
 - 2026-11-13: operator reported an empty R1 at start, grey worker pills regardless of outcome, missing planner/researcher pills, and I0009 reappearing after a path appeared only in heredoc text.
 - 2026-11-13: A001 complete at dac0bd4; bound review V001 FAIL (fixed), V002 PASS on the delta. Checks: snapshot tests, claude plugin test 21/21, check-docs, check-quality PASS.
 - 2026-11-13: PR #288 opened; CI green on 1c7a0b6 (Portable checks, Package and host discovery on ubuntu-latest and windows-latest).
+- 2026-11-13: operator delegated acceptance and merge for this initiative unless mandatory or high risk; risk assessed low; accepted and merged through PR #288.
