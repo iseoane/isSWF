@@ -210,12 +210,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J010
 
 - Size: M
-- Status: in-review
+- Status: completed
 - Objective: Make the host guides single-sourced, complete for bound reviews and equal for Pi and Claude.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Review R1 of 15b199e.
+- Next step: None.
 
 ### Acceptance
 
@@ -223,6 +223,13 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - The Claude bound review launches with stream-json, records the `Run:` session id and observes tool calls; the Claude content `outputBytes` limit is stated; a linked worktree has a next step; a missing approved effort has a path.
 - Pre-dispatch and workspace-policy text reduced to pointers; child acknowledgement and post-launch return of control stated for both hosts; host-capability claims tagged observed or documented; the Pi review uses the approved selection; the reverse contract opens with its trigger; a Claude plugin-loaded check added; Pi tool-loss recovery stated.
 - Tests: host-portability, j030-reverse-protocol, worker-method-evidence, worker-methodology, release-package; check-docs.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited): commit 15b199e; new .agents/hosts/bound-review-evidence.md (shipped via build-release, factory-package nativePiResources and the release-package list); stream-json traces and Run line for bound Claude reviews; host restatements reduced to pointers; acknowledgement, return of control and attempt-record authority for both hosts; capability tags; plugin-loaded check; Pi tool-loss recovery; docs en/es installation link updated.
+- Coordinator checks on 15b199e: release-package, worker-capacity, host-portability, j030-reverse-protocol pass; eslint and knip clean.
+- Review R1 (native isswf-reviewer, model inherited, diff 9359195..15b199e without .agents/roles): verdict as reported: "Aggregate: pass. Standards pass and Spec pass." Applied in 1987917: trace written to an ignored local path and deleted or kept private after recording; tool-loss "or" wording; "host's default effort is approved". Known limit noted in the guide: Windows PowerShell 5.1 may garble non-ASCII trace text.
+- Integration needs a person's approval (`.agents/hosts/**`, tools/build-release.mjs, tools/factory-package.mjs).
 
 ## J011
 
