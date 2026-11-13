@@ -114,7 +114,7 @@ Write a concise brief. Link earlier briefs, the plan and prior reports instead o
 
 - The observable outcome and reason.
 - Authorized scope and exclusions.
-- Verifiable acceptance criteria.
+- Verifiable acceptance criteria, written in proportion to real use: state the behavior required for expected inputs and name the edge cases that matter, instead of absolutes such as "always" or "any input" that turn extremely unlikely cases into required work.
 - Examined base and a reading map with paths, symbols, and current lines.
 - Dependencies, risks, and pending decisions.
 - Checks that would demonstrate the result: the focused checks for the changed behavior and those the project's documented check rule requires locally (for isSWF itself, `AGENTS.md` and `docs/en/development.md`). Name the full suite only when that rule requires it for the worker; otherwise leave it out. Name the behaviors and risks new tests must cover, not only a list of cases, because a worker adds a test only for a named behavior or risk. Ask for a mutation or sensitivity experiment only when a concrete doubt about test detection justifies it.
