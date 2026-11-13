@@ -234,12 +234,12 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J011
 
 - Size: S
-- Status: in-progress
+- Status: completed
 - Objective: Give triage, interview and writing explicit inputs and consistent walkthroughs.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements J011.
+- Next step: None. Delivery of I0051 (push, PR, CI, merge) awaits the operator.
 
 ### Acceptance
 
@@ -247,3 +247,10 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 - isswf-interview uses the project's glossary files and returns the outcome to the coordinator when no plan exists.
 - isswf-writing names the same walkthrough set as agent-documents.md.
 - Tests: host-discovery (CI), host-portability, release-package; check-docs.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited, two rounds): commits c9bf447 and 9ecaabe; triage required inputs with stops and factory-root paths, interview glossary and no-plan rules, writing walkthrough pointer; host-portability assertion updated.
+- Review R1 (native isswf-reviewer, model inherited, diff fdf85ec..c9bf447): verdict as reported: "The aggregate verdict is fail: Standards fails and Spec passes." F1 blocking (initiative/job required for all triage) and F2 suggestion (grant path source) sent to the worker's correction round.
+- Review R2 (native isswf-reviewer, model inherited, delta c9bf447..9ecaabe): verdict as reported: "both axes pass. F1 and F2 are resolved". N1 (link-duplicate uses the duplicate decision path) and N2 (assessment-only does not write a grant) applied by the coordinator in a5ab7b8.
+- Full `node tools/check-quality.mjs` PASS once on a5ab7b8. It first failed on tests/reviewer-original-evidence.mjs: the legacy reviewer bundle with the grown methodology exceeded its default 65,536-byte input budget (65,806 bytes measured); the test now sets an explicit 131,072-byte budget like other reviewer tests (165b42a). Known limit: a legacy reviewer run from this source with the default budget and full methodology can block as review-probe-budget; legacy runs normally pin an earlier checkpoint.
