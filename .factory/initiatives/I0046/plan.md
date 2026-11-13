@@ -201,3 +201,17 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 - Setup skill tells Claude Code users how to turn on the initiatives pane, naming the installation guide (a link failed the packaged-link check, CI run 43367147112, and was replaced).
 - Operator request in session: pane labels `.agents` reads as references (`referencias` in Spanish); docs en/es updated; coordinator skill now keeps job status current for status readers.
 - Local: check-quality PASS, check-docs PASS, plugin validate and test 8/8; CI run 43367778061 green on Linux and Windows at 3405931. No independent review (mechanical selection in brief).
+
+## J010
+
+- Size: S
+- Status: in-progress
+- Objective: Treat an initiative as touched in the pane when a Bash command names it with `--initiative IXXXX`, as well as by record paths.
+- Depends on: J008
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md)
+- Blocker: None.
+- Next step: Commit with test, CI on PR #281, then merge the I0046 chain into main.
+
+### Acceptance
+
+- `touchedIds` in hooks/register.tsx adds IDs from `--initiative IXXXX` in Bash commands; record paths still count; a test covers the flag case; en/es installation guides updated.
