@@ -1,6 +1,6 @@
 # TDD
 
-Use this reference when the operator or brief explicitly requests TDD, when a bug has a cheap local regression check, or when a focused behavioral test is a practical improvement for meaningful logic. A worker does not create a TDD requirement on its own. Do not add a test just to follow a ritual. Skip TDD when a useful test path is unclear, costly, brittle, or unrelated to the assigned behavior; use the closest relevant check instead.
+Use this reference when the brief selects TDD; the coordinator's [trigger table](../../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) says when it applies. A worker does not create a TDD requirement on its own. Do not add a test just to follow a ritual. Skip TDD when a useful test path is unclear, costly, brittle, or unrelated to the assigned behavior; use the closest relevant check instead.
 
 ## Loop
 

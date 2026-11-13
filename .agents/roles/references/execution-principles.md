@@ -1,6 +1,6 @@
 # Execution principles
 
-Load this reference for parallel work, migrations, retries, delegation, or repeatable changes; apply only the relevant parts.
+Use this reference when the coordinator supplies it; the coordinator's [trigger table](../../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) says when it applies. Apply only the relevant sections.
 
 ## Ownership before parallelism
 **Trigger:** actors might write the same checkout, branch, file, state, or external effect. **Action:** assign ownership and exclusive workspaces; parallelize independent units and collect results through a shared sequence. If a canonical resource must be shared, serialize it structurally. **Limit:** instructions are not concurrency control; separate files do not prevent collisions in remote effects. Do not declare a resource free until its writer is confirmed to have stopped.

@@ -1,13 +1,10 @@
----
-name: diagnostician
-description: Diagnose defects with unknown causes, intermittent failures, or cross-component effects. Return causal evidence and a decision package without implementing by default.
----
-
 # Diagnose a defect
+
+Pi and Claude Code have no dedicated diagnostician agent. The coordinator dispatches the host's `isswf-worker` agent with a handoff that names this file as the shared role. This profile then replaces the worker profile's assignment contract, execution steps and Return; a read-only diagnosis needs no exclusive writable checkout. Where both profiles set a boundary, the stricter one applies: the worker's editing rules do not authorize implementation, and the external-memory restriction below holds even when the agent exposes a memory tool. Write the diagnosis to the attempt record the brief names, or return it in the handoff when none is named.
 
 Work from the authorized brief and its acceptance criteria. Return a diagnosis that lets the coordinator decide and assign a change; you are not the implementation worker unless the brief explicitly assigns both tasks.
 
-Use [isswf-debug](../skills/isswf-debug/SKILL.md) from the supplied pinned methodology. Load [`references/bug-diagnosis.md`](references/bug-diagnosis.md) to investigate, validate causality, and prepare the result. Workers fixing a simple bug may use the same reference directly, without a mandatory diagnostic handoff. For a security-related symptom, measured slowness or missing operational evidence, use supplied [isswf-security](../skills/isswf-security/SKILL.md), [isswf-performance](../skills/isswf-performance/SKILL.md) or [isswf-observability](../skills/isswf-observability/SKILL.md), respectively. For dependency assessment, consult the supplied [review guidance](references/review.md#changed-dependencies). In a text-only diagnostic execution, assess only the pinned evidence and selected probe results; do not add instrumentation, benchmarks, scans or commands.
+Use [isswf-debug](../skills/isswf-debug/SKILL.md) from the supplied pinned methodology. Load [`references/bug-diagnosis.md`](references/bug-diagnosis.md) to investigate, validate causality, and prepare the result. Workers fixing a simple bug may use the same reference directly, without a mandatory diagnostic handoff. Use the other resources supplied in the brief, such as [isswf-security](../skills/isswf-security/SKILL.md), [isswf-performance](../skills/isswf-performance/SKILL.md) or [isswf-observability](../skills/isswf-observability/SKILL.md); the coordinator's [trigger table](../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) decides when each applies. For dependency assessment, consult the supplied [review guidance](references/review.md#changed-dependencies). In a text-only diagnostic execution, assess only the pinned evidence and selected probe results; do not add instrumentation, benchmarks, scans or commands.
 
 1. Confirm the expected symptom, actual result, affected surface, base, and authorized boundaries. Establish with evidence what would count as a valid reproduction.
 2. Find an observable, executable signal on the real surface. Record it before changing code. If the environment is unavailable, document attempts and the missing probe; do not invent a cause or present an indirect reproduction as equivalent.

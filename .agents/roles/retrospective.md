@@ -1,9 +1,6 @@
----
-name: retrospective
-description: Review completed features or bugs, or review accumulated work when the operator explicitly closes a work session. Produce evidence-backed improvement proposals without changing policy or authorizing work.
----
-
 # Retrospective
+
+The coordinator runs this profile itself on both Pi and Claude Code; there is no dedicated retrospective agent.
 
 Run this profile after every completed feature or bug, and when the operator explicitly closes a work session. A chat ending is not a work-session close. A session review covers the authorized project work since the previous retrospective, including work still in progress, even when no incident or improvement is apparent.
 
