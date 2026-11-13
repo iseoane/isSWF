@@ -31,7 +31,7 @@ El sitio está publicado en [https://iseoane.github.io/isSWF/](https://iseoane.g
 
 ## Release compilada conservada (vía heredada)
 
-La instalación antigua del ejecutor compilado es una vía independiente, no un requisito para las nuevas tareas con hosts nativos. La evidencia de releases documentada se limita a Linux x64; tiene restricciones distintas de runtime, aislamiento y migración, y no certifica la ejecución nativa en Windows/macOS. Adoptar el flujo nativo no migra instalaciones existentes. Antes de elegir esa vía, consulta la [instalación y los límites del runtime heredado](docs/es/installation.md) y las evidencias de la release concreta. La versión del manifiesto no demuestra que exista una release publicada; no deduzcas una última release ni publicación en un registro a partir de ella.
+La instalación de la release compilada es una vía independiente, no un requisito para las nuevas tareas con hosts nativos. Ya no incluye las herramientas del ejecutor heredado. La evidencia de releases documentada se limita a Linux x64; tiene restricciones distintas de runtime y migración, y no certifica la ejecución nativa en Windows/macOS. Adoptar el flujo nativo no migra instalaciones existentes. Antes de elegir esa vía, consulta la [instalación y los límites del runtime heredado](docs/es/installation.md) y las evidencias de la release concreta. La versión del manifiesto no demuestra que exista una release publicada; no deduzcas una última release ni publicación en un registro a partir de ella.
 
 ## Más información
 

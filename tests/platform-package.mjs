@@ -234,10 +234,59 @@ async function stateMigrationJourney(name, launcher, nodeLauncher = false) {
 }
 const nativeStateMigration = await stateMigrationJourney('installed migration project spaces ñ', binary);
 const nodeStateMigration = await stateMigrationJourney('node migration project spaces ñ', join(nodeRelease, 'tools/isswf.mjs'), true);
+// A project pinned to a historical release that still shipped the legacy executor (J002 merge on main) updates to
+// this native release; the gate loads the legacy effect journal from the retained pinned runtime, not from this release.
+async function legacyExecutorJourney() {
+  const legacyRevision = 'c8259b9b7699bf7afdf1be9895f97d6d69b39e38', legacySource = join(root, 'legacy source spaces ñ'), legacyRelease = join(root, 'legacy release spaces ñ');
+  const target = join(root, 'legacy executor project spaces ñ'), targetStore = join(root, 'legacy executor store spaces ñ');
+  run('git', ['clone', '-q', '--shared', '--no-checkout', source, legacySource]);
+  run('git', ['-C', legacySource, 'checkout', '-q', legacyRevision]);
+  run(process.execPath, [join(legacySource, 'tools/build-release.mjs'), '--source', legacySource, '--revision', legacyRevision, '--output', legacyRelease, '--runtime', 'node']);
+  const legacyReceipt = verifyRelease(legacyRelease);
+  for (const path of ['tools/isswf-job.mjs', 'tools/external-effect-journal.mjs', 'tools/native-recovery.mjs', '.factory/models.json']) {
+    assert.ok(legacyReceipt.files[path], `Positive control: the historical release ships ${path}`);
+    assert.equal(built.files[path], undefined, `The current release does not ship ${path}`);
+  }
+  await mkdir(target); run('git', ['init', '-q', target]);
+  const legacy = args => run(process.execPath, [join(legacyRelease, 'tools/isswf.mjs'), ...args, '--project', target, '--store', targetStore]);
+  const current = ([command, ...args], expectedStatus = 0) => run(binary, [command, '--project', target, '--store', targetStore, ...args], root, expectedStatus);
+  assert.equal(JSON.parse(legacy(['init', '--tracking', 'local'])).status, 'initialized');
+  const pinPath = join(target, '.isswf/install.json'), legacyPin = await readFile(pinPath);
+  await writeFile(join(target, '.isswf/models.json'), await readFile(join(legacyRelease, '.factory/models.json')));
+  const checkpoint = () => { run('git', ['-C', target, 'add', '.']); run('git', ['-C', target, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'checkpoint']); };
+  checkpoint();
+  const modelBytes = await readFile(join(target, '.isswf/models.json'));
+  const runs = join(root, 'legacy executor runs spaces ñ'), key = 'b'.repeat(64), intent = { intent: { key, logicalJobRef: 'platform/legacy-effect', repository: 'owner/repo' }, authority: null };
+  await mkdir(join(runs, 'effects', key), { recursive: true });
+  await writeFile(join(runs, 'legacy-attempt.job.json'), JSON.stringify({ logicalJobRef: 'platform/legacy-effect' }));
+  await writeFile(join(runs, 'effects', key, 'intent.json'), JSON.stringify(intent));
+  await writeFile(join(runs, 'effects', key, 'submitted.json'), JSON.stringify({ version: 1, key, intentSha256: createHash('sha256').update(JSON.stringify(intent)).digest('hex') }));
+  const workers = join(target, '.isswf/local/workers');
+  await mkdir(workers, { recursive: true });
+  await writeFile(join(workers, 'legacy.json'), JSON.stringify({ format: 1, project: await realpath(target), store: runs, attemptId: 'legacy-attempt', pin: JSON.parse(legacyPin) }));
+  const preview = JSON.parse(current(['inspect']));
+  assert.equal(preview.status, 'update-available');
+  assert.equal(preview.blockers.find(blocker => blocker.state === 'open-external-effect')?.effect, key, 'The retained legacy runtime reports the open effect');
+  const migrateArgs = ['migrate', '--id', 'M0001', '--expected', preview.expected, '--quiescent-ref', 'Synthetic fixture'];
+  const refused = current(migrateArgs, 1);
+  assert.match(refused, /open-external-effect/u);
+  assert.deepEqual(await readFile(pinPath), legacyPin, 'Refusal keeps the legacy pin');
+  await rm(workers, { recursive: true });
+  assert.equal(JSON.parse(current(migrateArgs)).status, 'migrated');
+  assert.equal(JSON.parse(await readFile(pinPath, 'utf8')).runtimeId, built.runtimeId);
+  assert.deepEqual(await readFile(join(target, '.isswf/models.json')), modelBytes, 'Existing legacy route file is preserved');
+  assert.equal(JSON.parse(current(['exec', '--', 'isswf-status', '--initiative', 'I0001'])).status, 'absent');
+  assert.match(current(['exec', '--', 'isswf-job', 'run'], 1), /Unknown tool/u);
+  checkpoint();
+  assert.equal(JSON.parse(current(['rollback', '--id', 'M0001', '--quiescent-ref', 'Synthetic fixture'])).status, 'migrated');
+  assert.deepEqual(await readFile(pinPath), legacyPin, 'Rollback restores the legacy pin');
+  return { legacyRevision, legacyRuntimeId: legacyReceipt.runtimeId, refused: refused.split('\n')[0].slice(0, 200) };
+}
+const legacyExecutor = await legacyExecutorJourney();
 assert.equal(nativeJourney.pin.runtimeFormat, 2, 'Native journey must select the compiled Bun artifact');
 assert.equal(nodeJourney.pin.runtimeFormat, 1, 'Node journey must select a genuine Node development release');
 assert.notEqual(nativeJourney.pin.runtimeId, nodeJourney.pin.runtimeId, 'Each journey must use its own immutable runtime pin');
 for (const test of ['host-portability', 'worktree-location']) run(process.execPath, [join(source, 'tests', test + '.mjs'), source]);
-const report = { status: 'PASS', platform: process.platform, arch: process.arch, revision, version: manifest.version, artifactId: built.artifactId, installed, checks: ['native Bun build', 'npm tarball installation and exact receipt', 'executable version and usage refusal', 'read-only inspect/status', 'native Bun installed init→pinned plan prepare/repeat/uncertain-claim refusal', 'Node release-launcher init→pinned plan prepare/repeat/uncertain-claim refusal', 'installed Bun and Node migration with stale digest, dirty state, unsafe symlink/junction, active legacy claim, uncertain transition and journal refusal; exact evidence retained', 'migration pins, models, setup and historical payload bytes/modes preserved across rename and repeat', 'dual-root refusal preserves one active root and all bytes', 'mutated installed pin negative control rejects repeat and preserves altered bytes', 'native owner evidence shape and unknown-owner recovery refusal', 'space and Unicode paths', 'native Git worktree recipes', 'static resource contracts'], planJourneys: { native: { project: nativeJourney.target, runtimeId: nativeJourney.pin.runtimeId }, node: { project: nodeJourney.target, runtimeId: nodeJourney.pin.runtimeId } }, migrationJourneys: { bun: nativeStateMigration, node: nodeStateMigration }, migrationAssertionMap: { 'brief criterion 1 — installed normal migration/repeat, exact payloads and one root': 'stateMigrationJourney() assertions for migrateStatus, repeatStatus, payload byte maps, no legacy root, and supported mode', 'brief criterion 2 — public refusal and protected evidence': 'stale digest, dirty/untracked, symlink/junction, .plan-write active legacy claim, .isswf-transition, incomplete journal and dual root assertions; each checks retained payloads/evidence', 'brief criterion 3 — publication fault policy': 'tests/state-migration-publication.mjs injects regular-file write/sync/close failures on the native host and Linux directory open/sync/close failures; its Windows policy seam is simulated and is not native evidence; the native platform matrix runs this test', 'brief criterion 4 — installed-result sensitivity': 'mutated .isswf/project-pin.json repeat is refused and altered bytes are retained; unmutated baseline payload base64/SHA-256 and observed refusal are in migrationJourneys', 'brief criterion 5 — supported policy identity': 'launcher objects name actual compiled Bun executable/runtime and Node executable/release entry/runtime; Windows symlink control creates a junction and is exercised natively in CI'}, limits: 'Migration is the normal installed path only; actual interrupted-owner recovery is not certified. Windows run remains pending; Linux evidence is not Windows evidence. Windows omits directory flushes and does not claim equivalent power-loss persistence. No host discovery in this script; run host-discovery separately. No provider execution or Linux sandbox equivalence is established.' };
+const report = { status: 'PASS', platform: process.platform, arch: process.arch, revision, version: manifest.version, artifactId: built.artifactId, installed, checks: ['native Bun build', 'npm tarball installation and exact receipt', 'executable version and usage refusal', 'read-only inspect/status', 'native Bun installed init→pinned plan prepare/repeat/uncertain-claim refusal', 'Node release-launcher init→pinned plan prepare/repeat/uncertain-claim refusal', 'installed Bun and Node migration with stale digest, dirty state, unsafe symlink/junction, active legacy claim, uncertain transition and journal refusal; exact evidence retained', 'migration pins, models, setup and historical payload bytes/modes preserved across rename and repeat', 'dual-root refusal preserves one active root and all bytes', 'mutated installed pin negative control rejects repeat and preserves altered bytes', 'legacy-executor release → current native migration: retained-runtime effect gate blocks then clears, models.json preserved, retired tool refused, rollback', 'native owner evidence shape and unknown-owner recovery refusal', 'space and Unicode paths', 'native Git worktree recipes', 'static resource contracts'], planJourneys: { native: { project: nativeJourney.target, runtimeId: nativeJourney.pin.runtimeId }, node: { project: nodeJourney.target, runtimeId: nodeJourney.pin.runtimeId } }, migrationJourneys: { bun: nativeStateMigration, node: nodeStateMigration }, legacyExecutor, migrationAssertionMap: { 'brief criterion 1 — installed normal migration/repeat, exact payloads and one root': 'stateMigrationJourney() assertions for migrateStatus, repeatStatus, payload byte maps, no legacy root, and supported mode', 'brief criterion 2 — public refusal and protected evidence': 'stale digest, dirty/untracked, symlink/junction, .plan-write active legacy claim, .isswf-transition, incomplete journal and dual root assertions; each checks retained payloads/evidence', 'brief criterion 3 — publication fault policy': 'tests/state-migration-publication.mjs injects regular-file write/sync/close failures on the native host and Linux directory open/sync/close failures; its Windows policy seam is simulated and is not native evidence; the native platform matrix runs this test', 'brief criterion 4 — installed-result sensitivity': 'mutated .isswf/project-pin.json repeat is refused and altered bytes are retained; unmutated baseline payload base64/SHA-256 and observed refusal are in migrationJourneys', 'brief criterion 5 — supported policy identity': 'launcher objects name actual compiled Bun executable/runtime and Node executable/release entry/runtime; Windows symlink control creates a junction and is exercised natively in CI'}, limits: 'Migration is the normal installed path only; actual interrupted-owner recovery is not certified. Windows run remains pending; Linux evidence is not Windows evidence. Windows omits directory flushes and does not claim equivalent power-loss persistence. No host discovery in this script; run host-discovery separately. No provider execution or Linux sandbox equivalence is established.' };
 await writeFile(join(root, 'platform-report.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify(report, null, 2));

@@ -15,7 +15,7 @@ During explicit setup:
 - **Missing approved effort.** Omit an effort parameter only under approved parent inheritance; otherwise block the delegation.
 - **Limits.** Do not invent YAML or settings fields, change user-global defaults, or label an approved preference as applied configuration. Observe actual model metadata when available; label unknown effort or identity unknown. Never fabricate per-role effort support, silently substitute a model, or dispatch through Pi because Claude cannot satisfy a selection.
 
-For current Claude work, the supported native configuration/profile/delegation mechanism is the sole selection owner. The setup record reports approval/application status, not a second editable model table; `models.json` is for explicitly selected legacy execution only. Missing native selection or unsupported persistence/effort remains pending, never a reason to read a legacy route, silently inherit a model or rewrite unrelated settings.
+For current Claude work, the supported native configuration/profile/delegation mechanism is the sole selection owner. The setup record reports approval/application status, not a second editable model table; `models.json` belongs only to legacy attempts that are reconciled with their original pinned runtime. Missing native selection or unsupported persistence/effort remains pending, never a reason to read a legacy route, silently inherit a model or rewrite unrelated settings.
 
 ## Verify the plugin is loaded
 
@@ -151,4 +151,4 @@ Evidence note: a historical Linux live run proved only an earlier supplied-evide
 
 ## Existing legacy runtime assignments
 
-Explicitly retained legacy assignments keep their original launcher, runtime pin, release identity and checkpointed inputs under `docs/installation.md` and `docs/local-worker-lifecycle.md`. Read those guides from their retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.
+The legacy executor is no longer shipped. An existing legacy assignment keeps its original launcher, runtime pin, release identity and checkpointed inputs, and is reconciled with that retained runtime before the project migrates under `docs/installation.md`. Read its contracts from that retained runtime. Do not remove claims, change stores, overwrite inputs or relabel an old failure to enter the new path. Host-native adoption does not migrate an installed project's state or complete historical acceptance.

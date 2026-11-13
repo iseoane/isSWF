@@ -1,6 +1,6 @@
 # Pi host-native delegation
 
-Use this guide when coordinating in Pi on native Windows or Linux. The factory owns methodology; Pi and its approved subagent extension own execution. Do not use a Claude launcher or the legacy isSWF executor as an automatic fallback.
+Use this guide when coordinating in Pi on native Windows or Linux. The factory owns methodology; Pi and its approved subagent extension own execution. Do not use a Claude launcher as an automatic fallback.
 
 ## Prerequisite and configuration
 
@@ -27,7 +27,7 @@ After installation, run `pi list` to confirm the package, then use `/reload` in 
 
 ### Configure role selections
 
-During explicit setup, offer the [portable factory preset](../skills/isswf-setup/SKILL.md#confirm-portable-factory-defaults) and confirm acceptance or customization before applying it. Preserve approved existing choices unless replacement is explicitly requested. Use trusted-project `.pi/settings.json` for the coordinator startup defaults and `subagents.agentOverrides.isswf-worker` and the other `isswf-` roles; inspect user settings for precedence, but do not change them as a setup side effect. Set `model` to the approved qualified provider/model and `thinking` to its supported effort. Preserve unrelated settings. The legacy `.factory/models.json` belongs to explicit legacy executor assignments, not this host-native path. Do not maintain a second live selection there.
+During explicit setup, offer the [portable factory preset](../skills/isswf-setup/SKILL.md#confirm-portable-factory-defaults) and confirm acceptance or customization before applying it. Preserve approved existing choices unless replacement is explicitly requested. Use trusted-project `.pi/settings.json` for the coordinator startup defaults and `subagents.agentOverrides.isswf-worker` and the other `isswf-` roles; inspect user settings for precedence, but do not change them as a setup side effect. Set `model` to the approved qualified provider/model and `thinking` to its supported effort. Preserve unrelated settings. A legacy `.factory/models.json` belongs only to legacy attempts that are reconciled with their original pinned runtime, not this host-native path. Do not maintain a second live selection there.
 
 #### Add CodeGraph and Engram tools when installed
 
@@ -38,7 +38,7 @@ During explicit setup, offer the [portable factory preset](../skills/isswf-setup
 
 An override `tools` list replaces the profile allowlist instead of merging, so write the profile's complete current list followed by the detected tool names. Add the resolved absolute path of each provider's loaded extension entry file to the role's `subagentOnlyExtensions`, preserving existing entries, because foreground children do not load the parent's ambient extensions. Omit a provider that is not detected and never install one. Do not change user settings. If a provider is later removed or a profile's tool list changes, reconcile these fields through setup again.
 
-For current Pi work, trusted project `.pi/settings.json` is the single editable project selection owner; the setup record describes approval and application status, not a second model table. Selected-state `models.json` belongs only to explicitly selected legacy execution and must not supply missing native selections. Missing, unsupported or approval-conflicting effective mappings leave the affected role pending until reconciled through the supported host mechanism; never silently repair settings or substitute a legacy route.
+For current Pi work, trusted project `.pi/settings.json` is the single editable project selection owner; the setup record describes approval and application status, not a second model table. Selected-state `models.json` belongs only to legacy attempts that are reconciled with their original pinned runtime and must not supply missing native selections. Missing, unsupported or approval-conflicting effective mappings leave the affected role pending until reconciled through the supported host mechanism; never silently repair settings or substitute a legacy route.
 
 Before launch, inspect current model/effort availability and the actual loaded agent mapping. Configuration is not permission or proof of subscription coverage. A missing or unsupported selection blocks that delegation; do not silently inherit, clamp, switch providers, or substitute a model. Explicit parent inheritance is allowed only when approved and its effective selection is known.
 
@@ -156,6 +156,6 @@ Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#clo
 
 ## Boundaries
 
-Use only the extension's verified capabilities. Do not claim OS filesystem/network containment, descendant-process cessation or durable crash recovery from a foreground session, tool list or separate context window. These are not the guarantees of the retained LPAC/Bubblewrap executors. Host settings and extensions execute trusted code; do not load project resources without the host's trust decision or copy credentials between profiles.
+Use only the extension's verified capabilities. Do not claim OS filesystem/network containment, descendant-process cessation or durable crash recovery from a foreground session, tool list or separate context window. Host settings and extensions execute trusted code; do not load project resources without the host's trust decision or copy credentials between profiles.
 
-For an explicitly selected existing legacy assignment, use its original runtime and `docs/local-worker-lifecycle.md` plus `docs/model-routing.md`. Preserve its pins, grants, reservations and failures. Never reinterpret it as a new host-native task to bypass an unresolved claim.
+The legacy executor is no longer shipped. An existing legacy attempt is reconciled with its original pinned runtime, which retains its own contracts, before the project migrates. Preserve its pins, grants, reservations and failures. Never reinterpret it as a new host-native task to bypass an unresolved claim.

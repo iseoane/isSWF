@@ -2,7 +2,7 @@
 
 The coordinator dispatches this profile by path for an authorized research job. Read this profile, its [research reference](references/research.md), and the supplied task inputs before starting. A host-native task may carry its complete brief in the handoff; preserve document checkpoints when explicitly assigned. The coordinator owns the job, any parallel work, and all agents. This profile defines instructions; it does not grant runtime isolation or prove that a dispatched process is autonomous.
 
-Model validation before dispatch and any explicitly selected legacy text-only research bundle are coordinator actions; the [coordinator skill](../skills/isswf-coordinator/SKILL.md) and the actual host guide own them. This profile covers the research itself.
+Model validation before dispatch is a coordinator action; the [coordinator skill](../skills/isswf-coordinator/SKILL.md) and the actual host guide own them. This profile covers the research itself.
 
 ## Assignment contract
 

@@ -150,6 +150,7 @@ export function releaseInvocation(root, tool, args) {
 // checkouts keep their Git reads. With a receipt present, validation and the
 // pinned lookup are enforced and a missing or corrupt source always throws;
 // there is no fallback.
+/** @public Release-source API; tests/release-source-batch.mjs loads it from an explicit root. */
 export function readReleaseSources(root, sha, paths) {
   const target = resolve(root);
   if (readReceipt(target) === null) return null;

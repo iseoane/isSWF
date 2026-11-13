@@ -29,7 +29,6 @@
     ".agents/skills/isswf-interview",
     ".agents/skills/isswf-howto",
     ".claude-plugin",
-    ".factory/models.json",
     ".factory/templates",
     ".isswf-release.json",
     ".isswf-sources",
@@ -41,10 +40,8 @@
     "tools/*.mjs",
     "docs/installation.md",
     "docs/durable-work.md",
-    "docs/model-routing.md",
     "docs/host-portability.md",
     "docs/source-activation.md",
-    "docs/local-worker-lifecycle.md",
     "docs/issue-intake.md"
   ],
   "pi": {

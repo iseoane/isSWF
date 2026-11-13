@@ -50,7 +50,7 @@ Installed workers receive the pinned debug and TDD skills as read-only methodolo
 
 Security, performance and observability are optional specialised workflows, not extra stages for every job. Use `/skill:isswf-security`, `/skill:isswf-performance` or `/skill:isswf-observability` in Pi, or the same names under `/isswf:` in Claude Code. Security starts with assets, trust boundaries and plausible abuse; it does not authorize exploitation or certify compliance. Performance requires a correctness-checked baseline and comparable measurements before a speedup claim. Observability starts from operational questions and bounds sensitive fields, metric cardinality, export and retention. It does not turn telemetry into proof of current process state.
 
-The applicable coordinator and role profiles select these resources conditionally. New installed workers receive them as pinned read-only methodology; text-only diagnostic/review callers receive selected resources from the same checkpoint as their role, and planners receive the selected design reference. Historical checkpoints retain their original resources. A supplied skill does not add tools, production access or provider permission.
+The applicable coordinator and role profiles select these resources conditionally. The coordinator supplies each child the selected resources from the same checkpoint as its role. Historical checkpoints retain their original resources. A supplied skill does not add tools, production access or provider permission.
 
 The shared design reference also covers domain language, useful interfaces, resulting complexity and significant decision records. It preserves each target's glossary and existing decision mechanism; it does not require a new architecture skill, an ADR for every choice or renamed persisted fields.
 
@@ -124,7 +124,5 @@ Keep credentials out of briefs, notes, and shared evidence. A local panel is not
 Start with [inspect work](operations.md) for everyday commands. The detailed English agent resources below are implementation contracts; read them only when needed:
 
 - [Installation, migration, and recovery](../installation.md).
-- [Job execution and interruption](../local-worker-lifecycle.md).
-- [Model choices and budgets](../model-routing.md).
 - [Plans, records, and evidence retention](../durable-work.md).
 - [Review selection](../../.agents/roles/references/review.md).

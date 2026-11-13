@@ -292,7 +292,7 @@ assert.match(await read('docs/es/operations.md'), /consume su resultado antes de
 assert.match(docs, /--plugin-dir/);
 assert.match(docs, /\/isswf:isswf-coordinator/);
 assert.match(docs, /static contract check, not proof of live delegation/i);
-assert.match(docs, /does not establish Pi-equivalent sandboxing/i);
+assert.match(docs, /Native host sessions and tool restrictions are not OS filesystem\/network containment/i);
 const piManifest = JSON.parse(await read('package.json'));
 assert.equal(piManifest.version, manifest.version, 'Pi and plugin must publish one release version');
 const loadedReleaseVersion = coordinatorFlow.match(/^isSWF loaded-resource release version: (\d+\.\d+\.\d+)$/mu)?.[1];
@@ -413,9 +413,6 @@ assert.match(await read('.factory/templates/job-brief.md'), /Current explicit st
 assert.match(await read('.factory/templates/delivery.md'), /Integration boundary/u);
 assert.match(await read('AGENTS.md'), /trusted current feature-to-PR start/u);
 assert.match(skill, /implementation alone/u);
-const effectGuide = await read('docs/local-worker-lifecycle.md');
-assert.match(effectGuide, /materializes that authorization into the concrete external-effect grant/u);
-assert.match(effectGuide, /Neither the helper nor a sandbox worker gains publication authority/u);
 const e2e = await read('.agents/skills/isswf-e2e/SKILL.md');
 assert.match(e2e, /does not require factory activation/u);
 for (const mode of ['Create or extend', 'Run', 'Maintain or audit']) assert.ok(e2e.includes(mode));
@@ -426,7 +423,6 @@ assert.match(await read('.agents/skills/isswf-e2e/references/browser.md'), /Play
 assert.match(await read('.agents/skills/isswf-e2e/references/test-quality.md'), /without interactive instructions to an AI agent/u);
 assert.ok(skill.includes('../isswf-e2e/SKILL.md'));
 assert.ok((await read('.agents/roles/worker.md')).includes('../skills/isswf-e2e/SKILL.md'));
-assert.ok((await read('tools/isswf-job.mjs')).includes("installedRelease?.files['.agents/skills/isswf-e2e/SKILL.md']"));
 const delivery = await read('.agents/roles/delivery.md');
 assert.ok(delivery.includes('[isswf-pr](../skills/isswf-pr/SKILL.md)'), 'Delivery must use the shared PR skill');
 const deliveryReference = await read('.agents/roles/references/delivery.md');
@@ -481,7 +477,7 @@ assert.match(setup, /initial setup, existing setup to reconcile, available runti
 assert.match(setup, /pi --offline --list-models/);
 assert.match(setup, /For an initial model selection, ask/);
 assert.match(setup, /host availability is not executor support/);
-assert.match(setup, /source-checkout mode must leave a missing config pending/);
+assert.match(setup, /preserve it unchanged and never create, edit or use it as current Pi or Claude model selection/);
 assert.match(setup, /Persist Claude-native role\/model\/effort decisions/);
 assert.doesNotMatch(setup, /full input checkpoint named in the trusted grant/);
 const entrySetup = setup.slice(setup.indexOf('### Setup-managed coordinator entry'), setup.indexOf('For every setup running in Pi'));
@@ -533,12 +529,6 @@ assert.match(claudeSetup, /\$\{CLAUDE_PLUGIN_ROOT\}\/\.agents\/skills\/isswf-set
 assert.match(host, /## Setup model choices/);
 assert.match(host, /Claude Code model selection/);
 assert.match(host, /Setup selection is a preference, not assignment approval/);
-const worker = await read('tools/isswf-job.mjs');
-assert.match(worker, /only exact configured LunaHigh worker route supported; no fallback/);
-assert.match(worker, /installed runtime must match the explicit project pin/);
-const preparer = await read('tools/pi-worker-task.mjs');
-assert.match(preparer, /profile must pin methodology files at the authorized baseline/);
-assert.match(preparer, /brief.path must name a committed regular-file blob/);
 // These are instruction-contract checks, not a live evaluation of agent adherence.
 for (const role of ['planner', 'researcher']) {
   for (const file of [`.agents/roles/${role}.md`, `.agents/roles/references/${role === 'planner' ? 'planning' : 'research'}.md`]) {
