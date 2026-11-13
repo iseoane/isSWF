@@ -136,6 +136,16 @@ for (const cwd of ['/p', 'C:\\p']) {
   })
 }
 
+test('a Bash command naming --initiative touches that initiative', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  await activate($)
+  await $.tool.call({ tool: 'Bash', command: 'node tools/isswf-status.mjs --project /p --initiative I0046' })
+  await clock.advance(1000)
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
+  await ui.unmount()
+})
+
 test('pin makes an unopened initiative a card and unpin returns it', ON, async ($, on) => {
   engine(on, '/p')
   await activate($)
