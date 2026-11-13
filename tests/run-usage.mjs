@@ -151,3 +151,14 @@ try {
 } finally {
   await rm(root, { recursive: true, force: true });
 }
+
+// The coordinator's own tool uses count as a transcript does: plugin prefix dropped, `.agents/` reads relative.
+{
+  const { countToolUses } = await import(pathToFileURL(join(source, 'tools/isswf-run-usage-core.mjs')).href);
+  assert.deepEqual(countToolUses([
+    { tool: 'Skill', input: { skill: 'isswf:isswf-review' } },
+    { tool: 'Read', input: { file_path: 'C:\\p\\.agents\\skills\\isswf-tdd\\SKILL.md' } },
+    { tool: 'Read', input: { file_path: '/p/README.md' } },
+    { tool: 'Bash', input: { command: 'cat .agents/roles/worker.md' } },
+  ]), { skills: { 'isswf-review': 1, 'isswf-tdd': 1 }, agentsReads: { '.agents/skills/isswf-tdd/SKILL.md': 1 } });
+}

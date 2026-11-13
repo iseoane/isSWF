@@ -5,8 +5,11 @@ export type IsswfPanePinned = string[]
 // `<initiative>-<job>` keys of completed jobs and `<initiative>-<job>-<entry>` keys of agent pills expanded in their card.
 export type IsswfPaneExpanded = string[]
 
+// The pane's selected tab.
+export type IsswfPaneTab = 'initiatives' | 'agents'
+
 declare module 'claude-code' {
   interface PluginState {
-    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded }
+    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab }
   }
 }

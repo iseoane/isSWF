@@ -89,6 +89,16 @@ function collector() {
   };
 }
 
+/** Counts skills and `.agents/` reads in a session's own tool uses (`{ tool, input }`), as a transcript is counted. */
+export function countToolUses(toolUses) {
+  const collected = collector();
+  for (const use of toolUses) {
+    if (use?.tool === 'Skill') collected.skill(use.input?.skill);
+    if (use?.tool === 'Read') collected.read(use.input?.file_path);
+  }
+  return { skills: collected.state.skills, agentsReads: collected.state.agentsReads };
+}
+
 // A mixed run is unknown because its tokens are not split by model.
 function costUsd(tokens, model) {
   const rates = Object.hasOwn(PRICES.models, model) ? PRICES.models[model] : null;
