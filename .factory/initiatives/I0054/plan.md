@@ -6,12 +6,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: The pane distinguishes review rounds within a brief revision and labels attempts the coordinator writes itself as `coordinator`.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Needs an explicit operator start.
-- Next step: Operator start; then implementation with focused tests and PR.
+- Blocker: None.
+- Next step: Coordinator implements in worktree isSWF-worktrees/i0054-j001 (branch feat/i0054-j001-pane-rounds); then bound review and PR. Keep I0054 open after J001 (operator has more ideas).
 
 ### Acceptance
 
@@ -21,4 +21,5 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ### Evidence
 
+- 2026-11-13: started by the operator ("Adelante con I0054"); keep the initiative open after this job.
 - 2026-11-13: I0053/J001 records A001 (coordinator writer), V001 (changes requested) and V002 (delta pass) all cite brief-r1 and were drawn as one round "R1 A001 reviewer reviewer".
