@@ -94,18 +94,26 @@ Source: operator request in a Claude Code session, 2026-11-13, after reviewing t
 ## J005
 
 - Size: S
-- Status: in-review
+- Status: completed
 - Objective: Make every Claude plugin skill entry carry its shared skill's activation description.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Review R1 of commit 7e7cdf7.
+- Next step: None.
 
 ### Acceptance
 
 - Each `skills/*/SKILL.md` description equals its shared `.agents/skills/*/SKILL.md` description byte for byte; the coordinator description names the operator's address words ("coordinator", "coordinador").
 - A focused test fails when a wrapper description differs from its shared skill (negative control recorded).
 - Tests: the new check, host-portability, release-package; check-docs.
+
+### Evidence
+
+- Worker A001 (native isswf-worker, model inherited): commit 7e7cdf7; 7 of 17 wrapper descriptions aligned; new tests/skill-wrapper-descriptions.mjs wired into check-quality and quality.yml; negative controls (altered description, wrapper without counterpart) fail as expected (worker-reported).
+- Coordinator checks: new test PASS, host-portability ok, check-docs PASS on 7e7cdf7; release-package pass on 610da8d (no source difference from 7e7cdf7 outside plan records).
+- Review R1 (native isswf-reviewer, model inherited, diff 18df593..7e7cdf7 supplied inline): verdict as reported: "Aggregate verdict: inconclusive. Standards passes. Spec passes on content but stays inconclusive because the release-package test ... has no observed run on 7e7cdf7." That gap is closed by the release-package run above; no candidate change.
+- Known limits: YAML block-scalar descriptions (`>`/`|`) would compare by indicator only; a missing description could match a body line; shared skills without a wrapper are not detected. All very unlikely today (17 = 17, single-line descriptions).
+- Integration needs a person's approval (`.github/workflows/quality.yml` changed, REVIEW.md).
 
 ## J006
 
