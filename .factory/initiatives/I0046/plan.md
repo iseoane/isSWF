@@ -205,13 +205,17 @@ Design approved by the operator on 2026-11-11 in the Claude Code session (mockup
 ## J010
 
 - Size: S
-- Status: in-progress
+- Status: completed
 - Objective: Treat an initiative as touched in the pane when a Bash command names it with `--initiative IXXXX`, as well as by record paths.
 - Depends on: J008
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Commit with test, CI on PR #281, then merge the I0046 chain into main.
+- Next step: None. Merged into main with the I0046 chain through PR #281.
 
 ### Acceptance
 
 - `touchedIds` in hooks/register.tsx adds IDs from `--initiative IXXXX` in Bash commands; record paths still count; a test covers the flag case; en/es installation guides updated.
+
+### Evidence
+
+- Commit 1966778: `INITIATIVE_FLAG` in `touchedIds`; new test passes and fails with the flag branch disabled (negative control); plugin test 9/9; check-docs PASS. Exact-head CI recorded on PR #281.
