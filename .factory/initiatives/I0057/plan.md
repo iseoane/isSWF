@@ -21,11 +21,11 @@ Sizing: each job's Size line gives its reason, judged by verification cost (.age
 
 Deferred candidates, without an observed incident yet; add a job only after one is observed: plan and brief edits refused while a writer for that job runs; the hook records which files a child read and which commands it ran, so resource consumption and checks run become observed rather than self-reported; the version advisory and Engram/Codegraph availability computed by a script at coordinator load; `gh issue create` without `needs-triage`; `gh pr merge` without `--match-head-commit` or with `--auto`; a warning at the fourth material brief revision; a pre-commit run of `tooling/quality/check-docs.mjs` and `git diff --check`.
 
-Observed candidate, eligible for a job: a `records:` commit made on a branch other than the expected one. On 2026-11-14 the I0057 re-plan (c07a5dc) was committed on `fix/j030-reverse-stdin`, the branch of PR324, instead of on `main`, because a peer session had switched the shared checkout's branch and the coordinator did not check it. Cost: one misplaced commit, moved to `main` and removed from that branch before it was pushed.
+The first observed candidate, a commit made on a branch that another session had switched to, became J009 on 2026-11-14.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
-Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after them. J003 and J005 are independent.
+Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after them. J003, J005 and J009 are independent.
 
 ## J001
 
@@ -204,3 +204,24 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the operator asked that worker and reviewer runs be observed for semantic steps that could become deterministic; a rule to remember to observe would itself depend on the coordinator's memory.
 - 2026-11-14: the J030 reviewer suggested that the review template ask for reviewer limits and convergence advice (I0009/J030/V006.md, round 4). The coordinator left the reviewer limits out of V006 twice (round 1, suggestion N2; round 3, added in round 4). The template already has the field (.factory/templates/review.md, "Limits and return"), but only 4 of 135 review records in .factory/initiatives use that section: review records are hand-written outside the template, and nothing checks the field.
+
+## J009
+
+- Status: pending
+- Size: S (one flow, no special risk: compare the branch before a commit)
+- Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief; decide where the session's expected branch is kept and how each host exposes the session's own switch and checkout commands.
+
+### Acceptance
+
+- The session's expected branch is the one it observed at start or last selected itself with `git switch` or `git checkout`. A `git commit` run from the session's shell on any other branch is refused, naming both branches, in Claude Code and Pi, on Linux and Windows.
+- A commit on the expected branch runs unchanged, and so do commits made through the plumbing commands this guard does not cover. Those commands are named as a known limit.
+- Re-selecting the branch with the session's own `git switch` makes it the expected branch again; the guard never switches branches, stashes or resets anything itself.
+
+### Evidence
+
+- 2026-11-14: the I0057 re-plan (c07a5dc) was committed on `fix/j030-reverse-stdin`, the branch of PR324, instead of on `main`. A peer session had switched the shared checkout's branch and the coordinator did not check it. Cost: one misplaced commit, moved to `main` (7b840ee) and removed from that branch with `git reset --keep` before it was pushed.
+- 2026-11-14: minutes later, the same checkout was on `records/close-i0009`, another branch switch by the peer session.
