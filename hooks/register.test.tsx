@@ -35,7 +35,12 @@ const PANE = {
 } as const
 
 // A fake host keyed by native paths: `C:\p` exercises the Windows separator end to end.
-function engine(on: any, cwd: string, records = RECORDS) {
+const OWN_MESSAGES = [
+  { role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Skill', input: { skill: 'isswf:isswf-coordinator' } }, { tool_use_id: 't2', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }, { tool_use_id: 't3', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }] },
+  { role: 'user', text: 'x', toolUses: [{ tool_use_id: 't4', tool: 'Skill', input: { skill: 'not-counted' } }] },
+]
+
+function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_MESSAGES) {
   const sep = cwd.includes('\\') ? '\\' : '/'
   const home = sep === '\\' ? 'C:\\h' : '/h'
   const files: Record<string, string> = {}
@@ -73,10 +78,7 @@ function engine(on: any, cwd: string, records = RECORDS) {
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
-  on('session.messages', () => ({ value: [
-    { role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Skill', input: { skill: 'isswf:isswf-coordinator' } }, { tool_use_id: 't2', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }, { tool_use_id: 't3', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }] },
-    { role: 'user', text: 'x', toolUses: [{ tool_use_id: 't4', tool: 'Skill', input: { skill: 'not-counted' } }] },
-  ] }))
+  on('session.messages', () => ({ value: messages }))
   return { clock: mock.clock(on), seen, settings }
 }
 
@@ -342,19 +344,27 @@ for (const [percentUsed, expected] of [[92, 1], [50, 0]] as const) {
   test(`resume after quota: ${percentUsed}% of the five-hour window ${expected ? 'schedules one' : 'schedules no'} resume prompt`, ON, async ($, on) => {
     const { clock } = engine(on, '/p')
     const prompts: string[] = []
-    on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed, resetsAt: new Date(10 * 60_000).toISOString() }] } }))
+    let resetsAt = 10 * 60_000
+    let used: number = percentUsed
+    const hhmm = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
+    on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: used, resetsAt: new Date(resetsAt).toISOString() }] } }))
     on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
     await activate($)
     await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
     let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
     expect(await text(ui, /^⏰/)).toBe('⏰ AutoWakeUp: no')
+    await clock.advance(1000)
+    await ui.unmount()
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    // Off, the switch already shows when a resume would come: the reset plus five minutes.
+    expect(await text(ui, /^⏰/)).toBe(`⏰ AutoWakeUp: no (${hhmm(15 * 60_000)})`)
     await ui.press({ key: 'resume-toggle' })
     await ui.unmount()
     ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
     await clock.advance(1000)
     await ui.unmount()
     ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
-    expect(await text(ui, /^⏰/)).toMatch(expected ? /^⏰ AutoWakeUp: sí \(\d\d:\d\d\)$/ : /^⏰ AutoWakeUp: sí \(\d\d:\d\d\)$/)
+    expect(await text(ui, /^⏰/)).toBe(`⏰ AutoWakeUp: sí (${hhmm(15 * 60_000)})`)
     await ui.unmount()
     // Repeated draws in the same window schedule nothing more.
     ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
@@ -367,6 +377,15 @@ for (const [percentUsed, expected] of [[92, 1], [50, 0]] as const) {
     if (expected) {
       expect(prompts[0]).toContain('I0046/J004')
       expect(prompts[0]).toContain('reconcile state first')
+      // After it fires the window renews below the threshold: the switch shows the next window's time, not the past one.
+      resetsAt = 5 * 60 * 60_000
+      used = 5
+      ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+      await clock.advance(1000)
+      await ui.unmount()
+      ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+      expect(await text(ui, /^⏰/)).toBe(`⏰ AutoWakeUp: sí (${hhmm(5 * 60 * 60_000 + 5 * 60_000)})`)
+      await ui.unmount()
     }
   })
 }
@@ -389,6 +408,7 @@ test('switching resume off cancels a scheduled prompt', ON, async ($, on) => {
   await ui.press({ key: 'resume-toggle' })
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^⏰/)).toMatch(/^⏰ AutoWakeUp: no \(\d\d:\d\d\)$/)
   await ui.unmount()
   await clock.advance(20 * 60_000)
   expect(prompts.length).toBe(0)
@@ -412,4 +432,21 @@ test('without a reset time the switch says nothing is scheduled', ON, async ($, 
   await ui.unmount()
   await clock.advance(60 * 60_000)
   expect(prompts.length).toBe(0)
+})
+
+test('the coordinator row says the worker profile was read, and an unresolved run gives no profile mark', ON, async ($, on) => {
+  // J004 has a coordinator-written attempt, and this session read roles/worker.md; the reviewer's transcript is gone.
+  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: partial\n', 'I0046/jobs/J004/V001.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/roles/reviewer.md\n- Verdict: fail\n- Run: claude agent=gone2\n' }, [{ role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Read', input: { file_path: '/p/.agents/roles/worker.md' } }] }])
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'tab-agents' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión) · writer con roles/worker.md')
+  expect(await text(ui, /^reviewer · /)).toBe('reviewer · 1 ejecución')
+  await ui.unmount()
 })

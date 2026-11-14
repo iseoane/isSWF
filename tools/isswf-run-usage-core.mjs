@@ -127,14 +127,23 @@ function linked(rel, text) {
   return out;
 }
 
+// An assignment names a file by its path from `.agents/` or from its parent folder (`references/review.md`,
+// `isswf-writing/SKILL.md`), whatever comes before; a skill may also be named by its bare name.
+function mentions(text, rel) {
+  const parts = rel.split('/');
+  if (text.includes(parts.slice(1).join('/')) || text.includes(parts.slice(-2).join('/'))) return true;
+  const skill = rel.match(/\/([^/]+)\/SKILL\.md$/u);
+  return Boolean(skill) && new RegExp(`(^|[^\\w-])${skill[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\w-])`, 'u').test(text);
+}
+
 // What the run used as methodology, not every file it opened: skills it invoked, and the `.agents/`
 // skills and references its assignment named (directly, or linked from a file it named directly) and it then
 // read. Without an assignment (the coordinator's own session) every `.agents/` read counts. Files the
 // run itself changed are its work, never its methodology.
 function methodology(state, assigned) {
-  const text = state.assigned.join('\n');
+  const text = state.assigned.join('\n').replace(/\\/g, '/');
   const read = new Set(state.reads);
-  const named = new Set([...read].filter(rel => !assigned || text.includes(rel.slice('.agents/'.length))));
+  const named = new Set([...read].filter(rel => !assigned || mentions(text, rel)));
   // One hop only: a deeper chain soon reaches files a run opens for other reasons.
   for (const rel of [...named]) {
     for (const next of linked(rel, state.contents.get(rel) ?? '')) if (read.has(next)) named.add(next);

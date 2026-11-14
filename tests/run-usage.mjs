@@ -21,12 +21,12 @@ const assistant = (requestId, timestamp, usage, content, stop = 'tool_use', mode
 const user = (timestamp, content = 'go') => ({ type: 'user', timestamp, message: { role: 'user', content } });
 
 // Synthetic Claude agent: Skill tool, .agents reads (POSIX and Windows separators), a repeated request id.
-// The prompt names worker.md and the brief names review.md; isswf-tdd is read but never assigned, and
-// review.md, though assigned, is edited by the run, so neither counts as used methodology.
+// The prompt names worker.md by a Windows path; the brief names design-principles.md from its parent folder,
+// review.md, and isswf-tdd by its bare name. review.md, though assigned, is edited by the run, so it is not used.
 const agentTranscript = jsonl([
-  user('2026-01-01T00:00:00.000Z', 'Apply .agents/roles/worker.md and read the brief.'),
+  user('2026-01-01T00:00:00.000Z', 'Apply C:\\repo\\.agents\\roles\\worker.md and read the brief.'),
   assistant('req_a0', '2026-01-01T00:00:00.500Z', claudeUsage(0, 0, 0, 0), [{ type: 'tool_use', id: 'b1', name: 'Read', input: { file_path: '/repo/.factory/initiatives/I0001/jobs/J001/brief-r1.md' } }, { type: 'tool_use', id: 'b2', name: 'Read', input: { file_path: '/repo/.agents/roles/references/review.md' } }, { type: 'tool_use', name: 'Edit', input: { file_path: '/repo/.agents/roles/references/review.md' } }, { type: 'tool_use', id: 'b3', name: 'Read', input: { file_path: '/repo/.agents/roles/references/design-principles.md' } }]),
-  user('2026-01-01T00:00:00.700Z', [{ type: 'tool_result', tool_use_id: 'b1', content: 'Use roles/references/design-principles.md and roles/references/review.md.' }]),
+  user('2026-01-01T00:00:00.700Z', [{ type: 'tool_result', tool_use_id: 'b1', content: 'Use references/design-principles.md, roles/references/review.md and the isswf-tdd skill.' }]),
   // worker.md links execution-principles.md (one hop, used), which links the coordinator skill (two hops, not used).
   assistant('req_a0b', '2026-01-01T00:00:00.800Z', claudeUsage(0, 0, 0, 0), [{ type: 'tool_use', id: 'w1', name: 'Read', input: { file_path: '/repo/.agents/roles/worker.md' } }, { type: 'tool_use', id: 'e1', name: 'Read', input: { file_path: '/repo/.agents/roles/references/execution-principles.md' } }, { type: 'tool_use', id: 'c1', name: 'Read', input: { file_path: '/repo/.agents/skills/isswf-coordinator/SKILL.md' } }]),
   user('2026-01-01T00:00:00.900Z', [{ type: 'tool_result', tool_use_id: 'w1', content: 'See [execution](references/execution-principles.md#retries).' }, { type: 'tool_result', tool_use_id: 'e1', content: 'See [triggers](../../skills/isswf-coordinator/SKILL.md).' }]),
@@ -91,7 +91,7 @@ try {
     tokens: { input: 11, output: 22, cacheRead: 33, cacheWrite: 44 }, durationMs: 5000,
     skills: { 'isswf-review': 1, 'isswf-tdd': 1, 'isswf-coordinator': 1 },
     agentsReads: { '.agents/roles/references/review.md': 1, '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1, '.agents/skills/isswf-coordinator/SKILL.md': 1, '.agents/skills/isswf-tdd/SKILL.md': 1 },
-    usedSkills: { 'isswf-review': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, costUsd: 'unknown',
+    usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, costUsd: 'unknown',
   });
   // The advisor iteration is billed on top of the request's top-level usage.
   assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, costUsd: 'unknown' });

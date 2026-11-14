@@ -152,7 +152,8 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
     resumeFor = window.resetsAt
     resumeAtMs = at
     resumeTimer = $.clock.after(Math.max(0, at - (await $.clock.now())), () => {
-      resumeTimer = undefined
+      // `resumeFor` stays, so the same window is not scheduled again; the switch shows the next window's time.
+      resumeTimer = resumeAtMs = undefined
       void $.prompt.submit({
         text: `isSWF: the five-hour usage window has reset. Work was in progress on ${work.join(', ')}. Load the isswf-coordinator skill, reconcile state first (isswf-status, open PRs, running reviews), then continue only the work already authorised; do not start new jobs without the operator's go.`,
       })
@@ -496,11 +497,14 @@ export const register: Register = (on, options) => {
         if (!byRole.has(role)) byRole.set(role, new Map())
         byRole.get(role)!.set(runKey(run), run)
       }
-      // A role's profile counts as followed in each run that used `.agents/roles/<role>.md`.
+      // A role's profile counts as read in each run that used `.agents/roles/<role>.md`.
       const profileMark = (role: string, found: any[]) => {
         if (!PROFILES.has(role)) return undefined
-        const followed = found.filter((u: any) => u?.found && typeof u.usedReferences === 'object' && u.usedReferences[`.agents/roles/${role}.md`]).length
-        return { text: `${t.profile} ${followed}/${found.length}`, isOk: followed === found.length }
+        // Runs whose transcript is unresolved or missing say nothing about the profile, so they are left out.
+        const resolved = found.filter((u: any) => u?.found && typeof u.usedReferences === 'object')
+        if (!resolved.length) return undefined
+        const followed = resolved.filter((u: any) => u.usedReferences[`.agents/roles/${role}.md`]).length
+        return { text: `${t.profile} ${followed}/${resolved.length}`, isOk: followed === resolved.length }
       }
       const agents = [...byRole].map(([role, runs]) => {
         const found = [...runs.keys()].map(k => usage.get(k))
@@ -517,7 +521,8 @@ export const register: Register = (on, options) => {
       const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
       // Only what was used is drawn: an empty section is left out, and so is an agent that used nothing.
       const used = (map: any) => !map || typeof map !== 'object' || Object.keys(map).length > 0
-      const row = (key: string, label: string, skills: any, reads: any, mark?: { text: string; isOk: boolean }) => (!mark && !used(skills) && !used(reads) ? null : (
+      // A warning keeps a row that used nothing, since its absence is the news.
+      const row = (key: string, label: string, skills: any, reads: any, mark?: { text: string; isOk: boolean }) => ((!mark || mark.isOk) && !used(skills) && !used(reads) ? null : (
         <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
           <Text bold color="claude">{label}{mark && <Text bold={false} color={mark.isOk ? 'success' : 'warning'}> · {mark.text}</Text>}</Text>
           {tallyBlock({ Box, Text }, 'skills', skills, t)}
