@@ -369,12 +369,12 @@ I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289):
 
 ## J030
 
-- Status: in-progress
+- Status: completed
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
 - Brief: [brief-r7.md](jobs/J030/brief-r7.md)
-- Blocker: None. r7 replaces the undocumented jq dependency of the reverse route with a shipped Node projection; budget approved 2026-11-14 (6 calls + 1 live reverse Pi call).
-- Next step: Worker on feat/j030-node-projection, independent review, PR and CI; after merge, one live reverse Claude→Pi call on native Windows. Forward Pi→Claude on Windows needs an operator-run Pi session.
+- Blocker: None. Accepted limits: the live Windows evidence used one operator-forced model (openrouter/free); Claude's effective model and effort in the forward run are not host-attested; the Pi coordinator relay ended with stopReason length; real Pi or Claude cancellation was not exercised.
+- Next step: None.
 
 ### Acceptance
 
@@ -384,6 +384,10 @@ I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289):
 
 ### Evidence
 
+
+- 2026-11-14 r7: tools/pi-jsonl-projection.mjs replaces the undocumented jq dependency. Worker A011 (claude agent=a24d84c933761c90b), TDD RED f5cc744 then GREEN 97abc99. V006 round 1 FAIL (R7-01 fixture-provenance overclaim), round 2 PASS. PR323 exact-head 8b3c4b0 Quality 3/3, merged as 05bc3db611f4a6f245ed77fdd1539002425eb989 under the standing grant.
+- 2026-11-14 live Windows evidence (A012): a reverse Claude→Pi run passed every success condition on the fourth launch (openrouter/free, reduced packet). Pi 1.5.2 waits for stdin, so the guide now closes it. Forward Pi→claude-code `opus:medium`: one successful read-only result. Neither review verdict was adopted. V006 round 3 FAIL (budget and preflight reconciliation), round 4 PASS after correction 2 of 2; round 4 relies on the repository review allowance. PR324 exact-head 132324b Quality 3/3, merged as bd4d2926685522b9d6f93634c0e717b7cff707c7. r7 calls: 5 of 6 plus six live launches, reconciled in A012.
+- 2026-11-14 closure: the coordinator closed J030 under the operator's standing grant ("autorizo todo lo que no sea riesgo alto…") and "tu preocupate de I0009", after proposing closure with these limits. There was no separate explicit acceptance; the operator may reopen.
 
 - 2026-11-14 operator standing grant: "autorizo todo lo que no sea riesgo alto o necesite resolver una duda por mi parte". It covers integration of MEDIUM-risk PRs after green exact-head CI. HIGH risk and open product questions still need the operator.
 - Planner found no verified bridge in factory guides/manifests; coordinator discovery adds existing builtin claude-code read-only external-CLI route candidate, async-only with unsupported Pi model overrides unless runner implements them.
