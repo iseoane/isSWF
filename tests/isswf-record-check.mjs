@@ -70,4 +70,20 @@ assert.deepEqual(codes(recordPaths('A001.md')[0], attempt(['claude agent=a1']).r
 // Only plans and records are checked.
 assert.deepEqual(codes(recordPaths('brief-r1.md')[0], '- Run: claude agent=\n'), []);
 
+// A job directory that holds an attempt or review record contradicts a pending or blocked plan status.
+const staged = plan(job('J001', 'pending'), job('J002', 'blocked'), job('J003', 'in-progress'), job('J004', 'pending'));
+const listing = { J001: ['brief-r1.md', 'A001.md'], J002: ['brief-r1.md', 'V001.md'], J003: ['brief-r1.md', 'A001.md'], J004: ['brief-r1.md', 'notes.md'] };
+const statusLine = id => lineOf(staged, `## ${id}`) + 2;
+for (const path of paths('plan.md')) {
+  assert.deepEqual(checkRecord({ path, text: staged, jobFiles: listing }), {
+    ok: false,
+    violations: [
+      { code: 'records-for-unstarted-job', job: 'J001', field: 'Status', line: statusLine('J001'), message: 'J001 is pending but its directory holds A001.md' },
+      { code: 'records-for-unstarted-job', job: 'J002', field: 'Status', line: statusLine('J002'), message: 'J002 is blocked but its directory holds V001.md' },
+    ],
+  });
+}
+assert.equal(checkRecord({ path: paths('plan.md')[0], text: staged }).ok, true, 'without a listing the rule has no input');
+assert.deepEqual(checkRecord({ path: paths('plan.md')[0], text: invented, jobFiles: { J001: ['A001.md'] } }).violations.map(({ code }) => code), ['invalid-job'], 'an unparsed plan reports only its parse error');
+
 console.log('record check tests passed');
