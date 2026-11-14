@@ -29,7 +29,7 @@ try {
   const parent = await commitFile('a.txt', 'a\n');
   gitRun(['checkout', '-q', '-b', 'feature']);
   const first = await commitFile('b.txt', 'b\n');
-  const second = await commitFile('c.txt', 'c\n');
+  const second = await commitFile('ñ c.txt', 'c\n');
   gitRun(['checkout', '-q', 'main']);
   const mainLater = await commitFile('d.txt', 'd\n');
 
@@ -37,7 +37,7 @@ try {
   const prepared = await prepare({ repository: repo, candidate: second, main: 'main', paths: ['plan.md', 'b.txt'], git });
   assert.equal(prepared.baseSha, parent);
   assert.notEqual(prepared.baseSha, mainLater);
-  assert.deepEqual(prepared.paths, ['b.txt', 'c.txt', 'plan.md']);
+  assert.deepEqual(prepared.paths, ['b.txt', 'ñ c.txt', 'plan.md']);
   const content = prepared.bindings['isswf.git-evidence.content/1'];
   assert.equal(content.repository, await realpath(repo));
   assert.equal(content.gitExecutable, git);
@@ -48,7 +48,7 @@ try {
   const delta = await prepare({ repository: repo, candidate: second, base: first, git });
   assert.equal(delta.baseSha, first);
   assert.equal(delta.baseSource, 'given');
-  assert.deepEqual(delta.paths, ['c.txt']);
+  assert.deepEqual(delta.paths, ['ñ c.txt']);
 
   assert.equal(await reason(prepare({ repository: repo, candidate: second, base: second, git })), 'base-equals-candidate');
   assert.equal(await reason(prepare({ repository: repo, candidate: 'f'.repeat(40), main: 'main', git })), `commit-not-found:${'f'.repeat(40)}`);
@@ -73,8 +73,10 @@ const tool = n => 'mcp__plugin_isswf_isswf_git_evidence__' + n;
 const ok = body => [{ type: 'text', text: JSON.stringify({ status: 'ok', ...body }) }, { type: 'text', text: 'decoded' }];
 const lines = [
   { type: 'system', subtype: 'init', session_id: 'sess-1', model: 'claude-opus-5-5' },
-  { type: 'assistant', message: { content: [{ type: 'tool_use', id: 't1', name: tool('identity'), input: {} }, { type: 'tool_use', id: 't2', name: tool('diff'), input: {} }, { type: 'tool_use', id: 't3', name: tool('diff'), input: { chunk: 2 } }, { type: 'tool_use', id: 't4', name: tool('content'), input: {} }] } },
+  { type: 'assistant', message: { content: [{ type: 'tool_use', id: 't1', name: tool('identity'), input: {} }, { type: 'tool_use', id: 't2', name: tool('diff'), input: {} }, { type: 'tool_use', id: 't3', name: tool('diff'), input: { chunk: 2 } }, { type: 'tool_use', id: 't4', name: tool('content'), input: {} }, { type: 'tool_use', id: 't5', name: tool('diff'), input: { chunk: 3 } }] } },
   { type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 't1', content: ok({}) }, { type: 'tool_result', tool_use_id: 't2', content: ok({ chunk: 1, chunkCount: 3 }) }, { type: 'tool_result', tool_use_id: 't3', content: ok({ chunk: 2, chunkCount: 3 }) }, { type: 'tool_result', tool_use_id: 't4', is_error: true, content: 'refused' }] } },
+  // A large result reaches the model as a persisted-output preview; the event keeps the full content.
+  { type: 'user', tool_use_result: ok({ chunk: 3, chunkCount: 3 }), message: { content: [{ type: 'tool_result', tool_use_id: 't5', content: '<persisted-output>\\nOutput too large.' }] } },
   { type: 'result', subtype: 'success', is_error: false, result: 'PASS', total_cost_usd: 0.5 },
 ];
 process.stdout.write(lines.map(l => JSON.stringify(l)).join('\\n') + '\\n');
@@ -104,8 +106,8 @@ process.stdout.write(lines.map(l => JSON.stringify(l)).join('\\n') + '\\n');
   assert.equal(read.complete, true);
   assert.equal(read.run, 'claude session=sess-1');
   assert.deepEqual(read.requested, { model: 'opus', effort: 'medium', source: 'preset' });
-  assert.deepEqual(read.evidenceCalls, { identity: 1, diff: 2, content: 0 });
-  assert.deepEqual(read.diff, { chunkCount: 3, fetched: [1, 2], complete: false });
+  assert.deepEqual(read.evidenceCalls, { identity: 1, diff: 3, content: 0 });
+  assert.deepEqual(read.diff, { chunkCount: 3, fetched: [1, 2, 3], complete: true });
   assert.equal(read.report, 'PASS');
 
   const lines = (await readFile(trace, 'utf8')).trim().split('\n');

@@ -96,7 +96,8 @@ const blocks = event => (Array.isArray(event.message?.content) ? event.message.c
 // The evidence server returns its JSON envelope as the first text part; a decoded view may follow as a second part.
 // A large result may reach the model as a <persisted-output> preview; the event's tool_use_result keeps the full content.
 const resultText = (block, event) => {
-  const content = typeof block.content === 'string' && Array.isArray(event.tool_use_result) ? event.tool_use_result : block.content;
+  const single = blocks(event).filter(other => other.type === 'tool_result').length === 1;
+  const content = single && typeof block.content === 'string' && Array.isArray(event.tool_use_result) ? event.tool_use_result : block.content;
   return typeof content === 'string' ? content : content?.[0]?.text ?? '';
 };
 
