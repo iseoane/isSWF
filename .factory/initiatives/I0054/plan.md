@@ -94,12 +94,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J005
 
-- Status: awaiting-human
+- Status: completed
 - Objective: When a plan cannot be parsed, the pane and isswf-status say which job, field and line broke it instead of only "plan unreadable".
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: Operator acceptance: the operator wants to try the pane (file tree, rounds, Agents, plan-error detail) before closing.
-- Next step: Operator tries the pane on I0054; on acceptance mark J005 completed. Findings become corrections in J005 or new jobs.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -109,18 +109,20 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ### Evidence
 
+- 2026-11-14: accepted by the operator after trying the pane ("genial!", "cierra todo").
+
 - 2026-11-14: found while preparing J004 (a note after the `Brief:` link made I0054 "plan no legible" with no detail); started by the operator ("Aplica esa mejora").
 - 2026-11-14: A001 at 3ee8cde; V001 PASS with S1/S2, fixed in A002 at 24df4d1; V002 PASS (I4 known limit). PR #311 merged at a5acce5 after Linux and Windows CI passed on 24df4d1. Accepted under delegated acceptance (low risk).
 - 2026-11-14: reopened to awaiting-human at the operator's request: delegated acceptance withdrawn for J005 until the operator has tried the pane ("con la prueba lo cerramos").
 
 ## J006
 
-- Status: awaiting-human
+- Status: completed
 - Objective: The initiative file tree is a third tab, Files, beside Initiatives and Agents in the same pane, instead of a separate pane.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
-- Blocker: Operator acceptance: the operator wants to try the Files tab in the pane before closing.
-- Next step: Operator tries the Files tab and the one-open rules on I0054; on acceptance mark J006 completed.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -131,6 +133,8 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 - A record's detail lists only what it states (model, effort, verdict, usage); a record with none of these is not selectable.
 
 ### Evidence
+
+- 2026-11-14: accepted by the operator after trying the pane ("genial!", "cierra todo").
 
 - 2026-11-14: A001 at bfd0bbd (base ad63815); V001 PASS with S1-S3, fixed in A002 at ab735cb (with 9563964); V002 delta PASS. PR #314 merged at eab8e1f after Linux and Windows CI passed on ab735cb. Awaiting the operator's try.
 
@@ -161,12 +165,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J008
 
-- Status: awaiting-human
+- Status: completed
 - Objective: Under the pane title and before the tabs, one row shows whether Engram and CodeGraph are available in this session, with a coloured status dot and the command to run when CodeGraph has no index.
 - Depends on: J006
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
-- Blocker: Operator acceptance: the operator tries the status row in the pane before closing.
-- Next step: Operator tries the row on this repository; on acceptance mark J008 completed.
+- Blocker: None.
+- Next step: None.
 
 ### Acceptance
 
@@ -176,6 +180,8 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 - Labels in English and Spanish; tests cover the three CodeGraph states and both Engram states; docs EN/ES `installation.md` updated.
 
 ### Evidence
+
+- 2026-11-14: accepted by the operator after trying the pane ("genial!", "cierra todo").
 
 - 2026-11-14: A001 at 35fb08c (base 35c05e0); V001 PASS (S1, I1 accepted), launched with tools/isswf-review-launch.mjs at the preset. PR #319 merged at c198268 after Linux and Windows CI passed on 35fb08c. Awaiting the operator's try.
 

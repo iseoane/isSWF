@@ -26,3 +26,4 @@ node_modules/
 /docs/es/workflow.delivery.json
 # Local AI runtime state
 .atl/
+.pi/subagents/
