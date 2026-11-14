@@ -112,3 +112,27 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 - 2026-11-14: found while preparing J004 (a note after the `Brief:` link made I0054 "plan no legible" with no detail); started by the operator ("Aplica esa mejora").
 - 2026-11-14: A001 at 3ee8cde; V001 PASS with S1/S2, fixed in A002 at 24df4d1; V002 PASS (I4 known limit). PR #311 merged at a5acce5 after Linux and Windows CI passed on 24df4d1. Accepted under delegated acceptance (low risk).
 - 2026-11-14: reopened to awaiting-human at the operator's request: delegated acceptance withdrawn for J005 until the operator has tried the pane ("con la prueba lo cerramos").
+
+## J006
+
+- Status: awaiting-human
+- Objective: The initiative file tree is a third tab, Files, beside Initiatives and Agents in the same pane, instead of a separate pane.
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: Operator acceptance: the operator wants to try the Files tab in the pane before closing.
+- Next step: Operator tries the Files tab and the one-open rules on I0054; on acceptance mark J006 completed.
+
+### Acceptance
+
+- The pane has three tabs: Initiatives, Agents and Files. Selecting an initiative card's title switches to Files showing that initiative's tree; Files without a selection lists the visible initiatives to choose from.
+- The separate file-tree pane is gone; tree behaviour (fold, open/close file, boundary, limits) is unchanged.
+- Docs EN/ES `installation.md` updated; tests cover the tab switch and the chooser.
+- Only one completed job is unfolded at a time, and one record detail is open at a time; jobs that are not completed always show their rounds.
+- A record's detail lists only what it states (model, effort, verdict, usage); a record with none of these is not selectable.
+
+### Evidence
+
+- 2026-11-14: A001 at bfd0bbd (base ad63815); V001 PASS with S1-S3, fixed in A002 at ab735cb (with 9563964); V002 delta PASS. PR #314 merged at eab8e1f after Linux and Windows CI passed on ab735cb. Awaiting the operator's try.
+
+- 2026-11-14: operator additions while trying the pane: one open detail and one unfolded completed job at a time (two in-progress jobs both stay open); coordinator records reduced to known facts, not selectable when empty.
+- 2026-11-14: operator feedback while trying J004/J005 ("lo quería como otro panel al lado de iniciativas y agentes"); started by that request.
