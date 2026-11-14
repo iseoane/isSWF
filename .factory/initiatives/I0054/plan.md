@@ -136,3 +136,25 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 - 2026-11-14: operator additions while trying the pane: one open detail and one unfolded completed job at a time (two in-progress jobs both stay open); coordinator records reduced to known facts, not selectable when empty.
 - 2026-11-14: operator feedback while trying J004/J005 ("lo quería como otro panel al lado de iniciativas y agentes"); started by that request.
+
+## J007
+
+- Status: completed
+- Objective: One tool prepares and launches a Claude bound review from the approved preset and the candidate's real parent, and turns its trace into checked record lines, so a review cannot start at the wrong model, effort or base.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
+- Blocker: None.
+- Next step: None.
+
+### Acceptance
+
+- `prepare` writes the three binding namespaces for a primary clone: base is the merge-base of the candidate with the main ref unless `--base` (delta) is given; content paths are the changed files plus the supplied plan, brief and policy files; repository and Git are canonical realpaths. It refuses a linked worktree, a base equal to the candidate, or a candidate missing from the clone.
+- `launch` takes model and effort from the reviewer row of the shipped portable preset unless the operator passes both explicitly, runs `claude -p` with the bindings and `MAX_MCP_OUTPUT_TOKENS=100000` only in that child process (no shell), task on standard input, trace to a file; works the same on Linux and Windows.
+- `record` reads a trace and prints the `Run:` line, the requested model and effort, whether every diff chunk was fetched, and the final report; a missing or error result is reported incomplete.
+- Tests cover base selection, refusals, preset reading and trace parsing with a fake `claude`; the Claude launch reference names the tool.
+
+### Evidence
+
+- 2026-11-14: A001 at bff97ce (base 309ed7f); V001 PASS (S1, S2, I1 fixed in A002 a731e98; S3 known limit); V002 FAIL (B1: A002 claimed tests a stopped command had lost); A003 b7f7565 added them; V003 PASS (I4 known limit). All three reviews launched with the new tool at the preset opus/medium. Operator approved integrating the workflow and host-guide changes ("por lo demas autorizo"). PR #316 merged at 7ca6801 after Linux and Windows CI passed on b7f7565.
+
+- 2026-11-14: proposed after review launches at the wrong effort (high instead of the preset's medium) and a wrong J006 base cost operator quota ("estos fallos cuestan dinero"); started by the operator ("adelante con la 007").
