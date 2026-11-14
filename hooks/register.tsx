@@ -271,9 +271,8 @@ function usageLines(entry: any, t: Labels) {
   return {
     model: models.length === 1 && models[0] !== 'unknown' ? models[0] : undefined,
     lines: [
-      `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''}`,
+      `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''} · ${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
       `${t.duration}: ${duration === undefined ? t.unknown : `${Math.round(duration / 1000)} s`}`,
-      `${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
     ],
   }
 }
@@ -324,8 +323,7 @@ function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
     isRunning: entry.verdict === 'running',
     details: [
       `${entry.id} · ${entry.kind}`,
-      model,
-      `${t.effort}: ${known(entry.effort, t)}`,
+      `${model} · ${t.effort}: ${known(entry.effort, t)}`,
       // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
       `${t.verdict}: ${entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict] ?? t.unknown}`,
       ...resolved.lines,
