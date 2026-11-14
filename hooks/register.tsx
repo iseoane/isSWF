@@ -45,8 +45,6 @@ const LABELS = {
     on: 'sí',
     off: 'no',
     resumeAt: 'a las',
-    wouldResumeAt: 'sería a las',
-    ifThreshold: '(si ≥90 %)',
     noReset: 'sin hora de renovación: no se programa',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'sin agentes delegados en las iniciativas visibles',
@@ -80,8 +78,6 @@ const LABELS = {
     on: 'on',
     off: 'off',
     resumeAt: 'at',
-    wouldResumeAt: 'would be at',
-    ifThreshold: '(if ≥90%)',
     noReset: 'no reset time: nothing scheduled',
     coordinator: 'coordinator (this session)',
     noAgents: 'no delegated agents in the visible initiatives',
@@ -464,7 +460,7 @@ export const register: Register = (on, options) => {
     const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
     const resumeDetail = resumeOn && resumeAtMs !== undefined ? ` · ${t.resumeAt} ${clockTime(resumeAtMs)}`
       : resumeOn && resumeNoReset ? ` · ${t.noReset}`
-      : resumeWouldAtMs !== undefined ? ` · ${t.wouldResumeAt} ${clockTime(resumeWouldAtMs)} ${t.ifThreshold}` : ''
+      : resumeWouldAtMs !== undefined ? ` · ${t.resumeAt} ${clockTime(resumeWouldAtMs)}` : ''
     const resumeText = `⏰ ${t.resume}: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const header = (
       <Box flexDirection="column">

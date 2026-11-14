@@ -353,7 +353,7 @@ for (const [percentUsed, expected] of [[92, 1], [50, 0]] as const) {
     await clock.advance(1000)
     await ui.unmount()
     ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
-    expect(await text(ui, /^⏰/)).toMatch(expected ? /^⏰ retomar tras cuota: sí · a las \d\d:\d\d$/ : /^⏰ retomar tras cuota: sí · sería a las \d\d:\d\d \(si ≥90 %\)$/)
+    expect(await text(ui, /^⏰/)).toMatch(expected ? /^⏰ retomar tras cuota: sí · a las \d\d:\d\d$/ : /^⏰ retomar tras cuota: sí · a las \d\d:\d\d$/)
     await ui.unmount()
     // Repeated draws in the same window schedule nothing more.
     ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
