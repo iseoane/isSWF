@@ -158,3 +158,25 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 - 2026-11-14: A001 at bff97ce (base 309ed7f); V001 PASS (S1, S2, I1 fixed in A002 a731e98; S3 known limit); V002 FAIL (B1: A002 claimed tests a stopped command had lost); A003 b7f7565 added them; V003 PASS (I4 known limit). All three reviews launched with the new tool at the preset opus/medium. Operator approved integrating the workflow and host-guide changes ("por lo demas autorizo"). PR #316 merged at 7ca6801 after Linux and Windows CI passed on b7f7565.
 
 - 2026-11-14: proposed after review launches at the wrong effort (high instead of the preset's medium) and a wrong J006 base cost operator quota ("estos fallos cuestan dinero"); started by the operator ("adelante con la 007").
+
+## J008
+
+- Status: awaiting-human
+- Objective: Under the pane title and before the tabs, one row shows whether Engram and CodeGraph are available in this session, with a coloured status dot and the command to run when CodeGraph has no index.
+- Depends on: J006
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Blocker: Operator acceptance: the operator tries the status row in the pane before closing.
+- Next step: Operator tries the row on this repository; on acceptance mark J008 completed.
+
+### Acceptance
+
+- The row reads `🧠 engram ●` and `🗺 codegraph ●`: icon, name, status dot in the theme's success, warning or error colour.
+- Engram: green when its MCP tools are in the session, red otherwise. CodeGraph: green when `.codegraph/` exists in the project and its MCP tools are in the session; yellow when the index exists but the tools are not; red with the hint `codegraph init` when there is no `.codegraph/`.
+- Read-only: the pane lists tools and checks a path; it never connects a server, calls a tool or runs a command.
+- Labels in English and Spanish; tests cover the three CodeGraph states and both Engram states; docs EN/ES `installation.md` updated.
+
+### Evidence
+
+- 2026-11-14: A001 at 35fb08c (base 35c05e0); V001 PASS (S1, I1 accepted), launched with tools/isswf-review-launch.mjs at the preset. PR #319 merged at c198268 after Linux and Windows CI passed on 35fb08c. Awaiting the operator's try.
+
+- 2026-11-14: operator request while trying the pane ("igual ponemos lo de engram y codegraph debajo del titulo y antes de las tabs"; "codegraph OK / parcial / no init y la pelotita podria ser verde, amarilla o roja"; brain for Engram; "icono nombre pelota del estado"); merge authorised ("tiene mi autorizacion para mergearlo en main"). Coordinator defaults the operator did not overrule: 🗺 for CodeGraph and a hint, not a button; no age threshold, because the index file only changes when there is something to index.
