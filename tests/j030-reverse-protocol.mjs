@@ -249,7 +249,7 @@ try {
     }
   };
   // POSIX reports the terminating signal at close; Windows terminates the process outright, so the observation there
-  // is a close after kill() with a nonzero exit code and no accepted report.
+  // is a close after kill() with a nonzero exit code or a reported signal, and no accepted report.
   const observedStop = (result, label) => {
     assert.equal(result.killed, true, `${label}: kill was delivered`);
     if (process.platform === 'win32') assert.ok(result.code !== 0 || result.signal !== null, `${label}: close observed after forced termination`);
