@@ -568,7 +568,7 @@ export const register: Register = (on, options) => {
             <Text dimColor>{roundLabel(job, round)}</Text>
             {pills.map(pill)}
           </Box>
-          {pills.filter((p: ReturnType<typeof pillView>) => expanded.includes(p.key)).map((p: ReturnType<typeof pillView>) => (
+          {pills.filter((p: ReturnType<typeof pillView>) => p.hasDetail && expanded.includes(p.key)).map((p: ReturnType<typeof pillView>) => (
             <Box key={`${p.key}-detail`} borderStyle="round" borderColor="claude" flexDirection="column">
               {p.details.map(line => <Text>{line}</Text>)}
             </Box>
