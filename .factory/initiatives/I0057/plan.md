@@ -120,11 +120,14 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 ### Acceptance
 
 - A delegation to an isSWF role (a Claude Agent call or the Pi subagent call) is refused, naming the failed condition, when any of these holds: the initiative status is not `observed`; the named brief is untracked, uncommitted or ignored; the prompt lacks the brief path, a full checkpoint SHA or a full base SHA; or the job is not `in-progress` in the committed plan.
+- A delegation to an isSWF role is also refused when its model or effort is missing or differs from the approved selection for that role. That selection is read from one structured, project-local source that the guard can parse. Prose in project-setup.md does not count. An operator-typed override covers a different value for a single dispatch. If no structured source exists yet, the job creates it first, migrating the approved Claude preset; it does not restore the legacy `.factory/models.json` routing.
 - A delegation that meets every condition runs unchanged, and delegations to other agents are not affected.
 - Passing the guard is not recorded or reported as authorization.
 - The coordinator skill's "Pre-dispatch refusal conditions" section is reduced to a pointer to the guard.
 
 ### Evidence
+
+- 2026-11-14: in this session every Claude dispatch (J008, J001 and its reviews) omitted effort. The briefs said effort was "not settable", although the Agent tool accepts it. The approved preset (project-setup.md:57; worker sonnet/medium, reviewer opus/medium, researcher haiku/high) exists only as prose. Operator: "El effort por defecto esta en el setup". The operator also noted that model and effort were once held in a JSON file (`.factory/models.json`, now legacy since 50b502e). They became semantic when native delegation replaced the legacy executor.
 
 - 2026-11-14: J029 was dispatched while its plan job stayed `blocked` (see J001); the conditions in .agents/skills/isswf-coordinator/SKILL.md:152-160 are held only in prose and nothing runs them at dispatch.
 - 2026-11-14 audit: the Claude plugin `tool.call` hook can return `deny` before a call runs (.claude-plugin/types/claude-code/index.d.ts, ToolCallResult); Pi 1.5.2 `tool_call` can block (installed docs/extensions.md). The Pi subagent call shape is not yet verified.
