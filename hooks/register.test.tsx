@@ -23,7 +23,7 @@ const RECORDS: Record<string, string> = {
 }
 const usage = { input_tokens: 1_000_000, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 const TRANSCRIPT = [
-  { type: 'user', timestamp: '2026-01-01T00:00:00.000Z', message: { role: 'user', content: 'go' } },
+  { type: 'user', timestamp: '2026-01-01T00:00:00.000Z', message: { role: 'user', content: 'Apply .agents/roles/worker.md.' } },
   { type: 'assistant', requestId: 'r1', timestamp: '2026-01-01T00:01:30.000Z', message: { model: 'claude-opus-5-5', usage, stop_reason: 'end_turn', content: [{ type: 'tool_use', name: 'Read', input: { file_path: '/p/.agents/roles/worker.md' } }] } },
 ].map(e => JSON.stringify(e)).join('\n') + '\n'
 
@@ -35,7 +35,12 @@ const PANE = {
 } as const
 
 // A fake host keyed by native paths: `C:\p` exercises the Windows separator end to end.
-function engine(on: any, cwd: string, records = RECORDS) {
+const OWN_MESSAGES = [
+  { role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Skill', input: { skill: 'isswf:isswf-coordinator' } }, { tool_use_id: 't2', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }, { tool_use_id: 't3', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }] },
+  { role: 'user', text: 'x', toolUses: [{ tool_use_id: 't4', tool: 'Skill', input: { skill: 'not-counted' } }] },
+]
+
+function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_MESSAGES) {
   const sep = cwd.includes('\\') ? '\\' : '/'
   const home = sep === '\\' ? 'C:\\h' : '/h'
   const files: Record<string, string> = {}
@@ -73,10 +78,7 @@ function engine(on: any, cwd: string, records = RECORDS) {
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
-  on('session.messages', () => ({ value: [
-    { role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Skill', input: { skill: 'isswf:isswf-coordinator' } }, { tool_use_id: 't2', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }, { tool_use_id: 't3', tool: 'Read', input: { file_path: '/p/.agents/roles/references/review.md' } }] },
-    { role: 'user', text: 'x', toolUses: [{ tool_use_id: 't4', tool: 'Skill', input: { skill: 'not-counted' } }] },
-  ] }))
+  on('session.messages', () => ({ value: messages }))
   return { clock: mock.clock(on), seen, settings }
 }
 
@@ -193,11 +195,11 @@ test('a pressed pill expands its usage detail resolved after the draw and collap
   expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe(undefined)
   await ui.press({ key: 'I0046-J004-A001' })
   expect(await text(ui, /^A001 ·/)).toBe('A001 · attempt')
-  expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe('modelo: claude-opus-5-5 (transcript)')
-  expect(await text(ui, /^tokens/)).toBe('tokens: 1000000')
+  expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe('modelo: claude-opus-5-5 (transcript) · esfuerzo: high')
+  expect(await text(ui, /^tokens/)).toBe('tokens: 1000000 · coste: $4.00')
   expect(await text(ui, /^duración/)).toBe('duración: 90 s')
-  expect(await text(ui, /^coste/)).toBe('coste: $4.00')
-  expect(await text(ui, /^skills/)).toBe('skills: 0 · referencias: 1')
+  // Skill and reference use lives in the Agents tab, not in a record's detail.
+  expect(await text(ui, /^skills/)).toBe(undefined)
   await ui.press({ key: 'I0046-J004-A001' })
   expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe(undefined)
   await ui.unmount()
@@ -308,7 +310,8 @@ test('review rounds within one brief are drawn separately; the brief revision sh
 
 test('the agents tab lists the coordinator and each delegated run with skill and reference counts', ON, async ($, on) => {
   // A completed job's run whose transcript is gone stays unknown rather than zero.
-  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J003/V001.md': '- Brief: I0046/jobs/J003/brief-r1.md\n- Verdict: pass\n- Run: claude agent=gone1\n' })
+  // J004 is in progress with an attempt the coordinator wrote, and this session never read roles/worker.md.
+  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J003/V001.md': '- Brief: I0046/jobs/J003/brief-r1.md\n- Verdict: pass\n- Run: claude agent=gone1\n', 'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: partial\n' })
   await activate($)
   await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
   let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
@@ -317,22 +320,133 @@ test('the agents tab lists the coordinator and each delegated run with skill and
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /Agentes/)).toBe('[Agentes]')
-  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión)')
+  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión) · writer sin roles/worker.md')
   await clock.advance(1000)
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
-  expect(await text(ui, /^skills: isswf-coordinator/)).toBe('skills: isswf-coordinator ×1')
-  expect(await text(ui, /review\.md/)).toBe('referencias: .agents/roles/references/review.md ×2')
-  expect(await text(ui, /^worker · I0046\/J004\/A001$/)).toBe('worker · I0046/J004/A001')
+  expect(await text(ui, /isswf-coordinator/)).toMatch(/^  isswf-coordinator +×1$/)
+  expect(await text(ui, /^  review /)).toMatch(/^  review +×2$/)
+  expect(await text(ui, /^worker · /)).toBe('worker · 1 ejecución · perfil 1/1')
   await clock.advance(1000)
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
-  expect(await text(ui, /worker\.md/)).toBe('referencias: .agents/roles/worker.md ×1')
-  expect(await text(ui, /^V001 · I0046\/J003\/V001$/)).toBe('V001 · I0046/J003/V001')
+  expect(await text(ui, /^  worker /)).toMatch(/^  worker +×1$/)
+  expect(await text(ui, /^desconocido · /)).toBe('desconocido · 1 ejecución')
   expect(await text(ui, /^skills: desconocido$/)).toBe('skills: desconocido')
   await ui.press({ key: 'tab-initiatives' })
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /I0046 · Pane mod/)).toBe('● I0046 · Pane mod')
+  await ui.unmount()
+})
+
+for (const [percentUsed, expected] of [[92, 1], [50, 0]] as const) {
+  test(`resume after quota: ${percentUsed}% of the five-hour window ${expected ? 'schedules one' : 'schedules no'} resume prompt`, ON, async ($, on) => {
+    const { clock } = engine(on, '/p')
+    const prompts: string[] = []
+    let resetsAt = 10 * 60_000
+    let used: number = percentUsed
+    const hhmm = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
+    on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: used, resetsAt: new Date(resetsAt).toISOString() }] } }))
+    on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /^⏰/)).toBe('⏰ AutoWakeUp: no')
+    await clock.advance(1000)
+    await ui.unmount()
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    // Off, the switch already shows when a resume would come: the reset plus five minutes.
+    expect(await text(ui, /^⏰/)).toBe(`⏰ AutoWakeUp: no (${hhmm(15 * 60_000)})`)
+    await ui.press({ key: 'resume-toggle' })
+    await ui.unmount()
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    await clock.advance(1000)
+    await ui.unmount()
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /^⏰/)).toBe(`⏰ AutoWakeUp: sí (${hhmm(15 * 60_000)})`)
+    await ui.unmount()
+    // Repeated draws in the same window schedule nothing more.
+    ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    await ui.unmount()
+    // The window resets at 10 min; the prompt is due five minutes later, not before.
+    await clock.advance(13 * 60_000)
+    expect(prompts.length).toBe(0)
+    await clock.advance(3 * 60_000)
+    expect(prompts.length).toBe(expected)
+    if (expected) {
+      expect(prompts[0]).toContain('I0046/J004')
+      expect(prompts[0]).toContain('reconcile state first')
+      // After it fires the window renews below the threshold: the switch shows the next window's time, not the past one.
+      resetsAt = 5 * 60 * 60_000
+      used = 5
+      ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+      await clock.advance(1000)
+      await ui.unmount()
+      ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+      expect(await text(ui, /^⏰/)).toBe(`⏰ AutoWakeUp: sí (${hhmm(5 * 60 * 60_000 + 5 * 60_000)})`)
+      await ui.unmount()
+    }
+  })
+}
+
+test('switching resume off cancels a scheduled prompt', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95, resetsAt: new Date(10 * 60_000).toISOString() }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'resume-toggle' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^⏰/)).toMatch(/^⏰ AutoWakeUp: sí \(\d\d:\d\d\)$/)
+  await ui.press({ key: 'resume-toggle' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^⏰/)).toMatch(/^⏰ AutoWakeUp: no \(\d\d:\d\d\)$/)
+  await ui.unmount()
+  await clock.advance(20 * 60_000)
+  expect(prompts.length).toBe(0)
+})
+
+test('without a reset time the switch says nothing is scheduled', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95 }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'resume-toggle' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^⏰/)).toBe('⏰ AutoWakeUp: sí (sin hora de renovación)')
+  await ui.unmount()
+  await clock.advance(60 * 60_000)
+  expect(prompts.length).toBe(0)
+})
+
+test('the coordinator row says the worker profile was read, and an unresolved run gives no profile mark', ON, async ($, on) => {
+  // J004 has a coordinator-written attempt, and this session read roles/worker.md; the reviewer's transcript is gone.
+  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: partial\n', 'I0046/jobs/J004/V001.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/roles/reviewer.md\n- Verdict: fail\n- Run: claude agent=gone2\n' }, [{ role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Read', input: { file_path: '/p/.agents/roles/worker.md' } }] }])
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'tab-agents' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await clock.advance(1000)
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión) · writer con roles/worker.md')
+  expect(await text(ui, /^reviewer · /)).toBe('reviewer · 1 ejecución')
   await ui.unmount()
 })

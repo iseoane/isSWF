@@ -10,6 +10,6 @@ export type IsswfPaneTab = 'initiatives' | 'agents'
 
 declare module 'claude-code' {
   interface PluginState {
-    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab }
+    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean }
   }
 }

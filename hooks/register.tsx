@@ -10,6 +10,11 @@ const PINNED = { plugin: 'isswf', key: 'pinned' } as const
 const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
 const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
 const TAB = { plugin: 'isswf', key: 'tab' } as const
+const RESUME = { plugin: 'isswf', key: 'resumeOnQuota' } as const
+const RESUME_THRESHOLD = 90
+const RESUME_DELAY_MS = 5 * 60_000
+// Delegated roles with a shared profile under `.agents/roles/`.
+const PROFILES = new Set(['worker', 'reviewer', 'researcher', 'planner', 'diagnostician'])
 const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
@@ -38,8 +43,16 @@ const LABELS = {
     completed: 'completados',
     inactive: 'No activas',
     tabs: { initiatives: 'Iniciativas', agents: 'Agentes' } as Record<string, string>,
+    on: 'sí',
+    off: 'no',
+    noReset: 'sin hora de renovación',
     coordinator: 'coordinador (esta sesión)',
-    noAgents: 'sin agentes delegados en las iniciativas visibles',
+    noAgents: 'ningún agente ha usado skills ni referencias',
+    run: 'ejecución',
+    runs: 'ejecuciones',
+    profile: 'perfil',
+    writer: 'writer sin roles/worker.md',
+    writerOk: 'writer con roles/worker.md',
   },
   en: {
     notActive: 'The isSWF coordinator is not active in this session.',
@@ -64,8 +77,16 @@ const LABELS = {
     completed: 'completed',
     inactive: 'Inactive',
     tabs: { initiatives: 'Initiatives', agents: 'Agents' } as Record<string, string>,
+    on: 'yes',
+    off: 'no',
+    noReset: 'no reset time',
     coordinator: 'coordinator (this session)',
-    noAgents: 'no delegated agents in the visible initiatives',
+    noAgents: 'no agent has used skills or references',
+    run: 'run',
+    runs: 'runs',
+    profile: 'profile',
+    writer: 'writer without roles/worker.md',
+    writerOk: 'writer with roles/worker.md',
   },
 }
 type Labels = typeof LABELS.en
@@ -92,8 +113,54 @@ const finishedRuns = new Map()
 const resolving = new Set<string>()
 let homes: Promise<{ claudeDir?: string; piDir?: string }> | undefined
 // The coordinator's own counts, refreshed after each Agents draw so drawing never waits on the transcript.
-let ownCounts: { skills: any; agentsReads: any } | undefined
+let ownCounts: { usedSkills: any; usedReferences: any } | undefined
 let countingOwn = false
+// One resume per usage window: the timer lives only in this session, and `resumeFor` is the window's reset time.
+let resumeTimer: Timer | undefined
+let resumeFor: string | undefined
+let resumeAtMs: number | undefined
+// True while the threshold is met but the window gives no reset time, so nothing can be scheduled.
+let resumeNoReset = false
+// The window's reset plus the delay, known even before the threshold, so the switch can say when a resume would come.
+let resumeWouldAtMs: number | undefined
+
+const clockTime = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
+
+function cancelResume() {
+  resumeTimer?.cancel()
+  resumeTimer = resumeFor = resumeAtMs = undefined
+}
+
+// Runs after the draw. It keeps the would-be resume time current and, when the switch is on, at 90% or more
+// of the five-hour window with a job in progress, schedules one resume prompt for the window's reset plus
+// five minutes. The prompt asks the coordinator to reconcile, not to act.
+function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
+  void (async () => {
+    const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
+    const parsed = window?.resetsAt ? Date.parse(window.resetsAt) + RESUME_DELAY_MS : NaN
+    const at = Number.isFinite(parsed) ? parsed : undefined
+    const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status === 'in-progress').map((j: any) => `${i.id}/${j.id}`))
+    const due = isOn && window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
+    const noReset = due && at === undefined
+    if (at !== resumeWouldAtMs || noReset !== resumeNoReset) {
+      resumeWouldAtMs = at
+      resumeNoReset = noReset
+      scheduleRefresh($)
+    }
+    if (!due || at === undefined || resumeFor === window.resetsAt) return
+    cancelResume()
+    resumeFor = window.resetsAt
+    resumeAtMs = at
+    resumeTimer = $.clock.after(Math.max(0, at - (await $.clock.now())), () => {
+      // `resumeFor` stays, so the same window is not scheduled again; the switch shows the next window's time.
+      resumeTimer = resumeAtMs = undefined
+      void $.prompt.submit({
+        text: `isSWF: the five-hour usage window has reset. Work was in progress on ${work.join(', ')}. Load the isswf-coordinator skill, reconcile state first (isswf-status, open PRs, running reviews), then continue only the work already authorised; do not start new jobs without the operator's go.`,
+      })
+    })
+    scheduleRefresh($)
+  })().catch(() => {})
+}
 
 function scheduleRefresh($: EngineInterface) {
   debounce?.cancel()
@@ -192,7 +259,6 @@ function countLabel(jobs: any[], t: Labels) {
 
 const known = (value: string, t: Labels) => (value === 'unknown' ? t.unknown : value)
 const sum = (values: any[]) => (values.some(v => typeof v !== 'number') ? undefined : values.reduce((a, b) => a + b, 0))
-const countKeys = (maps: any[]) => sum(maps.map(m => (m && typeof m === 'object' ? Object.values(m).reduce((a: number, b: any) => a + b, 0) : m)))
 
 // One entry may cite several runs; any unresolved run makes the sum unknown.
 function usageLines(entry: any, t: Labels) {
@@ -206,10 +272,8 @@ function usageLines(entry: any, t: Labels) {
   return {
     model: models.length === 1 && models[0] !== 'unknown' ? models[0] : undefined,
     lines: [
-      `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''}`,
+      `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''} · ${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
       `${t.duration}: ${duration === undefined ? t.unknown : `${Math.round(duration / 1000)} s`}`,
-      `${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
-      `skills: ${countKeys(found.map((u: any) => u.skills)) ?? t.unknown} · ${t.references}: ${countKeys(found.map((u: any) => u.agentsReads)) ?? t.unknown}`,
     ],
   }
 }
@@ -217,8 +281,27 @@ function usageLines(entry: any, t: Labels) {
 // `name ×n` pairs, most used first; unknown when the run's transcript could not be read.
 function tally(map: any, t: Labels) {
   if (!map || typeof map !== 'object') return t.unknown
-  const pairs = Object.entries(map).sort((a: any, b: any) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  return pairs.length ? pairs.map(([name, n]) => `${name} ×${n}`).join(', ') : '0'
+  // Show the skill or reference name alone (".agents/roles/references/review.md" -> "review"); same names add up.
+  const short = (path: string) => { const parts = path.split(/[\\/]/).filter(Boolean); const file = parts.pop() ?? path; return (/^skill\.md$/i.test(file) && parts.length ? parts.pop()! : file).replace(/\.md$/i, '') }
+  const named: Record<string, number> = {}
+  for (const [k, n] of Object.entries(map)) named[short(k)] = (named[short(k)] ?? 0) + (n as number)
+  const pairs = Object.entries(named).sort((a: any, b: any) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  return pairs
+}
+
+// One item per line with its count in a dim column, so long lists stay scannable.
+function tallyBlock(ui: any, title: string, map: any, t: Labels) {
+  const { Box, Text } = ui
+  const pairs = tally(map, t)
+  if (typeof pairs === 'string') return <Text><Text dimColor>{title}: </Text>{pairs}</Text>
+  if (pairs.length === 0) return null
+  const width = Math.max(...pairs.map(([name]) => name.length))
+  return (
+    <Box flexDirection="column">
+      <Text dimColor>{title}</Text>
+      {pairs.map(([name, n]) => <Text key={name}>  {name.padEnd(width)}  <Text dimColor>×{n}</Text></Text>)}
+    </Box>
+  )
 }
 
 // Review rounds are numbered within a brief revision; the revision is shown only when the job has several.
@@ -241,8 +324,7 @@ function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
     isRunning: entry.verdict === 'running',
     details: [
       `${entry.id} · ${entry.kind}`,
-      model,
-      `${t.effort}: ${known(entry.effort, t)}`,
+      `${model} · ${t.effort}: ${known(entry.effort, t)}`,
       // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
       `${t.verdict}: ${entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict] ?? t.unknown}`,
       ...resolved.lines,
@@ -367,9 +449,21 @@ export const register: Register = (on, options) => {
 
     const { title } = await paneSpec($)
     const { value: tab = 'initiatives' } = await $.state.get(TAB)
+    const { value: resumeOn = false } = await $.state.get(RESUME)
+    if (!resumeOn && (resumeTimer || resumeFor)) cancelResume()
+    checkResume($, cards, resumeOn)
+    const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
+    const resumeAt = resumeAtMs ?? resumeWouldAtMs
+    const resumeDetail = resumeOn && resumeNoReset ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
+    const resumeText = `⏰ AutoWakeUp: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const header = (
       <Box flexDirection="column">
-        <Text bold color="merged">{title}</Text>
+        <Box flexDirection="row" gap={2}>
+          <Text bold color="merged">{title}</Text>
+          <Button key="resume-toggle" plain onPress={toggleResume}>
+            <Text color={resumeOn ? 'success' : undefined} dimColor={!resumeOn}>{resumeText}</Text>
+          </Button>
+        </Box>
         <Box flexDirection="row" gap={1}>
           {['initiatives', 'agents'].map(name => (
             <Button key={`tab-${name}`} plain onPress={() => $.state.set(TAB, name).then(() => $.ui.invalidate('ui.render'))}>
@@ -395,26 +489,55 @@ export const register: Register = (on, options) => {
           .catch(() => {})
           .finally(() => { countingOwn = false })
       }
-      const own = ownCounts ?? { skills: undefined, agentsReads: undefined }
-      const agents = cards.flatMap((i: any) => i.jobs.flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries
-        .filter((x: any) => x.runs.length)
-        .map((x: any) => ({ key: `${i.id}-${j.id}-${x.id}`, label: `${x.role === 'unknown' ? x.id : x.role} · ${i.id}/${j.id}/${x.id}`, runs: x.runs, found: x.runs.map((run: any) => usage.get(runKey(run))) })))))
+      const own = ownCounts ?? { usedSkills: undefined, usedReferences: undefined }
+      // One accumulated row per agent role: every run of that role across the visible cards, each run counted once.
+      const byRole = new Map<string, Map<string, any>>()
+      for (const i of cards) for (const j of i.jobs) for (const r of j.rounds) for (const x of r.entries) for (const run of x.runs) {
+        const role = x.role === 'unknown' ? 'unknown' : x.role
+        if (!byRole.has(role)) byRole.set(role, new Map())
+        byRole.get(role)!.set(runKey(run), run)
+      }
+      // A role's profile counts as read in each run that used `.agents/roles/<role>.md`.
+      const profileMark = (role: string, found: any[]) => {
+        if (!PROFILES.has(role)) return undefined
+        // Runs whose transcript is unresolved or missing say nothing about the profile, so they are left out.
+        const resolved = found.filter((u: any) => u?.found && typeof u.usedReferences === 'object')
+        if (!resolved.length) return undefined
+        const followed = resolved.filter((u: any) => u.usedReferences[`.agents/roles/${role}.md`]).length
+        return { text: `${t.profile} ${followed}/${resolved.length}`, isOk: followed === resolved.length }
+      }
+      const agents = [...byRole].map(([role, runs]) => {
+        const found = [...runs.keys()].map(k => usage.get(k))
+        return { key: `role-${role}`, label: `${role === 'unknown' ? t.unknown : role} · ${runs.size} ${runs.size === 1 ? t.run : t.runs}`, mark: profileMark(role, found), runs: [...runs.values()], found }
+      })
+      // The coordinator writing an in-progress job should follow the worker profile; say whether this session did.
+      const writes = cards.some((i: any) => i.jobs.some((j: any) => j.status === 'in-progress' && j.rounds.some((r: any) => r.entries.some((x: any) => x.role === 'coordinator'))))
+      const ownRefs = own.usedReferences
+      const ownMark = writes && ownRefs && typeof ownRefs === 'object'
+        ? (ownRefs['.agents/roles/worker.md'] ? { text: t.writerOk, isOk: true } : { text: t.writer, isOk: false })
+        : undefined
       // Every listed run is resolved here, including completed jobs the initiatives tab leaves folded.
       resolveUsage($, agents.flatMap((a: any) => a.runs), snapshot.project)
       const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
-      const row = (key: string, label: string, skills: any, reads: any) => (
+      // Only what was used is drawn: an empty section is left out, and so is an agent that used nothing.
+      const used = (map: any) => !map || typeof map !== 'object' || Object.keys(map).length > 0
+      // A warning keeps a row that used nothing, since its absence is the news.
+      const row = (key: string, label: string, skills: any, reads: any, mark?: { text: string; isOk: boolean }) => ((!mark || mark.isOk) && !used(skills) && !used(reads) ? null : (
         <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
-          <Text bold color="claude">{label}</Text>
-          <Text wrap="wrap">skills: {tally(skills, t)}</Text>
-          <Text wrap="wrap">{t.references}: {tally(reads, t)}</Text>
+          <Text bold color="claude">{label}{mark && <Text bold={false} color={mark.isOk ? 'success' : 'warning'}> · {mark.text}</Text>}</Text>
+          {tallyBlock({ Box, Text }, 'skills', skills, t)}
+          {tallyBlock({ Box, Text }, t.references, reads, t)}
         </Box>
-      )
+      ))
+      const rows = [
+        row('coordinator', t.coordinator, own.usedSkills, own.usedReferences, ownMark),
+        ...agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.usedSkills : undefined)), merge(a.found.map((u: any) => u?.found ? u.usedReferences : undefined)), a.mark)),
+      ].filter(Boolean)
       return (
         <Box flexDirection="column">
           {header}
-          {row('coordinator', t.coordinator, own.skills, own.agentsReads)}
-          {agents.length === 0 && <Text dimColor>{t.noAgents}</Text>}
-          {agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.skills : undefined)), merge(a.found.map((u: any) => u?.found ? u.agentsReads : undefined))))}
+          {rows}
+          {rows.length === 0 && <Text dimColor>{t.noAgents}</Text>}
         </Box>
       )
     }

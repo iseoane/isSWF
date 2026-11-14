@@ -12,7 +12,7 @@ const ID = {
 };
 const COUNTERS = ['input', 'output', 'cacheRead', 'cacheWrite'];
 
-const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, costUsd: UNKNOWN });
+const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, costUsd: UNKNOWN });
 
 async function listDirs(fs, dir) {
   try {
@@ -62,9 +62,19 @@ async function locatePi(fs, piDir, project, id) {
   return found[0] ?? null;
 }
 
+const BRIEF = /\/jobs\/J\d+\/brief-r\d+\.md$/u;
+const blockText = content => (typeof content === 'string' ? content
+  : Array.isArray(content) ? content.map(b => (typeof b === 'string' ? b : typeof b?.text === 'string' ? b.text : '')).join('\n') : '');
+
 function collector() {
-  const state = { first: null, last: null, models: new Set(), skills: {}, agentsReads: {} };
+  const state = { first: null, last: null, models: new Set(), skills: {}, agentsReads: {}, invoked: {}, reads: [], edited: new Set(), assigned: [], briefCalls: new Set(), readCalls: new Map(), contents: new Map() };
   const count = (map, key) => { map[key] = (map[key] ?? 0) + 1; };
+  const relative = path => {
+    if (typeof path !== 'string') return null;
+    const normalized = path.replace(/\\/g, '/');
+    const at = normalized.lastIndexOf('.agents/');
+    return at < 0 ? null : normalized.slice(at);
+  };
   return {
     state,
     time(value) {
@@ -75,28 +85,89 @@ function collector() {
     },
     // `Skill` calls name a plugin skill `<plugin>:<skill>`; a SKILL.md read gives the bare name.
     skill: name => { if (safe(name)) count(state.skills, name.replace(/^[^:]*:/u, '')); },
-    read(path) {
-      if (typeof path !== 'string') return;
-      const normalized = path.replace(/\\/g, '/');
-      const at = normalized.lastIndexOf('.agents/');
-      if (at < 0) return;
-      const relative = normalized.slice(at);
-      count(state.agentsReads, relative);
+    invoke(name) { if (safe(name)) { this.skill(name); count(state.invoked, name.replace(/^[^:]*:/u, '')); } },
+    read(path, callId) {
+      if (typeof path === 'string' && BRIEF.test(path.replace(/\\/g, '/')) && callId) state.briefCalls.add(callId);
+      const rel = relative(path);
+      if (!rel) return;
+      count(state.agentsReads, rel);
+      state.reads.push(rel);
+      if (callId) state.readCalls.set(callId, rel);
       // A read of a skill's SKILL.md is how a file-only child loads that skill.
-      const skill = relative.match(/\/([^/]+)\/SKILL\.md$/u);
+      const skill = rel.match(/\/([^/]+)\/SKILL\.md$/u);
       if (skill) this.skill(skill[1]);
     },
+    edit(path) { const rel = relative(path); if (rel) state.edited.add(rel); },
+    // The assignment: the run's prompts, its system profile (Pi) and the text of the briefs it read.
+    assign(content) { const text = blockText(content); if (text) state.assigned.push(text); },
+    result(callId, content) {
+      if (!callId) return;
+      if (state.briefCalls.has(callId)) this.assign(content);
+      const rel = state.readCalls.get(callId);
+      if (rel && !state.contents.has(rel)) state.contents.set(rel, blockText(content));
+    },
   };
+}
+
+// Markdown link and code-span targets of a methodology file, resolved from its own directory.
+function linked(rel, text) {
+  const dir = rel.split('/').slice(0, -1);
+  const out = new Set();
+  for (const m of text.matchAll(/\]\(([^)\s#]+\.md)|`([^`\s#]+\.md)`/gu)) {
+    const target = (m[1] ?? m[2]).replace(/\\/g, '/');
+    const at = target.lastIndexOf('.agents/');
+    const parts = at >= 0 ? target.slice(at).split('/') : [...dir, ...target.split('/')];
+    const resolved = [];
+    for (const part of parts) {
+      if (part === '..') resolved.pop();
+      else if (part && part !== '.') resolved.push(part);
+    }
+    out.add(resolved.join('/'));
+  }
+  return out;
+}
+
+// An assignment names a file by its path from `.agents/` or from its parent folder (`references/review.md`,
+// `isswf-writing/SKILL.md`), whatever comes before; a skill may also be named by its bare name.
+function mentions(text, rel) {
+  const parts = rel.split('/');
+  if (text.includes(parts.slice(1).join('/')) || text.includes(parts.slice(-2).join('/'))) return true;
+  const skill = rel.match(/\/([^/]+)\/SKILL\.md$/u);
+  return Boolean(skill) && new RegExp(`(^|[^\\w-])${skill[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\w-])`, 'u').test(text);
+}
+
+// What the run used as methodology, not every file it opened: skills it invoked, and the `.agents/`
+// skills and references its assignment named (directly, or linked from a file it named directly) and it then
+// read. Without an assignment (the coordinator's own session) every `.agents/` read counts. Files the
+// run itself changed are its work, never its methodology.
+function methodology(state, assigned) {
+  const text = state.assigned.join('\n').replace(/\\/g, '/');
+  const read = new Set(state.reads);
+  const named = new Set([...read].filter(rel => !assigned || mentions(text, rel)));
+  // One hop only: a deeper chain soon reaches files a run opens for other reasons.
+  for (const rel of [...named]) {
+    for (const next of linked(rel, state.contents.get(rel) ?? '')) if (read.has(next)) named.add(next);
+  }
+  const usedSkills = { ...state.invoked };
+  const usedReferences = {};
+  for (const rel of state.reads) {
+    if (state.edited.has(rel) || !named.has(rel)) continue;
+    const skill = rel.match(/\/([^/]+)\/SKILL\.md$/u);
+    if (skill) usedSkills[skill[1]] = (usedSkills[skill[1]] ?? 0) + 1;
+    else usedReferences[rel] = (usedReferences[rel] ?? 0) + 1;
+  }
+  return { usedSkills, usedReferences };
 }
 
 /** Counts skills and `.agents/` reads in a session's own tool uses (`{ tool, input }`), as a transcript is counted. */
 export function countToolUses(toolUses) {
   const collected = collector();
   for (const use of toolUses) {
-    if (use?.tool === 'Skill') collected.skill(use.input?.skill);
+    if (use?.tool === 'Skill') collected.invoke(use.input?.skill);
     if (use?.tool === 'Read') collected.read(use.input?.file_path);
+    if (use?.tool === 'Edit' || use?.tool === 'Write') collected.edit(use.input?.file_path);
   }
-  return { skills: collected.state.skills, agentsReads: collected.state.agentsReads };
+  return { skills: collected.state.skills, agentsReads: collected.state.agentsReads, ...methodology(collected.state, false) };
 }
 
 // A mixed run is unknown because its tokens are not split by model.
@@ -110,7 +181,7 @@ function costUsd(tokens, model) {
 // `invalid` names the first failing check of a found transcript whose valid entries were still summed.
 function finish(collected, counters, model, finished, invalid) {
   const { first, last, skills, agentsReads } = collected.state;
-  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, costUsd: costUsd(counters, model) };
+  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, ...methodology(collected.state, true), costUsd: costUsd(counters, model) };
   return invalid ? { ...usage, tokensPartial: true, ...(usage.costUsd !== UNKNOWN && { costPartial: true }), reason: invalid } : usage;
 }
 
@@ -137,13 +208,23 @@ function claudeUsage(text, kind, invalid, full) {
   const extra = new Map();
   const parsed = parseTranscript(text, { entries: 0 }, entry => {
     collected.time(entry.timestamp);
+    if (entry.type === 'user') {
+      const content = entry.message?.content;
+      if (typeof content === 'string') collected.assign(content);
+      for (const block of Array.isArray(content) ? content : []) {
+        if (block?.type === 'text') collected.assign(block.text);
+        if (block?.type === 'tool_result') collected.result(block.tool_use_id, block.content);
+      }
+      return;
+    }
     if (entry.type !== 'assistant') return;
     const iterations = entry.message?.usage?.iterations;
     if (Array.isArray(iterations)) extra.set(entry.requestId, iterations.filter(i => i?.type !== 'message'));
     for (const block of Array.isArray(entry.message?.content) ? entry.message.content : []) {
       if (block?.type !== 'tool_use') continue;
-      if (block.name === 'Skill') collected.skill(block.input?.skill);
-      if (block.name === 'Read') collected.read(block.input?.file_path);
+      if (block.name === 'Skill') collected.invoke(block.input?.skill);
+      if (block.name === 'Read') collected.read(block.input?.file_path, block.id);
+      if (block.name === 'Edit' || block.name === 'Write') collected.edit(block.input?.file_path);
     }
   }, true);
   invalid ??= parsed.invalid;
@@ -184,6 +265,10 @@ function piTranscriptUsage(text, finished, invalid) {
       continue;
     }
     collected.time(record.ts);
+    // pi-subagents redacts the prompt; the agent's profile and its references arrive in the system sections.
+    if (record.recordType === 'message' && record.role === 'user') collected.assign(record.message?.content);
+    if (record.recordType === 'message' && record.role === 'system') collected.assign(Object.values(record.message?.sections ?? {}).filter(v => typeof v === 'string').join('\n'));
+    if (record.recordType === 'message' && record.role === 'toolResult') collected.result(record.message?.toolCallId, record.message?.content);
     if (record.recordType !== 'message' || record.role !== 'assistant') continue;
     let usage;
     try { usage = piUsage(record.usage); } catch {
@@ -193,7 +278,8 @@ function piTranscriptUsage(text, finished, invalid) {
     for (const key of COUNTERS) counters[key] += usage[key];
     collected.state.models.add(safe(record.model) ?? UNKNOWN);
     for (const block of Array.isArray(record.message?.content) ? record.message.content : []) {
-      if (block?.type === 'toolCall' && block.name === 'read') collected.read(block.arguments?.path);
+      if (block?.type === 'toolCall' && block.name === 'read') collected.read(block.arguments?.path, block.id);
+      if (block?.type === 'toolCall' && (block.name === 'edit' || block.name === 'write')) collected.edit(block.arguments?.path);
     }
   }
   return finish(collected, counters, single(collected.state.models), finished, invalid);
