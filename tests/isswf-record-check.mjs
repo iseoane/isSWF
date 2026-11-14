@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -106,5 +109,45 @@ assert.deepEqual(missing('A001.md', attempt([], attemptFields).replaceAll('\n', 
 assert.deepEqual(missing('A001.md', attempt([], ['Process deviations observed:']).replace('- Process', '  - Process')).map(({ field }) => field), ['Deviations from required procedure and consequence:'], 'a nested bullet still carries the label');
 assert.deepEqual(missing('brief-r1.md', ''), [], 'briefs have no required labels');
 assert.deepEqual(missing('A001.md', attempt([], reviewFields)).map(({ field }) => field), ['Deviations from required procedure and consequence:'], 'an attempt does not need review labels');
+
+// The CLI reads files, adds the job directory listing for a plan, prints JSON and exits 1 on any violation.
+const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-check-')));
+try {
+  const state = join(root, '.factory/initiatives/I0001');
+  await mkdir(join(state, 'jobs/J001'), { recursive: true });
+  await mkdir(join(state, 'jobs/J002'), { recursive: true });
+  const files = {
+    [join(state, 'plan.md')]: plan(job('J001', 'pending'), job('J002', 'in-progress')),
+    [join(state, 'jobs/J001/A001.md')]: attempt(['claude agent=unknown'], ['Process deviations observed:']),
+    [join(state, 'jobs/J002/A001.md')]: attempt(['claude agent=a1']),
+  };
+  for (const [file, text] of Object.entries(files)) await writeFile(file, text);
+  const cli = (...args) => spawnSync(process.execPath, [join(source, 'tools/isswf-record-check.mjs'), ...args], { encoding: 'utf8', timeout: 15000 });
+  const flat = [...Object.keys(files)].flatMap(file => ['--file', file]);
+  const found = cli('--project', root, ...flat);
+  assert.equal(found.status, 1, found.stderr);
+  const report = JSON.parse(found.stdout);
+  assert.equal(report.ok, false);
+  assert.deepEqual(report.files.map(({ file, violations }) => [file, violations.map(({ code, field }) => [code, field])]), [
+    [join(state, 'plan.md'), [['records-for-unstarted-job', 'Status']]],
+    [join(state, 'jobs/J001/A001.md'), [['run-id-unknown', 'Run:'], ['missing-field', 'Deviations from required procedure and consequence:']]],
+    [join(state, 'jobs/J002/A001.md'), []],
+  ]);
+  const clean = cli('--project', root, '--file', join(state, 'jobs/J002/A001.md'));
+  assert.equal(clean.status, 0, clean.stderr);
+  assert.deepEqual(JSON.parse(clean.stdout), { ok: true, files: [{ file: join(state, 'jobs/J002/A001.md'), ok: true, violations: [] }] });
+  // The other separator style names the same file.
+  const swapped = process.platform === 'win32' ? join(state, 'jobs/J002/A001.md').replaceAll('\\', '/') : join(state, 'jobs/J002/A001.md');
+  assert.equal(cli('--project', root.replaceAll('\\', '/'), '--file', swapped).status, 0);
+  const before = JSON.stringify(await Promise.all(Object.keys(files).map(file => readFile(file, 'utf8'))));
+  cli('--project', root, ...flat);
+  assert.equal(JSON.stringify(await Promise.all(Object.keys(files).map(file => readFile(file, 'utf8')))), before, 'the check never edits files');
+  // Usage errors and files outside the project fail without a report.
+  for (const args of [[], ['--project', root], ['--file', join(state, 'plan.md')], ['--project', 'relative', '--file', join(state, 'plan.md')], ['--project', root, '--file', join(tmpdir(), 'elsewhere.md')], ['--project', root, '--file', join(state, 'missing.md')], ['--project', root, '--bogus', 'x']]) {
+    const refused = cli(...args);
+    assert.equal(refused.status, 1, args.join(' '));
+    assert.equal(refused.stdout, '', args.join(' '));
+  }
+} finally { await rm(root, { recursive: true, force: true }); }
 
 console.log('record check tests passed');
