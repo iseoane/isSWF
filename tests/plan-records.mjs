@@ -11,6 +11,22 @@ const job = ({ status = 'pending', acceptance = '### Acceptance\n\n- Observable 
 for (const status of planStates) assert.equal(parsePlan(job({ status }))[0].reportedStatus, status);
 for (const status of ['active', 'done', 'ready']) assert.throws(() => parsePlan(job({ status })), /^Error: invalid-job$/u, status);
 assert.throws(() => parsePlan(job({ acceptance: '' })), /^Error: invalid-job$/u);
+// Each error keeps its message and says where it is: job, field and 1-based line.
+const where = (markdown) => { try { parsePlan(markdown); } catch (error) { return { code: error.code, job: error.job, field: error.field, line: error.line }; } };
+const lineOf = (markdown, text) => markdown.split('\n').findIndex(line => line.includes(text)) + 1;
+const base = job();
+assert.deepEqual(where(job({ status: 'done' })), { code: 'invalid-job', job: 'J001', field: 'Status', line: lineOf(base, '- Status:') });
+assert.deepEqual(where(job({ acceptance: '' })), { code: 'invalid-job', job: 'J001', field: 'Acceptance', line: lineOf(base, '## J001') });
+const noted = base.replace('(jobs/J001/brief-r1.md)', '(jobs/J001/brief-r1.md) (r1 superseded)');
+assert.deepEqual(where(noted), { code: 'unsafe-brief-reference', job: 'J001', field: 'Brief', line: lineOf(base, '- Brief:') });
+assert.deepEqual(where(base.replace('- Depends on: None', '- Depends on: J009')), { code: 'invalid-dependency', job: 'J001', field: 'Depends on', line: lineOf(base, '- Depends on:') });
+assert.deepEqual(where(base.replace('- Blocker: None.\n', '- Blocker: None.\n- Blocker: Again.\n')), { code: 'duplicate-field', job: 'J001', field: 'Blocker', line: lineOf(base, '- Blocker:') + 1 });
+assert.deepEqual(where(base.replace('Type: bug', 'Type: chore')), { code: 'invalid-plan-type', job: undefined, field: 'Type', line: lineOf(base, 'Type:') });
+assert.throws(() => parsePlan(noted), /^Error: unsafe-brief-reference$/u);
+const second = base.replace(/## J001[\s\S]*/u, m => `${m}\n${m.replaceAll('J001', 'J002')}`);
+assert.deepEqual(where(second.replace('## J002', '## J001').replace('jobs/J002/brief-r1.md', 'jobs/J001/brief-r1.md')), { code: 'duplicate-job', job: 'J001', field: undefined, line: second.split('\n').findIndex(line => line === '## J002') + 1 });
+const cyclic = second.replace('- Depends on: None', '- Depends on: J002').replace(/(## J002[\s\S]*?)- Depends on: None/u, '$1- Depends on: J001');
+assert.deepEqual(where(cyclic), { code: 'cyclic job dependencies', job: 'J001', field: 'Depends on', line: lineOf(base, '- Depends on:') });
 
 // Historical records predate the current contract and stay unchanged; any other plan must parse.
 const knownHistorical = new Map();

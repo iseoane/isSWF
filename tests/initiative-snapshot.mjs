@@ -63,7 +63,7 @@ try {
   assert.deepEqual(snapshot.skipped, []);
   assert.equal(initiative('I0004'), undefined, 'completed initiatives are omitted');
   assert.deepEqual(snapshot.unopened, [{ id: 'I0002', title: 'Not started' }]);
-  assert.deepEqual(initiative('I0003'), { id: 'I0003', title: 'unknown', type: 'unknown', status: 'unparsed', jobs: [] });
+  assert.deepEqual(initiative('I0003'), { id: 'I0003', title: 'unknown', type: 'unknown', status: 'unparsed', planError: { code: 'invalid-plan-type', field: 'Type' }, jobs: [] });
 
   const active = initiative('I0001');
   assert.equal(active.title, 'Active work');

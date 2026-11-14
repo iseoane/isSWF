@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
 import { plan, parsePlan, planStates as states } from './isswf-plan.mjs';
+import { planErrorDetail } from './isswf-plan-core.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
 
@@ -151,13 +152,18 @@ export async function status({ project, initiative }) {
     const heading = record.markdown.split(/\r?\n/u, 1)[0], prefix = `# ${initiative}: `;
     const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
     if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-plan-identity');
-    const parsed = parsePlan(record.markdown), jobs = [];
+    let parsed;
+    // Only the parser's errors say where the plan breaks; a file that changes or vanishes meanwhile does not.
+    try { parsed = parsePlan(record.markdown); } catch (error) { throw Object.assign(Error('invalid-plan'), { planError: planErrorDetail(error) }); }
+    const jobs = [];
     for (const job of parsed) {
       const { briefName, ...fields } = job;
       jobs.push({ ...fields, artifacts: await artifacts(dirname(record.path), { ...job, initiative }), processState: 'not-inspected' });
     }
     return { status: 'observed', observedAt, initiative, title, recommendation: recommendation(jobs), label: `${initiative} · ${title}`, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
-  } catch { return { status: 'unknown', observedAt, reason: 'invalid-or-changing-plan', executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits }; }
+  } catch (error) {
+    return { status: 'unknown', observedAt, reason: 'invalid-or-changing-plan', ...(error?.planError && { planError: error.planError }), executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
+  }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
