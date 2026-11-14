@@ -75,11 +75,12 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
     return { value: [...names].map(name => ({ name, kind: `${e.path}${sep}${name}` in files ? 'file' : 'dir', size: 0, mtimeMs: 0, isLink: false })) }
   })
   on('command.register', () => ({ value: { command: 'isswf-initiatives' } }))
-  on('ui.open', () => ({ value: { isPlaced: true } }))
+  const opened: string[] = []
+  on('ui.open', (_: unknown, e: { id: string }) => (opened.push(e.id), { value: { isPlaced: true } }))
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
   on('session.messages', () => ({ value: messages }))
-  return { clock: mock.clock(on), seen, settings }
+  return { clock: mock.clock(on), seen, settings, opened }
 }
 
 const activate = ($: any) => $.skill.prompt({ skill: 'isswf:isswf-coordinator', text: '' })
@@ -449,4 +450,57 @@ test('the coordinator row says the worker profile was read, and an unresolved ru
   expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión) · writer con roles/worker.md')
   expect(await text(ui, /^reviewer · /)).toBe('reviewer · 1 ejecución')
   await ui.unmount()
+})
+
+const TREE_PANE = { ...PANE, requestId: 'isswf-initiative-tree' }
+
+for (const cwd of ['/p', 'C:\\p']) {
+  test(`a card's title opens its initiative's file tree, and a file opens below it (${cwd})`, ON, async ($, on) => {
+    const { seen, opened } = engine(on, cwd)
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    await ui.press({ key: 'tree-I0046' })
+    await ui.unmount()
+    expect(opened).toContain('isswf-initiative-tree')
+    let tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    expect(await text(tree, /^I0046 ·/)).toBe('I0046 · archivos')
+    // Files first, then folders, folded until pressed.
+    expect(await text(tree, /plan\.md$/)).toBe('  plan.md')
+    expect(await text(tree, /jobs\/$/)).toBe('▸ jobs/')
+    expect(await text(tree, /J002\/$/)).toBe(undefined)
+    await tree.press({ key: 'file-jobs' })
+    await tree.unmount()
+    tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    expect(await text(tree, /J002\/$/)).toBe('  ▸ J002/')
+    await tree.press({ key: 'file-jobs/J002' })
+    await tree.unmount()
+    tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    await tree.press({ key: 'file-jobs/J002/brief-r1.md' })
+    await tree.unmount()
+    tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    expect((await tree.find({ type: 'Markdown', key: 'tree-file' }) as any)?.props?.text ?? (await tree.find({ type: 'Markdown', key: 'tree-file' }) as any)?.text).toBe('brief')
+    expect(seen.some(p => p.endsWith(['I0046', 'jobs', 'J002', 'brief-r1.md'].join(cwd.includes('\\') ? '\\' : '/')))).toBe(true)
+    // Pressing the open file again hides it.
+    await tree.press({ key: 'file-jobs/J002/brief-r1.md' })
+    await tree.unmount()
+    tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    expect(await tree.find({ type: 'Markdown', key: 'tree-file' })).toBe(undefined)
+    await tree.unmount()
+  })
+}
+
+test('the file tree reads nothing outside the selected initiative', ON, async ($, on) => {
+  const { seen } = engine(on, '/p')
+  // A stored selection is data: a path that leaves the initiative, or one no listing returned, is never read.
+  let file = ''
+  on('state.get', ($: any, e: { key: string }, next: any) => (e.key === 'tree' ? { value: { value: { id: 'I0046', open: ['jobs'], file }, version: 1 } } : next(e)))
+  await activate($)
+  for (file of ['../I0048/plan.md', 'jobs/../../I0048/plan.md', '/p/.factory/initiatives/I0048/plan.md', 'jobs/J002/missing.md']) {
+    const tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    expect(await tree.find({ type: 'Markdown', key: 'tree-file' })).toBe(undefined)
+    expect(await text(tree, /no se puede leer/)).toBe('no se puede leer')
+    await tree.unmount()
+  }
+  expect(seen.some(p => p.includes('..') || p.endsWith('I0048/plan.md') || p.endsWith('missing.md'))).toBe(false)
 })

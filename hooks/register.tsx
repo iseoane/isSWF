@@ -1,16 +1,20 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
-import { joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
+import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
+const TREE_PANE = 'isswf-initiative-tree'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
 const PINNED = { plugin: 'isswf', key: 'pinned' } as const
 const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
 const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
 const TAB = { plugin: 'isswf', key: 'tab' } as const
 const RESUME = { plugin: 'isswf', key: 'resumeOnQuota' } as const
+const TREE = { plugin: 'isswf', key: 'tree' } as const
+// A file is shown up to this many characters; one drawing holds 100000 in all.
+const FILE_CHARS = 60_000
 const RESUME_THRESHOLD = 90
 const RESUME_DELAY_MS = 5 * 60_000
 // Delegated roles with a shared profile under `.agents/roles/`.
@@ -46,6 +50,10 @@ const LABELS = {
     on: 'sí',
     off: 'no',
     noReset: 'sin hora de renovación',
+    files: 'archivos',
+    truncated: 'archivo recortado',
+    noFiles: 'sin archivos',
+    unreadable: 'no se puede leer',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'ningún agente ha usado skills ni referencias',
     run: 'ejecución',
@@ -80,6 +88,10 @@ const LABELS = {
     on: 'yes',
     off: 'no',
     noReset: 'no reset time',
+    files: 'files',
+    truncated: 'file truncated',
+    noFiles: 'no files',
+    unreadable: 'cannot be read',
     coordinator: 'coordinator (this session)',
     noAgents: 'no agent has used skills or references',
     run: 'run',
@@ -332,6 +344,35 @@ function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
   }
 }
 
+async function openTree($: EngineInterface, id: string, t: Labels) {
+  await $.state.set(TREE, { id, open: [] })
+  await $.ui.open({ id: TREE_PANE, title: `${id} · ${t.files}` })
+  $.ui.invalidate('ui.render')
+}
+
+// Only names a listing returned are joined, so a path cannot leave the initiative's folder; links are `other` and skipped.
+const SAFE_NAME = /^(?!\.\.?$)[^\\/]+$/
+const isInside = (rel: string) => rel.split('/').every(part => SAFE_NAME.test(part))
+
+async function treeRows($: EngineInterface, dir: string, rel: string, open: string[], depth: number): Promise<{ rel: string; name: string; isDir: boolean; depth: number }[]> {
+  const join = joiner(dir)
+  let entries
+  try {
+    entries = await $.fs.list(rel ? join(dir, ...rel.split('/')) : dir)
+  } catch {
+    return []
+  }
+  const kept = entries.filter(e => (e.kind === 'file' || e.kind === 'dir') && SAFE_NAME.test(e.name))
+    .sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'file' ? -1 : 1))
+  const rows = []
+  for (const e of kept) {
+    const path = rel ? `${rel}/${e.name}` : e.name
+    rows.push({ rel: path, name: e.name, isDir: e.kind === 'dir', depth })
+    if (e.kind === 'dir' && open.includes(path)) rows.push(...await treeRows($, dir, path, open, depth + 1))
+  }
+  return rows
+}
+
 export const register: Register = (on, options) => {
   // Opt-in: with the option off no hook is added, so nothing reads, schedules, registers or draws.
   if (options?.initiativesPane !== true) return
@@ -388,6 +429,56 @@ export const register: Register = (on, options) => {
     $.ui.invalidate('ui.render')
 
     return { text: t.opened }
+  })
+
+  on('ui.render', { component: 'Pane', requestId: TREE_PANE }, async ($, e) => {
+    const { Box, Button, Markdown, Text } = $.ui.resolve(e)
+    const t = await labelsFor($)
+    const { value: tree } = await $.state.get(TREE)
+    if (!tree || !/^I\d+$/.test(tree.id)) return <Text dimColor>{t.noFiles}</Text>
+    let stateDir
+    try {
+      stateDir = (await initiativesDir(await $.session.cwd(), { exists: (p: string) => $.fs.exists(p) })).stateDir
+    } catch (error) {
+      return <Text color="error">{String((error as Error).message)}</Text>
+    }
+    const dir = joiner(stateDir)(stateDir, tree.id)
+    const rows = await treeRows($, dir, '', tree.open, 0)
+    const set = (next: typeof tree) => $.state.set(TREE, next).then(() => $.ui.invalidate('ui.render'))
+    const press = (row: (typeof rows)[number]) => () => row.isDir
+      ? set({ ...tree, open: tree.open.includes(row.rel) ? tree.open.filter(p => p !== row.rel && !p.startsWith(`${row.rel}/`)) : [...tree.open, row.rel] })
+      : set({ ...tree, file: tree.file === row.rel ? undefined : row.rel })
+    let shown: string | undefined
+    let isTruncated = false
+    if (tree.file && isInside(tree.file) && rows.some(r => !r.isDir && r.rel === tree.file)) {
+      try {
+        const text = await $.fs.read(joiner(dir)(dir, ...tree.file.split('/')))
+        isTruncated = text.length > FILE_CHARS
+        shown = isTruncated ? text.slice(0, FILE_CHARS) : text
+      } catch {
+        shown = undefined
+      }
+    }
+    return (
+      <Box flexDirection="column">
+        <Text bold color="merged">{tree.id} · {t.files}</Text>
+        {rows.length === 0 && <Text dimColor>{t.noFiles}</Text>}
+        {rows.map(row => (
+          <Button key={`file-${row.rel}`} plain onPress={press(row)}>
+            <Text color={row.rel === tree.file ? 'claude' : undefined} bold={row.rel === tree.file}>
+              {'  '.repeat(row.depth)}{row.isDir ? `${tree.open.includes(row.rel) ? '▾' : '▸'} ${row.name}/` : `  ${row.name}`}
+            </Text>
+          </Button>
+        ))}
+        {tree.file && (
+          <Box borderStyle="round" borderColor="claude" flexDirection="column">
+            <Text bold>{tree.file}</Text>
+            {shown === undefined ? <Text color="error">{t.unreadable}</Text> : <Markdown key="tree-file" text={shown} />}
+            {isTruncated && <Text dimColor>… {t.truncated}</Text>}
+          </Box>
+        )}
+      </Box>
+    )
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
@@ -554,7 +645,9 @@ export const register: Register = (on, options) => {
           const closed = initiative.jobs.filter((j: any) => j.status === 'completed').length
           return (
             <Box borderStyle="round" borderColor="subtle" flexDirection="column">
-              <Text bold color="claude">● {initiative.id} · {initiative.title}</Text>
+              <Button key={`tree-${initiative.id}`} plain onPress={() => openTree($, initiative.id, t)}>
+                <Text bold color="claude">● {initiative.id} · {initiative.title}</Text>
+              </Button>
               {initiative.status === 'unparsed' && <Text dimColor>{t.unparsed}</Text>}
               <Text dimColor>jobs {closed}/{initiative.jobs.length} ✓ · {initiative.jobs.length - closed} {t.open}</Text>
               {closed > 0 && <Text color="success">✓ {closed} {t.completed}</Text>}
