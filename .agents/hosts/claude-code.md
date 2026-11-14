@@ -150,14 +150,14 @@ Use this only when the operator explicitly authorizes a Pi reviewer from a Claud
 It exits nonzero, prints nothing to stdout and names the cause on stderr, without echoing event content, when the stream has an invalid JSON line, a non-object event, a non-array assistant `content`, a block that is not an object or is neither `text` nor `thinking` with a string payload, or more than 8 MiB (8,388,608 bytes) of input. Each line is one JSON value; blank lines are ignored. It is a filter only: it never launches Pi, retries or decides acceptance, so the coordinator still applies the success and failure rules above.
 
 ```sh
-set -o pipefail; pi … | node <factory-root>/tools/pi-jsonl-projection.mjs
+set -o pipefail; pi … < /dev/null | node <factory-root>/tools/pi-jsonl-projection.mjs
 ```
 
-`pi …` stands for the approved producer invocation; `<factory-root>` is the trusted root resolved from the loaded plugin, written with forward slashes in Git Bash. Capture the combined pipeline stdout with a 16,000-byte limit and emit any success marker only after producer and filter succeed. Truncation, including loss of settlement, cannot be accepted.
+`pi …` stands for the approved producer invocation, with the prompt passed as arguments (for example `@<packet-file>`). Close its stdin with `< /dev/null`: in print mode Pi waits for a non-terminal stdin to end, so an open stdin leaves it idle until the timeout. Observed with Pi 1.5.2 on native Windows; this section does not establish the same behaviour for other versions. `<factory-root>` is the trusted root resolved from the loaded plugin, written with forward slashes in Git Bash. Capture the combined pipeline stdout with a 16,000-byte limit and emit any success marker only after producer and filter succeed. Truncation, including loss of settlement, cannot be accepted.
 
 The focused test, `tests/j030-reverse-protocol.mjs`, runs this module in Linux bash and Windows Git Bash through the pipeline above with synthetic input and no model call. It compares the module's output with fixtures derived by reading the retired filter's text, which was not executed for them; the module is stricter on rejection (no partial output, exit 1). It also covers producer, filter and size-limit failures and cancellation of a synthetic Node child. PowerShell and cmd pipelines, launching the real `pi` producer and real Pi or Claude cancellation are not covered, and tests do not enforce runtime behavior.
 
-Evidence note: a historical Linux live run proved only an earlier supplied-evidence scope and does not verify this projection. This section records no live reverse run on Windows.
+Evidence note: a historical Linux live run proved only an earlier supplied-evidence scope and does not verify this projection. One live reverse run on native Windows 11 (Pi 1.5.2 in Git Bash, 2026-11-14, `openrouter/free` because the approved Codex selection was unavailable to the operator) passed every success condition above through this projection. That run shows the transport, projection and terminal checks work with the real producer. It does not judge that model's review quality, and it is not repeated evidence for other models or versions.
 
 ## Existing legacy runtime assignments
 

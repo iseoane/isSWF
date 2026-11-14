@@ -267,7 +267,7 @@ try {
   const host = await readFile(hostGuide, 'utf8');
   const section = host.match(/### Portable JSONL projection[\s\S]*?(?=\n##)/u)?.[0];
   assert.ok(section, 'host guide owns the portable projection section');
-  assert.match(section, /set -o pipefail; pi … \| node <factory-root>\/tools\/pi-jsonl-projection\.mjs/u);
+  assert.match(section, /set -o pipefail; pi … < \/dev\/null \| node <factory-root>\/tools\/pi-jsonl-projection\.mjs/u);
   assert.match(section, /8 MiB \(8,388,608 bytes\)/u);
   assert.equal(/\bjq\b/u.test(host), false, 'the reverse procedure no longer depends on jq');
 } finally {
