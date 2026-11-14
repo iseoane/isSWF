@@ -12,7 +12,8 @@ import { verifyRelease } from '../tools/release-source.mjs';
 // public `recover-state` resolves it. Launcher: the npm-installed genuine Node release (tools/isswf.mjs).
 // The compiled Bun executable cannot take `node --import`, so this seam cannot run there (Bun gap).
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
-const temp = await mkdtemp(join(tmpdir(), 'isswf-interrupt-'));
+// Canonical temp path: runners may report an 8.3 short name, while the launcher resolves the long one.
+const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-interrupt-')));
 const npm = [process.env.npm_execpath, join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), resolve(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js')].find(path => path && isAbsolute(path) && existsSync(path));
 assert.ok(npm, 'A Node.js installation with npm CLI is required');
 const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', npm_config_cache: join(temp, 'npm-cache') };
