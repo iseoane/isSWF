@@ -89,6 +89,8 @@ jobs:
         run: node tests/plan-records.mjs .
       - name: Verify static host portability
         run: node tests/host-portability.mjs .
+      - name: Verify the reverse-route JSONL projection and synthetic transport controls without models
+        run: node tests/j030-reverse-protocol.mjs .
       - name: Verify Claude plugin skill descriptions match shared skills
         run: node tests/skill-wrapper-descriptions.mjs .
       - name: Verify missing host prerequisites stay blocked without hiding failures
