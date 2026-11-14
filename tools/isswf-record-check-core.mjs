@@ -5,17 +5,31 @@ import { parseRunLine } from './isswf-snapshot-core.mjs';
 
 // Callers pass Windows or POSIX paths, so the file name is split on both separators.
 const baseName = path => path.split(/[\\/]/).pop();
+const RECORD_NAME = /^[AV]\d{3}\.md$/;
 
-function planViolations(text) {
+function planViolations(text, jobFiles) {
+  let jobs;
   try {
-    parsePlan(text);
-    return [];
+    jobs = parsePlan(text);
   } catch (error) {
     const { code, job, field, line } = planErrorDetail(error);
     const where = [job, field].filter(Boolean).join(' ');
     const detail = `${where ? ` at ${where}` : ''}${line === undefined ? '' : ` (line ${line})`}`;
     return [{ code, ...(job && { job }), ...(field && { field }), ...(line !== undefined && { line }), message: `${code}${detail}` }];
   }
+  const lines = text.replaceAll('\r\n', '\n').split('\n');
+  // parsePlan does not return line numbers for valid jobs; the Status field follows its job header.
+  const statusLine = id => {
+    const header = lines.indexOf(`## ${id}`);
+    return header + 1 + lines.slice(header).findIndex(line => line.startsWith('- Status: '));
+  };
+  const violations = [];
+  for (const { id, reportedStatus } of jobs) {
+    if (reportedStatus !== 'pending' && reportedStatus !== 'blocked') continue;
+    const record = (jobFiles?.[id] ?? []).find(name => RECORD_NAME.test(name));
+    if (record) violations.push({ code: 'records-for-unstarted-job', job: id, field: 'Status', line: statusLine(id), message: `${id} is ${reportedStatus} but its directory holds ${record}` });
+  }
+  return violations;
 }
 
 // A line that reads as a launch identity but that the pane's parser rejects is silently dropped from the pane.
@@ -35,11 +49,12 @@ function runViolations(text) {
 
 /**
  * Checks one plan or record file and only reports: it never edits, grants or starts anything.
- * `path` may use `\` or `/`.
+ * `path` may use `\` or `/`. `jobFiles` maps a job ID to the file names in its directory and is
+ * only read when `path` is a plan.
  * @returns {{ ok: boolean, violations: { code: string, job?: string, field?: string, line?: number, message: string }[] }}
  */
-export function checkRecord({ path, text }) {
+export function checkRecord({ path, text, jobFiles }) {
   const name = baseName(path);
-  const violations = name === 'plan.md' ? planViolations(text) : /^[AV]\d{3}\.md$/.test(name) ? runViolations(text) : [];
+  const violations = name === 'plan.md' ? planViolations(text, jobFiles) : RECORD_NAME.test(name) ? runViolations(text) : [];
   return { ok: violations.length === 0, violations };
 }
