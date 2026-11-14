@@ -197,7 +197,8 @@ test('a pressed pill expands its usage detail resolved after the draw and collap
   expect(await text(ui, /^tokens/)).toBe('tokens: 1000000')
   expect(await text(ui, /^duración/)).toBe('duración: 90 s')
   expect(await text(ui, /^coste/)).toBe('coste: $4.00')
-  expect(await text(ui, /^skills/)).toBe('skills: 0 · referencias: 1')
+  // Skill and reference use lives in the Agents tab, not in a record's detail.
+  expect(await text(ui, /^skills/)).toBe(undefined)
   await ui.press({ key: 'I0046-J004-A001' })
   expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe(undefined)
   await ui.unmount()
@@ -308,7 +309,8 @@ test('review rounds within one brief are drawn separately; the brief revision sh
 
 test('the agents tab lists the coordinator and each delegated run with skill and reference counts', ON, async ($, on) => {
   // A completed job's run whose transcript is gone stays unknown rather than zero.
-  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J003/V001.md': '- Brief: I0046/jobs/J003/brief-r1.md\n- Verdict: pass\n- Run: claude agent=gone1\n' })
+  // J004 is in progress with an attempt the coordinator wrote, and this session never read roles/worker.md.
+  const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J003/V001.md': '- Brief: I0046/jobs/J003/brief-r1.md\n- Verdict: pass\n- Run: claude agent=gone1\n', 'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: partial\n' })
   await activate($)
   await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
   let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
@@ -317,13 +319,13 @@ test('the agents tab lists the coordinator and each delegated run with skill and
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /Agentes/)).toBe('[Agentes]')
-  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión)')
+  expect(await text(ui, /^coordinador/)).toBe('coordinador (esta sesión) · writer sin roles/worker.md')
   await clock.advance(1000)
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /isswf-coordinator/)).toMatch(/^  isswf-coordinator +×1$/)
   expect(await text(ui, /^  review /)).toMatch(/^  review +×2$/)
-  expect(await text(ui, /^worker · /)).toBe('worker · 1 ejecución')
+  expect(await text(ui, /^worker · /)).toBe('worker · 1 ejecución · perfil 1/1')
   await clock.advance(1000)
   await ui.unmount()
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })

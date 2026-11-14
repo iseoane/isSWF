@@ -98,7 +98,7 @@ function collector() {
       if (skill) this.skill(skill[1]);
     },
     edit(path) { const rel = relative(path); if (rel) state.edited.add(rel); },
-    // The assignment: the run's prompts and the text of the briefs it read.
+    // The assignment: the run's prompts, its system profile (Pi) and the text of the briefs it read.
     assign(content) { const text = blockText(content); if (text) state.assigned.push(text); },
     result(callId, content) {
       if (!callId) return;
@@ -256,8 +256,10 @@ function piTranscriptUsage(text, finished, invalid) {
       continue;
     }
     collected.time(record.ts);
-    if (record.recordType === 'message' && record.role === 'user') collected.assign(record.message?.content ?? record.content);
-    if (record.recordType === 'message' && record.role === 'toolResult') collected.result(record.message?.toolCallId ?? record.toolCallId, record.message?.content ?? record.content);
+    // pi-subagents redacts the prompt; the agent's profile and its references arrive in the system sections.
+    if (record.recordType === 'message' && record.role === 'user') collected.assign(record.message?.content);
+    if (record.recordType === 'message' && record.role === 'system') collected.assign(Object.values(record.message?.sections ?? {}).filter(v => typeof v === 'string').join('\n'));
+    if (record.recordType === 'message' && record.role === 'toolResult') collected.result(record.message?.toolCallId, record.message?.content);
     if (record.recordType !== 'message' || record.role !== 'assistant') continue;
     let usage;
     try { usage = piUsage(record.usage); } catch {

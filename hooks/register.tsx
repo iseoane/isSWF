@@ -13,6 +13,8 @@ const TAB = { plugin: 'isswf', key: 'tab' } as const
 const RESUME = { plugin: 'isswf', key: 'resumeOnQuota' } as const
 const RESUME_THRESHOLD = 90
 const RESUME_DELAY_MS = 5 * 60_000
+// Delegated roles with a shared profile under `.agents/roles/`.
+const PROFILES = new Set(['worker', 'reviewer', 'researcher', 'planner', 'diagnostician'])
 const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
@@ -48,6 +50,9 @@ const LABELS = {
     noAgents: 'ningún agente ha usado skills ni referencias',
     run: 'ejecución',
     runs: 'ejecuciones',
+    profile: 'perfil',
+    writer: 'writer sin roles/worker.md',
+    writerOk: 'writer con roles/worker.md',
   },
   en: {
     notActive: 'The isSWF coordinator is not active in this session.',
@@ -79,6 +84,9 @@ const LABELS = {
     noAgents: 'no agent has used skills or references',
     run: 'run',
     runs: 'runs',
+    profile: 'profile',
+    writer: 'writer without roles/worker.md',
+    writerOk: 'writer with roles/worker.md',
   },
 }
 type Labels = typeof LABELS.en
@@ -116,15 +124,6 @@ let resumeNoReset = false
 // The window's reset plus the delay, known even before the threshold, so the switch can say when a resume would come.
 let resumeWouldAtMs: number | undefined
 
-function trackReset($: EngineInterface) {
-  void (async () => {
-    const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
-    const at = window?.resetsAt ? Date.parse(window.resetsAt) + RESUME_DELAY_MS : NaN
-    const next = Number.isFinite(at) ? at : undefined
-    if (next !== resumeWouldAtMs) { resumeWouldAtMs = next; scheduleRefresh($) }
-  })().catch(() => {})
-}
-
 const clockTime = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
 
 function cancelResume() {
@@ -132,20 +131,23 @@ function cancelResume() {
   resumeTimer = resumeFor = resumeAtMs = undefined
 }
 
-// Runs after the draw: at 90% or more of the five-hour window with a job in progress, schedule one resume
-// prompt for the window's reset plus five minutes. The prompt asks the coordinator to reconcile, not to act.
-function checkResume($: EngineInterface, cards: any[]) {
+// Runs after the draw. It keeps the would-be resume time current and, when the switch is on, at 90% or more
+// of the five-hour window with a job in progress, schedules one resume prompt for the window's reset plus
+// five minutes. The prompt asks the coordinator to reconcile, not to act.
+function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
   void (async () => {
     const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
+    const parsed = window?.resetsAt ? Date.parse(window.resetsAt) + RESUME_DELAY_MS : NaN
+    const at = Number.isFinite(parsed) ? parsed : undefined
     const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status === 'in-progress').map((j: any) => `${i.id}/${j.id}`))
-    const due = window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
-    if (due !== resumeNoReset && (!due || !window?.resetsAt)) {
-      resumeNoReset = due && !window?.resetsAt
+    const due = isOn && window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
+    const noReset = due && at === undefined
+    if (at !== resumeWouldAtMs || noReset !== resumeNoReset) {
+      resumeWouldAtMs = at
+      resumeNoReset = noReset
       scheduleRefresh($)
     }
-    if (!due || !window?.resetsAt || resumeFor === window.resetsAt) return
-    const at = Date.parse(window.resetsAt) + RESUME_DELAY_MS
-    if (!Number.isFinite(at)) return
+    if (!due || at === undefined || resumeFor === window.resetsAt) return
     cancelResume()
     resumeFor = window.resetsAt
     resumeAtMs = at
@@ -256,7 +258,6 @@ function countLabel(jobs: any[], t: Labels) {
 
 const known = (value: string, t: Labels) => (value === 'unknown' ? t.unknown : value)
 const sum = (values: any[]) => (values.some(v => typeof v !== 'number') ? undefined : values.reduce((a, b) => a + b, 0))
-const countKeys = (maps: any[]) => sum(maps.map(m => (m && typeof m === 'object' ? Object.values(m).reduce((a: number, b: any) => a + b, 0) : m)))
 
 // One entry may cite several runs; any unresolved run makes the sum unknown.
 function usageLines(entry: any, t: Labels) {
@@ -273,7 +274,6 @@ function usageLines(entry: any, t: Labels) {
       `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''}`,
       `${t.duration}: ${duration === undefined ? t.unknown : `${Math.round(duration / 1000)} s`}`,
       `${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
-      `skills: ${countKeys(found.map((u: any) => u.skills)) ?? t.unknown} · ${t.references}: ${countKeys(found.map((u: any) => u.agentsReads)) ?? t.unknown}`,
     ],
   }
 }
@@ -451,12 +451,11 @@ export const register: Register = (on, options) => {
     const { title } = await paneSpec($)
     const { value: tab = 'initiatives' } = await $.state.get(TAB)
     const { value: resumeOn = false } = await $.state.get(RESUME)
-    trackReset($)
-    if (resumeOn) checkResume($, cards)
-    else if (resumeTimer || resumeFor) cancelResume()
+    if (!resumeOn && (resumeTimer || resumeFor)) cancelResume()
+    checkResume($, cards, resumeOn)
     const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
-    const resumeAt = resumeOn && resumeAtMs !== undefined ? resumeAtMs : resumeOn && resumeNoReset ? undefined : resumeWouldAtMs
-    const resumeDetail = resumeOn && resumeNoReset && resumeAtMs === undefined ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
+    const resumeAt = resumeAtMs ?? resumeWouldAtMs
+    const resumeDetail = resumeOn && resumeNoReset ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
     const resumeText = `⏰ AutoWakeUp: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const header = (
       <Box flexDirection="column">
@@ -499,22 +498,37 @@ export const register: Register = (on, options) => {
         if (!byRole.has(role)) byRole.set(role, new Map())
         byRole.get(role)!.set(runKey(run), run)
       }
-      const agents = [...byRole].map(([role, runs]) => ({ key: `role-${role}`, label: `${role === 'unknown' ? t.unknown : role} · ${runs.size} ${runs.size === 1 ? t.run : t.runs}`, runs: [...runs.values()], found: [...runs.keys()].map(k => usage.get(k)) }))
+      // A role's profile counts as followed in each run that used `.agents/roles/<role>.md`.
+      const profileMark = (role: string, found: any[]) => {
+        if (!PROFILES.has(role)) return undefined
+        const followed = found.filter((u: any) => u?.found && typeof u.usedReferences === 'object' && u.usedReferences[`.agents/roles/${role}.md`]).length
+        return { text: `${t.profile} ${followed}/${found.length}`, isOk: followed === found.length }
+      }
+      const agents = [...byRole].map(([role, runs]) => {
+        const found = [...runs.keys()].map(k => usage.get(k))
+        return { key: `role-${role}`, label: `${role === 'unknown' ? t.unknown : role} · ${runs.size} ${runs.size === 1 ? t.run : t.runs}`, mark: profileMark(role, found), runs: [...runs.values()], found }
+      })
+      // The coordinator writing an in-progress job should follow the worker profile; say whether this session did.
+      const writes = cards.some((i: any) => i.jobs.some((j: any) => j.status === 'in-progress' && j.rounds.some((r: any) => r.entries.some((x: any) => x.role === 'coordinator'))))
+      const ownRefs = own.usedReferences
+      const ownMark = writes && ownRefs && typeof ownRefs === 'object'
+        ? (ownRefs['.agents/roles/worker.md'] ? { text: t.writerOk, isOk: true } : { text: t.writer, isOk: false })
+        : undefined
       // Every listed run is resolved here, including completed jobs the initiatives tab leaves folded.
       resolveUsage($, agents.flatMap((a: any) => a.runs), snapshot.project)
       const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
       // Only what was used is drawn: an empty section is left out, and so is an agent that used nothing.
       const used = (map: any) => !map || typeof map !== 'object' || Object.keys(map).length > 0
-      const row = (key: string, label: string, skills: any, reads: any) => (!used(skills) && !used(reads) ? null : (
+      const row = (key: string, label: string, skills: any, reads: any, mark?: { text: string; isOk: boolean }) => (!mark && !used(skills) && !used(reads) ? null : (
         <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
-          <Text bold color="claude">{label}</Text>
+          <Text bold color="claude">{label}{mark && <Text bold={false} color={mark.isOk ? 'success' : 'warning'}> · {mark.text}</Text>}</Text>
           {tallyBlock({ Box, Text }, 'skills', skills, t)}
           {tallyBlock({ Box, Text }, t.references, reads, t)}
         </Box>
       ))
       const rows = [
-        row('coordinator', t.coordinator, own.usedSkills, own.usedReferences),
-        ...agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.usedSkills : undefined)), merge(a.found.map((u: any) => u?.found ? u.usedReferences : undefined)))),
+        row('coordinator', t.coordinator, own.usedSkills, own.usedReferences, ownMark),
+        ...agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.usedSkills : undefined)), merge(a.found.map((u: any) => u?.found ? u.usedReferences : undefined)), a.mark)),
       ].filter(Boolean)
       return (
         <Box flexDirection="column">

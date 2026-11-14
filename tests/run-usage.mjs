@@ -43,7 +43,9 @@ const sessionTranscript = jsonl([
 const openSession = jsonl([user('2026-01-03T00:00:00.000Z'), assistant('req_o1', '2026-01-03T00:00:02.000Z', claudeUsage(1, 1, 1, 1), [], 'end_turn')]);
 const piRecord = (ts, usage, content) => ({ recordType: 'message', role: 'assistant', ts, model: 'pi-test-1', usage, message: { role: 'assistant', content } });
 const piTranscript = jsonl([
-  { recordType: 'message', role: 'user', ts: 1000 },
+  { recordType: 'message', role: 'user', ts: 1000, message: { role: 'user', content: [{ type: 'text', text: '[prompt redacted]' }] } },
+  // The prompt is redacted; the system sections carry the profile, which names the debug skill.
+  { recordType: 'message', role: 'system', ts: 1500, message: { role: 'system', content: '', sections: { preamble: 'Use .agents/skills/isswf-debug/SKILL.md for bugs.' } } },
   piRecord(2000, { input: 100, output: 10, cacheRead: 50, cacheWrite: 5, cost: 0.1 }, [{ type: 'toolCall', name: 'read', arguments: { path: '/repo/.agents/skills/isswf-debug/SKILL.md' } }]),
   { recordType: 'tool_start', ts: 2500 },
   piRecord(4000, { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 }, [{ type: 'text', text: 'done' }]),
@@ -96,7 +98,7 @@ try {
   assert.deepEqual(pi, {
     found: true, finished: true, model: 'pi-test-1',
     tokens: { input: 101, output: 12, cacheRead: 53, cacheWrite: 9 }, durationMs: 3000,
-    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: {}, usedReferences: {}, costUsd: 'unknown',
+    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, costUsd: 'unknown',
   });
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
   const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', costUsd: 'unknown' };
