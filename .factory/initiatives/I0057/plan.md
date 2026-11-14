@@ -29,13 +29,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; compare the Claude plugin tool.call hook, Pi's tool_call/tool_result events and an opt-in pre-commit check for each host and platform.
+- Next step: A read-only researcher answers the brief-r1 cross-host feasibility questions; the coordinator records A001, then prepares brief-r2 for the writer.
 
 ### Acceptance
 
@@ -184,13 +184,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J008
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows: the deviations field in both templates, and per-round reviewer limits in review records)
 - Objective: Every attempt and review record reports the process deviations its author observed, and every review round records the reviewer's limits, so neither depends on the coordinator's memory.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; place the field in both templates and in the worker and reviewer return instructions.
+- Next step: The worker implements brief-r1 on feat/i0057-j008-record-fields and writes A001; then semantic review, PR and CI.
 
 ### Acceptance
 
