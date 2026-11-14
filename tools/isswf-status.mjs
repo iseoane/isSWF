@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
 import { plan, parsePlan, planStates as states } from './isswf-plan.mjs';
+import { planErrorDetail } from './isswf-plan-core.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
 
@@ -157,7 +158,10 @@ export async function status({ project, initiative }) {
       jobs.push({ ...fields, artifacts: await artifacts(dirname(record.path), { ...job, initiative }), processState: 'not-inspected' });
     }
     return { status: 'observed', observedAt, initiative, title, recommendation: recommendation(jobs), label: `${initiative} · ${title}`, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
-  } catch { return { status: 'unknown', observedAt, reason: 'invalid-or-changing-plan', executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits }; }
+  } catch (error) {
+    // A parser error says where the plan breaks; a changed or misnamed plan has no such detail.
+    return { status: 'unknown', observedAt, reason: 'invalid-or-changing-plan', ...(error?.code && { planError: planErrorDetail(error) }), executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
+  }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {

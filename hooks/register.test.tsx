@@ -525,3 +525,14 @@ test('a file over the 4 MiB read limit is named, not read', ON, async ($, on) =>
   expect(seen.some(p => p.endsWith('big.md'))).toBe(false)
   await tree.unmount()
 })
+
+test('an unreadable plan says which job, field and line broke it', ON, async ($, on) => {
+  const broken = plan('I0050', 'Broken', [['J001', 'in-progress', 'x']]).replace('(jobs/J001/brief-r1.md)', '(jobs/J001/brief-r1.md) (r1 superseded)')
+  const line = broken.split('\n').findIndex(l => l.startsWith('- Brief:')) + 1
+  engine(on, '/p', { ...RECORDS, 'I0050/plan.md': broken })
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0050' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /^plan no legible/)).toBe(`plan no legible: J001 · Brief, línea ${line} (unsafe-brief-reference)`)
+  await ui.unmount()
+})

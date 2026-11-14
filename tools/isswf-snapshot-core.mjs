@@ -1,6 +1,6 @@
 // No Node imports and no `process` access: hook runtimes that only offer an injected fs (the Claude
 // Code pane's `$.fs`) load this module. tools/isswf-snapshot.mjs is the Node wrapper.
-import { parsePlan } from './isswf-plan-core.mjs';
+import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 
 export const SCHEMA_VERSION = 1;
 
@@ -194,8 +194,8 @@ async function readInitiative(fs, id, dir, skipped) {
   let jobs;
   try {
     jobs = parsePlan(plan ?? '');
-  } catch {
-    return { id, title: title ?? UNKNOWN, type: UNKNOWN, status: 'unparsed', jobs: [] };
+  } catch (error) {
+    return { id, title: title ?? UNKNOWN, type: UNKNOWN, status: 'unparsed', planError: planErrorDetail(error), jobs: [] };
   }
   const parsed = [];
   for (const job of jobs) parsed.push(await readJob(fs, job, join(dir, 'jobs', job.id), id, skipped));

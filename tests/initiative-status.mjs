@@ -55,11 +55,17 @@ try {
   await writeFile(planPath, original.replaceAll('\n', '\r\n'));
   const crlf = inspect(); assert.equal(crlf.status, 'observed', 'A CRLF plan must parse through isswf-status'); assert.equal(crlf.title, 'Status fixture'); assert.equal(crlf.jobs.length, observed.jobs.length);
   await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: '));
-  assert.equal(inspect().status, 'unknown');
+  // A misnamed plan is not a parser error, so it carries no location.
+  assert.equal(inspect().status, 'unknown'); assert.equal(inspect().planError, undefined);
   await writeFile(planPath, original.replace('jobs/J001/brief-r1.md', '../../outside.md'));
-  assert.equal(inspect().status, 'unknown'); assert.equal(inspect().freshness, 'not-verified');
+  const lineOf = text => original.split('\n').findIndex(line => line.includes(text)) + 1;
+  const outside = inspect();
+  assert.equal(outside.status, 'unknown'); assert.equal(outside.freshness, 'not-verified');
+  assert.deepEqual(outside.planError, { code: 'unsafe-brief-reference', job: 'J001', field: 'Brief', line: lineOf('jobs/J001/brief-r1.md') });
   await writeFile(planPath, original.replace('- Status: in-progress', '- Status: invented'));
-  assert.equal(inspect().status, 'unknown');
+  const invented = inspect();
+  assert.equal(invented.status, 'unknown');
+  assert.deepEqual(invented.planError, { code: 'invalid-job', job: invented.planError.job, field: 'Status', line: lineOf('- Status: in-progress') });
   await writeFile(planPath, original.replace('Type: enhancement\n', ''));
   const malformedBytes = await tree(project);
   assert.equal(inspect().status, 'unknown', 'missing canonical plan type remains explicitly unknown');

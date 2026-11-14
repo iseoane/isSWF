@@ -45,6 +45,7 @@ const LABELS = {
     opened: 'Panel de iniciativas abierto.',
     noWork: 'sin trabajo iniciado',
     unparsed: 'plan no legible',
+    line: 'línea',
     completed: 'completados',
     inactive: 'No activas',
     tabs: { initiatives: 'Iniciativas', agents: 'Agentes' } as Record<string, string>,
@@ -84,6 +85,7 @@ const LABELS = {
     opened: 'Initiatives pane opened.',
     noWork: 'no work started',
     unparsed: 'plan unreadable',
+    line: 'line',
     completed: 'completed',
     inactive: 'Inactive',
     tabs: { initiatives: 'Initiatives', agents: 'Agents' } as Record<string, string>,
@@ -317,6 +319,14 @@ function tallyBlock(ui: any, title: string, map: any, t: Labels) {
       {pairs.map(([name, n]) => <Text key={name}>  {name.padEnd(width)}  <Text dimColor>×{n}</Text></Text>)}
     </Box>
   )
+}
+
+// `plan unreadable: J003 · Brief, line 54 (unsafe-brief-reference)`; only the parts the parser knew.
+function unparsedLabel(error: any, t: Labels) {
+  if (!error?.code) return t.unparsed
+  const where = [error.job, error.field].filter(Boolean).join(' · ')
+  const at = [where, error.line && `${t.line} ${error.line}`].filter(Boolean).join(', ')
+  return `${t.unparsed}: ${at ? `${at} ` : ''}(${error.code})`
 }
 
 // Review rounds are numbered within a brief revision; the revision is shown only when the job has several.
@@ -658,7 +668,7 @@ export const register: Register = (on, options) => {
               <Button key={`tree-${initiative.id}`} plain onPress={() => openTree($, initiative.id, t)}>
                 <Text bold color="claude">● {initiative.id} · {initiative.title}</Text>
               </Button>
-              {initiative.status === 'unparsed' && <Text dimColor>{t.unparsed}</Text>}
+              {initiative.status === 'unparsed' && <Text color="warning">{unparsedLabel(initiative.planError, t)}</Text>}
               <Text dimColor>jobs {closed}/{initiative.jobs.length} ✓ · {initiative.jobs.length - closed} {t.open}</Text>
               {closed > 0 && <Text color="success">✓ {closed} {t.completed}</Text>}
               {recentOf(initiative).map((job: any) => (
