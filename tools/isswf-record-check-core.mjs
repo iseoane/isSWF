@@ -48,7 +48,7 @@ function runViolations(text) {
 }
 
 // Labels of the current templates (.factory/templates/attempt.md and review.md), matched at the start of a line.
-const REQUIRED_FIELDS = {
+export const REQUIRED_FIELDS = {
   A: ['Deviations from required procedure and consequence:', 'Process deviations observed:'],
   V: ['Unreviewed areas and evidence limits:', 'Convergence advice:', 'Process deviations observed:'],
 };

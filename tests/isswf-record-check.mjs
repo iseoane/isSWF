@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
-const { checkRecord } = await import(pathToFileURL(join(source, 'tools/isswf-record-check-core.mjs')));
+const { checkRecord, REQUIRED_FIELDS } = await import(pathToFileURL(join(source, 'tools/isswf-record-check-core.mjs')));
 
 const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n`;
 const plan = (...jobs) => `# I0001: Synthetic\n\nType: bug\n\n${jobs.join('\n')}`;
@@ -93,6 +93,12 @@ for (const path of paths('plan.md')) {
 assert.equal(checkRecord({ path: paths('plan.md')[0], text: staged }).ok, true, 'without a listing the rule has no input');
 assert.deepEqual(checkRecord({ path: paths('plan.md')[0], text: invented, jobFiles: { J001: ['A001.md'] } }).violations.map(({ code }) => code), ['invalid-job'], 'an unparsed plan reports only its parse error');
 
+// Each label the core enforces must still appear in its template, so a template rename cannot leave the check demanding a label no record is given.
+for (const [kind, template] of [['A', 'attempt.md'], ['V', 'review.md']]) {
+  const templateText = await readFile(join(source, '.factory/templates', template), 'utf8');
+  for (const label of REQUIRED_FIELDS[kind]) assert.ok(templateText.includes(label), `${template} carries "${label}"`);
+}
+
 // A record missing a label of its current template is a violation, matched by the exact label.
 const missing = (name, text) => checkRecord({ path: recordPaths(name)[0], text }).violations.filter(({ code }) => code === 'missing-field');
 for (const [name, fields] of [['A001.md', attemptFields], ['V001.md', reviewFields]]) {
@@ -136,7 +142,7 @@ try {
   const clean = cli('--project', root, '--file', join(state, 'jobs/J002/A001.md'));
   assert.equal(clean.status, 0, clean.stderr);
   assert.deepEqual(JSON.parse(clean.stdout), { ok: true, files: [{ file: join(state, 'jobs/J002/A001.md'), ok: true, violations: [] }] });
-  // The other separator style names the same file.
+  // The other separator style names the same file. Windows-only by design: a backslash is an ordinary filename character on POSIX, so the swap is skipped there.
   const swapped = process.platform === 'win32' ? join(state, 'jobs/J002/A001.md').replaceAll('\\', '/') : join(state, 'jobs/J002/A001.md');
   assert.equal(cli('--project', root.replaceAll('\\', '/'), '--file', swapped).status, 0);
   const before = JSON.stringify(await Promise.all(Object.keys(files).map(file => readFile(file, 'utf8'))));
