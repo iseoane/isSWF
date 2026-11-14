@@ -384,6 +384,8 @@ I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289):
 
 ### Evidence
 
+
+- 2026-11-14 operator standing grant: "autorizo todo lo que no sea riesgo alto o necesite resolver una duda por mi parte". It covers integration of MEDIUM-risk PRs after green exact-head CI. HIGH risk and open product questions still need the operator.
 - Planner found no verified bridge in factory guides/manifests; coordinator discovery adds existing builtin claude-code read-only external-CLI route candidate, async-only with unsupported Pi model overrides unless runner implements them.
 - jobs/J030/brief-r1.md; no Claude actor, provider experiment, install or host configuration change occurred.
 - Current operator-authorized analysis and tests retained in [analysis-20261111.md](jobs/J030/analysis-20261111.md). Existing installed0.83.0 adapter contract and static host tests PASS; initial missing test-dependency ENOENT disclosed, no installation. Synthetic forward stop/error tests are not reverse Windows/effort evidence.
