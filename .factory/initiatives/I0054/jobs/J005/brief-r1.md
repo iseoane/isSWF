@@ -1,0 +1,6 @@
+# I0054/J005 r1: Say why a plan is unreadable (started 2026-11-14)
+
+Grounding (2026-11-14, main 280e6d7): `parsePlan` (tools/isswf-plan-core.mjs) throws bare codes (`invalid-plan-type`, `duplicate-job`, `duplicate-field`, `invalid-plan`, `invalid-job`, `unsafe-brief-reference`, `invalid-dependency`, `completed jobs require evidence`, `cyclic job dependencies`); tests match the messages exactly, so they must not change. `readInitiative` (tools/isswf-snapshot-core.mjs) catches and returns `status: 'unparsed'`; `isswf-status` returns `reason: 'invalid-or-changing-plan'`; the pane shows `t.unparsed`.
+Scope: attach `code`, `job`, `field`, `line` to parser errors; expose `planError` in the snapshot and status output; draw it in the pane; docs EN/ES operations.md (and installation.md if the pane text changes). Exclusions: no change to accepted plan syntax.
+Methodology: coordinator as writer with `roles/worker.md`, design-principles (contract: snapshot/status JSON), verification-principles, comments, code-quality; isswf-writing for docs. TDD not selected; focused tests in tests/plan-records.mjs, tests/initiative-snapshot.mjs and the pane test.
+Checks: those tests, `claude plugin test`, check-docs; bound review; CI.
