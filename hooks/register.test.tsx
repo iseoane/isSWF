@@ -80,7 +80,10 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
   on('session.messages', () => ({ value: messages }))
-  return { clock: mock.clock(on), seen, settings, opened }
+  const tools: string[] = []
+  on('tool.list', () => ({ value: tools.map(name => ({ name })) }))
+  const index = () => { files[[cwd, '.codegraph', 'codegraph.db'].join(sep)] = '' }
+  return { clock: mock.clock(on), seen, settings, opened, tools, index }
 }
 
 const activate = ($: any) => $.skill.prompt({ skill: 'isswf:isswf-coordinator', text: '' })
@@ -611,3 +614,26 @@ test('unfolding a completed job folds the other one', ON, async ($, on) => {
   expect(await ui.find({ type: 'Box', key: 'I0046-J003-V001' })).toBe(undefined)
   await ui.unmount()
 })
+
+const STATUS: [string, string[], boolean, string, string, boolean][] = [
+  ['nothing available', [], false, 'error', 'error', true],
+  ['an index without its tools', ['mcp__engram__mem_save'], true, 'success', 'warning', false],
+  ['both servers and an index', ['mcp__engram__mem_save', 'mcp__plugin_cg_codegraph__codegraph_explore'], true, 'success', 'success', false],
+]
+for (const [label, tools, indexed, engram, codegraph, hint] of STATUS) {
+  test(`the status row under the title: ${label}`, ON, async ($, on) => {
+    const host = engine(on, '/p')
+    host.tools.push(...tools)
+    if (indexed) host.index()
+    await activate($)
+    await $.tool.call({ tool: 'Read', file_path: '/p/.factory/initiatives/I0046/plan.md' })
+    await host.clock.advance(1000)
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /🧠 engram/)).toBeTruthy()
+    // The dot is the coloured child of each name's row.
+    const color = async (name: RegExp) => ((await ui.find({ type: 'Text', text: name })) as any)?.children?.find((c: any) => c?.children?.[0] === '●')?.props?.color
+    expect([await color(/🧠 engram/), await color(/🗺 codegraph/)]).toEqual([engram, codegraph])
+    expect(Boolean(await text(ui, /sin índice: codegraph init/))).toBe(hint)
+    await ui.unmount()
+  })
+}
