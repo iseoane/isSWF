@@ -8,8 +8,11 @@ export type IsswfPaneExpanded = string[]
 // The pane's selected tab.
 export type IsswfPaneTab = 'initiatives' | 'agents'
 
+// The initiative shown in the file-tree pane, its expanded folders and the open file, as paths relative to the initiative.
+export type IsswfPaneTree = { id: string; open: string[]; file?: string }
+
 declare module 'claude-code' {
   interface PluginState {
-    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean }
+    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree }
   }
 }

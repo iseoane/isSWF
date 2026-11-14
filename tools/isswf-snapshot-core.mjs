@@ -214,11 +214,17 @@ async function selectState(fs, project, join) {
   return current ? '.isswf' : '.factory';
 }
 
-export async function readSnapshot(project, fs) {
+/** The project's active `initiatives` directory, without reading any initiative. */
+export async function initiativesDir(project, fs) {
   if (!isAbsolute(project)) throw Error('absolute --project required');
   project = project.replace(/(?<=.)[\\/]+$/, '');
   const join = joiner(project);
-  const stateDir = join(project, await selectState(fs, project, join), 'initiatives');
+  return { project, join, stateDir: join(project, await selectState(fs, project, join), 'initiatives') };
+}
+
+export async function readSnapshot(project, fs) {
+  let join, stateDir;
+  ({ project, join, stateDir } = await initiativesDir(project, fs));
   if (!(await fs.exists(stateDir))) throw Error(`no initiatives directory at ${stateDir}`);
   const skipped = [];
   const initiatives = [];
