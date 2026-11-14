@@ -47,6 +47,19 @@ function runViolations(text) {
   return violations;
 }
 
+// Labels of the current templates (.factory/templates/attempt.md and review.md), matched at the start of a line.
+const REQUIRED_FIELDS = {
+  A: ['Deviations from required procedure and consequence:', 'Process deviations observed:'],
+  V: ['Unreviewed areas and evidence limits:', 'Convergence advice:', 'Process deviations observed:'],
+};
+
+function fieldViolations(kind, text) {
+  const lines = text.split('\n');
+  return REQUIRED_FIELDS[kind]
+    .filter(label => !lines.some(line => line.replace(/^\s*(?:[-*]\s+)?/, '').startsWith(label)))
+    .map(label => ({ code: 'missing-field', field: label, message: `record lacks the template field "${label}"` }));
+}
+
 /**
  * Checks one plan or record file and only reports: it never edits, grants or starts anything.
  * `path` may use `\` or `/`. `jobFiles` maps a job ID to the file names in its directory and is
@@ -55,6 +68,8 @@ function runViolations(text) {
  */
 export function checkRecord({ path, text, jobFiles }) {
   const name = baseName(path);
-  const violations = name === 'plan.md' ? planViolations(text, jobFiles) : RECORD_NAME.test(name) ? runViolations(text) : [];
+  let violations = [];
+  if (name === 'plan.md') violations = planViolations(text, jobFiles);
+  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...fieldViolations(name[0], text)];
   return { ok: violations.length === 0, violations };
 }
