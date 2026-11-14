@@ -4,6 +4,8 @@ Type: enhancement
 
 Operator feedback 2026-11-14 during I0009 on native Windows: the process is not deterministic, because it depends on the coordinator remembering written rules. In one session, seven rules held only in Markdown were broken and nothing checked them in time. Scheduled after I0009. Add executable machinery only where this evidence shows a structural need (AGENTS.md).
 
+Operator decision 2026-11-14: every guard ships in the Claude Code plugin (hooks/, registered through .claude-plugin), with an equivalent Pi extension mirror where Pi supports one. Shared rules live in one tools/ module that both hosts call. A guard a host cannot support is recorded as a gap, never silently skipped.
+
 ## J001
 
 - Status: pending
