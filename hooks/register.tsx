@@ -272,7 +272,11 @@ function usageLines(entry: any, t: Labels) {
 // `name ×n` pairs, most used first; unknown when the run's transcript could not be read.
 function tally(map: any, t: Labels) {
   if (!map || typeof map !== 'object') return t.unknown
-  const pairs = Object.entries(map).sort((a: any, b: any) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  // Show the skill or reference name alone (".agents/roles/references/review.md" -> "review"); same names add up.
+  const short = (path: string) => { const parts = path.split(/[\\/]/).filter(Boolean); const file = parts.pop() ?? path; return (/^skill\.md$/i.test(file) && parts.length ? parts.pop()! : file).replace(/\.md$/i, '') }
+  const named: Record<string, number> = {}
+  for (const [k, n] of Object.entries(map)) named[short(k)] = (named[short(k)] ?? 0) + (n as number)
+  const pairs = Object.entries(named).sort((a: any, b: any) => b[1] - a[1] || a[0].localeCompare(b[0]))
   return pairs.length ? pairs.map(([name, n]) => `${name} ×${n}`).join(', ') : '0'
 }
 
