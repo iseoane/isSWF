@@ -72,7 +72,7 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   on('fs.list', (_: unknown, { path }: { path: string }) => {
     const e = { path: norm(path) }
     const names = new Set(Object.keys(files).filter(f => f.startsWith(`${e.path}${sep}`)).map(f => f.slice(e.path.length + 1).split(sep)[0]))
-    return { value: [...names].map(name => ({ name, kind: `${e.path}${sep}${name}` in files ? 'file' : 'dir', size: 0, mtimeMs: 0, isLink: false })) }
+    return { value: [...names].map(name => ({ name, kind: `${e.path}${sep}${name}` in files ? 'file' : 'dir', size: files[`${e.path}${sep}${name}`]?.length ?? 0, mtimeMs: 0, isLink: false })) }
   })
   on('command.register', () => ({ value: { command: 'isswf-initiatives' } }))
   const opened: string[] = []
@@ -456,7 +456,8 @@ const TREE_PANE = { ...PANE, requestId: 'isswf-initiative-tree' }
 
 for (const cwd of ['/p', 'C:\\p']) {
   test(`a card's title opens its initiative's file tree, and a file opens below it (${cwd})`, ON, async ($, on) => {
-    const { seen, opened } = engine(on, cwd)
+    // A Windows checkout may hold CRLF line endings; the file is drawn with plain newlines.
+    const { seen, opened } = engine(on, cwd, { ...RECORDS, 'I0046/jobs/J002/brief-r1.md': 'brief\r\nsecond' })
     await activate($)
     await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
     let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
@@ -479,13 +480,23 @@ for (const cwd of ['/p', 'C:\\p']) {
     await tree.press({ key: 'file-jobs/J002/brief-r1.md' })
     await tree.unmount()
     tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
-    expect((await tree.find({ type: 'Markdown', key: 'tree-file' }) as any)?.props?.text ?? (await tree.find({ type: 'Markdown', key: 'tree-file' }) as any)?.text).toBe('brief')
+    expect((await tree.find({ type: 'Markdown', key: 'tree-file' }) as any)?.props?.text ?? (await tree.find({ type: 'Markdown', key: 'tree-file' }) as any)?.text).toBe('brief\nsecond')
     expect(seen.some(p => p.endsWith(['I0046', 'jobs', 'J002', 'brief-r1.md'].join(cwd.includes('\\') ? '\\' : '/')))).toBe(true)
     // Pressing the open file again hides it.
     await tree.press({ key: 'file-jobs/J002/brief-r1.md' })
     await tree.unmount()
     tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
     expect(await tree.find({ type: 'Markdown', key: 'tree-file' })).toBe(undefined)
+    // Folding the folder of an open file closes the file instead of calling it unreadable.
+    await tree.press({ key: 'file-jobs/J002/brief-r1.md' })
+    await tree.unmount()
+    tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    await tree.press({ key: 'file-jobs' })
+    await tree.unmount()
+    tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+    expect(await tree.find({ type: 'Markdown', key: 'tree-file' })).toBe(undefined)
+    expect(await text(tree, /no se puede leer/)).toBe(undefined)
+    expect(await text(tree, /J002\/$/)).toBe(undefined)
     await tree.unmount()
   })
 }
@@ -503,4 +514,14 @@ test('the file tree reads nothing outside the selected initiative', ON, async ($
     await tree.unmount()
   }
   expect(seen.some(p => p.includes('..') || p.endsWith('I0048/plan.md') || p.endsWith('missing.md'))).toBe(false)
+})
+
+test('a file over the 4 MiB read limit is named, not read', ON, async ($, on) => {
+  const { seen } = engine(on, '/p', { ...RECORDS, 'I0046/big.md': 'x'.repeat(4 * 1024 * 1024 + 1) })
+  on('state.get', ($: any, e: { key: string }, next: any) => (e.key === 'tree' ? { value: { value: { id: 'I0046', open: [], file: 'big.md' }, version: 1 } } : next(e)))
+  await activate($)
+  const tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
+  expect(await text(tree, /4 MiB/)).toBe('archivo de más de 4 MiB: no se muestra')
+  expect(seen.some(p => p.endsWith('big.md'))).toBe(false)
+  await tree.unmount()
 })
