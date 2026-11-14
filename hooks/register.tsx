@@ -45,6 +45,8 @@ const LABELS = {
     on: 'sí',
     off: 'no',
     resumeAt: 'a las',
+    wouldResumeAt: 'sería a las',
+    ifThreshold: '(si ≥90 %)',
     noReset: 'sin hora de renovación: no se programa',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'sin agentes delegados en las iniciativas visibles',
@@ -78,6 +80,8 @@ const LABELS = {
     on: 'on',
     off: 'off',
     resumeAt: 'at',
+    wouldResumeAt: 'would be at',
+    ifThreshold: '(if ≥90%)',
     noReset: 'no reset time: nothing scheduled',
     coordinator: 'coordinator (this session)',
     noAgents: 'no delegated agents in the visible initiatives',
@@ -117,6 +121,19 @@ let resumeFor: string | undefined
 let resumeAtMs: number | undefined
 // True while the threshold is met but the window gives no reset time, so nothing can be scheduled.
 let resumeNoReset = false
+// The window's reset plus the delay, known even before the threshold, so the switch can say when a resume would come.
+let resumeWouldAtMs: number | undefined
+
+function trackReset($: EngineInterface) {
+  void (async () => {
+    const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
+    const at = window?.resetsAt ? Date.parse(window.resetsAt) + RESUME_DELAY_MS : NaN
+    const next = Number.isFinite(at) ? at : undefined
+    if (next !== resumeWouldAtMs) { resumeWouldAtMs = next; scheduleRefresh($) }
+  })().catch(() => {})
+}
+
+const clockTime = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
 
 function cancelResume() {
   resumeTimer?.cancel()
@@ -277,7 +294,21 @@ function tally(map: any, t: Labels) {
   const named: Record<string, number> = {}
   for (const [k, n] of Object.entries(map)) named[short(k)] = (named[short(k)] ?? 0) + (n as number)
   const pairs = Object.entries(named).sort((a: any, b: any) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  return pairs.length ? pairs.map(([name, n]) => `${name} ×${n}`).join(', ') : '0'
+  return pairs
+}
+
+// One item per line with its count in a dim column, so long lists stay scannable.
+function tallyBlock(ui: any, title: string, map: any, t: Labels) {
+  const { Box, Text } = ui
+  const pairs = tally(map, t)
+  if (typeof pairs === 'string' || pairs.length === 0) return <Text><Text dimColor>{title}: </Text>{typeof pairs === 'string' ? pairs : '—'}</Text>
+  const width = Math.max(...pairs.map(([name]) => name.length))
+  return (
+    <Box flexDirection="column">
+      <Text dimColor>{title}</Text>
+      {pairs.map(([name, n]) => <Text key={name}>  {name.padEnd(width)}  <Text dimColor>×{n}</Text></Text>)}
+    </Box>
+  )
 }
 
 // Review rounds are numbered within a brief revision; the revision is shown only when the job has several.
@@ -427,10 +458,13 @@ export const register: Register = (on, options) => {
     const { title } = await paneSpec($)
     const { value: tab = 'initiatives' } = await $.state.get(TAB)
     const { value: resumeOn = false } = await $.state.get(RESUME)
+    trackReset($)
     if (resumeOn) checkResume($, cards)
     else if (resumeTimer || resumeFor) cancelResume()
     const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
-    const resumeDetail = !resumeOn ? '' : resumeAtMs !== undefined ? ` · ${t.resumeAt} ${new Date(resumeAtMs).toTimeString().slice(0, 5)}` : resumeNoReset ? ` · ${t.noReset}` : ''
+    const resumeDetail = resumeOn && resumeAtMs !== undefined ? ` · ${t.resumeAt} ${clockTime(resumeAtMs)}`
+      : resumeOn && resumeNoReset ? ` · ${t.noReset}`
+      : resumeWouldAtMs !== undefined ? ` · ${t.wouldResumeAt} ${clockTime(resumeWouldAtMs)} ${t.ifThreshold}` : ''
     const resumeText = `⏰ ${t.resume}: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const header = (
       <Box flexDirection="column">
@@ -480,8 +514,8 @@ export const register: Register = (on, options) => {
       const row = (key: string, label: string, skills: any, reads: any) => (
         <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
           <Text bold color="claude">{label}</Text>
-          <Text wrap="wrap">skills: {tally(skills, t)}</Text>
-          <Text wrap="wrap">{t.references}: {tally(reads, t)}</Text>
+          {tallyBlock({ Box, Text }, 'skills', skills, t)}
+          {tallyBlock({ Box, Text }, t.references, reads, t)}
         </Box>
       )
       return (
