@@ -9,7 +9,7 @@ Operator feedback 2026-11-14 on Windows: every press in the Claude Code initiati
 - Status: pending
 - Objective: A press that only changes pane view state (fold, unfold, record detail, tab) redraws without re-reading the project's state records; the snapshot is re-read only when records may have changed.
 - Depends on: None
-- Brief: None.
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
 - Blocker: None.
 - Next step: Start after I0009, on operator request.
 

@@ -9,7 +9,7 @@ Limits the operator accepted when closing I0009/J029 on 2026-11-14, plus one rel
 - Status: pending
 - Objective: Exercise actual interrupted-owner recovery through the compiled Bun artifact, and an interruption inside claim retirement (clearClaim), on Linux and Windows.
 - Depends on: None
-- Brief: None.
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
 - Blocker: None.
 - Next step: Research a pause seam usable with the compiled Bun executable without adding a production test hook; reuse tests/state-interruption.mjs for the clearClaim boundary.
 
@@ -28,7 +28,7 @@ Limits the operator accepted when closing I0009/J029 on 2026-11-14, plus one rel
 - Status: pending
 - Objective: tools/build-release.mjs accepts a release output on a different Windows drive from the source.
 - Depends on: None
-- Brief: None.
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
 - Blocker: None.
 - Next step: Fix isWithin for cross-drive paths with a focused regression test.
 
