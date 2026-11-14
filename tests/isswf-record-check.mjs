@@ -29,7 +29,11 @@ assert.equal(typeless.field, 'Type');
 
 // A `Run:` line the pane would ignore is a violation; the pane's own parser decides which ones.
 const { parseRunLine, readSnapshot } = await import(pathToFileURL(join(source, 'tools/isswf-snapshot-core.mjs')));
-const attempt = runs => `# Attempt report\n\n## Identity and pinned inputs\n\n- Job ID and attempt ID: J001 A001\n${runs.map(run => `- Run: ${run}\n`).join('')}- Reported status: complete\n`;
+// The labels every record needs, so fixtures only vary the field under test; an attempt need not carry the review's.
+const attemptFields = ['Deviations from required procedure and consequence:', 'Process deviations observed:'];
+const reviewFields = ['Unreviewed areas and evidence limits:', 'Convergence advice:', 'Process deviations observed:'];
+const withFields = fields => fields.map(label => `- ${label} None.\n`).join('');
+const attempt = (runs, fields = [...attemptFields, ...reviewFields]) => `# Attempt report\n\n## Identity and pinned inputs\n\n- Job ID and attempt ID: J001 A001\n${runs.map(run => `- Run: ${run}\n`).join('')}- Reported status: complete\n\n## Technical result\n\n${withFields(fields)}`;
 const recordPaths = name => paths(`jobs/J001/${name}`).map((path, index) => (index ? path.replaceAll('/', '\\') : path));
 const codes = (path, text) => checkRecord({ path, text }).violations.map(({ code }) => code);
 
@@ -85,5 +89,22 @@ for (const path of paths('plan.md')) {
 }
 assert.equal(checkRecord({ path: paths('plan.md')[0], text: staged }).ok, true, 'without a listing the rule has no input');
 assert.deepEqual(checkRecord({ path: paths('plan.md')[0], text: invented, jobFiles: { J001: ['A001.md'] } }).violations.map(({ code }) => code), ['invalid-job'], 'an unparsed plan reports only its parse error');
+
+// A record missing a label of its current template is a violation, matched by the exact label.
+const missing = (name, text) => checkRecord({ path: recordPaths(name)[0], text }).violations.filter(({ code }) => code === 'missing-field');
+for (const [name, fields] of [['A001.md', attemptFields], ['V001.md', reviewFields]]) {
+  assert.deepEqual(missing(name, attempt([], fields)), []);
+  for (const label of fields) {
+    for (const path of recordPaths(name)) {
+      const text = attempt([], fields.filter(other => other !== label));
+      assert.deepEqual(checkRecord({ path, text }).violations, [{ code: 'missing-field', field: label, message: `record lacks the template field "${label}"` }], `${name} without ${label}`);
+    }
+  }
+}
+assert.deepEqual(missing('A001.md', attempt([], ['Process deviations observed:']).replace('Process deviations observed:', 'Process deviations:')).map(({ field }) => field), ['Deviations from required procedure and consequence:', 'Process deviations observed:']);
+assert.deepEqual(missing('A001.md', attempt([], attemptFields).replaceAll('\n', '\r\n')), [], 'CRLF records');
+assert.deepEqual(missing('A001.md', attempt([], ['Process deviations observed:']).replace('- Process', '  - Process')).map(({ field }) => field), ['Deviations from required procedure and consequence:'], 'a nested bullet still carries the label');
+assert.deepEqual(missing('brief-r1.md', ''), [], 'briefs have no required labels');
+assert.deepEqual(missing('A001.md', attempt([], reviewFields)).map(({ field }) => field), ['Deviations from required procedure and consequence:'], 'an attempt does not need review labels');
 
 console.log('record check tests passed');
