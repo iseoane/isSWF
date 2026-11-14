@@ -344,12 +344,12 @@ I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289):
 
 ## J029
 
-- Status: blocked
+- Status: completed
 - Objective: Preserve state through native migration and actual interrupted-owner public recovery.
 - Depends on: J027, J032
 - Brief: [brief-r3.md](jobs/J029/brief-r3.md)
-- Blocker: Actual interrupted-owner recovery (slice 2) unverified; budget approved 2026-11-14 (8 calls). V001 historical TDD FAIL remains, accepted once by operator.
-- Next step: Dispatch one worker on feat/j029-interrupted-recovery, then independent review, PR and exact-head CI. J030 Windows follows once J029 is delivered.
+- Blocker: None. Accepted limits moved to I0056: compiled Bun interrupted recovery and interruption inside clearClaim are untested. V001 historical TDD FAIL remains, accepted once by operator.
+- Next step: None. J030 Windows follows.
 
 ### Acceptance
 
@@ -364,6 +364,8 @@ I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289):
 - Current analysis/tests retained in [analysis-20261111.md](jobs/J029/analysis-20261111.md). Linux tests/release-package.mjs PASS, with direct source inspection identifying injected deadOwner/bootstrap recovery versus actual owner-loss evidence. Strict Windows/Linux identity and native verification requirements preserved.
 - Receipt: CI correction 99dc65cc01cfde9058ee43d4aafee26914e8d372 (directory-sync guard form, behavior unchanged). Exact-head Quality SUCCESS 3/3 (Portable, Package and host discovery ubuntu/windows). Operator-approved expected-head merge of PR266 as bb2216bdf809cc0350a9720f529812204956d1af on 2026-11-11. Branch not deleted.
 - 2026-11-14 native Windows x64, Node v26.12.1, main e1e09d7: state-migration-publication PASS, directory-sync-portability ok, release-package PASS (217 s). Coordinator report-accuracy check: A001 GREEN claim for 124a605 stays contradicted (coordinator-checks-r2); A002, delivery and plan receipts match observed PR266/CI. Slice-2 brief-r3 prepared.
+- Slice 2: worker A003 (claude agent=aada2474f383c5245) at 7736266; review V002 Standards/Spec PASS (call 2 inconclusive: diff not supplied; call 3 substantive); coordinator applied its doc/comment suggestions at cefb0c3. Windows CI found two test-environment faults, fixed test-only without assertion changes: release built from a temp clone (2ac2f83, because build-release isWithin misjudges a cross-drive output, I0056) and canonical temp path for 8.3 short names (12efb53). Exact-head 12efb53 Quality SUCCESS 3/3 (Portable incl. ESLint/Knip, ubuntu, windows). Operator-approved expected-head merge of PR322 as e441d6dd6d56c749112bae3d72a728aea18b0121 on 2026-11-14. Calls 3/8 used.
+- 2026-11-14 operator closure: "Si" to closing J029 with the Bun and clearClaim limits recorded as future work (I0056).
 
 ## J030
 
