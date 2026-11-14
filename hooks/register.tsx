@@ -5,7 +5,6 @@ import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-co
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
-const TREE_PANE = 'isswf-initiative-tree'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
 const PINNED = { plugin: 'isswf', key: 'pinned' } as const
 const EXPANDED = { plugin: 'isswf', key: 'expanded' } as const
@@ -48,13 +47,14 @@ const LABELS = {
     line: 'línea',
     completed: 'completados',
     inactive: 'No activas',
-    tabs: { initiatives: 'Iniciativas', agents: 'Agentes' } as Record<string, string>,
+    tabs: { initiatives: 'Iniciativas', agents: 'Agentes', files: 'Archivos' } as Record<string, string>,
     on: 'sí',
     off: 'no',
     noReset: 'sin hora de renovación',
     files: 'archivos',
     truncated: 'archivo recortado',
     noFiles: 'sin archivos',
+    chooseInitiative: 'elige una iniciativa:',
     unreadable: 'no se puede leer',
     tooLarge: 'archivo de más de 4 MiB: no se muestra',
     coordinator: 'coordinador (esta sesión)',
@@ -88,13 +88,14 @@ const LABELS = {
     line: 'line',
     completed: 'completed',
     inactive: 'Inactive',
-    tabs: { initiatives: 'Initiatives', agents: 'Agents' } as Record<string, string>,
+    tabs: { initiatives: 'Initiatives', agents: 'Agents', files: 'Files' } as Record<string, string>,
     on: 'yes',
     off: 'no',
     noReset: 'no reset time',
     files: 'files',
     truncated: 'file truncated',
     noFiles: 'no files',
+    chooseInitiative: 'choose an initiative:',
     unreadable: 'cannot be read',
     tooLarge: 'file over 4 MiB: not shown',
     coordinator: 'coordinator (this session)',
@@ -337,29 +338,33 @@ function roundLabel(job: any, round: any) {
   return briefs.size > 1 ? `r${round.round}·${review}` : review
 }
 
+// Only what the record or its transcript says is listed; a record with nothing beyond its name has no detail.
 function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
-  const resolved = usageLines(entry, t)
+  const resolved = entry.runs.length ? usageLines(entry, t) : { model: undefined, lines: [] as string[] }
   const model = resolved.model
     ? `${t.model}: ${resolved.model} (transcript)`
-    : `${t.model}: ${known(entry.model, t)}${entry.modelSource === 'unknown' ? '' : ` (${entry.modelSource})`}`
+    : entry.model !== 'unknown' && entry.model ? `${t.model}: ${entry.model}${entry.modelSource === 'unknown' ? '' : ` (${entry.modelSource})`}` : undefined
+  const effort = entry.effort !== 'unknown' && entry.effort ? `${t.effort}: ${entry.effort}` : undefined
+  // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
+  const verdict = entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict]
+  const facts = [
+    [model, effort].filter(Boolean).join(' · '),
+    verdict && `${t.verdict}: ${verdict}`,
+    ...resolved.lines,
+  ].filter(Boolean) as string[]
   return {
     key: `${initiativeId}-${jobId}-${entry.id}`,
     label: entry.role === 'unknown' ? entry.id : entry.role,
     color: PILL_COLORS[entry.verdict],
     isRunning: entry.verdict === 'running',
-    details: [
-      `${entry.id} · ${entry.kind}`,
-      `${model} · ${t.effort}: ${known(entry.effort, t)}`,
-      // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
-      `${t.verdict}: ${entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict] ?? t.unknown}`,
-      ...resolved.lines,
-    ],
+    hasDetail: facts.length > 0,
+    details: [`${entry.id} · ${entry.kind}`, ...facts],
   }
 }
 
-async function openTree($: EngineInterface, id: string, t: Labels) {
+async function openTree($: EngineInterface, id: string) {
   await $.state.set(TREE, { id, open: [] })
-  await $.ui.open({ id: TREE_PANE, title: `${id} · ${t.files}` })
+  await $.state.set(TAB, 'files')
   $.ui.invalidate('ui.render')
 }
 
@@ -384,6 +389,63 @@ async function treeRows($: EngineInterface, dir: string, rel: string, open: stri
     if (e.kind === 'dir' && open.includes(path)) rows.push(...await treeRows($, dir, path, open, depth + 1))
   }
   return rows
+}
+
+// The Files tab: the selected initiative's folder as a tree, and the open file below it.
+async function filesView($: EngineInterface, ui: any, t: Labels) {
+  const { Box, Button, Markdown, Text } = ui
+  const { value: tree } = await $.state.get(TREE)
+  if (!tree || !/^I\d+$/.test(tree.id)) return null
+  let stateDir
+  try {
+    stateDir = (await initiativesDir(await $.session.cwd(), { exists: (p: string) => $.fs.exists(p) })).stateDir
+  } catch (error) {
+    return <Text color="error">{String((error as Error).message)}</Text>
+  }
+  const dir = joiner(stateDir)(stateDir, tree.id)
+  const rows = await treeRows($, dir, '', tree.open, 0)
+  const set = (next: typeof tree) => $.state.set(TREE, next).then(() => $.ui.invalidate('ui.render'))
+  const press = (row: (typeof rows)[number]) => () => row.isDir
+    ? set(tree.open.includes(row.rel)
+      // Folding a folder also closes a file inside it, which would otherwise stay open with no row to close it.
+      ? { ...tree, open: tree.open.filter(p => p !== row.rel && !p.startsWith(`${row.rel}/`)), file: tree.file?.startsWith(`${row.rel}/`) ? undefined : tree.file }
+      : { ...tree, open: [...tree.open, row.rel] })
+    : set({ ...tree, file: tree.file === row.rel ? undefined : row.rel })
+  let shown: string | undefined
+  let isTruncated = false
+  let isTooLarge = false
+  const listed = tree.file && isInside(tree.file) ? rows.find(r => !r.isDir && r.rel === tree.file) : undefined
+  // `$.fs.read` refuses files over 4 MiB.
+  if (listed && listed.size > READ_LIMIT) isTooLarge = true
+  else if (listed) {
+    try {
+      const text = (await $.fs.read(joiner(dir)(dir, ...listed.rel.split('/')))).replace(/\r\n?/g, '\n')
+      isTruncated = text.length > FILE_CHARS
+      shown = isTruncated ? text.slice(0, FILE_CHARS) : text
+    } catch {
+      shown = undefined
+    }
+  }
+  return (
+    <Box flexDirection="column">
+      <Text bold color="claude">{tree.id} · {t.files}</Text>
+      {rows.length === 0 && <Text dimColor>{t.noFiles}</Text>}
+      {rows.map(row => (
+        <Button key={`file-${row.rel}`} plain onPress={press(row)}>
+          <Text color={row.rel === tree.file ? 'claude' : undefined} bold={row.rel === tree.file}>
+            {'  '.repeat(row.depth)}{row.isDir ? `${tree.open.includes(row.rel) ? '▾' : '▸'} ${row.name}/` : `  ${row.name}`}
+          </Text>
+        </Button>
+      ))}
+      {tree.file && (
+        <Box borderStyle="round" borderColor="claude" flexDirection="column">
+          <Text bold>{tree.file}</Text>
+          {isTooLarge ? <Text dimColor>{t.tooLarge}</Text> : shown === undefined ? <Text color="error">{t.unreadable}</Text> : <Markdown key="tree-file" text={shown} />}
+          {isTruncated && <Text dimColor>… {t.truncated}</Text>}
+        </Box>
+      )}
+    </Box>
+  )
 }
 
 export const register: Register = (on, options) => {
@@ -444,65 +506,8 @@ export const register: Register = (on, options) => {
     return { text: t.opened }
   })
 
-  on('ui.render', { component: 'Pane', requestId: TREE_PANE }, async ($, e) => {
-    const { Box, Button, Markdown, Text } = $.ui.resolve(e)
-    const t = await labelsFor($)
-    const { value: tree } = await $.state.get(TREE)
-    if (!tree || !/^I\d+$/.test(tree.id)) return <Text dimColor>{t.noFiles}</Text>
-    let stateDir
-    try {
-      stateDir = (await initiativesDir(await $.session.cwd(), { exists: (p: string) => $.fs.exists(p) })).stateDir
-    } catch (error) {
-      return <Text color="error">{String((error as Error).message)}</Text>
-    }
-    const dir = joiner(stateDir)(stateDir, tree.id)
-    const rows = await treeRows($, dir, '', tree.open, 0)
-    const set = (next: typeof tree) => $.state.set(TREE, next).then(() => $.ui.invalidate('ui.render'))
-    const press = (row: (typeof rows)[number]) => () => row.isDir
-      ? set(tree.open.includes(row.rel)
-        // Folding a folder also closes a file inside it, which would otherwise stay open with no row to close it.
-        ? { ...tree, open: tree.open.filter(p => p !== row.rel && !p.startsWith(`${row.rel}/`)), file: tree.file?.startsWith(`${row.rel}/`) ? undefined : tree.file }
-        : { ...tree, open: [...tree.open, row.rel] })
-      : set({ ...tree, file: tree.file === row.rel ? undefined : row.rel })
-    let shown: string | undefined
-    let isTruncated = false
-    let isTooLarge = false
-    const listed = tree.file && isInside(tree.file) ? rows.find(r => !r.isDir && r.rel === tree.file) : undefined
-    // `$.fs.read` refuses files over 4 MiB.
-    if (listed && listed.size > READ_LIMIT) isTooLarge = true
-    else if (listed) {
-      try {
-        const text = (await $.fs.read(joiner(dir)(dir, ...listed.rel.split('/')))).replace(/\r\n?/g, '\n')
-        isTruncated = text.length > FILE_CHARS
-        shown = isTruncated ? text.slice(0, FILE_CHARS) : text
-      } catch {
-        shown = undefined
-      }
-    }
-    return (
-      <Box flexDirection="column">
-        <Text bold color="merged">{tree.id} · {t.files}</Text>
-        {rows.length === 0 && <Text dimColor>{t.noFiles}</Text>}
-        {rows.map(row => (
-          <Button key={`file-${row.rel}`} plain onPress={press(row)}>
-            <Text color={row.rel === tree.file ? 'claude' : undefined} bold={row.rel === tree.file}>
-              {'  '.repeat(row.depth)}{row.isDir ? `${tree.open.includes(row.rel) ? '▾' : '▸'} ${row.name}/` : `  ${row.name}`}
-            </Text>
-          </Button>
-        ))}
-        {tree.file && (
-          <Box borderStyle="round" borderColor="claude" flexDirection="column">
-            <Text bold>{tree.file}</Text>
-            {isTooLarge ? <Text dimColor>{t.tooLarge}</Text> : shown === undefined ? <Text color="error">{t.unreadable}</Text> : <Markdown key="tree-file" text={shown} />}
-            {isTruncated && <Text dimColor>… {t.truncated}</Text>}
-          </Box>
-        )}
-      </Box>
-    )
-  })
-
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Button, Text } = $.ui.resolve(e)
+    const { Box, Button, Markdown, Text } = $.ui.resolve(e)
     const t = await labelsFor($)
     if (!(await $.state.get(IS_ACTIVATED)).value) return <Text dimColor>{t.notActive}</Text>
     const { value: touched = [] } = await $.state.get(TOUCHED)
@@ -532,13 +537,24 @@ export const register: Register = (on, options) => {
     resolveUsage($, cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status !== 'completed' || isExpanded(i, j)))
       .flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries.flatMap((x: any) => x.runs))), snapshot.project)
 
-    const toggle = (key: string) => () => update($, EXPANDED, expanded.includes(key) ? removing(key) : adding([key])).then(() => $.ui.invalidate('ui.render'))
+    // One completed job is unfolded at a time: unfolding one folds the other and closes any open record detail.
+    const toggle = (key: string) => () => update($, EXPANDED, (list: string[] | undefined) => (list ?? []).includes(key) ? (list ?? []).filter(k => k !== key) : [key])
+      .then(() => $.ui.invalidate('ui.render'))
     // A pressed pill opens its detail in normal flow below its round, so it pushes later lines down instead of covering them.
+    // One record detail is open at a time: opening one closes the others; the unfolded job stays unfolded.
+    const isPillKey = (key: string) => key.split('-').length === 3
+    const togglePill = (key: string) => () => update($, EXPANDED, (list: string[] | undefined) => (list ?? []).includes(key)
+      ? (list ?? []).filter(k => k !== key)
+      : [...(list ?? []).filter(k => !isPillKey(k)), key].sort()).then(() => $.ui.invalidate('ui.render'))
     const pill = (p: ReturnType<typeof pillView>) => (
       <Box key={p.key} borderStyle={p.isRunning ? 'dashed' : 'round'} borderColor={p.color} borderDimColor={!p.color}>
-        <Button key={p.key} plain onPress={toggle(p.key)}>
-          <Text color={p.color} dimColor={!p.color}>{p.label}</Text>
-        </Button>
+        {p.hasDetail
+          ? (
+            <Button key={p.key} plain onPress={togglePill(p.key)}>
+              <Text color={p.color} dimColor={!p.color}>{p.label}</Text>
+            </Button>
+          )
+          : <Text color={p.color} dimColor={!p.color}>{p.label}</Text>}
       </Box>
     )
     const rounds = (initiative: any, job: any) => job.rounds.map((round: any) => {
@@ -576,7 +592,7 @@ export const register: Register = (on, options) => {
           </Button>
         </Box>
         <Box flexDirection="row" gap={1}>
-          {['initiatives', 'agents'].map(name => (
+          {['initiatives', 'agents', 'files'].map(name => (
             <Button key={`tab-${name}`} plain onPress={() => $.state.set(TAB, name).then(() => $.ui.invalidate('ui.render'))}>
               <Text bold={tab === name} color={tab === name ? 'claude' : undefined} dimColor={tab !== name}>{tab === name ? `[${t.tabs[name]}]` : ` ${t.tabs[name]} `}</Text>
             </Button>
@@ -585,6 +601,24 @@ export const register: Register = (on, options) => {
         <Text color="merged">{'═'.repeat(Math.max(1, e.props.bodyColumns ?? 40))}</Text>
       </Box>
     )
+    if (tab === 'files') {
+      const tree = await filesView($, { Box, Button, Markdown, Text }, t)
+      const choices = [...cards, ...unopenedCards]
+      return (
+        <Box flexDirection="column">
+          {header}
+          <Box flexDirection="row" gap={1} flexWrap="wrap">
+            <Text dimColor>{t.chooseInitiative}</Text>
+            {choices.map((i: any) => (
+              <Button key={`files-${i.id}`} plain onPress={() => openTree($, i.id)}>
+                <Text>{i.id}</Text>
+              </Button>
+            ))}
+          </Box>
+          {tree}
+        </Box>
+      )
+    }
     if (tab === 'agents') {
       // The coordinator is this session; delegated agents are the runs cited by the visible cards' records.
       if (!countingOwn) {
@@ -665,7 +699,7 @@ export const register: Register = (on, options) => {
           const closed = initiative.jobs.filter((j: any) => j.status === 'completed').length
           return (
             <Box borderStyle="round" borderColor="subtle" flexDirection="column">
-              <Button key={`tree-${initiative.id}`} plain onPress={() => openTree($, initiative.id, t)}>
+              <Button key={`tree-${initiative.id}`} plain onPress={() => openTree($, initiative.id)}>
                 <Text bold color="claude">● {initiative.id} · {initiative.title}</Text>
               </Button>
               {initiative.status === 'unparsed' && <Text color="warning">{unparsedLabel(initiative.planError, t)}</Text>}

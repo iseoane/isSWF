@@ -6,7 +6,7 @@ export type IsswfPanePinned = string[]
 export type IsswfPaneExpanded = string[]
 
 // The pane's selected tab.
-export type IsswfPaneTab = 'initiatives' | 'agents'
+export type IsswfPaneTab = 'initiatives' | 'agents' | 'files'
 
 // The initiative shown in the file-tree pane, its expanded folders and the open file, as paths relative to the initiative.
 export type IsswfPaneTree = { id: string; open: string[]; file?: string }

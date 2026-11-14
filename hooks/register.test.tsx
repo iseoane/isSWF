@@ -452,20 +452,21 @@ test('the coordinator row says the worker profile was read, and an unresolved ru
   await ui.unmount()
 })
 
-const TREE_PANE = { ...PANE, requestId: 'isswf-initiative-tree' }
+const TREE_PANE = PANE
 
 for (const cwd of ['/p', 'C:\\p']) {
-  test(`a card's title opens its initiative's file tree, and a file opens below it (${cwd})`, ON, async ($, on) => {
+  test(`a card's title opens its initiative's file tree in the Files tab, and a file opens below it (${cwd})`, ON, async ($, on) => {
     // A Windows checkout may hold CRLF line endings; the file is drawn with plain newlines.
-    const { seen, opened } = engine(on, cwd, { ...RECORDS, 'I0046/jobs/J002/brief-r1.md': 'brief\r\nsecond' })
+    const { seen } = engine(on, cwd, { ...RECORDS, 'I0046/jobs/J002/brief-r1.md': 'brief\r\nsecond' })
     await activate($)
     await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
     let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
     await ui.press({ key: 'tree-I0046' })
     await ui.unmount()
-    expect(opened).toContain('isswf-initiative-tree')
     let tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
-    expect(await text(tree, /^I0046 ·/)).toBe('I0046 · archivos')
+    // The title switches the same pane to its Files tab; no other pane opens.
+    expect(await text(tree, /Archivos/)).toBe('[Archivos]')
+    expect(await text(tree, /^I0046 · archivos/)).toBe('I0046 · archivos')
     // Files first, then folders, folded until pressed.
     expect(await text(tree, /plan\.md$/)).toBe('  plan.md')
     expect(await text(tree, /jobs\/$/)).toBe('▸ jobs/')
@@ -505,20 +506,21 @@ test('the file tree reads nothing outside the selected initiative', ON, async ($
   const { seen } = engine(on, '/p')
   // A stored selection is data: a path that leaves the initiative, or one no listing returned, is never read.
   let file = ''
-  on('state.get', ($: any, e: { key: string }, next: any) => (e.key === 'tree' ? { value: { value: { id: 'I0046', open: ['jobs'], file }, version: 1 } } : next(e)))
+  on('state.get', ($: any, e: { key: string }, next: any) => (e.key === 'tree' ? { value: { value: { id: 'I0046', open: ['jobs'], file }, version: 1 } } : e.key === 'tab' ? { value: { value: 'files', version: 1 } } : next(e)))
   await activate($)
-  for (file of ['../I0048/plan.md', 'jobs/../../I0048/plan.md', '/p/.factory/initiatives/I0048/plan.md', 'jobs/J002/missing.md']) {
+  for (file of ['../I0048/plan.md', 'jobs/../../I0048/plan.md', '/p/.factory/initiatives/I0048/plan.md', 'jobs/J002/missing.md', '../../secret.md']) {
     const tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
     expect(await tree.find({ type: 'Markdown', key: 'tree-file' })).toBe(undefined)
     expect(await text(tree, /no se puede leer/)).toBe('no se puede leer')
     await tree.unmount()
   }
-  expect(seen.some(p => p.includes('..') || p.endsWith('I0048/plan.md') || p.endsWith('missing.md'))).toBe(false)
+  // The Initiatives data still reads every plan; the file view adds no read outside its listing.
+  expect(seen.some(p => p.includes('..') || p.endsWith('missing.md') || p.endsWith('secret.md'))).toBe(false)
 })
 
 test('a file over the 4 MiB read limit is named, not read', ON, async ($, on) => {
   const { seen } = engine(on, '/p', { ...RECORDS, 'I0046/big.md': 'x'.repeat(4 * 1024 * 1024 + 1) })
-  on('state.get', ($: any, e: { key: string }, next: any) => (e.key === 'tree' ? { value: { value: { id: 'I0046', open: [], file: 'big.md' }, version: 1 } } : next(e)))
+  on('state.get', ($: any, e: { key: string }, next: any) => (e.key === 'tree' ? { value: { value: { id: 'I0046', open: [], file: 'big.md' }, version: 1 } } : e.key === 'tab' ? { value: { value: 'files', version: 1 } } : next(e)))
   await activate($)
   const tree = await $.ui.mount({ ...TREE_PANE, surface: 'desktop' })
   expect(await text(tree, /4 MiB/)).toBe('archivo de más de 4 MiB: no se muestra')
@@ -534,5 +536,78 @@ test('an unreadable plan says which job, field and line broke it', ON, async ($,
   await $.command.run({ command: 'isswf-initiatives', args: 'pin I0050' })
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await text(ui, /^plan no legible/)).toBe(`plan no legible: J001 · Brief, línea ${line} (unsafe-brief-reference)`)
+  await ui.unmount()
+})
+
+test('the Files tab without a selection offers the visible initiatives', ON, async ($, on) => {
+  engine(on, '/p')
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'tab-files' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /elige una iniciativa/)).toBe('elige una iniciativa:')
+  expect(await text(ui, /plan\.md$/)).toBe(undefined)
+  await ui.press({ key: 'files-I0046' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await text(ui, /plan\.md$/)).toBe('  plan.md')
+  await ui.unmount()
+})
+
+test('opening a record detail closes the other open one', ON, async ($, on) => {
+  engine(on, '/p')
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'I0046-J004-A001' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Box', key: 'I0046-J004-A001-detail' })).toBeDefined()
+  await ui.press({ key: 'I0046-J004-V001' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Box', key: 'I0046-J004-V001-detail' })).toBeDefined()
+  expect(await ui.find({ type: 'Box', key: 'I0046-J004-A001-detail' })).toBe(undefined)
+  await ui.unmount()
+})
+
+test('a coordinator record shows only what it states, and with nothing to show it is not a button', ON, async ($, on) => {
+  engine(on, '/p', {
+    ...RECORDS,
+    'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n',
+    'I0046/jobs/J004/A003.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: complete\n',
+  })
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Button', key: 'I0046-J004-A002' })).toBe(undefined)
+  await ui.press({ key: 'I0046-J004-A003' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  // No model, effort or usage lines: the record states none and has no run.
+  expect(await text(ui, /^modelo/)).toBe(undefined)
+  expect(await text(ui, /^uso/)).toBe(undefined)
+  expect(await text(ui, /^veredicto/)).toBe('veredicto: complete')
+  await ui.unmount()
+})
+
+test('unfolding a completed job folds the other one', ON, async ($, on) => {
+  engine(on, '/p')
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'I0046-J002' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'I0046-J003' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Box', key: 'I0046-J003-V001' })).toBeDefined()
+  await ui.press({ key: 'I0046-J002' })
+  await ui.unmount()
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Box', key: 'I0046-J003-V001' })).toBe(undefined)
   await ui.unmount()
 })
