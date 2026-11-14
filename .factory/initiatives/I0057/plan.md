@@ -6,39 +6,67 @@ Operator feedback 2026-11-14 during I0009 on native Windows: the process is not 
 
 Operator decision 2026-11-14: every guard ships in the Claude Code plugin (hooks/, registered through .claude-plugin), with an equivalent Pi extension mirror where Pi supports one. Shared rules live in one tools/ module that both hosts call. A guard a host cannot support is recorded as a gap, never silently skipped.
 
+Re-planned 2026-11-14 after a read-only coordinator audit (Engram observation 4583). The traced incidents (J029; `Brief: None.` in I0055 and I0056) show the rules were correct and, for plans, a checker already existed, but nothing ran it when the mistake was made: only CI did, later. Each job moves an existing rule or check to that moment, in one of three ways: generate the record so the mistake cannot be written, check it when written, or refuse the action before it runs.
+
+Rules for every job:
+
+- A guard only refuses or informs. It never grants permission, starts work or approves an action (AGENTS.md).
+- The rule lives in the shared tools/ module; the Claude plugin hook and the Pi extension only call it. A host or platform that cannot support the guard is recorded as a gap in the job's evidence.
+- The model has no way to bypass a guard. If an override is needed, it is a command the operator types.
+- When a guard ships, the Markdown rule it enforces is reduced to a one-line pointer in the same PR, so each rule has one owner.
+- Guards narrow mistakes; they are not containment. Shell paths that evade a guard are named in the job's limits, not claimed as covered.
+- When closing each job, the coordinator copies the process deviations its attempt and review records report into the deferred candidates below, with date, rule and cost. Until J008 ships, it records any it observes itself.
+
+Sizing: each job's Size line gives its reason, judged by verification cost (.agents/roles/references/planning.md): S is one flow with no special risk; M is two or three related flows, or one bounded special risk. An L job is split before start. Plan approval is preparation only; each job needs an explicit operator start.
+
+Deferred candidates, without an observed incident yet; add a job only after one is observed: plan and brief edits refused while a writer for that job runs; the hook records which files a child read and which commands it ran, so resource consumption and checks run become observed rather than self-reported; the version advisory and Engram/Codegraph availability computed by a script at coordinator load; `gh issue create` without `needs-triage`; `gh pr merge` without `--match-head-commit` or with `--auto`; a warning at the fourth material brief revision; a pre-commit run of `tooling/quality/check-docs.mjs` and `git diff --check`.
+
+Observed candidate, eligible for a job: a `records:` commit made on a branch other than the expected one. On 2026-11-14 the I0057 re-plan (c07a5dc) was committed on `fix/j030-reverse-stdin`, the branch of PR324, instead of on `main`, because a peer session had switched the shared checkout's branch and the coordinator did not check it. Cost: one misplaced commit, moved to `main` and removed from that branch before it was pushed.
+
+Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
+
+Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after them. J003 and J005 are independent.
+
 ## J001
 
 - Status: pending
+- Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
 - Blocker: None.
-- Next step: Prepare a brief; compare a Claude Code PostToolUse hook, a Pi equivalent and a pre-commit check for each host and platform.
+- Next step: Prepare a brief; compare the Claude plugin tool.call hook, Pi's tool_call/tool_result events and an opt-in pre-commit check for each host and platform.
 
 ### Acceptance
 
-- Editing `.isswf/` or `.factory/` initiative records runs the strict plan parser and a records validator. The validator checks that `Run:` lines match the pane's parser, that a job with records or an active writer is not left `pending` or `blocked` while work runs, and that record fields are present. Failures surface before commit on Linux and Windows, in Pi and Claude Code.
+- `isswf-status` exits nonzero for a plan that does not parse, keeping its current `planError` detail (code, job, field and line); a valid plan keeps exit 0 and its current output.
+- After an Edit or Write to a plan, brief, attempt or review record under `.isswf/` or `.factory/`, the shared validator runs and any violation reaches the model in the same turn, in Claude Code and Pi, on Linux and Windows.
+- The validator checks the strict plan parse, that `Run:` lines match the pane's parser, that a job whose records show a started writer is not left `pending` or `blocked`, and that required record fields are present.
 - One shared validator owns the rules and the pane parser reuses it; no rule is duplicated in two places.
+- The coordinator skill's plan read-back instruction is reduced to a pointer to the check.
 
 ### Evidence
 
-- 2026-11-14: I0055 and I0056 used `Brief: None.`; only CI caught `unsafe-brief-reference` (PR323). The status tool does not apply the strict parse.
+- 2026-11-14: I0055 and I0056 used `Brief: None.`; only CI caught `unsafe-brief-reference` (PR323).
+- 2026-11-14 correction to the entry above: replaying the pre-fix I0055 plan in a Git repository, `isswf-status` does detect it (`status: unknown`, `invalid-or-changing-plan`, `planError` `unsafe-brief-reference` at J001 Brief line 12), but it exits 0, so only a reader who checks the output notices. Outside a Git root it reports `unreadable-or-unsafe-plan` even for a valid plan. `tests/plan-records.mjs` catches it in about a second but runs only in CI. Plans written at 20:03 (8566437), fixed at 20:38 (03a24a8).
 - 2026-11-14: `Run:` lines with trailing notes in A003, A011 and V006 were silently ignored by the pane (tools/isswf-snapshot-core.mjs:116).
 - 2026-11-14: J029 stayed `blocked` while its worker, review and PR ran, so the pane's quota-resume prompt (hooks/register.tsx:165) never armed.
 
 ## J002
 
 - Status: pending
+- Size: M (two related flows, generating the review handoff and detecting unreviewed commits before delivery)
 - Objective: Delegation handoffs that the methodology requires are generated, not hand-written.
-- Depends on: None
+- Depends on: J004
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
 - Blocker: None.
-- Next step: Prepare a brief after J001.
+- Next step: Prepare a brief after J004, reusing its dispatch guard for the review handoff check.
 
 ### Acceptance
 
 - An unbound reviewer handoff is produced by a tool that emits the exact `base..candidate` diff file, its byte count and SHA-256, and the required review resources; a review cannot be dispatched without them.
 - Delivery detects commits that change non-record paths after the last reviewed candidate without a recorded delta review, before push or in CI.
+- The matching coordinator and host-guide rules are reduced to pointers to the tool and the check.
 
 ### Evidence
 
@@ -48,18 +76,131 @@ Operator decision 2026-11-14: every guard ships in the Claude Code plugin (hooks
 ## J003
 
 - Status: pending
-- Objective: Coordinator shell use cannot silently break session state or violate the CI-waiting rule.
+- Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
+- Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
 - Blocker: None.
-- Next step: Prepare a brief; check which guards each host supports.
+- Next step: Prepare a brief; check which guards each host supports, including for child agents.
 
 ### Acceptance
 
 - A `cd` that would leave the session working directory outside the project root is refused or reverted, so the pane keeps finding the state directory.
 - Continuous CI waiting (`gh pr checks --watch`, `gh run watch`, sleep loops) is refused, with the documented alternatives offered (feature-delivery.md: a native completion event, one bounded deferred check, or manual revisit).
+- Package acquisition from coordinator or child shells (`npx`, `npm install`, `npm i`, `pnpm dlx`, `pip install` and equivalents) is refused, while already installed locked tools such as `tooling/quality/node_modules/eslint/bin/eslint.js` still run.
+- Commands that evade these patterns are listed as known limits.
 
 ### Evidence
 
 - 2026-11-14: a `cd` into jobs/J029 and later into .agents moved the session cwd; the pane showed "no .isswf or .factory state directory".
 - 2026-11-14: the coordinator used `gh pr checks --watch` with sleep, contrary to feature-delivery.md:63; one wait was killed for low memory.
+- 2026-11-03: a Claude worker ran unauthorized `npx eslint` and `npx knip` with package-acquisition warnings and the wrong tool configuration, a repeated violation (Engram observation 4426).
+
+## J004
+
+- Status: pending
+- Size: M (one flow, with one bounded risk: refusing a legitimate dispatch)
+- Objective: A delegation that fails the coordinator's pre-dispatch refusal conditions is refused by the host before the child starts.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief after J001; verify the Pi subagent tool name and arguments the guard must inspect.
+
+### Acceptance
+
+- A delegation to an isSWF role (a Claude Agent call or the Pi subagent call) is refused, naming the failed condition, when any of these holds: the initiative status is not `observed`; the named brief is untracked, uncommitted or ignored; the prompt lacks the brief path, a full checkpoint SHA or a full base SHA; or the job is not `in-progress` in the committed plan.
+- A delegation that meets every condition runs unchanged, and delegations to other agents are not affected.
+- Passing the guard is not recorded or reported as authorization.
+- The coordinator skill's "Pre-dispatch refusal conditions" section is reduced to a pointer to the guard.
+
+### Evidence
+
+- 2026-11-14: J029 was dispatched while its plan job stayed `blocked` (see J001); the conditions in .agents/skills/isswf-coordinator/SKILL.md:152-160 are held only in prose and nothing runs them at dispatch.
+- 2026-11-14 audit: the Claude plugin `tool.call` hook can return `deny` before a call runs (.claude-plugin/types/claude-code/index.d.ts, ToolCallResult); Pi 1.5.2 `tool_call` can block (installed docs/extensions.md). The Pi subagent call shape is not yet verified.
+
+## J005
+
+- Status: pending
+- Size: M (one flow, but verification needs a real compaction on each host)
+- Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief; confirm how each host lets a plugin steer the summary and add context after compaction.
+
+### Acceptance
+
+- When a session in which the coordinator skill is active compacts, the summary instructions keep the active initiative and job, child agent IDs, candidate SHA, remaining budgets and the version-advisory marker, in Claude Code and Pi.
+- The first turn after that compaction receives a reminder to reload the coordinator skill and the methodology in use, or the host reloads the skill itself.
+- Sessions that never activated the coordinator are not affected.
+- The host guides' reload-after-compaction instruction is reduced to a pointer.
+
+### Evidence
+
+- 2026-11-14: the operator reports that forgotten process rules are recurrent. Linking this to compaction is an inference, not a traced cause.
+- 2026-11-14 audit: .agents/hosts/claude-code.md asks the coordinator to reload its skill after compaction, a rule that itself depends on memory. Mechanisms found: Claude plugin `session.compact` (steer or skip) and SessionStart `reloadSkills`; Pi `session_before_compact` and `before_agent_start`.
+
+## J006
+
+- Status: pending
+- Size: S (one flow, no special risk)
+- Objective: The coordinator changes plan job fields through a command instead of hand-editing Markdown.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief after J001; decide in it how the command relates to the existing grant-guarded tools/isswf-plan.mjs.
+
+### Acceptance
+
+- A command sets a job's Status, Blocker and Next step, appends Evidence, and adds a new job or plan in the form `parsePlan` accepts, including the pending brief reference.
+- It writes atomically, reads the plan back with `parsePlan`, and on any failure exits nonzero and leaves the file unchanged.
+- Hand edits remain possible and are still checked by J001's validator.
+
+### Evidence
+
+- 2026-11-14: the `Brief: None.` lines in I0055 and I0056 were hand-written (8566437).
+- 2026-11-14 audit: the `render()` function in tools/isswf-plan.mjs always writes a valid brief reference, but it requires an external plan-only grant file and is not used for native plans.
+
+## J007
+
+- Status: pending
+- Size: M (two related flows, attempt and review records, plus the launch identity)
+- Objective: New attempt and review records start with their mechanical fields filled from Git and the launch identity.
+- Depends on: J006
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief after J006, listing which template fields are derivable and from which source.
+
+### Acceptance
+
+- A command creates the job's next unused `A<nnn>.md` or `V<nnn>.md` from the template. It fills the record ID, review round, `Run:` line, brief path, revision and checkpoint SHA, base SHA, checkout, branch and requested model from the supplied launch data and Git; semantic fields stay for the author.
+- At completion, the changed paths and commits `base..candidate` are filled from Git.
+- An existing record ID is never reused; on a conflict the command refuses.
+
+### Evidence
+
+- 2026-11-14: A011 added a `Run note` line, and `Run:` lines with trailing notes in A003, A011 and V006 were ignored by the pane (see J001).
+- 2026-11-14 audit: about half of the roughly 30 fields in .factory/templates/attempt.md are copies of data already held in Git or in the launch call.
+
+## J008
+
+- Status: pending
+- Size: M (two related flows: the deviations field in both templates, and per-round reviewer limits in review records)
+- Objective: Every attempt and review record reports the process deviations its author observed, and every review round records the reviewer's limits, so neither depends on the coordinator's memory.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief; place the field in both templates and in the worker and reviewer return instructions.
+
+### Acceptance
+
+- The attempt and review templates have a required `Process deviations observed:` field. Its value is either `None.` or, for each deviation, a written rule that was not followed, or mechanical data copied by hand that could have been derived.
+- The worker and reviewer profiles ask for that field in their return; existing records are not rewritten.
+- Each review round, including a delta round appended to an existing review record, records the reviewer's limits (unreviewed areas, evidence not observed, approvals the reviewer cannot give) and its convergence advice in the template's `Unreviewed areas and evidence limits:` field, or `None.`.
+- Once J001 ships, its validator reports a new record that lacks the deviations field and a review round that lacks the limits field.
+- Both fields are self-reported and are documented as such, not as observed evidence.
+
+### Evidence
+
+- 2026-11-14: the operator asked that worker and reviewer runs be observed for semantic steps that could become deterministic; a rule to remember to observe would itself depend on the coordinator's memory.
+- 2026-11-14: the J030 reviewer suggested that the review template ask for reviewer limits and convergence advice (I0009/J030/V006.md, round 4). The coordinator left the reviewer limits out of V006 twice (round 1, suggestion N2; round 3, added in round 4). The template already has the field (.factory/templates/review.md, "Limits and return"), but only 4 of 135 review records in .factory/initiatives use that section: review records are hand-written outside the template, and nothing checks the field.
