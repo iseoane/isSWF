@@ -44,9 +44,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: A read-only researcher answers the brief-r1 cross-host feasibility questions; the coordinator records A001, then prepares brief-r2 for the writer.
+- Next step: The worker implements brief-r2 (shared record validator, CLI and strict status exit) on feat/i0057-j001-record-check; the hook and Pi wiring follows in brief-r3 after the runtime probes in A002.
 
 ### Acceptance
 
@@ -195,13 +195,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows: the deviations field in both templates, and per-round reviewer limits in review records)
 - Objective: Every attempt and review record reports the process deviations its author observed, and every review round records the reviewer's limits, so neither depends on the coordinator's memory.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Open the PR for candidate 62c501a, verify CI on the exact head and merge; then close J008 with the deviations copied to the deferred candidates.
+- Next step: None. The J001 validator check of these fields is J001 scope.
 
 ### Acceptance
 
@@ -221,6 +221,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
   - [V003](jobs/J008/V003.md): pass.
   - Two correction cycles: [A002](jobs/J008/A002.md) and [A003](jobs/J008/A003.md).
 - 2026-11-14: the operator approved integration of the role-profile change, which REVIEW.md lists under "Always needs a person" ("Si apruebo"). The operator also extended the review budget ("Si necesitas más rondas las tienes").
+- 2026-11-14: PR326 merged as 0d2ff5d2fc1a53b00bf422d29fc244d2dcee20ba after green CI on exact head 3d712c37da63df01a9e69c815a84710fc227fa0f (Ubuntu and Windows package and host discovery, portable checks). The deviations reported in A001-A003 and V001-V003 were copied to the deferred candidates.
 
 ## J009
 
