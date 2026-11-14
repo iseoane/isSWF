@@ -129,25 +129,35 @@ These flags are per-process arguments, not a host configuration change. Do not u
 
 ## Reverse supplied-evidence contract
 
-Use this only when the operator explicitly authorizes a Pi reviewer from a Claude coordinator on Linux; otherwise this route is unavailable.
+Use this only when the operator explicitly authorizes a Pi reviewer from a Claude coordinator on Linux or Windows; otherwise this route is unavailable.
 
-- **Shape.** A Claude coordinator consumes an independent no-tools Pi reviewer report for supplied evidence. The coordinator, not the Pi reviewer, owns one explicitly authorized synchronous Linux Bash pipeline invoking the approved existing Pi CLI in JSON mode. This is not a Claude-native Agent→Pi bridge. The Pi reviewer receives no shell, launch authority or other new dispatcher. Existing Pi→Claude supplied-evidence review is the opposite direction and must not be described as this reverse path.
+- **Shape.** A Claude coordinator consumes an independent no-tools Pi reviewer report for supplied evidence. The coordinator, not the Pi reviewer, owns one explicitly authorized synchronous Bash pipeline (Linux bash or Windows Git Bash) invoking the approved existing Pi CLI in JSON mode and the [portable projection](#portable-jsonl-projection). This is not a Claude-native Agent→Pi bridge. The Pi reviewer receives no shell, launch authority or other new dispatcher. Existing Pi→Claude supplied-evidence review is the opposite direction and must not be described as this reverse path.
 - **Packet.** The coordinator binds the exact candidate/cwd, supplies the complete diff and required canonical review resources inline, requests the approved Pi reviewer selection, and consumes the exact terminal report.
 - **Preflight.** Before any live launch, independently verify the current explicit permission, the actual existing safe executable/host route, current selection and bounded budget. Do not discover an unsafe PATH wrapper by invoking version/help. Verify the route/account is the approved one without reading credential values; if that cannot be established, block. A past selection does not establish current availability or authorization.
 - **Identity.** The producer argv/request, requested model/effort, host-reported identity and effective effort are separate facts; leave effective effort unknown unless attested.
 - **Transport.** Bind explicit candidate cwd and bounded stdin, stdout, stderr and timeout. No host/tool/provider fallback or automatic retry is permitted.
 - **Success.** Require successful producer and filter exits under `pipefail`, exactly one session with the expected cwd, exactly one complete final assistant report with expected provider/model, nonempty concatenated text blocks, `stopReason: stop`, no error, and exactly one `agent_settled` with `aborted: false`.
-- **Failure.** Missing/duplicate/malformed/truncated terminal, retry/compaction/error events (including suffixed event names), identity mismatch, output/stderr truncation, nonzero exit, timeout and cancellation are failure or inconclusive, never success. Cancellation is not proof of cessation; reconcile the actor before any further action. No descendant, real-provider cancellation, Windows, native bridge, isolation or general recovery claim is made.
+- **Failure.** Missing/duplicate/malformed/truncated terminal, retry/compaction/error events (including suffixed event names), identity mismatch, output/stderr truncation, nonzero exit, timeout and cancellation are failure or inconclusive, never success. Cancellation is not proof of cessation; reconcile the actor before any further action. No descendant, real-provider cancellation, native bridge, isolation or general recovery claim is made, and Windows is claimed only for the projection and synthetic controls named below.
 
-### Canonical Linux JSONL projection
+### Portable JSONL projection
 
-This filter follows the public Pi JSONL shape: final `message.content` is an array, and only its `text` blocks are preserved; thinking blocks are dropped. Before projection, it requires each source block to have a recognized shape and all text to be a string; malformed content halts the jq process nonzero rather than being normalized or silently dropped. `cwd` comes only from the whitelisted session event, never inferred from the message. Session and settlement payloads are whitelisted, and adverse event type suffixes are retained. The focused test, `tests/j030-reverse-protocol.mjs`, extracts these exact bytes and runs synthetic no-model transport/failure controls; tests do not enforce runtime behavior. Capture combined pipeline stdout with a 16,000-byte limit; emit any success marker only after producer and filter succeed. Truncation, including loss of settlement, cannot be accepted.
+`tools/pi-jsonl-projection.mjs` is the canonical filter. It follows the public Pi JSONL shape: final `message.content` is an array, and only its `text` blocks are preserved; thinking blocks are dropped. It reads Pi's JSON-mode JSONL on stdin and writes only these records, one compact JSON object per line:
+
+- `session` as `type` and `cwd`, `agent_settled` as `type` and `aborted`, and each assistant `message_end` as `type` and `message` with `role`, `provider`, `model`, `stopReason`, `errorMessage` and the text blocks. An absent whitelisted field is `null`; `cwd` comes only from the session event, never from the message.
+- Any event whose type contains `retry`, `compaction` or `error` (suffixes included), as its `type` alone.
+- Nothing for every other event.
+
+It exits nonzero, prints nothing to stdout and names the cause on stderr, without echoing event content, when the stream has an invalid JSON line, a non-object event, a non-array assistant `content`, a block that is not an object or is neither `text` nor `thinking` with a string payload, or more than 8 MiB (8,388,608 bytes) of input. Each line is one JSON value; blank lines are ignored. It is a filter only: it never launches Pi, retries or decides acceptance, so the coordinator still applies the success and failure rules above.
 
 ```sh
-jq -c 'select(.type == "session" or .type == "agent_settled" or (.type == "message_end" and .message.role == "assistant") or (.type | tostring | test("retry|compaction|error"))) | if .type == "session" then {type, cwd} elif .type == "agent_settled" then {type, aborted} elif .type == "message_end" then (.message.content as $content | if ($content | type) != "array" then "assistant content must be an array" | halt_error(5) elif (all($content[]; type == "object" and ((.type == "text" and (.text | type) == "string") or (.type == "thinking" and (.thinking | type) == "string"))) | not) then "malformed assistant content block" | halt_error(5) else {type, message: (.message | {role, provider, model, stopReason, errorMessage, content: [$content[] | select(.type == "text") | {type, text}]})} end) else {type} end'
+set -o pipefail; pi … | node <factory-root>/tools/pi-jsonl-projection.mjs
 ```
 
-Evidence note: a historical Linux live run proved only an earlier supplied-evidence scope and does not verify this projection. Native Windows evidence remains deliberately deferred.
+`pi …` stands for the approved producer invocation; `<factory-root>` is the trusted root resolved from the loaded plugin, written with forward slashes in Git Bash. Capture the combined pipeline stdout with a 16,000-byte limit and emit any success marker only after producer and filter succeed. Truncation, including loss of settlement, cannot be accepted.
+
+The focused test, `tests/j030-reverse-protocol.mjs`, runs this module in Linux bash and Windows Git Bash through the pipeline above with synthetic input and no model call. It compares the module's output with fixtures derived by reading the retired filter's text, which was not executed for them; the module is stricter on rejection (no partial output, exit 1). It also covers producer, filter and size-limit failures and cancellation of a synthetic Node child. PowerShell and cmd pipelines, launching the real `pi` producer and real Pi or Claude cancellation are not covered, and tests do not enforce runtime behavior.
+
+Evidence note: a historical Linux live run proved only an earlier supplied-evidence scope and does not verify this projection. This section records no live reverse run on Windows.
 
 ## Existing legacy runtime assignments
 

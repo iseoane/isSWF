@@ -17,6 +17,7 @@
     "tools/token-native-claude.mjs",
     "tools/token-native-claude-transcript.mjs",
     "tools/git-evidence-mcp.mjs",
+    "tools/pi-jsonl-projection.mjs",
     "tools/factory-package.mjs",
     "tests/*.mjs",
     "tooling/quality/eslint.config.mjs",
