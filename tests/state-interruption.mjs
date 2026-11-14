@@ -187,8 +187,11 @@ async function recoverAndVerify(ctx, termination) {
 
 let keep = false;
 try {
-  const revision = run('git', ['-C', source, 'rev-parse', 'HEAD']).stdout.trim(), release = join(temp, 'release spaces ñ');
-  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', source, '--revision', revision, '--output', release, '--runtime', 'node']);
+  // Build from a clone in temp, as release-package does: source and output then share a drive on Windows CI.
+  const clone = join(temp, 'source');
+  run('git', ['clone', '-q', '--shared', source, clone]);
+  const revision = run('git', ['-C', clone, 'rev-parse', 'HEAD']).stdout.trim(), release = join(temp, 'release spaces ñ');
+  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', release, '--runtime', 'node']);
   const built = verifyRelease(release);
   const packed = JSON.parse(run(process.execPath, [npm, 'pack', release, '--ignore-scripts', '--json', '--pack-destination', temp]).stdout);
   const consumer = join(temp, 'consumer spaces ñ');
