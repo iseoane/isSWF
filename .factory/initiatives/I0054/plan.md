@@ -91,3 +91,23 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 - 2026-11-14: operator request; started by the operator ("y ya pasamos al nuevo job") once J003 merged.
 - 2026-11-14: open point from the J003 screenshots: a malformed plan field makes the whole card "plan no legible" without naming the field.
 - 2026-11-14: A001 at eeb49fb; bound review V001 FAIL (fold showed a false "cannot be read"; CRLF; 4 MiB), fixed in A002 at 8e2e8e9; V002 PASS; docs-only R2-1 wording applied at bec5147. PR #309 merged at e76bf27 after Linux and Windows CI passed on bec5147. Accepted under delegated acceptance (low risk).
+
+## J005
+
+- Status: completed
+- Objective: When a plan cannot be parsed, the pane and isswf-status say which job, field and line broke it instead of only "plan unreadable".
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: None.
+- Next step: None. I0054 stays open for further operator ideas.
+
+### Acceptance
+
+- Plan parser errors keep their current messages and also carry the job, field and 1-based line when they apply.
+- The snapshot JSON gives an unparsed initiative a `planError` with that code, job, field and line; `isswf-status` reports the same for an invalid plan. Documented in docs EN/ES `operations.md`.
+- The pane's card shows the detail, for example `plan no legible: J003 · Brief, línea 54 (unsafe-brief-reference)`.
+
+### Evidence
+
+- 2026-11-14: found while preparing J004 (a note after the `Brief:` link made I0054 "plan no legible" with no detail); started by the operator ("Aplica esa mejora").
+- 2026-11-14: A001 at 3ee8cde; V001 PASS with S1/S2, fixed in A002 at 24df4d1; V002 PASS (I4 known limit). PR #311 merged at a5acce5 after Linux and Windows CI passed on 24df4d1. Accepted under delegated acceptance (low risk).
