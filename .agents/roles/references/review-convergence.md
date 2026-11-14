@@ -30,6 +30,6 @@ Start the summary with the count of findings by severity and origin.
 
 A review round is one review of one candidate within the same job. The coordinator supplies the round number and the prior review IDs in the brief. If they are missing, state that and review the candidate in full as round 1.
 
-From round 2, scope the review to the delta under [changed candidates](review.md#choose-sufficient-verification). Do not report a finding again: cite its earlier ID and record whether it is resolved, still open or changed.
+From round 2, scope the review to the delta under [changed candidates](review.md#choose-sufficient-verification). Do not report a finding again: cite its earlier ID and record whether it is resolved, still open or changed. Repeat the reviewer limits and convergence advice for the delta round; do not rely on an earlier round's limits.
 
 When the brief's review-round or correction budget is spent and a blocking finding remains, the reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks the operator before any further correction. This recommendation never renews a spent budget.

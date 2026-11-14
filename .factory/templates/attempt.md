@@ -43,7 +43,8 @@
 - Changed paths:
 - Checks run and observed results:
 - Required red/green commit pairs and reviewer reproduction command/results (if TDD selected):
-- Deviations from required procedure and consequence:
+- Deviations from required procedure and consequence: `<the author's own departures from this assignment's procedure, or None.>`
+- Process deviations observed (self-reported, not observed evidence): `None.`, or one entry per deviation by any actor, the coordinator's handoff included: a written rule that was not followed, or mechanical data copied by hand that could have been derived. Your own departures from this assignment's procedure go in the field above instead; do not repeat them here.
 - Resulting artifact paths and checkpoint or commit references:
 - Risks, limits, and next action:
 

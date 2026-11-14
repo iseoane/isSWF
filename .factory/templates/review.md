@@ -41,7 +41,10 @@
 
 ## Limits and return
 
-- Unreviewed areas and evidence limits:
+- Reviewer limits for this round (self-reported by the reviewer, not observed evidence). Every round records them, including a delta round appended to an existing record; write `None.` when there are none:
+  - Unreviewed areas and evidence limits: `<unreviewed areas, evidence not observed, approvals the reviewer cannot give, or None.>`
+  - Convergence advice: `<what the coordinator should do next to converge, such as the smallest check or correction that would close this round, or None.>`
+- Process deviations observed (self-reported, not observed evidence): `None.`, or one entry per deviation by any actor, the coordinator's handoff included: a written rule that was not followed, or mechanical data copied by hand that could have been derived.
 - Required corrections or unresolved questions:
 - Return this artifact to the coordinator. Do not edit the candidate or disposition your own findings.
 - Coordinator override, recorded afterwards by the coordinator and never written into the verdicts above: `<decision, reason, evidence and authority, or None.>`
