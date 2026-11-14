@@ -48,6 +48,8 @@ const LABELS = {
     noReset: 'sin hora de renovación: no se programa',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'sin agentes delegados en las iniciativas visibles',
+    run: 'ejecución',
+    runs: 'ejecuciones',
   },
   en: {
     notActive: 'The isSWF coordinator is not active in this session.',
@@ -79,6 +81,8 @@ const LABELS = {
     noReset: 'no reset time: nothing scheduled',
     coordinator: 'coordinator (this session)',
     noAgents: 'no delegated agents in the visible initiatives',
+    run: 'run',
+    runs: 'runs',
   },
 }
 type Labels = typeof LABELS.en
@@ -458,9 +462,14 @@ export const register: Register = (on, options) => {
           .finally(() => { countingOwn = false })
       }
       const own = ownCounts ?? { skills: undefined, agentsReads: undefined }
-      const agents = cards.flatMap((i: any) => i.jobs.flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries
-        .filter((x: any) => x.runs.length)
-        .map((x: any) => ({ key: `${i.id}-${j.id}-${x.id}`, label: `${x.role === 'unknown' ? x.id : x.role} · ${i.id}/${j.id}/${x.id}`, runs: x.runs, found: x.runs.map((run: any) => usage.get(runKey(run))) })))))
+      // One accumulated row per agent role: every run of that role across the visible cards, each run counted once.
+      const byRole = new Map<string, Map<string, any>>()
+      for (const i of cards) for (const j of i.jobs) for (const r of j.rounds) for (const x of r.entries) for (const run of x.runs) {
+        const role = x.role === 'unknown' ? 'unknown' : x.role
+        if (!byRole.has(role)) byRole.set(role, new Map())
+        byRole.get(role)!.set(runKey(run), run)
+      }
+      const agents = [...byRole].map(([role, runs]) => ({ key: `role-${role}`, label: `${role === 'unknown' ? t.unknown : role} · ${runs.size} ${runs.size === 1 ? t.run : t.runs}`, runs: [...runs.values()], found: [...runs.keys()].map(k => usage.get(k)) }))
       // Every listed run is resolved here, including completed jobs the initiatives tab leaves folded.
       resolveUsage($, agents.flatMap((a: any) => a.runs), snapshot.project)
       const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
