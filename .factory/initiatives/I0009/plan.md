@@ -369,12 +369,12 @@ I0014 alignment (2026-11-13): I0014 retired the legacy executor (PR #287, #289):
 
 ## J030
 
-- Status: blocked
+- Status: in-progress
 - Objective: Support native Pi↔Claude review interoperability, including Pi coordinator to Claude Opus MEDIUM.
 - Depends on: J027, J032
-- Brief: [brief-r6.md](jobs/J030/brief-r6.md)
-- Blocker: Linux r6 integrated via PR264; full J030 still requires deliberately deferred native Windows reverse evidence.
-- Next step: Continue selected J029 Linux in a fresh coordinator context, then native Windows for both jobs. Operator explicitly approved PR264 integration; protected expected-head merge of9a7c75f5c4bbaff5844c4ea43ddaaec3e4adced9 verified MERGED at3c0cf20526dc3d707f30032dc6ca0dd8c93c9a50. Pre-merge Quality42979983835 SUCCESS3/3; post-merge CI not observed. V005 PASS/function80925c1 and original V004 FAIL retained. J030 unit calls5/6 reviews2/3 corrections2/2 exhausted; no active async actors. Preserve local plan/delivery receipts before branch switch; no cleanup or Windows/full-job closure. J029 scope/budget requires reconciliation from its analysis and brief before dispatch; original reverse2/3pairs unchanged.
+- Brief: [brief-r7.md](jobs/J030/brief-r7.md)
+- Blocker: None. r7 replaces the undocumented jq dependency of the reverse route with a shipped Node projection; budget approved 2026-11-14 (6 calls + 1 live reverse Pi call).
+- Next step: Worker on feat/j030-node-projection, independent review, PR and CI; after merge, one live reverse Claude→Pi call on native Windows. Forward Pi→Claude on Windows needs an operator-run Pi session.
 
 ### Acceptance
 
