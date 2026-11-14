@@ -5,6 +5,7 @@
     "tools/isswf-intake.mjs",
     "tools/isswf-plan.mjs",
     "tools/isswf-status.mjs",
+    "tools/isswf-record-check.mjs",
     "tools/isswf-snapshot.mjs",
     "tools/isswf-snapshot-core.mjs",
     "tools/isswf-run-usage-core.mjs",
