@@ -94,12 +94,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J005
 
-- Status: completed
+- Status: awaiting-human
 - Objective: When a plan cannot be parsed, the pane and isswf-status say which job, field and line broke it instead of only "plan unreadable".
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
-- Blocker: None.
-- Next step: None. I0054 stays open for further operator ideas.
+- Blocker: Operator acceptance: the operator wants to try the pane (file tree, rounds, Agents, plan-error detail) before closing.
+- Next step: Operator tries the pane on I0054; on acceptance mark J005 completed. Findings become corrections in J005 or new jobs.
 
 ### Acceptance
 
@@ -111,3 +111,4 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 - 2026-11-14: found while preparing J004 (a note after the `Brief:` link made I0054 "plan no legible" with no detail); started by the operator ("Aplica esa mejora").
 - 2026-11-14: A001 at 3ee8cde; V001 PASS with S1/S2, fixed in A002 at 24df4d1; V002 PASS (I4 known limit). PR #311 merged at a5acce5 after Linux and Windows CI passed on 24df4d1. Accepted under delegated acceptance (low risk).
+- 2026-11-14: reopened to awaiting-human at the operator's request: delegated acceptance withdrawn for J005 until the operator has tried the pane ("con la prueba lo cerramos").
