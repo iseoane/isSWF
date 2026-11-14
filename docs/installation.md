@@ -107,11 +107,34 @@ Checkpoint the legacy state in Git and reconcile its writers. Move it with the e
 RELEASE/bin/isswf migrate-state --project /absolute/project --id S0001 --expected INVENTORY_DIGEST --quiescent-ref OPERATOR_RECONCILIATION_REFERENCE
 ```
 
-This operation renames the whole directory on the same filesystem. It changes no file contents, modes, historical links, or Git checkpoints and creates no second active state directory. Its private journal lives in the selected runtime store. Symlinks, special files, interrupted claims, known legacy activity, dirty/untracked files, and inventory drift block the move. The inventory is bounded to 10,000 entries and 64 MiB of regular file data; larger projects require a separately designed migration. Regular-file write, sync, and close failures remain fatal on every platform. Linux also flushes the affected directories and treats directory open, sync, and close failures as fatal. Windows omits directory flushes because its supported filesystem contract does not provide the same directory-entry durability; this does not promise equivalent persistence after power loss. Normal migration does not establish actual interrupted-owner recovery on Windows.
+This operation renames the whole directory on the same filesystem. It changes no file contents, modes, historical links, or Git checkpoints and creates no second active state directory. Its private journal lives in the selected runtime store. Symlinks, special files, interrupted claims, known legacy activity, dirty/untracked files, and inventory drift block the move. The inventory is bounded to 10,000 entries and 64 MiB of regular file data; larger projects require a separately designed migration. Regular-file write, sync, and close failures remain fatal on every platform. Linux also flushes the affected directories and treats directory open, sync, and close failures as fatal. Windows omits directory flushes because its supported filesystem contract does not provide the same directory-entry durability; this does not promise equivalent persistence after power loss.
 
 Initialize afterward to add only missing installation/configuration files. Existing setup decisions and models remain unchanged. Historical `.factory` references still identify their original Git checkpoints; they are not rewritten to pretend old records were created elsewhere. Old copied tools are retained as bytes, not upgraded in place; use the new pinned launcher for ongoing work.
 
-If the move process stops with `.isswf-transition` retained, inspect its journal and run `recover-state --project /absolute/project --id S0001` through the same release/store. Recovery requires a stopped owner and exact unchanged inventory at one location. It reconciles a completed rename or an unchanged original directory. It never merges directories or guesses over drift. Claims are published with complete owner and recovery metadata. Recovery can reconstruct an absent journal from that claim; malformed metadata remains blocked for manual inspection.
+If the move process stops, `.isswf-transition` stays in the project root. Never delete it by hand: it is the only record that ties the journal in the runtime store to the project. Recover as follows:
+
+1. Stop every other writer of the project, then run `inspect` (it writes nothing) through the same release and store as the move.
+2. Run `recover-state` with the same `--id`:
+
+```sh
+RELEASE/bin/isswf recover-state --project /absolute/project --id S0001
+```
+
+3. Check that the result names exactly one `activeDirectory` and that the other directory is gone.
+
+Recovery proceeds only when the recorded owner is provably gone, the claim and journal agree, exactly one of `.factory` and `.isswf` exists, and its inventory is still the recorded one. Owner identity is the process ID together with its start time and the boot identity (Linux start ticks and boot ID; Windows creation time and boot time through PowerShell). Evidence that cannot be read counts as a live owner. Where the move stopped decides the result:
+
+| Move stopped | State found | `recover-state` result |
+| --- | --- | --- |
+| After the claim, before the journal record | `.factory` active, no journal | Rebuilds the journal record from the claim, writes `recovered.json` (`unchanged-before`) and retires the claim. |
+| After the record, before the rename | `.factory` active | Writes `recovered.json` (`unchanged-before`) and retires the claim. |
+| After the rename, before `complete.json` | `.isswf` active | Writes `recovered.json` (`moved`) and `complete.json`, then retires the claim. |
+
+Recovery never merges directories and never replays the move. After the first two results, `.factory` is unchanged; run `migrate-state` again with a new `--id`, because the journal of the interrupted ID is kept and never overwritten. After the third, repeating `migrate-state` with the original `--id` and digest reports `unchanged`. A second `recover-state` finds no claim and fails without changing any file.
+
+Recovery refuses, with a nonzero exit and every claim, journal and state byte left in place, when the owner is still running or cannot be identified, `owner.json` is malformed or lacks its identity fields, the claim and journal records differ, the directory differs from its recorded inventory, or both roots exist. There is no force-unlock or claim-clearing command. Wait for or stop the owner process yourself and inspect the retained files before trying again.
+
+The `tests/state-interruption.mjs` journey ends a real `migrate-state` process abruptly (`SIGKILL`, which terminates the process outright on Windows) at each of the three stop points and then recovers through the npm-installed Node release launcher. It also covers each refusal above, including a live owner. The compiled Bun executable cannot host that test's pause seam, so interrupted recovery is not exercised through it; that path remains untested. The check runs in the Linux and Windows platform matrix. Windows still omits directory flushes, so recovery after a power loss is not promised.
 
 ## Run with the project's version
 
