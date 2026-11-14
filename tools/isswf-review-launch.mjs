@@ -43,7 +43,7 @@ export async function prepare({ repository, candidate, base, main = 'origin/main
   const baseSha = base ? commit(repo, gitExecutable, base) : git(repo, gitExecutable, ['merge-base', commit(repo, gitExecutable, main), candidateSha]);
   if (!fullSha(baseSha) || !fullSha(candidateSha)) throw Error('full-sha-required');
   if (baseSha === candidateSha) throw Error('base-equals-candidate');
-  const changed = git(repo, gitExecutable, ['diff', '--name-only', '--no-renames', baseSha, candidateSha]).split('\n').filter(Boolean);
+  const changed = git(repo, gitExecutable, ['-c', 'core.quotePath=false', 'diff', '--name-only', '--no-renames', '-z', baseSha, candidateSha]).split('\0').filter(Boolean);
   const allowlist = [...new Set([...changed, ...paths])];
   if (allowlist.length < 1 || allowlist.length > 64) throw Error('content-paths-must-be-1-to-64');
   const common = { version: 1, repository: repo, baseSha, candidateSha, gitExecutable, timeoutMs: 5000 };
@@ -75,19 +75,30 @@ export async function launch({ bindings, task, trace, factoryRoot, model, effort
   // The binding lives only in this child's environment so no other Claude session inherits it.
   const env = { ...process.env, ISSWF_GIT_EVIDENCE_BINDINGS: bindingText, MAX_MCP_OUTPUT_TOKENS: '100000' };
   await writeFile(`${trace}.launch.json`, `${JSON.stringify({ version: 1, kind: KIND, ...selection }, null, 2)}\n`);
+  const input = createReadStream(task);
+  await new Promise((resolve, reject) => { input.once('open', resolve); input.once('error', reject); });
+  const output = createWriteStream(trace);
   const exitCode = await new Promise((resolve, reject) => {
     const child = spawn(claude, [...claudePrefix, ...args], { env, shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'inherit'] });
     child.on('error', reject);
-    createReadStream(task).pipe(child.stdin);
-    child.stdout.pipe(createWriteStream(trace));
-    child.on('close', code => resolve(code));
+    output.on('error', reject);
+    input.pipe(child.stdin);
+    child.stdout.pipe(output);
+    // Resolve once the child has exited and the trace is flushed, so a caller can read it right away; a signal counts as failed.
+    const exited = new Promise(done => child.on('close', (status, signal) => done(status ?? (signal ? 1 : 0))));
+    const flushed = new Promise(done => output.on('finish', done));
+    Promise.all([exited, flushed]).then(([code]) => resolve(code));
   });
   return { ...selection, exitCode, trace };
 }
 
 const blocks = event => (Array.isArray(event.message?.content) ? event.message.content : []);
 // The evidence server returns its JSON envelope as the first text part; a decoded view may follow as a second part.
-const resultText = block => (typeof block.content === 'string' ? block.content : block.content?.[0]?.text ?? '');
+// A large result may reach the model as a <persisted-output> preview; the event's tool_use_result keeps the full content.
+const resultText = (block, event) => {
+  const content = typeof block.content === 'string' && Array.isArray(event.tool_use_result) ? event.tool_use_result : block.content;
+  return typeof content === 'string' ? content : content?.[0]?.text ?? '';
+};
 
 export async function record({ trace }) {
   const events = (await readFile(trace, 'utf8')).split(/\r?\n/u).filter(Boolean).map(line => JSON.parse(line));
@@ -105,7 +116,7 @@ export async function record({ trace }) {
       if (!use || tool < 0) continue;
       const name = ['identity', 'diff', 'content'][tool];
       let body;
-      try { body = JSON.parse(resultText(block)); } catch { continue; }
+      try { body = JSON.parse(resultText(block, event)); } catch { continue; }
       if (body.status !== 'ok') continue;
       calls[name] += 1;
       if (name === 'diff') { chunkCount = body.chunkCount ?? 1; chunks.add(body.chunk ?? use.input?.chunk ?? 1); }
