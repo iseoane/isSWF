@@ -18,11 +18,18 @@ const RESUMED_SESSION = '77777777-8888-4999-8aaa-bbbbbbbbbbbb';
 const jsonl = entries => entries.map(e => JSON.stringify(e)).join('\n') + '\n';
 const claudeUsage = (input, output, read, write) => ({ input_tokens: input, output_tokens: output, cache_read_input_tokens: read, cache_creation_input_tokens: write });
 const assistant = (requestId, timestamp, usage, content, stop = 'tool_use', model = 'claude-test-1') => ({ type: 'assistant', requestId, timestamp, version: '2.1.300', message: { model, usage, content, stop_reason: stop } });
-const user = timestamp => ({ type: 'user', timestamp, message: { role: 'user', content: 'go' } });
+const user = (timestamp, content = 'go') => ({ type: 'user', timestamp, message: { role: 'user', content } });
 
 // Synthetic Claude agent: Skill tool, .agents reads (POSIX and Windows separators), a repeated request id.
+// The prompt names worker.md and the brief names review.md; isswf-tdd is read but never assigned, and
+// review.md, though assigned, is edited by the run, so neither counts as used methodology.
 const agentTranscript = jsonl([
-  user('2026-01-01T00:00:00.000Z'),
+  user('2026-01-01T00:00:00.000Z', 'Apply .agents/roles/worker.md and read the brief.'),
+  assistant('req_a0', '2026-01-01T00:00:00.500Z', claudeUsage(0, 0, 0, 0), [{ type: 'tool_use', id: 'b1', name: 'Read', input: { file_path: '/repo/.factory/initiatives/I0001/jobs/J001/brief-r1.md' } }, { type: 'tool_use', id: 'b2', name: 'Read', input: { file_path: '/repo/.agents/roles/references/review.md' } }, { type: 'tool_use', name: 'Edit', input: { file_path: '/repo/.agents/roles/references/review.md' } }, { type: 'tool_use', id: 'b3', name: 'Read', input: { file_path: '/repo/.agents/roles/references/design-principles.md' } }]),
+  user('2026-01-01T00:00:00.700Z', [{ type: 'tool_result', tool_use_id: 'b1', content: 'Use roles/references/design-principles.md and roles/references/review.md.' }]),
+  // worker.md links execution-principles.md (one hop, used), which links the coordinator skill (two hops, not used).
+  assistant('req_a0b', '2026-01-01T00:00:00.800Z', claudeUsage(0, 0, 0, 0), [{ type: 'tool_use', id: 'w1', name: 'Read', input: { file_path: '/repo/.agents/roles/worker.md' } }, { type: 'tool_use', id: 'e1', name: 'Read', input: { file_path: '/repo/.agents/roles/references/execution-principles.md' } }, { type: 'tool_use', id: 'c1', name: 'Read', input: { file_path: '/repo/.agents/skills/isswf-coordinator/SKILL.md' } }]),
+  user('2026-01-01T00:00:00.900Z', [{ type: 'tool_result', tool_use_id: 'w1', content: 'See [execution](references/execution-principles.md#retries).' }, { type: 'tool_result', tool_use_id: 'e1', content: 'See [triggers](../../skills/isswf-coordinator/SKILL.md).' }]),
   assistant('req_a1', '2026-01-01T00:00:01.000Z', claudeUsage(10, 20, 30, 40), [{ type: 'tool_use', name: 'Skill', input: { skill: 'isswf:isswf-review' } }, { type: 'tool_use', name: 'Read', input: { file_path: '/repo/.agents/roles/worker.md' } }]),
   assistant('req_a1', '2026-01-01T00:00:01.500Z', claudeUsage(10, 20, 30, 40), [{ type: 'tool_use', name: 'Read', input: { file_path: 'C:\\repo\\.agents\\skills\\isswf-tdd\\SKILL.md' } }]),
   user('2026-01-01T00:00:02.000Z'),
@@ -80,23 +87,24 @@ try {
   assert.deepEqual(agent, {
     found: true, finished: true, model: 'claude-test-1',
     tokens: { input: 11, output: 22, cacheRead: 33, cacheWrite: 44 }, durationMs: 5000,
-    skills: { 'isswf-review': 1, 'isswf-tdd': 1 },
-    agentsReads: { '.agents/roles/worker.md': 2, '.agents/skills/isswf-tdd/SKILL.md': 1 }, costUsd: 'unknown',
+    skills: { 'isswf-review': 1, 'isswf-tdd': 1, 'isswf-coordinator': 1 },
+    agentsReads: { '.agents/roles/references/review.md': 1, '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1, '.agents/skills/isswf-coordinator/SKILL.md': 1, '.agents/skills/isswf-tdd/SKILL.md': 1 },
+    usedSkills: { 'isswf-review': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, costUsd: 'unknown',
   });
   // The advisor iteration is billed on top of the request's top-level usage.
-  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, costUsd: 'unknown' });
+  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, costUsd: 'unknown' });
   assert.deepEqual(pi, {
     found: true, finished: true, model: 'pi-test-1',
     tokens: { input: 101, output: 12, cacheRead: 53, cacheWrite: 9 }, durationMs: 3000,
-    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, costUsd: 'unknown',
+    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: {}, usedReferences: {}, costUsd: 'unknown',
   });
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
-  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', costUsd: 'unknown' };
+  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', costUsd: 'unknown' };
   assert.deepEqual(missing, { found: false, reason: 'transcript-not-found', ...unknown });
   // Valid entries of a found transcript are still summed and the result is marked partial.
   assert.deepEqual(broken, {
     found: true, finished: true, model: 'claude-test-1', tokens: { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 },
-    durationMs: 1000, skills: {}, agentsReads: {}, costUsd: 'unknown', tokensPartial: true, reason: 'malformed-line',
+    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, costUsd: 'unknown', tokensPartial: true, reason: 'malformed-line',
   });
   assert.deepEqual(escape, { found: false, reason: 'invalid-id', ...unknown });
   assert.equal(openPi.finished, false, 'a Pi child without its meta file is unfinished');
@@ -160,5 +168,13 @@ try {
     { tool: 'Read', input: { file_path: 'C:\\p\\.agents\\skills\\isswf-tdd\\SKILL.md' } },
     { tool: 'Read', input: { file_path: '/p/README.md' } },
     { tool: 'Bash', input: { command: 'cat .agents/roles/worker.md' } },
-  ]), { skills: { 'isswf-review': 1, 'isswf-tdd': 1 }, agentsReads: { '.agents/skills/isswf-tdd/SKILL.md': 1 } });
+    { tool: 'Read', input: { file_path: '/p/.agents/roles/reviewer.md' } },
+    { tool: 'Read', input: { file_path: '/p/.agents/skills/isswf-coordinator/SKILL.md' } },
+    { tool: 'Edit', input: { file_path: '/p/.agents/skills/isswf-coordinator/SKILL.md' } },
+  ]), {
+    skills: { 'isswf-review': 1, 'isswf-tdd': 1, 'isswf-coordinator': 1 },
+    agentsReads: { '.agents/skills/isswf-tdd/SKILL.md': 1, '.agents/roles/reviewer.md': 1, '.agents/skills/isswf-coordinator/SKILL.md': 1 },
+    // Without an assignment every `.agents/` read counts, except a file the session changed.
+    usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/reviewer.md': 1 },
+  });
 }

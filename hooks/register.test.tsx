@@ -23,7 +23,7 @@ const RECORDS: Record<string, string> = {
 }
 const usage = { input_tokens: 1_000_000, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 const TRANSCRIPT = [
-  { type: 'user', timestamp: '2026-01-01T00:00:00.000Z', message: { role: 'user', content: 'go' } },
+  { type: 'user', timestamp: '2026-01-01T00:00:00.000Z', message: { role: 'user', content: 'Apply .agents/roles/worker.md.' } },
   { type: 'assistant', requestId: 'r1', timestamp: '2026-01-01T00:01:30.000Z', message: { model: 'claude-opus-5-5', usage, stop_reason: 'end_turn', content: [{ type: 'tool_use', name: 'Read', input: { file_path: '/p/.agents/roles/worker.md' } }] } },
 ].map(e => JSON.stringify(e)).join('\n') + '\n'
 

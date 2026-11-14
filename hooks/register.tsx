@@ -45,7 +45,7 @@ const LABELS = {
     off: 'no',
     noReset: 'sin hora de renovación',
     coordinator: 'coordinador (esta sesión)',
-    noAgents: 'sin agentes delegados en las iniciativas visibles',
+    noAgents: 'ningún agente ha usado skills ni referencias',
     run: 'ejecución',
     runs: 'ejecuciones',
   },
@@ -76,7 +76,7 @@ const LABELS = {
     off: 'no',
     noReset: 'no reset time',
     coordinator: 'coordinator (this session)',
-    noAgents: 'no delegated agents in the visible initiatives',
+    noAgents: 'no agent has used skills or references',
     run: 'run',
     runs: 'runs',
   },
@@ -105,7 +105,7 @@ const finishedRuns = new Map()
 const resolving = new Set<string>()
 let homes: Promise<{ claudeDir?: string; piDir?: string }> | undefined
 // The coordinator's own counts, refreshed after each Agents draw so drawing never waits on the transcript.
-let ownCounts: { skills: any; agentsReads: any } | undefined
+let ownCounts: { usedSkills: any; usedReferences: any } | undefined
 let countingOwn = false
 // One resume per usage window: the timer lives only in this session, and `resumeFor` is the window's reset time.
 let resumeTimer: Timer | undefined
@@ -293,7 +293,8 @@ function tally(map: any, t: Labels) {
 function tallyBlock(ui: any, title: string, map: any, t: Labels) {
   const { Box, Text } = ui
   const pairs = tally(map, t)
-  if (typeof pairs === 'string' || pairs.length === 0) return <Text><Text dimColor>{title}: </Text>{typeof pairs === 'string' ? pairs : '—'}</Text>
+  if (typeof pairs === 'string') return <Text><Text dimColor>{title}: </Text>{pairs}</Text>
+  if (pairs.length === 0) return null
   const width = Math.max(...pairs.map(([name]) => name.length))
   return (
     <Box flexDirection="column">
@@ -490,7 +491,7 @@ export const register: Register = (on, options) => {
           .catch(() => {})
           .finally(() => { countingOwn = false })
       }
-      const own = ownCounts ?? { skills: undefined, agentsReads: undefined }
+      const own = ownCounts ?? { usedSkills: undefined, usedReferences: undefined }
       // One accumulated row per agent role: every run of that role across the visible cards, each run counted once.
       const byRole = new Map<string, Map<string, any>>()
       for (const i of cards) for (const j of i.jobs) for (const r of j.rounds) for (const x of r.entries) for (const run of x.runs) {
@@ -502,19 +503,24 @@ export const register: Register = (on, options) => {
       // Every listed run is resolved here, including completed jobs the initiatives tab leaves folded.
       resolveUsage($, agents.flatMap((a: any) => a.runs), snapshot.project)
       const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
-      const row = (key: string, label: string, skills: any, reads: any) => (
+      // Only what was used is drawn: an empty section is left out, and so is an agent that used nothing.
+      const used = (map: any) => !map || typeof map !== 'object' || Object.keys(map).length > 0
+      const row = (key: string, label: string, skills: any, reads: any) => (!used(skills) && !used(reads) ? null : (
         <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
           <Text bold color="claude">{label}</Text>
           {tallyBlock({ Box, Text }, 'skills', skills, t)}
           {tallyBlock({ Box, Text }, t.references, reads, t)}
         </Box>
-      )
+      ))
+      const rows = [
+        row('coordinator', t.coordinator, own.usedSkills, own.usedReferences),
+        ...agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.usedSkills : undefined)), merge(a.found.map((u: any) => u?.found ? u.usedReferences : undefined)))),
+      ].filter(Boolean)
       return (
         <Box flexDirection="column">
           {header}
-          {row('coordinator', t.coordinator, own.skills, own.agentsReads)}
-          {agents.length === 0 && <Text dimColor>{t.noAgents}</Text>}
-          {agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.skills : undefined)), merge(a.found.map((u: any) => u?.found ? u.agentsReads : undefined))))}
+          {rows}
+          {rows.length === 0 && <Text dimColor>{t.noAgents}</Text>}
         </Box>
       )
     }
