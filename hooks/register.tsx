@@ -41,11 +41,9 @@ const LABELS = {
     completed: 'completados',
     inactive: 'No activas',
     tabs: { initiatives: 'Iniciativas', agents: 'Agentes' } as Record<string, string>,
-    resume: 'retomar tras cuota',
     on: 'sí',
     off: 'no',
-    resumeAt: 'a las',
-    noReset: 'sin hora de renovación: no se programa',
+    noReset: 'sin hora de renovación',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'sin agentes delegados en las iniciativas visibles',
     run: 'ejecución',
@@ -74,11 +72,9 @@ const LABELS = {
     completed: 'completed',
     inactive: 'Inactive',
     tabs: { initiatives: 'Initiatives', agents: 'Agents' } as Record<string, string>,
-    resume: 'resume after quota',
-    on: 'on',
-    off: 'off',
-    resumeAt: 'at',
-    noReset: 'no reset time: nothing scheduled',
+    on: 'yes',
+    off: 'no',
+    noReset: 'no reset time',
     coordinator: 'coordinator (this session)',
     noAgents: 'no delegated agents in the visible initiatives',
     run: 'run',
@@ -458,10 +454,9 @@ export const register: Register = (on, options) => {
     if (resumeOn) checkResume($, cards)
     else if (resumeTimer || resumeFor) cancelResume()
     const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
-    const resumeDetail = resumeOn && resumeAtMs !== undefined ? ` · ${t.resumeAt} ${clockTime(resumeAtMs)}`
-      : resumeOn && resumeNoReset ? ` · ${t.noReset}`
-      : resumeWouldAtMs !== undefined ? ` · ${t.resumeAt} ${clockTime(resumeWouldAtMs)}` : ''
-    const resumeText = `⏰ ${t.resume}: ${resumeOn ? t.on : t.off}${resumeDetail}`
+    const resumeAt = resumeOn && resumeAtMs !== undefined ? resumeAtMs : resumeOn && resumeNoReset ? undefined : resumeWouldAtMs
+    const resumeDetail = resumeOn && resumeNoReset && resumeAtMs === undefined ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
+    const resumeText = `⏰ AutoWakeUp: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const header = (
       <Box flexDirection="column">
         <Box flexDirection="row" gap={2}>
