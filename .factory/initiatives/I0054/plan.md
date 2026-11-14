@@ -73,12 +73,12 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Objective: Selecting an initiative in the Initiatives tab opens a third pane with that initiative's file tree; selecting a file shows its contents below the tree, so plans, briefs and records can be read without leaving the CLI.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Coordinator implements in a worktree from main after 17f1e48, loading roles/worker.md and the triggered references first; then bound review, PR and merge.
+- Next step: None. I0054 stays open for further operator ideas.
 
 ### Acceptance
 
@@ -90,3 +90,4 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 - 2026-11-14: operator request; started by the operator ("y ya pasamos al nuevo job") once J003 merged.
 - 2026-11-14: open point from the J003 screenshots: a malformed plan field makes the whole card "plan no legible" without naming the field.
+- 2026-11-14: A001 at eeb49fb; bound review V001 FAIL (fold showed a false "cannot be read"; CRLF; 4 MiB), fixed in A002 at 8e2e8e9; V002 PASS; docs-only R2-1 wording applied at bec5147. PR #309 merged at e76bf27 after Linux and Windows CI passed on bec5147. Accepted under delegated acceptance (low risk).
