@@ -21,7 +21,7 @@ These tools package the factory, manage a project's installation and read or pre
 | Build and verify a package | `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
 | Initialise, select, update, and recover a project's installation | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Prepare plans and issue intake | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-intake.mjs` |
-| Read records and show the local panel | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
+| Read records and show the local panel | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-record-check.mjs`, `tools/isswf-record-check-core.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
 
 The release compiler bundles tool entrypoints into one Bun executable and supplies each module's original identity and package-root paths. Original source files remain verified provenance. Source development still runs on Node.js.
 
