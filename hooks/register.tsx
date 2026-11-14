@@ -58,6 +58,7 @@ const LABELS = {
     chooseInitiative: 'elige una iniciativa:',
     unreadable: 'no se puede leer',
     tooLarge: 'archivo de más de 4 MiB: no se muestra',
+    noIndex: 'sin índice: codegraph init',
     coordinator: 'coordinador (esta sesión)',
     noAgents: 'ningún agente ha usado skills ni referencias',
     run: 'ejecución',
@@ -100,6 +101,7 @@ const LABELS = {
     chooseInitiative: 'choose an initiative:',
     unreadable: 'cannot be read',
     tooLarge: 'file over 4 MiB: not shown',
+    noIndex: 'no index: codegraph init',
     coordinator: 'coordinator (this session)',
     noAgents: 'no agent has used skills or references',
     run: 'run',
@@ -394,6 +396,23 @@ async function treeRows($: EngineInterface, dir: string, rel: string, open: stri
   return rows
 }
 
+// Engram and CodeGraph availability, read only: tool names in the session and the index folder; nothing is connected, called or run.
+const hasServer = (names: string[], server: string) => names.some(n => new RegExp(`^mcp__(?:plugin_.+_)?${server}__`).test(n))
+async function connections($: EngineInterface) {
+  let names: string[] = []
+  try {
+    names = (await $.tool.list()).map(tool => tool.name)
+  } catch {}
+  const cwd = await $.session.cwd()
+  const isIndexed = await $.fs.exists(joiner(cwd)(cwd, '.codegraph')).catch(() => false)
+  const hasCodegraph = hasServer(names, 'codegraph')
+  return {
+    engram: hasServer(names, 'engram') ? 'success' : 'error',
+    codegraph: !isIndexed ? 'error' : hasCodegraph ? 'success' : 'warning',
+    isIndexed,
+  } as const
+}
+
 // The Files tab: the selected initiative's folder as a tree, and the open file below it.
 async function filesView($: EngineInterface, ui: any, t: Labels) {
   const { Box, Button, Markdown, Text } = ui
@@ -586,6 +605,7 @@ export const register: Register = (on, options) => {
     const resumeAt = resumeAtMs ?? resumeWouldAtMs
     const resumeDetail = resumeOn && resumeNoReset ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
     const resumeText = `⏰ AutoWakeUp: ${resumeOn ? t.on : t.off}${resumeDetail}`
+    const tools = await connections($)
     const header = (
       <Box flexDirection="column">
         <Box flexDirection="row" gap={2}>
@@ -593,6 +613,10 @@ export const register: Register = (on, options) => {
           <Button key="resume-toggle" plain onPress={toggleResume}>
             <Text color={resumeOn ? 'success' : undefined} dimColor={!resumeOn}>{resumeText}</Text>
           </Button>
+        </Box>
+        <Box flexDirection="row" gap={2}>
+          <Text>🧠 engram <Text color={tools.engram}>●</Text></Text>
+          <Text>🗺 codegraph <Text color={tools.codegraph}>●</Text>{!tools.isIndexed && <Text dimColor> {t.noIndex}</Text>}</Text>
         </Box>
         <Box flexDirection="row" gap={1}>
           {['initiatives', 'agents', 'files'].map(name => (
