@@ -8,7 +8,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyRelease } from '../tools/release-source.mjs';
 
-// Journey: a real `migrate-state` process is terminated at each moveState boundary, then the installed
+// Journey: a real `migrate-state` process is terminated at three moveState boundaries, then the installed
 // public `recover-state` resolves it. Launcher: the npm-installed genuine Node release (tools/isswf.mjs).
 // The compiled Bun executable cannot take `node --import`, so this seam cannot run there (Bun gap).
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
