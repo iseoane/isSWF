@@ -9,7 +9,8 @@ const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdt
 const project = join(root, 'project'); await mkdir(project);
 assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);
 const invoke = (tool, args) => spawnSync(process.execPath, [join(source, 'tools', tool), ...args], { encoding: 'utf8', timeout: 15000 });
-const inspect = () => { const result = invoke('isswf-status.mjs', ['--project', project, '--initiative', 'I0001']); assert.equal(result.status, 0, result.stderr); return JSON.parse(result.stdout); };
+// A plan that does not parse exits 1 with the same JSON; every other result exits 0.
+const inspect = (exit = 0) => { const result = invoke('isswf-status.mjs', ['--project', project, '--initiative', 'I0001']); assert.equal(result.status, exit, result.stderr); return JSON.parse(result.stdout); };
 async function tree(path) {
   const output = {};
   for (const name of (await readdir(path)).sort()) {
@@ -56,22 +57,25 @@ try {
   const crlf = inspect(); assert.equal(crlf.status, 'observed', 'A CRLF plan must parse through isswf-status'); assert.equal(crlf.title, 'Status fixture'); assert.equal(crlf.jobs.length, observed.jobs.length);
   await writeFile(planPath, original.replace('# I0001: Status fixture', '# I0001: '));
   // A misnamed plan is not a parser error, so it carries no location.
-  assert.equal(inspect().status, 'unknown'); assert.equal(inspect().planError, undefined);
+  assert.equal(inspect(1).status, 'unknown'); assert.equal(inspect(1).planError, undefined);
   await writeFile(planPath, original.replace('jobs/J001/brief-r1.md', '../../outside.md'));
   const lineOf = text => original.split('\n').findIndex(line => line.includes(text)) + 1;
-  const outside = inspect();
+  const outside = inspect(1);
   assert.equal(outside.status, 'unknown'); assert.equal(outside.freshness, 'not-verified');
   assert.deepEqual(outside.planError, { code: 'unsafe-brief-reference', job: 'J001', field: 'Brief', line: lineOf('jobs/J001/brief-r1.md') });
   await writeFile(planPath, original.replace('- Status: in-progress', '- Status: invented'));
-  const invented = inspect();
+  const invented = inspect(1);
   assert.equal(invented.status, 'unknown');
   const inventedJob = original.split('\n').slice(0, lineOf('- Status: in-progress')).reverse().find(line => line.startsWith('## ')).slice(3);
   assert.deepEqual(invented.planError, { code: 'invalid-job', job: inventedJob, field: 'Status', line: lineOf('- Status: in-progress') });
   await writeFile(planPath, original.replace('Type: enhancement\n', ''));
   const malformedBytes = await tree(project);
-  assert.equal(inspect().status, 'unknown', 'missing canonical plan type remains explicitly unknown');
+  assert.equal(inspect(1).status, 'unknown', 'missing canonical plan type remains explicitly unknown');
   assert.deepEqual(await tree(project), malformedBytes, 'status reads never rewrite malformed plan bytes');
-  await writeFile(planPath, original.replace('## J002', '## J001')); assert.equal(inspect().status, 'unknown');
-  await rm(planPath); if (await fileSymlinkOrSkip(grant, planPath, 'initiative-status symlinked plan refusal')) assert.equal(inspect().status, 'unknown');
+  await writeFile(planPath, original.replace('## J002', '## J001')); assert.equal(inspect(1).status, 'unknown');
+  await rm(planPath); if (await fileSymlinkOrSkip(grant, planPath, 'initiative-status symlinked plan refusal')) {
+    // An unreadable or unsafe plan can be an environment limit (for example a project that is not a Git root), not a plan defect, so it stays exit 0.
+    const unsafe = inspect(); assert.equal(unsafe.status, 'unknown'); assert.equal(unsafe.reason, 'unreadable-or-unsafe-plan');
+  }
   console.log('PASS: actual plan and artifacts summarized without writes; absent/malformed/unsafe records visible; reported progress never becomes liveness or acceptance');
 } finally { await rm(root, { recursive: true, force: true }); }
