@@ -65,7 +65,8 @@ try {
   await writeFile(planPath, original.replace('- Status: in-progress', '- Status: invented'));
   const invented = inspect();
   assert.equal(invented.status, 'unknown');
-  assert.deepEqual(invented.planError, { code: 'invalid-job', job: invented.planError.job, field: 'Status', line: lineOf('- Status: in-progress') });
+  const inventedJob = original.split('\n').slice(0, lineOf('- Status: in-progress')).reverse().find(line => line.startsWith('## ')).slice(3);
+  assert.deepEqual(invented.planError, { code: 'invalid-job', job: inventedJob, field: 'Status', line: lineOf('- Status: in-progress') });
   await writeFile(planPath, original.replace('Type: enhancement\n', ''));
   const malformedBytes = await tree(project);
   assert.equal(inspect().status, 'unknown', 'missing canonical plan type remains explicitly unknown');

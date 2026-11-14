@@ -23,6 +23,10 @@ assert.deepEqual(where(base.replace('- Depends on: None', '- Depends on: J009'))
 assert.deepEqual(where(base.replace('- Blocker: None.\n', '- Blocker: None.\n- Blocker: Again.\n')), { code: 'duplicate-field', job: 'J001', field: 'Blocker', line: lineOf(base, '- Blocker:') + 1 });
 assert.deepEqual(where(base.replace('Type: bug', 'Type: chore')), { code: 'invalid-plan-type', job: undefined, field: 'Type', line: lineOf(base, 'Type:') });
 assert.throws(() => parsePlan(noted), /^Error: unsafe-brief-reference$/u);
+const second = base.replace(/## J001[\s\S]*/u, m => `${m}\n${m.replaceAll('J001', 'J002')}`);
+assert.deepEqual(where(second.replace('## J002', '## J001').replace('jobs/J002/brief-r1.md', 'jobs/J001/brief-r1.md')), { code: 'duplicate-job', job: 'J001', field: undefined, line: second.split('\n').findIndex(line => line === '## J002') + 1 });
+const cyclic = second.replace('- Depends on: None', '- Depends on: J002').replace(/(## J002[\s\S]*?)- Depends on: None/u, '$1- Depends on: J001');
+assert.deepEqual(where(cyclic), { code: 'cyclic job dependencies', job: 'J001', field: 'Depends on', line: lineOf(base, '- Depends on:') });
 
 // Historical records predate the current contract and stay unchanged; any other plan must parse.
 const knownHistorical = new Map();
