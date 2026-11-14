@@ -1,0 +1,5 @@
+# I0054/J004 r1: Initiative file tree pane (prepared 2026-11-14)
+
+Grounding (2026-11-14, Claude Code 2.1.325 types): a second pane is `$.ui.open({ id, title })` drawn by a `ui.render` hook on `{ component: 'Pane', requestId: id }`; `$.fs.list`/`$.fs.read` read the records; the `Markdown` element (`{ text }`, up to 100000 characters per drawing) draws a file as an assistant reply is drawn, on every surface. Initiative cards are drawn in `hooks/register.tsx`; records live under the snapshot's state directory (`.isswf/` or `.factory/`)/initiatives/<ID>.
+Limits: read-only; paths are resolved under the selected initiative's directory and anything else is refused; large files are truncated with a visible note. Pi has no pane; this job is Claude Code only and says so in the docs.
+Methodology: coordinator as writer loads `roles/worker.md`, design-principles (new UI state and boundary), verification-principles, comments, code-quality; isswf-writing for docs. Checks: `claude plugin test`, check-docs, CI; bound review.

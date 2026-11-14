@@ -48,20 +48,45 @@ Operator feedback 2026-11-13 on the Claude Code initiatives pane (hooks/register
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Objective: An opt-in switch in the pane title schedules a resume of the coordinator's work 5 minutes after the five-hour usage window resets, when usage reached 90% or more while work was in progress.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: Coordinator implements in worktree isSWF-worktrees/i0054-j003; then bound review, PR and merge. Keep I0054 open afterwards (operator has more ideas).
+- Next step: None.
 
 ### Acceptance
 
 - A switch in the pane title, off by default, persisted in pane state.
 - When on and the `five_hour` rate-limit window is at 90% or more while a coordinator job is in progress, one resume prompt is scheduled for `resetsAt` plus 5 minutes; it names the in-progress initiative and job and asks the coordinator to reconcile state before continuing. No duplicate schedules; switching off cancels it.
 - The limit is documented: the schedule lives only while the Claude session stays open.
+- r2: the switch reads `AutoWakeUp: sí|no (HH:MM)` with the would-be resume time whenever known.
+- r2: the Agents tab counts only methodology a run used, draws nothing unused, and marks whether each role followed its profile (and the coordinator, when it writes, `roles/worker.md`); the record detail drops skill counts and pairs effort with model and cost with tokens. The usage JSON adds `usedSkills`/`usedReferences` (docs EN/ES).
 
 ### Evidence
 
 - 2026-11-13: operator request (threshold 90%).
 - 2026-11-13: started by the operator ("continua coordinador con el resto de jobs").
+- 2026-11-14: operator additions during the job (switch wording, Agents readability and methodology-only counting, profile marks, compact record detail); recorded in brief-r2.
+- 2026-11-14: the coordinator wrote J003 first without loading the worker methodology; the operator flagged the quality loss. It then loaded worker.md and the triggered references and reviewed the whole diff against them (A001).
+- 2026-11-14: bound reviews V003 (r2 round 1, FAIL; fixed in A002) and V004 (round 2, PASS). PR #307 merged at 17f1e48 after Linux and Windows CI passed on c95943f. Accepted under delegated acceptance (low-medium risk, opt-in UI).
+
+## J004
+
+- Status: in-progress
+- Objective: Selecting an initiative in the Initiatives tab opens a third pane with that initiative's file tree; selecting a file shows its contents below the tree, so plans, briefs and records can be read without leaving the CLI.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: None.
+- Next step: Coordinator implements in a worktree from main after 17f1e48, loading roles/worker.md and the triggered references first; then bound review, PR and merge.
+
+### Acceptance
+
+- Pressing an initiative's title opens (or retargets) a separate pane listing that initiative's directory as a tree (plan, jobs, briefs, records), collapsible by directory.
+- Pressing a file shows it below the tree, Markdown rendered; pressing it again hides it. Only files under that initiative's records directory can be shown.
+- Documented in docs EN/ES `installation.md`; tests cover tree, open/close and the path boundary.
+
+### Evidence
+
+- 2026-11-14: operator request; started by the operator ("y ya pasamos al nuevo job") once J003 merged.
+- 2026-11-14: open point from the J003 screenshots: a malformed plan field makes the whole card "plan no legible" without naming the field.
