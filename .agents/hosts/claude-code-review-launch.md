@@ -2,6 +2,22 @@
 
 Read this from the [Claude Code host guide](claude-code.md#bound-identity-committed-diff-and-file-content-for-claude-reviewers) only when launching or checking a bound review. It is canonical for the Claude launch; the shared [bound review evidence](bound-review-evidence.md) reference holds the binding namespaces, content path and range rules, repository topology, verifier, operational boundary and [candidate-bound checks](bound-review-evidence.md#supply-candidate-bound-checks). Read both in full before launching.
 
+## Launch with the review launch tool
+
+`tools/isswf-review-launch.mjs` performs the steps below so the model, effort and base cannot drift from the approved inputs. Run it from the trusted factory root:
+
+```sh
+node tools/isswf-review-launch.mjs prepare --repository /absolute/primary-clone --candidate <sha> --path <plan> --path <brief> --path REVIEW.md --out tooling/.local/<job>/bindings.json
+node tools/isswf-review-launch.mjs launch --bindings tooling/.local/<job>/bindings.json --task review-task.md --trace tooling/.local/<job>/review-trace.jsonl --factory-root /absolute/factory-root
+node tools/isswf-review-launch.mjs record --trace tooling/.local/<job>/review-trace.jsonl
+```
+
+- **`prepare`** binds the base to the merge-base of the candidate with `--main` (default `origin/main`), the candidate's real parent, unless a delta review passes the previous candidate as `--base`. The content allowlist is the changed files plus each `--path`. It refuses a linked worktree, a base equal to the candidate and an unknown commit, and fills the limits this page sets.
+- **`launch`** takes model and effort from the Reviewer row of the preset in `.agents/skills/isswf-setup/SKILL.md` unless both `--model` and `--effort` are passed for an approved project selection. It sets the binding and `MAX_MCP_OUTPUT_TOKENS` only in the child, starts Claude without a shell, sends the task on standard input and writes the trace plus a `<trace>.launch.json` with the requested selection. On Windows, pass `--claude` with the full path of `claude.exe` when `claude` resolves to a `.cmd` shim, which cannot start without a shell.
+- **`record`** prints the `Run:` value, the requested and observed model, the requested effort, the evidence calls with a non-error result, whether every diff chunk was fetched, and the final report. A missing or error result prints `complete: false` and exits 1. It does not write the review record.
+
+The tool covers the Claude bound review only; Pi reviewers use their own invokers.
+
 ## Bound identity, committed diff and file content for Claude reviewers
 
 The plugin registers one local stdio server, `isswf_git_evidence`, that runs `tools/git-evidence-mcp.mjs`. It exposes `identity`, `diff` and `content` and calls the same public CLI, `tools/git-evidence.mjs`, with a fixed operation. Identity takes no arguments. Diff takes an optional `chunk` number. Content takes `slot` (`base` or `candidate`), an allowlisted `path` and an optional `offset` and `length` given together. Extra arguments are rejected.

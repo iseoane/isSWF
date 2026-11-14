@@ -11,6 +11,7 @@
     "tools/isswf-panel.mjs",
     "tools/git-evidence.mjs",
     "tools/review-checks.mjs",
+    "tools/isswf-review-launch.mjs",
     "tools/git-evidence-pi-extension.mjs",
     "tools/token-native-pi.mjs",
     "tools/token-native-claude.mjs",
