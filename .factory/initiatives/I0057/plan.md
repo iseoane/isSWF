@@ -23,6 +23,14 @@ Deferred candidates, without an observed incident yet; add a job only after one 
 
 The first observed candidate, a commit made on a branch that another session had switched to, became J009 on 2026-11-14.
 
+Further candidates observed on 2026-11-14, to assess:
+
+- A records commit chained after a failed scripted edit still ran: commits of plan changes should require a passing `isswf-status` read-back (a J001 extension).
+- `isswf-status` run outside a Git root reports a generic error, which once led to a wrong claim about its output: the tool should name the missing Git root.
+- A brief was committed and its job set in-progress, but the coordinator ended the turn without dispatching: an in-progress job with a committed brief and no recorded `Run:` at turn end could warn.
+- Briefs recorded a tool limit ("effort not settable") that the tool schema contradicts: capability claims in briefs could be checked against the host's tool schema.
+- `hooks/register.test.tsx` is not run by any CI step or test (J001/A002): any hook guard needs a test that runs.
+
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
 Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after them. J003, J005 and J009 are independent.
