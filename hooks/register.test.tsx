@@ -197,7 +197,7 @@ test('a pressed pill expands its usage detail resolved after the draw and collap
   await ui.press({ key: 'I0046-J004-A001' })
   expect(await text(ui, /^A001 ·/)).toBe('A001 · attempt')
   expect(await text(ui, /^modelo: claude-opus-5-5/)).toBe('modelo: claude-opus-5-5 (transcript) · esfuerzo: high')
-  expect(await text(ui, /^tokens/)).toBe('tokens: 1000000 · coste: $4.00')
+  expect(await text(ui, /^tokens/)).toBe('tokens: 1.000.000 · coste: $4.00')
   expect(await text(ui, /^duración/)).toBe('duración: 90 s')
   // Skill and reference use lives in the Agents tab, not in a record's detail.
   expect(await text(ui, /^skills/)).toBe(undefined)

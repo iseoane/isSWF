@@ -44,6 +44,7 @@ const LABELS = {
     opened: 'Panel de iniciativas abierto.',
     noWork: 'sin trabajo iniciado',
     unparsed: 'plan no legible',
+    thousands: '.',
     line: 'línea',
     completed: 'completados',
     inactive: 'No activas',
@@ -85,6 +86,7 @@ const LABELS = {
     opened: 'Initiatives pane opened.',
     noWork: 'no work started',
     unparsed: 'plan unreadable',
+    thousands: ',',
     line: 'line',
     completed: 'completed',
     inactive: 'Inactive',
@@ -275,7 +277,8 @@ function countLabel(jobs: any[], t: Labels) {
   return [blocked && `${blocked} ${t.blocked}`, open && `${open} ${t.open}`].filter(Boolean).join(' · ')
 }
 
-const known = (value: string, t: Labels) => (value === 'unknown' ? t.unknown : value)
+// 4511679 -> 4.511.679 (es) or 4,511,679 (en).
+const grouped = (n: number, t: Labels) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, t.thousands)
 const sum = (values: any[]) => (values.some(v => typeof v !== 'number') ? undefined : values.reduce((a, b) => a + b, 0))
 
 // One entry may cite several runs; any unresolved run makes the sum unknown.
@@ -290,7 +293,7 @@ function usageLines(entry: any, t: Labels) {
   return {
     model: models.length === 1 && models[0] !== 'unknown' ? models[0] : undefined,
     lines: [
-      `tokens: ${tokens ?? t.unknown}${partial ? ` (${t.partial})` : ''} · ${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
+      `tokens: ${tokens === undefined ? t.unknown : grouped(tokens, t)}${partial ? ` (${t.partial})` : ''} · ${t.cost}: ${cost === undefined ? t.unknown : `$${cost.toFixed(2)}${partial ? ` (${t.partial})` : ''}`}`,
       `${t.duration}: ${duration === undefined ? t.unknown : `${Math.round(duration / 1000)} s`}`,
     ],
   }
