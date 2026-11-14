@@ -19,6 +19,12 @@ assert.match(reviewTemplate, /Exact diff source and consumed[\s\S]*Candidate pat
 assert.match(reviewerRole, /selected-method evidence[\s\S]*separately from Spec/u);
 assert.match(reviewerRole, /unbound Agent-tool review of a commit or snapshot candidate without the exact diff[\s\S]*exact diff not supplied[\s\S]*Bound Pi\/Claude/u);
 assert.match(reviewerRole, /record its source, base, candidate, and reviewed path scope as consumed evidence/u);
+const reviewConvergence = await readFile(join(source, '.agents/roles/references/review-convergence.md'), 'utf8');
+assert.match(attemptTemplate, /Deviations from required procedure and consequence:[^\n]*own departures[\s\S]*Process deviations observed:[^\n]*self-reported, not observed evidence[\s\S]*None\.[\s\S]*written rule that was not followed[\s\S]*copied by hand that could have been derived[\s\S]*another actor \(the coordinator's handoff included\)[\s\S]*never list one incident in both fields/u);
+assert.match(reviewTemplate, /Reviewer limits for this round \(self-reported[\s\S]*delta round appended[\s\S]*Unreviewed areas and evidence limits:[\s\S]*approvals the reviewer cannot give[\s\S]*Convergence advice:[^\n]*recommended next step[\s\S]*accept[\s\S]*review-convergence\.md[\s\S]*Required corrections or unresolved questions[\s\S]*Process deviations observed:[^\n]*self-reported, not observed evidence[^\n]*written rule that was not followed[^\n]*copied by hand that could have been derived/u);
+assert.match(actualWorker, /`Process deviations observed:` field as the template defines it \(self-reported, not observed evidence\)[\s\S]*Deviations from required procedure and consequence:/u);
+assert.match(reviewerRole, /In every round, including a delta round[\s\S]*`Convergence advice:`[\s\S]*`Process deviations observed:`[\s\S]*self-reported, not observed evidence/u);
+assert.match(reviewConvergence, /Repeat the reviewer limits and convergence advice for the delta round/u);
 const coordinatorSkill = await readFile(join(source, '.agents/skills/isswf-coordinator/SKILL.md'), 'utf8');
 assert.match(coordinatorSkill, /For each selected method[\s\S]*observed failing regression before implementation[\s\S]*disclosure does not waive/u);
 assert.match(coordinatorSkill, /For an unbound Agent-tool review, supply the exact base\/candidate diff[\s\S]*reviewer\.md#required-input[\s\S]*reject any complete pass or fail report/u);

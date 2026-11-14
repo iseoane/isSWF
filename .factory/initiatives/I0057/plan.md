@@ -23,19 +23,30 @@ Deferred candidates, without an observed incident yet; add a job only after one 
 
 The first observed candidate, a commit made on a branch that another session had switched to, became J009 on 2026-11-14.
 
+Further candidates observed on 2026-11-14, to assess:
+
+- A records commit chained after a failed scripted edit still ran: commits of plan changes should require a passing `isswf-status` read-back (a J001 extension).
+- `isswf-status` run outside a Git root reports a generic error, which once led to a wrong claim about its output: the tool should name the missing Git root.
+- A brief was committed and its job set in-progress, but the coordinator ended the turn without dispatching: an in-progress job with a committed brief and no recorded `Run:` at turn end could warn.
+- Briefs recorded a tool limit ("effort not settable") that the tool schema contradicts: capability claims in briefs could be checked against the host's tool schema.
+- `hooks/register.test.tsx` is not run by any CI step or test (J001/A002): any hook guard needs a test that runs.
+- A wording correction dropped part of a contract definition, and the phrase tests passed (J008/V002 F4): a record field's definition could have one canonical source, with its key phrases asserted.
+- Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
+- Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
+
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
 Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after them. J003, J005 and J009 are independent.
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; compare the Claude plugin tool.call hook, Pi's tool_call/tool_result events and an opt-in pre-commit check for each host and platform.
+- Next step: A read-only researcher answers the brief-r1 cross-host feasibility questions; the coordinator records A001, then prepares brief-r2 for the writer.
 
 ### Acceptance
 
@@ -184,13 +195,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J008
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows: the deviations field in both templates, and per-round reviewer limits in review records)
 - Objective: Every attempt and review record reports the process deviations its author observed, and every review round records the reviewer's limits, so neither depends on the coordinator's memory.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; place the field in both templates and in the worker and reviewer return instructions.
+- Next step: Open the PR for candidate 62c501a, verify CI on the exact head and merge; then close J008 with the deviations copied to the deferred candidates.
 
 ### Acceptance
 
@@ -204,6 +215,12 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the operator asked that worker and reviewer runs be observed for semantic steps that could become deterministic; a rule to remember to observe would itself depend on the coordinator's memory.
 - 2026-11-14: the J030 reviewer suggested that the review template ask for reviewer limits and convergence advice (I0009/J030/V006.md, round 4). The coordinator left the reviewer limits out of V006 twice (round 1, suggestion N2; round 3, added in round 4). The template already has the field (.factory/templates/review.md, "Limits and return"), but only 4 of 135 review records in .factory/initiatives use that section: review records are hand-written outside the template, and nothing checks the field.
+- 2026-11-14: Candidate 62c501a4007e0e6eb3a7f6aec4d0b8fb01776f9b went through three review rounds.
+  - [V001](jobs/J008/V001.md): pass, with three suggestions.
+  - [V002](jobs/J008/V002.md): fail. F4: the correction dropped half of the deviation definition.
+  - [V003](jobs/J008/V003.md): pass.
+  - Two correction cycles: [A002](jobs/J008/A002.md) and [A003](jobs/J008/A003.md).
+- 2026-11-14: the operator approved integration of the role-profile change, which REVIEW.md lists under "Always needs a person" ("Si apruebo"). The operator also extended the review budget ("Si necesitas más rondas las tienes").
 
 ## J009
 
