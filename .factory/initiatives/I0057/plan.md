@@ -34,6 +34,8 @@ Further candidates observed on 2026-11-14, to assess:
 - Knip and ESLint are not part of `check-quality`, so a worker's local checks can pass while CI fails (J001 PR327): the worker brief or a pre-push check could run them.
 - After merging a job, the coordinator stopped and asked the operator whether to continue, although the standing grant covers advancing the plan (2026-11-15; operator: "el avanzar con los jobs no es algo que necesite de mi", "Es el objetivo básico de la factoría"): at a job close, the next eligible job could be proposed mechanically from the plan's dependencies and statuses.
 - New tests are not run by CI unless listed by hand in `tools/check-quality.mjs` or the workflow (J001 `tests/isswf-record-check.mjs`): a check could fail when a `tests/*.mjs` file is not run anywhere.
+- `tools/isswf-plan-edit.mjs` cannot set the `Brief:` field, so each brief revision bump is still a hand edit (2026-11-15).
+- Transient `.git/index.lock` errors recur in the shared checkout during commits (J001 A005, J006 A001, coordinator 2026-11-15): the source is unidentified; a commit helper could wait and retry once.
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
@@ -50,7 +52,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: The worker implements brief-r4 (record validation after a write in Claude Code and Pi) on feat/i0057-j001-record-guard; integration needs the operator's approval because it edits .agents/hosts/pi/agents/*.md.
+- Next step: Independent review of brief-r4 candidate 65002c2; integration needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/*.md).
 
 ### Acceptance
 
@@ -123,9 +125,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (one flow, with one bounded risk: refusing a legitimate dispatch)
 - Objective: A delegation that fails the coordinator's pre-dispatch refusal conditions is refused by the host before the child starts.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J004/brief-r2.md)
 - Blocker: None.
-- Next step: A read-only researcher answers brief-r1 (delegation event shapes, structured model/effort source, mechanical refusal checks); then the coordinator prepares brief-r2.
+- Next step: A worker runs the brief-r2 probe (Agent tool.call and agent.spawn model/effort fields, deny behaviour, Pi thinking parse) outside the repository; then the coordinator prepares brief-r3.
 
 ### Acceptance
 
@@ -141,6 +143,8 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: J029 was dispatched while its plan job stayed `blocked` (see J001); the conditions in .agents/skills/isswf-coordinator/SKILL.md:152-160 are held only in prose and nothing runs them at dispatch.
 - 2026-11-14 audit: the Claude plugin `tool.call` hook can return `deny` before a call runs (.claude-plugin/types/claude-code/index.d.ts, ToolCallResult); Pi 1.5.2 `tool_call` can block (installed docs/extensions.md). The Pi subagent call shape is not yet verified.
+- 2026-11-15: research ([A001](jobs/J004/A001.md)): Claude `agent.spawn` input carries `model` but no effort; Pi `subagent` has `model` and no top-level thinking field; no structured selection source exists, and project-setup.md:56 claims Pi overrides that .pi/settings.json does not hold.
+- 2026-11-15: operator approved integrating J004 (grant and authority code, .agents/hosts/**) on condition: "Autorizo pero cada agente aunque sea en el mismo fichero tienen sus modelos por si quiero usar o mezclar diferentes agentes". The selection file gives each agent its own host, model and effort.
 
 ## J005
 
