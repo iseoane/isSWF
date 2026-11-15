@@ -6,22 +6,45 @@ export const HANDOFF_SCHEMA = 'isswf.handoff/1';
 export const MAX_DIFF_BYTES = 4 * 1024 * 1024;
 const MAX_HANDOFF_BYTES = 1024 * 1024;
 const LINE_PREFIX = String.raw`^[ \t]*(?:[-*][ \t]+)?`;
-const ABSOLUTE_PATH = /^(?:[A-Za-z]:[\\/]|[\\/]{1,2}[^\\/\s])/u;
+// A drive path or a path from the root; a UNC path (`\\host\share`, `//host/share`) would make the guard read from a network share.
+const ABSOLUTE_PATH = /^(?:[A-Za-z]:[\\/]|[\\/][^\\/\s])/u;
+// The attributes file the bound diff names, by platform; the core cannot see the platform, so it accepts either.
+const NULL_DEVICES = ['NUL', '/dev/null'];
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const isSha = (value, length) => typeof value === 'string' && new RegExp(`^[0-9a-f]{${length}}$`, 'u').test(value);
 
 /**
+ * The argument list of the bound `isswf_git_diff` tool, with `nullDevice` as the attributes file (`NUL` on Windows, `/dev/null` elsewhere).
+ * tools/git-evidence.mjs runs it and tools/isswf-handoff.mjs writes it into the envelope, so the guard can compare it.
+ */
+export const diffCommandArguments = (baseSha, candidateSha, nullDevice) => ['--no-pager', `--attr-source=${candidateSha}`, '-c', `core.attributesFile=${nullDevice}`, 'diff', '--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', baseSha, candidateSha];
+
+// The value after `label` on every line that gives one. The path is captured with a character class and trimmed afterwards: a lazy `.*?`
+// in front of a trailing-space pattern is quadratic on a long run of spaces.
+const lineValues = (body, label, value) => [...body.matchAll(new RegExp(`${LINE_PREFIX}${label}:?[ \\t]+${value}`, 'gmu'))].map(match => match[1].trimEnd());
+
+// The one value a label has, `undefined` when it has none, or `{ conflict }` when its lines disagree.
+function single(values) {
+  const distinct = [...new Set(values)];
+  return distinct.length > 1 ? { conflict: true } : distinct[0];
+}
+
+/**
  * The handoff path, its SHA-256 and the candidate a reviewer prompt names, each on its own line as `handoff: <absolute path>`,
- * `handoff-sha256: <64 hex>` and `candidate <40 hex>` (a colon after the label is optional), or `{ error }` naming what is missing.
+ * `handoff-sha256: <64 hex>` and `candidate <40 hex>` (a colon after the label is optional), or `{ error }` naming what is missing or ambiguous.
+ * A label given on several lines must have the same value each time.
  */
 export function handoffReferences(prompt) {
   const body = typeof prompt === 'string' ? prompt : '';
-  const path = new RegExp(`${LINE_PREFIX}handoff:?[ \\t]+(\\S.*?)[ \\t\\r]*$`, 'mu').exec(body)?.[1];
+  const path = single(lineValues(body, 'handoff', String.raw`(\S[^\r\n]*)`));
+  const sha256 = single(lineValues(body, 'handoff-sha256', String.raw`([0-9a-f]{64})[ \t\r]*$`));
+  const candidate = single(lineValues(body, 'candidate', String.raw`([0-9a-f]{40})[ \t\r]*$`));
+  for (const [name, value] of [['handoff', path], ['handoff-sha256', sha256], ['candidate', candidate]]) {
+    if (value?.conflict) return { error: `the prompt has more than one \`${name}\` line with different values` };
+  }
   if (path === undefined) return { error: 'the prompt does not give the handoff file as a line `handoff: <absolute path>`' };
-  if (!ABSOLUTE_PATH.test(path)) return { error: `the handoff path ${path} must be an absolute path` };
-  const sha256 = new RegExp(`${LINE_PREFIX}handoff-sha256:?[ \\t]+([0-9a-f]{64})[ \\t\\r]*$`, 'mu').exec(body)?.[1];
+  if (!ABSOLUTE_PATH.test(path)) return { error: `the handoff path ${path} must be an absolute local path (a drive path or one from the root, not a network share)` };
   if (sha256 === undefined) return { error: 'the prompt does not give the 64-hex SHA-256 of the handoff file as a line `handoff-sha256: <hex>`' };
-  const candidate = new RegExp(`${LINE_PREFIX}candidate:?[ \\t]+([0-9a-f]{40})[ \\t\\r]*$`, 'mu').exec(body)?.[1];
   if (candidate === undefined) return { error: 'the prompt does not give the full 40-hex candidate SHA as a line `candidate <sha>`' };
   return { path, sha256, candidate };
 }
@@ -40,10 +63,11 @@ async function readFile(io, path, label, limit, limitText) {
 /**
  * Checks a reviewer dispatch against its handoff and returns the reason it fails, or undefined when it holds: the handoff file hashes to
  * the digest in the prompt, its envelope names this candidate, base, checkpoint and job brief, and the diff file it names has the bytes and SHA-256 it records.
- * `references` is the parsed brief, checkpoint and base of the prompt; `io.readBytes(path)` resolves with the file's bytes.
- * @param {{ prompt: string, references: { initiative: string, job: string, revision: string, checkpoint: string, base: string }, io: { readBytes: (path: string) => Promise<Uint8Array> } }} input
+ * It checks the files for consistency with the call (the bound diff argument list, the reviewer host and agent) and with each other; it cannot show where the diff came from.
+ * `references` is the parsed brief, checkpoint and base of the prompt; `host` and `agent` are the call's; `io.readBytes(path)` resolves with the file's bytes.
+ * @param {{ prompt: string, host: string, agent: string, references: { initiative: string, job: string, revision: string, checkpoint: string, base: string }, io: { readBytes: (path: string) => Promise<Uint8Array> } }} input
  */
-export async function verifyHandoff({ prompt, references, io }) {
+export async function verifyHandoff({ prompt, host, agent, references, io }) {
   const named = handoffReferences(prompt);
   if (named.error) return named.error;
   const file = await readFile(io, named.path, 'handoff file', MAX_HANDOFF_BYTES, '1 MiB');
@@ -63,8 +87,15 @@ export async function verifyHandoff({ prompt, references, io }) {
     ['candidate', envelope.candidate, named.candidate], ['base', envelope.base, references.base], ['checkpoint', brief.checkpoint, references.checkpoint],
     ['initiative', envelope.initiative, references.initiative], ['job', envelope.job, references.job], ['brief revision', String(brief.revision), references.revision],
   ]) if (actual !== expected) return `the handoff ${field} ${actual} is not the prompt's ${expected}`;
+  const reviewer = isObject(envelope.reviewer) ? envelope.reviewer : {};
+  if (reviewer.host !== host) return `the handoff reviewer host ${reviewer.host} is not ${host}`;
+  // The Claude agent is named with or without the plugin prefix, and the selection file may key it either way.
+  const bare = name => (typeof name === 'string' ? name.replace(/^isswf:/u, '') : name);
+  if (bare(reviewer.agent) !== bare(agent)) return `the handoff reviewer agent ${reviewer.agent} is not ${agent}`;
   const diff = isObject(envelope.diff) ? envelope.diff : {};
-  if (typeof diff.path !== 'string' || !ABSOLUTE_PATH.test(diff.path)) return 'the handoff diff path must be an absolute path';
+  if (typeof diff.path !== 'string' || !ABSOLUTE_PATH.test(diff.path)) return 'the handoff diff path must be an absolute local path (a drive path or one from the root, not a network share)';
+  const argv = JSON.stringify(diff.argv);
+  if (!NULL_DEVICES.some(device => JSON.stringify(diffCommandArguments(envelope.base, envelope.candidate, device)) === argv)) return 'the handoff diff argv is not the argument list of the bound diff (isswf_git_diff) for this base and candidate';
   if (!Number.isInteger(diff.bytes) || diff.bytes < 0 || diff.bytes > MAX_DIFF_BYTES || !isSha(diff.sha256, 64)) return 'the handoff diff needs an integer bytes up to 4 MiB and a 64-hex sha256';
   const patch = await readFile(io, diff.path, 'diff file', diff.bytes, `the ${diff.bytes} bytes the handoff records`);
   if (patch.error) return patch.error;

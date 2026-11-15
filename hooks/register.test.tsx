@@ -1,5 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
-import { buildEnvelope, sha256Hex } from '../tools/isswf-handoff-core.mjs'
+import { buildEnvelope, diffCommandArguments, sha256Hex } from '../tools/isswf-handoff-core.mjs'
 
 const ON = { options: { initiativesPane: true } }
 const AGENT = 'abc123'
@@ -744,7 +744,7 @@ test('a reviewer dispatch needs a handoff whose digests verify, and the worker n
   const diffPath = `C:${SEP}tmp${SEP}J001.diff`
   const envelope = buildEnvelope({
     initiative: 'I0001', job: 'J001', base: BASE, candidate: CANDIDATE,
-    diff: { path: diffPath, argv: ['diff'], bytes: diff.length, sha256: sha256Hex(diff) },
+    diff: { path: diffPath, argv: diffCommandArguments(BASE, CANDIDATE, 'NUL'), bytes: diff.length, sha256: sha256Hex(diff) },
     brief: { path: BRIEF, revision: '1', checkpoint: CHECKPOINT, blob: null }, reviewGuide: null, round: 1, priorReviews: [],
     reviewer: { host: 'claude', agent: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' }, resources: [],
   })

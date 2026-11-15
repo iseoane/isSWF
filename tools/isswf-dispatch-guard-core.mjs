@@ -167,7 +167,7 @@ async function checkCall(host, call, io) {
   await checkPlan(join(project, state, 'initiatives', initiative, 'plan.md'), job, io);
   await checkBrief(project, `${state}/initiatives/${initiative}/jobs/${job}/brief-r${revision}.md`, checkpoint, join, io);
   if (REVIEWER_AGENT.test(call.agent)) {
-    const reason = await verifyHandoff({ prompt: call.prompt, references, io });
+    const reason = await verifyHandoff({ prompt: call.prompt, host, agent: call.agent, references, io });
     if (reason) refuse(6, reason);
   }
 }

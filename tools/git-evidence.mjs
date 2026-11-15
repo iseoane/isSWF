@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { lstat, opendir, realpath } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { diffCommandArguments } from './isswf-handoff-core.mjs';
 
 const sha = value => typeof value === 'string' && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(value);
 const ownKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join(',') === [...keys].sort().join(',');
@@ -180,7 +181,7 @@ export async function content(input, slot, path, range) {
 }
 
 // The argv and environment of the bound diff. tools/isswf-handoff.mjs runs the same ones, so an unbound reviewer's digest matches a bound one's.
-export const diffArguments = (baseSha, candidateSha) => ['--no-pager', `--attr-source=${candidateSha}`, '-c', `core.attributesFile=${process.platform === 'win32' ? 'NUL' : '/dev/null'}`, 'diff', '--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', baseSha, candidateSha];
+export const diffArguments = (baseSha, candidateSha) => diffCommandArguments(baseSha, candidateSha, process.platform === 'win32' ? 'NUL' : '/dev/null');
 export const diffEnvironment = () => ({ GIT_INDEX_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null' });
 
 export async function diff(input) {
