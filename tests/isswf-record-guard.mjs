@@ -156,7 +156,8 @@ const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8')
 assert.ok(manifest.pi.extensions.includes(`./${extension}`), 'the package declares the record guard extension');
 for (const [role, declared] of [['worker', true], ['planner', false], ['researcher', false], ['reviewer', false]]) {
   const profile = await readFile(join(source, `.agents/hosts/pi/agents/isswf-${role}.md`), 'utf8');
-  assert.equal(profile.includes(`subagentOnlyExtensions: ../../../../${extension}\n`), declared, role);
+  const entries = (/^subagentOnlyExtensions: (.*)$/mu.exec(profile)?.[1] ?? '').split(',').map(entry => entry.trim());
+  assert.equal(entries.includes(`../../../../${extension}`), declared, role);
 }
 assert.match(await readFile(join(source, '.agents/hosts/pi/agents/isswf-reviewer.md'), 'utf8'), /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu, 'the reviewer keeps its git-evidence extension');
 

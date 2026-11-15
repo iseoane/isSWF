@@ -264,4 +264,18 @@ assert.equal(HEREDOC.flags + QUOTED.flags, 'gg');
 const paneText = raw => raw.replace(HEREDOC, '$3\n').replace(QUOTED, quoted => (/\s/.test(quoted) ? '""' : quoted));
 assert.equal(paneText('git commit -F - <<EOF > out.txt\n.factory/initiatives/I0001/plan.md\nEOF\ncat "a b" ".factory/x"'), 'git commit -F -  > out.txt\ncat "" ".factory/x"');
 
+// Packaging: the package extension covers the main session; the worker is the only profile with `bash`, so only it declares the guard
+// for its child. `subagentOnlyExtensions` takes a comma-separated list, so the worker keeps its record guard next to it.
+const extension = 'tools/isswf-command-guard-pi-extension.mjs';
+const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
+assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs', `./${extension}`]);
+for (const [role, shell] of [['worker', true], ['planner', false], ['researcher', false], ['reviewer', false]]) {
+  const profile = await readFile(join(source, `.agents/hosts/pi/agents/isswf-${role}.md`), 'utf8');
+  const tools = /^tools: (.*)$/mu.exec(profile)[1].split(',').map(tool => tool.trim());
+  const declared = (/^subagentOnlyExtensions: (.*)$/mu.exec(profile)?.[1] ?? '').split(',').map(entry => entry.trim());
+  assert.equal(tools.includes('bash'), shell, `${role} shell tool`);
+  assert.equal(declared.includes(`../../../../${extension}`), shell, `${role} declares the command guard`);
+}
+assert.match(await readFile(join(source, '.agents/hosts/pi/agents/isswf-worker.md'), 'utf8'), /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/isswf-record-guard-pi-extension\.mjs, \.\.\/\.\.\/\.\.\/\.\.\/tools\/isswf-command-guard-pi-extension\.mjs$/mu, 'the worker keeps its record guard');
+
 console.log('PASS command guard');
