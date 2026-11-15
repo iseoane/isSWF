@@ -272,4 +272,16 @@ try {
 // Packaging: the package declares the extension for the Pi main session, next to the record guard's.
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
 assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs']);
-console.log('PASS dispatch guard: shared core conditions, override line, fail-closed behavior, the Pi extension and its packaging');
+
+// Claude: the one `tool.call` hook (the engine refuses a second unmatched one) refuses an Agent call before `next(e)`,
+// whatever the pane option is, and runs Git through `$.process.run`. register.tsx has no runner, so this is a source check.
+const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');
+const hookAt = hooks.indexOf("on('tool.call'");
+const hook = hooks.slice(hookAt);
+assert.equal(hooks.match(/on\('tool\.call'/gu).length, 1, 'a single tool.call hook');
+assert.ok(hookAt < hooks.indexOf('options?.initiativesPane !== true'), 'registered whatever the pane option is');
+const guardAt = hook.indexOf('guardDispatch(');
+assert.ok(guardAt > 0 && guardAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
+assert.ok(hook.slice(0, guardAt).includes("e.tool === 'Agent'"), 'only the Agent tool is guarded');
+for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', 'return { deny:']) assert.ok(hook.includes(part), part);
+console.log('PASS dispatch guard: shared core conditions, override line, fail-closed behavior, the Pi extension, its packaging and the Claude hook');
