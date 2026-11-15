@@ -159,6 +159,7 @@ export function tokenize(command) {
       } else if (!PASSTHROUGH_KEYWORDS.has(leading)) break;
       rest = rest.slice(1);
     }
+    rest = dropRedirections(rest);
     const words = valueHeader ? [] : stripPrefixes(rest);
     const name = words.length && words[0] !== OPAQUE ? basename(words[0]) : undefined;
     if (BRACE_LOOP_COMMANDS.has(name)) openLoop().awaiting = true;
@@ -251,22 +252,30 @@ function ciWaiting(segments) {
 
 const LOCKED_PREFIXES = ['tooling/quality', 'tooling/host-tests'];
 const normalizedPath = path => (path ?? '').replaceAll('\\', '/').replace(/^(?:\.\/)+/u, '').replace(/\/+$/u, '');
-// A relative locked path, or an absolute one that ends in a locked path.
+// A relative locked path, or an absolute one with no `.` or `..` segment that ends in a locked path. The core has no
+// project root, so an absolute path is not checked to be inside the project.
 const isLockedPrefix = path => {
   const n = normalizedPath(path);
-  return LOCKED_PREFIXES.includes(n) || (/^(?:\/|[A-Za-z]:\/)/u.test(n) && LOCKED_PREFIXES.some(l => n.endsWith(`/${l}`)));
+  return LOCKED_PREFIXES.includes(n) || (/^(?:\/|[A-Za-z]:\/)/u.test(n) && !n.split('/').some(part => part === '.' || part === '..') && LOCKED_PREFIXES.some(l => n.endsWith(`/${l}`)));
 };
-// Redirection words are not install arguments; a lone operator also consumes its target.
+// Redirection words are not arguments of the command they follow; a lone operator also consumes its target.
 const REDIRECTION = /^(?:\d*|\*|&)?(?:>>?|<|>&|&>|>\|)/u;
 const REDIRECTION_ALONE = /^(?:\d*|\*|&)?(?:>>?|<|>&|&>|>\|)$/u;
+function dropRedirections(words) {
+  const kept = [];
+  for (let i = 0; i < words.length; i++) {
+    if (!REDIRECTION.test(words[i])) kept.push(words[i]);
+    else if (REDIRECTION_ALONE.test(words[i])) i++;
+  }
+  return kept;
+}
 // `npm ci --prefix <locked directory> --ignore-scripts`, with no package arguments and no other flag, in any order.
 function lockedInstall(args) {
   let prefix;
   let ignoreScripts = false;
   let ci = 0;
   for (let i = 0; i < args.length; i++) {
-    if (REDIRECTION.test(args[i])) i += REDIRECTION_ALONE.test(args[i]) ? 1 : 0;
-    else if (args[i] === 'ci') ci++;
+    if (args[i] === 'ci') ci++;
     else if (args[i] === '--ignore-scripts') ignoreScripts = true;
     else if (args[i] === '--prefix') prefix = args[++i];
     else if (args[i].startsWith('--prefix=')) prefix = args[i].slice('--prefix='.length);
