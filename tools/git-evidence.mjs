@@ -179,6 +179,10 @@ export async function content(input, slot, path, range) {
   }
 }
 
+// The argv and environment of the bound diff. tools/isswf-handoff.mjs runs the same ones, so an unbound reviewer's digest matches a bound one's.
+export const diffArguments = (baseSha, candidateSha) => ['--no-pager', `--attr-source=${candidateSha}`, '-c', `core.attributesFile=${process.platform === 'win32' ? 'NUL' : '/dev/null'}`, 'diff', '--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', baseSha, candidateSha];
+export const diffEnvironment = () => ({ GIT_INDEX_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null' });
+
 export async function diff(input) {
   let binding;
   try {
@@ -195,8 +199,7 @@ export async function diff(input) {
       const resolved = runGit(binding, ['rev-parse', '--verify', `${expected}^{commit}`], deadline).toString('ascii').trim();
       if (resolved !== expected) throw Error(`${name}-commit-identity-mismatch`);
     }
-    const env = { GIT_INDEX_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null' };
-    const patch = runGit(binding, ['--no-pager', `--attr-source=${binding.candidateSha}`, '-c', `core.attributesFile=${process.platform === 'win32' ? 'NUL' : '/dev/null'}`, 'diff', '--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', binding.baseSha, binding.candidateSha], deadline, binding.outputBytes + 1, env);
+    const patch = runGit(binding, diffArguments(binding.baseSha, binding.candidateSha), deadline, binding.outputBytes + 1, diffEnvironment());
     if (patch.length > binding.outputBytes) throw Error('diff-output-limit');
     const result = {
       version: 1, status: 'ok', operation: 'diff', repository: binding.repository,
