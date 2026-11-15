@@ -107,10 +107,10 @@ Known limits:
 
 - Only `git commit` is checked. `commit-tree`, `update-ref`, `merge`, `rebase`, `cherry-pick`, `revert`, `am`, `stash`, `pull` and `reset` are not.
 - Aliases, scripts, `eval`, `bash -c` and commands built from variables are not parsed. Commands you type yourself with Pi's `!` are not guarded.
-- The guard compares before the call. A peer switch that lands inside the same chained command is not seen, and after a `git switch` or `git checkout` the guard adopts whatever branch the checkout is on, including one a peer switched to meanwhile. Parallel Pi tool calls can interleave.
+- The guard compares before the call. A peer switch that lands inside the same chained command is not seen, and after a `git switch` or `git checkout` the guard adopts whatever branch the checkout is on, including one a peer switched to meanwhile. `git checkout -- <file> && git commit` adopts the checkout's current branch before the commit check, so it is not refused. Parallel tool calls can interleave, on Claude Code as on Pi.
 - The first look at a repository adopts the branch it is on, so a session's first command that runs after a peer switch is not refused.
 - A rename of the current branch (`git branch -m`) or an operation in progress that detaches HEAD, such as an interactive `rebase` stop or `bisect`, makes the next `git commit` look like a switch. Adopt the state with the `git switch` command the refusal names; the guard reads the checkout after that call even if Git refuses it.
-- A child that Claude Code starts in its own worktree is judged against the session directory unless its command names the directory. `--git-dir` pointing at a linked worktree's private directory is read as the main checkout. Pi reads `HEAD` from files, so a repository that stores references in the reftable format is not checked there.
+- A child that Claude Code starts in its own worktree is judged against the session directory unless its command names the directory, so it can be refused after the main loop switches. It should then adopt its own branch with `git switch <its own branch>`, not switch to the expected branch the refusal names. isSWF writers do not use automatic worktree isolation. `--git-dir` pointing at a linked worktree's private directory is read as the main checkout. Pi reads `HEAD` from files, so a repository that stores references in the reftable format is not checked there.
 
 ## Plan edit
 
