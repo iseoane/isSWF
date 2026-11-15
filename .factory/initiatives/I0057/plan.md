@@ -46,9 +46,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
 - Blocker: None.
-- Next step: Integrate brief-r2 (PR from feat/i0057-j001-record-check after green exact-head CI); then run the A002 runtime probes and prepare brief-r3 for the hook and Pi wiring.
+- Next step: A worker runs the three runtime probes of brief-r3 outside the repository; the coordinator records them in A006 and prepares brief-r4 for the hook and Pi wiring.
 
 ### Acceptance
 
@@ -66,6 +66,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: J029 stayed `blocked` while its worker, review and PR ran, so the pane's quota-resume prompt (hooks/register.tsx:165) never armed.
 - 2026-11-15: brief-r2 candidate 5f34fdf passed review round 3 ([V003](jobs/J001/V003.md)) after V001 (F1) and V002 (F6) failed on stale exit-code statements; attempts A003-A005. On real records the new validator flagged `J008/A002.md:7` `run-id-unknown`.
 - 2026-11-15: PR327 CI failed Knip (`REQUIRED_FIELDS` unused: the test imports the core dynamically). After V003 the coordinator added the core as a Knip entry, as for `isswf-snapshot-core.mjs`; Knip passed locally. Not independently reviewed; CI verifies it. Knip was not run locally before review although its locked install is documented.
+- 2026-11-15: PR327 merged (591af0372885199977a05dddbbeeaa1540ac41ae) after green CI on exact head 9d9d61c (Linux, Windows, portable checks).
 
 ## J002
 
@@ -160,13 +161,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow, no special risk)
 - Objective: The coordinator changes plan job fields through a command instead of hand-editing Markdown.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief after J001; decide in it how the command relates to the existing grant-guarded tools/isswf-plan.mjs.
+- Next step: The worker implements brief-r1 (plan edit command, separate from the grant-guarded tools/isswf-plan.mjs) on feat/i0057-j006-plan-edit.
 
 ### Acceptance
 
