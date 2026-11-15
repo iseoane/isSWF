@@ -166,6 +166,172 @@ try {
       assert.deepEqual(JSON.parse(refused.stdout), { ok: false, code }, code);
     }
   }
+  // `create` writes the next record from the template with the launch data and Git facts filled, and leaves every other line as the template has it.
+  {
+    const { checkRecord } = await load('isswf-record-check-core.mjs');
+    const { parseRunLine, readSnapshot } = await load('isswf-snapshot-core.mjs');
+    const project = join(root, 'create');
+    const jobRel = '.factory/initiatives/I0001/jobs/J001';
+    const jobDir = join(project, jobRel);
+    await mkdir(jobDir, { recursive: true });
+    git(project, 'init', '-q', '-b', 'main');
+    await writeFile(join(project, 'base.txt'), 'base\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'base');
+    const base = git(project, 'rev-parse', 'HEAD');
+    const twoJobs = `${planText()}\n${planText('pending').split('\n').slice(4).join('\n').replace('## J001', '## J002').replaceAll('jobs/J001', 'jobs/J002')}`;
+    await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), twoJobs);
+    await writeFile(join(jobDir, 'brief-r1.md'), '# Brief\n');
+    await mkdir(join(project, '.agents/roles'), { recursive: true });
+    await writeFile(join(project, '.agents/roles/worker.md'), '# Worker\n');
+    await writeFile(join(project, '.agents/roles/reviewer.md'), '# Reviewer\n');
+    await writeFile(join(project, '.factory/dispatch-selection.json'), '{}\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'checkpoint');
+    const checkpoint = git(project, 'rev-parse', 'HEAD');
+    await writeFile(join(project, 'REVIEW.md'), '# Review guide\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'candidate');
+    const candidate = git(project, 'rev-parse', 'HEAD');
+    const blob = (rev, path) => git(project, 'rev-parse', `${rev}:${path}`);
+
+    const cli = (command, args) => {
+      const result = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), command, ...Object.entries(args).flat()], { encoding: 'utf8', timeout: 30000 });
+      return { status: result.status, out: JSON.parse(result.stdout || 'null'), stderr: result.stderr };
+    };
+    const target = { '--project': project, '--initiative': 'I0001', '--job': 'J001' };
+    const attemptArgs = { ...target, '--kind': 'attempt', '--id': 'A001', '--role': 'worker', '--brief': `${jobRel}/brief-r1.md`, '--checkpoint': checkpoint, '--base': base, '--model': 'sonnet', '--effort': 'medium' };
+    const reviewArgs = { ...target, '--kind': 'review', '--id': 'V001', '--role': 'reviewer', '--brief': `${jobRel}/brief-r1.md`, '--checkpoint': checkpoint, '--base': base, '--model': 'haiku', '--effort': 'high', '--candidate': candidate };
+
+    // The expected record is the template with exactly these lines replaced or removed.
+    const expected = async (name, changes) => {
+      const used = new Set();
+      const lines = (await readFile(join(source, '.factory/templates', name), 'utf8')).split('\n').flatMap(line => {
+        const label = Object.keys(changes).find(key => line.startsWith(`- ${key}`));
+        if (label === undefined) return [line];
+        used.add(label);
+        return changes[label] === null ? [] : [`- ${label}${changes[label]}`];
+      });
+      assert.deepEqual([...used].sort(), Object.keys(changes).sort(), `${name} fields`);
+      return lines.join('\n');
+    };
+    const stamp = text => text.replace(/^(- (?:Report|Review) timestamp(?: and timezone)?: )\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ \(UTC\)$/mu, '$1<now>');
+    const read = async name => stamp(await readFile(join(jobDir, name), 'utf8'));
+
+    // An attempt with every optional input.
+    const full = cli('create', { ...attemptArgs, '--run': 'claude agent=a1b2c3', '--round': '2', '--checkout': project, '--branch': 'feat/x', '--candidate': candidate });
+    assert.equal(full.status, 0, JSON.stringify(full));
+    assert.deepEqual(full.out, { ok: true, initiative: 'I0001', job: 'J001', kind: 'attempt', id: 'A001', path: join(jobDir, 'A001.md'), violations: [] });
+    const brief = `${jobRel}/brief-r1.md`;
+    assert.equal(await read('A001.md'), await expected('attempt.md', {
+      'Job ID and attempt ID:': ' I0001/J001, A001',
+      'Review round:': ' 2',
+      'Run:': ' claude agent=a1b2c3',
+      'Report timestamp and timezone:': ' <now>',
+      'Brief path, revision, and input checkpoint (full Git SHA):': ` ${brief}, r1, ${checkpoint}`,
+      'Plan path and revision, if used:': ` .factory/initiatives/I0001/plan.md, ${checkpoint}`,
+      'Profile path and revision, if available:': ` .agents/roles/worker.md, blob ${blob(checkpoint, '.agents/roles/worker.md')}`,
+      'Target codebase base (full Git SHA):': ` ${base}`,
+      'Exclusive checkout or worktree:': ` ${project}`,
+      'Branch:': ' feat/x',
+      'Candidate commit SHA:': ` ${candidate}`,
+      'Model configuration path and input Git SHA (full SHA):': ` .factory/dispatch-selection.json, blob ${blob(checkpoint, '.factory/dispatch-selection.json')}`,
+      'Requested model and effort:': ' `sonnet`/`medium`',
+    }));
+
+    // Without the optional inputs the round and Run lines go, the checkout and branch come from the project, and an untracked file is said so.
+    // The brief may be given as an absolute path in the platform's own form.
+    const minimal = cli('create', { ...attemptArgs, '--id': 'A002', '--role': 'researcher', '--checkpoint': base, '--brief': join(jobDir, 'brief-r1.md') });
+    assert.equal(minimal.status, 0, JSON.stringify(minimal));
+    assert.equal(await read('A002.md'), await expected('attempt.md', {
+      'Job ID and attempt ID:': ' I0001/J001, A002',
+      'Review round:': null,
+      'Run:': null,
+      'Report timestamp and timezone:': ' <now>',
+      'Brief path, revision, and input checkpoint (full Git SHA):': ` ${brief}, r1, ${base}`,
+      'Plan path and revision, if used:': ` .factory/initiatives/I0001/plan.md, ${base}`,
+      'Profile path and revision, if available:': ' .agents/roles/researcher.md, not tracked at the checkpoint',
+      'Target codebase base (full Git SHA):': ` ${base}`,
+      'Exclusive checkout or worktree:': ` ${project}`,
+      'Branch:': ' main',
+      'Model configuration path and input Git SHA (full SHA):': ' .factory/dispatch-selection.json, not tracked at the checkpoint',
+      'Requested model and effort:': ' `sonnet`/`medium`',
+    }));
+
+    // A review fills its candidate, REVIEW.md at the candidate, the round and the earlier reviews of the job.
+    const review1 = cli('create', { ...reviewArgs, '--run': 'claude session=s-9', '--round': '1' });
+    assert.equal(review1.status, 0, JSON.stringify(review1));
+    assert.equal(await read('V001.md'), await expected('review.md', {
+      'Job ID and review ID:': ' I0001/J001, V001',
+      'Run:': ' claude session=s-9',
+      'Review round in this job, and prior review IDs:': ' 1; prior reviews: none',
+      'Project `REVIEW.md` consumed (path and revision), or absent:': ` REVIEW.md, blob ${blob(candidate, 'REVIEW.md')}`,
+      'Brief path and exact revision:': ` ${brief}, r1, ${checkpoint}`,
+      'Base commit SHA:': ` ${base}`,
+      'Candidate commit SHA, or reproducible snapshot identity:': ` ${candidate}`,
+      'Reviewer profile, model, and effort:': ` .agents/roles/reviewer.md, blob ${blob(checkpoint, '.agents/roles/reviewer.md')}, requested \`haiku\`/\`high\``,
+      'Review timestamp:': ' <now>',
+    }));
+    const review2 = cli('create', { ...reviewArgs, '--id': 'V002', '--round': '2', '--candidate': base });
+    assert.equal(review2.status, 0, JSON.stringify(review2));
+    const second = await read('V002.md');
+    assert.ok(second.includes('- Review round in this job, and prior review IDs: 2; prior reviews: V001\n'));
+    assert.ok(second.includes('consumed (path and revision), or absent: absent\n'), 'REVIEW.md is absent at that candidate');
+    assert.ok(!second.includes('- Run: claude agent=<id>'), 'an unknown run leaves no Run line');
+
+    // Every created record is clean for the checker, has a Run line the pane accepts and a model and effort the pane reads.
+    for (const name of ['A001.md', 'A002.md', 'V001.md', 'V002.md']) {
+      const text = await readFile(join(jobDir, name), 'utf8');
+      assert.deepEqual(checkRecord({ path: join(jobDir, name), text }), { ok: true, violations: [] }, name);
+    }
+    assert.deepEqual(parseRunLine('- Run: claude agent=a1b2c3'), { host: 'claude', kind: 'agent', id: 'a1b2c3' });
+    const api = {
+      list: async dir => (await readdir(dir, { withFileTypes: true })).map(entry => ({ name: entry.name, kind: entry.isDirectory() ? 'dir' : 'file' })),
+      stat: path => stat(path),
+      read: path => readFile(path, 'utf8'),
+      exists: path => access(path).then(() => true, () => false),
+    };
+    const entries = (await readSnapshot(project, api)).initiatives[0].jobs[0].rounds.flatMap(round => round.entries);
+    const a001 = entries.find(entry => entry.id === 'A001');
+    assert.deepEqual([a001.model, a001.modelSource, a001.effort, a001.runs], ['sonnet', 'requested', 'medium', [{ host: 'claude', kind: 'agent', id: 'a1b2c3' }]]);
+    assert.equal(a001.role, 'worker');
+
+    // Refusals leave no file behind.
+    const before = (await readdir(jobDir)).sort();
+    const refuse = (args, code, field) => {
+      const done = cli('create', args);
+      assert.deepEqual([done.status, done.out.ok, done.out.code, done.out.field], [1, false, code, field], JSON.stringify(args));
+    };
+    const next = { ...attemptArgs, '--id': 'A003' };
+    refuse({ ...next, '--id': 'A009' }, 'id-not-next');
+    refuse({ ...next, '--id': 'A001' }, 'id-not-next');
+    refuse({ ...next, '--id': 'V003' }, 'invalid-id');
+    refuse({ ...next, '--kind': 'review', '--id': 'A003' }, 'invalid-id');
+    refuse({ ...next, '--role': 'reviewer' }, 'invalid-role');
+    refuse({ ...reviewArgs, '--id': 'V003', '--role': 'worker' }, 'invalid-role');
+    refuse({ ...next, '--job': 'J002' }, 'job-not-in-progress');
+    refuse({ ...next, '--job': 'J003' }, 'job-not-found');
+    for (const flag of ['checkpoint', 'base', 'candidate']) {
+      for (const bad of ['abc123', 'A'.repeat(40), 'a'.repeat(39), `${'a'.repeat(40)}0`]) refuse({ ...next, [`--${flag}`]: bad }, `invalid-${flag}`);
+      refuse({ ...next, [`--${flag}`]: 'f'.repeat(40) }, 'commit-not-found', flag);
+    }
+    refuse({ ...next, '--model': 'two words' }, 'invalid-model');
+    refuse({ ...next, '--effort': '' }, 'invalid-effort');
+    refuse({ ...next, '--run': 'claude agent=<id> note' }, 'invalid-run');
+    refuse({ ...next, '--round': '0' }, 'invalid-round');
+    refuse({ ...next, '--brief': '.factory/initiatives/I0001/jobs/J002/brief-r1.md' }, 'invalid-brief');
+    refuse({ ...next, '--brief': '../outside/brief-r1.md' }, 'invalid-brief');
+    refuse({ ...next, '--checkout': 'relative' }, 'invalid-checkout');
+    refuse({ ...next, '--branch': 'two words' }, 'invalid-branch');
+    assert.deepEqual((await readdir(jobDir)).sort(), before, 'a refusal creates nothing');
+
+    // A record that appears between the check and the publication is not replaced.
+    const { createRecord } = await load('isswf-record-new.mjs');
+    const racer = join(jobDir, 'A003.md');
+    await assert.rejects(createRecord({ project, initiative: 'I0001', job: 'J001', kind: 'attempt', id: 'A003', role: 'worker', brief, checkpoint, base, model: 'sonnet', effort: 'medium', beforeLink: () => writeFile(racer, 'theirs\n') }), { code: 'record-exists' });
+    assert.equal(await readFile(racer, 'utf8'), 'theirs\n');
+    assert.deepEqual((await readdir(jobDir)).filter(name => name.endsWith('.tmp')), [], 'no temporary file is left behind');
+  }
   console.log('isswf-record-new test ok');
 } finally {
   await rm(root, { recursive: true, force: true });
