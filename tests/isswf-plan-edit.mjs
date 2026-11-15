@@ -78,6 +78,59 @@ try {
   assert.equal(created.status, 0, created.stderr);
   assert.deepEqual(created.out, { ok: true, initiative: 'I0002', job: 'J001', action: 'new-plan' });
   assert.equal(await readFile(join(project, '.factory/initiatives/I0002/plan.md'), 'utf8'), fresh);
+
+  // A request that would produce an invalid plan, or that cannot be read, exits 1 with a coded JSON error and leaves the plan byte-identical.
+  const current = plan(block('J001'), block('J002', { status: 'in-progress' }));
+  await writeFile(planPath, current);
+  const target = ['--project', project, '--initiative', 'I0001'];
+  const addArgs = (job, deps = 'J001') => ['add-job', ...target, '--job', job, '--objective', 'Add', '--depends-on', deps, '--size', 'S', '--next-step', 'Go', '--acceptance', 'Outcome'];
+  const refused = async (args, code, where = {}) => {
+    const before = await readFile(planPath);
+    const done = cli(...args);
+    assert.equal(done.status, 1, `${args.join(' ')} ${done.stderr}`);
+    assert.equal(done.out.ok, false, args.join(' '));
+    assert.equal(done.out.code, code, args.join(' '));
+    for (const [key, value] of Object.entries(where)) assert.deepEqual(done.out[key], value, `${args.join(' ')} ${key}`);
+    assert.deepEqual(await readFile(planPath), before, args.join(' '));
+  };
+  await refused(['set', ...target, '--job', 'J999', '--field', 'Status', '--value', 'in-progress'], 'unknown-job');
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'invented'], 'invalid-job', { job: 'J001', field: 'Status' });
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'completed'], 'completed jobs require evidence', { job: 'J001' });
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Objective', '--value', 'Other'], 'unknown-field');
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', 'one\ntwo'], 'invalid-value');
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', 'tab\there'], 'invalid-value');
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', ' '], 'invalid-value');
+  await refused(['append-evidence', ...target, '--job', 'J999', '--value', 'ran it'], 'unknown-job');
+  await refused(['append-evidence', ...target, '--job', 'J001', '--value', 'one\r\ntwo'], 'invalid-value');
+  await refused(addArgs('J003', 'J404'), 'invalid-dependency', { job: 'J003', field: 'Depends on' });
+  await refused(addArgs('J003', 'J003'), 'invalid-dependency');
+  await refused(addArgs('J001'), 'duplicate-job', { job: 'J001' });
+  await refused(addArgs('j3'), 'invalid-job-id');
+  await refused([...addArgs('J003'), '--acceptance', ''], 'invalid-value');
+  await refused(['add-job', ...target, '--job', 'J003', '--objective', 'Add', '--depends-on', 'J001', '--size', 'S', '--next-step', 'Go'], 'usage');
+  await refused(['rename', ...target], 'usage');
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'pending', '--bogus', 'x'], 'usage');
+  await refused(['set', '--project', 'relative/path', '--initiative', 'I0001', '--job', 'J001', '--field', 'Status', '--value', 'pending'], 'invalid-project');
+  await refused(['set', '--project', project, '--initiative', '../I0001', '--job', 'J001', '--field', 'Status', '--value', 'pending'], 'invalid-initiative');
+  await refused(['set', '--project', project, '--initiative', 'I0404', '--job', 'J001', '--field', 'Status', '--value', 'pending'], 'plan-not-found');
+
+  // A plan that was hand-edited into an invalid state is reported, not repaired or extended.
+  const handEdited = current.replace('- Brief: [brief-r1.md](jobs/J001/brief-r1.md)', '- Brief: None.');
+  await writeFile(planPath, handEdited);
+  await refused(['set', ...target, '--job', 'J002', '--field', 'Status', '--value', 'pending'], 'current-plan-invalid', { planError: { code: 'unsafe-brief-reference', job: 'J001', field: 'Brief', line: handEdited.split('\n').findIndex(line => line.startsWith('- Brief: None.')) + 1 } });
+  await writeFile(planPath, current);
+
+  // new-plan refuses an existing plan and an invalid request without writing anything.
+  const newArgs = (initiative, type = 'bug') => ['new-plan', '--project', project, '--initiative', initiative, '--title', 'Another', '--type', type, '--job', 'J001', '--objective', 'Add', '--depends-on', 'None', '--size', 'S', '--next-step', 'Go', '--acceptance', 'Outcome'];
+  const existing = await readFile(planPath);
+  const exists = cli(...newArgs('I0001'));
+  assert.deepEqual([exists.status, exists.out.code], [1, 'plan-exists']);
+  assert.deepEqual(await readFile(planPath), existing);
+  for (const [args, code] of [[newArgs('I0003', 'chore'), 'invalid-plan-type'], [newArgs('i0003'), 'invalid-initiative'], [[...newArgs('I0003'), '--job', 'J001'], 'usage']]) {
+    const done = cli(...args);
+    assert.deepEqual([done.status, done.out.ok, done.out.code], [1, false, code], code);
+    assert.equal(await readFile(join(project, '.factory/initiatives/I0003/plan.md')).catch(error => error.code), 'ENOENT', code);
+  }
 } finally { await rm(root, { recursive: true, force: true }); }
 
 console.log('plan edit tests passed');
