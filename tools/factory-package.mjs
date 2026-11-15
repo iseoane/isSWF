@@ -34,6 +34,7 @@ export const nativePiResources = [
   "tools/isswf-dispatch-guard-core.mjs",
   "tools/isswf-command-guard-pi-extension.mjs",
   "tools/isswf-command-core.mjs",
+  "tools/isswf-branch-guard-core.mjs",
   "tools/isswf-record-check-core.mjs",
   "tools/isswf-plan-core.mjs",
   "tools/isswf-snapshot-core.mjs",

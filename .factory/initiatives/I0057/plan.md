@@ -103,13 +103,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
 - Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J003/brief-r3.md)
 - Blocker: None.
-- Next step: PR and exact-head CI; the operator approved the merge in advance on 2026-11-15, subject to a passing review and green exact-head CI.
+- Next step: None.
 
 ### Acceptance
 
@@ -128,6 +128,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: coordinator decisions under the standing grant: the documented locked installs (npm ci --prefix tooling/quality or tooling/host-tests with --ignore-scripts and no package arguments) stay allowed; a bounded CI wait is one sleep of at most 900 s followed by one gh pr checks, with no loop; the Claude and Pi PowerShell tools get the same matcher where they exist; Pi user_bash (the operator's own commands) is not guarded.
 - 2026-11-15: probe ([A002](jobs/J003/A002.md)), Claude Code 2.1.325: the host resets every standalone shell cd ("Shell cwd was reset to …") and $.session.cwd() never moves, so the cd acceptance is met natively on this version; the 2026-11-14 pane symptom has an open cause. A nonzero exit sets ran.isError; PowerShell is a separate tool with the command in e.command.
 - 2026-11-15: brief-r3 review passed in two rounds ([V001](jobs/J003/V001.md) fail on F1, a refused documented locked install with a redirection; [V002](jobs/J003/V002.md) pass); correction 2 (N1, N2) verified by the coordinator without a third model review: RED 848cdfa failed, GREEN ac7f919 passed, and on candidate ee159ec the command-guard, dispatch-guard, record-guard, package-metadata and host-portability tests, check-docs and git diff --check exited 0, with checkCommand refusing yarn 2>&1 and a dotted absolute prefix and allowing the redirected locked installs. Known limits: the evasions listed in the operations guides, a live Pi run, a live Claude child refusal and Linux not run; the guard fails open.
+- 2026-11-15: PR332 merged as 204d70770be511fd060cec22d47d24121d8ca3a4 under the operator's advance approval, after green CI on exact head f0c21df2a9f98c6a48facf3dedcc5295af015a65 (Ubuntu and Windows package and host discovery, portable checks). Deviations from A003, V001 and V002 (required references and isswf-writing not consumed, test literals corrected inside GREEN commits) are covered by the deferred skill-loading candidate.
 
 ## J004
 
@@ -210,13 +211,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J007
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows, attempt and review records, plus the launch identity)
 - Objective: New attempt and review records start with their mechanical fields filled from Git and the launch identity.
 - Depends on: J006
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief after J006, listing which template fields are derivable and from which source.
+- Next step: Implementation brief r2 after J009 merges (shared packaging and docs paths).
 
 ### Acceptance
 
@@ -228,6 +229,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: A011 added a `Run note` line, and `Run:` lines with trailing notes in A003, A011 and V006 were ignored by the pane (see J001).
 - 2026-11-14 audit: about half of the roughly 30 fields in .factory/templates/attempt.md are copies of data already held in Git or in the launch call.
+- 2026-11-15: research ([A001](jobs/J007/A001.md)): no tool writes attempt or review records; about half the fields come from launch data or Git; reuse the exclusive link create, checkRecord and the dispatch-guard parser (export its base); the record-name pattern is defined four times and the reviewer model has two sources; create the record after a successful launch.
 
 ## J008
 
@@ -265,9 +267,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: S (one flow, no special risk: compare the branch before a commit)
 - Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J009/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J009/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation brief r3 after J003 lands the shared command tokeniser (all edit the single tool.call hook).
+- Next step: PR and exact-head CI; the merge needs the operator's approval (tools/factory-package.mjs).
 
 ### Acceptance
 
@@ -281,3 +283,4 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: minutes later, the same checkout was on `records/close-i0009`, another branch switch by the peer session.
 - 2026-11-15: research ([A001](jobs/J009/A001.md)): keep the expected branch per agent loop, read HEAD through $.fs (Claude) or node:fs (Pi), reread HEAD after the session's own switch or checkout; extends the J003 tokeniser.
 - 2026-11-15: probe ([A002](jobs/J009/A002.md)), Claude Code 2.1.325: a $.state value survived a manual compaction; $.process.run ran git rev-parse in a headless session without a permission prompt; a linked worktree's .git file and its gitdir HEAD read through $.fs on Windows.
+- 2026-11-15: brief-r3 review passed in round 1 ([V001](jobs/J009/V001.md), S1-S3 suggestions); correction 1 verified by the coordinator without another model review: RED f0cbc8c failed, GREEN d047091 passed, and on candidate 035fd71 the branch-guard, command-guard, dispatch-guard, record-guard, package-metadata and host-portability tests, check-docs and git diff --check exited 0. Known limits: only git commit is checked; aliases, scripts and eval are not parsed; a session's first command after a peer switch is not refused; a Claude child in its own worktree is judged against the session directory; the guard fails open; a live Pi run and Linux not run locally.

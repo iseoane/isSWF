@@ -1,6 +1,7 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
+import { checkBranch, observeBranch, refreshBranches } from '../tools/isswf-branch-guard-core.mjs'
 import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
 import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
@@ -15,6 +16,7 @@ const IS_ACTIVATED = { plugin: 'isswf', key: 'isActivated' } as const
 const TAB = { plugin: 'isswf', key: 'tab' } as const
 const RESUME = { plugin: 'isswf', key: 'resumeOnQuota' } as const
 const TREE = { plugin: 'isswf', key: 'tree' } as const
+const BRANCHES = { plugin: 'isswf', key: 'branches' } as const
 // A file is shown up to this many characters; one drawing holds 100000 in all.
 const FILE_CHARS = 60_000
 const READ_LIMIT = 4 * 1024 * 1024
@@ -469,14 +471,42 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
 
 const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
 
+// What the branch guard needs from the host, for the loop that made the call: the main loop, or a child by its agent id.
+function branchHost($: EngineInterface, e: { agentId?: string }) {
+  return {
+    loop: e.agentId ?? 'main',
+    // The engine refuses `$.fs` and `$.process` passed as values, so each call is spelled out.
+    observe: (dir: string) => observeBranch(dir, {
+      git: async (argv: string[], cwd: string) => {
+        const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+        return { exitCode, stdout }
+      },
+      read: (file: string) => $.fs.read(file),
+    }),
+    store: {
+      read: async () => (await $.state.get(BRANCHES)).value ?? {},
+      set: (key: string, state: { branch: string } | { detached: string }) => update($, BRANCHES, (all: Record<string, unknown> | undefined) => ({ ...all, [key]: state })),
+    },
+  }
+}
+
 export const register: Register = (on, options) => {
   // The engine accepts one unmatched `tool.call` hook, so this one serves the shell and dispatch guards and the record check,
   // which run whatever the pane option is, and the pane's observation, which runs only with the option on.
   on('tool.call', async ($, e, next) => {
-    // A delegated child's shell calls reach this hook too. The core fails open, so a fault in it never blocks a call.
+    // The directories the shell call must look at again once it has run.
+    let reobserve: string[] = []
+    const branches = branchHost($, e)
+    // A delegated child's shell calls reach this hook too. Both cores fail open, so a fault in them never blocks a call.
     if (e.tool === 'Bash' || e.tool === 'PowerShell') {
-      const verdict = guardCommand((e as { command?: unknown }).command)
+      const command = (e as { command?: unknown }).command
+      const verdict = guardCommand(command)
       if ('deny' in verdict) return { deny: verdict.deny }
+      try {
+        const branch = await checkBranch({ command, cwd: await $.session.cwd(), ...branches })
+        if (branch.deny !== undefined) return { deny: branch.deny }
+        reobserve = branch.reobserve
+      } catch {}
     }
     // The guard refuses before the child starts, so it runs ahead of `next(e)`; `$.fs` and `$.process` are spelled out per call.
     if (e.tool === 'Agent') {
@@ -494,6 +524,8 @@ export const register: Register = (on, options) => {
       if ('deny' in verdict) return { deny: verdict.deny }
     }
     const ran = await next(e)
+    // A session's own `git switch` or `git checkout` selects the branch the checkout is on now, whatever the call's outcome.
+    if (reobserve.length) await refreshBranches({ dirs: reobserve, ...branches })
     // A failure in either part must never change or repeat the tool's result.
     if (options?.initiativesPane === true) {
       try {
