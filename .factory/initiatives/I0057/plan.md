@@ -109,7 +109,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J003/brief-r3.md)
 - Blocker: None.
-- Next step: Correction cycle 2 for V002 (N1, N2), verified by the coordinator without a third model review; then PR and exact-head CI. The operator approved the merge in advance on 2026-11-15, subject to a passing review and green exact-head CI.
+- Next step: PR and exact-head CI; the operator approved the merge in advance on 2026-11-15, subject to a passing review and green exact-head CI.
 
 ### Acceptance
 
@@ -127,6 +127,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: research ([A001](jobs/J003/A001.md)): Claude denies Bash before next(e); Pi bash spawns per call, so a cd never persists and the cd acceptance is Claude-only; unknown whether Claude Bash keeps a cd and whether $.session.cwd() follows it.
 - 2026-11-15: coordinator decisions under the standing grant: the documented locked installs (npm ci --prefix tooling/quality or tooling/host-tests with --ignore-scripts and no package arguments) stay allowed; a bounded CI wait is one sleep of at most 900 s followed by one gh pr checks, with no loop; the Claude and Pi PowerShell tools get the same matcher where they exist; Pi user_bash (the operator's own commands) is not guarded.
 - 2026-11-15: probe ([A002](jobs/J003/A002.md)), Claude Code 2.1.325: the host resets every standalone shell cd ("Shell cwd was reset to …") and $.session.cwd() never moves, so the cd acceptance is met natively on this version; the 2026-11-14 pane symptom has an open cause. A nonzero exit sets ran.isError; PowerShell is a separate tool with the command in e.command.
+- 2026-11-15: brief-r3 review passed in two rounds ([V001](jobs/J003/V001.md) fail on F1, a refused documented locked install with a redirection; [V002](jobs/J003/V002.md) pass); correction 2 (N1, N2) verified by the coordinator without a third model review: RED 848cdfa failed, GREEN ac7f919 passed, and on candidate ee159ec the command-guard, dispatch-guard, record-guard, package-metadata and host-portability tests, check-docs and git diff --check exited 0, with checkCommand refusing yarn 2>&1 and a dotted absolute prefix and allowing the redirected locked installs. Known limits: the evasions listed in the operations guides, a live Pi run, a live Claude child refusal and Linux not run; the guard fails open.
 
 ## J004
 
