@@ -54,6 +54,9 @@ export async function recordNames({ root, relative: jobRelative }, git) {
   return names;
 }
 
+/** The review IDs (`V001`, ...) among the file names of a job directory, in order: the job's prior reviews. */
+export const reviewIds = names => [...names].filter(name => /^V\d{3}\.md$/u.test(name)).map(name => name.slice(0, 4)).sort();
+
 /** The next unused record ID of `kind` for the job. */
 export async function nextId({ project, initiative, job, kind }) {
   const target = await jobTarget({ project, initiative, job });
@@ -147,7 +150,7 @@ export async function createRecord(input) {
     checkout: workDir,
     branch: currentBranch,
     reviewGuide: candidate === undefined ? undefined : blobAt(git, candidate, 'REVIEW.md'),
-    priorReviews: [...names].filter(name => /^V\d{3}\.md$/u.test(name)).map(name => name.slice(0, 4)).sort(),
+    priorReviews: reviewIds(names),
     timestamp: `${new Date().toISOString().replace(/\.\d+Z$/u, 'Z')} (UTC)`,
   };
   const template = (await readFile(join(FACTORY_ROOT, '.factory/templates', `${kind}.md`), 'utf8')).replaceAll('\r\n', '\n');
