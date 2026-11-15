@@ -104,7 +104,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: Probe brief-r2 (Claude cd persistence, $.session.cwd(), isError on a nonzero exit, PowerShell tool name), then the implementation brief after J004; J003 lands the shared command tokeniser.
+- Next step: Implementation brief r3 after J004 merges: CI-waiting and package-acquisition rules for Bash and PowerShell on both hosts, in a shared command tokeniser; the cd rule is out of scope (native reset, recorded as version-dependent).
 
 ### Acceptance
 
@@ -121,6 +121,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: the coordinator again used `gh pr checks --watch` twice for PR327, contrary to feature-delivery.md; PR328 used one deferred check instead.
 - 2026-11-15: research ([A001](jobs/J003/A001.md)): Claude denies Bash before next(e); Pi bash spawns per call, so a cd never persists and the cd acceptance is Claude-only; unknown whether Claude Bash keeps a cd and whether $.session.cwd() follows it.
 - 2026-11-15: coordinator decisions under the standing grant: the documented locked installs (npm ci --prefix tooling/quality or tooling/host-tests with --ignore-scripts and no package arguments) stay allowed; a bounded CI wait is one sleep of at most 900 s followed by one gh pr checks, with no loop; the Claude and Pi PowerShell tools get the same matcher where they exist; Pi user_bash (the operator's own commands) is not guarded.
+- 2026-11-15: probe ([A002](jobs/J003/A002.md)), Claude Code 2.1.325: the host resets every standalone shell cd ("Shell cwd was reset to …") and $.session.cwd() never moves, so the cd acceptance is met natively on this version; the 2026-11-14 pane symptom has an open cause. A nonzero exit sets ran.isError; PowerShell is a separate tool with the command in e.command.
 
 ## J004
 
