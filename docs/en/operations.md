@@ -36,6 +36,19 @@ node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/p
 - `A<nnn>.md` and `V<nnn>.md`: a `- Run:` line the snapshot's parser would ignore is `run-line-unparsed`, and one with `unknown` as its ID is `run-id-unknown` (the template says to omit the line). A record without a template label is `missing-field` with the exact label: `Deviations from required procedure and consequence:` and `Process deviations observed:` in an attempt, and `Unreviewed areas and evidence limits:`, `Convergence advice:` and `Process deviations observed:` in a review.
 - Other files are not checked.
 
+## Plan edit
+
+```bash
+node tools/isswf-plan-edit.mjs set --project /absolute/project --initiative I0001 --job J001 --field Status --value in-progress
+node tools/isswf-plan-edit.mjs append-evidence --project /absolute/project --initiative I0001 --job J001 --value "2026-11-15: focused test passed"
+node tools/isswf-plan-edit.mjs add-job --project /absolute/project --initiative I0001 --job J002 --objective "Outcome" --depends-on J001 --size "S (one flow)" --next-step "Prepare a brief." --acceptance "Observable outcome"
+node tools/isswf-plan-edit.mjs new-plan --project /absolute/project --initiative I0002 --title "Title" --type enhancement --job J001 --objective "Outcome" --depends-on None --size "S (one flow)" --next-step "Prepare a brief." --acceptance "Observable outcome"
+```
+
+`tools/isswf-plan-edit.mjs` edits `<state directory>/initiatives/<ID>/plan.md` so that a plan job field is not hand-written. `set` changes `Status`, `Blocker` or `Next step`. `append-evidence` adds an evidence item. `add-job` appends a `pending` job with a pending brief reference (`--depends-on` is `None` or `J1,J2`, and `--acceptance` repeats). `new-plan` creates a plan with its first job and refuses an existing plan. It writes a complete temporary file and links it into place, so a plan that appears meanwhile is not replaced. Every subcommand needs the project directory and its `.isswf` or `.factory` state directory to exist already (`state-not-found` otherwise) and never creates them. Each value is one line and is written verbatim. Every result is read back with `parsePlan`: a request that would produce an invalid plan, or a plan that another writer changed meanwhile, prints `{ ok: false, code, ... }` and exits 1 with the plan unchanged. Success prints `{ ok: true, initiative, job, action }` and exits 0. Line endings and every other byte are kept, and both `\` and `/` work in the project path.
+
+The command grants nothing: it reads no grant file and does not replace `tools/isswf-plan.mjs`, which renders a whole plan from a proposal. It does not lock the plan, so hand edits stay valid and `tools/isswf-record-check.mjs` still checks them. The check that the plan did not change runs just before the rename, so a writer that lands in that instant can still be overwritten.
+
 ## Initiative snapshot
 
 `tools/isswf-snapshot.mjs` reads every initiative under the active state directory (`.isswf` or `.factory`) and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. It wraps `tools/isswf-snapshot-core.mjs`, which has no Node imports and does every read, including the state-directory choice, through an injected object with async `exists`, `list`, `stat` and `read`. Runtimes without Node built-ins import the core and call `readSnapshot(project, fs)` with their own `fs`. The Node wrapper's `readSnapshot(project, fs)` defaults `fs` to Node and also applies the regular-directory check from `tools/project-state.mjs`, which the core cannot do.

@@ -32,6 +32,8 @@ Further candidates observed on 2026-11-14, to assess:
 - `hooks/register.test.tsx` is not run by any CI step or test (J001/A002): any hook guard needs a test that runs.
 - A wording correction dropped part of a contract definition, and the phrase tests passed (J008/V002 F4): a record field's definition could have one canonical source, with its key phrases asserted.
 - Knip and ESLint are not part of `check-quality`, so a worker's local checks can pass while CI fails (J001 PR327): the worker brief or a pre-push check could run them.
+- After merging a job, the coordinator stopped and asked the operator whether to continue, although the standing grant covers advancing the plan (2026-11-15; operator: "el avanzar con los jobs no es algo que necesite de mi", "Es el objetivo básico de la factoría"): at a job close, the next eligible job could be proposed mechanically from the plan's dependencies and statuses.
+- New tests are not run by CI unless listed by hand in `tools/check-quality.mjs` or the workflow (J001 `tests/isswf-record-check.mjs`): a check could fail when a `tests/*.mjs` file is not run anywhere.
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
@@ -46,9 +48,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
 - Blocker: None.
-- Next step: Integrate brief-r2 (PR from feat/i0057-j001-record-check after green exact-head CI); then run the A002 runtime probes and prepare brief-r3 for the hook and Pi wiring.
+- Next step: Prepare brief-r4: wire the validator into a plugin `tool.call` handler with post-`next(e)` context (A006 Q1, Q2) and a Pi extension declared through `subagentOnlyExtensions`; add `tests/isswf-record-check.mjs` and `hooks/register.test.tsx` to a check CI runs.
 
 ### Acceptance
 
@@ -66,6 +68,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: J029 stayed `blocked` while its worker, review and PR ran, so the pane's quota-resume prompt (hooks/register.tsx:165) never armed.
 - 2026-11-15: brief-r2 candidate 5f34fdf passed review round 3 ([V003](jobs/J001/V003.md)) after V001 (F1) and V002 (F6) failed on stale exit-code statements; attempts A003-A005. On real records the new validator flagged `J008/A002.md:7` `run-id-unknown`.
 - 2026-11-15: PR327 CI failed Knip (`REQUIRED_FIELDS` unused: the test imports the core dynamically). After V003 the coordinator added the core as a Knip entry, as for `isswf-snapshot-core.mjs`; Knip passed locally. Not independently reviewed; CI verifies it. Knip was not run locally before review although its locked install is documented.
+- 2026-11-15: PR327 merged (591af0372885199977a05dddbbeeaa1540ac41ae) after green CI on exact head 9d9d61c (Linux, Windows, portable checks).
+- 2026-11-15: runtime probes ([A006](jobs/J001/A006.md)): a plugin `tool.call` handler's post-`next(e)` `context` reaches the model in the same turn with the tool result unchanged; the parent handler sees child Bash calls with `agentId`; a hooks module receives `classic.SessionStart` (`compact`), but its `additionalContext` did not reach the model (affects J005).
+- 2026-11-15: `tests/isswf-record-check.mjs` from PR327 is not run by CI: neither `.github/workflows/quality.yml` nor `tools/check-quality.mjs` lists it.
 
 ## J002
 
@@ -157,16 +162,17 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the operator reports that forgotten process rules are recurrent. Linking this to compaction is an inference, not a traced cause.
 - 2026-11-14 audit: .agents/hosts/claude-code.md asks the coordinator to reload its skill after compaction, a rule that itself depends on memory. Mechanisms found: Claude plugin `session.compact` (steer or skip) and SessionStart `reloadSkills`; Pi `session_before_compact` and `before_agent_start`.
+- 2026-11-15 probe (J001/A006): a hooks module's `additionalContext` from `classic.SessionStart` (`compact`) did not reach the model, while a settings-hook SessionStart output did. `session.compact` steering, `$.session.append` and `reloadSkills` are untested.
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow, no special risk)
 - Objective: The coordinator changes plan job fields through a command instead of hand-editing Markdown.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief after J001; decide in it how the command relates to the existing grant-guarded tools/isswf-plan.mjs.
+- Next step: Integrate the PR from feat/i0057-j006-plan-edit after green exact-head CI.
 
 ### Acceptance
 
@@ -178,6 +184,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the `Brief: None.` lines in I0055 and I0056 were hand-written (8566437).
 - 2026-11-14 audit: the `render()` function in tools/isswf-plan.mjs always writes a valid brief reference, but it requires an external plan-only grant file and is not used for native plans.
+- 2026-11-15: brief-r1 candidate 1d3a10f passed review ([V001](jobs/J006/V001.md) pass with S1-S4, corrected; [V002](jobs/J006/V002.md) delta pass). Known limit (V002 I4): on non-Windows systems a directory fsync failing after the rename or link reports failure although the plan changed. The I1 test found a kept lone `- None.` placeholder, fixed in 34df5ab. This evidence line was written with the new command.
 
 ## J007
 
