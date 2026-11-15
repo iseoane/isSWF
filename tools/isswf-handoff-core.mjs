@@ -3,9 +3,10 @@
 
 // Stub for the TDD cycle: every export except sha256Hex is empty until its behaviour is implemented.
 export const HANDOFF_SCHEMA = 'isswf.handoff/1';
+// The Claude hook cannot read a file over 4 MiB, so a diff above it could not be verified there and is refused when it is written.
+export const MAX_DIFF_BYTES = 4 * 1024 * 1024;
 export const handoffReferences = () => ({});
 export const verifyHandoff = async () => undefined;
-export const buildEnvelope = () => ({});
 export const reviewCandidateOf = () => undefined;
 export const overrideCommitsOf = () => [];
 export const isDocsPath = () => false;
@@ -49,4 +50,17 @@ export function sha256Hex(bytes) {
     state[0] += a; state[1] += b; state[2] += c; state[3] += d; state[4] += e; state[5] += f; state[6] += g; state[7] += h;
   }
   return Array.from(state, word => word.toString(16).padStart(8, '0')).join('');
+}
+
+/** The `isswf.handoff/1` envelope for a review: the one place that fixes its keys and their order. */
+export function buildEnvelope({ initiative, job, base, candidate, diff, brief, reviewGuide, round, priorReviews, reviewer, resources }) {
+  return {
+    schema: HANDOFF_SCHEMA, kind: 'review', initiative, job, base, candidate,
+    diff: { path: diff.path, argv: diff.argv, bytes: diff.bytes, sha256: diff.sha256 },
+    brief: { path: brief.path, revision: brief.revision, checkpoint: brief.checkpoint, blob: brief.blob ?? null },
+    reviewGuide: { path: 'REVIEW.md', blob: reviewGuide ?? null },
+    round, priorReviews: [...priorReviews],
+    reviewer: { host: reviewer.host, agent: reviewer.agent, model: reviewer.model, effort: reviewer.effort },
+    resources: resources.map(({ path, absolutePath, blob }) => ({ path, absolutePath, blob: blob ?? null })),
+  };
 }
