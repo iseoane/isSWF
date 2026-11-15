@@ -154,6 +154,18 @@ try {
     assert.equal(await readFile(join(project, '.factory/initiatives/I0003/plan.md')).catch(error => error.code), 'ENOENT', code);
   }
 
+  // A project that does not exist, or has no state directory, is refused and nothing is created for it.
+  await mkdir(join(root, 'bare'));
+  const entries = await readdir(root);
+  for (const absent of [join(root, 'missing'), join(root, 'bare')]) {
+    for (const args of [newArgs('I0003'), ['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'pending'], ['append-evidence', ...target, '--job', 'J001', '--value', 'x']]) {
+      const done = cli(...args.map(value => (value === project ? absent : value)));
+      assert.deepEqual([done.status, done.out.ok, done.out.code], [1, false, 'state-not-found'], `${absent} ${args[0]}`);
+    }
+  }
+  assert.deepEqual(await readdir(root), entries);
+  assert.deepEqual(await readdir(join(root, 'bare')), []);
+
   // A plan another writer changed between read and rename is not overwritten, and no temporary file is left.
   await writeFile(planPath, current);
   const edit = text => setField(text, { job: 'J001', field: 'Status', value: 'in-progress' });
