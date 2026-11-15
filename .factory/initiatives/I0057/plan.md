@@ -159,7 +159,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (one flow, but verification needs a real compaction on each host)
 - Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J005/brief-r2.md)
 - Blocker: None.
 - Next step: Probe brief-r2 for the untested Claude post-compaction routes ($.session.append, SessionStart reloadSkills, auto trigger), then the implementation brief.
 
