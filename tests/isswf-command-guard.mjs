@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
-const { tokenize, checkCommand, guardCommand } = await load('tools/isswf-command-core.mjs');
+const { HEREDOC, QUOTED, tokenize, checkCommand, guardCommand } = await load('tools/isswf-command-core.mjs');
 const { default: registerGuard } = await load('tools/isswf-command-guard-pi-extension.mjs');
 
 const refused = (command, rule) => assert.equal(checkCommand(command)?.rule, rule, `should refuse (${rule}): ${command}`);
@@ -230,5 +231,37 @@ for (const command of [
   assert.equal(await handler({ toolName: 'bash' }, {}), undefined, 'a call without input is left alone');
   assert.equal(await handler(undefined, {}), undefined, 'an unreadable event is left alone');
 }
+
+// Fail open: a fault inside a rule allows the command, and an input that is not text is not a command.
+assert.deepEqual(guardCommand('npx x', [() => { throw new Error('rule fault'); }]), {});
+assert.deepEqual(guardCommand('npx x', [() => ({ rule: 'late', reason: 'after a fault' })]), { deny: 'isSWF command guard (late): after a fault' });
+for (const input of [undefined, null, 42, {}, ['npx x']]) assert.deepEqual(guardCommand(input), {}, String(input));
+assert.deepEqual(guardCommand(''), {});
+
+// Claude: the one `tool.call` hook refuses `Bash` and `PowerShell` before `next(e)`, whatever the pane option is.
+// The event carries the command in `command`, for the main session and for a child (`agentId`).
+// register.tsx has no runner, so the hook is a source check; the live check covers the host.
+const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');
+const hook = hooks.slice(hooks.indexOf("on('tool.call'"));
+const coreImport = /import \{([^}]*)\} from '\.\.\/tools\/isswf-command-core\.mjs'/u.exec(hooks)?.[1] ?? '';
+assert.ok(/\bguardCommand\b/u.test(coreImport), 'the hook imports the shared core');
+const shellAt = hook.indexOf('guardCommand(');
+assert.ok(shellAt > 0 && shellAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
+assert.ok(hook.slice(0, shellAt).includes("e.tool === 'Bash'") && hook.slice(0, shellAt).includes("e.tool === 'PowerShell'"), 'both shell tools are guarded');
+assert.ok(hook.slice(shellAt, hook.indexOf('await next(e)')).includes('return { deny:'), 'a refusal is a deny');
+assert.ok(!hook.slice(0, shellAt).includes('agentId'), 'children and the main session are guarded alike');
+for (const event of [{ tool: 'Bash', command: 'npx --version' }, { tool: 'PowerShell', command: 'npx --version' }, { tool: 'Bash', command: 'npx --version', agentId: 'a1b2c3' }]) {
+  assert.match(guardCommand(event.command).deny, /package-acquisition/u, JSON.stringify(event));
+}
+assert.deepEqual(guardCommand('node --version'), {});
+
+// The pane's heredoc and quoted-text handling uses the same patterns, moved unchanged.
+assert.ok(/\bHEREDOC\b/u.test(coreImport) && /\bQUOTED\b/u.test(coreImport), 'the pane imports the patterns from the core');
+assert.ok(!/^const (?:HEREDOC|QUOTED) =/mu.test(hooks), 'the patterns live in the core only');
+assert.equal(HEREDOC.source, String.raw`<<-?\s*(['"]?)(\w+)\1([^\n]*)\n[\s\S]*?(?:\n\s*\2\s*(?:\n|$)|$)`);
+assert.equal(QUOTED.source, String.raw`(["'])(?:(?!\1)[\s\S])*\1`);
+assert.equal(HEREDOC.flags + QUOTED.flags, 'gg');
+const paneText = raw => raw.replace(HEREDOC, '$3\n').replace(QUOTED, quoted => (/\s/.test(quoted) ? '""' : quoted));
+assert.equal(paneText('git commit -F - <<EOF > out.txt\n.factory/initiatives/I0001/plan.md\nEOF\ncat "a b" ".factory/x"'), 'git commit -F -  > out.txt\n\ncat "" ".factory/x"');
 
 console.log('PASS command guard');
