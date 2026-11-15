@@ -321,6 +321,7 @@ try {
     refuse({ ...next, '--round': '0' }, 'invalid-round');
     refuse({ ...next, '--brief': '.factory/initiatives/I0001/jobs/J002/brief-r1.md' }, 'invalid-brief');
     refuse({ ...next, '--brief': '../outside/brief-r1.md' }, 'invalid-brief');
+    refuse({ ...next, '--brief': brief.replace('brief-r1', 'brief-r9') }, 'brief-not-found');
     refuse({ ...next, '--checkout': 'relative' }, 'invalid-checkout');
     refuse({ ...next, '--branch': 'two words' }, 'invalid-branch');
     assert.deepEqual((await readdir(jobDir)).sort(), before, 'a refusal creates nothing');
