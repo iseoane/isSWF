@@ -63,10 +63,11 @@ export function appendEvidence(text, { job, value }) {
     if (heading < 0) insertAfter(lines, lastContent(start, end), ['', '### Evidence', '', `- ${value}`], eol);
     else {
       const next = lines.findIndex((line, index) => index > heading && index < end && content(line).startsWith('### '));
-      const last = lastContent(heading, next < 0 ? end : next);
+      const sectionEnd = next < 0 ? end : next, last = lastContent(heading, sectionEnd);
+      const items = lines.slice(heading + 1, sectionEnd).filter(line => content(line).trim());
       if (last === heading) insertAfter(lines, heading, ['', `- ${value}`], eol);
       // A lone `- None.` placeholder is replaced, not followed by the evidence.
-      else if (last === heading + 2 && content(lines[last]) === '- None.') lines[last] = `- ${value}${ending(lines[last])}`;
+      else if (items.length === 1 && content(items[0]) === '- None.') lines[last] = `- ${value}${ending(lines[last])}`;
       else insertAfter(lines, last, [`- ${value}`], eol);
     }
     return lines.join('');
