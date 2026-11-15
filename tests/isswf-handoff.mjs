@@ -264,6 +264,36 @@ try {
   assert.equal(tool(['coverage', '--project', repo]).code, 'base-not-found');
   assert.equal(tool(['coverage', '--project', repo, '--base', 'main~0']).code, 'invalid-base');
   assert.equal(tool(['coverage']).code, 'usage');
+
+  // A pull request's merge commit has no changes of its own: the commits it brings in are what counts, and a reviewed one passes.
+  const merged = join(coverTemp, 'merged');
+  await mkdir(merged);
+  git(merged, 'init', '-q', '-b', 'main', '.');
+  const put = async (path, content) => {
+    await mkdir(join(merged, path, '..'), { recursive: true });
+    await writeFile(join(merged, path), content);
+  };
+  await put('README.md', 'start\n');
+  await put('.factory/initiatives/I0001/plan.md', plan('in-progress'));
+  git(merged, 'add', '-A');
+  git(merged, 'commit', '-qm', 'main');
+  const origin = git(merged, 'rev-parse', 'HEAD');
+  git(merged, 'checkout', '-q', '-b', 'feature');
+  await put('src/x.mjs', 'export const x = 1;\n');
+  git(merged, 'add', '-A');
+  git(merged, 'commit', '-qm', 'feature');
+  const built = git(merged, 'rev-parse', 'HEAD');
+  await put('.factory/initiatives/I0001/jobs/J001/V001.md', reviewText(built));
+  git(merged, 'add', '-A');
+  git(merged, 'commit', '-qm', 'records: V001');
+  git(merged, 'checkout', '-q', 'main');
+  await put('docs/en/other.md', 'other\n');
+  git(merged, 'add', '-A');
+  git(merged, 'commit', '-qm', 'docs on main');
+  git(merged, 'merge', '--no-ff', '-q', '-m', 'merge feature', 'feature');
+  const viaMerge = tool(['coverage', '--project', merged, '--base', origin, '--head', git(merged, 'rev-parse', 'HEAD')]);
+  assert.equal(viaMerge.ok, false, 'the docs commit made on main after the base is not reviewed');
+  assert.deepEqual(viaMerge.jobs[0].uncovered.map(entry => entry.paths), [['docs/en/other.md']], 'only the docs commit, not the merge commit that brings in the reviewed one');
 } finally {
   await rm(coverTemp, { recursive: true, force: true });
 }
