@@ -309,8 +309,8 @@ try {
     refuse({ ...next, '--kind': 'review', '--id': 'A003' }, 'invalid-id');
     refuse({ ...next, '--role': 'reviewer' }, 'invalid-role');
     refuse({ ...reviewArgs, '--id': 'V003', '--role': 'worker' }, 'invalid-role');
-    refuse({ ...next, '--job': 'J002' }, 'job-not-in-progress');
-    refuse({ ...next, '--job': 'J003' }, 'job-not-found');
+    refuse({ ...next, '--job': 'J002', '--brief': brief.replace('J001', 'J002') }, 'job-not-in-progress');
+    refuse({ ...next, '--job': 'J003', '--brief': brief.replace('J001', 'J003') }, 'job-not-found');
     for (const flag of ['checkpoint', 'base', 'candidate']) {
       for (const bad of ['abc123', 'A'.repeat(40), 'a'.repeat(39), `${'a'.repeat(40)}0`]) refuse({ ...next, [`--${flag}`]: bad }, `invalid-${flag}`);
       refuse({ ...next, [`--${flag}`]: 'f'.repeat(40) }, 'commit-not-found', flag);
