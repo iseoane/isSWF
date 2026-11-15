@@ -188,6 +188,12 @@ for (const command of [
   'npm ci --prefix ../tooling/quality --ignore-scripts',
   'npm ci --prefix /x/tooling/quality-extra --ignore-scripts',
   'npm ci --prefix tooling/quality --ignore-scripts left-pad 2>&1',
+  'yarn 2>&1',
+  'yarn > log',
+  'npm 2>&1 install x',
+  'npm install x 2>&1',
+  'npm ci --prefix C:/repo/tooling/quality/../../x/tooling/quality --ignore-scripts',
+  'npm ci --prefix /x/./tooling/quality --ignore-scripts',
 ]) refused(command, 'package-acquisition');
 for (const command of [
   'npm ci --prefix tooling/quality --ignore-scripts',
@@ -241,6 +247,7 @@ for (const command of [
   'npm ci --prefix=/home/me/repo/tooling/host-tests/ --ignore-scripts',
   'npm ci --prefix C:\\Users\\me\\repo\\tooling\\quality --ignore-scripts',
   'npm ci --prefix=C:/Users/me/repo/tooling/host-tests --ignore-scripts',
+  'sleep 60; gh pr checks 1 2>&1',
   'nice make',
   'cmd /c dir',
   'xargs echo',
