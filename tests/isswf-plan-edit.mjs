@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
 const { parsePlan } = await import(pathToFileURL(join(source, 'tools/isswf-plan-core.mjs')));
+const { editPlanFile } = await import(pathToFileURL(join(source, 'tools/isswf-plan-edit.mjs')));
 const { setField, appendEvidence, addJob, newPlan } = await import(pathToFileURL(join(source, 'tools/isswf-plan-edit-core.mjs')));
 
 // One job in the plan format the coordinator writes, so expectations differ from the input only in the field under test.
@@ -131,6 +132,22 @@ try {
     assert.deepEqual([done.status, done.out.ok, done.out.code], [1, false, code], code);
     assert.equal(await readFile(join(project, '.factory/initiatives/I0003/plan.md')).catch(error => error.code), 'ENOENT', code);
   }
+
+  // A plan another writer changed between read and rename is not overwritten, and no temporary file is left.
+  await writeFile(planPath, current);
+  const edit = text => setField(text, { job: 'J001', field: 'Status', value: 'in-progress' });
+  const changed = current.replace('Intro text.', 'Intro text, edited meanwhile.');
+  for (const [name, change] of [['edited', () => writeFile(planPath, changed)], ['same length', () => writeFile(planPath, current.replace('Intro text.', 'Intro texts'))], ['removed', () => rm(planPath)]]) {
+    await writeFile(planPath, current);
+    await assert.rejects(editPlanFile({ project, initiative: 'I0001', edit, beforeRename: change }), { code: 'plan-changed' }, name);
+    assert.deepEqual((await readdir(join(project, '.factory/initiatives/I0001'))).filter(entry => entry.endsWith('.tmp')), [], name);
+  }
+  assert.equal(await readFile(planPath, 'utf8').catch(error => error.code), 'ENOENT');
+  await writeFile(planPath, changed);
+  await assert.rejects(editPlanFile({ project, initiative: 'I0001', edit, beforeRename: () => writeFile(planPath, current) }), { code: 'plan-changed' }, 'restored to different bytes');
+  assert.equal(await readFile(planPath, 'utf8'), current);
+  await editPlanFile({ project, initiative: 'I0001', edit, beforeRename: async () => {} });
+  assert.equal(await readFile(planPath, 'utf8'), plan(block('J001', { status: 'in-progress' }), block('J002', { status: 'in-progress' })));
 } finally { await rm(root, { recursive: true, force: true }); }
 
 console.log('plan edit tests passed');
