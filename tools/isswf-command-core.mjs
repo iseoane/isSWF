@@ -113,10 +113,48 @@ function timeoutOperands(words) {
   return words.slice(i);
 }
 
+const CD_COMMANDS = new Set(['cd', 'chdir', 'pushd', 'set-location', 'sl']);
+// A directory the command spells out, or null when it is a variable, a substitution, `~`, quoted text with spaces or `-`.
+const literalDir = word => (word === undefined || word === '-' || /[$`~\u0001]/u.test(word) ? null : word);
+
+// The directory a `cd`, `pushd` or `Set-Location` call moves to, as typed; `-P`-style flags, `/d` and `-Path` are skipped.
+function cdTarget(args) {
+  let rest = args;
+  while (rest.length) {
+    if (rest[0] === '--') return literalDir(rest[1]);
+    if (/^-(?:path|literalpath)$/iu.test(rest[0])) return literalDir(rest[1]);
+    if (!/^(?:-.|\/d$)/iu.test(rest[0])) break;
+    rest = rest.slice(1);
+  }
+  return literalDir(rest[0]);
+}
+
+const GIT_VALUE_OPTIONS = new Set(['-C', '-c', '--git-dir', '--work-tree', '--namespace', '--super-prefix', '--config-env', '--attr-source']);
+
+// The global options of a `git` call, which come before its subcommand, and the subcommand with its arguments.
+function parseGit(args) {
+  const git = { dirs: [], config: [], gitDir: undefined, workTree: undefined, subcommand: undefined, args: [] };
+  for (let i = 0; i < args.length; i++) {
+    const word = args[i];
+    if (!word.startsWith('-')) return { ...git, subcommand: word, args: args.slice(i + 1) };
+    const equals = word.startsWith('--') ? word.indexOf('=') : -1;
+    const flag = equals < 0 ? word : word.slice(0, equals);
+    if (!GIT_VALUE_OPTIONS.has(flag)) continue;
+    const value = equals < 0 ? args[++i] : word.slice(equals + 1);
+    if (flag === '-C') git.dirs.push(literalDir(value));
+    else if (flag === '-c') git.config.push(value);
+    else if (flag === '--git-dir') git.gitDir = literalDir(value);
+    else if (flag === '--work-tree') git.workTree = literalDir(value);
+  }
+  return git;
+}
+
 /**
  * Splits a command into segments on `&&`, `||`, `;`, `|`, `&` and newlines, after setting aside heredocs, comments and quoted text.
  * Each segment has its `words`, its normalized `command` (a lower-case basename without `.cmd` or `.exe`) with its `args`, the
  * parenthesis and brace `depth`, and the ids of the loops it is inside (`loops`).
+ * Every segment also has `cd`, the directories that earlier `cd` and `pushd` segments at the same depth moved to, as typed
+ * (`null` when not literal), and a `git` segment has `git`: `dirs` (`-C`), `config` (`-c`), `gitDir`, `workTree`, `subcommand` and `args`.
  */
 export function tokenize(command) {
   const segments = [];
@@ -128,6 +166,8 @@ export function tokenize(command) {
   // A loop opens before its body arrives: a header, then `do` (Bash) or `{` (PowerShell). One that is still waiting for its body
   // when something else follows is no loop (`% Name`, the trailing `while (...)` of `do { } while (...)`) and is dropped.
   let header;
+  // A subshell starts in its parent's directory, and a `cd` inside it does not outlive it.
+  const cds = [[]];
   const openLoop = () => {
     const loop = { id: nextId++, style: undefined, base: braces, paren: undefined, awaiting: false };
     loops.push(loop);
@@ -163,7 +203,10 @@ export function tokenize(command) {
     const words = valueHeader ? [] : stripPrefixes(rest);
     const name = words.length && words[0] !== OPAQUE ? basename(words[0]) : undefined;
     if (BRACE_LOOP_COMMANDS.has(name)) openLoop().awaiting = true;
-    segments.push({ words: rest, command: name, args: words.slice(1), depth, loops: loops.map(loop => loop.id) });
+    const segment = { words: rest, command: name, args: words.slice(1), depth, loops: loops.map(loop => loop.id), cd: [...cds[depth]] };
+    if (name === 'git') segment.git = parseGit(segment.args);
+    if (CD_COMMANDS.has(name)) cds[depth].push(cdTarget(segment.args));
+    segments.push(segment);
   };
 
   for (const token of lex(wordsOnly(command))) {
@@ -177,9 +220,11 @@ export function tokenize(command) {
     if (token.op === '(') {
       if (header) header.paren = depth;
       else dropAwaiting();
+      cds[depth + 1] = [...cds[depth]];
       depth++;
     } else if (token.op === ')') {
       depth = Math.max(0, depth - 1);
+      cds.length = depth + 1;
       for (const loop of loops) if (loop.paren === depth) loop.awaiting = true;
     } else if (token.op === '{') {
       const pending = loops.findLast(loop => loop.style === undefined);
@@ -188,11 +233,13 @@ export function tokenize(command) {
         pending.base = braces;
         pending.awaiting = false;
       }
+      cds[depth + 1] = [...cds[depth]];
       depth++;
       braces++;
     } else if (token.op !== '}' && token.op !== ';') dropAwaiting();
     if (token.op === '}') {
       depth = Math.max(0, depth - 1);
+      cds.length = depth + 1;
       braces = Math.max(0, braces - 1);
       const open = loops.findLastIndex(loop => loop.style === 'brace' && loop.base === braces);
       if (open >= 0) loops.length = open;
