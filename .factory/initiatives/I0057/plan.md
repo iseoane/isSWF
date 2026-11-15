@@ -268,7 +268,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J009/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation (brief-r3): worker on feat/i0057-j009-branch-guard, then unbound review, PR and exact-head CI.
+- Next step: Correction cycle 1 for V001 (S1 code and test; S2, S3 and I3 docs), verified by the coordinator; then PR and exact-head CI; the merge needs the operator's approval (tools/factory-package.mjs).
 
 ### Acceptance
 
