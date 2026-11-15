@@ -3,6 +3,7 @@ import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import { checkBranch, observeBranch, refreshBranches } from '../tools/isswf-branch-guard-core.mjs'
 import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
+import { compactionInstructions, compactionReminder, isCoordinatorSkill, rememberDispatch } from '../tools/isswf-compaction-core.mjs'
 import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
@@ -17,6 +18,8 @@ const TAB = { plugin: 'isswf', key: 'tab' } as const
 const RESUME = { plugin: 'isswf', key: 'resumeOnQuota' } as const
 const TREE = { plugin: 'isswf', key: 'tree' } as const
 const BRANCHES = { plugin: 'isswf', key: 'branches' } as const
+// The last accepted dispatches of a session that activated the coordinator; the post-compaction reminder lists them.
+const ASSIGNMENTS = { plugin: 'isswf', key: 'assignments' } as const
 // A file is shown up to this many characters; one drawing holds 100000 in all.
 const FILE_CHARS = 60_000
 const READ_LIMIT = 4 * 1024 * 1024
@@ -524,6 +527,15 @@ export const register: Register = (on, options) => {
       if ('deny' in verdict) return { deny: verdict.deny }
     }
     const ran = await next(e)
+    // The coordinator's accepted dispatches outlive a compaction in `$.state`; a failure here never changes the tool's result.
+    if (e.tool === 'Agent' && ran.deny === undefined && !ran.isError) {
+      try {
+        if ((await $.state.get(IS_ACTIVATED)).value) {
+          const runId = (ran.result as { agentId?: unknown } | undefined)?.agentId
+          await update($, ASSIGNMENTS, (list: unknown[] | undefined) => rememberDispatch(list, { host: 'claude', input: e, runId }))
+        }
+      } catch {}
+    }
     // A session's own `git switch` or `git checkout` selects the branch the checkout is on now, whatever the call's outcome.
     if (reobserve.length) await refreshBranches({ dirs: reobserve, ...branches })
     // A failure in either part must never change or repeat the tool's result.
@@ -553,6 +565,46 @@ export const register: Register = (on, options) => {
     }
   })
 
+  // The coordinator's activation is recorded whatever the pane option is: compaction reads it. With the option off nothing else
+  // happens here, so nothing schedules, registers or draws.
+  on('skill.prompt', async ($, e, next) => {
+    if (isCoordinatorSkill(e.skill)) {
+      try {
+        await $.state.set(IS_ACTIVATED, true)
+      } catch {}
+      if (options?.initiativesPane === true) {
+        ensureFallback($)
+        void paneSpec($).then(spec => $.ui.open(spec))
+      }
+    }
+
+    return next(e)
+  })
+
+  // A session that activated the coordinator asks its summary to keep the assignment. Only the main conversation is steered,
+  // and any fault leaves the compaction as the host would have run it.
+  on('session.compact', async ($, e, next) => {
+    let steered = e
+    try {
+      if (e.agentId === undefined && (await $.state.get(IS_ACTIVATED)).value) steered = { ...e, instructions: compactionInstructions(e.instructions) }
+    } catch {}
+    return next(steered)
+  })
+
+  // The first start after a compaction tells the model to reload the coordinator skill. `additionalContext` reaches the model there
+  // (J005/A002); a message appended after /compact does not.
+  on('classic.SessionStart', async ($, e, next) => {
+    const result = await next(e)
+    if (e.source !== 'compact') return result
+    try {
+      if (!(await $.state.get(IS_ACTIVATED)).value) return result
+      const { value: assignments } = await $.state.get(ASSIGNMENTS)
+      return { ...result, additionalContext: [...(result.additionalContext ?? []), compactionReminder({ host: 'claude', assignments })] }
+    } catch {
+      return result
+    }
+  })
+
   // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.
   if (options?.initiativesPane !== true) return
 
@@ -561,16 +613,6 @@ export const register: Register = (on, options) => {
       name: 'isswf-initiatives',
       description: 'Open or refresh the isSWF initiatives pane; pin or unpin <ID>',
     })
-
-    return next(e)
-  })
-
-  on('skill.prompt', async ($, e, next) => {
-    if (e.skill.endsWith('isswf-coordinator')) {
-      await $.state.set(IS_ACTIVATED, true)
-      ensureFallback($)
-      void paneSpec($).then(spec => $.ui.open(spec))
-    }
 
     return next(e)
   })
