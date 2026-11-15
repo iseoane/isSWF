@@ -9,6 +9,8 @@
     "tools/isswf-record-check-core.mjs",
     "tools/isswf-plan-edit.mjs",
     "tools/isswf-plan-edit-core.mjs",
+    "tools/isswf-record-new.mjs",
+    "tools/isswf-record-new-core.mjs",
     "tools/isswf-snapshot.mjs",
     "tools/isswf-snapshot-core.mjs",
     "tools/isswf-run-usage-core.mjs",

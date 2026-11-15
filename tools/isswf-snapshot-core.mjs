@@ -10,6 +10,8 @@ export function joiner(path) {
   return (...parts) => parts.join(sep);
 }
 const MAX_BYTES = 1024 * 1024;
+// Attempt and review record names (A or V and three digits): the checker, the guard, the status command and the pane share this.
+export const RECORD_NAME = /^[AV]\d{3}\.md$/;
 const UNKNOWN = 'unknown';
 const EFFORTS = /\b(minimal|low|medium|high|xhigh|max)\b/i;
 const MODEL_NAME = /(gpt|claude|opus|sonnet|haiku|gemini|glm|kimi|qwen|deepseek)/i;
@@ -154,7 +156,7 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
   const briefRounds = files.map(f => f.match(/^brief-r(\d+)\.md$/)?.[1]).filter(Boolean).map(Number).sort((a, b) => a - b);
   const latest = briefRounds.at(-1) ?? null;
   const records = [];
-  for (const file of files.filter(f => /^[AV]\d{3}\.md$/.test(f)).sort()) {
+  for (const file of files.filter(f => RECORD_NAME.test(f)).sort()) {
     const text = await readBounded(fs, join(dir, file), skipped);
     if (text === null) continue;
     const record = parseRecord(file, text, initiativeId, job.id);

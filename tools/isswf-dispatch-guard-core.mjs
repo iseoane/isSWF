@@ -84,7 +84,12 @@ async function checkSelection(host, call, state, file, io) {
   }
 }
 
-function checkReferences(prompt) {
+/**
+ * Reads the job brief path and the full checkpoint and base SHAs from a dispatch prompt, or refuses. Exported so a tool that records a
+ * launch can read them with the same parser as the guard; only the tests use it so far.
+ * @public
+ */
+export function checkReferences(prompt) {
   const body = typeof prompt === 'string' ? prompt : '';
   const brief = BRIEF_PATH.exec(body);
   if (!brief) refuse(3, 'the prompt does not name the job brief as .../initiatives/<I>/jobs/<J>/brief-r<n>.md');
@@ -93,7 +98,7 @@ function checkReferences(prompt) {
     shas[word] = fullShaAfter(body, word);
     if (!shas[word]) refuse(3, `the prompt does not give the full 40-hex ${label} SHA after the word "${word}"`);
   }
-  return { initiative: brief[1], job: brief[2], revision: brief[3], checkpoint: shas.checkpoint };
+  return { initiative: brief[1], job: brief[2], revision: brief[3], checkpoint: shas.checkpoint, base: shas.base };
 }
 
 async function checkPlan(planPath, job, io) {

@@ -1,11 +1,10 @@
 // No Node imports and no `process` access, like tools/isswf-snapshot-core.mjs: runtimes that only offer
 // an injected fs load this module. tools/isswf-record-check.mjs is the Node wrapper.
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
-import { parseRunLine } from './isswf-snapshot-core.mjs';
+import { parseRunLine, RECORD_NAME } from './isswf-snapshot-core.mjs';
 
 // Callers pass Windows or POSIX paths, so the file name is split on both separators.
 const baseName = path => path.split(/[\\/]/).pop();
-const RECORD_NAME = /^[AV]\d{3}\.md$/;
 
 function planViolations(text, jobFiles) {
   let jobs;
@@ -42,6 +41,7 @@ function runViolations(text) {
     if (!RUN_CANDIDATE.test(line)) continue;
     const run = parseRunLine(line);
     if (!run) violations.push({ code: 'run-line-unparsed', field: 'Run:', line: index + 1, message: RUN_MESSAGE });
+    else if (run.id === '<id>') violations.push({ code: 'run-id-unfilled', field: 'Run:', line: index + 1, message: 'Run: line still has the template placeholder <id>: copy the launch ID or omit the line' });
     else if (run.id === 'unknown') violations.push({ code: 'run-id-unknown', field: 'Run:', line: index + 1, message: 'Run: line has no known ID: omit the line when the ID is unknown' });
   }
   return violations;

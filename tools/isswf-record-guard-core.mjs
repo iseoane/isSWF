@@ -2,12 +2,16 @@
 // only an injected fs. The Pi extension and hooks/register.tsx pass their own `read` and `list` and share this
 // path matching and message.
 import { checkRecord } from './isswf-record-check-core.mjs';
-import { joiner } from './isswf-snapshot-core.mjs';
+import { joiner, RECORD_NAME } from './isswf-snapshot-core.mjs';
 
 // The same ceiling as tools/isswf-record-check.mjs.
 const MAX_CHARS = 1024 * 1024;
 // The plan and the attempt and review records are the only files `checkRecord` has rules for.
-const RECORD_PATH = /^(?:.*\/)?(?:\.isswf|\.factory)\/initiatives\/I\d+\/(?:plan\.md|jobs\/J\d+\/[AV]\d{3}\.md)$/;
+const RECORD_PATH = /^(?:.*\/)?(?:\.isswf|\.factory)\/initiatives\/I\d+\/(?:plan\.md|jobs\/J\d+\/([^/]+))$/;
+const isRecordPath = path => {
+  const match = RECORD_PATH.exec(path);
+  return match !== null && (match[1] === undefined || RECORD_NAME.test(match[1]));
+};
 
 // A missing or unreadable directory is no listing, as in the CLI.
 async function names(list, dir, kind) {
@@ -41,7 +45,7 @@ function describe({ code, job, field, line, message }) {
  */
 export async function guardRecord({ path, read, list } = {}) {
   try {
-    if (typeof path !== 'string' || !RECORD_PATH.test(path.replaceAll('\\', '/'))) return undefined;
+    if (typeof path !== 'string' || !isRecordPath(path.replaceAll('\\', '/'))) return undefined;
     const text = await read(path);
     if (typeof text !== 'string' || text.length > MAX_CHARS) return undefined;
     const isPlan = path.endsWith('plan.md');

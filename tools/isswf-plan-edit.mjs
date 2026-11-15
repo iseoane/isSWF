@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { link, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planErrorDetail } from './isswf-plan-core.mjs';
 import { addJob, appendEvidence, isIdentifier, newPlan, setField } from './isswf-plan-edit-core.mjs';
@@ -32,41 +32,51 @@ async function planPath(project, initiative) {
 }
 
 /**
- * Applies `edit` (plan text to plan text) to the initiative's plan: a temporary file in the same directory, then a rename over the plan.
- * The rename is refused when the plan's SHA-256 is no longer the one read. `beforeRename` lets a test act in that window; a writer that
+ * Applies `edit` (file text to file text) to the existing file at `path`: a temporary file in the same directory, then a rename over the file.
+ * `what` (`plan` or `record`) names the file in the refusal codes `<what>-not-found`, `unsafe-<what>` and `<what>-changed`.
+ * The rename is refused when the file's SHA-256 is no longer the one read. `beforeRename` lets a test act in that window; a writer that
  * lands between the check and the rename is still not detected, because the filesystem offers no compare-and-rename.
  */
-export async function editPlanFile({ project, initiative, edit, beforeRename }) {
-  const path = await planPath(project, initiative);
-  const stat = await lstat(path).catch(error => { throw error.code === 'ENOENT' ? fail('plan-not-found') : error; });
-  if (!stat.isFile() || stat.size > MAX_BYTES) throw fail('unsafe-plan');
+export async function editFile({ path, what, edit, beforeRename }) {
+  const stat = await lstat(path).catch(error => { throw error.code === 'ENOENT' ? fail(`${what}-not-found`) : error; });
+  if (!stat.isFile() || stat.size > MAX_BYTES) throw fail(`unsafe-${what}`);
   const original = await readFile(path);
   const text = original.toString('utf8');
   // Bytes that are not UTF-8 would not survive the round trip, so the edit would change lines it never touched.
-  if (!Buffer.from(text).equals(original)) throw fail('unsafe-plan');
+  if (!Buffer.from(text).equals(original)) throw fail(`unsafe-${what}`);
   const next = edit(text);
-  const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
+  const temp = join(dirname(path), `.${basename(path)}.${randomBytes(6).toString('hex')}.tmp`);
   try {
     await writeSynced(temp, next);
     await beforeRename?.();
     const now = await readFile(path).catch(() => undefined);
-    if (!now || sha256(now) !== sha256(original)) throw fail('plan-changed');
+    if (!now || sha256(now) !== sha256(original)) throw fail(`${what}-changed`);
     await rename(temp, path);
   } catch (error) { await unlink(temp).catch(() => {}); throw error; }
   await syncDirectory(dirname(path));
 }
 
-/** Creates a plan that must not exist: the whole text goes to a temporary file, and `link` publishes it only if no plan is there. */
-export async function createPlanFile({ project, initiative, text, beforeLink }) {
-  const path = await planPath(project, initiative);
-  await mkdir(dirname(path), { recursive: true });
-  const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
+/** Applies `edit` to the initiative's plan; see `editFile`. */
+export async function editPlanFile({ project, initiative, edit, beforeRename }) {
+  await editFile({ path: await planPath(project, initiative), what: 'plan', edit, beforeRename });
+}
+
+/** Creates a file that must not exist: the whole text goes to a temporary file, and `link` publishes it only if nothing is at `path`; an existing file fails with `existsCode`. */
+export async function createExclusive({ path, text, existsCode, beforeLink }) {
+  const temp = join(dirname(path), `.${basename(path)}.${randomBytes(6).toString('hex')}.tmp`);
   try {
     await writeSynced(temp, text);
     await beforeLink?.();
-    await link(temp, path).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
+    await link(temp, path).catch(error => { throw error.code === 'EEXIST' ? fail(existsCode) : error; });
   } finally { await unlink(temp).catch(() => {}); }
   await syncDirectory(dirname(path));
+}
+
+/** Creates a plan that must not exist. */
+export async function createPlanFile({ project, initiative, text, beforeLink }) {
+  const path = await planPath(project, initiative);
+  await mkdir(dirname(path), { recursive: true });
+  await createExclusive({ path, text, existsCode: 'plan-exists', beforeLink });
 }
 
 const common = ['--project', '--initiative'];
