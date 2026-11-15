@@ -135,7 +135,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     {
       const chained = await s.check('git switch main && git commit -m three', repo);
       assert.equal(chained.deny, undefined, label('a switch earlier in the same command re-selects the branch'));
-      assert.deepEqual(chained.reobserve, [repo]);
+      assert.deepEqual(chained.reobserve, [resolveDir(repo, '.')]);
       sh(repo, 'switch', '-q', 'main');
       await s.refresh(chained.reobserve);
       assert.equal((await s.check('git commit -m four', repo)).deny, undefined);
@@ -144,7 +144,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     {
       const adopt = await s.check('git switch other', repo);
       assert.equal(adopt.deny, undefined);
-      assert.deepEqual(adopt.reobserve, [repo]);
+      assert.deepEqual(adopt.reobserve, [resolveDir(repo, '.')]);
       await s.refresh(adopt.reobserve);
       assert.equal((await s.check('git commit -m on-other', repo)).deny, undefined, label('adopting the current branch on purpose'));
     }
@@ -192,7 +192,7 @@ for (const [mode, observe] of Object.entries(observers)) {
       assert.equal((await t.check('(cd repo); git commit -m x', outside)).deny, undefined, label('a subshell cd does not outlive it'));
       assert.equal((await t.check('cd $SOMEWHERE && git commit -m x', repo)).deny, undefined, label('a directory the guard cannot read allows the command'));
       assert.equal((await t.check('git -C "my repo" commit -m x', repo)).deny, undefined);
-      assert.equal((await t.check('git -C nowhere commit -m x', repo)).deny, undefined, label('a directory outside Git'));
+      assert.equal((await t.check('git -C nowhere commit -m x', outside)).deny, undefined, label('a directory outside Git'));
       sh(repo, 'switch', '-q', 'main');
     }
 
