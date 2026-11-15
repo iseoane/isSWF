@@ -1,11 +1,13 @@
 // No Node imports and no `process` access, like tools/isswf-record-guard-core.mjs: the Claude hooks module has
 // only an injected fs. The Pi extension and hooks/register.tsx pass their own `io`.
+import { verifyHandoff } from './isswf-handoff-core.mjs';
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 import { joiner } from './isswf-snapshot-core.mjs';
 
 // The same ceiling as tools/isswf-record-guard-core.mjs.
 const MAX_CHARS = 1024 * 1024;
 const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
+const REVIEWER_AGENT = /^(?:isswf:)?isswf-reviewer$/u;
 const STATE_DIRECTORIES = ['.isswf', '.factory'];
 // Pi has no thinking field: the level is a suffix of the model, and a model id may contain ':' itself.
 const PI_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
@@ -18,7 +20,7 @@ const fullShaAfter = (body, word) => {
   return sha?.length === 40 ? sha : undefined;
 };
 const OVERRIDE_LINE = /^Override:[ \t]+model=(\S+)[ \t]+effort=(\S+)[ \t]*$/u;
-const CONDITION_NAMES = { 2: 'selection', 3: 'references', 4: 'plan', 5: 'brief' };
+const CONDITION_NAMES = { 2: 'selection', 3: 'references', 4: 'plan', 5: 'brief', 6: 'handoff' };
 
 class Refusal extends Error {
   constructor(condition, detail) {
@@ -160,16 +162,21 @@ async function checkCall(host, call, io) {
   const join = joiner(project);
   const state = await stateDirectory(project, io);
   await checkSelection(host, call, state, join(project, state, 'dispatch-selection.json'), io);
-  const { initiative, job, revision, checkpoint } = checkReferences(call.prompt);
+  const references = checkReferences(call.prompt);
+  const { initiative, job, revision, checkpoint } = references;
   await checkPlan(join(project, state, 'initiatives', initiative, 'plan.md'), job, io);
   await checkBrief(project, `${state}/initiatives/${initiative}/jobs/${job}/brief-r${revision}.md`, checkpoint, join, io);
+  if (REVIEWER_AGENT.test(call.agent)) {
+    const reason = await verifyHandoff({ prompt: call.prompt, host, agent: call.agent, references, io });
+    if (reason) refuse(6, reason);
+  }
 }
 
 /**
  * Decides whether a delegation to an isSWF role agent may start. `input` is the host's raw tool input:
  * Claude's `Agent` call (`subagent_type`, `model`, `effort`, `prompt`) or Pi's `subagent` call (`agent`, `task`,
  * `model` with an optional `:level` suffix, and the `tasks` and `chain` forms). `io` supplies `project()`,
- * `read(path)`, `list(dir)` as `{ name, kind }` entries, `stat(path)` as `{ kind }` and `git(argv, cwd)`, which resolves with the
+ * `read(path)`, `readBytes(path)` (the file's bytes, for a reviewer's handoff), `list(dir)` as `{ name, kind }` entries, `stat(path)` as `{ kind }` and `git(argv, cwd)`, which resolves with the
  * exit code. Another agent is allowed without reading anything. A failure of the guard itself refuses the isSWF
  * role call, never any other. The verdict only refuses: `{ allow: true }` is not an authorization to dispatch.
  * @returns {Promise<{ allow: true } | { deny: string, condition: string }>}

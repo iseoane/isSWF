@@ -9,6 +9,8 @@ const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
 const { guardDispatch } = await load('tools/isswf-dispatch-guard-core.mjs');
 const { default: registerGuard } = await load('tools/isswf-dispatch-guard-pi-extension.mjs');
+const { buildEnvelope, handoffReferences, sha256Hex } = await load('tools/isswf-handoff-core.mjs');
+const { diffArguments } = await load('tools/git-evidence.mjs');
 
 const CHECKPOINT = 'a1'.repeat(20);
 const BASE = 'b2'.repeat(20);
@@ -44,6 +46,12 @@ const memoryIo = ({ project = '/work/project', files: raw = {}, dirs = ['.factor
       calls.read.push(path);
       if (!(norm(path) in files)) throw Error('ENOENT');
       return files[norm(path)];
+    },
+    readBytes: async path => {
+      calls.read.push(path);
+      if (!(norm(path) in files)) throw Error('ENOENT');
+      const value = files[norm(path)];
+      return typeof value === 'string' ? new TextEncoder().encode(value) : value;
     },
     list: async () => dirs.map(name => ({ name, kind: 'dir' })),
     stat: async path => {
@@ -197,6 +205,108 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   refused(await claude(claudeCall(), memoryIo(project({ committed: false }))), 'brief', 'checkpoint', CHECKPOINT);
 }
 
+// Condition 6: a reviewer dispatch carries the handoff the tool wrote, and the handoff, its digest and the diff file all verify.
+const CANDIDATE = 'c3'.repeat(20);
+const HANDOFF_PATH = '/tmp/handoffs/J001-c3c3c3c3c3c3.handoff.json';
+const DIFF_PATH = '/tmp/handoffs/J001-c3c3c3c3c3c3.diff';
+const bytesOf = text => new TextEncoder().encode(text);
+const DIFF = bytesOf('diff --git a/x b/x\n+changed\n');
+const envelopeOf = diff => buildEnvelope({
+  initiative: 'I0001', job: 'J001', base: BASE, candidate: CANDIDATE,
+  diff: { path: DIFF_PATH, argv: diffArguments(BASE, CANDIDATE), bytes: diff.length, sha256: sha256Hex(diff) },
+  brief: { path: BRIEF, revision: '1', checkpoint: CHECKPOINT, blob: null }, reviewGuide: null, round: 1, priorReviews: [],
+  reviewer: { host: 'claude', agent: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' }, resources: [],
+});
+const reviewerCall = prompt => claudeCall({ subagent_type: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium', prompt });
+// `mutate` changes the envelope before it is hashed, `tamper` changes the stored handoff bytes afterwards, `stored` replaces the diff file.
+const handoffCase = ({ mutate, tamper, stored = DIFF, drop = [], handoffPath = HANDOFF_PATH, line = digest => `handoff: ${handoffPath}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}` } = {}) => {
+  const envelope = envelopeOf(DIFF);
+  mutate?.(envelope);
+  const genuine = bytesOf(JSON.stringify(envelope, null, 2));
+  const files = { ...project().files, [handoffPath]: tamper?.(genuine) ?? genuine, [DIFF_PATH]: stored };
+  for (const path of drop) delete files[path];
+  return { io: memoryIo({ ...project(), files }), prompt: dispatchPrompt(line(sha256Hex(genuine))) };
+};
+const reviewed = async options => {
+  const { io, prompt } = handoffCase(options);
+  return claude(reviewerCall(prompt), io);
+};
+assert.deepEqual(await reviewed(), { allow: true }, 'a verifying handoff');
+assert.deepEqual(await reviewed({ handoffPath: 'C:\\tmp\\handoffs\\J001.handoff.json' }), { allow: true }, 'a Windows handoff path');
+assert.deepEqual(await reviewed({ line: digest => `handoff ${HANDOFF_PATH}\nhandoff-sha256 ${digest}\ncandidate: ${CANDIDATE}` }), { allow: true }, 'the labels with or without a colon');
+// Only a reviewer needs a handoff; the worker dispatch above carries none.
+assert.deepEqual(await claude(claudeCall({ subagent_type: 'isswf-worker' }), memoryIo(project())), { allow: true });
+refused(await claude(reviewerCall(dispatchPrompt()), memoryIo(project())), 'handoff', 'handoff');
+refused(await reviewed({ line: digest => `handoff-sha256: ${digest}\ncandidate ${CANDIDATE}` }), 'handoff', 'handoff');
+refused(await reviewed({ line: () => `handoff: ${HANDOFF_PATH}\ncandidate ${CANDIDATE}` }), 'handoff', 'handoff-sha256');
+refused(await reviewed({ line: digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest.slice(0, 40)}\ncandidate ${CANDIDATE}` }), 'handoff', 'handoff-sha256');
+refused(await reviewed({ line: digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest}` }), 'handoff', 'candidate');
+refused(await reviewed({ line: digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE.slice(0, 12)}` }), 'handoff', 'candidate');
+refused(await reviewed({ line: digest => `handoff: handoffs/h.json\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}` }), 'handoff', 'absolute');
+refused(await reviewed({ drop: [HANDOFF_PATH] }), 'handoff', 'cannot be read');
+refused(await reviewed({ tamper: bytes => bytesOf(`${new TextDecoder().decode(bytes)} `) }), 'handoff', 'does not match');
+refused(await reviewed({ tamper: () => bytesOf('{not json') }), 'handoff', 'does not match');
+refused(await reviewed({ mutate: envelope => { envelope.schema = 'isswf.handoff/2'; } }), 'handoff', 'schema');
+refused(await reviewed({ mutate: envelope => { envelope.kind = 'work'; } }), 'handoff', 'review');
+refused(await reviewed({ mutate: envelope => { envelope.candidate = 'd4'.repeat(20); } }), 'handoff', 'candidate');
+refused(await reviewed({ mutate: envelope => { envelope.base = 'd4'.repeat(20); } }), 'handoff', 'base');
+refused(await reviewed({ mutate: envelope => { envelope.job = 'J002'; } }), 'handoff', 'job');
+refused(await reviewed({ mutate: envelope => { envelope.initiative = 'I0002'; } }), 'handoff', 'initiative');
+refused(await reviewed({ mutate: envelope => { envelope.brief.checkpoint = 'd4'.repeat(20); } }), 'handoff', 'checkpoint');
+refused(await reviewed({ mutate: envelope => { envelope.brief.revision = '2'; } }), 'handoff', 'revision');
+refused(await reviewed({ drop: [DIFF_PATH] }), 'handoff', 'diff', 'cannot be read');
+refused(await reviewed({ stored: bytesOf('diff --git a/x b/x\n+CHANGED\n') }), 'handoff', 'diff', 'sha-256');
+refused(await reviewed({ stored: bytesOf('diff --git a/x b/x\n+changed\n+more\n') }), 'handoff', 'diff', 'bytes');
+refused(await reviewed({ mutate: envelope => { envelope.diff.path = 'relative.diff'; } }), 'handoff', 'diff', 'absolute');
+// The files must be consistent with this call, not only with each other: the bound diff argument list, and the reviewer the call names.
+refused(await reviewed({ mutate: envelope => { envelope.diff.argv = [...envelope.diff.argv, '--ext-diff']; } }), 'handoff', 'argv');
+refused(await reviewed({ mutate: envelope => { envelope.diff.argv = diffArguments(BASE, 'd4'.repeat(20)); } }), 'handoff', 'argv');
+refused(await reviewed({ mutate: envelope => { envelope.reviewer.host = 'pi'; } }), 'handoff', 'host');
+refused(await reviewed({ mutate: envelope => { envelope.reviewer.agent = 'isswf-worker'; } }), 'handoff', 'agent');
+// A UNC path would make the guard read a network share, so it is refused for both files.
+refused(await reviewed({ handoffPath: '//host/share/h.json' }), 'handoff', 'absolute');
+refused(await reviewed({ handoffPath: String.raw`\\host\share\h.json` }), 'handoff', 'absolute');
+refused(await reviewed({ mutate: envelope => { envelope.diff.path = '//host/share/x.diff'; } }), 'handoff', 'diff', 'absolute');
+refused(await reviewed({ mutate: envelope => { envelope.diff.path = String.raw`\\host\share\x.diff`; } }), 'handoff', 'diff', 'absolute');
+// A label given twice with different values is ambiguous; the same value twice is not.
+const twice = (extra, order = lines => lines) => digest => order(`handoff: ${HANDOFF_PATH}
+handoff-sha256: ${digest}
+candidate ${CANDIDATE}
+${extra(digest)}`);
+refused(await reviewed({ line: twice(() => 'handoff: /tmp/other.handoff.json') }), 'handoff', 'more than one');
+refused(await reviewed({ line: twice(() => `handoff-sha256: ${'0'.repeat(64)}`) }), 'handoff', 'more than one');
+refused(await reviewed({ line: twice(() => `candidate ${'d4'.repeat(20)}`) }), 'handoff', 'more than one');
+assert.deepEqual(await reviewed({ line: twice(() => `handoff: ${HANDOFF_PATH}`) }), { allow: true }, 'an identical repeat');
+// A long run of spaces followed by a non-space on the handoff line is read in linear time.
+{
+  const started = performance.now();
+  const parsed = handoffReferences(`handoff: /tmp/h.json${' '.repeat(100000)}x
+`);
+  assert.ok(performance.now() - started < 500, `handoffReferences took ${performance.now() - started} ms`);
+  assert.ok(parsed.error, 'the digest and candidate lines are missing');
+}
+{
+  // A runtime that cannot read bytes makes the check fail, not pass.
+  const { io, prompt } = handoffCase();
+  delete io.readBytes;
+  refused(await claude(reviewerCall(prompt), io), 'handoff', 'cannot be read');
+}
+// A file the prompt names is not read when its size already exceeds the limit.
+{
+  const { io, prompt } = handoffCase({ tamper: () => new Uint8Array(1024 * 1024 + 1) });
+  refused(await claude(reviewerCall(prompt), io), 'handoff', 'over 1 MiB');
+  assert.ok(!io.calls.read.includes(HANDOFF_PATH), 'an oversized handoff is not read');
+  const big = handoffCase({ stored: new Uint8Array(4 * 1024 * 1024 + 1) });
+  refused(await claude(reviewerCall(big.prompt), big.io), 'handoff', 'diff file', 'bytes the handoff records');
+  assert.ok(!big.io.calls.read.includes(DIFF_PATH), 'an oversized diff file is not read');
+}
+// The handoff check follows the others: a reviewer with no brief is refused for the brief first.
+{
+  const base = project();
+  delete base.files[`/work/project/${BRIEF}`];
+  refused(await claude(reviewerCall(handoffCase().prompt), memoryIo(base)), 'brief');
+}
+
 // The guard fails closed for an isSWF role call and never for another agent.
 {
   const broken = memoryIo(project());
@@ -256,7 +366,29 @@ try {
 
   // An allowed call, and the calls the guard does not own, return nothing so the tool runs unchanged.
   assert.equal(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` }), undefined, 'a call that meets every condition');
-  assert.equal(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free:low' }), undefined, 'a model id that contains a colon');
+  // A reviewer call also needs a handoff that verifies against the real files, which live outside the project.
+  const handoffDir = join(temp, 'handoffs');
+  await mkdir(handoffDir);
+  const handoffEnvelope = buildEnvelope({
+    initiative: 'I0001', job: 'J001', base: BASE, candidate: CANDIDATE,
+    diff: { path: join(handoffDir, 'x.diff'), argv: diffArguments(BASE, CANDIDATE), bytes: DIFF.length, sha256: sha256Hex(DIFF) },
+    brief: { path: BRIEF, revision: '1', checkpoint: head, blob: null }, reviewGuide: null, round: 1, priorReviews: [],
+    reviewer: { host: 'pi', agent: 'isswf-reviewer', model: 'vendor/model:free', effort: 'low' }, resources: [],
+  });
+  const handoffText = bytesOf(JSON.stringify(handoffEnvelope, null, 2));
+  await writeFile(join(handoffDir, 'x.diff'), DIFF);
+  await writeFile(join(handoffDir, 'x.handoff.json'), handoffText);
+  const handoffLines = (digest = sha256Hex(handoffText)) => `handoff: ${join(handoffDir, 'x.handoff.json')}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}`;
+  assert.equal(await call({ agent: 'isswf-reviewer', task: task(handoffLines()), model: 'vendor/model:free:low' }), undefined, 'a model id that contains a colon, with a verifying handoff');
+  blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free:low' }), 'handoff');
+  blocked(await call({ agent: 'isswf-reviewer', task: task(handoffLines('0'.repeat(64))), model: 'vendor/model:free:low' }), 'does not match');
+  await writeFile(join(handoffDir, 'x.diff'), bytesOf('diff --git a/x b/x\n+CHANGED\n'));
+  blocked(await call({ agent: 'isswf-reviewer', task: task(handoffLines()), model: 'vendor/model:free:low' }), 'diff', 'sha-256');
+  await writeFile(join(handoffDir, 'x.diff'), DIFF);
+  // A bound Pi review, launched with extensionBindings, also carries the handoff: the guard asks for it on every reviewer call.
+  const bound = { extensionBindings: { 'isswf.git-evidence/1': { version: 1 } } };
+  blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free:low', async: false, options: bound }), 'handoff');
+  assert.equal(await call({ agent: 'isswf-reviewer', task: task(handoffLines()), model: 'vendor/model:free:low', async: false, options: bound }), undefined, 'a bound review with a verifying handoff');
   assert.equal(await call({ agent: 'scout', task: 'look', model: 'x' }), undefined, 'another agent');
   assert.equal(await call({ action: 'list' }), undefined, 'a management call');
   blocked(await call({ action: 'run', agent: 'isswf-worker', task: 'x', model: `${PI_MODEL}:high` }), 'brief');
@@ -338,7 +470,7 @@ assert.ok(hookAt < hooks.indexOf('options?.initiativesPane !== true'), 'register
 const guardAt = hook.indexOf('guardDispatch(');
 assert.ok(guardAt > 0 && guardAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
 assert.ok(hook.slice(0, guardAt).includes("e.tool === 'Agent'"), 'only the Agent tool is guarded');
-for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', 'return { deny:']) assert.ok(hook.includes(part), part);
+for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', "as: 'bytes'", 'readBytes', 'return { deny:']) assert.ok(hook.includes(part), part);
 // The reference parser stays linear on a long unbroken token and still returns the brief path with its state root.
 {
   const { checkReferences } = await load('tools/isswf-dispatch-guard-core.mjs');

@@ -44,7 +44,7 @@ Before launch, inspect current model/effort availability and the actual loaded a
 
 ## Pi coordinator to Claude Code: supplied-evidence review
 
-Use this only when the coordinator has explicitly authorized a separate-context, read-only Claude review. This is the installed `pi-subagents` code-owned `claude-code` external-CLI adapter—not a Claude native Agent bridge and not bound Git-tool review.
+Use this only when the coordinator has explicitly authorized a separate-context, read-only Claude review. This is the installed `pi-subagents` code-owned `claude-code` external-CLI adapter—not a Claude native Agent bridge and not bound Git-tool review. This route carries the diff inline. Every Pi `isswf-reviewer` `subagent` call, bound or not, carries the handoff that `tools/isswf-handoff.mjs review --host pi` generates (skill isswf-handoff); the package's dispatch guard refuses the call when the handoff, its digest or the diff file does not verify.
 
 Before a live call, confirm through an authorized sanitized preflight that the exact existing Claude executable is a direct safe binary, the selected account is the approved first-party subscription route, and trusted user settings/hooks do not install helpers, change endpoints, or introduce alternate providers. Check only relevant flag/presence and route metadata; never read or record credential values, auth files, private hook contents, or transcripts. The adapter inherits allowlisted credential and endpoint variables, so its profile does not itself enforce subscription-only billing. If paid-key/alternate-provider routing or trusted settings cannot be ruled out, stop before launch. Do not use a PATH command or run a version/help preflight to discover the executable if it could be a mutating package-manager wrapper.
 
@@ -148,6 +148,7 @@ subagent({
 The loaded `pi-subagents` contract passes these namespaces through `PI_SUBAGENT_EXTENSION_BINDINGS` during child extension startup. The child-only extension captures and validates each once before any later environment restoration.
 
 - **Reviewer calls.** The reviewer must call `isswf_git_diff`, check the returned bound identities, `patchBytes`, `patchSha256` and native integrity-verification result, and use the exact returned patch block. When exact file evidence is required, it calls `isswf_git_content` with an allowlisted path and base/candidate slot and checks the selected commit/path, status, byte count, digest verification and exact readable view or explicit base64-only result.
+- **Handoff lines.** The launch's `task` also carries the `handoff`, `handoff-sha256` and `candidate` lines from `tools/isswf-handoff.mjs review --host pi`, whose envelope must name the same base and candidate as the bindings. The package's dispatch guard checks them on this call as on any reviewer call and refuses the launch without them; the bound tools remain the evidence the reviewer reports.
 - **No resume.** Do not resume a retained child for this evidence step: `extensionBindings` is launch-only and retained resumes reject it.
 
 ## Continue a unit in a fresh coordinator context

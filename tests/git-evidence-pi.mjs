@@ -130,6 +130,7 @@ try {
   await copyFile(join(source, 'tools/git-evidence-pi-extension.mjs'), unboundExtension);
   await copyFile(join(source, 'tools/git-evidence-invoke.mjs'), join(root, 'git-evidence-invoke.mjs'));
   await copyFile(join(source, 'tools/git-evidence.mjs'), join(root, 'git-evidence.mjs'));
+  await copyFile(join(source, 'tools/isswf-handoff-core.mjs'), join(root, 'isswf-handoff-core.mjs'));
   const missingLoader = new sdk.DefaultResourceLoader({
     cwd: workspace, agentDir: profile, settingsManager: settings,
     noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true,

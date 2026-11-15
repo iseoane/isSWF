@@ -17,7 +17,7 @@ const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SHA = /^[0-9a-f]{40}$/u;
 const ROLES = { attempt: ['worker', 'researcher', 'planner'], review: ['reviewer'] };
 
-async function locateGit() {
+export async function locateGit() {
   const locator = process.platform === 'win32' ? 'where.exe' : 'which';
   const found = spawnSync(locator, ['git'], { encoding: 'utf8', windowsHide: true }).stdout?.trim().split(/\r?\n/u)[0];
   if (!found) throw recordError('git-not-found');
@@ -25,12 +25,12 @@ async function locateGit() {
 }
 
 /** Runs Git in `cwd` through the shared runner with literal pathspecs and returns its stdout as text. */
-async function gitIn(cwd) {
+export async function gitIn(cwd) {
   const binding = { repository: cwd, gitExecutable: await locateGit(), timeoutMs: GIT_TIMEOUT_MS };
   return args => runGit(binding, args, Date.now() + GIT_TIMEOUT_MS, GIT_MAX_BUFFER, { GIT_LITERAL_PATHSPECS: '1' }).toString('utf8');
 }
 
-async function jobTarget({ project, initiative, job }) {
+export async function jobTarget({ project, initiative, job }) {
   if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
   if (!/^I\d+$/u.test(initiative ?? '')) throw recordError('invalid-initiative');
   if (!isIdentifier(job ?? '')) throw recordError('invalid-job');
@@ -43,7 +43,7 @@ async function jobTarget({ project, initiative, job }) {
 const childNames = (output, prefix) => output.split('\0').filter(path => path.startsWith(prefix) && !path.slice(prefix.length).includes('/')).map(path => path.slice(prefix.length));
 
 /** Every file name the job directory has in the working tree, the index, HEAD and each local and remote-tracking branch. */
-async function recordNames({ root, relative: jobRelative }, git) {
+export async function recordNames({ root, relative: jobRelative }, git) {
   const directory = `${jobRelative}/`;
   const names = new Set((await readdir(join(root, jobRelative)).catch(() => [])));
   for (const name of childNames(git(['ls-files', '-z', '--', directory]), directory)) names.add(name);
@@ -54,6 +54,9 @@ async function recordNames({ root, relative: jobRelative }, git) {
   return names;
 }
 
+/** The review IDs (`V001`, ...) among the file names of a job directory, in order: the job's prior reviews. */
+export const reviewIds = names => [...names].filter(name => /^V\d{3}\.md$/u.test(name)).map(name => name.slice(0, 4)).sort();
+
 /** The next unused record ID of `kind` for the job. */
 export async function nextId({ project, initiative, job, kind }) {
   const target = await jobTarget({ project, initiative, job });
@@ -61,11 +64,11 @@ export async function nextId({ project, initiative, job, kind }) {
 }
 
 /** The blob of the file `path` in commit `rev`, or undefined when that commit does not track it. */
-function blobAt(git, rev, path) {
+export function blobAt(git, rev, path) {
   return /^\d{6} blob ([0-9a-f]{40,64})\t/u.exec(git(['ls-tree', '-z', rev, '--', path]).split('\0')[0])?.[1];
 }
 
-function checkSha(value, flag, { optional = false } = {}) {
+export function checkSha(value, flag, { optional = false } = {}) {
   if (value === undefined && optional) return;
   if (typeof value !== 'string' || !SHA.test(value)) throw recordError(`invalid-${flag}`);
 }
@@ -76,11 +79,11 @@ function knownRun(run) {
   return parsed !== null && parsed.id !== 'unknown';
 }
 
-function assertCommit(git, sha, flag) {
+export function assertCommit(git, sha, flag) {
   try { git(['rev-parse', '--verify', '-q', `${sha}^{commit}`]); } catch { throw recordError('commit-not-found', { field: flag }); }
 }
 
-function briefOf(brief, { root, relative: jobRelative }) {
+export function briefOf(brief, { root, relative: jobRelative }) {
   const path = (typeof brief === 'string' && isAbsolute(brief) ? relative(root, brief) : String(brief)).split(sep).join('/').replaceAll('\\', '/');
   const revision = /^brief-r([1-9]\d*)\.md$/u.exec(path.slice(jobRelative.length + 1))?.[1];
   if (!path.startsWith(`${jobRelative}/`) || revision === undefined) throw recordError('invalid-brief');
@@ -88,12 +91,12 @@ function briefOf(brief, { root, relative: jobRelative }) {
 }
 
 // A brief the coordinator has not written is refused here, whatever Git holds at the checkpoint.
-async function requireBrief({ root }, brief) {
+export async function requireBrief({ root }, brief) {
   const info = await lstat(join(root, ...brief.path.split('/'))).catch(() => undefined);
   if (!info?.isFile()) throw recordError('brief-not-found');
 }
 
-async function requireInProgress({ root, state }, initiative, job) {
+export async function requireInProgress({ root, state }, initiative, job) {
   const text = await readFile(join(root, state, 'initiatives', initiative, 'plan.md'), 'utf8').catch(error => { throw recordError(error.code === 'ENOENT' ? 'plan-not-found' : 'unreadable-plan'); });
   let jobs;
   try { jobs = parsePlan(text); } catch (error) { throw recordError('current-plan-invalid', { planError: planErrorDetail(error) }); }
@@ -147,7 +150,7 @@ export async function createRecord(input) {
     checkout: workDir,
     branch: currentBranch,
     reviewGuide: candidate === undefined ? undefined : blobAt(git, candidate, 'REVIEW.md'),
-    priorReviews: [...names].filter(name => /^V\d{3}\.md$/u.test(name)).map(name => name.slice(0, 4)).sort(),
+    priorReviews: reviewIds(names),
     timestamp: `${new Date().toISOString().replace(/\.\d+Z$/u, 'Z')} (UTC)`,
   };
   const template = (await readFile(join(FACTORY_ROOT, '.factory/templates', `${kind}.md`), 'utf8')).replaceAll('\r\n', '\n');

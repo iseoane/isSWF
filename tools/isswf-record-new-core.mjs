@@ -75,7 +75,7 @@ const COMPLETION_LABELS = {
   review: { candidate: 'Candidate commit SHA, or reproducible snapshot identity:', paths: 'Candidate paths reviewed:', base: 'Base commit SHA:' },
 };
 const TEMPLATE_RUN = '- Run: claude agent=<id>';
-const isRecordPath = path => /^\.(?:isswf|factory)\/initiatives\//u.test(path);
+export const isRecordPath = path => /^\.(?:isswf|factory)\/initiatives\//u.test(path);
 
 /** The base commit the record names, which `complete` diffs from. */
 export function recordBase(kind, text) {
