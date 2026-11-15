@@ -87,6 +87,12 @@ function briefOf(brief, { root, relative: jobRelative }) {
   return { path, revision };
 }
 
+// A brief the coordinator has not written is refused here, whatever Git holds at the checkpoint.
+async function requireBrief({ root }, brief) {
+  const info = await lstat(join(root, ...brief.path.split('/'))).catch(() => undefined);
+  if (!info?.isFile()) throw recordError('brief-not-found');
+}
+
 async function requireInProgress({ root, state }, initiative, job) {
   const text = await readFile(join(root, state, 'initiatives', initiative, 'plan.md'), 'utf8').catch(error => { throw recordError(error.code === 'ENOENT' ? 'plan-not-found' : 'unreadable-plan'); });
   let jobs;
@@ -117,6 +123,7 @@ export async function createRecord(input) {
   if (checkout !== undefined && !isAbsolute(checkout)) throw recordError('invalid-checkout');
   if (branch !== undefined && !/^[^\s\p{Cc}~^:?*[\\]{1,200}$/u.test(branch)) throw recordError('invalid-branch');
   await requireInProgress(target, initiative, job);
+  await requireBrief(target, brief);
 
   const git = await gitIn(target.root);
   const names = await recordNames(target, git);

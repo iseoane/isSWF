@@ -365,6 +365,7 @@ try {
     await rm(join(project, '.isswf'), { recursive: true, force: true });
     await mkdir(jobDir, { recursive: true });
     await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planText());
+    await writeFile(join(jobDir, 'brief-r1.md'), 'brief\n');
 
     const cli = (command, args) => {
       const result = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), command, ...Object.entries(args).flat()], { encoding: 'utf8', timeout: 30000 });
@@ -451,12 +452,15 @@ try {
     }
 
     // A changed path that Markdown code cannot hold faithfully is refused, not written wrongly.
+    // The switch brings the committed brief; the untracked copy would be overwritten.
+    await rm(join(jobDir, 'brief-r1.md'));
     git(project, 'switch', '-q', '-c', 'odd', candidate);
     await writeFile(join(project, 'we`ird.txt'), 'x\n');
     git(project, 'add', '--', 'we`ird.txt');
     git(project, 'commit', '-q', '-m', 'odd name');
     const odd = git(project, 'rev-parse', 'HEAD');
     git(project, 'switch', '-q', 'main');
+    await writeFile(join(jobDir, 'brief-r1.md'), 'brief\n');
     attempt('A011');
     await refuseComplete('A011.md', text => text, 'unsafe-path', 'we`ird.txt', { '--candidate': odd });
 
