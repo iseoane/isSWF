@@ -69,7 +69,7 @@ La guarda rechaza la llamada si falla cualquiera de estas condiciones:
 2. El archivo de selección existe y es JSON válido, el agente tiene una entrada bajo este host (un host o un agente ausentes equivalen a "sin entrada para este host") y el modelo y el esfuerzo de la llamada están presentes y coinciden con los de esa entrada. El mensaje indica qué valor falta o difiere y qué espera el archivo.
 3. El prompt nombra el brief del trabajo como `.../initiatives/<I>/jobs/<J>/brief-r<n>.md` y da el SHA completo de 40 caracteres del checkpoint de documentos tras la palabra "checkpoint" y de la base objetivo tras la palabra "base".
 4. El plan de la iniciativa es válido y el trabajo está `in-progress`.
-5. El brief existe, está rastreado por Git, no está ignorado por Git (tampoco si se añadió a la fuerza) y está confirmado en el checkpoint indicado (`git cat-file -e <checkpoint>:<brief>`). Claude Code ejecuta Git mediante la llamada de procesos del host y Pi mediante `git`; si Git no puede ejecutarse, la guarda rechaza.
+5. El brief existe, está rastreado por Git, no está ignorado por Git (tampoco si se añadió a la fuerza) y está confirmado en el checkpoint indicado (`git cat-file -e <checkpoint>:./<brief>`, resuelto desde el directorio del proyecto). La guarda no comprueba que el SHA de la base exista; un checkpoint inexistente se rechaza mediante esta comprobación de confirmación. Claude Code ejecuta Git mediante la llamada de procesos del host y Pi mediante `git`; si Git no puede ejecutarse, la guarda rechaza.
 
 Una línea del prompt que empiece por `Override: model=<m> effort=<e>` sustituye el modelo y el esfuerzo de la entrada solo para esa llamada. Solo se admite una línea así y las condiciones 3 a 5 siguen aplicándose.
 

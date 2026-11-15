@@ -69,7 +69,7 @@ The guard refuses when any of these fails:
 2. The selection file exists and parses, the agent has an entry under this host (a missing host or agent is "no entry for this host"), and the call's model and effort are present and equal that entry's. The message says which value is missing or different and what the file expects.
 3. The prompt names the job's brief as `.../initiatives/<I>/jobs/<J>/brief-r<n>.md` and gives the full 40-character SHA of the document-input checkpoint after the word "checkpoint" and of the target base after the word "base".
 4. The initiative plan parses and the job is `in-progress`.
-5. The brief exists, is tracked by Git, is not Git-ignored (also when it was force-added) and is committed at the named checkpoint (`git cat-file -e <checkpoint>:<brief>`). Claude Code runs Git through the host's process call and Pi through `git`; if Git cannot run, the guard refuses.
+5. The brief exists, is tracked by Git, is not Git-ignored (also when it was force-added) and is committed at the named checkpoint (`git cat-file -e <checkpoint>:./<brief>`, resolved from the project directory). The guard does not check that the base SHA exists; a missing checkpoint is refused through this commit check. Claude Code runs Git through the host's process call and Pi through `git`; if Git cannot run, the guard refuses.
 
 A line that starts with `Override: model=<m> effort=<e>` in the prompt replaces the entry's model and effort for that one call. Only one such line is accepted, and conditions 3 to 5 still apply.
 
