@@ -43,6 +43,7 @@ Further candidates observed on 2026-11-14, to assess:
 - The selection file prescribed by a brief could not meet an operator condition, and only the review caught it (J004 V001 F1): a brief that records an operator condition could carry it as an acceptance test the worker must add.
 - The pane's Agents tab shows `unknown` for three runs and `skills: unknown` for the worker, and lists host guides (`claude-code`, `pi`) under references, since every non-skill `.agents/**` read counts as a reference (operator, 2026-11-15, after I0057): records could name the role in a field the pane reads, unresolved transcripts could be distinguished from runs that used nothing, and host guides could get their own group.
 - Whether a child loaded the skills and references its brief selects is not checked, and for the worker it cannot even be observed today: the pane shows `skills: unknown` because its transcripts are not resolved (operator, 2026-11-15). Find why the worker transcripts are not resolved, then compare the brief's selected skills and required references with the child's observed reads and warn at attempt close when one is missing (extends the deferred "which files a child read" candidate).
+- Two sources for the reviewer's model: `tools/isswf-review-launch.mjs:59-70` reads the setup skill's preset, while the dispatch guard checks `dispatch-selection.json` (J007 A001): one source could be read by both. `tools/isswf-plan-edit.mjs` is not packaged although the coordinator uses it (J007 A001).
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -88,7 +89,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
 - Blocker: None.
-- Next step: Prepare a brief after J004, reusing its dispatch guard for the review handoff check.
+- Next step: Research brief r1 for the isswf-handoff skill and tool (review mode), then the implementation brief.
 
 ### Acceptance
 
@@ -100,6 +101,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: J029 review call 2 stopped inconclusive because the handoff lacked the diff; one call was lost.
 - 2026-11-14: coordinator test changes 2ac2f83 and 12efb53 were merged in PR322 before independent review (V003, J029-R4-04).
+- 2026-11-15: operator decision: deliver J002 as a distributed skill isswf-handoff backed by a tool, review mode first (the generated reviewer handoff, required by the dispatch guard for reviewer dispatches); a session-handoff mode, inspired by Matt Pocock's handoff skill (reference, do not duplicate; suggested skills; redaction), goes with J005 or a separate job.
 
 ## J003
 
@@ -215,9 +217,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, attempt and review records, plus the launch identity)
 - Objective: New attempt and review records start with their mechanical fields filled from Git and the launch identity.
 - Depends on: J006
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J007/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation brief r2 after J009 merges (shared packaging and docs paths).
+- Next step: Implementation (brief-r2): worker on feat/i0057-j007-record-new, then unbound review, PR and exact-head CI; the merge needs the operator's approval (.agents/roles/*.md, tools/factory-package.mjs).
 
 ### Acceptance
 
@@ -263,13 +265,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J009
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow, no special risk: compare the branch before a commit)
 - Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J009/brief-r3.md)
 - Blocker: None.
-- Next step: PR and exact-head CI; the merge needs the operator's approval (tools/factory-package.mjs).
+- Next step: None.
 
 ### Acceptance
 
@@ -284,3 +286,4 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: research ([A001](jobs/J009/A001.md)): keep the expected branch per agent loop, read HEAD through $.fs (Claude) or node:fs (Pi), reread HEAD after the session's own switch or checkout; extends the J003 tokeniser.
 - 2026-11-15: probe ([A002](jobs/J009/A002.md)), Claude Code 2.1.325: a $.state value survived a manual compaction; $.process.run ran git rev-parse in a headless session without a permission prompt; a linked worktree's .git file and its gitdir HEAD read through $.fs on Windows.
 - 2026-11-15: brief-r3 review passed in round 1 ([V001](jobs/J009/V001.md), S1-S3 suggestions); correction 1 verified by the coordinator without another model review: RED f0cbc8c failed, GREEN d047091 passed, and on candidate 035fd71 the branch-guard, command-guard, dispatch-guard, record-guard, package-metadata and host-portability tests, check-docs and git diff --check exited 0. Known limits: only git commit is checked; aliases, scripts and eval are not parsed; a session's first command after a peer switch is not refused; a Claude child in its own worktree is judged against the session directory; the guard fails open; a live Pi run and Linux not run locally.
+- 2026-11-15: PR333 merged as e48b86ef17642ac886f21b5aff37ff38a8925545 with the operator's approval, after green CI on exact head 985635fef1e37793482230df1b7b6b4a54ce8d13 (Ubuntu and Windows package and host discovery, portable checks), which supplies the Linux evidence for acceptance 1. Deviations from A003 and V001 (an inert stub in a RED, test expectations corrected inside GREEN commits) are covered by the deferred candidates.
