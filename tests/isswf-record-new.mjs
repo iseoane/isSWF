@@ -74,6 +74,22 @@ try {
     assert.equal(typeof checkReferences, 'function', 'the dispatch guard exports its reference parser');
     assert.deepEqual(checkReferences(prompt), { initiative: 'I0057', job: 'J007', revision: '2', checkpoint, base });
   }
+  // The exclusive create of the plan editor serves any file: a file that exists, or appears while the temporary file is written, is never replaced.
+  {
+    const { createExclusive } = await load('isswf-plan-edit.mjs');
+    assert.equal(typeof createExclusive, 'function', 'the plan editor exports its exclusive create');
+    const dir = join(root, 'exclusive');
+    await mkdir(dir);
+    const path = join(dir, 'A001.md');
+    await createExclusive({ path, text: 'first\n', existsCode: 'record-exists' });
+    assert.equal(await readFile(path, 'utf8'), 'first\n');
+    await assert.rejects(createExclusive({ path, text: 'second\n', existsCode: 'record-exists' }), { code: 'record-exists' });
+    assert.equal(await readFile(path, 'utf8'), 'first\n');
+    const raced = join(dir, 'A002.md');
+    await assert.rejects(createExclusive({ path: raced, text: 'mine\n', existsCode: 'record-exists', beforeLink: () => writeFile(raced, 'theirs\n') }), { code: 'record-exists' });
+    assert.equal(await readFile(raced, 'utf8'), 'theirs\n');
+    assert.deepEqual((await readdir(dir)).sort(), ['A001.md', 'A002.md'], 'no temporary file is left behind');
+  }
   console.log('isswf-record-new test ok');
 } finally {
   await rm(root, { recursive: true, force: true });
