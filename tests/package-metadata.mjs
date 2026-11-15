@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, posix, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] ?? '.');
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-metadata-')));
@@ -43,5 +44,18 @@ for (const [name, mutate, accepted] of cases) {
     assert.notEqual(checked.status, 0, 'The deliberately absent payload cannot be built');
     assert.match(checked.stderr, accepted ? nextGate : refusal, name + ': ' + tool);
   }
+}
+// A Pi package that lists a module must list every module it imports by a relative path, or the host fails to load it.
+{
+  const { nativePiResources } = await import(pathToFileURL(join(source, 'tools/factory-package.mjs')).href);
+  const missing = [];
+  for (const path of nativePiResources.filter(entry => entry.endsWith('.mjs'))) {
+    const text = await readFile(join(source, path), 'utf8');
+    for (const [, specifier] of text.matchAll(/(?:^|\n)\s*(?:import|export)\b[^'"\n;]*\bfrom\s*['"](\.{1,2}\/[^'"]+)['"]/gu)) {
+      const target = posix.normalize(posix.join(posix.dirname(path), specifier));
+      if (!nativePiResources.includes(target)) missing.push(`${path} imports ${target}`);
+    }
+  }
+  assert.deepEqual(missing, [], 'every relative import of a nativePiResources module is itself listed');
 }
 console.log('PASS both CLI metadata validators admit exact native and legacy manifests; reject unknown paths/settings and production dependencies. Manifest-only fixture, not a package build.');
