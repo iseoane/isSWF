@@ -114,11 +114,13 @@ async function checkPlan(planPath, job, io) {
 
 // Git answers by exit code; a runtime that cannot run it makes the check fail, not pass.
 async function checkBrief(project, relative, join, io) {
+  let info;
   try {
-    await io.stat(join(project, ...relative.split('/')));
+    info = await io.stat(join(project, ...relative.split('/')));
   } catch {
-    refuse(5, `the brief ${relative} does not exist`);
+    info = undefined;
   }
+  if (info?.kind !== 'file') refuse(5, `the brief ${relative} does not exist as a file`);
   let tracked, ignored;
   try {
     tracked = await io.git(['ls-files', '--error-unmatch', '--', relative], project);

@@ -234,7 +234,7 @@ try {
   blocked(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:low` }), 'effort', 'low', 'high');
   blocked(await call({ agent: 'isswf-worker', task: task(), model: 'other/model:high' }), 'model', 'other/model');
   blocked(await call({ agent: 'isswf-worker', task: task() }), 'no model');
-  blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free' }), 'effort', 'vendor/model:free');
+  blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free' }), 'effort', 'no effort', 'low');
   blocked(await call({ agent: 'isswf-planner', task: task(), model: 'opus:low' }), 'host claude');
   blocked(await call({ agent: 'isswf-researcher', task: task(), model: 'x:low' }), 'no entry');
   assert.equal(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: 'other/model:xhigh' }), undefined, 'the override line');
@@ -242,15 +242,13 @@ try {
 
   // Conditions 3, 4 and 5 through the real plan and Git.
   blocked(await call({ agent: 'isswf-worker', task: 'do it', model: `${PI_MODEL}:high` }), 'brief');
-  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('J001', 'J009')), model: `${PI_MODEL}:high` }), 'does not exist');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r9')), model: `${PI_MODEL}:high` }), 'does not exist');
   blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r2')), model: `${PI_MODEL}:high` }), 'not tracked');
+  // An ignored, untracked brief fails the tracked check first; the ignore answer itself is covered with the injected Git above.
   blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r3')), model: `${PI_MODEL}:high` }), 'not tracked');
   await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'pending')));
   blocked(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` }), 'J001', 'pending');
   await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'in-progress')));
-  // A tracked file that an ignore rule matches is reported as ignored once Git is told to look at it.
-  git(root, 'add', '-f', '.factory/initiatives/I0001/jobs/J001/brief-r3.md');
-  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r3')), model: `${PI_MODEL}:high` }), 'ignored');
 
   // Parallel tasks and chain steps are each checked, and a step without a task uses the request's.
   const good = { agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` };
@@ -265,9 +263,9 @@ try {
   await mkdir(join(plain, '.factory/initiatives/I0001/jobs/J001'), { recursive: true });
   for (const path of ['.factory/dispatch-selection.json', '.factory/initiatives/I0001/plan.md', BRIEF]) await writeFile(join(plain, path), await readFile(join(root, path)));
   blocked(await call(good, { cwd: plain }), 'brief', 'not tracked');
-  blocked(await call(good, undefined), 'dispatch guard error');
+  blocked(await call(good, null), 'dispatch guard error');
   blocked(await call(good, { cwd: join(temp, 'missing') }), 'dispatch guard error');
-  assert.equal(await call({ agent: 'scout', task: 'x' }, undefined), undefined, 'another agent is unaffected by a guard failure');
+  assert.equal(await call({ agent: 'scout', task: 'x' }, null), undefined, 'another agent is unaffected by a guard failure');
 } finally {
   await rm(temp, { recursive: true, force: true });
 }
