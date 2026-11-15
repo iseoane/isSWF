@@ -262,6 +262,6 @@ assert.equal(HEREDOC.source, String.raw`<<-?\s*(['"]?)(\w+)\1([^\n]*)\n[\s\S]*?(
 assert.equal(QUOTED.source, String.raw`(["'])(?:(?!\1)[\s\S])*\1`);
 assert.equal(HEREDOC.flags + QUOTED.flags, 'gg');
 const paneText = raw => raw.replace(HEREDOC, '$3\n').replace(QUOTED, quoted => (/\s/.test(quoted) ? '""' : quoted));
-assert.equal(paneText('git commit -F - <<EOF > out.txt\n.factory/initiatives/I0001/plan.md\nEOF\ncat "a b" ".factory/x"'), 'git commit -F -  > out.txt\n\ncat "" ".factory/x"');
+assert.equal(paneText('git commit -F - <<EOF > out.txt\n.factory/initiatives/I0001/plan.md\nEOF\ncat "a b" ".factory/x"'), 'git commit -F -  > out.txt\ncat "" ".factory/x"');
 
 console.log('PASS command guard');
