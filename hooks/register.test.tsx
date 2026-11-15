@@ -725,7 +725,7 @@ test('the reminder lists the accepted dispatches, and a refused one is not remem
   expect(refused.deny).toContain('isSWF dispatch refused')
   const reminder = contextOf(await startAfterCompaction($))
   expect(reminder).toContain('isswf:isswf-worker: I0001/J001')
-  expect(reminder).toContain('brief initiatives/I0001/jobs/J001/brief-r1.md')
+  expect(reminder).toContain('brief .factory/initiatives/I0001/jobs/J001/brief-r1.md')
   expect(reminder).toContain(`checkpoint ${CHECKPOINT}`)
   expect(reminder).toContain(`base ${BASE}`)
   expect(reminder).toContain('run agent-77')

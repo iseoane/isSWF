@@ -24,8 +24,8 @@ for (const other of ['isswf:isswf-worker', 'other-skill', 'isswf-coordinator-not
 
 // Only an accepted dispatch to an isSWF role with the guard's references is remembered.
 const first = rememberDispatch([], { ...claude('isswf:isswf-worker'), runId: 'agent-1' });
-assert.deepEqual(first, [{ agent: 'isswf:isswf-worker', initiative: 'I0001', job: 'J001', revision: '1', checkpoint: CHECKPOINT, base: BASE, run: 'agent-1' }]);
-assert.deepEqual(rememberDispatch(first, claude('isswf:isswf-reviewer')).at(-1), { agent: 'isswf:isswf-reviewer', initiative: 'I0001', job: 'J001', revision: '1', checkpoint: CHECKPOINT, base: BASE }, 'no run ID when the host returned none');
+assert.deepEqual(first, [{ agent: 'isswf:isswf-worker', initiative: 'I0001', job: 'J001', path: briefPath(), checkpoint: CHECKPOINT, base: BASE, run: 'agent-1' }]);
+assert.deepEqual(rememberDispatch(first, claude('isswf:isswf-reviewer')).at(-1), { agent: 'isswf:isswf-reviewer', initiative: 'I0001', job: 'J001', path: briefPath(), checkpoint: CHECKPOINT, base: BASE }, 'no run ID when the host returned none');
 assert.deepEqual(rememberDispatch(first, claude('Explore')), first, 'another agent is not remembered');
 assert.deepEqual(rememberDispatch(first, claude('isswf:isswf-worker', 'no references at all')), first, 'a prompt without the guard references is not remembered');
 assert.deepEqual(rememberDispatch(first, { host: 'claude', input: undefined }), first, 'an unreadable call changes nothing');
@@ -58,7 +58,7 @@ const claudeReminder = compactionReminder({ host: 'claude', assignments: first }
 assert.match(claudeReminder, /\/isswf:isswf-coordinator/u);
 assert.match(claudeReminder, /methodology the next step requires/u);
 assert.match(claudeReminder, /reconcile/iu);
-assert.ok(claudeReminder.includes(`brief initiatives/I0001/jobs/J001/brief-r1.md`) && claudeReminder.includes(CHECKPOINT) && claudeReminder.includes(BASE) && claudeReminder.includes('run agent-1') && claudeReminder.includes('isswf:isswf-worker'));
+assert.ok(claudeReminder.includes(`brief ${briefPath()}`) && claudeReminder.includes(CHECKPOINT) && claudeReminder.includes(BASE) && claudeReminder.includes('run agent-1') && claudeReminder.includes('isswf:isswf-worker'));
 assert.match(claudeReminder, /at most 5/u);
 assert.doesNotMatch(claudeReminder, /does not let a hook steer/u, 'Claude steers its summary, so the Pi limit is not stated');
 const piReminder = compactionReminder({ host: 'pi', assignments: [] });
