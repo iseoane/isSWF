@@ -34,6 +34,8 @@ Further candidates observed on 2026-11-14, to assess:
 - Knip and ESLint are not part of `check-quality`, so a worker's local checks can pass while CI fails (J001 PR327): the worker brief or a pre-push check could run them.
 - After merging a job, the coordinator stopped and asked the operator whether to continue, although the standing grant covers advancing the plan (2026-11-15; operator: "el avanzar con los jobs no es algo que necesite de mi", "Es el objetivo básico de la factoría"): at a job close, the next eligible job could be proposed mechanically from the plan's dependencies and statuses.
 - New tests are not run by CI unless listed by hand in `tools/check-quality.mjs` or the workflow (J001 `tests/isswf-record-check.mjs`): a check could fail when a `tests/*.mjs` file is not run anywhere.
+- `tools/isswf-plan-edit.mjs` cannot set the `Brief:` field, so each brief revision bump is still a hand edit (2026-11-15).
+- Transient `.git/index.lock` errors recur in the shared checkout during commits (J001 A005, J006 A001, coordinator 2026-11-15): the source is unidentified; a commit helper could wait and retry once.
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
@@ -48,9 +50,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
+- Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: Prepare brief-r4: wire the validator into a plugin `tool.call` handler with post-`next(e)` context (A006 Q1, Q2) and a Pi extension declared through `subagentOnlyExtensions`; add `tests/isswf-record-check.mjs` and `hooks/register.test.tsx` to a check CI runs.
+- Next step: PR and exact-head CI; merge needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/isswf-worker.md and isswf-planner.md).
 
 ### Acceptance
 
@@ -71,6 +73,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: PR327 merged (591af0372885199977a05dddbbeeaa1540ac41ae) after green CI on exact head 9d9d61c (Linux, Windows, portable checks).
 - 2026-11-15: runtime probes ([A006](jobs/J001/A006.md)): a plugin `tool.call` handler's post-`next(e)` `context` reaches the model in the same turn with the tool result unchanged; the parent handler sees child Bash calls with `agentId`; a hooks module receives `classic.SessionStart` (`compact`), but its `additionalContext` did not reach the model (affects J005).
 - 2026-11-15: `tests/isswf-record-check.mjs` from PR327 is not run by CI: neither `.github/workflows/quality.yml` nor `tools/check-quality.mjs` lists it.
+- 2026-11-15: brief-r4 review passed in two rounds ([V004](jobs/J001/V004.md), [V005](jobs/J001/V005.md)); candidate 9279f41. Acceptance 2 amended by the coordinator: the read-only Pi planner does not declare the guard, because it can never write. Known limit: no test runs the merged Claude tool.call hook (only its source text is checked).
 
 ## J002
 
@@ -95,13 +98,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
 - Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; check which guards each host supports, including for child agents.
+- Next step: Read-only research (brief-r1), then the implementation brief r2.
 
 ### Acceptance
 
@@ -115,16 +118,17 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: a `cd` into jobs/J029 and later into .agents moved the session cwd; the pane showed "no .isswf or .factory state directory".
 - 2026-11-14: the coordinator used `gh pr checks --watch` with sleep, contrary to feature-delivery.md:63; one wait was killed for low memory.
 - 2026-11-03: a Claude worker ran unauthorized `npx eslint` and `npx knip` with package-acquisition warnings and the wrong tool configuration, a repeated violation (Engram observation 4426).
+- 2026-11-15: the coordinator again used `gh pr checks --watch` twice for PR327, contrary to feature-delivery.md; PR328 used one deferred check instead.
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Size: M (one flow, with one bounded risk: refusing a legitimate dispatch)
 - Objective: A delegation that fails the coordinator's pre-dispatch refusal conditions is refused by the host before the child starts.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: Prepare a brief after J001; verify the Pi subagent tool name and arguments the guard must inspect.
+- Next step: Dispatch the brief-r3 worker after the J001 r4 merge (both edit the single tool.call hook).
 
 ### Acceptance
 
@@ -140,6 +144,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: J029 was dispatched while its plan job stayed `blocked` (see J001); the conditions in .agents/skills/isswf-coordinator/SKILL.md:152-160 are held only in prose and nothing runs them at dispatch.
 - 2026-11-14 audit: the Claude plugin `tool.call` hook can return `deny` before a call runs (.claude-plugin/types/claude-code/index.d.ts, ToolCallResult); Pi 1.5.2 `tool_call` can block (installed docs/extensions.md). The Pi subagent call shape is not yet verified.
+- 2026-11-15: research ([A001](jobs/J004/A001.md)): Claude `agent.spawn` input carries `model` but no effort; Pi `subagent` has `model` and no top-level thinking field; no structured selection source exists, and project-setup.md:56 claims Pi overrides that .pi/settings.json does not hold.
+- 2026-11-15: operator approved integrating J004 (grant and authority code, .agents/hosts/**) on condition: "Autorizo pero cada agente aunque sea en el mismo fichero tienen sus modelos por si quiero usar o mezclar diferentes agentes". The selection file gives each agent its own host, model and effort.
+- 2026-11-15: probe ([A002](jobs/J004/A002.md)): Claude `tool.call` for Agent carries `model` and `effort`, `agent.spawn` has no effort; a spawn `deny` leaves the child unstarted and the parent sees the reason; Pi thinking is only a model suffix.
 
 ## J005
 
@@ -166,13 +173,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J006
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow, no special risk)
 - Objective: The coordinator changes plan job fields through a command instead of hand-editing Markdown.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Integrate the PR from feat/i0057-j006-plan-edit after green exact-head CI.
+- Next step: None.
 
 ### Acceptance
 
@@ -185,6 +192,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the `Brief: None.` lines in I0055 and I0056 were hand-written (8566437).
 - 2026-11-14 audit: the `render()` function in tools/isswf-plan.mjs always writes a valid brief reference, but it requires an external plan-only grant file and is not used for native plans.
 - 2026-11-15: brief-r1 candidate 1d3a10f passed review ([V001](jobs/J006/V001.md) pass with S1-S4, corrected; [V002](jobs/J006/V002.md) delta pass). Known limit (V002 I4): on non-Windows systems a directory fsync failing after the rename or link reports failure although the plan changed. The I1 test found a kept lone `- None.` placeholder, fixed in 34df5ab. This evidence line was written with the new command.
+- 2026-11-15: PR328 merged (dd02e1d9dd6ae68af12e64f5566aecb77e265c61) after green CI on exact head 91bd334 (Linux, Windows, portable checks).
 
 ## J007
 
@@ -239,13 +247,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J009
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow, no special risk: compare the branch before a commit)
 - Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; decide where the session's expected branch is kept and how each host exposes the session's own switch and checkout commands.
+- Next step: Read-only research (brief-r1), then the implementation brief r2.
 
 ### Acceptance
 

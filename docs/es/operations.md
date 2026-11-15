@@ -36,6 +36,10 @@ node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/p
 - `A<nnn>.md` y `V<nnn>.md`: una línea `- Run:` que el analizador de la instantánea ignoraría es `run-line-unparsed`, y una con `unknown` como ID es `run-id-unknown` (la plantilla indica omitir la línea). Un registro sin una etiqueta de la plantilla es `missing-field` con la etiqueta exacta: `Deviations from required procedure and consequence:` y `Process deviations observed:` en un intento, y `Unreviewed areas and evidence limits:`, `Convergence advice:` y `Process deviations observed:` en una revisión.
 - No se comprueban otros archivos.
 
+### Comprobación automática tras una escritura
+
+Cuando un Edit, Write o MultiEdit (Claude Code) o una edición o escritura (Pi) deja un plan, un intento o una revisión en `.isswf/initiatives/` o `.factory/initiatives/` con alguna infracción, se ejecuta la misma comprobación y el modelo ve cada infracción (código, trabajo, campo y línea) en el mismo turno. El resultado de la herramienta no se modifica ni se retiene, una escritura correcta no añade nada y la comprobación solo informa: nunca edita un archivo, bloquea una escritura ni inicia trabajo. En Claude Code se aplica a la sesión principal y a los agentes delegados, esté o no activado el panel de iniciativas. En Pi se aplica a la sesión principal mediante el paquete y al agente worker mediante `subagentOnlyExtensions` (el planner y el researcher son de solo lectura); un ajuste del proyecto que sustituya esa lista la reemplaza en lugar de combinarse, así que conserva `tools/isswf-record-guard-pi-extension.mjs` en la sustitución. Si falla la propia comprobación, no informa de nada.
+
 ## Edición de planes
 
 ```bash

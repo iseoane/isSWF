@@ -1,6 +1,7 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
+import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
 
@@ -470,8 +471,41 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
   )
 }
 
+const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
+
 export const register: Register = (on, options) => {
-  // Opt-in: with the option off no hook is added, so nothing reads, schedules, registers or draws.
+  // The engine accepts one unmatched `tool.call` hook, so this one serves the record check, which runs whatever
+  // the pane option is, and the pane's observation, which runs only with the option on.
+  on('tool.call', async ($, e, next) => {
+    const ran = await next(e)
+    // A failure in either part must never change or repeat the tool's result.
+    if (options?.initiativesPane === true) {
+      try {
+        if ((await $.state.get(IS_ACTIVATED)).value) {
+          ensureFallback($)
+          const ids = touchedIds(e)
+          if (ids.length) {
+            await update($, TOUCHED, adding(ids))
+            scheduleRefresh($)
+          }
+        }
+      } catch {}
+    }
+    try {
+      // A denied or failed write changed no record, and `deny` declares no `context`.
+      if (ran.deny !== undefined || ran.isError) return ran
+      const path = (e as { file_path?: unknown }).file_path
+      if (!WRITE_TOOLS.has(e.tool) || typeof path !== 'string') return ran
+      // The record check only reports, as model-visible context; the tool result stays as it was.
+      // The engine refuses `$.fs` passed as a value, so each call is spelled out.
+      const text = await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
+      return text ? { ...ran, context: [...(ran.context ?? []), text] } : ran
+    } catch {
+      return ran
+    }
+  })
+
+  // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.
   if (options?.initiativesPane !== true) return
 
   on('session.start', async ($, e, next) => {
@@ -491,23 +525,6 @@ export const register: Register = (on, options) => {
     }
 
     return next(e)
-  })
-
-  on('tool.call', async ($, e, next) => {
-    const ran = await next(e)
-    // Observation only: a failure here must never change or repeat the tool's result.
-    try {
-      if ((await $.state.get(IS_ACTIVATED)).value) {
-        ensureFallback($)
-        const ids = touchedIds(e)
-        if (ids.length) {
-          await update($, TOUCHED, adding(ids))
-          scheduleRefresh($)
-        }
-      }
-    } catch {}
-
-    return ran
   })
 
   on('command.run', { command: 'isswf-initiatives' }, async ($, e) => {
