@@ -154,13 +154,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Size: M (one flow, but verification needs a real compaction on each host)
 - Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; confirm how each host lets a plugin steer the summary and add context after compaction.
+- Next step: Probe brief-r1 (Claude session.compact instructions and messages, skill-load detection, Pi compaction events), then the implementation brief r2.
 
 ### Acceptance
 
