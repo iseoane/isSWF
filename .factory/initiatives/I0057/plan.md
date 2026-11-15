@@ -43,7 +43,8 @@ Further candidates observed on 2026-11-14, to assess:
 - The selection file prescribed by a brief could not meet an operator condition, and only the review caught it (J004 V001 F1): a brief that records an operator condition could carry it as an acceptance test the worker must add.
 - The pane's Agents tab shows `unknown` for three runs and `skills: unknown` for the worker, and lists host guides (`claude-code`, `pi`) under references, since every non-skill `.agents/**` read counts as a reference (operator, 2026-11-15, after I0057): records could name the role in a field the pane reads, unresolved transcripts could be distinguished from runs that used nothing, and host guides could get their own group.
 - Whether a child loaded the skills and references its brief selects is not checked, and for the worker it cannot even be observed today: the pane shows `skills: unknown` because its transcripts are not resolved (operator, 2026-11-15). Find why the worker transcripts are not resolved, then compare the brief's selected skills and required references with the child's observed reads and warn at attempt close when one is missing (extends the deferred "which files a child read" candidate).
-- Two sources for the reviewer's model: `tools/isswf-review-launch.mjs:59-70` reads the setup skill's preset, while the dispatch guard checks `dispatch-selection.json` (J007 A001): one source could be read by both. `tools/isswf-plan-edit.mjs` is not packaged although the coordinator uses it (J007 A001).
+- Two sources for the reviewer's model: `tools/isswf-review-launch.mjs:59-70` reads the setup skill's preset, while the dispatch guard checks `dispatch-selection.json` (J007 A001): one source could be read by both.
+- From J007: `tools/isswf-record-new.mjs` duplicates `trustedGit` from `tools/isswf-review-launch.mjs`; the review template's profile line has commas, so `parseModel` does not read its model; `editFile` does not detect a writer that lands between its check and the rename; `runGit` sets `GIT_CONFIG_GLOBAL=NUL`, so a user's `safe.directory` is ignored and a Windows "dubious ownership" repository fails opaquely; next-ID does not see uncommitted records in other worktrees (V001 I3).
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -219,7 +220,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J006
 - Brief: [brief-r2.md](jobs/J007/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation (brief-r2): worker on feat/i0057-j007-record-new, then unbound review, PR and exact-head CI; the merge needs the operator's approval (.agents/roles/*.md, tools/factory-package.mjs).
+- Next step: Push, PR and exact-head CI; merge with the operator's advance approval.
 
 ### Acceptance
 
@@ -232,6 +233,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: A011 added a `Run note` line, and `Run:` lines with trailing notes in A003, A011 and V006 were ignored by the pane (see J001).
 - 2026-11-14 audit: about half of the roughly 30 fields in .factory/templates/attempt.md are copies of data already held in Git or in the launch call.
 - 2026-11-15: research ([A001](jobs/J007/A001.md)): no tool writes attempt or review records; about half the fields come from launch data or Git; reuse the exclusive link create, checkRecord and the dispatch-guard parser (export its base); the record-name pattern is defined four times and the reviewer model has two sources; create the record after a successful launch.
+- 2026-11-15: implementation ([A002](jobs/J007/A002.md), correction cycle 1 [A003](jobs/J007/A003.md)): `tools/isswf-record-new.mjs` next/create/complete, one shared record-name pattern (isswf-status made strict, accepted as a bug fix in [V001](jobs/J007/V001.md) I1), `checkReferences` returns the base, `run-id-unfilled` in the record checker. Review [V001](jobs/J007/V001.md) fail (F1 brief existence) → [V002](jobs/J007/V002.md) pass; S3 applied by the coordinator (d6b9844). The coordinator replayed every RED/GREEN pair and observed check-quality exit 0 at 34ebb37 (Windows). The operator approved the merge in advance (worker.md needs a person). V001 and V002 were created with the new command.
 
 ## J008
 
