@@ -44,6 +44,15 @@ for (const eol of ['\n', '\r\n']) {
   expectEdit(addJob(withEol(plan(block('J001'))), { ...jobSpec, dependsOn: [] }), `${plan(block('J001'))}\n${block('J002', { size: 'S (one flow)', objective: 'Add the thing', next: 'Prepare the brief.', acceptance: ['First outcome', 'Second outcome'], pending: ' (pending until prepared)' })}`);
 }
 
+// Every Unicode control character and line or paragraph separator would end the line for some reader, so a value holding one is refused.
+for (const bad of ['', ' ', ' ', '']) {
+  const value = `one${bad}two`;
+  const current = plan(block('J001'));
+  assert.throws(() => setField(current, { job: 'J001', field: 'Next step', value }), { code: 'invalid-value' }, JSON.stringify(bad));
+  assert.throws(() => appendEvidence(current, { job: 'J001', value }), { code: 'invalid-value' }, JSON.stringify(bad));
+  assert.throws(() => addJob(current, { ...jobSpec, objective: value }), { code: 'invalid-value' }, JSON.stringify(bad));
+}
+
 const fresh = newPlan({ initiative: 'I0002', title: 'Fresh plan', type: 'enhancement', ...jobSpec, job: 'J001', dependsOn: [] });
 assert.equal(fresh, `# I0002: Fresh plan\n\nType: enhancement\n\n${block('J001', { size: 'S (one flow)', objective: 'Add the thing', next: 'Prepare the brief.', acceptance: ['First outcome', 'Second outcome'], pending: ' (pending until prepared)' })}`);
 assert.equal(parsePlan(fresh).length, 1);
