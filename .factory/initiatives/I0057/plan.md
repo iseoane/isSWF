@@ -132,7 +132,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: brief-r3 worker on feat/i0057-j004-dispatch-guard from main 3f18562.
+- Next step: Correction cycle 1 for V001 (F1 host-keyed selection, F2, F3, F4, F5 cat-file, F6 prose, F7), then a round-2 delta review; integration needs the operator's approval.
 
 ### Acceptance
 
