@@ -102,9 +102,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
 - Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: Read-only research (brief-r1), then the implementation brief r2.
+- Next step: Probe brief-r2 (Claude cd persistence, $.session.cwd(), isError on a nonzero exit, PowerShell tool name), then the implementation brief after J004; J003 lands the shared command tokeniser.
 
 ### Acceptance
 
@@ -119,6 +119,8 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the coordinator used `gh pr checks --watch` with sleep, contrary to feature-delivery.md:63; one wait was killed for low memory.
 - 2026-11-03: a Claude worker ran unauthorized `npx eslint` and `npx knip` with package-acquisition warnings and the wrong tool configuration, a repeated violation (Engram observation 4426).
 - 2026-11-15: the coordinator again used `gh pr checks --watch` twice for PR327, contrary to feature-delivery.md; PR328 used one deferred check instead.
+- 2026-11-15: research ([A001](jobs/J003/A001.md)): Claude denies Bash before next(e); Pi bash spawns per call, so a cd never persists and the cd acceptance is Claude-only; unknown whether Claude Bash keeps a cd and whether $.session.cwd() follows it.
+- 2026-11-15: coordinator decisions under the standing grant: the documented locked installs (npm ci --prefix tooling/quality or tooling/host-tests with --ignore-scripts and no package arguments) stay allowed; a bounded CI wait is one sleep of at most 900 s followed by one gh pr checks, with no loop; the Claude and Pi PowerShell tools get the same matcher where they exist; Pi user_bash (the operator's own commands) is not guarded.
 
 ## J004
 
@@ -251,9 +253,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: S (one flow, no special risk: compare the branch before a commit)
 - Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J009/brief-r2.md)
 - Blocker: None.
-- Next step: Read-only research (brief-r1), then the implementation brief r2.
+- Next step: Probe brief-r2 ($.state across a Claude compaction, $.process.run in a hooks module, a .git worktree file on Windows), then the implementation brief after J003.
 
 ### Acceptance
 
@@ -265,3 +267,4 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the I0057 re-plan (c07a5dc) was committed on `fix/j030-reverse-stdin`, the branch of PR324, instead of on `main`. A peer session had switched the shared checkout's branch and the coordinator did not check it. Cost: one misplaced commit, moved to `main` (7b840ee) and removed from that branch with `git reset --keep` before it was pushed.
 - 2026-11-14: minutes later, the same checkout was on `records/close-i0009`, another branch switch by the peer session.
+- 2026-11-15: research ([A001](jobs/J009/A001.md)): keep the expected branch per agent loop, read HEAD through $.fs (Claude) or node:fs (Pi), reread HEAD after the session's own switch or checkout; extends the J003 tokeniser.
