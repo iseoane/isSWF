@@ -7,13 +7,15 @@ import { joiner } from './isswf-snapshot-core.mjs';
 const MAX_CHARS = 1024 * 1024;
 const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
 const STATE_DIRECTORIES = ['.isswf', '.factory'];
-const HOSTS = ['claude', 'pi'];
 // Pi has no thinking field: the level is a suffix of the model, and a model id may contain ':' itself.
 const PI_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
 const BRIEF_PATH = /initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
 // The first hex token on the same line after the word that names it; only a full 40-hex token counts, so a short SHA is not
 // rescued by a full one that follows it.
-const fullShaAfter = (body, word) => new RegExp(`\\b${word}\\b[^\\n]{0,80}?(?<![0-9A-Za-z])([0-9a-f]{7,64})(?![0-9A-Za-z])`, 'iu').exec(body)?.[1].length === 40;
+const fullShaAfter = (body, word) => {
+  const sha = new RegExp(`\\b${word}\\b[^\\n]{0,80}?(?<![0-9A-Za-z])([0-9a-f]{7,64})(?![0-9A-Za-z])`, 'iu').exec(body)?.[1];
+  return sha?.length === 40 ? sha : undefined;
+};
 const OVERRIDE_LINE = /^Override:[ \t]+model=(\S+)[ \t]+effort=(\S+)[ \t]*$/u;
 const CONDITION_NAMES = { 2: 'selection', 3: 'references', 4: 'plan', 5: 'brief' };
 
@@ -35,10 +37,10 @@ function splitPiModel(model) {
   return at > 0 && PI_LEVELS.includes(model.slice(at + 1)) ? { model: model.slice(0, at), effort: model.slice(at + 1) } : { model, effort: undefined };
 }
 
-/** The delegated children one tool call starts, as `{ agent, model, effort, prompt }` for the host's event shape. */
+/** The delegated children one tool call names (a Pi `action` call is exempt only because none of them is an isSWF role), as `{ agent, model, effort, prompt }` for the host's event shape. */
 function callsOf(host, input) {
   if (host === 'claude') return [{ agent: input?.subagent_type, model: input?.model, effort: input?.effort, prompt: input?.prompt }];
-  if (!isObject(input) || text(input.action)) return [];
+  if (!isObject(input)) return [];
   const children = [input];
   if (Array.isArray(input.tasks)) children.push(...input.tasks);
   if (Array.isArray(input.chain)) for (const step of input.chain) children.push(step, ...(isObject(step) && Array.isArray(step.parallel) ? step.parallel : []));
@@ -68,11 +70,11 @@ async function checkSelection(host, call, state, file, io) {
     refuse(2, `${state}/dispatch-selection.json is missing or is not valid JSON`);
   }
   if (!isObject(selection) || selection.schemaVersion !== 1 || !isObject(selection.agents)) refuse(2, `${state}/dispatch-selection.json needs schemaVersion 1 and an agents object`);
-  const entry = Object.hasOwn(selection.agents, call.agent) ? selection.agents[call.agent] : undefined;
-  if (entry === undefined) refuse(2, `${state}/dispatch-selection.json has no entry for ${call.agent}`);
+  const forHost = selection.agents[host];
+  const entry = isObject(forHost) && Object.hasOwn(forHost, call.agent) ? forHost[call.agent] : undefined;
+  if (entry === undefined) refuse(2, `${state}/dispatch-selection.json has no entry for ${call.agent} for host ${host}`);
   const missing = ['model', 'effort'].find(field => !text(entry?.[field]));
-  if (!isObject(entry) || !HOSTS.includes(entry.host) || missing) refuse(2, `the entry for ${call.agent} needs host claude or pi and a model and an effort${missing ? ` (${missing} is missing)` : ''}`);
-  if (entry.host !== host) refuse(2, `the entry for ${call.agent} is for host ${entry.host}, not ${host}`);
+  if (!isObject(entry) || missing) refuse(2, `the entry for ${call.agent} for host ${host} needs a model and an effort${missing ? ` (${missing} is missing)` : ''}`);
   const override = overrideOf(call.prompt);
   const expected = override ?? entry;
   const source = override ? 'the Override line' : `${state}/dispatch-selection.json`;
@@ -86,10 +88,12 @@ function checkReferences(prompt) {
   const body = typeof prompt === 'string' ? prompt : '';
   const brief = BRIEF_PATH.exec(body);
   if (!brief) refuse(3, 'the prompt does not name the job brief as .../initiatives/<I>/jobs/<J>/brief-r<n>.md');
+  const shas = {};
   for (const [word, label] of [['checkpoint', 'document-input checkpoint'], ['base', 'target base']]) {
-    if (!fullShaAfter(body, word)) refuse(3, `the prompt does not give the full 40-hex ${label} SHA after the word "${word}"`);
+    shas[word] = fullShaAfter(body, word);
+    if (!shas[word]) refuse(3, `the prompt does not give the full 40-hex ${label} SHA after the word "${word}"`);
   }
-  return { initiative: brief[1], job: brief[2], revision: brief[3] };
+  return { initiative: brief[1], job: brief[2], revision: brief[3], checkpoint: shas.checkpoint };
 }
 
 async function checkPlan(planPath, job, io) {
@@ -113,7 +117,7 @@ async function checkPlan(planPath, job, io) {
 }
 
 // Git answers by exit code; a runtime that cannot run it makes the check fail, not pass.
-async function checkBrief(project, relative, join, io) {
+async function checkBrief(project, relative, checkpoint, join, io) {
   let info;
   try {
     info = await io.stat(join(project, ...relative.split('/')));
@@ -121,16 +125,19 @@ async function checkBrief(project, relative, join, io) {
     info = undefined;
   }
   if (info?.kind !== 'file') refuse(5, `the brief ${relative} does not exist as a file`);
-  let tracked, ignored;
+  let tracked, ignored, committed;
   try {
     tracked = await io.git(['ls-files', '--error-unmatch', '--', relative], project);
-    ignored = await io.git(['check-ignore', '-q', '--', relative], project);
+    // --no-index: a force-added brief under an ignored path is tracked and would otherwise not be reported as ignored.
+    ignored = await io.git(['check-ignore', '--no-index', '-q', '--', relative], project);
+    committed = await io.git(['cat-file', '-e', `${checkpoint}:${relative}`], project);
   } catch (error) {
     refuse(5, `Git could not check the brief: ${error?.message ?? error}`);
   }
   if (tracked !== 0) refuse(5, `the brief ${relative} is not tracked by Git (untracked or never committed)`);
   if (ignored === 0) refuse(5, `the brief ${relative} is ignored by Git`);
   if (ignored !== 1) refuse(5, `git check-ignore could not decide for the brief ${relative}`);
+  if (committed !== 0) refuse(5, `the brief ${relative} is not committed at the checkpoint ${checkpoint}`);
 }
 
 async function checkCall(host, call, io) {
@@ -138,9 +145,9 @@ async function checkCall(host, call, io) {
   const join = joiner(project);
   const state = await stateDirectory(project, io);
   await checkSelection(host, call, state, join(project, state, 'dispatch-selection.json'), io);
-  const { initiative, job, revision } = checkReferences(call.prompt);
+  const { initiative, job, revision, checkpoint } = checkReferences(call.prompt);
   await checkPlan(join(project, state, 'initiatives', initiative, 'plan.md'), job, io);
-  await checkBrief(project, `${state}/initiatives/${initiative}/jobs/${job}/brief-r${revision}.md`, join, io);
+  await checkBrief(project, `${state}/initiatives/${initiative}/jobs/${job}/brief-r${revision}.md`, checkpoint, join, io);
 }
 
 /**

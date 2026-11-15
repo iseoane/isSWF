@@ -259,7 +259,7 @@ try {
   assert.equal(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free:low' }), undefined, 'a model id that contains a colon');
   assert.equal(await call({ agent: 'scout', task: 'look', model: 'x' }), undefined, 'another agent');
   assert.equal(await call({ action: 'list' }), undefined, 'a management call');
-  blocked(await call({ action: 'run', agent: 'isswf-worker', task: 'x' }), 'brief');
+  blocked(await call({ action: 'run', agent: 'isswf-worker', task: 'x', model: `${PI_MODEL}:high` }), 'brief');
   assert.equal(await call({ agent: 'isswf-worker', task: 'x' }, ctx, 'bash'), undefined, 'another tool');
 
   // Condition 2 reads the model and the thinking suffix.
