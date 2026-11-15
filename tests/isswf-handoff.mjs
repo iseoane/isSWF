@@ -121,8 +121,9 @@ try {
     assert.equal(resource.blob, git(root, 'rev-parse', `${checkpoint}:${resource.path}`), resource.path);
     assert.equal(resolve(resource.absolutePath), join(source, ...resource.path.split('/')), 'resolved from the factory root that holds the tool');
   }
-  assert.deepEqual(review(['--prior', 'V001', 'V002']).envelope.priorReviews, ['V001', 'V002']);
-  assert.equal(review(['--prior', 'V001', 'V002']).envelope.round, 3);
+  const elsewhere = join(temp, 'out-prior');
+  assert.deepEqual(review(['--prior', 'V001', 'V002'], { '--out': elsewhere }).envelope.priorReviews, ['V001', 'V002']);
+  assert.equal(review(['--prior', 'V001', 'V002'], { '--out': elsewhere }).envelope.round, 3);
 
   const refuses = (result, code) => {
     assert.equal(result.ok, false, JSON.stringify(result));
@@ -132,6 +133,9 @@ try {
   // Running it again with the same arguments is harmless; a different base for the same candidate never overwrites the first handoff.
   assert.deepEqual(review().handoff, made.handoff);
   refuses(review([], { '--base': mid }), 'handoff-exists');
+  // The handoff file is write-once too: other bytes for the same candidate are refused and the first file stays.
+  refuses(review(['--prior', 'V001', 'V002']), 'handoff-exists');
+  assert.deepEqual(await readFile(handoffFile), handoffBytes, 'the first handoff is unchanged');
 
   // Refusals leave nothing written and name the cause.
   refuses(review([], { '--candidate': candidate.slice(0, 12) }), 'invalid-candidate');
@@ -264,6 +268,32 @@ try {
   assert.equal(tool(['coverage', '--project', repo]).code, 'base-not-found');
   assert.equal(tool(['coverage', '--project', repo, '--base', 'main~0']).code, 'invalid-base');
   assert.equal(tool(['coverage']).code, 'usage');
+
+  // Two jobs in one range: a commit that a later job's review covers is not unreviewed for the earlier job.
+  const pair = join(coverTemp, 'pair');
+  await mkdir(pair);
+  git(pair, 'init', '-q', '-b', 'main', '.');
+  const keep = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(pair, path, '..'), { recursive: true });
+      await writeFile(join(pair, path), content);
+    }
+    git(pair, 'add', '-A');
+    git(pair, 'commit', '-qm', message);
+    return git(pair, 'rev-parse', 'HEAD');
+  };
+  const pairBase = await keep({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const codeOne = await keep({ 'src/one.mjs': 'one\n' }, 'job one code');
+  await keep({ [`${jobDir('J001')}/V001.md`]: reviewText(codeOne) }, 'records: J001 V001');
+  const codeTwo = await keep({ 'src/two.mjs': 'two\n' }, 'job two code');
+  const reviewTwo = await keep({ [`${jobDir('J002')}/V001.md`]: reviewText(codeTwo) }, 'records: J002 V001');
+  const both = tool(['coverage', '--project', pair, '--base', pairBase, '--head', reviewTwo]);
+  assert.equal(both.ok, true, JSON.stringify(both));
+  assert.deepEqual(both.jobs.map(entry => [entry.job, entry.uncovered]), [['J001', []], ['J002', []]]);
+  const extra = await keep({ 'src/three.mjs': 'three\n' }, 'code nobody reviewed');
+  const unreviewed = tool(['coverage', '--project', pair, '--base', pairBase, '--head', extra]);
+  assert.equal(unreviewed.ok, false);
+  assert.deepEqual(unreviewed.jobs.map(entry => entry.uncovered.map(item => item.commit)), [[extra], [extra]], 'a commit no job reviewed stays uncovered for each');
 
   // A pull request's merge commit has no changes of its own: the commits it brings in are what counts, and a reviewed one passes.
   const merged = join(coverTemp, 'merged');
