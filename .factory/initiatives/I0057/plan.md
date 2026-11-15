@@ -217,7 +217,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J006
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Research (brief-r1) by a read-only researcher; implementation brief r2 after it.
+- Next step: Implementation brief r2 after J009 merges (shared packaging and docs paths).
 
 ### Acceptance
 
@@ -229,6 +229,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: A011 added a `Run note` line, and `Run:` lines with trailing notes in A003, A011 and V006 were ignored by the pane (see J001).
 - 2026-11-14 audit: about half of the roughly 30 fields in .factory/templates/attempt.md are copies of data already held in Git or in the launch call.
+- 2026-11-15: research ([A001](jobs/J007/A001.md)): no tool writes attempt or review records; about half the fields come from launch data or Git; reuse the exclusive link create, checkRecord and the dispatch-guard parser (export its base); the record-name pattern is defined four times and the reviewer model has two sources; create the record after a successful launch.
 
 ## J008
 
@@ -268,7 +269,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J009/brief-r3.md)
 - Blocker: None.
-- Next step: Correction cycle 1 for V001 (S1 code and test; S2, S3 and I3 docs), verified by the coordinator; then PR and exact-head CI; the merge needs the operator's approval (tools/factory-package.mjs).
+- Next step: PR and exact-head CI; the merge needs the operator's approval (tools/factory-package.mjs).
 
 ### Acceptance
 
@@ -282,3 +283,4 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: minutes later, the same checkout was on `records/close-i0009`, another branch switch by the peer session.
 - 2026-11-15: research ([A001](jobs/J009/A001.md)): keep the expected branch per agent loop, read HEAD through $.fs (Claude) or node:fs (Pi), reread HEAD after the session's own switch or checkout; extends the J003 tokeniser.
 - 2026-11-15: probe ([A002](jobs/J009/A002.md)), Claude Code 2.1.325: a $.state value survived a manual compaction; $.process.run ran git rev-parse in a headless session without a permission prompt; a linked worktree's .git file and its gitdir HEAD read through $.fs on Windows.
+- 2026-11-15: brief-r3 review passed in round 1 ([V001](jobs/J009/V001.md), S1-S3 suggestions); correction 1 verified by the coordinator without another model review: RED f0cbc8c failed, GREEN d047091 passed, and on candidate 035fd71 the branch-guard, command-guard, dispatch-guard, record-guard, package-metadata and host-portability tests, check-docs and git diff --check exited 0. Known limits: only git commit is checked; aliases, scripts and eval are not parsed; a session's first command after a peer switch is not refused; a Claude child in its own worktree is judged against the session directory; the guard fails open; a live Pi run and Linux not run locally.
