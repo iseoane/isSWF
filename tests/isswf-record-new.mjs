@@ -65,6 +65,15 @@ try {
     for (const name of accepted) assert.ok(RECORD_NAME.test(name), `RECORD_NAME ${name}`);
     for (const name of ignored) assert.ok(!RECORD_NAME.test(name), `RECORD_NAME ${name}`);
   }
+  // The dispatch guard's reference parser also returns the target base, so the launch data has one parser.
+  {
+    const { checkReferences } = await load('isswf-dispatch-guard-core.mjs');
+    const checkpoint = 'a'.repeat(40);
+    const base = 'b'.repeat(40);
+    const prompt = `Brief .factory/initiatives/I0057/jobs/J007/brief-r2.md at checkpoint ${checkpoint}, target base ${base}.`;
+    assert.equal(typeof checkReferences, 'function', 'the dispatch guard exports its reference parser');
+    assert.deepEqual(checkReferences(prompt), { initiative: 'I0057', job: 'J007', revision: '2', checkpoint, base });
+  }
   console.log('isswf-record-new test ok');
 } finally {
   await rm(root, { recursive: true, force: true });
