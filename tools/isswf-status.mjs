@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
 import { plan, parsePlan, planStates as states } from './isswf-plan.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
+import { RECORD_NAME } from './isswf-snapshot-core.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
 
@@ -81,7 +82,7 @@ async function artifacts(root, job) {
     const brief = await snapshot(join(path, job.briefName));
     const reports = [];
     for (const entry of (await readdir(path)).sort()) {
-      if (!/^[AV][0-9]+\.md$/u.test(entry)) continue;
+      if (!RECORD_NAME.test(entry)) continue;
       if (reports.length >= 100) throw Error('too-many-reports');
       const report = await snapshot(join(path, entry));
       const reportedStatus = /^- Reported status: (.+)$/mu.exec(report.text)?.[1] ?? null;
