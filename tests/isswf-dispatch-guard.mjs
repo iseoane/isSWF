@@ -1,0 +1,180 @@
+import assert from 'node:assert/strict';
+import { resolve, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const source = resolve(process.argv[2] || '.');
+const load = name => import(pathToFileURL(join(source, name)));
+const { guardDispatch } = await load('tools/isswf-dispatch-guard-core.mjs');
+
+const CHECKPOINT = 'a1'.repeat(20);
+const BASE = 'b2'.repeat(20);
+const BRIEF = '.factory/initiatives/I0001/jobs/J001/brief-r1.md';
+const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n`;
+const plan = (...jobs) => `# I0001: Synthetic\n\nType: bug\n\n${jobs.join('\n')}`;
+const dispatchPrompt = (extra = '') => `Work on the brief ${BRIEF}.\nInput checkpoint ${CHECKPOINT}.\nTarget base: main ${BASE}.\n${extra}`;
+const selectionFile = agents => JSON.stringify({ schemaVersion: 1, agents });
+const claudeAgents = {
+  'isswf:isswf-worker': { host: 'claude', model: 'sonnet', effort: 'medium' },
+  'isswf-worker': { host: 'claude', model: 'sonnet', effort: 'medium' },
+  'isswf:isswf-reviewer': { host: 'claude', model: 'opus', effort: 'medium' },
+  'isswf:isswf-researcher': { host: 'pi', model: 'openai-codex/gpt-6-luna', effort: 'high' },
+};
+
+// The in-memory io behaves like Claude's `$.fs` and `$.process.run`: it rejects a missing path and lists `{ name, kind }`.
+// `git` answers the two Git questions the guard asks, by exit code.
+const memoryIo = ({ project = '/work/project', files = {}, dirs = ['.factory'], tracked = true, ignored = false, git } = {}) => {
+  const norm = path => path.replaceAll('\\', '/');
+  const calls = { git: [], read: [] };
+  return {
+    calls,
+    project: () => project,
+    read: async path => {
+      calls.read.push(path);
+      if (!(norm(path) in files)) throw Error('ENOENT');
+      return files[norm(path)];
+    },
+    list: async () => dirs.map(name => ({ name, kind: 'dir' })),
+    stat: async path => {
+      if (!(norm(path) in files)) throw Error('ENOENT');
+      return { kind: 'file', size: files[norm(path)].length };
+    },
+    git: git ?? (async argv => {
+      calls.git.push(argv);
+      if (argv[0] === 'ls-files') return tracked ? 0 : 1;
+      if (argv[0] === 'check-ignore') return ignored ? 0 : 1;
+      throw Error(`unexpected git ${argv.join(' ')}`);
+    }),
+  };
+};
+const project = (overrides = {}, root = '/work/project') => ({
+  project: root,
+  files: {
+    [`${root}/.factory/dispatch-selection.json`]: selectionFile(claudeAgents),
+    [`${root}/.factory/initiatives/I0001/plan.md`]: plan(job('J001', 'in-progress')),
+    [`${root}/${BRIEF}`]: '# brief\n',
+  },
+  ...overrides,
+});
+const claudeCall = (overrides = {}) => ({ tool: 'Agent', subagent_type: 'isswf:isswf-worker', model: 'sonnet', effort: 'medium', run_in_background: false, description: 'x', prompt: dispatchPrompt(), ...overrides });
+const claude = (input, io) => guardDispatch({ host: 'claude', input, io });
+const refused = (verdict, condition, ...parts) => {
+  assert.equal(typeof verdict.deny, 'string', JSON.stringify(verdict));
+  assert.equal(verdict.condition, condition, verdict.deny);
+  for (const part of parts) assert.ok(verdict.deny.includes(part), `${part}\n${verdict.deny}`);
+};
+
+// Condition 1: only isSWF role agents are checked; any other call is allowed and no input is read.
+for (const subagent_type of [undefined, 'general-purpose', 'Explore', 'isswf:other', 'my-isswf-worker', 'isswf', '']) {
+  const io = memoryIo({ files: {} });
+  io.project = () => { throw Error('must not be asked'); };
+  assert.deepEqual(await claude(claudeCall({ subagent_type, model: undefined, effort: undefined, prompt: 'hi' }), io), { allow: true }, String(subagent_type));
+}
+
+// A delegation that meets every condition is allowed, for the plugin name and the bare name, and carries nothing that reads as a grant.
+for (const subagent_type of ['isswf:isswf-worker', 'isswf-worker']) {
+  const io = memoryIo(project());
+  assert.deepEqual(await claude(claudeCall({ subagent_type }), io), { allow: true }, subagent_type);
+  assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '-q', '--']]);
+}
+// Windows spelling of the project root works the same.
+assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\project'))), { allow: true }, 'a backslash project root');
+// `.isswf` is a state directory too.
+{
+  const files = Object.fromEntries(Object.entries(project().files).map(([path, text]) => [path.replace('/.factory/', '/.isswf/'), text]));
+  assert.deepEqual(await claude(claudeCall({ prompt: dispatchPrompt().replace('.factory/', '.isswf/') }), memoryIo({ files, dirs: ['.isswf'] })), { allow: true }, '.isswf');
+}
+
+// Condition 2: the selection file and the agent's own entry.
+{
+  const base = project();
+  const withSelection = text => memoryIo({ ...base, files: { ...base.files, '/work/project/.factory/dispatch-selection.json': text } });
+  const noFile = { ...base.files };
+  delete noFile['/work/project/.factory/dispatch-selection.json'];
+  refused(await claude(claudeCall(), memoryIo({ ...base, files: noFile })), 'selection', 'dispatch-selection.json', 'missing');
+  refused(await claude(claudeCall(), withSelection('{not json')), 'selection', 'valid JSON');
+  refused(await claude(claudeCall(), withSelection(JSON.stringify({ schemaVersion: 2, agents: claudeAgents }))), 'selection', 'schemaVersion');
+  refused(await claude(claudeCall(), withSelection(JSON.stringify({ schemaVersion: 1 }))), 'selection', 'agents');
+  refused(await claude(claudeCall({ subagent_type: 'isswf:isswf-planner' }), withSelection(selectionFile(claudeAgents))), 'selection', 'isswf:isswf-planner', 'no entry');
+  refused(await claude(claudeCall(), withSelection(selectionFile({ 'isswf:isswf-worker': { host: 'claude', model: 'sonnet' } }))), 'selection', 'effort', 'entry');
+  refused(await claude(claudeCall(), withSelection(selectionFile({ 'isswf:isswf-worker': { host: 'other', model: 'sonnet', effort: 'low' } }))), 'selection', 'host');
+  refused(await claude(claudeCall({ subagent_type: 'isswf:isswf-researcher', model: 'openai-codex/gpt-6-luna', effort: 'high' }), memoryIo(base)), 'selection', 'host pi', 'claude');
+  refused(await claude(claudeCall(), memoryIo({ ...base, dirs: ['.factory', '.isswf'] })), 'selection', '.isswf', '.factory');
+  refused(await claude(claudeCall(), memoryIo({ ...base, dirs: [] })), 'selection', 'state directory');
+
+  refused(await claude(claudeCall({ model: undefined }), memoryIo(base)), 'selection', 'model', 'no model', 'sonnet');
+  refused(await claude(claudeCall({ effort: undefined }), memoryIo(base)), 'selection', 'effort', 'no effort', 'medium');
+  refused(await claude(claudeCall({ model: 'opus' }), memoryIo(base)), 'selection', 'model', 'opus', 'sonnet');
+  refused(await claude(claudeCall({ effort: 'high' }), memoryIo(base)), 'selection', 'effort', 'high', 'medium');
+  refused(await claude(claudeCall({ model: '' }), memoryIo(base)), 'selection', 'no model');
+}
+
+// The Override line replaces the entry for that one call and nothing else.
+{
+  const base = project();
+  const override = (line, call = {}) => claude(claudeCall({ prompt: dispatchPrompt(line), ...call }), memoryIo(base));
+  assert.deepEqual(await override('Override: model=opus effort=high', { model: 'opus', effort: 'high' }), { allow: true }, 'a matching override');
+  refused(await override('Override: model=opus effort=high'), 'selection', 'model', 'sonnet', 'Override');
+  refused(await override('Override: model=opus effort=high', { model: 'opus' }), 'selection', 'effort', 'medium', 'high');
+  refused(await override('Override: model=opus'), 'selection', 'Override: model=<m> effort=<e>');
+  refused(await override('Override: model=opus effort=high\nOverride: model=haiku effort=low', { model: 'opus', effort: 'high' }), 'selection', 'one Override');
+  refused(await override('Note: Override: model=opus effort=high mid-line is not a line start', { model: 'opus', effort: 'high' }), 'selection', 'sonnet');
+  // The override does not waive the other conditions.
+  refused(await claude(claudeCall({ model: 'opus', effort: 'high', prompt: `Override: model=opus effort=high\nbrief ${BRIEF}` }), memoryIo(base)), 'references');
+  refused(await claude(claudeCall({ subagent_type: 'isswf:isswf-planner', model: 'opus', effort: 'low', prompt: dispatchPrompt('Override: model=opus effort=low') }), memoryIo(base)), 'selection', 'no entry');
+}
+
+// Condition 3: the prompt names a brief path and two full SHAs.
+{
+  const io = () => memoryIo(project());
+  refused(await claude(claudeCall({ prompt: `checkpoint ${CHECKPOINT} base ${BASE}` }), io()), 'references', 'brief');
+  refused(await claude(claudeCall({ prompt: `${BRIEF} base ${BASE}` }), io()), 'references', 'checkpoint');
+  refused(await claude(claudeCall({ prompt: `${BRIEF} checkpoint ${CHECKPOINT}` }), io()), 'references', 'base');
+  refused(await claude(claudeCall({ prompt: `${BRIEF} checkpoint ${CHECKPOINT.slice(0, 12)} base ${BASE}` }), io()), 'references', 'checkpoint');
+  refused(await claude(claudeCall({ prompt: `${BRIEF} checkpoint ${CHECKPOINT} base ${BASE.slice(0, 39)}` }), io()), 'references', 'base');
+  refused(await claude(claudeCall({ prompt: `${BRIEF} checkpoint ${CHECKPOINT}0 base ${BASE}` }), io()), 'references', 'checkpoint');
+  refused(await claude(claudeCall({ prompt: `.factory/initiatives/I0001/jobs/J001/notes.md checkpoint ${CHECKPOINT} base ${BASE}` }), io()), 'references', 'brief');
+  refused(await claude(claudeCall({ prompt: undefined }), io()), 'references', 'brief');
+  // A Windows-spelled brief path and a prompt with the SHAs on one line are fine.
+  assert.deepEqual(await claude(claudeCall({ prompt: `C:\\work\\project\\.factory\\initiatives\\I0001\\jobs\\J001\\brief-r1.md, checkpoint ${CHECKPOINT}, base ${BASE}` }), io()), { allow: true });
+}
+
+// Condition 4: the plan parses and the named job is in-progress.
+{
+  const at = text => memoryIo(project({ files: { ...project().files, '/work/project/.factory/initiatives/I0001/plan.md': text } }));
+  for (const status of ['pending', 'blocked', 'in-review', 'awaiting-human', 'completed']) {
+    refused(await claude(claudeCall(), at(plan(job('J001', status), job('J002', 'in-progress')))), 'plan', 'J001', status, 'in-progress');
+  }
+  refused(await claude(claudeCall(), at(plan(job('J002', 'in-progress')))), 'plan', 'J001', 'not in the plan');
+  refused(await claude(claudeCall(), at(plan(job('J001', 'invented')))), 'plan', 'invalid-job', 'Status');
+  refused(await claude(claudeCall(), at('not a plan')), 'plan', 'invalid-plan-type');
+  refused(await claude(claudeCall(), at(`${plan(job('J001', 'in-progress'))}${'x'.repeat(1024 * 1024)}`)), 'plan', '1 MiB');
+  const noPlan = project();
+  delete noPlan.files['/work/project/.factory/initiatives/I0001/plan.md'];
+  refused(await claude(claudeCall(), memoryIo(noPlan)), 'plan', 'plan.md');
+  assert.deepEqual(await claude(claudeCall(), at(plan(job('J002', 'pending'), job('J001', 'in-progress')))), { allow: true }, 'other jobs do not matter');
+}
+
+// Condition 5: the brief exists, is tracked and is not ignored; a Git failure refuses.
+{
+  const noBrief = project();
+  delete noBrief.files[`/work/project/${BRIEF}`];
+  refused(await claude(claudeCall(), memoryIo(noBrief)), 'brief', 'brief-r1.md', 'does not exist');
+  refused(await claude(claudeCall(), memoryIo(project({ tracked: false }))), 'brief', 'not tracked');
+  refused(await claude(claudeCall(), memoryIo(project({ ignored: true }))), 'brief', 'ignored');
+  refused(await claude(claudeCall(), memoryIo(project({ git: async () => { throw Error('git is not available'); } }))), 'brief', 'git is not available');
+  refused(await claude(claudeCall(), memoryIo(project({ git: async argv => (argv[0] === 'ls-files' ? 0 : 128) }))), 'brief', 'check-ignore');
+}
+
+// The guard fails closed for an isSWF role call and never for another agent.
+{
+  const broken = memoryIo(project());
+  broken.project = () => { throw Error('cwd is gone'); };
+  refused(await claude(claudeCall(), broken), 'error', 'dispatch guard error: cwd is gone');
+  const noList = memoryIo(project());
+  noList.list = async () => { throw Error('EACCES'); };
+  refused(await claude(claudeCall(), noList), 'error', 'dispatch guard error: EACCES');
+  assert.deepEqual(await claude(claudeCall({ subagent_type: 'general-purpose' }), broken), { allow: true }, 'another agent is unaffected');
+  refused(await guardDispatch({ host: 'claude', input: claudeCall(), io: undefined }), 'error', 'dispatch guard error');
+  assert.deepEqual(await guardDispatch({ host: 'claude', input: undefined, io: undefined }), { allow: true }, 'no call, nothing to guard');
+}
+console.log('PASS dispatch guard: shared core conditions, override line and fail-closed behavior');
