@@ -9,7 +9,7 @@ const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
 const STATE_DIRECTORIES = ['.isswf', '.factory'];
 // Pi has no thinking field: the level is a suffix of the model, and a model id may contain ':' itself.
 const PI_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
-const BRIEF_PATH = /initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
+const BRIEF_PATH = /(?:[\w.:-]+[\\/])*initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
 // The first hex token on the same line after the word that names it; only a full 40-hex token counts, so a short SHA is not
 // rescued by a full one that follows it.
 const fullShaAfter = (body, word) => {
@@ -90,7 +90,7 @@ async function checkSelection(host, call, state, file, io) {
 }
 
 /**
- * Reads the job brief path and the full checkpoint and base SHAs from a dispatch prompt, or refuses. Exported so a tool that records a
+ * Reads the job brief (its initiative, job, revision and the path as the prompt wrote it, state root included) and the full checkpoint and base SHAs from a dispatch prompt, or refuses. Exported so a tool that records a
  * launch can read them with the same parser as the guard; only the tests use it so far.
  * @public
  */
@@ -103,7 +103,7 @@ export function checkReferences(prompt) {
     shas[word] = fullShaAfter(body, word);
     if (!shas[word]) refuse(3, `the prompt does not give the full 40-hex ${label} SHA after the word "${word}"`);
   }
-  return { initiative: brief[1], job: brief[2], revision: brief[3], checkpoint: shas.checkpoint, base: shas.base };
+  return { initiative: brief[1], job: brief[2], revision: brief[3], path: brief[0], checkpoint: shas.checkpoint, base: shas.base };
 }
 
 async function checkPlan(planPath, job, io) {

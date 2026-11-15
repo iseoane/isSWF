@@ -22,8 +22,8 @@ export function rememberDispatch(assignments, { host, input, runId } = {}) {
   const kept = [];
   for (const call of callsOf(host, input).filter(candidate => isRoleAgent(candidate.agent) && SAFE_NAME.test(candidate.agent))) {
     try {
-      const { initiative, job, revision, checkpoint, base } = checkReferences(call.prompt);
-      kept.push({ agent: call.agent, initiative, job, revision, checkpoint, base, ...(typeof runId === 'string' && SAFE_RUN.test(runId) ? { run: runId } : {}) });
+      const { initiative, job, path, checkpoint, base } = checkReferences(call.prompt);
+      kept.push({ agent: call.agent, initiative, job, path, checkpoint, base, ...(typeof runId === 'string' && SAFE_RUN.test(runId) ? { run: runId } : {}) });
     } catch {
       // The guard refuses such a call, or it is not an isSWF assignment; either way there is nothing to remember.
     }
@@ -47,8 +47,8 @@ export function compactionInstructions(existing) {
   return own ? `${own}\n${keep}` : keep;
 }
 
-const describe = ({ agent, initiative, job, revision, checkpoint, base, run }) =>
-  `- ${agent}: ${initiative}/${job}, brief initiatives/${initiative}/jobs/${job}/brief-r${revision}.md, checkpoint ${checkpoint}, base ${base}${run ? `, run ${run}` : ''}`;
+const describe = ({ agent, initiative, job, path, checkpoint, base, run }) =>
+  `- ${agent}: ${initiative}/${job}, brief ${path}, checkpoint ${checkpoint}, base ${base}${run ? `, run ${run}` : ''}`;
 
 /** The first message after a compaction of a session whose coordinator was active, for `host` `claude` or `pi`. */
 export function compactionReminder({ host, assignments }) {

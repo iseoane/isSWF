@@ -16,8 +16,11 @@ export type IsswfBranchState = { branch: string } | { detached: string }
 // The branch each agent loop selected in each repository, keyed by loop and repository top-level directory.
 export type IsswfBranches = Record<string, IsswfBranchState>
 
+// An accepted dispatch the coordinator session remembers for the compaction reminder, as rememberDispatch stores it.
+export type IsswfAssignment = { agent: string; initiative: string; job: string; path: string; checkpoint: string; base: string; run?: string }
+
 declare module 'claude-code' {
   interface PluginState {
-    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree; branches: IsswfBranches }
+    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree; branches: IsswfBranches; assignments: IsswfAssignment[] }
   }
 }
