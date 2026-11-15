@@ -269,4 +269,7 @@ try {
 } finally {
   await rm(temp, { recursive: true, force: true });
 }
-console.log('PASS dispatch guard: shared core conditions, override line, fail-closed behavior and the Pi extension');
+// Packaging: the package declares the extension for the Pi main session, next to the record guard's.
+const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
+assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs']);
+console.log('PASS dispatch guard: shared core conditions, override line, fail-closed behavior, the Pi extension and its packaging');
