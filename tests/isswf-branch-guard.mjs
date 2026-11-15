@@ -374,4 +374,12 @@ for (const [mode, observe] of Object.entries(observers)) {
   assert.ok(/branches: IsswfBranches/u.test(types), 'the state key is declared through PluginState');
 }
 
+// Packaging: the core ships next to the command core, Knip and the quality check know it, and the quality check runs this test.
+{
+  const read = path => readFile(join(source, path), 'utf8');
+  assert.ok((await read('tools/factory-package.mjs')).includes('"tools/isswf-branch-guard-core.mjs"'), 'the package allowlist ships the core');
+  assert.ok(JSON.parse(await read('tooling/quality/knip.json')).entry.includes('tools/isswf-branch-guard-core.mjs'), 'Knip treats the core as an entry');
+  assert.ok((await read('tools/check-quality.mjs')).includes("'tests/isswf-branch-guard.mjs'"), 'the quality check runs this test');
+}
+
 console.log('PASS branch guard');
