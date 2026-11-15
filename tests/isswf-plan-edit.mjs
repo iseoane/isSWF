@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
 const { parsePlan } = await import(pathToFileURL(join(source, 'tools/isswf-plan-core.mjs')));
-const { editPlanFile } = await import(pathToFileURL(join(source, 'tools/isswf-plan-edit.mjs')));
+const { createPlanFile, editPlanFile } = await import(pathToFileURL(join(source, 'tools/isswf-plan-edit.mjs')));
 const { setField, appendEvidence, addJob, newPlan } = await import(pathToFileURL(join(source, 'tools/isswf-plan-edit-core.mjs')));
 
 // One job in the plan format the coordinator writes, so expectations differ from the input only in the field under test.
@@ -153,6 +153,21 @@ try {
     assert.deepEqual([done.status, done.out.ok, done.out.code], [1, false, code], code);
     assert.equal(await readFile(join(project, '.factory/initiatives/I0003/plan.md')).catch(error => error.code), 'ENOENT', code);
   }
+
+  // A new plan is written whole to a temporary file and linked into place, so no reader sees it partial and a plan that appears meanwhile is not replaced.
+  const fresher = join(project, '.factory/initiatives/I0005');
+  let seen;
+  await createPlanFile({ project, initiative: 'I0005', text: fresh, beforeLink: async () => {
+    const names = await readdir(fresher);
+    seen = { names: names.length, plan: names.includes('plan.md'), temp: names[0] && await readFile(join(fresher, names[0]), 'utf8') };
+  } });
+  assert.deepEqual(seen, { names: 1, plan: false, temp: fresh });
+  assert.deepEqual(await readdir(fresher), ['plan.md']);
+  assert.equal(await readFile(join(fresher, 'plan.md'), 'utf8'), fresh);
+  await rm(join(fresher, 'plan.md'));
+  await assert.rejects(createPlanFile({ project, initiative: 'I0005', text: fresh, beforeLink: () => writeFile(join(fresher, 'plan.md'), 'other writer') }), { code: 'plan-exists' });
+  assert.equal(await readFile(join(fresher, 'plan.md'), 'utf8'), 'other writer');
+  assert.deepEqual(await readdir(fresher), ['plan.md']);
 
   // A project that does not exist, or has no state directory, is refused and nothing is created for it.
   await mkdir(join(root, 'bare'));
