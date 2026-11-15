@@ -101,6 +101,71 @@ try {
     const attempt = await readFile(join(source, '.factory/templates/attempt.md'), 'utf8');
     for (const label of ['- Branch:', '- Candidate commit SHA:']) assert.ok(attempt.split('\n').includes(label), `attempt template has ${label}`);
   }
+  // `next` takes the job's highest number per kind over the working tree, the index, HEAD and every local and remote-tracking branch.
+  {
+    const project = join(root, 'next');
+    const jobRel = '.factory/initiatives/I0001/jobs/J001';
+    const jobDir = join(project, jobRel);
+    await mkdir(jobDir, { recursive: true });
+    git(project, 'init', '-q', '-b', 'main');
+    await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planText());
+    await writeFile(join(jobDir, 'brief-r1.md'), '# Brief\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'plan');
+    const next = (kind, ...extra) => {
+      const result = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), 'next', '--project', project, '--initiative', 'I0001', '--job', 'J001', '--kind', kind, ...extra], { encoding: 'utf8', timeout: 30000 });
+      assert.equal(result.status, 0, `next ${kind}: ${result.stderr}`);
+      return JSON.parse(result.stdout);
+    };
+    const expectNext = (attempt, review, label) => assert.deepEqual([next('attempt').id, next('review').id], [attempt, review], label);
+    const commitFile = (name, message) => { git(project, 'add', '-f', join(jobRel, name)); git(project, 'commit', '-q', '-m', message); };
+
+    expectNext('A001', 'V001', 'a job without records');
+    await writeFile(join(jobDir, 'A001.md'), 'x\n');
+    expectNext('A002', 'V001', 'the working tree, per kind');
+    await writeFile(join(jobDir, 'A002.md'), 'x\n');
+    git(project, 'add', join(jobRel, 'A002.md'));
+    await rm(join(jobDir, 'A001.md'));
+    await rm(join(jobDir, 'A002.md'));
+    expectNext('A003', 'V001', 'the index');
+    git(project, 'reset', '-q');
+    await writeFile(join(jobDir, 'A003.md'), 'x\n');
+    commitFile('A003.md', 'a003');
+    git(project, 'rm', '-q', '--cached', join(jobRel, 'A003.md'));
+    await rm(join(jobDir, 'A003.md'));
+    expectNext('A004', 'V001', 'HEAD');
+    git(project, 'reset', '-q', '--hard');
+    git(project, 'switch', '-q', '-c', 'other');
+    await writeFile(join(jobDir, 'A005.md'), 'x\n');
+    commitFile('A005.md', 'a005');
+    git(project, 'switch', '-q', 'main');
+    git(project, 'reset', '-q', '--hard');
+    expectNext('A006', 'V001', 'another local branch');
+    git(project, 'switch', '-q', '-c', 'work');
+    await writeFile(join(jobDir, 'V010.md'), 'x\n');
+    commitFile('V010.md', 'v010');
+    git(project, 'update-ref', 'refs/remotes/origin/feature', git(project, 'rev-parse', 'work'));
+    git(project, 'switch', '-q', 'main');
+    git(project, 'branch', '-q', '-D', 'work');
+    expectNext('A006', 'V011', 'a remote-tracking branch');
+    // A name that is not a record never counts.
+    await writeFile(join(jobDir, 'A900-continuation.md'), 'x\n');
+    await writeFile(join(jobDir, 'A1000.md'), 'x\n');
+    expectNext('A006', 'V011', 'names outside the record pattern');
+    // The last number cannot be exceeded.
+    await writeFile(join(jobDir, 'A999.md'), 'x\n');
+    const full = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), 'next', '--project', project, '--initiative', 'I0001', '--job', 'J001', '--kind', 'attempt'], { encoding: 'utf8', timeout: 30000 });
+    assert.equal(full.status, 1);
+    assert.deepEqual(JSON.parse(full.stdout), { ok: false, code: 'ids-exhausted' });
+    // Bad input is a usage refusal with exit 1.
+    for (const [args, code] of [[['--project', 'relative'], 'invalid-project'], [['--kind', 'plan'], 'invalid-kind'], [['--job', 'j 1'], 'invalid-job'], [['--initiative', 'X1'], 'invalid-initiative']]) {
+      const base = { '--project': project, '--initiative': 'I0001', '--job': 'J001', '--kind': 'attempt' };
+      const merged = Object.entries({ ...base, [args[0]]: args[1] }).flat();
+      const refused = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), 'next', ...merged], { encoding: 'utf8', timeout: 30000 });
+      assert.equal(refused.status, 1, code);
+      assert.deepEqual(JSON.parse(refused.stdout), { ok: false, code }, code);
+    }
+  }
   console.log('isswf-record-new test ok');
 } finally {
   await rm(root, { recursive: true, force: true });
