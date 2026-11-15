@@ -92,6 +92,26 @@ This guard reduces mistakes; it is not a sandbox, and it enforces a process rule
 
 The guard does not restrict `cd`. Claude Code 2.1.325 resets a standalone `cd` at the end of the call (observed on Windows with Git Bash), so a shell `cd` does not persist there. That is version-dependent host behavior, not something this guard provides. Pi starts each `bash` call in a new process, so a `cd` never persists either.
 
+## Branch guard
+
+Before a shell command runs, the host checks that a `git commit` would land on the branch the session selected. When the checkout is on another branch, for example because a person, a peer session or an agent switched it, the guard refuses the commit and names both branches. It only compares: it never switches branches, stashes or resets anything. It is a process rule, not an authority, and its refusal is not a retry signal.
+
+- **Where it runs.** In Claude Code, the same `tool.call` hook as the shell command guard checks each `Bash` and `PowerShell` call of the main session and of delegated agents, after the command guard and before the call, with or without the initiatives pane. It reads the branch with `git` (through the host), falls back to reading `HEAD` from the files, and keeps the expected branches in the plugin state. In Pi, `tools/isswf-command-guard-pi-extension.mjs` refuses on `tool_call`, looks again on `tool_result` and starts afresh on `session_start`. It reads `HEAD` from the files with `node:fs`, so it needs no process per call, and the worker agent loads it like the command guard. The logic is in `tools/isswf-branch-guard-core.mjs`, which has no Node imports; the `git` parsing is in `tools/isswf-command-core.mjs`.
+- **The expected branch.** The guard keeps one per agent loop (the main session, and each delegated Claude agent by its agent id; one per Pi session) and per repository, keyed by its top-level directory. A linked worktree is its own repository. The first time a loop runs a shell command that touches a repository, the guard records the branch the checkout is on. After every call of the loop that contains `git switch` or `git checkout` in that repository, the guard reads the checkout again and adopts what it finds, whatever the call's outcome: a failed switch and `git checkout -- <file>` adopt the branch the checkout is on. A detached HEAD is expected as detached, whatever commit it is on.
+- **What it refuses.** A `git commit` with any options and any global option (`-C`, `-c`, `--git-dir`, `--work-tree`, `--no-pager`) on a checkout whose branch differs from the expected one. The checkout it looks at is the `-C` directory, else the directory an earlier `cd` or `pushd` in the same command set, else the session directory; `--git-dir` or `--work-tree` makes it the given repository. Text that only mentions a commit, such as a commit message or a `gh pr create --body`, is not a commit. A commit on the expected branch, and every other command, runs unchanged.
+- **How to continue.** The refusal names the current and the expected branch and says that another actor may have switched the checkout. Re-select the branch with your own `git switch <expected>`, or adopt the current one on purpose with `git switch <current>` (`git switch --detach` for a detached HEAD). A `git switch main && git commit` in one command runs, because the switch re-selects the branch.
+
+The guard fails open: if it cannot read the branch, cannot read or write its state, or fails itself, it allows the command and leaves the expected branches as they were. A command whose directory it cannot read, such as one given by a variable, `~`, `-` or quoted text with spaces, or an MSYS-style path such as `/c/repo`, runs unchecked.
+
+Known limits:
+
+- Only `git commit` is checked. `commit-tree`, `update-ref`, `merge`, `rebase`, `cherry-pick`, `revert`, `am`, `stash`, `pull` and `reset` are not.
+- Aliases, scripts, `eval`, `bash -c` and commands built from variables are not parsed. Commands you type yourself with Pi's `!` are not guarded.
+- The guard compares before the call. A peer switch that lands inside the same chained command is not seen, and after a `git switch` or `git checkout` the guard adopts whatever branch the checkout is on, including one a peer switched to meanwhile. Parallel Pi tool calls can interleave.
+- The first look at a repository adopts the branch it is on, so a session's first command that runs after a peer switch is not refused.
+- A rename of the current branch (`git branch -m`) or an operation in progress that detaches HEAD, such as an interactive `rebase` stop or `bisect`, makes the next `git commit` look like a switch. Adopt the state with the `git switch` command the refusal names; the guard reads the checkout after that call even if Git refuses it.
+- A child that Claude Code starts in its own worktree is judged against the session directory unless its command names the directory. `--git-dir` pointing at a linked worktree's private directory is read as the main checkout. Pi reads `HEAD` from files, so a repository that stores references in the reftable format is not checked there.
+
 ## Plan edit
 
 ```bash
