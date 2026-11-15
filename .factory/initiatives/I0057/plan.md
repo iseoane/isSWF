@@ -33,6 +33,7 @@ Further candidates observed on 2026-11-14, to assess:
 - A wording correction dropped part of a contract definition, and the phrase tests passed (J008/V002 F4): a record field's definition could have one canonical source, with its key phrases asserted.
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
+- A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -46,7 +47,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: The worker implements brief-r2 (shared record validator, CLI and strict status exit) on feat/i0057-j001-record-check; the hook and Pi wiring follows in brief-r3 after the runtime probes in A002.
+- Next step: Integrate brief-r2 (PR from feat/i0057-j001-record-check after green exact-head CI); then run the A002 runtime probes and prepare brief-r3 for the hook and Pi wiring.
 
 ### Acceptance
 
@@ -62,6 +63,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14 correction to the entry above: replaying the pre-fix I0055 plan in a Git repository, `isswf-status` does detect it (`status: unknown`, `invalid-or-changing-plan`, `planError` `unsafe-brief-reference` at J001 Brief line 12), but it exits 0, so only a reader who checks the output notices. Outside a Git root it reports `unreadable-or-unsafe-plan` even for a valid plan. `tests/plan-records.mjs` catches it in about a second but runs only in CI. Plans written at 20:03 (8566437), fixed at 20:38 (03a24a8).
 - 2026-11-14: `Run:` lines with trailing notes in A003, A011 and V006 were silently ignored by the pane (tools/isswf-snapshot-core.mjs:116).
 - 2026-11-14: J029 stayed `blocked` while its worker, review and PR ran, so the pane's quota-resume prompt (hooks/register.tsx:165) never armed.
+- 2026-11-15: brief-r2 candidate 5f34fdf passed review round 3 ([V003](jobs/J001/V003.md)) after V001 (F1) and V002 (F6) failed on stale exit-code statements; attempts A003-A005. On real records the new validator flagged `J008/A002.md:7` `run-id-unknown`.
 
 ## J002
 
