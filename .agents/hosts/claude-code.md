@@ -110,7 +110,7 @@ A bound review runs as its own `claude -p` process with `ISSWF_GIT_EVIDENCE_BIND
 
 ## Continue a unit in a fresh coordinator context
 
-Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) with Claude Code's supported mechanisms: the operator starts a fresh interactive `claude` session in the assigned checkout and gives it the handoff, or runs `/compact` with instructions to retain the handoff. After compaction or in the new session, reload the coordinator skill and the methodology the next step requires; a compaction summary is not a substitute for those resources or for reconciling the records.
+Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) with Claude Code's supported mechanisms: the operator starts a fresh interactive `claude` session in the assigned checkout and gives it the handoff, or runs `/compact` with instructions to retain the handoff. After a compaction the plugin reminds the coordinator to reload its skill and the methodology the next step requires; the "Compaction" section of the operations guide describes what it keeps and its limits. A new session has no reminder, so reload the coordinator skill there. In either case, reconcile the records before acting: a compaction summary does not replace them.
 
 ### Headless coordinator launch
 

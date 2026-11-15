@@ -45,6 +45,10 @@ Further candidates observed on 2026-11-14, to assess:
 - Whether a child loaded the skills and references its brief selects is not checked, and for the worker it cannot even be observed today: the pane shows `skills: unknown` because its transcripts are not resolved (operator, 2026-11-15). Find why the worker transcripts are not resolved, then compare the brief's selected skills and required references with the child's observed reads and warn at attempt close when one is missing (extends the deferred "which files a child read" candidate).
 - Two sources for the reviewer's model: `tools/isswf-review-launch.mjs:59-70` reads the setup skill's preset, while the dispatch guard checks `dispatch-selection.json` (J007 A001): one source could be read by both.
 - From J007: `tools/isswf-record-new.mjs` duplicates `trustedGit` from `tools/isswf-review-launch.mjs`; the review template's profile line has commas, so `parseModel` does not read its model; `editFile` does not detect a writer that lands between its check and the rename; `runGit` sets `GIT_CONFIG_GLOBAL=NUL`, so a user's `safe.directory` is ignored and a Windows "dubious ownership" repository fails opaquely; next-ID does not see uncommitted records in other worktrees (V001 I3).
+- A read-only researcher reads the shared checkout while a worker commits, so its sources may differ from its base (J007 A001, J002 A001): researchers could read at the base through the Git evidence tools or `git show`.
+- Two record-path classifiers diverge: `isRecordPath` in `tools/isswf-record-new-core.mjs` and `RECORD_PATH` in `tools/isswf-record-guard-core.mjs` (J002 A001).
+- The host stops long background commands (CI waits, the full check) under memory pressure, and nothing resumes them (2026-11-15): the coordinator guide could say how to resume, or the CI wait could be a short foreground check.
+- Scope label for triage (operator, 2026-11-15): each candidate is either for this repository only (for example check-quality, ESLint and Knip) or for the factory, since target projects use other languages.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -84,13 +88,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows, generating the review handoff and detecting unreviewed commits before delivery)
 - Objective: Delegation handoffs that the methodology requires are generated, not hand-written.
 - Depends on: J004
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Research brief r1 for the isswf-handoff skill and tool (review mode), then the implementation brief.
+- Next step: Implementation brief r2 after the J005 merge (shares hooks/register.tsx and the dispatch-guard Pi extension).
 
 ### Acceptance
 
@@ -103,6 +107,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: J029 review call 2 stopped inconclusive because the handoff lacked the diff; one call was lost.
 - 2026-11-14: coordinator test changes 2ac2f83 and 12efb53 were merged in PR322 before independent review (V003, J029-R4-04).
 - 2026-11-15: operator decision: deliver J002 as a distributed skill isswf-handoff backed by a tool, review mode first (the generated reviewer handoff, required by the dispatch guard for reviewer dispatches); a session-handoff mode, inspired by Matt Pocock's handoff skill (reference, do not duplicate; suggested skills; redaction), goes with J005 or a separate job.
+- 2026-11-15: research ([A001](jobs/J002/A001.md)): use the bound git-evidence diff argv and digest so unbound and bound digests match; the guard re-verifies a handoff file and SHA-256 named in a reviewer prompt; unreviewed commits are found from the latest V candidate, subtracting record paths and accepting recorded docs-only overrides; PR322 must fail and J007 d6b9844 must pass. The operator approved the J002 merge in advance (dispatch guard, packaging, host guides).
 
 ## J003
 
@@ -170,9 +175,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (one flow, but verification needs a real compaction on each host)
 - Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J005/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J005/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation brief r3 after J004 merges (shares hooks/register.tsx); Pi summary steering stays an acceptance limit for the operator to accept or reject.
+- Next step: PR and exact-head CI, then merge; the operator accepts or rejects the Pi summary limit.
 
 ### Acceptance
 
@@ -188,6 +193,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15 probe (J001/A006): a hooks module's `additionalContext` from `classic.SessionStart` (`compact`) did not reach the model, while a settings-hook SessionStart output did. `session.compact` steering, `$.session.append` and `reloadSkills` are untested.
 - 2026-11-15: probe ([A001](jobs/J005/A001.md)), Claude Code 2.1.325: session.compact instructions steer the summary; hook-returned messages after a manual /compact never reached the model; skill.prompt detects the coordinator; Pi can add a message through before_agent_start but cannot steer its own summarizer.
 - 2026-11-15: probe ([A002](jobs/J005/A002.md)): a plugin classic.SessionStart hook with source compact and additionalContext reached the model after a manual /compact; $.session.append did not; a skill invoked again after compaction reaches the model; auto trigger untested.
+- 2026-11-15: implementation ([A003](jobs/J005/A003.md); corrections [A004](jobs/J005/A004.md), [A005](jobs/J005/A005.md)): coordinator flag set unconditionally; Claude session.compact instructions and a SessionStart compact reminder (observed live with haiku); Pi reminder through before_agent_start after session_compact (stand-in tests only; Pi refused to compact a small session); the last 5 accepted dispatches remembered by the hooks on both hosts. Reviews [V001](jobs/J005/V001.md) pass and [V002](jobs/J005/V002.md) pass; the coordinator's full check found the host guides linking an unpackaged guide (fixed in cycle 1) and S4 (quadratic brief-path regex) was fixed in cycle 2 and verified mechanically. check-quality exit 0 at 2d993db (Windows). Merge approved in advance; the Pi summary limit awaits the operator's decision.
 
 ## J006
 
@@ -214,13 +220,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J007
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows, attempt and review records, plus the launch identity)
 - Objective: New attempt and review records start with their mechanical fields filled from Git and the launch identity.
 - Depends on: J006
 - Brief: [brief-r2.md](jobs/J007/brief-r2.md)
 - Blocker: None.
-- Next step: Push, PR and exact-head CI; merge with the operator's advance approval.
+- Next step: None
 
 ### Acceptance
 
@@ -234,6 +240,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14 audit: about half of the roughly 30 fields in .factory/templates/attempt.md are copies of data already held in Git or in the launch call.
 - 2026-11-15: research ([A001](jobs/J007/A001.md)): no tool writes attempt or review records; about half the fields come from launch data or Git; reuse the exclusive link create, checkRecord and the dispatch-guard parser (export its base); the record-name pattern is defined four times and the reviewer model has two sources; create the record after a successful launch.
 - 2026-11-15: implementation ([A002](jobs/J007/A002.md), correction cycle 1 [A003](jobs/J007/A003.md)): `tools/isswf-record-new.mjs` next/create/complete, one shared record-name pattern (isswf-status made strict, accepted as a bug fix in [V001](jobs/J007/V001.md) I1), `checkReferences` returns the base, `run-id-unfilled` in the record checker. Review [V001](jobs/J007/V001.md) fail (F1 brief existence) → [V002](jobs/J007/V002.md) pass; S3 applied by the coordinator (d6b9844). The coordinator replayed every RED/GREEN pair and observed check-quality exit 0 at 34ebb37 (Windows). The operator approved the merge in advance (worker.md needs a person). V001 and V002 were created with the new command.
+- 2026-11-15: merged as PR #334 (d1d3ded10f8eb6a203c93d43bfd2919a8c889bcf) after green CI on the exact head e4c602a, with the operator's advance approval.
 
 ## J008
 

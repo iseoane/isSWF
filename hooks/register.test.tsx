@@ -637,3 +637,125 @@ for (const [label, tools, indexed, engram, codegraph, hint] of STATUS) {
     await ui.unmount()
   })
 }
+
+// Compaction: a session that activated the coordinator keeps its assignment through a summary and a reminder.
+const CHECKPOINT = 'a1'.repeat(20)
+const BASE = 'b2'.repeat(20)
+const BRIEF = '.factory/initiatives/I0001/jobs/J001/brief-r1.md'
+const DISPATCH = `Work on the brief ${BRIEF}.\nInput checkpoint ${CHECKPOINT}.\nTarget base: main ${BASE}.`
+// The Windows separator is spelled by code, so the fixture reads the same on any host.
+const SEP = String.fromCharCode(92)
+const CWD = `C:${SEP}p`
+const at = (...parts: string[]) => [CWD, ...parts].join(SEP)
+
+// Just enough host for the dispatch guard to accept an isSWF worker call; `git` answers tracked, not ignored, committed.
+function dispatchHost(on: any) {
+  const files: Record<string, string> = {
+    [at('.factory', 'dispatch-selection.json')]: JSON.stringify({ schemaVersion: 1, agents: { claude: { 'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' } } } }),
+    [at('.factory', 'initiatives', 'I0001', 'plan.md')]: plan('I0001', 'Synthetic', [['J001', 'in-progress', 'work']]),
+    [at('.factory', 'initiatives', 'I0001', 'jobs', 'J001', 'brief-r1.md')]: 'brief',
+  }
+  // A Linux test host resolves `C:` against its own directory, so the mock keeps the path from the drive on.
+  const native = (path: string) => path.slice(Math.max(0, path.search(/[A-Za-z]:/)))
+  on('session.cwd', () => ({ value: CWD }))
+  on('fs.list', (_: unknown, { path }: { path: string }) => ({ value: native(path) === CWD ? [{ name: '.factory', kind: 'dir', size: 0, mtimeMs: 0, isLink: false }] : [] }))
+  on('fs.read', (_: unknown, { path }: { path: string }) => {
+    if (!(native(path) in files)) throw new Error('ENOENT')
+    return { value: files[native(path)] }
+  })
+  on('fs.stat', (_: unknown, { path }: { path: string }) => {
+    if (!(native(path) in files)) throw new Error('ENOENT')
+    return { value: { kind: 'file', size: files[native(path)].length, mtimeMs: 0, isLink: false } }
+  })
+  on('process.run', (_: unknown, e: { argv: string[] }) => ({ value: { exitCode: e.argv[1] === 'check-ignore' ? 1 : 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('tool.call', () => ({ result: { agentId: 'agent-77' } }))
+}
+const worker = (prompt = DISPATCH) => ({ tool: 'Agent', subagent_type: 'isswf:isswf-worker', model: 'sonnet', effort: 'medium', prompt })
+const SUMMARY = [{ role: 'assistant', text: 'summary', toolUses: [] }] as const
+const COMPACTING = [{ role: 'user', text: 'work', toolUses: [] }] as const
+const compact = ($: any, instructions?: string) => $.session.compact({ trigger: 'manual', messages: COMPACTING, ...(instructions === undefined ? {} : { instructions }) })
+const startAfterCompaction = ($: any) => $.classic.SessionStart({ source: 'compact' })
+const contextOf = (result: any) => (result?.additionalContext ?? []).join('\n')
+
+test('a session that activated the coordinator adds the retention instructions to its compaction, with or without the pane option', async ($, on) => {
+  const seen: (string | undefined)[] = []
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
+  await compact($)
+  await activate($)
+  await compact($)
+  await compact($, 'keep the plan')
+  expect(seen[0]).toBeUndefined()
+  for (const part of ['initiative and job', 'child agent IDs', 'candidate commit SHA', 'remaining review and correction budgets', 'open operator decisions', 'version advisory marker']) expect(seen[1]).toContain(part)
+  expect(seen[2]?.startsWith('keep the plan\n')).toBe(true)
+})
+
+test('a session that never activated the coordinator compacts and starts unchanged', async ($, on) => {
+  const seen: (string | undefined)[] = []
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
+  on('classic.SessionStart', () => ({}))
+  await $.skill.prompt({ skill: 'other-skill', text: '' })
+  await compact($, 'keep the plan')
+  expect(seen).toEqual(['keep the plan'])
+  expect(contextOf(await startAfterCompaction($))).toBe('')
+})
+
+test('after a compaction the first start of an activated session tells the model to reload the coordinator skill', async ($, on) => {
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('classic.SessionStart', () => ({}))
+  await activate($)
+  const reminder = contextOf(await startAfterCompaction($))
+  expect(reminder).toContain('/isswf:isswf-coordinator')
+  expect(reminder).toContain('methodology the next step requires')
+  expect(reminder).toContain('Reconcile the records')
+  expect(reminder).toContain('No dispatch was recorded')
+  // Only a start after a compaction carries it.
+  for (const source of ['startup', 'resume', 'clear'] as const) expect(contextOf(await $.classic.SessionStart({ source }))).toBe('')
+})
+
+test('the reminder lists the accepted dispatches, and a refused one is not remembered', async ($, on) => {
+  dispatchHost(on)
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('classic.SessionStart', () => ({}))
+  await activate($)
+  const ran = await $.tool.call(worker())
+  expect(ran.result).toEqual({ agentId: 'agent-77' })
+  const refused = await $.tool.call(worker('no references'))
+  expect(refused.deny).toContain('isSWF dispatch refused')
+  const reminder = contextOf(await startAfterCompaction($))
+  expect(reminder).toContain('isswf:isswf-worker: I0001/J001')
+  expect(reminder).toContain('brief .factory/initiatives/I0001/jobs/J001/brief-r1.md')
+  expect(reminder).toContain(`checkpoint ${CHECKPOINT}`)
+  expect(reminder).toContain(`base ${BASE}`)
+  expect(reminder).toContain('run agent-77')
+  expect(reminder.match(/isswf:isswf-worker: /g)).toHaveLength(1)
+})
+
+test('a session that never activated the coordinator remembers no dispatch', async ($, on) => {
+  dispatchHost(on)
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('classic.SessionStart', () => ({}))
+  await $.tool.call(worker())
+  await activate($)
+  expect(contextOf(await startAfterCompaction($))).toContain('No dispatch was recorded')
+})
+
+test('a fault in the compaction hooks leaves the host behaviour unchanged', async ($, on) => {
+  const seen: (string | undefined)[] = []
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
+  on('classic.SessionStart', () => ({ additionalContext: ['other hook'] }))
+  const stored = new Map<string, unknown>()
+  let broken = false
+  on('state.get', (_: unknown, e: { key: string }) => {
+    if (broken) throw new Error('state unavailable')
+    return { value: { value: stored.get(e.key), version: 1 } }
+  })
+  on('state.set', (_: unknown, e: { key: string; value: unknown }) => (stored.set(e.key, e.value), { value: { isSet: true, version: 1 } }))
+  await activate($)
+  broken = true
+  await compact($, 'keep the plan')
+  expect(seen).toEqual(['keep the plan'])
+  expect((await startAfterCompaction($)).additionalContext).toEqual(['other hook'])
+})

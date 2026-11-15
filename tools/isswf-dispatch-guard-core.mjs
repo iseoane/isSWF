@@ -9,6 +9,7 @@ const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
 const STATE_DIRECTORIES = ['.isswf', '.factory'];
 // Pi has no thinking field: the level is a suffix of the model, and a model id may contain ':' itself.
 const PI_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
+const PATH_CHAR = /[\w.:\\/-]/u;
 const BRIEF_PATH = /initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
 // The first hex token on the same line after the word that names it; only a full 40-hex token counts, so a short SHA is not
 // rescued by a full one that follows it.
@@ -28,6 +29,8 @@ class Refusal extends Error {
 const refuse = (condition, detail) => {
   throw new Refusal(condition, detail);
 };
+/** Whether an agent name is an isSWF role agent, the only kind the guard checks. */
+export const isRoleAgent = agent => typeof agent === 'string' && ROLE_AGENT.test(agent);
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = value => typeof value === 'string' && value !== '';
 
@@ -37,8 +40,11 @@ function splitPiModel(model) {
   return at > 0 && PI_LEVELS.includes(model.slice(at + 1)) ? { model: model.slice(0, at), effort: model.slice(at + 1) } : { model, effort: undefined };
 }
 
-/** The delegated children one tool call names (a Pi `action` call is exempt only because none of them is an isSWF role), as `{ agent, model, effort, prompt }` for the host's event shape. */
-function callsOf(host, input) {
+/**
+ * The delegated children one tool call names (a Pi `action` call is exempt only because none of them is an isSWF role), as `{ agent, model, effort, prompt }` for the host's event shape.
+ * Exported so the compaction memory reads a dispatch with the guard's own parser.
+ */
+export function callsOf(host, input) {
   if (host === 'claude') return [{ agent: input?.subagent_type, model: input?.model, effort: input?.effort, prompt: input?.prompt }];
   if (!isObject(input)) return [];
   const children = [input];
@@ -85,7 +91,7 @@ async function checkSelection(host, call, state, file, io) {
 }
 
 /**
- * Reads the job brief path and the full checkpoint and base SHAs from a dispatch prompt, or refuses. Exported so a tool that records a
+ * Reads the job brief (its initiative, job, revision and the path as the prompt wrote it, state root included) and the full checkpoint and base SHAs from a dispatch prompt, or refuses. Exported so a tool that records a
  * launch can read them with the same parser as the guard; only the tests use it so far.
  * @public
  */
@@ -98,7 +104,10 @@ export function checkReferences(prompt) {
     shas[word] = fullShaAfter(body, word);
     if (!shas[word]) refuse(3, `the prompt does not give the full 40-hex ${label} SHA after the word "${word}"`);
   }
-  return { initiative: brief[1], job: brief[2], revision: brief[3], checkpoint: shas.checkpoint, base: shas.base };
+  // The state root is whatever path characters precede the match; walking back keeps the match itself unchanged and the cost linear.
+  let start = brief.index;
+  while (start > 0 && PATH_CHAR.test(body[start - 1])) start -= 1;
+  return { initiative: brief[1], job: brief[2], revision: brief[3], path: body.slice(start, brief.index + brief[0].length), checkpoint: shas.checkpoint, base: shas.base };
 }
 
 async function checkPlan(planPath, job, io) {
@@ -166,7 +175,7 @@ async function checkCall(host, call, io) {
  * @returns {Promise<{ allow: true } | { deny: string, condition: string }>}
  */
 export async function guardDispatch({ host, input, io } = {}) {
-  for (const call of callsOf(host, input).filter(candidate => typeof candidate.agent === 'string' && ROLE_AGENT.test(candidate.agent))) {
+  for (const call of callsOf(host, input).filter(candidate => isRoleAgent(candidate.agent))) {
     try {
       await checkCall(host, call, io);
     } catch (error) {

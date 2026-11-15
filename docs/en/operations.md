@@ -112,6 +112,24 @@ Known limits:
 - A rename of the current branch (`git branch -m`) or an operation in progress that detaches HEAD, such as an interactive `rebase` stop or `bisect`, makes the next `git commit` look like a switch. Adopt the state with the `git switch` command the refusal names; the guard reads the checkout after that call even if Git refuses it.
 - A child that Claude Code starts in its own worktree is judged against the session directory unless its command names the directory, so it can be refused after the main loop switches. It should then adopt its own branch with `git switch <its own branch>`, not switch to the expected branch the refusal names. isSWF writers do not use automatic worktree isolation. `--git-dir` pointing at a linked worktree's private directory is read as the main checkout. Pi reads `HEAD` from files, so a repository that stores references in the reftable format is not checked there.
 
+## Compaction
+
+When a session whose coordinator skill was loaded compacts its conversation, the host asks the summary to keep the assignment and, on the first turn afterwards, reminds the model to reload the skill. The reminder is a process aid, not an authority: it starts no work, grants nothing and replaces no record. A session that never loaded the coordinator skill is not affected, on either host.
+
+- **What marks a session.** In Claude Code, the plugin's `skill.prompt` hook notes that the coordinator skill was expanded, with or without the initiatives pane; the note is kept in the plugin state. In Pi, `tools/isswf-compaction-pi-extension.mjs` notes the operator's `/skill:isswf-coordinator` on `input`, or the model reading the coordinator's `SKILL.md` on `tool_call`. Pi has no skill-load event, and those are the two ways its documentation gives for loading a skill. A new or resumed Pi session starts without the note until the skill is loaded again.
+- **What the summary keeps (Claude Code).** On `session.compact` of the main conversation, the plugin adds instructions after any text you typed after `/compact`. They ask the summary to keep the active initiative and job and the brief in use, the child agent IDs with their roles and tasks, the candidate commit SHA and the target base SHA, the remaining review and correction budgets, the open operator decisions and the version advisory marker. A model writes the summary, so this steers it and does not guarantee it.
+- **Assignment memory (both hosts).** Once the coordinator skill is loaded, the session keeps the last 5 dispatches that the dispatch guard accepted. Each entry holds the agent, the initiative and job, the brief path, the checkpoint, the base and, when the host returns it, the run ID: the `agentId` of Claude's `Agent` result, or the `runId` or `asyncId` of Pi's `subagent` details. Older entries are dropped. Claude keeps the list in the plugin state and Pi in the extension's memory. The logic is in `tools/isswf-compaction-core.mjs`, which has no Node imports.
+- **The reminder.** It asks the model to reload the coordinator skill and the methodology the next step requires, to reconcile the records with the summary before acting (the records win), and lists the remembered dispatches. In Claude Code it is `additionalContext` from the plugin's `SessionStart` hook for source `compact`, and the skill is `/isswf:isswf-coordinator`. In Pi it is a message returned by the first `before_agent_start` after `session_compact`, and the skill is `/skill:isswf-coordinator`. Each compaction gets one reminder.
+- **The Pi limit.** Pi lets an extension cancel a compaction or supply a whole summary of its own, but not add instructions to Pi's summarizer. The Pi summary is therefore not steered: after a Pi compaction, the candidate commit, the remaining budgets and the open operator decisions may be missing from it. The Pi reminder carries only the remembered dispatches and says so. Take the rest from the records or ask the operator. The operator accepts or rejects this limit; changing Pi's compaction settings or supplying a custom summarizer is outside this feature.
+
+All of it fails open: a fault in a hook leaves the compaction or the start as the host would have run it.
+
+Known limits:
+
+- The Claude Code steering and reminder were observed on a manual `/compact` only; the `auto` trigger is registered but was not observed. A message appended after a manual `/compact` did not reach the model, which is why the reminder uses `SessionStart` context.
+- A dispatch made before the coordinator skill was loaded, or by a means other than Claude's `Agent` tool or Pi's `subagent` tool, is not remembered. The list does not survive a new Pi session.
+- The reminder tells the model to reload the skill; it does not reload it. A fresh session started from a handoff has no reminder, because nothing compacted.
+
 ## Plan edit
 
 ```bash

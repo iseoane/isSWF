@@ -72,7 +72,7 @@ try {
     const base = 'b'.repeat(40);
     const prompt = `Brief .factory/initiatives/I0057/jobs/J007/brief-r2.md at checkpoint ${checkpoint}, target base ${base}.`;
     assert.equal(typeof checkReferences, 'function', 'the dispatch guard exports its reference parser');
-    assert.deepEqual(checkReferences(prompt), { initiative: 'I0057', job: 'J007', revision: '2', checkpoint, base });
+    assert.deepEqual(checkReferences(prompt), { initiative: 'I0057', job: 'J007', revision: '2', path: '.factory/initiatives/I0057/jobs/J007/brief-r2.md', checkpoint, base });
   }
   // The exclusive create of the plan editor serves any file: a file that exists, or appears while the temporary file is written, is never replaced.
   {

@@ -152,7 +152,7 @@ The loaded `pi-subagents` contract passes these namespaces through `PI_SUBAGENT_
 
 ## Continue a unit in a fresh coordinator context
 
-Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) with Pi's supported mechanisms: the operator starts a fresh session by running `pi` in the assigned checkout without `--continue` or `--resume` and gives it the handoff, or runs `/compact [instructions]` with instructions to retain the handoff. Then reload the coordinator skill (`/skill:isswf-coordinator`) and the methodology the next step requires, and reconcile the records before acting. Do not change Pi's automatic compaction settings for this purpose.
+Apply the shared [unit handoff rule](../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) with Pi's supported mechanisms: the operator starts a fresh session by running `pi` in the assigned checkout without `--continue` or `--resume` and gives it the handoff, or runs `/compact [instructions]` with instructions to retain the handoff. After a compaction the package's extension reminds the coordinator to reload its skill and the methodology the next step requires; the "Compaction" section of the operations guide describes what it keeps and the limit that Pi's summary is not steered. A new session has no reminder, so load the coordinator skill there (`/skill:isswf-coordinator`). In either case, reconcile the records before acting. Do not change Pi's automatic compaction settings for this purpose.
 
 ## Boundaries
 

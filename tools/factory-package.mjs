@@ -35,6 +35,8 @@ export const nativePiResources = [
   "tools/isswf-command-guard-pi-extension.mjs",
   "tools/isswf-command-core.mjs",
   "tools/isswf-branch-guard-core.mjs",
+  "tools/isswf-compaction-pi-extension.mjs",
+  "tools/isswf-compaction-core.mjs",
   "tools/isswf-record-check-core.mjs",
   "tools/isswf-plan-core.mjs",
   "tools/isswf-snapshot-core.mjs",
@@ -230,7 +232,7 @@ function validateManifest(bytes) {
     Object.keys(manifest.pi).sort().join(",") !== (hasSubagents ? "extensions,skills,subagents" : "skills") ||
     JSON.stringify(manifest.pi.skills) !== JSON.stringify(skills) ||
     (hasSubagents && JSON.stringify(manifest.pi.subagents) !== JSON.stringify({ agents: ["./.agents/hosts/pi/agents"] })) ||
-    (hasSubagents && JSON.stringify(manifest.pi.extensions) !== JSON.stringify(["./tools/isswf-record-guard-pi-extension.mjs", "./tools/isswf-dispatch-guard-pi-extension.mjs", "./tools/isswf-command-guard-pi-extension.mjs"])) ||
+    (hasSubagents && JSON.stringify(manifest.pi.extensions) !== JSON.stringify(["./tools/isswf-record-guard-pi-extension.mjs", "./tools/isswf-dispatch-guard-pi-extension.mjs", "./tools/isswf-command-guard-pi-extension.mjs", "./tools/isswf-compaction-pi-extension.mjs"])) ||
     (released && (
       JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: "tools/isswf.mjs" }) ||
       JSON.stringify(manifest.keywords) !== JSON.stringify(["pi-package"]) ||
