@@ -23,6 +23,8 @@ Deferred candidates, without an observed incident yet; add a job only after one 
 
 The first observed candidate, a commit made on a branch that another session had switched to, became J009 on 2026-11-14.
 
+On 2026-11-15 the operator moved the triage of these candidates and the pane issues to [I0058](../I0058/plan.md), ordered by value. The list below stays as the source record.
+
 Further candidates observed on 2026-11-14, to assess:
 
 - A records commit chained after a failed scripted edit still ran: commits of plan changes should require a passing `isswf-status` read-back (a J001 extension).
@@ -171,13 +173,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Size: M (one flow, but verification needs a real compaction on each host)
 - Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J005/brief-r3.md)
 - Blocker: None.
-- Next step: PR and exact-head CI, then merge; the operator accepts or rejects the Pi summary limit.
+- Next step: None
 
 ### Acceptance
 
@@ -194,6 +196,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: probe ([A001](jobs/J005/A001.md)), Claude Code 2.1.325: session.compact instructions steer the summary; hook-returned messages after a manual /compact never reached the model; skill.prompt detects the coordinator; Pi can add a message through before_agent_start but cannot steer its own summarizer.
 - 2026-11-15: probe ([A002](jobs/J005/A002.md)): a plugin classic.SessionStart hook with source compact and additionalContext reached the model after a manual /compact; $.session.append did not; a skill invoked again after compaction reaches the model; auto trigger untested.
 - 2026-11-15: implementation ([A003](jobs/J005/A003.md); corrections [A004](jobs/J005/A004.md), [A005](jobs/J005/A005.md)): coordinator flag set unconditionally; Claude session.compact instructions and a SessionStart compact reminder (observed live with haiku); Pi reminder through before_agent_start after session_compact (stand-in tests only; Pi refused to compact a small session); the last 5 accepted dispatches remembered by the hooks on both hosts. Reviews [V001](jobs/J005/V001.md) pass and [V002](jobs/J005/V002.md) pass; the coordinator's full check found the host guides linking an unpackaged guide (fixed in cycle 1) and S4 (quadratic brief-path regex) was fixed in cycle 2 and verified mechanically. check-quality exit 0 at 2d993db (Windows). Merge approved in advance; the Pi summary limit awaits the operator's decision.
+- 2026-11-15: the operator accepted the Pi summary limit ("Lo acepto (lo de pi)"). Merged as PR #335 after green CI on the exact head d1f41a9, with the operator's advance approval.
 
 ## J006
 
