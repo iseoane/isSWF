@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { link, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planErrorDetail } from './isswf-plan-core.mjs';
 import { addJob, appendEvidence, isIdentifier, newPlan, setField } from './isswf-plan-edit-core.mjs';
@@ -56,17 +56,22 @@ export async function editPlanFile({ project, initiative, edit, beforeRename }) 
   await syncDirectory(dirname(path));
 }
 
-/** Creates a plan that must not exist: the whole text goes to a temporary file, and `link` publishes it only if no plan is there. */
-export async function createPlanFile({ project, initiative, text, beforeLink }) {
-  const path = await planPath(project, initiative);
-  await mkdir(dirname(path), { recursive: true });
-  const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
+/** Creates a file that must not exist: the whole text goes to a temporary file, and `link` publishes it only if nothing is at `path`; an existing file fails with `existsCode`. */
+export async function createExclusive({ path, text, existsCode, beforeLink }) {
+  const temp = join(dirname(path), `.${basename(path)}.${randomBytes(6).toString('hex')}.tmp`);
   try {
     await writeSynced(temp, text);
     await beforeLink?.();
-    await link(temp, path).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
+    await link(temp, path).catch(error => { throw error.code === 'EEXIST' ? fail(existsCode) : error; });
   } finally { await unlink(temp).catch(() => {}); }
   await syncDirectory(dirname(path));
+}
+
+/** Creates a plan that must not exist. */
+export async function createPlanFile({ project, initiative, text, beforeLink }) {
+  const path = await planPath(project, initiative);
+  await mkdir(dirname(path), { recursive: true });
+  await createExclusive({ path, text, existsCode: 'plan-exists', beforeLink });
 }
 
 const common = ['--project', '--initiative'];
