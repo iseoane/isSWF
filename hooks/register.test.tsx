@@ -1,4 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
+import { buildEnvelope, sha256Hex } from '../tools/isswf-handoff-core.mjs'
 
 const ON = { options: { initiativesPane: true } }
 const AGENT = 'abc123'
@@ -649,9 +650,10 @@ const CWD = `C:${SEP}p`
 const at = (...parts: string[]) => [CWD, ...parts].join(SEP)
 
 // Just enough host for the dispatch guard to accept an isSWF worker call; `git` answers tracked, not ignored, committed.
-function dispatchHost(on: any) {
-  const files: Record<string, string> = {
-    [at('.factory', 'dispatch-selection.json')]: JSON.stringify({ schemaVersion: 1, agents: { claude: { 'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' } } } }),
+function dispatchHost(on: any, extra: Record<string, string | Uint8Array> = {}) {
+  const files: Record<string, string | Uint8Array> = {
+    ...extra,
+    [at('.factory', 'dispatch-selection.json')]: JSON.stringify({ schemaVersion: 1, agents: { claude: { 'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' }, 'isswf:isswf-reviewer': { model: 'opus', effort: 'medium' } } } }),
     [at('.factory', 'initiatives', 'I0001', 'plan.md')]: plan('I0001', 'Synthetic', [['J001', 'in-progress', 'work']]),
     [at('.factory', 'initiatives', 'I0001', 'jobs', 'J001', 'brief-r1.md')]: 'brief',
   }
@@ -659,9 +661,12 @@ function dispatchHost(on: any) {
   const native = (path: string) => path.slice(Math.max(0, path.search(/[A-Za-z]:/)))
   on('session.cwd', () => ({ value: CWD }))
   on('fs.list', (_: unknown, { path }: { path: string }) => ({ value: native(path) === CWD ? [{ name: '.factory', kind: 'dir', size: 0, mtimeMs: 0, isLink: false }] : [] }))
-  on('fs.read', (_: unknown, { path }: { path: string }) => {
+  on('fs.read', (_: unknown, { path, as }: { path: string; as?: string }) => {
     if (!(native(path) in files)) throw new Error('ENOENT')
-    return { value: files[native(path)] }
+    const content = files[native(path)]
+    if (as !== 'bytes') return { value: content }
+    const bytes = typeof content === 'string' ? new TextEncoder().encode(content) : content
+    return { value: { base64: btoa(String.fromCharCode(...bytes)) } }
   })
   on('fs.stat', (_: unknown, { path }: { path: string }) => {
     if (!(native(path) in files)) throw new Error('ENOENT')
@@ -730,6 +735,29 @@ test('the reminder lists the accepted dispatches, and a refused one is not remem
   expect(reminder).toContain(`base ${BASE}`)
   expect(reminder).toContain('run agent-77')
   expect(reminder.match(/isswf:isswf-worker: /g)).toHaveLength(1)
+})
+
+test('a reviewer dispatch needs a handoff whose digests verify, and the worker needs none', async ($, on) => {
+  const diff = new TextEncoder().encode('diff --git a/x b/x\n+changed\n')
+  const CANDIDATE = 'c3'.repeat(20)
+  const handoffPath = `C:${SEP}tmp${SEP}J001.handoff.json`
+  const diffPath = `C:${SEP}tmp${SEP}J001.diff`
+  const envelope = buildEnvelope({
+    initiative: 'I0001', job: 'J001', base: BASE, candidate: CANDIDATE,
+    diff: { path: diffPath, argv: ['diff'], bytes: diff.length, sha256: sha256Hex(diff) },
+    brief: { path: BRIEF, revision: '1', checkpoint: CHECKPOINT, blob: null }, reviewGuide: null, round: 1, priorReviews: [],
+    reviewer: { host: 'claude', agent: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' }, resources: [],
+  })
+  const handoff = new TextEncoder().encode(JSON.stringify(envelope, null, 2))
+  dispatchHost(on, { [handoffPath]: handoff, [diffPath]: diff })
+  const reviewer = (extra: string) => ({ tool: 'Agent', subagent_type: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium', prompt: `${DISPATCH}\n${extra}` })
+  const lines = (digest: string) => `handoff: ${handoffPath}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}`
+  expect((await $.tool.call(reviewer(lines(sha256Hex(handoff))))).result).toEqual({ agentId: 'agent-77' })
+  const missing = await $.tool.call(reviewer(''))
+  expect(missing.deny).toContain('condition 6 (handoff)')
+  const wrong = await $.tool.call(reviewer(lines('0'.repeat(64))))
+  expect(wrong.deny).toContain('does not match')
+  expect((await $.tool.call(worker())).result).toEqual({ agentId: 'agent-77' })
 })
 
 test('a session that never activated the coordinator remembers no dispatch', async ($, on) => {
