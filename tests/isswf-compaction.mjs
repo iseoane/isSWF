@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -67,4 +68,81 @@ assert.match(piReminder, /does not let a hook steer its summary/u);
 assert.match(piReminder, /No dispatch was recorded/u);
 assert.equal(compactionReminder({ host: 'claude', assignments: undefined }).includes('No dispatch was recorded'), true, 'a missing list reads as empty');
 
-console.log('PASS compaction: coordinator detection, bounded assignment memory, summary instructions and the post-compaction reminder');
+// Pi: the same memory and texts behind the extension's events. The stand-in `pi` records handlers by event name.
+const extension = await load('tools/isswf-compaction-pi-extension.mjs');
+assert.equal(extension.loadError, undefined, 'tools/isswf-compaction-pi-extension.mjs loads');
+const session = () => {
+  const handlers = new Map();
+  extension.default({ on: (name, handler) => handlers.set(name, handler) });
+  return { emit: async (name, event) => handlers.get(name)?.(event, { cwd: '/p' }) };
+};
+const SKILL = '/x/skills/isswf-coordinator/SKILL.md';
+const subagent = (task = prompt()) => ({ toolName: 'subagent', input: { agent: 'isswf-worker', task, model: 'm:high' }, isError: false, details: { runId: 'pi-run-1' } });
+const reminderOf = async pi => (await pi.emit('before_agent_start', { messageType: 'user' }))?.message;
+
+// A session that never activated the coordinator is not affected, whatever else happens in it.
+const idle = session();
+await idle.emit('session_start', { reason: 'startup' });
+await idle.emit('input', { text: '/skill:other-skill', source: 'interactive' });
+await idle.emit('tool_call', { toolName: 'read', input: { path: '/x/skills/isswf-coordinator/references/version-advisory.md' } });
+await idle.emit('tool_result', subagent());
+await idle.emit('session_compact', { reason: 'manual' });
+assert.equal(await idle.emit('before_agent_start', { messageType: 'user' }), undefined, 'no reminder without the coordinator');
+
+// The operator's /skill:isswf-coordinator, with or without arguments, activates it; the first run after a compaction gets the reminder once.
+for (const text of ['/skill:isswf-coordinator', '/skill:isswf-coordinator plan this']) {
+  const pi = session();
+  await pi.emit('input', { text, source: 'interactive' });
+  assert.equal(await reminderOf(pi), undefined, 'nothing before a compaction');
+  await pi.emit('session_compact', { reason: 'threshold' });
+  const message = await reminderOf(pi);
+  assert.equal(message.customType, 'isswf-compaction');
+  assert.equal(message.display, true);
+  assert.match(message.content, /\/skill:isswf-coordinator/u);
+  assert.match(message.content, /does not let a hook steer its summary/u);
+  assert.equal(await reminderOf(pi), undefined, 'the reminder is given once per compaction');
+  await pi.emit('session_compact', { reason: 'manual' });
+  assert.ok(await reminderOf(pi), 'and again after the next compaction');
+}
+
+// The model loading the skill by reading its SKILL.md activates it too, with either path separator.
+for (const path of [SKILL, SKILL.replaceAll('/', String.fromCharCode(92))]) {
+  const pi = session();
+  await pi.emit('tool_call', { toolName: 'read', input: { path } });
+  await pi.emit('session_compact', { reason: 'overflow', willRetry: true });
+  assert.ok(await reminderOf(pi), `activated by reading ${path}`);
+}
+const bash = session();
+await bash.emit('tool_call', { toolName: 'bash', input: { command: `cat ${SKILL}` } });
+await bash.emit('session_compact', {});
+assert.equal(await reminderOf(bash), undefined, 'only a read of the skill file activates it');
+
+// Accepted subagent dispatches are remembered once the coordinator is active; an errored or non-subagent result is not.
+const busy = session();
+await busy.emit('tool_result', subagent(prompt('J009')));
+await busy.emit('input', { text: '/skill:isswf-coordinator' });
+await busy.emit('tool_result', subagent(prompt('J001')));
+await busy.emit('tool_result', { ...subagent(prompt('J002')), isError: true });
+await busy.emit('tool_result', { ...subagent(prompt('J003')), toolName: 'bash' });
+await busy.emit('session_compact', { reason: 'manual' });
+const content = (await reminderOf(busy)).content;
+assert.ok(content.includes('isswf-worker: I0001/J001') && content.includes('run pi-run-1') && content.includes(CHECKPOINT) && content.includes(BASE));
+for (const absent of ['J009', 'J002', 'J003']) assert.ok(!content.includes(absent), `${absent} is not remembered`);
+
+// A new or resumed session starts without the previous one's flag; a fault in any handler never reaches Pi.
+const fresh = session();
+await fresh.emit('input', { text: '/skill:isswf-coordinator' });
+await fresh.emit('session_start', { reason: 'new' });
+await fresh.emit('session_compact', {});
+assert.equal(await reminderOf(fresh), undefined, 'session_start clears the coordinator flag');
+const faulty = session();
+for (const name of ['session_start', 'input', 'tool_call', 'tool_result', 'session_compact', 'before_agent_start']) {
+  for (const event of [undefined, null, {}, { text: 7, toolName: 'read', input: null, details: 'x' }]) await assert.doesNotReject(async () => faulty.emit(name, event), `${name} survives ${JSON.stringify(event)}`);
+}
+
+// Packaging: the package declares the extension for the main session, after the guards', and the worker child does not load it.
+const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
+assert.equal(manifest.pi.extensions.at(-1), './tools/isswf-compaction-pi-extension.mjs');
+assert.ok(!(await readFile(join(source, '.agents/hosts/pi/agents/isswf-worker.md'), 'utf8')).includes('compaction'), 'children do not load the compaction extension');
+
+console.log('PASS compaction: coordinator detection, bounded assignment memory, summary instructions, the post-compaction reminder, the Pi extension and its packaging');

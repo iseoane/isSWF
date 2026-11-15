@@ -319,7 +319,7 @@ assert.equal(paneText('git commit -F - <<EOF > out.txt\n.factory/initiatives/I00
 // for its child. `subagentOnlyExtensions` takes a comma-separated list, so the worker keeps its record guard next to it.
 const extension = 'tools/isswf-command-guard-pi-extension.mjs';
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
-assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs', `./${extension}`]);
+assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs', `./${extension}`, './tools/isswf-compaction-pi-extension.mjs']);
 for (const [role, shell] of [['worker', true], ['planner', false], ['researcher', false], ['reviewer', false]]) {
   const profile = await readFile(join(source, `.agents/hosts/pi/agents/isswf-${role}.md`), 'utf8');
   const tools = /^tools: (.*)$/mu.exec(profile)[1].split(',').map(tool => tool.trim());
