@@ -9,7 +9,7 @@ const { guardDispatch } = await load('tools/isswf-dispatch-guard-core.mjs');
 const CHECKPOINT = 'a1'.repeat(20);
 const BASE = 'b2'.repeat(20);
 const BRIEF = '.factory/initiatives/I0001/jobs/J001/brief-r1.md';
-const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n`;
+const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- ${status === 'completed' ? 'Merged.' : 'None.'}\n`;
 const plan = (...jobs) => `# I0001: Synthetic\n\nType: bug\n\n${jobs.join('\n')}`;
 const dispatchPrompt = (extra = '') => `Work on the brief ${BRIEF}.\nInput checkpoint ${CHECKPOINT}.\nTarget base: main ${BASE}.\n${extra}`;
 const selectionFile = agents => JSON.stringify({ schemaVersion: 1, agents });
@@ -22,8 +22,9 @@ const claudeAgents = {
 
 // The in-memory io behaves like Claude's `$.fs` and `$.process.run`: it rejects a missing path and lists `{ name, kind }`.
 // `git` answers the two Git questions the guard asks, by exit code.
-const memoryIo = ({ project = '/work/project', files = {}, dirs = ['.factory'], tracked = true, ignored = false, git } = {}) => {
+const memoryIo = ({ project = '/work/project', files: raw = {}, dirs = ['.factory'], tracked = true, ignored = false, git } = {}) => {
   const norm = path => path.replaceAll('\\', '/');
+  const files = Object.fromEntries(Object.entries(raw).map(([path, text]) => [norm(path), text]));
   const calls = { git: [], read: [] };
   return {
     calls,
