@@ -4,10 +4,10 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runGit } from './git-evidence.mjs';
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
-import { createExclusive } from './isswf-plan-edit.mjs';
+import { createExclusive, editFile } from './isswf-plan-edit.mjs';
 import { isIdentifier } from './isswf-plan-edit-core.mjs';
 import { checkRecord } from './isswf-record-check-core.mjs';
-import { nextRecordId, recordError, recordPrefix, renderRecord } from './isswf-record-new-core.mjs';
+import { completeText, nextRecordId, recordBase, recordError, recordPrefix, renderRecord } from './isswf-record-new-core.mjs';
 import { parseRunLine } from './isswf-snapshot-core.mjs';
 import { stateDirectory } from './project-state.mjs';
 
@@ -153,10 +153,41 @@ export async function createRecord(input) {
   return { ok: true, initiative, job, kind, id, path, violations };
 }
 
-const SHARED = ['--project', '--initiative', '--job', '--kind'];
+/**
+ * Fills the Git-derived fields of an existing record: the candidate, its changed paths and, for an attempt, the commits from the base
+ * the record names to the candidate. A field the author already edited is refused and the record is left as it was.
+ */
+export async function completeRecord(input) {
+  const { initiative, job, record, candidate, run, beforeRename } = input;
+  const target = await jobTarget(input);
+  if (!/^[AV]\d{3}$/u.test(record ?? '')) throw recordError('invalid-record');
+  checkSha(candidate, 'candidate');
+  if (run !== undefined && !knownRun(run)) throw recordError('invalid-run');
+  const git = await gitIn(target.root);
+  assertCommit(git, candidate, 'candidate');
+  const kind = record.startsWith('A') ? 'attempt' : 'review';
+  const path = join(target.root, target.relative, `${record}.md`);
+  let filled;
+  await editFile({
+    path, what: 'record', beforeRename,
+    edit: text => {
+      const base = recordBase(kind, text);
+      assertCommit(git, base, 'base');
+      const paths = git(['-c', 'core.quotePath=false', 'diff', '--name-only', '--no-renames', '-z', base, candidate]).split('\0').filter(Boolean);
+      const commits = kind === 'attempt' ? git(['rev-list', '--reverse', `${base}..${candidate}`]).split('\n').filter(Boolean) : undefined;
+      const completed = completeText({ text, kind, candidate, paths, commits, run });
+      ({ filled } = completed);
+      return completed.text;
+    },
+  });
+  return { ok: true, initiative, job, record, path, filled };
+}
+
+const LOCATION = ['--project', '--initiative', '--job'];
 const commands = {
-  next: { required: SHARED, optional: [] },
-  create: { required: [...SHARED, '--id', '--role', '--brief', '--checkpoint', '--base', '--model', '--effort'], optional: ['--run', '--round', '--checkout', '--branch', '--candidate'] },
+  next: { required: [...LOCATION, '--kind'], optional: [] },
+  create: { required: [...LOCATION, '--kind', '--id', '--role', '--brief', '--checkpoint', '--base', '--model', '--effort'], optional: ['--run', '--round', '--checkout', '--branch', '--candidate'] },
+  complete: { required: [...LOCATION, '--record', '--candidate'], optional: ['--run'] },
 };
 
 /** Parses `<command> --flag VALUE ...`: every required flag once, each optional flag at most once. */
@@ -175,7 +206,9 @@ function parseArgs([command, ...parts]) {
 
 async function run(argv) {
   const { command, args } = parseArgs(argv);
-  const input = { project: args['--project'], initiative: args['--initiative'], job: args['--job'], kind: args['--kind'] };
+  const location = { project: args['--project'], initiative: args['--initiative'], job: args['--job'] };
+  if (command === 'complete') return completeRecord({ ...location, record: args['--record'], candidate: args['--candidate'], run: args['--run'] });
+  const input = { ...location, kind: args['--kind'] };
   if (command === 'next') return { ok: true, ...input, id: await nextId(input) };
   return createRecord({
     ...input, id: args['--id'], role: args['--role'], brief: args['--brief'], checkpoint: args['--checkpoint'], base: args['--base'],
