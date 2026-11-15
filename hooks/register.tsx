@@ -1,6 +1,7 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
+import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
 
@@ -470,8 +471,24 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
   )
 }
 
+const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
+
 export const register: Register = (on, options) => {
-  // Opt-in: with the option off no hook is added, so nothing reads, schedules, registers or draws.
+  // Runs whatever the pane option is: it reports on a plan or record the tool call just wrote, and only reports.
+  on('tool.call', async ($, e, next) => {
+    const ran = await next(e)
+    try {
+      const path = (e as { file_path?: unknown }).file_path
+      if (!WRITE_TOOLS.has(e.tool) || typeof path !== 'string') return ran
+      // The engine refuses `$.fs` passed as a value, so each call is spelled out.
+      const text = await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
+      return text ? { ...ran, context: [text] } : ran
+    } catch {
+      return ran
+    }
+  })
+
+  // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.
   if (options?.initiativesPane !== true) return
 
   on('session.start', async ($, e, next) => {

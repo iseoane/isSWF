@@ -20,8 +20,9 @@ const git = (...args) => {
 git('init', '-q');
 const cases = [
   ['native', () => {}, true],
-  ['legacy', manifest => { delete manifest.pi.subagents; }, true],
+  ['legacy', manifest => { delete manifest.pi.subagents; delete manifest.pi.extensions; }, true],
   ['unknown-agent-path', manifest => { manifest.pi.subagents = { agents: ['./unapproved'] }; }, false],
+  ['unknown-extension-path', manifest => { manifest.pi.extensions = ['./tools/unapproved.mjs']; }, false],
   ['extra-setting', manifest => { manifest.pi.subagents.enabled = true; }, false],
   ['runtime-dependency', manifest => { manifest.dependencies = { 'pi-subagents': '0.83.0' }; }, false],
 ];

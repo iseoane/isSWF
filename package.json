@@ -46,6 +46,7 @@
   ],
   "pi": {
     "subagents": { "agents": ["./.agents/hosts/pi/agents"] },
+    "extensions": ["./tools/isswf-record-guard-pi-extension.mjs"],
     "skills": [
       "./.agents/skills/isswf-coordinator",
       "./.agents/skills/isswf-setup",

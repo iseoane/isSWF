@@ -28,6 +28,11 @@ export const nativePiResources = [
   "tools/git-evidence-pi-extension.mjs",
   "tools/git-evidence-invoke.mjs",
   "tools/git-evidence-mcp.mjs",
+  "tools/isswf-record-guard-pi-extension.mjs",
+  "tools/isswf-record-guard-core.mjs",
+  "tools/isswf-record-check-core.mjs",
+  "tools/isswf-plan-core.mjs",
+  "tools/isswf-snapshot-core.mjs",
   ".agents/roles/planner.md",
   ".agents/roles/researcher.md",
   ".agents/roles/references/planning.md",
@@ -217,9 +222,10 @@ function validateManifest(bytes) {
     !/^\d+\.\d+\.\d+$/u.test(manifest.version ?? "") ||
     typeof manifest.description !== "string" ||
     !manifest.pi ||
-    Object.keys(manifest.pi).sort().join(",") !== (hasSubagents ? "skills,subagents" : "skills") ||
+    Object.keys(manifest.pi).sort().join(",") !== (hasSubagents ? "extensions,skills,subagents" : "skills") ||
     JSON.stringify(manifest.pi.skills) !== JSON.stringify(skills) ||
     (hasSubagents && JSON.stringify(manifest.pi.subagents) !== JSON.stringify({ agents: ["./.agents/hosts/pi/agents"] })) ||
+    (hasSubagents && JSON.stringify(manifest.pi.extensions) !== JSON.stringify(["./tools/isswf-record-guard-pi-extension.mjs"])) ||
     (released && (
       JSON.stringify(manifest.bin) !== JSON.stringify({ isswf: "tools/isswf.mjs" }) ||
       JSON.stringify(manifest.keywords) !== JSON.stringify(["pi-package"]) ||
