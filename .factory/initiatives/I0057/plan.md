@@ -172,7 +172,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: The worker implements brief-r1 (plan edit command, separate from the grant-guarded tools/isswf-plan.mjs) on feat/i0057-j006-plan-edit.
+- Next step: Integrate the PR from feat/i0057-j006-plan-edit after green exact-head CI.
 
 ### Acceptance
 
@@ -184,6 +184,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the `Brief: None.` lines in I0055 and I0056 were hand-written (8566437).
 - 2026-11-14 audit: the `render()` function in tools/isswf-plan.mjs always writes a valid brief reference, but it requires an external plan-only grant file and is not used for native plans.
+- 2026-11-15: brief-r1 candidate 1d3a10f passed review ([V001](jobs/J006/V001.md) pass with S1-S4, corrected; [V002](jobs/J006/V002.md) delta pass). Known limit (V002 I4): on non-Windows systems a directory fsync failing after the rename or link reports failure although the plan changed. The I1 test found a kept lone `- None.` placeholder, fixed in 34df5ab. This evidence line was written with the new command.
 
 ## J007
 
