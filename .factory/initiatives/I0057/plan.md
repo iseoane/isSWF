@@ -52,7 +52,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: Independent review of brief-r4 candidate 65002c2; integration needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/*.md).
+- Next step: Correction cycle 1 for V004 S1 and S2, then a round-2 delta review; integration needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/*.md).
 
 ### Acceptance
 
