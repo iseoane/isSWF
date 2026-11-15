@@ -94,9 +94,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, generating the review handoff and detecting unreviewed commits before delivery)
 - Objective: Delegation handoffs that the methodology requires are generated, not hand-written.
 - Depends on: J004
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation brief r2 after the J005 merge (shares hooks/register.tsx and the dispatch-guard Pi extension).
+- Next step: Implementation (brief-r2): worker on feat/i0057-j002-handoff, then unbound review, PR and exact-head CI; merge approved in advance by the operator.
 
 ### Acceptance
 
