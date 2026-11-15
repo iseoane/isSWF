@@ -75,6 +75,23 @@ A line that starts with `Override: model=<m> effort=<e>` in the prompt replaces 
 
 The guard only refuses. Passing it is not an authorization and is never recorded or reported as one: the grant, the budget and the other coordinator rules still apply. It does not check that the SHAs exist or that the brief is unchanged since the checkpoint. The project is the session's working directory. If the guard itself fails, it refuses the isSWF role call with `dispatch guard error: <message>` and never affects another agent (in Pi, a failure blocks the whole call that names an isSWF role). Pi management actions that name no isSWF role agent, workflow scripts and slash commands do not go through it.
 
+## Shell command guard
+
+Before a shell command runs, the host checks it and refuses it when it waits on CI continuously or acquires packages. The refusal names the rule and the documented alternative, and says it is not a retry signal: do not rephrase the command to get past it. In Claude Code the plugin's `tool.call` hook checks each `Bash` and `PowerShell` call of the main session and of delegated agents, with or without the initiatives pane. In Pi the package extension `tools/isswf-command-guard-pi-extension.mjs` checks each `bash` and `powershell` call of the main session, and the worker agent, the only role with a shell, loads it through `subagentOnlyExtensions` next to the record guard; a project setting that overrides that list replaces it instead of merging, so keep both entries. Commands you type yourself with Pi's `!` are not guarded. The tokenizer and the rules live in `tools/isswf-command-core.mjs`, which has no Node imports.
+
+The guard splits a command on `&&`, `||`, `;`, `|` and newlines after setting aside heredocs, comments and quoted text, so text that only mentions a refused command, such as a commit message that contains `npx`, is not refused. It drops leading variable assignments and the `sudo`, `env`, `command` and `exec` prefixes, and compares a command by its lower-case name without its directory, `.cmd` or `.exe`.
+
+It refuses:
+
+- **CI waiting** (`ci-waiting`): `gh pr checks` with `--watch`, `gh run watch`, `watch` running `gh`, any loop that contains both a sleep (`sleep`, `Start-Sleep`, `timeout /t`) and `gh` (`while`, `until` and `for` in Bash; `while`, `do`, `for`, `foreach` and `ForEach-Object` in PowerShell), and a `gh` command that follows more than 900 seconds of sleep in the same command. The alternatives are a native completion event, one bounded deferred check, or reporting CI as pending, as `.agents/roles/references/feature-delivery.md` describes.
+- **Package acquisition** (`package-acquisition`): `npx`, `bunx`, `uvx`, `corepack`, `npm install`, `i`, `add`, `ci`, `exec` and `x`, `pnpm dlx`, `add`, `install`, `i` and `exec`, `yarn dlx`, `add`, `install` and bare `yarn`, `pip` or `pip3 install`, `python`, `python3` or `py -m pip install`, `uv pip install`, `uv tool install`, and `bun add`, `install`, `i` and `x`. The alternative is the installed local ESLint and Knip commands in [the development guide](development.md#quality-checks).
+
+It allows one bounded check, which is sleeping at most 900 seconds in total and then running one `gh pr checks`, with no loop. It also allows the two documented locked installs, `npm ci --prefix tooling/quality --ignore-scripts` and `npm ci --prefix tooling/host-tests --ignore-scripts`, in any flag order, with optional `--no-audit` and `--no-fund` and no package arguments. `node <path>`, `npm run`, `npm test` and installed local tools run as before. A sleep length the guard cannot read, such as a variable, counts as zero. A loop that pairs any `gh` command with a sleep is refused, even when it only spaces out calls.
+
+This guard reduces mistakes; it is not a sandbox, and it enforces a process rule, not an authority. If the guard itself fails, the command is allowed, because failing closed would block every shell call. A command can evade it through `eval`, `bash -c`, `sh -c`, `pwsh -c` or `node -e`, aliases, functions, sourced scripts, command substitution inside quotes, a variable used as a command name, a quoted command line such as `watch "gh pr checks"`, a script that polls, repeated separate calls, background tools or `curl | sh`. Treat those as breaches of the rule, not as permitted alternatives.
+
+The guard does not restrict `cd`. Claude Code 2.1.325 resets a standalone `cd` at the end of the call (observed on Windows with Git Bash), so a shell `cd` does not persist there. That is version-dependent host behavior, not something this guard provides. Pi starts each `bash` call in a new process, so a `cd` never persists either.
+
 ## Plan edit
 
 ```bash
