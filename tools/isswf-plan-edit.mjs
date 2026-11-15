@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { lstat, mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +7,7 @@ import { addJob, appendEvidence, isIdentifier, newPlan, setField } from './isswf
 import { stateDirectory } from './project-state.mjs';
 
 const MAX_BYTES = 1024 * 1024;
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = code => Object.assign(Error(code), { code });
 
 function planPath(project, initiative) {
@@ -15,8 +16,12 @@ function planPath(project, initiative) {
   return join(resolve(project), stateDirectory(resolve(project)), 'initiatives', initiative, 'plan.md');
 }
 
-/** Applies `edit` (plan text to plan text) to the initiative's plan: a temporary file in the same directory, then a rename over the plan. */
-export async function editPlanFile({ project, initiative, edit }) {
+/**
+ * Applies `edit` (plan text to plan text) to the initiative's plan: a temporary file in the same directory, then a rename over the plan.
+ * The rename is refused when the plan's SHA-256 is no longer the one read. `beforeRename` lets a test act in that window; a writer that
+ * lands between the check and the rename is still not detected, because the filesystem offers no compare-and-rename.
+ */
+export async function editPlanFile({ project, initiative, edit, beforeRename }) {
   const path = planPath(project, initiative);
   const stat = await lstat(path).catch(error => { throw error.code === 'ENOENT' ? fail('plan-not-found') : error; });
   if (!stat.isFile() || stat.size > MAX_BYTES) throw fail('unsafe-plan');
@@ -28,6 +33,9 @@ export async function editPlanFile({ project, initiative, edit }) {
   const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
   try {
     await writeFile(temp, next, { flag: 'wx' });
+    await beforeRename?.();
+    const now = await readFile(path).catch(() => undefined);
+    if (!now || sha256(now) !== sha256(original)) throw fail('plan-changed');
     await rename(temp, path);
   } catch (error) { await unlink(temp).catch(() => {}); throw error; }
 }
