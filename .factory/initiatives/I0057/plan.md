@@ -109,7 +109,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J003/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation (brief-r3): worker on feat/i0057-j003-shell-guard, then unbound review; merge needs the operator's approval (.agents/hosts/**, tools/factory-package.mjs, tools/build-release.mjs).
+- Next step: Correction cycle 1 for V001 (F1-F6), then a round-2 delta review; the operator approved the merge in advance on 2026-11-15, subject to a passing review and green exact-head CI.
 
 ### Acceptance
 
