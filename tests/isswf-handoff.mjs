@@ -193,10 +193,13 @@ try {
     git(repo, 'commit', '-qm', message);
     return git(repo, 'rev-parse', 'HEAD');
   };
-  const reviewText = (candidate, extra = '') => `# review\n\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n${extra}`;
+  // A review covers the commits from its base to its candidate; the base defaults to the start of the range.
+  let reviewBase;
+  const reviewText = (candidate, extra = '', base = reviewBase) => `# review\n\n- Base commit SHA: ${base}\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n${extra}`;
   const override = (...shas) => `- Coordinator override, recorded afterwards by the coordinator and never written into the verdicts above: the coordinator applied ${shas.join(' and ')} itself.\n`;
   // J003 was reviewed before this range began, and the range changes none of its records.
-  const start = await commit({ 'README.md': 'start\n', [`${jobDir('J003')}/V001.md`]: reviewText('0'.repeat(40)), '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const start = await commit({ 'README.md': 'start\n', [`${jobDir('J003')}/V001.md`]: reviewText('0'.repeat(40), '', '0'.repeat(40)), '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  reviewBase = start;
   git(repo, 'update-ref', 'refs/remotes/origin/main', start);
   const feature = await commit({ 'src/x.mjs': 'export const x = 1;\n' }, 'feature');
   const reviewed = await commit({ [`${jobDir('J001')}/V001.md`]: reviewText(feature) }, 'records: V001');
@@ -284,9 +287,9 @@ try {
   };
   const pairBase = await keep({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
   const codeOne = await keep({ 'src/one.mjs': 'one\n' }, 'job one code');
-  await keep({ [`${jobDir('J001')}/V001.md`]: reviewText(codeOne) }, 'records: J001 V001');
+  await keep({ [`${jobDir('J001')}/V001.md`]: reviewText(codeOne, '', pairBase) }, 'records: J001 V001');
   const codeTwo = await keep({ 'src/two.mjs': 'two\n' }, 'job two code');
-  const reviewTwo = await keep({ [`${jobDir('J002')}/V001.md`]: reviewText(codeTwo) }, 'records: J002 V001');
+  const reviewTwo = await keep({ [`${jobDir('J002')}/V001.md`]: reviewText(codeTwo, '', pairBase) }, 'records: J002 V001');
   const both = tool(['coverage', '--project', pair, '--base', pairBase, '--head', reviewTwo]);
   assert.equal(both.ok, true, JSON.stringify(both));
   assert.deepEqual(both.jobs.map(entry => [entry.job, entry.uncovered]), [['J001', []], ['J002', []]]);
@@ -294,6 +297,50 @@ try {
   const unreviewed = tool(['coverage', '--project', pair, '--base', pairBase, '--head', extra]);
   assert.equal(unreviewed.ok, false);
   assert.deepEqual(unreviewed.jobs.map(entry => entry.uncovered.map(item => item.commit)), [[extra], [extra]], 'a commit no job reviewed stays uncovered for each');
+
+  // The PR322 shape across jobs: an unreviewed correction of one job lies before another job's candidate but outside that job's reviewed range.
+  const shape = join(coverTemp, 'shape');
+  await mkdir(shape);
+  git(shape, 'init', '-q', '-b', 'main', '.');
+  const stage = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(shape, path, '..'), { recursive: true });
+      await writeFile(join(shape, path), content);
+    }
+    git(shape, 'add', '-A');
+    git(shape, 'commit', '-qm', message);
+    return git(shape, 'rev-parse', 'HEAD');
+  };
+  const shapeBase = await stage({ 'README.md': 'start' + String.fromCharCode(10), '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const c1 = await stage({ 'src/one.mjs': 'one' + String.fromCharCode(10) }, 'job one code');
+  const c2 = await stage({ 'src/one.mjs': 'one corrected' + String.fromCharCode(10) }, 'job one correction, never reviewed');
+  const c3 = await stage({ 'src/two.mjs': 'two' + String.fromCharCode(10) }, 'job two code');
+  const shaped = await stage({ [`${jobDir('J001')}/V001.md`]: reviewText(c1, '', shapeBase), [`${jobDir('J002')}/V001.md`]: reviewText(c3, '', c2) }, 'records: both reviews');
+  const gap = tool(['coverage', '--project', shape, '--base', shapeBase, '--head', shaped]);
+  assert.equal(gap.ok, false, JSON.stringify(gap));
+  assert.deepEqual(gap.jobs.map(entry => entry.uncovered.map(item => item.commit)), [[c2], [c2]], 'c2 is in no reviewed base..candidate range');
+
+  // The override lines of every reviewed job apply to the one commit list: a documentation commit named by one job's record is excused for both.
+  const overrideRepo = join(coverTemp, 'override');
+  await mkdir(overrideRepo);
+  git(overrideRepo, 'init', '-q', '-b', 'main', '.');
+  const lay = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(overrideRepo, path, '..'), { recursive: true });
+      await writeFile(join(overrideRepo, path), content);
+    }
+    git(overrideRepo, 'add', '-A');
+    git(overrideRepo, 'commit', '-qm', message);
+    return git(overrideRepo, 'rev-parse', 'HEAD');
+  };
+  const overrideBase = await lay({ 'README.md': 'start' + String.fromCharCode(10), '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const codeA = await lay({ 'src/one.mjs': 'one' + String.fromCharCode(10) }, 'job one code');
+  const note = await lay({ 'docs/en/note.md': 'note' + String.fromCharCode(10) }, 'docs by the coordinator');
+  const codeB = await lay({ 'src/two.mjs': 'two' + String.fromCharCode(10) }, 'job two code');
+  const both2 = await lay({ [`${jobDir('J001')}/V001.md`]: reviewText(codeA, override(note), overrideBase), [`${jobDir('J002')}/V001.md`]: reviewText(codeB, '', note) }, 'records: both reviews');
+  const excused = tool(['coverage', '--project', overrideRepo, '--base', overrideBase, '--head', both2]);
+  assert.equal(excused.ok, true, JSON.stringify(excused));
+  assert.deepEqual(excused.jobs.map(entry => entry.overridden.map(item => item.commit)), [[note], [note]], 'the override applies to both jobs');
 
   // A pull request's merge commit has no changes of its own: the commits it brings in are what counts, and a reviewed one passes.
   const merged = join(coverTemp, 'merged');
@@ -313,7 +360,7 @@ try {
   git(merged, 'add', '-A');
   git(merged, 'commit', '-qm', 'feature');
   const built = git(merged, 'rev-parse', 'HEAD');
-  await put('.factory/initiatives/I0001/jobs/J001/V001.md', reviewText(built));
+  await put('.factory/initiatives/I0001/jobs/J001/V001.md', reviewText(built, '', origin));
   git(merged, 'add', '-A');
   git(merged, 'commit', '-qm', 'records: V001');
   git(merged, 'checkout', '-q', 'main');
