@@ -48,9 +48,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
+- Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: Prepare brief-r4: wire the validator into a plugin `tool.call` handler with post-`next(e)` context (A006 Q1, Q2) and a Pi extension declared through `subagentOnlyExtensions`; add `tests/isswf-record-check.mjs` and `hooks/register.test.tsx` to a check CI runs.
+- Next step: The worker implements brief-r4 (record validation after a write in Claude Code and Pi) on feat/i0057-j001-record-guard; integration needs the operator's approval because it edits .agents/hosts/pi/agents/*.md.
 
 ### Acceptance
 
@@ -115,6 +115,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: a `cd` into jobs/J029 and later into .agents moved the session cwd; the pane showed "no .isswf or .factory state directory".
 - 2026-11-14: the coordinator used `gh pr checks --watch` with sleep, contrary to feature-delivery.md:63; one wait was killed for low memory.
 - 2026-11-03: a Claude worker ran unauthorized `npx eslint` and `npx knip` with package-acquisition warnings and the wrong tool configuration, a repeated violation (Engram observation 4426).
+- 2026-11-15: the coordinator again used `gh pr checks --watch` twice for PR327, contrary to feature-delivery.md; PR328 used one deferred check instead.
 
 ## J004
 
@@ -166,13 +167,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J006
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow, no special risk)
 - Objective: The coordinator changes plan job fields through a command instead of hand-editing Markdown.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Integrate the PR from feat/i0057-j006-plan-edit after green exact-head CI.
+- Next step: None.
 
 ### Acceptance
 
@@ -185,6 +186,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the `Brief: None.` lines in I0055 and I0056 were hand-written (8566437).
 - 2026-11-14 audit: the `render()` function in tools/isswf-plan.mjs always writes a valid brief reference, but it requires an external plan-only grant file and is not used for native plans.
 - 2026-11-15: brief-r1 candidate 1d3a10f passed review ([V001](jobs/J006/V001.md) pass with S1-S4, corrected; [V002](jobs/J006/V002.md) delta pass). Known limit (V002 I4): on non-Windows systems a directory fsync failing after the rename or link reports failure although the plan changed. The I1 test found a kept lone `- None.` placeholder, fixed in 34df5ab. This evidence line was written with the new command.
+- 2026-11-15: PR328 merged (dd02e1d9dd6ae68af12e64f5566aecb77e265c61) after green CI on exact head 91bd334 (Linux, Windows, portable checks).
 
 ## J007
 
