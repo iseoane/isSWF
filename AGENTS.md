@@ -63,6 +63,7 @@ Keep this development checkout separate from any installed release. Follow `docs
 
 - Deliver functional, verifiable units rather than layer-only changes. Select interviews, roles, TDD and review from the task's actual risk, using the coordinator's selection criteria; there is no mandatory pipeline.
 - Keep methodology in the shared Markdown profiles and references. Add executable machinery only for a demonstrated structural need.
+- In this repository, when a process rule has been observed violated and its condition can be checked mechanically from data the host or Git already exposes (paths, fields, commands, SHAs, statuses), implement it as a check or guard instead of strengthening the prose. Keep judgment (scope, risk, quality, intent) semantic. A rule that cannot be checked stays prose; record why.
 - Update the existing canonical guide and retain only evidence needed to trust or reproduce the result. Avoid duplicate plans, status stores and narrative closure documents. Before archiving or removing evidence or worktrees, follow `docs/durable-work.md` and its retention policy; preserve unique work and existing operator edits.
 
 ## Resource naming
