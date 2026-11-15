@@ -28,6 +28,8 @@ class Refusal extends Error {
 const refuse = (condition, detail) => {
   throw new Refusal(condition, detail);
 };
+/** Whether an agent name is an isSWF role agent, the only kind the guard checks. */
+export const isRoleAgent = agent => typeof agent === 'string' && ROLE_AGENT.test(agent);
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = value => typeof value === 'string' && value !== '';
 
@@ -37,8 +39,11 @@ function splitPiModel(model) {
   return at > 0 && PI_LEVELS.includes(model.slice(at + 1)) ? { model: model.slice(0, at), effort: model.slice(at + 1) } : { model, effort: undefined };
 }
 
-/** The delegated children one tool call names (a Pi `action` call is exempt only because none of them is an isSWF role), as `{ agent, model, effort, prompt }` for the host's event shape. */
-function callsOf(host, input) {
+/**
+ * The delegated children one tool call names (a Pi `action` call is exempt only because none of them is an isSWF role), as `{ agent, model, effort, prompt }` for the host's event shape.
+ * Exported so the compaction memory reads a dispatch with the guard's own parser.
+ */
+export function callsOf(host, input) {
   if (host === 'claude') return [{ agent: input?.subagent_type, model: input?.model, effort: input?.effort, prompt: input?.prompt }];
   if (!isObject(input)) return [];
   const children = [input];
@@ -166,7 +171,7 @@ async function checkCall(host, call, io) {
  * @returns {Promise<{ allow: true } | { deny: string, condition: string }>}
  */
 export async function guardDispatch({ host, input, io } = {}) {
-  for (const call of callsOf(host, input).filter(candidate => typeof candidate.agent === 'string' && ROLE_AGENT.test(candidate.agent))) {
+  for (const call of callsOf(host, input).filter(candidate => isRoleAgent(candidate.agent))) {
     try {
       await checkCall(host, call, io);
     } catch (error) {
