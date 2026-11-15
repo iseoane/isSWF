@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { link, lstat, mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
+import { link, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planErrorDetail } from './isswf-plan-core.mjs';
@@ -9,6 +9,18 @@ import { stateDirectory } from './project-state.mjs';
 const MAX_BYTES = 1024 * 1024;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = code => Object.assign(Error(code), { code });
+
+async function writeSynced(path, text) {
+  const file = await open(path, 'wx');
+  try { await file.writeFile(text); await file.sync(); } finally { await file.close(); }
+}
+
+async function syncDirectory(path) {
+  // Windows rejects directory-handle sync; regular-file sync remains mandatory.
+  if (process.platform === 'win32') return;
+  const directory = await open(path, 'r');
+  try { await directory.sync(); } finally { await directory.close(); }
+}
 
 async function planPath(project, initiative) {
   if (!isAbsolute(project)) throw fail('invalid-project');
@@ -35,12 +47,13 @@ export async function editPlanFile({ project, initiative, edit, beforeRename }) 
   const next = edit(text);
   const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
   try {
-    await writeFile(temp, next, { flag: 'wx' });
+    await writeSynced(temp, next);
     await beforeRename?.();
     const now = await readFile(path).catch(() => undefined);
     if (!now || sha256(now) !== sha256(original)) throw fail('plan-changed');
     await rename(temp, path);
   } catch (error) { await unlink(temp).catch(() => {}); throw error; }
+  await syncDirectory(dirname(path));
 }
 
 /** Creates a plan that must not exist: the whole text goes to a temporary file, and `link` publishes it only if no plan is there. */
@@ -49,10 +62,11 @@ export async function createPlanFile({ project, initiative, text, beforeLink }) 
   await mkdir(dirname(path), { recursive: true });
   const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
   try {
-    await writeFile(temp, text, { flag: 'wx' });
+    await writeSynced(temp, text);
     await beforeLink?.();
     await link(temp, path).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
   } finally { await unlink(temp).catch(() => {}); }
+  await syncDirectory(dirname(path));
 }
 
 const common = ['--project', '--initiative'];
