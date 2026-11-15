@@ -52,7 +52,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: Correction cycle 1 for V004 S1 and S2, then a round-2 delta review; integration needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/*.md).
+- Next step: PR and exact-head CI; merge needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/isswf-worker.md and isswf-planner.md).
 
 ### Acceptance
 
@@ -73,6 +73,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: PR327 merged (591af0372885199977a05dddbbeeaa1540ac41ae) after green CI on exact head 9d9d61c (Linux, Windows, portable checks).
 - 2026-11-15: runtime probes ([A006](jobs/J001/A006.md)): a plugin `tool.call` handler's post-`next(e)` `context` reaches the model in the same turn with the tool result unchanged; the parent handler sees child Bash calls with `agentId`; a hooks module receives `classic.SessionStart` (`compact`), but its `additionalContext` did not reach the model (affects J005).
 - 2026-11-15: `tests/isswf-record-check.mjs` from PR327 is not run by CI: neither `.github/workflows/quality.yml` nor `tools/check-quality.mjs` lists it.
+- 2026-11-15: brief-r4 review passed in two rounds ([V004](jobs/J001/V004.md), [V005](jobs/J001/V005.md)); candidate 9279f41. Acceptance 2 amended by the coordinator: the read-only Pi planner does not declare the guard, because it can never write. Known limit: no test runs the merged Claude tool.call hook (only its source text is checked).
 
 ## J002
 
