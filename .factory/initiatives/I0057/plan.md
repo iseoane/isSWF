@@ -177,7 +177,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J005/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation (brief-r3): worker on feat/i0057-j005-compaction, then unbound review, PR and exact-head CI; the merge needs the operator's approval (.agents/hosts/**); the Pi summary limit is for the operator to accept or reject.
+- Next step: PR and exact-head CI, then merge; the operator accepts or rejects the Pi summary limit.
 
 ### Acceptance
 
@@ -193,6 +193,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15 probe (J001/A006): a hooks module's `additionalContext` from `classic.SessionStart` (`compact`) did not reach the model, while a settings-hook SessionStart output did. `session.compact` steering, `$.session.append` and `reloadSkills` are untested.
 - 2026-11-15: probe ([A001](jobs/J005/A001.md)), Claude Code 2.1.325: session.compact instructions steer the summary; hook-returned messages after a manual /compact never reached the model; skill.prompt detects the coordinator; Pi can add a message through before_agent_start but cannot steer its own summarizer.
 - 2026-11-15: probe ([A002](jobs/J005/A002.md)): a plugin classic.SessionStart hook with source compact and additionalContext reached the model after a manual /compact; $.session.append did not; a skill invoked again after compaction reaches the model; auto trigger untested.
+- 2026-11-15: implementation ([A003](jobs/J005/A003.md); corrections [A004](jobs/J005/A004.md), [A005](jobs/J005/A005.md)): coordinator flag set unconditionally; Claude session.compact instructions and a SessionStart compact reminder (observed live with haiku); Pi reminder through before_agent_start after session_compact (stand-in tests only; Pi refused to compact a small session); the last 5 accepted dispatches remembered by the hooks on both hosts. Reviews [V001](jobs/J005/V001.md) pass and [V002](jobs/J005/V002.md) pass; the coordinator's full check found the host guides linking an unpackaged guide (fixed in cycle 1) and S4 (quadratic brief-path regex) was fixed in cycle 2 and verified mechanically. check-quality exit 0 at 2d993db (Windows). Merge approved in advance; the Pi summary limit awaits the operator's decision.
 
 ## J006
 
