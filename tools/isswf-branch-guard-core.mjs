@@ -24,7 +24,8 @@ export function resolveDir(base, path) {
 function parseHead(text) {
   const head = text.trim();
   const branch = /^ref:\s*refs\/heads\/(.+)$/u.exec(head)?.[1];
-  if (branch) return { branch };
+  // A reftable repository keeps this placeholder in HEAD and its real branch elsewhere.
+  if (branch) return branch === '.invalid' ? undefined : { branch };
   return /^[0-9a-f]{40}(?:[0-9a-f]{24})?$/u.test(head) ? { detached: head } : undefined;
 }
 
