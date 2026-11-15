@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
 const { guardDispatch } = await load('tools/isswf-dispatch-guard-core.mjs');
+const { default: registerGuard } = await load('tools/isswf-dispatch-guard-pi-extension.mjs');
 
 const CHECKPOINT = 'a1'.repeat(20);
 const BASE = 'b2'.repeat(20);
@@ -178,4 +182,93 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   refused(await guardDispatch({ host: 'claude', input: claudeCall(), io: undefined }), 'error', 'dispatch guard error');
   assert.deepEqual(await guardDispatch({ host: 'claude', input: undefined, io: undefined }), { allow: true }, 'no call, nothing to guard');
 }
-console.log('PASS dispatch guard: shared core conditions, override line and fail-closed behavior');
+// Pi: the extension blocks a `subagent` call in a real project with a real Git repository.
+const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-dispatch-guard-')));
+const git = (cwd, ...args) => {
+  const result = spawnSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', ...args], { cwd, encoding: 'utf8', timeout: 20000 });
+  assert.equal(result.status, 0, result.stderr);
+};
+const PI_MODEL = 'openai-codex/gpt-6-luna';
+const piAgents = {
+  'isswf-worker': { host: 'pi', model: PI_MODEL, effort: 'high' },
+  'isswf-reviewer': { host: 'pi', model: 'vendor/model:free', effort: 'low' },
+  'isswf-planner': { host: 'claude', model: 'opus', effort: 'low' },
+};
+try {
+  const root = join(temp, 'project');
+  const write = async (path, text) => {
+    await mkdir(join(root, path, '..'), { recursive: true });
+    await writeFile(join(root, path), text);
+  };
+  await write('.factory/dispatch-selection.json', selectionFile(piAgents));
+  await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'in-progress')));
+  await write(BRIEF, '# brief\n');
+  await write('.gitignore', 'brief-r3.md\n');
+  git(temp, 'init', '-q', 'project');
+  git(root, 'add', '-A');
+  git(root, 'commit', '-qm', 'fixture');
+  await write('.factory/initiatives/I0001/jobs/J001/brief-r2.md', '# untracked\n');
+  await write('.factory/initiatives/I0001/jobs/J001/brief-r3.md', '# ignored\n');
+
+  const handlers = [];
+  registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
+  assert.deepEqual(handlers.map(([name]) => name), ['tool_call'], 'only the call event is used');
+  const [[, handler]] = handlers;
+  const ctx = { cwd: root };
+  const call = (input, context = ctx, toolName = 'subagent') => handler({ type: 'tool_call', toolName, toolCallId: 't1', input }, context);
+  const task = (extra = '', brief = BRIEF) => dispatchPrompt(extra).replace(BRIEF, brief);
+  const blocked = (result, ...parts) => {
+    assert.equal(result?.block, true, `expected a block, got ${JSON.stringify(result)}`);
+    for (const part of parts) assert.ok(result.reason.includes(part), `${part}\n${result.reason}`);
+  };
+
+  // An allowed call, and the calls the guard does not own, return nothing so the tool runs unchanged.
+  assert.equal(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` }), undefined, 'a call that meets every condition');
+  assert.equal(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free:low' }), undefined, 'a model id that contains a colon');
+  assert.equal(await call({ agent: 'scout', task: 'look', model: 'x' }), undefined, 'another agent');
+  assert.equal(await call({ action: 'list' }), undefined, 'a management call');
+  assert.equal(await call({ agent: 'isswf-worker', task: 'x' }, ctx, 'bash'), undefined, 'another tool');
+
+  // Condition 2 reads the model and the thinking suffix.
+  blocked(await call({ agent: 'isswf-worker', task: task(), model: PI_MODEL }), 'effort', 'no effort', 'high');
+  blocked(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:low` }), 'effort', 'low', 'high');
+  blocked(await call({ agent: 'isswf-worker', task: task(), model: 'other/model:high' }), 'model', 'other/model');
+  blocked(await call({ agent: 'isswf-worker', task: task() }), 'no model');
+  blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free' }), 'effort', 'vendor/model:free');
+  blocked(await call({ agent: 'isswf-planner', task: task(), model: 'opus:low' }), 'host claude');
+  blocked(await call({ agent: 'isswf-researcher', task: task(), model: 'x:low' }), 'no entry');
+  assert.equal(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: 'other/model:xhigh' }), undefined, 'the override line');
+  blocked(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: `${PI_MODEL}:high` }), 'Override');
+
+  // Conditions 3, 4 and 5 through the real plan and Git.
+  blocked(await call({ agent: 'isswf-worker', task: 'do it', model: `${PI_MODEL}:high` }), 'brief');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('J001', 'J009')), model: `${PI_MODEL}:high` }), 'does not exist');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r2')), model: `${PI_MODEL}:high` }), 'not tracked');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r3')), model: `${PI_MODEL}:high` }), 'not tracked');
+  await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'pending')));
+  blocked(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` }), 'J001', 'pending');
+  await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'in-progress')));
+  // A tracked file that an ignore rule matches is reported as ignored once Git is told to look at it.
+  git(root, 'add', '-f', '.factory/initiatives/I0001/jobs/J001/brief-r3.md');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r3')), model: `${PI_MODEL}:high` }), 'ignored');
+
+  // Parallel tasks and chain steps are each checked, and a step without a task uses the request's.
+  const good = { agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` };
+  assert.equal(await call({ tasks: [good, { ...good, agent: 'scout' }] }), undefined, 'parallel children that pass');
+  blocked(await call({ tasks: [good, { ...good, model: `${PI_MODEL}:low` }] }), 'effort');
+  blocked(await call({ chain: [{ agent: 'scout', task: 'x' }, { parallel: [good, { ...good, agent: 'isswf-planner' }] }] }), 'isswf-planner', 'host claude');
+  assert.equal(await call({ task: task(), chain: [{ agent: 'isswf-worker', model: `${PI_MODEL}:high` }] }), undefined, 'a step uses the original request');
+  blocked(await call({ task: 'no references', chain: [{ agent: 'isswf-worker', model: `${PI_MODEL}:high` }] }), 'brief');
+
+  // Without a Git repository the brief check cannot pass; a guard failure refuses the isSWF role call only.
+  const plain = join(temp, 'plain');
+  await mkdir(join(plain, '.factory/initiatives/I0001/jobs/J001'), { recursive: true });
+  for (const path of ['.factory/dispatch-selection.json', '.factory/initiatives/I0001/plan.md', BRIEF]) await writeFile(join(plain, path), await readFile(join(root, path)));
+  blocked(await call(good, { cwd: plain }), 'brief', 'not tracked');
+  blocked(await call(good, undefined), 'dispatch guard error');
+  blocked(await call(good, { cwd: join(temp, 'missing') }), 'dispatch guard error');
+  assert.equal(await call({ agent: 'scout', task: 'x' }, undefined), undefined, 'another agent is unaffected by a guard failure');
+} finally {
+  await rm(temp, { recursive: true, force: true });
+}
+console.log('PASS dispatch guard: shared core conditions, override line, fail-closed behavior and the Pi extension');
