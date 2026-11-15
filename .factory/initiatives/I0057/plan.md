@@ -46,13 +46,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: PR and exact-head CI; merge needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/isswf-worker.md and isswf-planner.md).
+- Next step: None.
 
 ### Acceptance
 
@@ -74,6 +74,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: runtime probes ([A006](jobs/J001/A006.md)): a plugin `tool.call` handler's post-`next(e)` `context` reaches the model in the same turn with the tool result unchanged; the parent handler sees child Bash calls with `agentId`; a hooks module receives `classic.SessionStart` (`compact`), but its `additionalContext` did not reach the model (affects J005).
 - 2026-11-15: `tests/isswf-record-check.mjs` from PR327 is not run by CI: neither `.github/workflows/quality.yml` nor `tools/check-quality.mjs` lists it.
 - 2026-11-15: brief-r4 review passed in two rounds ([V004](jobs/J001/V004.md), [V005](jobs/J001/V005.md)); candidate 9279f41. Acceptance 2 amended by the coordinator: the read-only Pi planner does not declare the guard, because it can never write. Known limit: no test runs the merged Claude tool.call hook (only its source text is checked).
+- 2026-11-15: PR329 merged at 3f18562fa84c1db05468807e184a433124935727 after exact-head CI passed on f73aed6 (one deferred check); the operator approved the needs-a-person paths in the conversation.
 
 ## J002
 
@@ -131,7 +132,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: Dispatch the brief-r3 worker after the J001 r4 merge (both edit the single tool.call hook).
+- Next step: brief-r3 worker on feat/i0057-j004-dispatch-guard from main 3f18562.
 
 ### Acceptance
 
@@ -160,7 +161,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Probe brief-r1 (Claude session.compact instructions and messages, skill-load detection, Pi compaction events), then the implementation brief r2.
+- Next step: Probe brief-r2 for the untested Claude post-compaction routes ($.session.append, SessionStart reloadSkills, auto trigger), then the implementation brief.
 
 ### Acceptance
 
@@ -174,6 +175,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the operator reports that forgotten process rules are recurrent. Linking this to compaction is an inference, not a traced cause.
 - 2026-11-14 audit: .agents/hosts/claude-code.md asks the coordinator to reload its skill after compaction, a rule that itself depends on memory. Mechanisms found: Claude plugin `session.compact` (steer or skip) and SessionStart `reloadSkills`; Pi `session_before_compact` and `before_agent_start`.
 - 2026-11-15 probe (J001/A006): a hooks module's `additionalContext` from `classic.SessionStart` (`compact`) did not reach the model, while a settings-hook SessionStart output did. `session.compact` steering, `$.session.append` and `reloadSkills` are untested.
+- 2026-11-15: probe ([A001](jobs/J005/A001.md)), Claude Code 2.1.325: session.compact instructions steer the summary; hook-returned messages after a manual /compact never reached the model; skill.prompt detects the coordinator; Pi can add a message through before_agent_start but cannot steer its own summarizer.
 
 ## J006
 
