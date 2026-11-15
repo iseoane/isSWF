@@ -53,6 +53,18 @@ for (const bad of [0x85, 0x2028, 0x2029, 0x9f].map(code => String.fromCharCode(c
   assert.throws(() => addJob(current, { ...jobSpec, objective: value }), { code: 'invalid-value' }, JSON.stringify(bad));
 }
 
+// appendEvidence by plan shape, with the exact text each branch writes.
+const evidenceShapes = [
+  ['no Evidence section', block('J001').replace('\n### Evidence\n\n- None.\n', ''), text => `${text}\n### Evidence\n\n- added\n`],
+  ['empty Evidence section', block('J001', { evidence: [] }), () => `${block('J001', { evidence: ['added'] })}\n`],
+  ['a lone placeholder with no blank line before it', block('J001').replace('### Evidence\n\n- None.', '### Evidence\n- None.'), text => text.replace('- None.', '- added')],
+];
+for (const [name, jobText, expected] of evidenceShapes) {
+  const result = appendEvidence(plan(jobText), { job: 'J001', value: 'added' });
+  assert.equal(result, plan(expected(jobText)), name);
+  assert.equal(parsePlan(result)[0].evidence.at(-1), 'added', name);
+}
+
 const fresh = newPlan({ initiative: 'I0002', title: 'Fresh plan', type: 'enhancement', ...jobSpec, job: 'J001', dependsOn: [] });
 assert.equal(fresh, `# I0002: Fresh plan\n\nType: enhancement\n\n${block('J001', { size: 'S (one flow)', objective: 'Add the thing', next: 'Prepare the brief.', acceptance: ['First outcome', 'Second outcome'], pending: ' (pending until prepared)' })}`);
 assert.equal(parsePlan(fresh).length, 1);
