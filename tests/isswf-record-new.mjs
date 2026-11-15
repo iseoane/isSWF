@@ -449,11 +449,21 @@ try {
       assert.deepEqual([refused.status, refused.out.ok, refused.out.code], [1, false, code], record);
     }
 
+    // A changed path that Markdown code cannot hold faithfully is refused, not written wrongly.
+    git(project, 'switch', '-q', '-c', 'odd', candidate);
+    await writeFile(join(project, 'we`ird.txt'), 'x\n');
+    git(project, 'add', '--', 'we`ird.txt');
+    git(project, 'commit', '-q', '-m', 'odd name');
+    const odd = git(project, 'rev-parse', 'HEAD');
+    git(project, 'switch', '-q', 'main');
+    attempt('A011');
+    await refuseComplete('A011.md', text => text, 'unsafe-path', 'we`ird.txt', { '--candidate': odd });
+
     // A record that changes between the read and the replacement is not overwritten.
     const { completeRecord } = await load('isswf-record-new.mjs');
-    attempt('A011');
-    const racedPath = file('A011.md');
-    await assert.rejects(completeRecord({ project, initiative: 'I0001', job: 'J001', record: 'A011', candidate, beforeRename: () => writeFile(racedPath, 'theirs\n') }), { code: 'record-changed' });
+    attempt('A012');
+    const racedPath = file('A012.md');
+    await assert.rejects(completeRecord({ project, initiative: 'I0001', job: 'J001', record: 'A012', candidate, beforeRename: () => writeFile(racedPath, 'theirs\n') }), { code: 'record-changed' });
     assert.equal(await readFile(racedPath, 'utf8'), 'theirs\n');
     assert.deepEqual((await readdir(jobDir)).filter(name => name.endsWith('.tmp')), [], 'no temporary file is left behind');
   }
