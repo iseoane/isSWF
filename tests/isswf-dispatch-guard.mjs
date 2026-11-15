@@ -326,7 +326,7 @@ try {
 }
 // Packaging: the package declares the extension for the Pi main session, next to the record guard's.
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
-assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs']);
+assert.deepEqual(manifest.pi.extensions, ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs', './tools/isswf-command-guard-pi-extension.mjs']);
 
 // Claude: the one `tool.call` hook (the engine refuses a second unmatched one) refuses an Agent call before `next(e)`,
 // whatever the pane option is, and runs Git through `$.process.run`. register.tsx has no runner, so this is a source check.

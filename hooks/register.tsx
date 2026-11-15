@@ -1,6 +1,7 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
+import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
 import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
@@ -260,12 +261,6 @@ function resolveUsage($: EngineInterface, runs: any[], project: string) {
   })().catch(() => {})
 }
 
-// Heredoc bodies and quoted text with spaces, such as commit messages or scripts, only mention paths;
-// a quoted single path is still an operand.
-// The rest of a heredoc's opening line, such as its output redirection, is kept.
-const HEREDOC = /<<-?\s*(['"]?)(\w+)\1([^\n]*)\n[\s\S]*?(?:\n\s*\2\s*(?:\n|$)|$)/g
-const QUOTED = /(["'])(?:(?!\1)[\s\S])*\1/g
-
 function touchedIds(e: { tool: string; file_path?: unknown; command?: unknown }) {
   const raw = e.tool === 'Bash' ? e.command : ['Read', 'Edit', 'Write'].includes(e.tool) ? e.file_path : undefined
   if (typeof raw !== 'string') return []
@@ -475,9 +470,14 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
 const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
 
 export const register: Register = (on, options) => {
-  // The engine accepts one unmatched `tool.call` hook, so this one serves the dispatch guard and the record check,
+  // The engine accepts one unmatched `tool.call` hook, so this one serves the shell and dispatch guards and the record check,
   // which run whatever the pane option is, and the pane's observation, which runs only with the option on.
   on('tool.call', async ($, e, next) => {
+    // A delegated child's shell calls reach this hook too. The core fails open, so a fault in it never blocks a call.
+    if (e.tool === 'Bash' || e.tool === 'PowerShell') {
+      const verdict = guardCommand((e as { command?: unknown }).command)
+      if ('deny' in verdict) return { deny: verdict.deny }
+    }
     // The guard refuses before the child starts, so it runs ahead of `next(e)`; `$.fs` and `$.process` are spelled out per call.
     if (e.tool === 'Agent') {
       const verdict = await guardDispatch({
