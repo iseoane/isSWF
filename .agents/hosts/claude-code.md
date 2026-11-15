@@ -12,10 +12,10 @@ During explicit setup:
 - **Shipped default.** The shipped thin role profiles use `model: inherit` before setup; this is not the confirmed factory preset or proof of actual identity.
 - **Apply.** Apply accepted model and effort through Claude's documented project-local configuration/delegation mechanism, verifying support separately for the coordinator and each child. Global effort is not evidence of per-role effort.
 - **Unpersisted effort.** If the native host cannot persist a requested per-role effort, record that preference in the setup record and enforce it through a supported explicit delegation parameter only after capability verification; otherwise leave that role pending.
-- **Missing approved effort.** Omit an effort parameter only under approved parent inheritance; otherwise block the delegation.
+- **Missing approved effort.** Pass the effort of the agent's entry in `<selected-state>/dispatch-selection.json` as the call's `effort`; the dispatch guard refuses a call without it. Omit it only for an agent that has no entry and is not an isSWF role.
 - **Limits.** Do not invent YAML or settings fields, change user-global defaults, or label an approved preference as applied configuration. Observe actual model metadata when available; label unknown effort or identity unknown. Never fabricate per-role effort support, silently substitute a model, or dispatch through Pi because Claude cannot satisfy a selection.
 
-For current Claude work, the supported native configuration/profile/delegation mechanism is the sole selection owner. The setup record reports approval/application status, not a second editable model table; `models.json` belongs only to legacy attempts that are reconciled with their original pinned runtime. Missing native selection or unsupported persistence/effort remains pending, never a reason to read a legacy route, silently inherit a model or rewrite unrelated settings.
+For current Claude work, `<selected-state>/dispatch-selection.json` holds the approved model and effort of each isSWF role agent, one entry per agent with its own host, and the plugin's dispatch guard enforces it on every `Agent` call, so the call must carry exactly that `model` and `effort` (or an `Override:` line in its prompt). A dispatch that omits or changes either is refused before the child starts; pass the entry's values rather than inheriting. The setup record reports approval/application status, not another editable model table; `models.json` belongs only to legacy attempts that are reconciled with their original pinned runtime. Missing native selection or unsupported persistence/effort remains pending, never a reason to read a legacy route, silently inherit a model or rewrite unrelated settings.
 
 ## Verify the plugin is loaded
 
@@ -31,7 +31,7 @@ During explicit Claude Code setup, inspect the installed host/version and docume
 
 ## Required child context
 
-Before each Agent-tool child or bound review (`claude -p`), the coordinator prepares and freezes the canonical plan and curated brief as its [durable-records step](../skills/isswf-coordinator/SKILL.md#3-ground-the-work-in-verifiable-references-and-durable-records) requires, then applies its [pre-dispatch refusal conditions](../skills/isswf-coordinator/SKILL.md#pre-dispatch-refusal-conditions). A failed condition blocks the dispatch. A new host-native task needs no factory release receipt, project runtime pin, external grant file, compiled isSWF executable or capacity store.
+Before each Agent-tool child or bound review (`claude -p`), the coordinator prepares and freezes the canonical plan and curated brief as its [durable-records step](../skills/isswf-coordinator/SKILL.md#3-ground-the-work-in-verifiable-references-and-durable-records) requires, then applies its [pre-dispatch refusal conditions](../skills/isswf-coordinator/SKILL.md#pre-dispatch-refusal-conditions). A failed condition blocks the dispatch. The plugin's dispatch guard (the `tool.call` hook in `hooks/register.tsx`) refuses an `Agent` call to an `isswf:` or `isswf-` agent that fails them and names the condition; it runs whether or not the initiatives pane is on, and passing it is not an authorization. A new host-native task needs no factory release receipt, project runtime pin, external grant file, compiled isSWF executable or capacity store.
 
 Before delegating, provide:
 
