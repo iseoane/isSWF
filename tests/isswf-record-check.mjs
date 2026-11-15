@@ -70,6 +70,8 @@ for (const run of [...accepted, ...ignored]) {
 }
 const [trailing] = checkRecord({ path: recordPaths('A001.md')[0], text: attempt(['claude agent=a1 (resumed)']) }).violations;
 assert.deepEqual(trailing, { code: 'run-line-unparsed', field: 'Run:', line: 6, message: 'Run: line is ignored by the pane: use "- Run: <claude agent|claude session|pi child>=<id>" alone on the line' });
+// A template line whose `<id>` was never replaced names no launch, though the pane's parser accepts it.
+for (const path of recordPaths('A001.md')) assert.deepEqual(codes(path, attempt(['claude agent=<id>'])), ['run-id-unfilled']);
 // The pane keeps `agent=unknown` as an identity, but the template says to omit the line when the ID is unknown.
 assert.equal((await paneRuns(attempt(['claude agent=unknown'])))[0].id, 'unknown');
 for (const path of recordPaths('A001.md')) assert.deepEqual(codes(path, attempt(['claude agent=unknown'])), ['run-id-unknown']);
