@@ -1,13 +1,16 @@
 {
   "schemaVersion": 1,
   "agents": {
-    "isswf:isswf-worker": { "host": "claude", "model": "sonnet", "effort": "medium" },
-    "isswf-worker": { "host": "claude", "model": "sonnet", "effort": "medium" },
-    "isswf:isswf-reviewer": { "host": "claude", "model": "opus", "effort": "medium" },
-    "isswf-reviewer": { "host": "claude", "model": "opus", "effort": "medium" },
-    "isswf:isswf-researcher": { "host": "claude", "model": "haiku", "effort": "high" },
-    "isswf-researcher": { "host": "claude", "model": "haiku", "effort": "high" },
-    "isswf:isswf-planner": { "host": "claude", "model": "opus", "effort": "low" },
-    "isswf-planner": { "host": "claude", "model": "opus", "effort": "low" }
+    "claude": {
+      "isswf:isswf-worker": { "model": "sonnet", "effort": "medium" },
+      "isswf-worker": { "model": "sonnet", "effort": "medium" },
+      "isswf:isswf-reviewer": { "model": "opus", "effort": "medium" },
+      "isswf-reviewer": { "model": "opus", "effort": "medium" },
+      "isswf:isswf-researcher": { "model": "haiku", "effort": "high" },
+      "isswf-researcher": { "model": "haiku", "effort": "high" },
+      "isswf:isswf-planner": { "model": "opus", "effort": "low" },
+      "isswf-planner": { "model": "opus", "effort": "low" }
+    },
+    "pi": {}
   }
 }

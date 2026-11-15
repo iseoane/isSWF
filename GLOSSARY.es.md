@@ -76,7 +76,7 @@ Un intercambio opcional en el que un agente hace al operador una pregunta cada v
 _Avoid_: cuestionario cuando sugiera una lista o un número fijo de preguntas.
 
 **Archivo de selección**:
-El `dispatch-selection.json` local del proyecto, que registra, con una entrada por agente, el host, el modelo y el esfuerzo aprobados para cada agente de rol de isSWF. La guarda de despacho compara una delegación con él; una línea `Override:` en un prompt sustituye una entrada solo para esa llamada.
+El `dispatch-selection.json` local del proyecto, que registra, con una entrada por host y agente, el modelo y el esfuerzo aprobados para cada agente de rol de isSWF. La guarda de despacho compara una delegación con él; una línea `Override:` en un prompt sustituye una entrada solo para esa llamada.
 _Avoid_: tabla de modelos o archivo de enrutamiento; no contiene un orden de reserva ni es el `models.json` heredado.
 
 **Guarda de despacho**:

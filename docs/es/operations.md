@@ -42,34 +42,38 @@ Cuando un Edit, Write o MultiEdit (Claude Code) o una edición o escritura (Pi) 
 
 ## Guarda de despacho
 
-Antes de que empiece una delegación a un agente de rol de isSWF, el host la comprueba y la rechaza si falla una condición, indicando cuál. En Claude Code, el hook `tool.call` del plugin comprueba cada llamada `Agent`, con o sin el panel de iniciativas. En Pi, la extensión del paquete `tools/isswf-dispatch-guard-pi-extension.mjs` comprueba cada llamada `subagent` de la sesión principal, incluidas sus formas `tasks` y `chain`. Solo se comprueban los agentes llamados `isswf-<rol>` o `isswf:isswf-<rol>`; cualquier otro agente funciona como antes. Las reglas compartidas están en `tools/isswf-dispatch-guard-core.mjs`, que no importa módulos de Node.
+Antes de que empiece una delegación a un agente de rol de isSWF, el host la comprueba y la rechaza si falla una condición, indicando cuál. En Claude Code, el hook `tool.call` del plugin comprueba cada llamada `Agent`, con o sin el panel de iniciativas. En Pi, la extensión del paquete `tools/isswf-dispatch-guard-pi-extension.mjs` comprueba cada llamada `subagent` de la sesión principal, incluidas sus formas `tasks` y `chain`. Solo se comprueban los agentes llamados `isswf-<rol>` o `isswf:isswf-<rol>`; cualquier otro agente funciona como antes. En Pi, un agente de rol de isSWF rechazado bloquea toda la llamada `subagent`, incluidos sus demás hijos. Las reglas compartidas están en `tools/isswf-dispatch-guard-core.mjs`, que no importa módulos de Node.
 
-El modelo y el esfuerzo aprobados del proyecto están en `<directorio de estado>/dispatch-selection.json` (`.factory/` o `.isswf/`), con una entrada por agente. Cada entrada tiene su propio host, modelo y esfuerzo, de modo que puedes usar o mezclar agentes y hosts libremente; no hay orden de reserva ni valor por defecto por host. Edita cualquier entrada a mano. `isswf-setup` escribe el archivo cuando confirmas los valores por defecto.
+El modelo y el esfuerzo aprobados del proyecto están en `<directorio de estado>/dispatch-selection.json` (`.factory/` o `.isswf/`), con una entrada por agente bajo su host (`claude` o `pi`). Cada entrada tiene su propio modelo y esfuerzo, de modo que puedes usar o mezclar agentes y hosts libremente, y el mismo nombre sin prefijo puede llevar un modelo distinto en cada host; no hay orden de reserva ni valor por defecto por host. Edita cualquier entrada a mano. `isswf-setup` escribe el archivo cuando confirmas los valores por defecto.
 
 ```json
 {
   "schemaVersion": 1,
   "agents": {
-    "isswf:isswf-worker": { "host": "claude", "model": "sonnet", "effort": "medium" },
-    "isswf-worker": { "host": "claude", "model": "sonnet", "effort": "medium" },
-    "isswf-reviewer": { "host": "pi", "model": "openai-codex/gpt-6.1-sol", "effort": "medium" }
+    "claude": {
+      "isswf:isswf-worker": { "model": "sonnet", "effort": "medium" },
+      "isswf-worker": { "model": "sonnet", "effort": "medium" }
+    },
+    "pi": {
+      "isswf-worker": { "model": "openai-codex/gpt-6.1-sol", "effort": "medium" }
+    }
   }
 }
 ```
 
-Una entrada se llama exactamente como la llamada nombra al agente. Claude Code tiene `isswf:isswf-worker` e `isswf-worker`; una entrada tiene un solo host, así que un nombre sin prefijo solo puede servir a un host en un archivo. La llamada debe llevar los mismos valores: en Claude Code su `model` y su `effort`; en Pi `model` como `<modelo>:<esfuerzo>`, por ejemplo `openai-codex/gpt-6.1-sol:medium` (un identificador de modelo puede contener `:`, así que solo un nivel de razonamiento final cuenta como esfuerzo).
+Una entrada se llama exactamente como la llamada nombra al agente. Claude Code tiene `isswf:isswf-worker` e `isswf-worker`. La llamada debe llevar los mismos valores: en Claude Code su `model` y su `effort`; en Pi `model` como `<modelo>:<esfuerzo>`, por ejemplo `openai-codex/gpt-6.1-sol:medium` (un identificador de modelo puede contener `:`, así que solo un nivel de razonamiento final cuenta como esfuerzo).
 
 La guarda rechaza la llamada si falla cualquiera de estas condiciones:
 
 1. El agente es un agente de rol de isSWF. Si no lo es, la llamada se permite sin cambios.
-2. El archivo de selección existe y se lee, el agente tiene una entrada para este host y el modelo y el esfuerzo de la llamada están presentes y coinciden con los de esa entrada. El mensaje indica qué valor falta o difiere y qué espera el archivo.
+2. El archivo de selección existe y es JSON válido, el agente tiene una entrada bajo este host (un host o un agente ausentes equivalen a "sin entrada para este host") y el modelo y el esfuerzo de la llamada están presentes y coinciden con los de esa entrada. El mensaje indica qué valor falta o difiere y qué espera el archivo.
 3. El prompt nombra el brief del trabajo como `.../initiatives/<I>/jobs/<J>/brief-r<n>.md` y da el SHA completo de 40 caracteres del checkpoint de documentos tras la palabra "checkpoint" y de la base objetivo tras la palabra "base".
-4. El plan de la iniciativa se lee y el trabajo está `in-progress`.
-5. El brief existe, está rastreado por Git y no está ignorado por Git. Claude Code ejecuta Git mediante la llamada de procesos del host y Pi mediante `git`; si Git no puede ejecutarse, la guarda rechaza.
+4. El plan de la iniciativa es válido y el trabajo está `in-progress`.
+5. El brief existe, está rastreado por Git, no está ignorado por Git (tampoco si se añadió a la fuerza) y está confirmado en el checkpoint indicado (`git cat-file -e <checkpoint>:<brief>`). Claude Code ejecuta Git mediante la llamada de procesos del host y Pi mediante `git`; si Git no puede ejecutarse, la guarda rechaza.
 
 Una línea del prompt que empiece por `Override: model=<m> effort=<e>` sustituye el modelo y el esfuerzo de la entrada solo para esa llamada. Solo se admite una línea así y las condiciones 3 a 5 siguen aplicándose.
 
-La guarda solo rechaza. Superarla no es una autorización y nunca se registra ni se informa como tal: la concesión, el presupuesto y las demás reglas del coordinador siguen vigentes. No comprueba que los SHA existan ni que el brief no haya cambiado desde el checkpoint. El proyecto es el directorio de trabajo de la sesión. Si la propia guarda falla, rechaza la llamada al agente de rol de isSWF con `dispatch guard error: <mensaje>` y nunca afecta a otro agente. Las acciones de gestión de Pi, los scripts de flujo de trabajo y los comandos con barra no pasan por ella.
+La guarda solo rechaza. Superarla no es una autorización y nunca se registra ni se informa como tal: la concesión, el presupuesto y las demás reglas del coordinador siguen vigentes. No comprueba que los SHA existan ni que el brief no haya cambiado desde el checkpoint. El proyecto es el directorio de trabajo de la sesión. Si la propia guarda falla, rechaza la llamada al agente de rol de isSWF con `dispatch guard error: <mensaje>` y nunca afecta a otro agente (en Pi, un fallo bloquea toda la llamada que nombra un rol de isSWF). Las acciones de gestión de Pi que no nombran ningún agente de rol de isSWF, los scripts de flujo de trabajo y los comandos con barra no pasan por ella.
 
 ## Edición de planes
 

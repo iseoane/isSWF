@@ -81,7 +81,7 @@ for (const guide of ['.agents/hosts/claude-code.md', '.agents/hosts/pi.md']) {
   assert.match(text, /dispatch guard/u, `${guide} names the dispatch guard`);
   assert.match(text, /dispatch-selection\.json/u, `${guide} points to the selection file`);
 }
-assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /one entry per agent, each with its own host, model and effort/u);
+assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /one entry per agent under its host, each with its own model and effort/u);
 assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /beyond its `local\/` subdirectory, is Git-ignored.*ask the operator how to proceed.*never force-add/u);
 assert.match(durableWork, /Workspace policy and retained evidence/u);
 assert.match(durableWork, /approved writing-workspace policy and the readiness of its native binding are separate facts/u);

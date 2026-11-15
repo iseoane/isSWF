@@ -76,7 +76,7 @@ An opt-in exchange in which an agent asks the operator one question at a time, e
 _Avoid_: questionnaire when implying a fixed list or count of questions.
 
 **Selection file**:
-The project-local `dispatch-selection.json` that records, one entry per agent, the host, model and effort approved for each isSWF role agent. The dispatch guard compares a delegation against it; an `Override:` line in one prompt replaces an entry for that call only.
+The project-local `dispatch-selection.json` that records, one entry per host and agent, the model and effort approved for each isSWF role agent. The dispatch guard compares a delegation against it; an `Override:` line in one prompt replaces an entry for that call only.
 _Avoid_: model table or routing file; it holds no fallback order and is not the legacy `models.json`.
 
 **Dispatch guard**:

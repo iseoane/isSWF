@@ -42,34 +42,38 @@ When an Edit, Write or MultiEdit (Claude Code) or an edit or write (Pi) leaves a
 
 ## Dispatch guard
 
-Before a delegation to an isSWF role agent starts, the host checks it and refuses it when a condition fails, naming that condition. In Claude Code the plugin's `tool.call` hook checks each `Agent` call, with or without the initiatives pane. In Pi the package extension `tools/isswf-dispatch-guard-pi-extension.mjs` checks each `subagent` call of the main session, including its `tasks` and `chain` forms. Only agents named `isswf-<role>` or `isswf:isswf-<role>` are checked; every other agent runs as before. The shared rules live in `tools/isswf-dispatch-guard-core.mjs`, which has no Node imports.
+Before a delegation to an isSWF role agent starts, the host checks it and refuses it when a condition fails, naming that condition. In Claude Code the plugin's `tool.call` hook checks each `Agent` call, with or without the initiatives pane. In Pi the package extension `tools/isswf-dispatch-guard-pi-extension.mjs` checks each `subagent` call of the main session, including its `tasks` and `chain` forms. Only agents named `isswf-<role>` or `isswf:isswf-<role>` are checked; every other agent runs as before. In Pi one refused isSWF role blocks the whole `subagent` call, including its other children. The shared rules live in `tools/isswf-dispatch-guard-core.mjs`, which has no Node imports.
 
-The project's approved model and effort are kept in `<state directory>/dispatch-selection.json` (`.factory/` or `.isswf/`), one entry per agent. Each entry has its own host, model and effort, so you can use or mix agents and hosts freely; there is no fallback order and no per-host default. Edit any entry by hand. `isswf-setup` writes the file when you confirm the defaults.
+The project's approved model and effort are kept in `<state directory>/dispatch-selection.json` (`.factory/` or `.isswf/`), one entry per agent under its host (`claude` or `pi`). Each entry has its own model and effort, so you can use or mix agents and hosts freely, and the same bare name can carry a different model on each host; there is no fallback order and no per-host default. Edit any entry by hand. `isswf-setup` writes the file when you confirm the defaults.
 
 ```json
 {
   "schemaVersion": 1,
   "agents": {
-    "isswf:isswf-worker": { "host": "claude", "model": "sonnet", "effort": "medium" },
-    "isswf-worker": { "host": "claude", "model": "sonnet", "effort": "medium" },
-    "isswf-reviewer": { "host": "pi", "model": "openai-codex/gpt-6.1-sol", "effort": "medium" }
+    "claude": {
+      "isswf:isswf-worker": { "model": "sonnet", "effort": "medium" },
+      "isswf-worker": { "model": "sonnet", "effort": "medium" }
+    },
+    "pi": {
+      "isswf-worker": { "model": "openai-codex/gpt-6.1-sol", "effort": "medium" }
+    }
   }
 }
 ```
 
-An entry is named exactly as a dispatch names the agent. Claude Code has both `isswf:isswf-worker` and `isswf-worker`; an entry has one host, so a bare name can serve only one host in a file. The call must carry the same values: in Claude Code its `model` and `effort`; in Pi `model` as `<model>:<effort>`, for example `openai-codex/gpt-6.1-sol:medium` (a model id may contain `:`, so only a final thinking level is the effort).
+An entry is named exactly as a dispatch names the agent. Claude Code has both `isswf:isswf-worker` and `isswf-worker`. The call must carry the same values: in Claude Code its `model` and `effort`; in Pi `model` as `<model>:<effort>`, for example `openai-codex/gpt-6.1-sol:medium` (a model id may contain `:`, so only a final thinking level is the effort).
 
 The guard refuses when any of these fails:
 
 1. The agent is an isSWF role agent. Otherwise the call is allowed unchanged.
-2. The selection file exists and parses, the agent has an entry for this host, and the call's model and effort are present and equal that entry's. The message says which value is missing or different and what the file expects.
+2. The selection file exists and parses, the agent has an entry under this host (a missing host or agent is "no entry for this host"), and the call's model and effort are present and equal that entry's. The message says which value is missing or different and what the file expects.
 3. The prompt names the job's brief as `.../initiatives/<I>/jobs/<J>/brief-r<n>.md` and gives the full 40-character SHA of the document-input checkpoint after the word "checkpoint" and of the target base after the word "base".
 4. The initiative plan parses and the job is `in-progress`.
-5. The brief exists, is tracked by Git and is not Git-ignored. Claude Code runs Git through the host's process call and Pi through `git`; if Git cannot run, the guard refuses.
+5. The brief exists, is tracked by Git, is not Git-ignored (also when it was force-added) and is committed at the named checkpoint (`git cat-file -e <checkpoint>:<brief>`). Claude Code runs Git through the host's process call and Pi through `git`; if Git cannot run, the guard refuses.
 
 A line that starts with `Override: model=<m> effort=<e>` in the prompt replaces the entry's model and effort for that one call. Only one such line is accepted, and conditions 3 to 5 still apply.
 
-The guard only refuses. Passing it is not an authorization and is never recorded or reported as one: the grant, the budget and the other coordinator rules still apply. It does not check that the SHAs exist or that the brief is unchanged since the checkpoint. The project is the session's working directory. If the guard itself fails, it refuses the isSWF role call with `dispatch guard error: <message>` and never affects another agent. Pi management actions, workflow scripts and slash commands do not go through it.
+The guard only refuses. Passing it is not an authorization and is never recorded or reported as one: the grant, the budget and the other coordinator rules still apply. It does not check that the SHAs exist or that the brief is unchanged since the checkpoint. The project is the session's working directory. If the guard itself fails, it refuses the isSWF role call with `dispatch guard error: <message>` and never affects another agent (in Pi, a failure blocks the whole call that names an isSWF role). Pi management actions that name no isSWF role agent, workflow scripts and slash commands do not go through it.
 
 ## Plan edit
 
