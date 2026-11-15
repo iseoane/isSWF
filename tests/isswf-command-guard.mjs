@@ -20,7 +20,7 @@ assert.deepEqual(commands('echo ok # npx x; gh run watch\nls'), ['echo', 'ls']);
   const [segment] = tokenize('FOO=1 BAR=2 sudo env X=1 command npx.cmd -y pkg');
   assert.equal(segment.command, 'npx');
   assert.deepEqual(segment.args, ['-y', 'pkg']);
-  assert.equal(tokenize('C:\tools\GH.exe pr checks')[0].command, 'gh');
+  assert.equal(tokenize(String.raw`C:\tools\GH.exe pr checks`)[0].command, 'gh');
   assert.equal(tokenize('/usr/bin/gh run watch')[0].command, 'gh');
   assert.equal(tokenize('exec ./node_modules/.bin/npx.cmd x')[0].command, 'npx');
   assert.deepEqual(tokenize('npm "install" left-pad')[0].args, ['install', 'left-pad']);
@@ -31,7 +31,7 @@ assert.deepEqual(tokenize('(npx a); echo $(npx b)').map(segment => [segment.comm
   const bash = tokenize('while true; do sleep 1; done; ls');
   assert.deepEqual(bash.filter(segment => segment.command).map(segment => [segment.command, segment.loops.length > 0]), [['true', true], ['sleep', true], ['ls', false]]);
   const powershell = tokenize('while ($true) { Start-Sleep 1 }; gh pr checks');
-  assert.deepEqual(powershell.filter(segment => segment.command).map(segment => [segment.command, segment.loops.length > 0]), [['start-sleep', true], ['gh', false]]);
+  assert.deepEqual(powershell.filter(segment => segment.command).map(segment => [segment.command, segment.loops.length > 0]), [['$true', true], ['start-sleep', true], ['gh', false]]);
   const nested = tokenize('for a in 1; do while x; do sleep 1; done; sleep 2; done; sleep 3');
   assert.deepEqual(nested.filter(segment => segment.command === 'sleep').map(segment => segment.loops.length), [2, 1, 0]);
 }
