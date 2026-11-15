@@ -125,9 +125,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (one flow, with one bounded risk: refusing a legitimate dispatch)
 - Objective: A delegation that fails the coordinator's pre-dispatch refusal conditions is refused by the host before the child starts.
 - Depends on: J001
-- Brief: [brief-r2.md](jobs/J004/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: A worker runs the brief-r2 probe (Agent tool.call and agent.spawn model/effort fields, deny behaviour, Pi thinking parse) outside the repository; then the coordinator prepares brief-r3.
+- Next step: Dispatch the brief-r3 worker after the J001 r4 merge (both edit the single tool.call hook).
 
 ### Acceptance
 
@@ -145,6 +145,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14 audit: the Claude plugin `tool.call` hook can return `deny` before a call runs (.claude-plugin/types/claude-code/index.d.ts, ToolCallResult); Pi 1.5.2 `tool_call` can block (installed docs/extensions.md). The Pi subagent call shape is not yet verified.
 - 2026-11-15: research ([A001](jobs/J004/A001.md)): Claude `agent.spawn` input carries `model` but no effort; Pi `subagent` has `model` and no top-level thinking field; no structured selection source exists, and project-setup.md:56 claims Pi overrides that .pi/settings.json does not hold.
 - 2026-11-15: operator approved integrating J004 (grant and authority code, .agents/hosts/**) on condition: "Autorizo pero cada agente aunque sea en el mismo fichero tienen sus modelos por si quiero usar o mezclar diferentes agentes". The selection file gives each agent its own host, model and effort.
+- 2026-11-15: probe ([A002](jobs/J004/A002.md)): Claude `tool.call` for Agent carries `model` and `effort`, `agent.spawn` has no effort; a spawn `deny` leaves the child unstarted and the parent sees the reason; Pi thinking is only a model suffix.
 
 ## J005
 
