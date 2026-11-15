@@ -106,9 +106,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
 - Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J003/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation brief r3 after J004 merges: CI-waiting and package-acquisition rules for Bash and PowerShell on both hosts, in a shared command tokeniser; the cd rule is out of scope (native reset, recorded as version-dependent).
+- Next step: Implementation (brief-r3): worker on feat/i0057-j003-shell-guard, then unbound review; merge needs the operator's approval (.agents/hosts/**, tools/factory-package.mjs, tools/build-release.mjs).
 
 ### Acceptance
 
