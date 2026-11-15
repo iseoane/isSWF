@@ -172,4 +172,98 @@ try {
   await rm(temp, { recursive: true, force: true });
 }
 
+// The unreviewed-commit check, with real Git: a linear history read at different heads.
+const coverTemp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-coverage-')));
+try {
+  const repo = join(coverTemp, 'repo');
+  await mkdir(repo);
+  git(repo, 'init', '-q', '-b', 'main', '.');
+  const jobDir = job => `.factory/initiatives/I0001/jobs/${job}`;
+  const commit = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(repo, path, '..'), { recursive: true });
+      if (content === null) await rm(join(repo, path));
+      else await writeFile(join(repo, path), content);
+    }
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-qm', message);
+    return git(repo, 'rev-parse', 'HEAD');
+  };
+  const reviewText = (candidate, extra = '') => `# review\n\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n${extra}`;
+  const override = (...shas) => `- Coordinator override, recorded afterwards by the coordinator and never written into the verdicts above: the coordinator applied ${shas.join(' and ')} itself.\n`;
+  // J003 was reviewed before this range began, and the range changes none of its records.
+  const start = await commit({ 'README.md': 'start\n', [`${jobDir('J003')}/V001.md`]: reviewText('0'.repeat(40)), '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  git(repo, 'update-ref', 'refs/remotes/origin/main', start);
+  const feature = await commit({ 'src/x.mjs': 'export const x = 1;\n' }, 'feature');
+  const reviewed = await commit({ [`${jobDir('J001')}/V001.md`]: reviewText(feature) }, 'records: V001');
+  const check = (head, extra = []) => tool(['coverage', '--project', repo, '--base', start, '--head', head, ...extra]);
+  const jobOf = (result, name = 'J001') => result.jobs.find(entry => entry.job === name);
+
+  // Records after the reviewed candidate need no review, and a job whose records the range does not touch is not read.
+  const clean = check(reviewed);
+  assert.equal(clean.ok, true, JSON.stringify(clean));
+  assert.equal(clean.exitCode, 0);
+  assert.deepEqual(clean.jobs.map(entry => [entry.job, entry.record, entry.candidate, entry.uncovered]), [['J001', 'V001', feature, []]]);
+  const records = await commit({ [`${jobDir('J001')}/A001.md`]: '# attempt\n', '.factory/initiatives/I0001/plan.md': plan('in-review') }, 'records: attempt and plan');
+  assert.equal(check(records).ok, true, 'a records-only commit after the candidate');
+
+  // The PR322 shape: commits that change a test after the reviewed candidate, with no later review.
+  const first = await commit({ 'tests/state-interruption.mjs': 'one\n' }, 'test: first');
+  const second = await commit({ 'tests/state-interruption.mjs': 'two\n', [`${jobDir('J001')}/A002.md`]: '# attempt\n' }, 'test: second');
+  const failed = check(second);
+  assert.equal(failed.ok, false, JSON.stringify(failed));
+  assert.equal(failed.exitCode, 1);
+  assert.equal(failed.code, 'unreviewed-commits');
+  assert.deepEqual(jobOf(failed).uncovered, [{ commit: first, paths: ['tests/state-interruption.mjs'] }, { commit: second, paths: ['tests/state-interruption.mjs'] }]);
+  // A later review of a later candidate covers them; the first review stays in the record.
+  const secondReview = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second) }, 'records: V002');
+  const covered = check(secondReview);
+  assert.equal(covered.ok, true, JSON.stringify(covered));
+  assert.equal(jobOf(covered).record, 'V002');
+
+  // The J007 case: a documentation-only commit named in a coordinator override passes, and only then.
+  const docs = await commit({ 'docs/en/operations.md': 'a\n', 'docs/es/operations.md': 'b\n', 'GLOSSARY.md': 'g\n' }, 'docs: fix');
+  assert.equal(check(docs).ok, false, 'a documentation commit without an override');
+  const named = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second, override(docs)) }, 'records: override');
+  const passed = check(named);
+  assert.equal(passed.ok, true, JSON.stringify(passed));
+  assert.deepEqual(jobOf(passed).overridden, [{ commit: docs, paths: ['GLOSSARY.md', 'docs/en/operations.md', 'docs/es/operations.md'] }]);
+  const short = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second, override(docs.slice(0, 9))) }, 'records: abbreviated override');
+  assert.equal(check(short).ok, true, 'an abbreviated SHA of at least seven characters names the commit');
+  const tooShort = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second, override(docs.slice(0, 5))) }, 'records: too short');
+  assert.equal(check(tooShort).ok, false, 'a five-character prefix does not name a commit');
+
+  // An override never excuses a commit that changes code, tests or agent instructions, even when it also changes documentation.
+  for (const [files, label] of [[{ 'tools/x.mjs': 'x\n' }, 'code'], [{ '.agents/skills/x/SKILL.md': 's\n' }, 'agent instructions'], [{ 'docs/en/a.md': 'a\n', 'src/y.mjs': 'y\n' }, 'documentation with code']]) {
+    const mixed = await commit(files, `mixed ${label}`);
+    const excused = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second, override(docs, mixed)) }, `records: override ${label}`);
+    const result = check(excused);
+    assert.equal(result.ok, false, label);
+    assert.deepEqual(jobOf(result).uncovered.map(entry => entry.commit), [mixed], label);
+  }
+
+  // A candidate that is not in the branch's history leaves every commit unreviewed.
+  const orphan = await commit({ [`${jobDir('J001')}/V003.md`]: reviewText('1'.repeat(40)) }, 'records: V003 for another history');
+  const lost = check(orphan);
+  assert.equal(lost.ok, false);
+  assert.ok(jobOf(lost).uncovered.some(entry => entry.commit === feature), 'the feature commit counts as unreviewed');
+
+  // A job without any review, an initiative or job filter, and the default base from origin/main.
+  const none = await commit({ [`${jobDir('J002')}/brief-r1.md`]: '# brief\n', 'src/z.mjs': 'z\n' }, 'brief and code for a job without reviews');
+  const all = check(none);
+  assert.deepEqual(all.skipped, [{ initiative: 'I0001', job: 'J002', reason: 'no-review' }]);
+  assert.equal(check(none, ['--job', 'J002']).exitCode, 0, 'the filter leaves out the failing job');
+  assert.equal(check(none, ['--initiative', 'I0001', '--job', 'J001']).exitCode, 1);
+  const byDefault = tool(['coverage', '--project', repo]);
+  assert.equal(byDefault.base, start, 'the default base is the merge base with origin/main');
+  assert.equal(byDefault.head, none);
+  assert.equal(byDefault.ok, all.ok);
+  git(repo, 'update-ref', '-d', 'refs/remotes/origin/main');
+  assert.equal(tool(['coverage', '--project', repo]).code, 'base-not-found');
+  assert.equal(tool(['coverage', '--project', repo, '--base', 'main~0']).code, 'invalid-base');
+  assert.equal(tool(['coverage']).code, 'usage');
+} finally {
+  await rm(coverTemp, { recursive: true, force: true });
+}
+
 console.log('PASS handoff');
