@@ -22,6 +22,7 @@ Estas herramientas empaquetan la fábrica, gestionan la instalación de un proye
 | Inicializar, seleccionar, actualizar y recuperar la instalación de un proyecto | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Preparar planes y recibir issues | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-plan-edit.mjs`, `tools/isswf-plan-edit-core.mjs`, `tools/isswf-intake.mjs` |
 | Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-record-check.mjs`, `tools/isswf-record-check-core.mjs`, `tools/isswf-record-guard-core.mjs`, `tools/isswf-record-guard-pi-extension.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
+| Rechazar un despacho fallido a un agente de rol de isSWF | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 
 Estas herramientas tienen contratos distintos. No des por hecho que los comandos, modelos compatibles, recuperación o permisos de un rol se aplican a otro.
 

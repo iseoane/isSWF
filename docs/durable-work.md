@@ -104,4 +104,4 @@ The confirmation says recorded, not applied. The same status reader exposes note
 
 ## Model routing
 
-Current Pi and Claude model selections belong to each host's native configuration. The legacy executor and its route contract are no longer shipped; an existing legacy `models.json` stays unchanged for attempts reconciled with their original pinned runtime. Do not copy native selections into it or resolve a pinned legacy attempt against native defaults.
+The approved model and effort of each isSWF role agent are one entry per agent in `<selected-state>/dispatch-selection.json`, which the dispatch guard enforces (`docs/en/operations.md`, Dispatch guard); each host's native configuration keeps its own settings. The legacy executor and its route contract are no longer shipped; an existing legacy `models.json` stays unchanged for attempts reconciled with their original pinned runtime. Do not copy native selections into it or resolve a pinned legacy attempt against native defaults.

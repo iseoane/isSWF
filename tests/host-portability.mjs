@@ -70,9 +70,18 @@ const coordinatorDispatch = await read('.agents/skills/isswf-coordinator/SKILL.m
 assert.doesNotMatch(coordinatorDispatch, /through the pinned launcher in installed projects/u);
 assert.match(coordinatorDispatch, /### Pre-dispatch refusal conditions/u);
 assert.match(coordinatorDispatch, /`status` is anything other than `observed`\. Exit code 0 alone is not sufficient/u);
-assert.match(coordinatorDispatch, /brief is uncommitted, untracked or Git-ignored at the document-input checkpoint/u);
-assert.match(coordinatorDispatch, /does not name the brief path, the full Git SHA of the document-input checkpoint, and the target base SHA/u);
-for (const guide of ['.agents/hosts/claude-code.md', '.agents/hosts/pi.md']) assert.ok((await read(guide)).includes('../skills/isswf-coordinator/SKILL.md#pre-dispatch-refusal-conditions'), guide);
+// The section points to the host's dispatch guard and keeps only the checks the guard cannot make.
+assert.match(coordinatorDispatch, /dispatch guard[^\n]*`<selected-state>\/dispatch-selection\.json`/u);
+assert.match(coordinatorDispatch, /Passing the guard is not an authorization and is never recorded or reported as one/u);
+assert.match(coordinatorDispatch, /the job is `in-progress`/u);
+assert.match(coordinatorDispatch, /the full SHAs the prompt names exist/u);
+for (const guide of ['.agents/hosts/claude-code.md', '.agents/hosts/pi.md']) {
+  const text = await read(guide);
+  assert.ok(text.includes('../skills/isswf-coordinator/SKILL.md#pre-dispatch-refusal-conditions'), guide);
+  assert.match(text, /dispatch guard/u, `${guide} names the dispatch guard`);
+  assert.match(text, /dispatch-selection\.json/u, `${guide} points to the selection file`);
+}
+assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /one entry per agent under its host, each with its own model and effort/u);
 assert.match(await read('.agents/skills/isswf-setup/SKILL.md'), /beyond its `local\/` subdirectory, is Git-ignored.*ask the operator how to proceed.*never force-add/u);
 assert.match(durableWork, /Workspace policy and retained evidence/u);
 assert.match(durableWork, /approved writing-workspace policy and the readiness of its native binding are separate facts/u);

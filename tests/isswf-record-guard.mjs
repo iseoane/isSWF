@@ -153,7 +153,7 @@ try {
 // Packaging: the package extension covers the main session; the worker child declares its own. The planner and researcher are read-only, so the guard could never fire there.
 const extension = 'tools/isswf-record-guard-pi-extension.mjs';
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
-assert.deepEqual(manifest.pi.extensions, [`./${extension}`]);
+assert.ok(manifest.pi.extensions.includes(`./${extension}`), 'the package declares the record guard extension');
 for (const [role, declared] of [['worker', true], ['planner', false], ['researcher', false], ['reviewer', false]]) {
   const profile = await readFile(join(source, `.agents/hosts/pi/agents/isswf-${role}.md`), 'utf8');
   assert.equal(profile.includes(`subagentOnlyExtensions: ../../../../${extension}\n`), declared, role);

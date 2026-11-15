@@ -1,6 +1,7 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
+import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
@@ -474,9 +475,24 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
 const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
 
 export const register: Register = (on, options) => {
-  // The engine accepts one unmatched `tool.call` hook, so this one serves the record check, which runs whatever
-  // the pane option is, and the pane's observation, which runs only with the option on.
+  // The engine accepts one unmatched `tool.call` hook, so this one serves the dispatch guard and the record check,
+  // which run whatever the pane option is, and the pane's observation, which runs only with the option on.
   on('tool.call', async ($, e, next) => {
+    // The guard refuses before the child starts, so it runs ahead of `next(e)`; `$.fs` and `$.process` are spelled out per call.
+    if (e.tool === 'Agent') {
+      const verdict = await guardDispatch({
+        host: 'claude',
+        input: e,
+        io: {
+          project: () => $.session.cwd(),
+          read: (file: string) => $.fs.read(file),
+          list: (dir: string) => $.fs.list(dir),
+          stat: (file: string) => $.fs.stat(file),
+          git: async (argv: string[], cwd: string) => (await $.process.run(['git', ...argv], { cwd })).exitCode,
+        },
+      })
+      if ('deny' in verdict) return { deny: verdict.deny }
+    }
     const ran = await next(e)
     // A failure in either part must never change or repeat the tool's result.
     if (options?.initiativesPane === true) {

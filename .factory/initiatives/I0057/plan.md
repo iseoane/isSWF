@@ -39,6 +39,8 @@ Further candidates observed on 2026-11-14, to assess:
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
+- Worker shells ran python heredocs that hung until killed, once for low memory (J001 A007, J005 A001, 2026-11-15): a shell guard (J003) could refuse interactive interpreters reading a heredoc, or worker briefs could name node for scripting.
+- The selection file prescribed by a brief could not meet an operator condition, and only the review caught it (J004 V001 F1): a brief that records an operator condition could carry it as an acceptance test the worker must add.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -46,13 +48,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
 - Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: PR and exact-head CI; merge needs the operator's approval (tools/factory-package.mjs, tools/build-release.mjs, .agents/hosts/pi/agents/isswf-worker.md and isswf-planner.md).
+- Next step: None.
 
 ### Acceptance
 
@@ -74,6 +76,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: runtime probes ([A006](jobs/J001/A006.md)): a plugin `tool.call` handler's post-`next(e)` `context` reaches the model in the same turn with the tool result unchanged; the parent handler sees child Bash calls with `agentId`; a hooks module receives `classic.SessionStart` (`compact`), but its `additionalContext` did not reach the model (affects J005).
 - 2026-11-15: `tests/isswf-record-check.mjs` from PR327 is not run by CI: neither `.github/workflows/quality.yml` nor `tools/check-quality.mjs` lists it.
 - 2026-11-15: brief-r4 review passed in two rounds ([V004](jobs/J001/V004.md), [V005](jobs/J001/V005.md)); candidate 9279f41. Acceptance 2 amended by the coordinator: the read-only Pi planner does not declare the guard, because it can never write. Known limit: no test runs the merged Claude tool.call hook (only its source text is checked).
+- 2026-11-15: PR329 merged at 3f18562fa84c1db05468807e184a433124935727 after exact-head CI passed on f73aed6 (one deferred check); the operator approved the needs-a-person paths in the conversation.
 
 ## J002
 
@@ -102,9 +105,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
 - Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: Read-only research (brief-r1), then the implementation brief r2.
+- Next step: Implementation brief r3 after J004 merges: CI-waiting and package-acquisition rules for Bash and PowerShell on both hosts, in a shared command tokeniser; the cd rule is out of scope (native reset, recorded as version-dependent).
 
 ### Acceptance
 
@@ -119,6 +122,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the coordinator used `gh pr checks --watch` with sleep, contrary to feature-delivery.md:63; one wait was killed for low memory.
 - 2026-11-03: a Claude worker ran unauthorized `npx eslint` and `npx knip` with package-acquisition warnings and the wrong tool configuration, a repeated violation (Engram observation 4426).
 - 2026-11-15: the coordinator again used `gh pr checks --watch` twice for PR327, contrary to feature-delivery.md; PR328 used one deferred check instead.
+- 2026-11-15: research ([A001](jobs/J003/A001.md)): Claude denies Bash before next(e); Pi bash spawns per call, so a cd never persists and the cd acceptance is Claude-only; unknown whether Claude Bash keeps a cd and whether $.session.cwd() follows it.
+- 2026-11-15: coordinator decisions under the standing grant: the documented locked installs (npm ci --prefix tooling/quality or tooling/host-tests with --ignore-scripts and no package arguments) stay allowed; a bounded CI wait is one sleep of at most 900 s followed by one gh pr checks, with no loop; the Claude and Pi PowerShell tools get the same matcher where they exist; Pi user_bash (the operator's own commands) is not guarded.
+- 2026-11-15: probe ([A002](jobs/J003/A002.md)), Claude Code 2.1.325: the host resets every standalone shell cd ("Shell cwd was reset to …") and $.session.cwd() never moves, so the cd acceptance is met natively on this version; the 2026-11-14 pane symptom has an open cause. A nonzero exit sets ran.isError; PowerShell is a separate tool with the command in e.command.
 
 ## J004
 
@@ -128,7 +134,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: Dispatch the brief-r3 worker after the J001 r4 merge (both edit the single tool.call hook).
+- Next step: PR and exact-head CI; merge needs the operator's approval (grant and authority code, .agents/hosts/**, tools/factory-package.mjs, tools/build-release.mjs).
 
 ### Acceptance
 
@@ -147,16 +153,18 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: research ([A001](jobs/J004/A001.md)): Claude `agent.spawn` input carries `model` but no effort; Pi `subagent` has `model` and no top-level thinking field; no structured selection source exists, and project-setup.md:56 claims Pi overrides that .pi/settings.json does not hold.
 - 2026-11-15: operator approved integrating J004 (grant and authority code, .agents/hosts/**) on condition: "Autorizo pero cada agente aunque sea en el mismo fichero tienen sus modelos por si quiero usar o mezclar diferentes agentes". The selection file gives each agent its own host, model and effort.
 - 2026-11-15: probe ([A002](jobs/J004/A002.md)): Claude `tool.call` for Agent carries `model` and `effort`, `agent.spawn` has no effort; a spawn `deny` leaves the child unstarted and the parent sees the reason; Pi thinking is only a model suffix.
+- 2026-11-15: J009/A002 observed $.process.run running git from a Claude hooks module without a prompt, so condition 5 (brief committed) can be checked on Claude too; the brief-r3 worker uses it.
+- 2026-11-15: brief-r3 review passed in two rounds ([V001](jobs/J004/V001.md), [V002](jobs/J004/V002.md)); correction 2 (F10, F11) verified by the coordinator without a third model review: RED 8fdf459 failed, GREEN d74a2b1 passed, and on candidate 2e1d095 the guard, host-portability, release-package, record-guard and package-metadata tests, check-docs and git diff --check exited 0. Known limits: any prompt line can carry Override:, the base SHA is not checked to exist, and the initiative's observed status stays a coordinator check.
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Size: M (one flow, but verification needs a real compaction on each host)
 - Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Brief: [brief-r2.md](jobs/J005/brief-r2.md)
 - Blocker: None.
-- Next step: Prepare a brief; confirm how each host lets a plugin steer the summary and add context after compaction.
+- Next step: Implementation brief r3 after J004 merges (shares hooks/register.tsx); Pi summary steering stays an acceptance limit for the operator to accept or reject.
 
 ### Acceptance
 
@@ -170,6 +178,8 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the operator reports that forgotten process rules are recurrent. Linking this to compaction is an inference, not a traced cause.
 - 2026-11-14 audit: .agents/hosts/claude-code.md asks the coordinator to reload its skill after compaction, a rule that itself depends on memory. Mechanisms found: Claude plugin `session.compact` (steer or skip) and SessionStart `reloadSkills`; Pi `session_before_compact` and `before_agent_start`.
 - 2026-11-15 probe (J001/A006): a hooks module's `additionalContext` from `classic.SessionStart` (`compact`) did not reach the model, while a settings-hook SessionStart output did. `session.compact` steering, `$.session.append` and `reloadSkills` are untested.
+- 2026-11-15: probe ([A001](jobs/J005/A001.md)), Claude Code 2.1.325: session.compact instructions steer the summary; hook-returned messages after a manual /compact never reached the model; skill.prompt detects the coordinator; Pi can add a message through before_agent_start but cannot steer its own summarizer.
+- 2026-11-15: probe ([A002](jobs/J005/A002.md)): a plugin classic.SessionStart hook with source compact and additionalContext reached the model after a manual /compact; $.session.append did not; a skill invoked again after compaction reaches the model; auto trigger untested.
 
 ## J006
 
@@ -251,9 +261,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: S (one flow, no special risk: compare the branch before a commit)
 - Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J009/brief-r2.md)
 - Blocker: None.
-- Next step: Read-only research (brief-r1), then the implementation brief r2.
+- Next step: Implementation brief r3 after J003 lands the shared command tokeniser (all edit the single tool.call hook).
 
 ### Acceptance
 
@@ -265,3 +275,5 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 - 2026-11-14: the I0057 re-plan (c07a5dc) was committed on `fix/j030-reverse-stdin`, the branch of PR324, instead of on `main`. A peer session had switched the shared checkout's branch and the coordinator did not check it. Cost: one misplaced commit, moved to `main` (7b840ee) and removed from that branch with `git reset --keep` before it was pushed.
 - 2026-11-14: minutes later, the same checkout was on `records/close-i0009`, another branch switch by the peer session.
+- 2026-11-15: research ([A001](jobs/J009/A001.md)): keep the expected branch per agent loop, read HEAD through $.fs (Claude) or node:fs (Pi), reread HEAD after the session's own switch or checkout; extends the J003 tokeniser.
+- 2026-11-15: probe ([A002](jobs/J009/A002.md)), Claude Code 2.1.325: a $.state value survived a manual compaction; $.process.run ran git rev-parse in a headless session without a permission prompt; a linked worktree's .git file and its gitdir HEAD read through $.fs on Windows.
