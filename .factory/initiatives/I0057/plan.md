@@ -31,6 +31,7 @@ Further candidates observed on 2026-11-14, to assess:
 - Briefs recorded a tool limit ("effort not settable") that the tool schema contradicts: capability claims in briefs could be checked against the host's tool schema.
 - `hooks/register.test.tsx` is not run by any CI step or test (J001/A002): any hook guard needs a test that runs.
 - A wording correction dropped part of a contract definition, and the phrase tests passed (J008/V002 F4): a record field's definition could have one canonical source, with its key phrases asserted.
+- Knip and ESLint are not part of `check-quality`, so a worker's local checks can pass while CI fails (J001 PR327): the worker brief or a pre-push check could run them.
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
@@ -64,6 +65,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: `Run:` lines with trailing notes in A003, A011 and V006 were silently ignored by the pane (tools/isswf-snapshot-core.mjs:116).
 - 2026-11-14: J029 stayed `blocked` while its worker, review and PR ran, so the pane's quota-resume prompt (hooks/register.tsx:165) never armed.
 - 2026-11-15: brief-r2 candidate 5f34fdf passed review round 3 ([V003](jobs/J001/V003.md)) after V001 (F1) and V002 (F6) failed on stale exit-code statements; attempts A003-A005. On real records the new validator flagged `J008/A002.md:7` `run-id-unknown`.
+- 2026-11-15: PR327 CI failed Knip (`REQUIRED_FIELDS` unused: the test imports the core dynamically). After V003 the coordinator added the core as a Knip entry, as for `isswf-snapshot-core.mjs`; Knip passed locally. Not independently reviewed; CI verifies it. Knip was not run locally before review although its locked install is documented.
 
 ## J002
 
