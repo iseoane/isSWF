@@ -109,7 +109,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J003/brief-r3.md)
 - Blocker: None.
-- Next step: Correction cycle 1 for V001 (F1-F6), then a round-2 delta review; the operator approved the merge in advance on 2026-11-15, subject to a passing review and green exact-head CI.
+- Next step: Correction cycle 2 for V002 (N1, N2), verified by the coordinator without a third model review; then PR and exact-head CI. The operator approved the merge in advance on 2026-11-15, subject to a passing review and green exact-head CI.
 
 ### Acceptance
 
