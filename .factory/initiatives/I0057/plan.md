@@ -161,7 +161,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J005/brief-r2.md)
 - Blocker: None.
-- Next step: Probe brief-r2 for the untested Claude post-compaction routes ($.session.append, SessionStart reloadSkills, auto trigger), then the implementation brief.
+- Next step: Implementation brief r3 after J004 merges (shares hooks/register.tsx); Pi summary steering stays an acceptance limit for the operator to accept or reject.
 
 ### Acceptance
 
@@ -176,6 +176,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14 audit: .agents/hosts/claude-code.md asks the coordinator to reload its skill after compaction, a rule that itself depends on memory. Mechanisms found: Claude plugin `session.compact` (steer or skip) and SessionStart `reloadSkills`; Pi `session_before_compact` and `before_agent_start`.
 - 2026-11-15 probe (J001/A006): a hooks module's `additionalContext` from `classic.SessionStart` (`compact`) did not reach the model, while a settings-hook SessionStart output did. `session.compact` steering, `$.session.append` and `reloadSkills` are untested.
 - 2026-11-15: probe ([A001](jobs/J005/A001.md)), Claude Code 2.1.325: session.compact instructions steer the summary; hook-returned messages after a manual /compact never reached the model; skill.prompt detects the coordinator; Pi can add a message through before_agent_start but cannot steer its own summarizer.
+- 2026-11-15: probe ([A002](jobs/J005/A002.md)): a plugin classic.SessionStart hook with source compact and additionalContext reached the model after a manual /compact; $.session.append did not; a skill invoked again after compaction reaches the model; auto trigger untested.
 
 ## J006
 
