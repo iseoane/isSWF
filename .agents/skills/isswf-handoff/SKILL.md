@@ -56,7 +56,7 @@ Run this before `gh pr create` and before a merge, and whenever commits were add
 node <factory-root>/tools/isswf-handoff.mjs coverage --project <abs>
 ```
 
-Without `--base` it uses the merge base of `HEAD` and `origin/main`, so fetch `origin/main` first; `base-not-found` means it is absent. `--head`, `--initiative` and `--job` narrow the range or the jobs. For each job whose records the range changes, it takes the latest review's candidate. A commit is covered when the latest candidate of any such job includes it, so a later job's review covers the commits of an earlier job in the same range; it lists every commit that no job's candidate includes and that changes a path outside the job records.
+Without `--base` it uses the merge base of `HEAD` and `origin/main`, so fetch `origin/main` first; `base-not-found` means it is absent. `--head`, `--initiative` and `--job` narrow the range or the jobs. For each job whose records the range changes, it takes the latest review's candidate. A commit is covered only when it lies inside the `Base commit SHA`..`Candidate commit SHA` range of the latest review of some such job; a later candidate whose range starts after an unreviewed commit does not cover it. It lists every other commit that changes a path outside the job records. The override lines of every such job's latest review apply to this one list.
 
 - Exit 0: `jobs[].uncovered` is empty everywhere. Jobs without a review are listed under `skipped`. This shows only that recorded reviews cover the commits; it is not a review verdict.
 - Exit 1, `unreviewed-commits`: each `uncovered` entry names a commit and its paths. Obtain a delta review of those commits, record it as the next review of the job, and run the check again.
