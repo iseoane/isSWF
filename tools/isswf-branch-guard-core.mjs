@@ -126,14 +126,17 @@ export async function checkBranch({ command, cwd, loop, store, observe }) {
     };
     if (first) await look(cwd);
     const reobserve = [];
+    const switched = new Set();
     for (const { commit, dir } of calls) {
       if (!commit) {
         reobserve.push(dir);
+        const found = await look(dir);
+        if (found) switched.add(found.top);
         continue;
       }
-      // A switch earlier in the same command re-selects the branch, so the commit after it is not checked.
-      if (reobserve.includes(dir)) continue;
       const found = await look(dir);
+      // A switch earlier in the same command re-selects the branch of that repository, so a commit after it is not checked.
+      if (found && switched.has(found.top)) continue;
       if (found && !sameState(entries[keyOf(loop, found.top)], found.state)) return { deny: refusal(found.top, found.state, entries[keyOf(loop, found.top)]), reobserve: [] };
     }
     return { reobserve: [...new Set(reobserve)] };
