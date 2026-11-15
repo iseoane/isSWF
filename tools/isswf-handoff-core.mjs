@@ -26,8 +26,11 @@ export function handoffReferences(prompt) {
   return { path, sha256, candidate };
 }
 
-async function readFile(io, path, label) {
+// A file whose size the host reports above `limit` is refused unread, so a path in a prompt cannot make the guard load a huge file.
+async function readFile(io, path, label, limit, limitText) {
   try {
+    const size = (await io.stat(path))?.size;
+    if (typeof size === 'number' && size > limit) return { error: `the ${label} ${path} is over ${limitText}` };
     const bytes = await io.readBytes(path);
     if (bytes instanceof Uint8Array) return { bytes };
   } catch { /* reported below */ }
@@ -43,7 +46,7 @@ async function readFile(io, path, label) {
 export async function verifyHandoff({ prompt, references, io }) {
   const named = handoffReferences(prompt);
   if (named.error) return named.error;
-  const file = await readFile(io, named.path, 'handoff file');
+  const file = await readFile(io, named.path, 'handoff file', MAX_HANDOFF_BYTES, '1 MiB');
   if (file.error) return file.error;
   if (file.bytes.length > MAX_HANDOFF_BYTES) return 'the handoff file is over 1 MiB';
   if (sha256Hex(file.bytes) !== named.sha256) return `the handoff file ${named.path} does not match the handoff-sha256 in the prompt (it changed after the digest was taken)`;
@@ -63,7 +66,7 @@ export async function verifyHandoff({ prompt, references, io }) {
   const diff = isObject(envelope.diff) ? envelope.diff : {};
   if (typeof diff.path !== 'string' || !ABSOLUTE_PATH.test(diff.path)) return 'the handoff diff path must be an absolute path';
   if (!Number.isInteger(diff.bytes) || diff.bytes < 0 || diff.bytes > MAX_DIFF_BYTES || !isSha(diff.sha256, 64)) return 'the handoff diff needs an integer bytes up to 4 MiB and a 64-hex sha256';
-  const patch = await readFile(io, diff.path, 'diff file');
+  const patch = await readFile(io, diff.path, 'diff file', diff.bytes, `the ${diff.bytes} bytes the handoff records`);
   if (patch.error) return patch.error;
   if (patch.bytes.length !== diff.bytes) return `the diff file has ${patch.bytes.length} bytes; the handoff records ${diff.bytes}`;
   if (sha256Hex(patch.bytes) !== diff.sha256) return 'the diff file sha-256 does not match the handoff';
