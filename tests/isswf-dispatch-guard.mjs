@@ -339,4 +339,14 @@ const guardAt = hook.indexOf('guardDispatch(');
 assert.ok(guardAt > 0 && guardAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
 assert.ok(hook.slice(0, guardAt).includes("e.tool === 'Agent'"), 'only the Agent tool is guarded');
 for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', 'return { deny:']) assert.ok(hook.includes(part), part);
+// The reference parser stays linear on a long unbroken token and still returns the brief path with its state root.
+{
+  const { checkReferences } = await load('tools/isswf-dispatch-guard-core.mjs');
+  const brief = '.factory/initiatives/I0057/jobs/J005/brief-r3.md';
+  const prompt = `${'a'.repeat(200000)} ${brief} checkpoint ${'c'.repeat(40)} base ${'d'.repeat(40)}`;
+  const started = performance.now();
+  const refs = checkReferences(prompt);
+  assert.ok(performance.now() - started < 200, 'checkReferences on a 200000-character token returns within 200 ms');
+  assert.equal(refs.path, brief, 'the full path is kept with its state root');
+}
 console.log('PASS dispatch guard: shared core conditions, override line, fail-closed behavior, the Pi extension, its packaging and the Claude hook');
