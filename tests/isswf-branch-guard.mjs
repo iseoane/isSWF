@@ -141,6 +141,24 @@ for (const [mode, observe] of Object.entries(observers)) {
       await s.refresh(chained.reobserve);
       assert.equal((await s.check('git commit -m four', repo)).deny, undefined);
     }
+    // The exemption compares repository top levels, not directory text.
+    {
+      const other = join(base, 'other-repo').replaceAll('\\', '/');
+      mkdirSync(other);
+      sh(other, 'init', '-q');
+      writeFileSync(join(other, 'b.txt'), 'b\n');
+      sh(other, 'add', '.');
+      sh(other, 'commit', '-q', '-m', 'first');
+      mkdirSync(join(repo, 'sub'));
+      assert.equal((await s.check('git -C ../other-repo commit -m x', repo)).deny, undefined, label('the other repository is first seen on its branch'));
+      const otherBranch = sh(other, 'branch', '--show-current').trim();
+      sh(repo, 'switch', '-q', 'other');
+      sh(other, 'switch', '-q', '-c', 'peer');
+      assert.equal((await s.check('git switch main && cd sub && git commit -m x', repo)).deny, undefined, label('a commit in a subdirectory of the switched repository follows the switch'));
+      refusal(await s.check('git switch main && git -C ../other-repo commit -m x', repo), 'peer', otherBranch);
+      sh(other, 'switch', '-q', otherBranch);
+      sh(repo, 'switch', '-q', 'main');
+    }
     sh(repo, 'switch', '-q', 'other');
     {
       const adopt = await s.check('git switch other', repo);
