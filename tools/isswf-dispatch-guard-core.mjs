@@ -9,7 +9,8 @@ const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
 const STATE_DIRECTORIES = ['.isswf', '.factory'];
 // Pi has no thinking field: the level is a suffix of the model, and a model id may contain ':' itself.
 const PI_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
-const BRIEF_PATH = /(?:[\w.:-]+[\\/])*initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
+const PATH_CHAR = /[\w.:\\/-]/u;
+const BRIEF_PATH = /initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
 // The first hex token on the same line after the word that names it; only a full 40-hex token counts, so a short SHA is not
 // rescued by a full one that follows it.
 const fullShaAfter = (body, word) => {
@@ -103,7 +104,10 @@ export function checkReferences(prompt) {
     shas[word] = fullShaAfter(body, word);
     if (!shas[word]) refuse(3, `the prompt does not give the full 40-hex ${label} SHA after the word "${word}"`);
   }
-  return { initiative: brief[1], job: brief[2], revision: brief[3], path: brief[0], checkpoint: shas.checkpoint, base: shas.base };
+  // The state root is whatever path characters precede the match; walking back keeps the match itself unchanged and the cost linear.
+  let start = brief.index;
+  while (start > 0 && PATH_CHAR.test(body[start - 1])) start -= 1;
+  return { initiative: brief[1], job: brief[2], revision: brief[3], path: body.slice(start, brief.index + brief[0].length), checkpoint: shas.checkpoint, base: shas.base };
 }
 
 async function checkPlan(planPath, job, io) {
