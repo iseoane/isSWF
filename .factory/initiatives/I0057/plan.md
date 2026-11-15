@@ -119,13 +119,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Size: M (one flow, with one bounded risk: refusing a legitimate dispatch)
 - Objective: A delegation that fails the coordinator's pre-dispatch refusal conditions is refused by the host before the child starts.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief after J001; verify the Pi subagent tool name and arguments the guard must inspect.
+- Next step: A read-only researcher answers brief-r1 (delegation event shapes, structured model/effort source, mechanical refusal checks); then the coordinator prepares brief-r2.
 
 ### Acceptance
 
