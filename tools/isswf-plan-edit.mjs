@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { lstat, mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
+import { link, lstat, mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planErrorDetail } from './isswf-plan-core.mjs';
@@ -43,10 +43,16 @@ export async function editPlanFile({ project, initiative, edit, beforeRename }) 
   } catch (error) { await unlink(temp).catch(() => {}); throw error; }
 }
 
-export async function createPlanFile({ project, initiative, text }) {
+/** Creates a plan that must not exist: the whole text goes to a temporary file, and `link` publishes it only if no plan is there. */
+export async function createPlanFile({ project, initiative, text, beforeLink }) {
   const path = await planPath(project, initiative);
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, text, { flag: 'wx' }).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
+  const temp = join(dirname(path), `.plan.md.${randomBytes(6).toString('hex')}.tmp`);
+  try {
+    await writeFile(temp, text, { flag: 'wx' });
+    await beforeLink?.();
+    await link(temp, path).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
+  } finally { await unlink(temp).catch(() => {}); }
 }
 
 const common = ['--project', '--initiative'];
