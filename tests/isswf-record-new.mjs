@@ -332,6 +332,131 @@ try {
     assert.equal(await readFile(racer, 'utf8'), 'theirs\n');
     assert.deepEqual((await readdir(jobDir)).filter(name => name.endsWith('.tmp')), [], 'no temporary file is left behind');
   }
+  // `complete` fills the candidate, the changed paths and the commits from Git, and refuses to overwrite what the author wrote.
+  {
+    const { checkRecord } = await load('isswf-record-check-core.mjs');
+    const project = join(root, 'complete');
+    const jobRel = '.factory/initiatives/I0001/jobs/J001';
+    const jobDir = join(project, jobRel);
+    await mkdir(join(project, 'src'), { recursive: true });
+    git(project, 'init', '-q', '-b', 'main');
+    await writeFile(join(project, 'src/old-ü.txt'), 'old\n');
+    await writeFile(join(project, 'README.md'), 'readme\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'base');
+    const base = git(project, 'rev-parse', 'HEAD');
+    git(project, 'switch', '-q', '-c', 'cand');
+    git(project, 'mv', 'src/old-ü.txt', 'src/nuevo-ñ.txt');
+    await writeFile(join(project, 'README.md'), 'readme changed\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'rename');
+    const first = git(project, 'rev-parse', 'HEAD');
+    await mkdir(join(project, 'tools'));
+    await mkdir(join(project, '.isswf/initiatives/I0009'), { recursive: true });
+    await mkdir(jobDir, { recursive: true });
+    await writeFile(join(project, 'tools/x.mjs'), 'x\n');
+    await writeFile(join(project, '.isswf/initiatives/I0009/plan.md'), 'plan\n');
+    await writeFile(join(jobDir, 'brief-r1.md'), 'brief\n');
+    git(project, 'add', '-A');
+    git(project, 'commit', '-q', '-m', 'tool and records');
+    const candidate = git(project, 'rev-parse', 'HEAD');
+    git(project, 'switch', '-q', 'main');
+    await rm(join(project, '.isswf'), { recursive: true, force: true });
+    await mkdir(jobDir, { recursive: true });
+    await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planText());
+
+    const cli = (command, args) => {
+      const result = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), command, ...Object.entries(args).flat()], { encoding: 'utf8', timeout: 30000 });
+      return { status: result.status, out: JSON.parse(result.stdout || 'null'), stderr: result.stderr };
+    };
+    const target = { '--project': project, '--initiative': 'I0001', '--job': 'J001' };
+    const attempt = (id, extra = {}) => {
+      const done = cli('create', { ...target, '--kind': 'attempt', '--id': id, '--role': 'worker', '--brief': `${jobRel}/brief-r1.md`, '--checkpoint': base, '--base': base, '--model': 'sonnet', '--effort': 'medium', ...extra });
+      assert.equal(done.status, 0, JSON.stringify(done));
+    };
+    const completeArgs = (record, extra = {}) => ({ ...target, '--record': record, '--candidate': candidate, ...extra });
+    const file = name => join(jobDir, name);
+    const withNested = (text, label, items) => text.replace(`- ${label}\n`, `- ${label}\n${items.map(item => `  ${item}\n`).join('')}`);
+    const changed = ['  - `README.md`', '  - `src/nuevo-ñ.txt`', '  - `src/old-ü.txt`', '  - `tools/x.mjs`', '  - Record paths:', '    - `.factory/initiatives/I0001/jobs/J001/brief-r1.md`', '    - `.isswf/initiatives/I0009/plan.md`'].map(line => line.slice(2));
+
+    // An attempt: the candidate inline, the paths with the record paths apart, and the commits oldest first.
+    attempt('A001');
+    const created = await readFile(file('A001.md'), 'utf8');
+    const done = cli('complete', completeArgs('A001'));
+    assert.equal(done.status, 0, JSON.stringify(done));
+    assert.deepEqual(done.out, { ok: true, initiative: 'I0001', job: 'J001', record: 'A001', path: file('A001.md'), filled: ['Candidate commit SHA:', 'Changed paths:', 'Resulting artifact paths and checkpoint or commit references:'] });
+    let expectedText = created.replace('- Candidate commit SHA:\n', `- Candidate commit SHA: ${candidate}\n`);
+    expectedText = withNested(expectedText, 'Changed paths:', changed);
+    expectedText = withNested(expectedText, 'Resulting artifact paths and checkpoint or commit references:', ['- Commits (oldest first):', `  - \`${first}\``, `  - \`${candidate}\``]);
+    assert.equal(await readFile(file('A001.md'), 'utf8'), expectedText);
+    assert.deepEqual(checkRecord({ path: file('A001.md'), text: expectedText }), { ok: true, violations: [] });
+    // A second run with the same candidate finds every field filled with that very text and changes nothing.
+    assert.equal(cli('complete', completeArgs('A001')).status, 0);
+    assert.equal(await readFile(file('A001.md'), 'utf8'), expectedText);
+
+    // A review records its candidate and the paths it reviews, and has no commit list.
+    const review = cli('create', { ...target, '--kind': 'review', '--id': 'V001', '--role': 'reviewer', '--brief': `${jobRel}/brief-r1.md`, '--checkpoint': base, '--base': base, '--model': 'haiku', '--effort': 'high' });
+    assert.equal(review.status, 0, JSON.stringify(review));
+    const reviewCreated = await readFile(file('V001.md'), 'utf8');
+    assert.equal(cli('complete', completeArgs('V001')).status, 0);
+    assert.equal(await readFile(file('V001.md'), 'utf8'), withNested(reviewCreated.replace('- Candidate commit SHA, or reproducible snapshot identity:\n', `- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n`), 'Candidate paths reviewed:', changed));
+
+    // A Run line is added after the identity lines, or after the last Run line, once.
+    attempt('A002', { '--run': 'claude agent=first', '--round': '2' });
+    assert.equal(cli('complete', completeArgs('A002', { '--run': 'claude session=second' })).status, 0);
+    assert.equal(cli('complete', completeArgs('A002', { '--run': 'claude session=second' })).status, 0);
+    const runs = (await readFile(file('A002.md'), 'utf8')).split('\n').filter(line => line.startsWith('- Run:'));
+    assert.deepEqual(runs, ['- Run: claude agent=first', '- Run: claude session=second']);
+    attempt('A003');
+    assert.equal(cli('complete', completeArgs('A003', { '--run': 'pi child=c-1' })).status, 0);
+    assert.ok((await readFile(file('A003.md'), 'utf8')).startsWith('# Attempt report'));
+    const lines003 = (await readFile(file('A003.md'), 'utf8')).split('\n');
+    assert.equal(lines003[lines003.findIndex(line => line.startsWith('- Job ID and attempt ID:')) + 1], '- Run: pi child=c-1');
+
+    // CRLF records keep their line endings.
+    attempt('A004');
+    const crlf = (await readFile(file('A004.md'), 'utf8')).replaceAll('\n', '\r\n');
+    await writeFile(file('A004.md'), crlf);
+    assert.equal(cli('complete', completeArgs('A004')).status, 0);
+    const afterCrlf = await readFile(file('A004.md'), 'utf8');
+    assert.ok(!/(?<!\r)\n/u.test(afterCrlf), 'every line still ends with CRLF');
+    assert.ok(afterCrlf.includes(`- Candidate commit SHA: ${candidate}\r\n`));
+
+    // A field that is no longer the template's text is refused, the whole file stays as it was, and nothing is partly filled.
+    const refuseComplete = async (name, change, code, field, extra = {}) => {
+      const text = change(await readFile(file(name), 'utf8'));
+      await writeFile(file(name), text);
+      const refused = cli('complete', completeArgs(name.slice(0, 4), extra));
+      assert.deepEqual([refused.status, refused.out.ok, refused.out.code, refused.out.field], [1, false, code, field], `${name} ${code}`);
+      assert.equal(await readFile(file(name), 'utf8'), text, `${name} is unchanged`);
+    };
+    attempt('A005');
+    await refuseComplete('A005.md', text => text.replace('- Changed paths:\n', '- Changed paths: by hand\n'), 'field-not-template', 'Changed paths:');
+    attempt('A006');
+    await refuseComplete('A006.md', text => text.replace('- Candidate commit SHA:\n', `- Candidate commit SHA: ${base}\n`), 'field-not-template', 'Candidate commit SHA:');
+    attempt('A007');
+    await refuseComplete('A007.md', text => withNested(text, 'Resulting artifact paths and checkpoint or commit references:', ['- by hand']), 'field-not-template', 'Resulting artifact paths and checkpoint or commit references:');
+    attempt('A008');
+    await refuseComplete('A008.md', text => text.replace('- Changed paths:\n', ''), 'field-missing', 'Changed paths:');
+    attempt('A009');
+    await refuseComplete('A009.md', text => text.replace(/^- Target codebase base.*$/mu, '- Target codebase base (full Git SHA): unknown'), 'base-not-recorded', undefined);
+    attempt('A010');
+    await refuseComplete('A010.md', text => text, 'invalid-candidate', undefined, { '--candidate': 'abc' });
+    await refuseComplete('A010.md', text => text, 'commit-not-found', 'candidate', { '--candidate': 'f'.repeat(40) });
+    await refuseComplete('A010.md', text => text, 'invalid-run', undefined, { '--run': 'claude agent=<id> note' });
+    for (const [record, code] of [['B001', 'invalid-record'], ['A1', 'invalid-record'], ['A099', 'record-not-found']]) {
+      const refused = cli('complete', completeArgs(record));
+      assert.deepEqual([refused.status, refused.out.ok, refused.out.code], [1, false, code], record);
+    }
+
+    // A record that changes between the read and the replacement is not overwritten.
+    const { completeRecord } = await load('isswf-record-new.mjs');
+    attempt('A011');
+    const racedPath = file('A011.md');
+    await assert.rejects(completeRecord({ project, initiative: 'I0001', job: 'J001', record: 'A011', candidate, beforeRename: () => writeFile(racedPath, 'theirs\n') }), { code: 'record-changed' });
+    assert.equal(await readFile(racedPath, 'utf8'), 'theirs\n');
+    assert.deepEqual((await readdir(jobDir)).filter(name => name.endsWith('.tmp')), [], 'no temporary file is left behind');
+  }
   console.log('isswf-record-new test ok');
 } finally {
   await rm(root, { recursive: true, force: true });
