@@ -170,9 +170,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (one flow, but verification needs a real compaction on each host)
 - Objective: After a compaction, the coordinator still holds the active assignment and reloads its skill.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J005/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J005/brief-r3.md)
 - Blocker: None.
-- Next step: Implementation brief r3 after J004 merges (shares hooks/register.tsx); Pi summary steering stays an acceptance limit for the operator to accept or reject.
+- Next step: Implementation (brief-r3): worker on feat/i0057-j005-compaction, then unbound review, PR and exact-head CI; the merge needs the operator's approval (.agents/hosts/**); the Pi summary limit is for the operator to accept or reject.
 
 ### Acceptance
 
