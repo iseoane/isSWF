@@ -15,7 +15,7 @@ const editError = (code, where = {}) => Object.assign(Error(code), { code }, whe
 
 /** One line of text that the plan parser reads back verbatim: no control characters, newlines or blank value. */
 function oneLine(value, field) {
-  if (typeof value !== 'string' || !value.trim() || value.length > 4000 || /[\x00-\x1f\x7f]/u.test(value)) throw editError('invalid-value', { field });
+  if (typeof value !== 'string' || !value.trim() || value.length > 4000 || /[\p{Cc}\u2028\u2029]/u.test(value)) throw editError('invalid-value', { field });
   return value;
 }
 
