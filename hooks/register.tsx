@@ -519,6 +519,7 @@ export const register: Register = (on, options) => {
         io: {
           project: () => $.session.cwd(),
           read: (file: string) => $.fs.read(file),
+          readBytes: async (file: string) => Uint8Array.from(atob((await $.fs.read(file, { as: 'bytes' })).base64), char => char.charCodeAt(0)),
           list: (dir: string) => $.fs.list(dir),
           stat: (file: string) => $.fs.stat(file),
           git: async (argv: string[], cwd: string) => (await $.process.run(['git', ...argv], { cwd })).exitCode,

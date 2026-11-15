@@ -16,7 +16,7 @@ const git = (argv, cwd) => new Promise((resolve, reject) => {
 export default function (pi) {
   pi.on('tool_call', async (event, ctx) => {
     if (event?.toolName !== 'subagent') return undefined;
-    const io = { project: () => ctx.cwd, read: file => readFile(file, 'utf8'), list, stat: async file => ({ kind: kindOf(await stat(file)) }), git };
+    const io = { project: () => ctx.cwd, read: file => readFile(file, 'utf8'), readBytes: file => readFile(file), list, stat: async file => ({ kind: kindOf(await stat(file)) }), git };
     const verdict = await guardDispatch({ host: 'pi', input: event.input, io });
     return verdict.deny === undefined ? undefined : { block: true, reason: verdict.deny };
   });

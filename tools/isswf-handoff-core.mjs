@@ -1,12 +1,74 @@
 // No Node imports and no `process` access, like tools/isswf-dispatch-guard-core.mjs: the Claude hooks module and the Pi extension both
 // call it with an injected `readBytes`. tools/isswf-handoff.mjs is the Node wrapper that runs Git and writes the files.
 
-// Stub for the TDD cycle: every export except sha256Hex is empty until its behaviour is implemented.
 export const HANDOFF_SCHEMA = 'isswf.handoff/1';
 // The Claude hook cannot read a file over 4 MiB, so a diff above it could not be verified there and is refused when it is written.
 export const MAX_DIFF_BYTES = 4 * 1024 * 1024;
-export const handoffReferences = () => ({});
-export const verifyHandoff = async () => undefined;
+const MAX_HANDOFF_BYTES = 1024 * 1024;
+const LINE_PREFIX = String.raw`^[ \t]*(?:[-*][ \t]+)?`;
+const ABSOLUTE_PATH = /^(?:[A-Za-z]:[\\/]|[\\/]{1,2}[^\\/\s])/u;
+const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const isSha = (value, length) => typeof value === 'string' && new RegExp(`^[0-9a-f]{${length}}$`, 'u').test(value);
+
+/**
+ * The handoff path, its SHA-256 and the candidate a reviewer prompt names, each on its own line as `handoff: <absolute path>`,
+ * `handoff-sha256: <64 hex>` and `candidate <40 hex>` (a colon after the label is optional), or `{ error }` naming what is missing.
+ */
+export function handoffReferences(prompt) {
+  const body = typeof prompt === 'string' ? prompt : '';
+  const path = new RegExp(`${LINE_PREFIX}handoff:?[ \\t]+(\\S.*?)[ \\t\\r]*$`, 'mu').exec(body)?.[1];
+  if (path === undefined) return { error: 'the prompt does not give the handoff file as a line `handoff: <absolute path>`' };
+  if (!ABSOLUTE_PATH.test(path)) return { error: `the handoff path ${path} must be an absolute path` };
+  const sha256 = new RegExp(`${LINE_PREFIX}handoff-sha256:?[ \\t]+([0-9a-f]{64})[ \\t\\r]*$`, 'mu').exec(body)?.[1];
+  if (sha256 === undefined) return { error: 'the prompt does not give the 64-hex SHA-256 of the handoff file as a line `handoff-sha256: <hex>`' };
+  const candidate = new RegExp(`${LINE_PREFIX}candidate:?[ \\t]+([0-9a-f]{40})[ \\t\\r]*$`, 'mu').exec(body)?.[1];
+  if (candidate === undefined) return { error: 'the prompt does not give the full 40-hex candidate SHA as a line `candidate <sha>`' };
+  return { path, sha256, candidate };
+}
+
+async function readFile(io, path, label) {
+  try {
+    const bytes = await io.readBytes(path);
+    if (bytes instanceof Uint8Array) return { bytes };
+  } catch { /* reported below */ }
+  return { error: `the ${label} ${path} cannot be read` };
+}
+
+/**
+ * Checks a reviewer dispatch against its handoff and returns the reason it fails, or undefined when it holds: the handoff file hashes to
+ * the digest in the prompt, its envelope names this candidate, base, checkpoint and job brief, and the diff file it names has the bytes and SHA-256 it records.
+ * `references` is the parsed brief, checkpoint and base of the prompt; `io.readBytes(path)` resolves with the file's bytes.
+ * @param {{ prompt: string, references: { initiative: string, job: string, revision: string, checkpoint: string, base: string }, io: { readBytes: (path: string) => Promise<Uint8Array> } }} input
+ */
+export async function verifyHandoff({ prompt, references, io }) {
+  const named = handoffReferences(prompt);
+  if (named.error) return named.error;
+  const file = await readFile(io, named.path, 'handoff file');
+  if (file.error) return file.error;
+  if (file.bytes.length > MAX_HANDOFF_BYTES) return 'the handoff file is over 1 MiB';
+  if (sha256Hex(file.bytes) !== named.sha256) return `the handoff file ${named.path} does not match the handoff-sha256 in the prompt (it changed after the digest was taken)`;
+  let envelope;
+  try {
+    envelope = JSON.parse(new TextDecoder().decode(file.bytes));
+  } catch {
+    return 'the handoff file is not valid JSON';
+  }
+  if (!isObject(envelope) || envelope.schema !== HANDOFF_SCHEMA) return `the handoff schema is not ${HANDOFF_SCHEMA}`;
+  if (envelope.kind !== 'review') return 'the handoff is not a review handoff (kind review)';
+  const brief = isObject(envelope.brief) ? envelope.brief : {};
+  for (const [field, actual, expected] of [
+    ['candidate', envelope.candidate, named.candidate], ['base', envelope.base, references.base], ['checkpoint', brief.checkpoint, references.checkpoint],
+    ['initiative', envelope.initiative, references.initiative], ['job', envelope.job, references.job], ['brief revision', String(brief.revision), references.revision],
+  ]) if (actual !== expected) return `the handoff ${field} ${actual} is not the prompt's ${expected}`;
+  const diff = isObject(envelope.diff) ? envelope.diff : {};
+  if (typeof diff.path !== 'string' || !ABSOLUTE_PATH.test(diff.path)) return 'the handoff diff path must be an absolute path';
+  if (!Number.isInteger(diff.bytes) || diff.bytes < 0 || diff.bytes > MAX_DIFF_BYTES || !isSha(diff.sha256, 64)) return 'the handoff diff needs an integer bytes up to 4 MiB and a 64-hex sha256';
+  const patch = await readFile(io, diff.path, 'diff file');
+  if (patch.error) return patch.error;
+  if (patch.bytes.length !== diff.bytes) return `the diff file has ${patch.bytes.length} bytes; the handoff records ${diff.bytes}`;
+  if (sha256Hex(patch.bytes) !== diff.sha256) return 'the diff file sha-256 does not match the handoff';
+  return undefined;
+}
 
 /** The commit a review record names on its candidate line, or undefined when the line is missing or names no full SHA. */
 export const reviewCandidateOf = text => /^- Candidate commit SHA, or reproducible snapshot identity: *([0-9a-f]{40})\s*$/mu.exec(text)?.[1];
