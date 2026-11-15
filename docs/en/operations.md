@@ -36,6 +36,10 @@ node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/p
 - `A<nnn>.md` and `V<nnn>.md`: a `- Run:` line the snapshot's parser would ignore is `run-line-unparsed`, and one with `unknown` as its ID is `run-id-unknown` (the template says to omit the line). A record without a template label is `missing-field` with the exact label: `Deviations from required procedure and consequence:` and `Process deviations observed:` in an attempt, and `Unreviewed areas and evidence limits:`, `Convergence advice:` and `Process deviations observed:` in a review.
 - Other files are not checked.
 
+### Automatic check after a write
+
+When an Edit, Write or MultiEdit (Claude Code) or an edit or write (Pi) leaves a plan, attempt or review record under `.isswf/initiatives/` or `.factory/initiatives/` with a violation, the same check runs and the model sees each violation (code, job, field and line) in the same turn. The tool result is not changed or withheld, a clean write adds nothing, and the check only reports: it never edits a file, blocks a write or starts work. In Claude Code it applies to the main session and to delegated agents, whether or not the initiatives pane is on. In Pi it applies to the main session through the package and to the worker and planner agents through `subagentOnlyExtensions`; a project setting that overrides that list replaces it instead of merging, so keep `tools/isswf-record-guard-pi-extension.mjs` in the override. A failure of the check itself reports nothing.
+
 ## Plan edit
 
 ```bash
