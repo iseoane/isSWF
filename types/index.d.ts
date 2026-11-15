@@ -11,8 +11,13 @@ export type IsswfPaneTab = 'initiatives' | 'agents' | 'files'
 // The initiative shown in the Files tab, its expanded folders and the open file, as paths relative to the initiative.
 export type IsswfPaneTree = { id: string; open: string[]; file?: string }
 
+// What a checkout is on: a branch, or a detached HEAD at a commit.
+export type IsswfBranchState = { branch: string } | { detached: string }
+// The branch each agent loop selected in each repository, keyed by loop and repository top-level directory.
+export type IsswfBranches = Record<string, IsswfBranchState>
+
 declare module 'claude-code' {
   interface PluginState {
-    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree }
+    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree; branches: IsswfBranches }
   }
 }

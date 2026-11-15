@@ -362,9 +362,9 @@ for (const [mode, observe] of Object.entries(observers)) {
   const paneAt = hook.indexOf('options?.initiativesPane === true');
   assert.ok(commandAt > 0 && commandAt < checkAt && checkAt < nextAt, 'the branch check runs after the command guard and before the tool is called');
   assert.ok(nextAt < refreshAt && refreshAt < paneAt, 'the branches are looked at again after the tool, ahead of the pane and independent of its option');
-  const before = hook.slice(commandAt, nextAt);
+  const before = hook.slice(0, nextAt);
   assert.ok(before.includes("e.tool === 'Bash' || e.tool === 'PowerShell'"), 'both shell tools are checked');
-  assert.ok(before.includes("agentId ?? 'main'"), 'the main loop and each child have their own expected branches');
+  assert.ok(hooks.includes("loop: e.agentId ?? 'main'"), 'the main loop and each child have their own expected branches');
   assert.ok(/return \{ deny: branch\.deny \}/u.test(before), 'a refusal is a deny');
   assert.ok(/await \$\.process\.run\(\['git', \.\.\.argv\], \{ cwd \}\)/u.test(hook) && hook.includes('$.fs.read(file)'), 'Git runs through the host and the files are the fallback');
   const afterNext = hook.slice(nextAt, refreshAt);
