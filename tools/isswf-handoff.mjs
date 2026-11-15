@@ -7,7 +7,7 @@ import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
 import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
 import { isRecordPath, recordError } from './isswf-record-new-core.mjs';
-import { assertCommit, blobAt, briefOf, checkSha, gitIn, jobTarget, locateGit, recordNames, requireBrief, requireInProgress } from './isswf-record-new.mjs';
+import { assertCommit, blobAt, briefOf, checkSha, gitIn, jobTarget, locateGit, recordNames, requireBrief, reviewIds, requireInProgress } from './isswf-record-new.mjs';
 
 const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const GIT_TIMEOUT_MS = 30000;
@@ -44,8 +44,8 @@ async function reviewerSelection({ root, state }, host) {
   throw recordError('reviewer-selection-missing', { field: host });
 }
 
-// The diff file is write-once: a second handoff for the same candidate and base finds the same bytes, and any other base is refused.
-async function writeDiff(path, bytes) {
+// Both files are write-once: a second handoff for the same candidate and base finds the same bytes, and anything else under that name is refused.
+async function writeOnce(path, bytes) {
   try {
     await writeFile(path, bytes, { flag: 'wx' });
   } catch (error) {
@@ -86,7 +86,7 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   if (patch.length > MAX_DIFF_BYTES) throw recordError('diff-too-large');
 
   const names = await recordNames(target, git);
-  const priorReviews = prior ?? [...names].filter(name => /^V\d{3}\.md$/u.test(name)).map(name => name.slice(0, 4)).sort();
+  const priorReviews = prior ?? reviewIds(names);
   const stem = `${job}-${candidate.slice(0, 12)}`;
   const diffPath = join(directory, `${stem}.diff`);
   const envelope = buildEnvelope({
@@ -99,9 +99,9 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   });
   const text = Buffer.from(`${JSON.stringify(envelope, null, 2)}\n`, 'utf8');
   await mkdir(directory, { recursive: true });
-  await writeDiff(diffPath, patch);
+  await writeOnce(diffPath, patch);
   const handoffPath = join(directory, `${stem}.handoff.json`);
-  await writeFile(handoffPath, text);
+  await writeOnce(handoffPath, text);
   const handoff = { path: handoffPath, sha256: createHash('sha256').update(text).digest('hex'), bytes: text.length };
   return { ok: true, handoff, envelope, promptLines: [`handoff: ${handoff.path}`, `handoff-sha256: ${handoff.sha256}`, `candidate ${candidate}`] };
 }
@@ -125,27 +125,27 @@ export async function coverage({ project, initiative, job, base, head }) {
   assertCommit(git, from, 'base');
   assertCommit(git, tip, 'head');
 
+  // Every job whose records the range changes counts as a reviewer of the commits it names, even when --initiative or --job leaves it out of the report.
   const touched = new Map();
   for (const path of git(['diff', '--name-only', '-z', from, tip]).split('\0')) {
     const match = INITIATIVE_JOB.exec(path);
-    if (match && (!initiative || match[1] === initiative) && (!job || match[2] === job)) touched.set(match[0], { initiative: match[1], job: match[2], directory: match[0] });
+    if (match) touched.set(match[0], { initiative: match[1], job: match[2], directory: match[0] });
   }
+  const reviews = [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory)).map(entry => {
+    const record = reviewIds(git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').filter(Boolean).map(path => basename(path))).at(-1);
+    const text = record && git(['show', `${tip}:${entry.directory}${record}.md`]);
+    return { ...entry, record, text, candidate: text && reviewCandidateOf(text) };
+  });
+  // A reviewed candidate outside this history reviewed some other code, so it covers nothing here. A commit is covered when any job's latest candidate includes it.
+  const covering = [...new Set(reviews.map(entry => entry.candidate).filter(candidate => candidate !== undefined && isAncestor(candidate, tip)))];
+  const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`, ...(covering.length ? ['--not', ...covering] : [])]).split('\n').filter(Boolean).map(commit => ({
+    commit,
+    paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
+  })).filter(item => item.paths.length);
   const jobs = [], skipped = [];
-  for (const entry of [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory))) {
-    const record = git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').map(path => basename(path)).filter(name => /^V\d{3}\.md$/u.test(name)).sort().at(-1);
-    if (!record) {
-      skipped.push({ initiative: entry.initiative, job: entry.job, reason: 'no-review' });
-      continue;
-    }
-    const text = git(['show', `${tip}:${entry.directory}${record}`]);
-    const candidate = reviewCandidateOf(text);
-    // A candidate outside this history reviewed some other code, so it covers nothing here.
-    const covering = candidate !== undefined && isAncestor(candidate, tip) ? ['--not', candidate] : [];
-    const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`, ...covering]).split('\n').filter(Boolean).map(commit => ({
-      commit,
-      paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
-    })).filter(item => item.paths.length);
-    jobs.push({ initiative: entry.initiative, job: entry.job, record: record.slice(0, 4), candidate, ...uncoveredCommits({ commits, overrides: overrideCommitsOf(text) }) });
+  for (const entry of reviews.filter(item => (!initiative || item.initiative === initiative) && (!job || item.job === job))) {
+    if (!entry.record) skipped.push({ initiative: entry.initiative, job: entry.job, reason: 'no-review' });
+    else jobs.push({ initiative: entry.initiative, job: entry.job, record: entry.record, candidate: entry.candidate, ...uncoveredCommits({ commits, overrides: overrideCommitsOf(entry.text) }) });
   }
   const failed = jobs.some(item => item.uncovered.length);
   return { ok: !failed, ...(failed && { code: 'unreviewed-commits' }), base: from, head: tip, jobs, skipped };
