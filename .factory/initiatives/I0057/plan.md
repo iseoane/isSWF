@@ -134,7 +134,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: Correction cycle 2 for V002 F10 (cat-file path from the project subdirectory) and F11 (docs), verified by the coordinator; then PR, exact-head CI and the operator's approval before merge.
+- Next step: PR and exact-head CI; merge needs the operator's approval (grant and authority code, .agents/hosts/**, tools/factory-package.mjs, tools/build-release.mjs).
 
 ### Acceptance
 
@@ -154,6 +154,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: operator approved integrating J004 (grant and authority code, .agents/hosts/**) on condition: "Autorizo pero cada agente aunque sea en el mismo fichero tienen sus modelos por si quiero usar o mezclar diferentes agentes". The selection file gives each agent its own host, model and effort.
 - 2026-11-15: probe ([A002](jobs/J004/A002.md)): Claude `tool.call` for Agent carries `model` and `effort`, `agent.spawn` has no effort; a spawn `deny` leaves the child unstarted and the parent sees the reason; Pi thinking is only a model suffix.
 - 2026-11-15: J009/A002 observed $.process.run running git from a Claude hooks module without a prompt, so condition 5 (brief committed) can be checked on Claude too; the brief-r3 worker uses it.
+- 2026-11-15: brief-r3 review passed in two rounds ([V001](jobs/J004/V001.md), [V002](jobs/J004/V002.md)); correction 2 (F10, F11) verified by the coordinator without a third model review: RED 8fdf459 failed, GREEN d74a2b1 passed, and on candidate 2e1d095 the guard, host-portability, release-package, record-guard and package-metadata tests, check-docs and git diff --check exited 0. Known limits: any prompt line can carry Override:, the base SHA is not checked to exist, and the initiative's observed status stays a coordinator check.
 
 ## J005
 
