@@ -263,6 +263,15 @@ refused(await reviewed({ mutate: envelope => { envelope.diff.path = 'relative.di
   delete io.readBytes;
   refused(await claude(reviewerCall(prompt), io), 'handoff', 'cannot be read');
 }
+// A file the prompt names is not read when its size already exceeds the limit.
+{
+  const { io, prompt } = handoffCase({ tamper: () => new Uint8Array(1024 * 1024 + 1) });
+  refused(await claude(reviewerCall(prompt), io), 'handoff', 'over 1 MiB');
+  assert.ok(!io.calls.read.includes(HANDOFF_PATH), 'an oversized handoff is not read');
+  const big = handoffCase({ stored: new Uint8Array(4 * 1024 * 1024 + 1) });
+  refused(await claude(reviewerCall(big.prompt), big.io), 'handoff', 'diff file', 'bytes the handoff records');
+  assert.ok(!big.io.calls.read.includes(DIFF_PATH), 'an oversized diff file is not read');
+}
 // The handoff check follows the others: a reviewer with no brief is refused for the brief first.
 {
   const base = project();
