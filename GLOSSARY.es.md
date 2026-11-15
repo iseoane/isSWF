@@ -81,3 +81,7 @@ _Avoid_: tabla de modelos o archivo de enrutamiento; no contiene un orden de res
 
 **Guarda de despacho**:
 La comprobación del host que rechaza una delegación a un agente de rol de isSWF antes de que empiece el hijo cuando incumple las condiciones previas al despacho. Superarla no es una autorización.
+
+**Handoff de revisión**:
+El archivo con el diff exacto `base..candidate`, su número de bytes y su SHA-256, y el sobre `isswf.handoff/1` que escribe `tools/isswf-handoff.mjs review` para un revisor sin herramientas de evidencia de Git vinculadas. La guarda de despacho los comprueba antes de que empiece un revisor; comprobarlos no concede nada.
+_Avoid_: handoff de sesión (otro modo, aún no construido) o el handoff compacto que cierra una unidad funcional.

@@ -22,6 +22,7 @@ Estas herramientas empaquetan la fábrica, gestionan la instalación de un proye
 | Inicializar, seleccionar, actualizar y recuperar la instalación de un proyecto | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Preparar planes y recibir issues | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-plan-edit.mjs`, `tools/isswf-plan-edit-core.mjs`, `tools/isswf-intake.mjs` |
 | Crear registros de intento y de revisión | `tools/isswf-record-new.mjs`, `tools/isswf-record-new-core.mjs` |
+| Dar al revisor el diff exacto y comprobar que todo commit está revisado | `tools/isswf-handoff.mjs`, `tools/isswf-handoff-core.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/check-quality.mjs` |
 | Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-record-check.mjs`, `tools/isswf-record-check-core.mjs`, `tools/isswf-record-guard-core.mjs`, `tools/isswf-record-guard-pi-extension.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
 | Rechazar un despacho fallido a un agente de rol de isSWF | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Rechazar un comando de shell que espera al CI o adquiere paquetes | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |

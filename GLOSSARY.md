@@ -81,3 +81,7 @@ _Avoid_: model table or routing file; it holds no fallback order and is not the 
 
 **Dispatch guard**:
 The host check that refuses a delegation to an isSWF role agent before the child starts when it fails the pre-dispatch conditions. Passing it is not an authorization.
+
+**Review handoff**:
+The exact `base..candidate` diff file, its byte count and SHA-256, and the `isswf.handoff/1` envelope that `tools/isswf-handoff.mjs review` writes for a reviewer without bound git-evidence tools. The dispatch guard checks them before a reviewer starts; checking them grants nothing.
+_Avoid_: session handoff (a different, unbuilt mode) or the compact handoff that closes a functional unit.
