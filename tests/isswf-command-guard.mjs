@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
 const { tokenize, checkCommand, guardCommand } = await load('tools/isswf-command-core.mjs');
+const { default: registerGuard } = await load('tools/isswf-command-guard-pi-extension.mjs');
 
 const refused = (command, rule) => assert.equal(checkCommand(command)?.rule, rule, `should refuse (${rule}): ${command}`);
 const allowed = command => assert.equal(checkCommand(command), undefined, `should allow: ${command}`);
@@ -206,6 +207,28 @@ for (const command of [
 {
   const verdict = guardCommand('npx --version');
   for (const part of ['package-acquisition', 'tooling/quality/node_modules/eslint/bin/eslint.js', 'tooling/quality/node_modules/knip/bin/knip.js', 'npm ci --prefix tooling/quality --ignore-scripts', 'npm ci --prefix tooling/host-tests --ignore-scripts', 'not a retry signal']) assert.ok(verdict.deny?.includes(part), part);
+}
+
+// Pi: the `tool_call` handler blocks `bash` and `powershell` with the refusal text and leaves every other call alone.
+{
+  const handlers = [];
+  registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
+  assert.deepEqual(handlers.map(([name]) => name), ['tool_call'], 'only the call event is used');
+  const [[, handler]] = handlers;
+  const call = (toolName, command) => handler({ toolName, input: { command } }, { cwd: '/work' });
+  for (const toolName of ['bash', 'powershell']) {
+    const blocked = await call(toolName, 'gh pr checks 1 --watch');
+    assert.equal(blocked.block, true, toolName);
+    assert.equal(blocked.reason, guardCommand('gh pr checks 1 --watch').deny, toolName);
+    assert.match((await call(toolName, 'npx --version')).reason, /package-acquisition/u, toolName);
+    assert.equal(await call(toolName, 'node --version'), undefined, toolName);
+    assert.equal(await call(toolName, 'sleep 900 && gh pr checks 1'), undefined, toolName);
+  }
+  assert.equal(await call('read', 'npx --version'), undefined, 'only shell tools are guarded');
+  assert.equal(await call('subagent', 'npx --version'), undefined);
+  assert.equal(await handler({ toolName: 'bash', input: {} }, {}), undefined, 'a call without a command is left alone');
+  assert.equal(await handler({ toolName: 'bash' }, {}), undefined, 'a call without input is left alone');
+  assert.equal(await handler(undefined, {}), undefined, 'an unreadable event is left alone');
 }
 
 console.log('PASS command guard');
