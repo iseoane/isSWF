@@ -130,7 +130,8 @@ async function checkBrief(project, relative, checkpoint, join, io) {
     tracked = await io.git(['ls-files', '--error-unmatch', '--', relative], project);
     // --no-index: a force-added brief under an ignored path is tracked and would otherwise not be reported as ignored.
     ignored = await io.git(['check-ignore', '--no-index', '-q', '--', relative], project);
-    committed = await io.git(['cat-file', '-e', `${checkpoint}:${relative}`], project);
+    // `./` makes Git resolve the path from the project directory, as the checks above do, not from the repository root.
+    committed = await io.git(['cat-file', '-e', `${checkpoint}:./${relative}`], project);
   } catch (error) {
     refuse(5, `Git could not check the brief: ${error?.message ?? error}`);
   }

@@ -87,8 +87,8 @@ for (const subagent_type of [undefined, 'general-purpose', 'Explore', 'isswf:oth
 for (const subagent_type of ['isswf:isswf-worker', 'isswf-worker']) {
   const io = memoryIo(project());
   assert.deepEqual(await claude(claudeCall({ subagent_type }), io), { allow: true }, subagent_type);
-  assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '--no-index', '-q'], ['cat-file', '-e', `${CHECKPOINT}:${BRIEF}`]]);
-  assert.equal(io.calls.git[2][2], `${CHECKPOINT}:${BRIEF}`, 'the brief must exist at the named checkpoint');
+  assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '--no-index', '-q'], ['cat-file', '-e', `${CHECKPOINT}:./${BRIEF}`]]);
+  assert.equal(io.calls.git[2][2], `${CHECKPOINT}:./${BRIEF}`, 'the brief must exist at the named checkpoint');
 }
 // Windows spelling of the project root works the same.
 assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\project'))), { allow: true }, 'a backslash project root');
