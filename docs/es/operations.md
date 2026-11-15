@@ -36,6 +36,19 @@ node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/p
 - `A<nnn>.md` y `V<nnn>.md`: una línea `- Run:` que el analizador de la instantánea ignoraría es `run-line-unparsed`, y una con `unknown` como ID es `run-id-unknown` (la plantilla indica omitir la línea). Un registro sin una etiqueta de la plantilla es `missing-field` con la etiqueta exacta: `Deviations from required procedure and consequence:` y `Process deviations observed:` en un intento, y `Unreviewed areas and evidence limits:`, `Convergence advice:` y `Process deviations observed:` en una revisión.
 - No se comprueban otros archivos.
 
+## Edición de planes
+
+```bash
+node tools/isswf-plan-edit.mjs set --project /absolute/project --initiative I0001 --job J001 --field Status --value in-progress
+node tools/isswf-plan-edit.mjs append-evidence --project /absolute/project --initiative I0001 --job J001 --value "2026-11-15: focused test passed"
+node tools/isswf-plan-edit.mjs add-job --project /absolute/project --initiative I0001 --job J002 --objective "Outcome" --depends-on J001 --size "S (one flow)" --next-step "Prepare a brief." --acceptance "Observable outcome"
+node tools/isswf-plan-edit.mjs new-plan --project /absolute/project --initiative I0002 --title "Title" --type enhancement --job J001 --objective "Outcome" --depends-on None --size "S (one flow)" --next-step "Prepare a brief." --acceptance "Observable outcome"
+```
+
+`tools/isswf-plan-edit.mjs` edita `<directorio de estado>/initiatives/<ID>/plan.md` para no escribir a mano un campo de un trabajo del plan. `set` cambia `Status`, `Blocker` o `Next step`. `append-evidence` añade un elemento de evidencia. `add-job` añade al final un trabajo `pending` con una referencia de brief pendiente (`--depends-on` es `None` o `J1,J2`, y `--acceptance` se puede repetir). `new-plan` crea un plan con su primer trabajo y rechaza un plan existente. Cada valor es una sola línea y se escribe tal cual. Cada resultado se relee con `parsePlan`: una petición que produciría un plan inválido, o un plan que otro escritor ha cambiado entretanto, imprime `{ ok: false, code, ... }` y termina con código 1 sin cambiar el plan. El éxito imprime `{ ok: true, initiative, job, action }` y termina con código 0. Se conservan los finales de línea y todos los demás bytes, y en la ruta del proyecto funcionan tanto `\` como `/`.
+
+El comando no concede nada: no lee ningún archivo de permisos y no sustituye a `tools/isswf-plan.mjs`, que genera un plan completo a partir de una propuesta. No bloquea el plan, así que las ediciones a mano siguen siendo válidas y `tools/isswf-record-check.mjs` las sigue comprobando. La comprobación de que el plan no ha cambiado se hace justo antes del renombrado, de modo que un escritor que llegue en ese instante aún puede ser sobrescrito.
+
 ## Instantánea de iniciativas
 
 `tools/isswf-snapshot.mjs` lee todas las iniciativas del directorio de estado activo (`.isswf` o `.factory`) y muestra un único objeto JSON con `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` y `skipped`. Es de solo lectura y no llama a ningún modelo ni a la red. Envuelve `tools/isswf-snapshot-core.mjs`, que no importa nada de Node y hace todas las lecturas, incluida la elección del directorio de estado, a través de un objeto inyectado con `exists`, `list`, `stat` y `read` asíncronos. Los entornos sin módulos integrados de Node importan el núcleo y llaman a `readSnapshot(project, fs)` con su propio `fs`. El `readSnapshot(project, fs)` del envoltorio de Node usa Node como `fs` por defecto y además aplica la comprobación de directorio regular de `tools/project-state.mjs`, que el núcleo no puede hacer.
