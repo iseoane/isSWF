@@ -90,6 +90,17 @@ try {
     assert.equal(await readFile(raced, 'utf8'), 'theirs\n');
     assert.deepEqual((await readdir(dir)).sort(), ['A001.md', 'A002.md'], 'no temporary file is left behind');
   }
+  // A filled template line parses: the Run line has no trailing guidance, and the attempt template has the lines the tool fills.
+  {
+    const { parseRunLine } = await load('isswf-snapshot-core.mjs');
+    for (const name of ['attempt.md', 'review.md']) {
+      const text = await readFile(join(source, '.factory/templates', name), 'utf8');
+      const runLine = text.split('\n').find(line => line.startsWith('- Run:'));
+      assert.deepEqual(parseRunLine(runLine), { host: 'claude', kind: 'agent', id: '<id>' }, `${name} Run line`);
+    }
+    const attempt = await readFile(join(source, '.factory/templates/attempt.md'), 'utf8');
+    for (const label of ['- Branch:', '- Candidate commit SHA:']) assert.ok(attempt.split('\n').includes(label), `attempt template has ${label}`);
+  }
   console.log('isswf-record-new test ok');
 } finally {
   await rm(root, { recursive: true, force: true });
