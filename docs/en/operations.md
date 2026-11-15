@@ -125,6 +125,22 @@ node tools/isswf-plan-edit.mjs new-plan --project /absolute/project --initiative
 
 The command grants nothing: it reads no grant file and does not replace `tools/isswf-plan.mjs`, which renders a whole plan from a proposal. It does not lock the plan, so hand edits stay valid and `tools/isswf-record-check.mjs` still checks them. The check that the plan did not change runs just before the rename, so a writer that lands in that instant can still be overwritten.
 
+## Record creation
+
+```bash
+node tools/isswf-record-new.mjs next --project /absolute/project --initiative I0001 --job J001 --kind attempt
+node tools/isswf-record-new.mjs create --project /absolute/project --initiative I0001 --job J001 --kind attempt --id A002 --role worker --brief .factory/initiatives/I0001/jobs/J001/brief-r1.md --checkpoint <40-hex> --base <40-hex> --model sonnet --effort medium --run "claude agent=<id>"
+node tools/isswf-record-new.mjs complete --project /absolute/project --initiative I0001 --job J001 --record A002 --candidate <40-hex>
+```
+
+`tools/isswf-record-new.mjs` creates the next attempt (`A<nnn>`) or review (`V<nnn>`) record of a job from the template, with every mechanical field filled from the launch data and Git, and later fills the changed paths and commits. The semantic fields stay for the author. The text comes from `.factory/templates/` in the factory root that holds the tool, not from the project.
+
+- `next` prints `{ ok: true, initiative, job, kind, id }`. The ID is one more than the highest number of that kind among the job's record names in the working tree, the index, `HEAD` and every local and remote-tracking branch, so a record that exists only on another branch is not reused. Attempts and reviews are numbered separately; after `999` it refuses with `ids-exhausted`.
+- `create` needs `--id` to equal `next`'s answer. `--role` is `worker`, `researcher` or `planner` for an attempt and `reviewer` for a review. `--checkpoint` and `--base` are full SHAs that must name commits. `--model` and `--effort` are written as the requested values. `--run` is the launch's `Run:` value and is omitted when unknown. `--round`, `--checkout`, `--branch` and `--candidate` are optional; the checkout defaults to the project and the branch to its current branch. The brief and the plan must exist, the plan job must be `in-progress`, and the profile, model-configuration and `REVIEW.md` fields name the blob Git holds at the checkpoint. The rendered record is read back with the record checker, and a record that would be invalid is not written. The file is linked into place exclusively, so an existing record is never overwritten (`record-exists`).
+- `complete` fills a record's candidate, changed paths (`git diff` from the record's base to the candidate, with record paths grouped apart) and, for an attempt, the commits, and adds `--run` when given. It refuses a field the author already edited (`field-not-template`) and a path that Markdown code cannot hold (`unsafe-path`). Running it again with the same candidate changes nothing.
+
+Success prints `{ ok: true, ... }` and exits 0; a refusal prints `{ ok: false, code, ... }` and exits 1 with nothing written. The command does not commit, grants nothing and does not replace the author's review of the record. Known limits: the review template's profile line has commas, so status readers do not take its model from it, and the record checker accepts the template's literal `<id>` in a `Run:` line.
+
 ## Initiative snapshot
 
 `tools/isswf-snapshot.mjs` reads every initiative under the active state directory (`.isswf` or `.factory`) and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. It wraps `tools/isswf-snapshot-core.mjs`, which has no Node imports and does every read, including the state-directory choice, through an injected object with async `exists`, `list`, `stat` and `read`. Runtimes without Node built-ins import the core and call `readSnapshot(project, fs)` with their own `fs`. The Node wrapper's `readSnapshot(project, fs)` defaults `fs` to Node and also applies the regular-directory check from `tools/project-state.mjs`, which the core cannot do.
