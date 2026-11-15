@@ -147,7 +147,7 @@ async function checkCall(host, call, io) {
  * Decides whether a delegation to an isSWF role agent may start. `input` is the host's raw tool input:
  * Claude's `Agent` call (`subagent_type`, `model`, `effort`, `prompt`) or Pi's `subagent` call (`agent`, `task`,
  * `model` with an optional `:level` suffix, and the `tasks` and `chain` forms). `io` supplies `project()`,
- * `read(path)`, `list(dir)` as `{ name, kind }` entries, `stat(path)` and `git(argv, cwd)`, which resolves with the
+ * `read(path)`, `list(dir)` as `{ name, kind }` entries, `stat(path)` as `{ kind }` and `git(argv, cwd)`, which resolves with the
  * exit code. Another agent is allowed without reading anything. A failure of the guard itself refuses the isSWF
  * role call, never any other. The verdict only refuses: `{ allow: true }` is not an authorization to dispatch.
  * @returns {Promise<{ allow: true } | { deny: string, condition: string }>}
