@@ -97,13 +97,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Size: M (three related command patterns, with one bounded risk: refusing legitimate commands)
 - Objective: Coordinator and child shell use cannot silently break session state, violate the CI-waiting rule or acquire packages.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; check which guards each host supports, including for child agents.
+- Next step: Read-only research (brief-r1), then the implementation brief r2.
 
 ### Acceptance
 
@@ -246,13 +246,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J009
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow, no special risk: compare the branch before a commit)
 - Objective: A session cannot commit on a branch that another actor switched the checkout to without it noticing.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief; decide where the session's expected branch is kept and how each host exposes the session's own switch and checkout commands.
+- Next step: Read-only research (brief-r1), then the implementation brief r2.
 
 ### Acceptance
 
