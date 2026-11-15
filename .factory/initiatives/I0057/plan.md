@@ -150,6 +150,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: research ([A001](jobs/J004/A001.md)): Claude `agent.spawn` input carries `model` but no effort; Pi `subagent` has `model` and no top-level thinking field; no structured selection source exists, and project-setup.md:56 claims Pi overrides that .pi/settings.json does not hold.
 - 2026-11-15: operator approved integrating J004 (grant and authority code, .agents/hosts/**) on condition: "Autorizo pero cada agente aunque sea en el mismo fichero tienen sus modelos por si quiero usar o mezclar diferentes agentes". The selection file gives each agent its own host, model and effort.
 - 2026-11-15: probe ([A002](jobs/J004/A002.md)): Claude `tool.call` for Agent carries `model` and `effort`, `agent.spawn` has no effort; a spawn `deny` leaves the child unstarted and the parent sees the reason; Pi thinking is only a model suffix.
+- 2026-11-15: J009/A002 observed $.process.run running git from a Claude hooks module without a prompt, so condition 5 (brief committed) can be checked on Claude too; the brief-r3 worker uses it.
 
 ## J005
 
@@ -256,7 +257,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J009/brief-r2.md)
 - Blocker: None.
-- Next step: Probe brief-r2 ($.state across a Claude compaction, $.process.run in a hooks module, a .git worktree file on Windows), then the implementation brief after J003.
+- Next step: Implementation brief r3 after J003 lands the shared command tokeniser (all edit the single tool.call hook).
 
 ### Acceptance
 
@@ -269,3 +270,4 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: the I0057 re-plan (c07a5dc) was committed on `fix/j030-reverse-stdin`, the branch of PR324, instead of on `main`. A peer session had switched the shared checkout's branch and the coordinator did not check it. Cost: one misplaced commit, moved to `main` (7b840ee) and removed from that branch with `git reset --keep` before it was pushed.
 - 2026-11-14: minutes later, the same checkout was on `records/close-i0009`, another branch switch by the peer session.
 - 2026-11-15: research ([A001](jobs/J009/A001.md)): keep the expected branch per agent loop, read HEAD through $.fs (Claude) or node:fs (Pi), reread HEAD after the session's own switch or checkout; extends the J003 tokeniser.
+- 2026-11-15: probe ([A002](jobs/J009/A002.md)), Claude Code 2.1.325: a $.state value survived a manual compaction; $.process.run ran git rev-parse in a headless session without a permission prompt; a linked worktree's .git file and its gitdir HEAD read through $.fs on Windows.
