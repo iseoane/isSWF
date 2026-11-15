@@ -211,13 +211,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J007
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows, attempt and review records, plus the launch identity)
 - Objective: New attempt and review records start with their mechanical fields filled from Git and the launch identity.
 - Depends on: J006
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief after J006, listing which template fields are derivable and from which source.
+- Next step: Research (brief-r1) by a read-only researcher; implementation brief r2 after it.
 
 ### Acceptance
 
