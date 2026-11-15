@@ -347,4 +347,31 @@ for (const [mode, observe] of Object.entries(observers)) {
   }
 }
 
+// Claude: the one `tool.call` hook refuses `Bash` and `PowerShell` after the command guard and before `next(e)`, whatever the pane option
+// is, for the main loop (`main`) and for a child (`agentId`), and looks again after `next(e)` without touching its result.
+// register.tsx has no runner here, so the hook is a source check; the live check covers the host.
+{
+  const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');
+  const hook = hooks.slice(hooks.indexOf("on('tool.call'"));
+  const imported = /import \{([^}]*)\} from '\.\.\/tools\/isswf-branch-guard-core\.mjs'/u.exec(hooks)?.[1] ?? '';
+  for (const name of ['checkBranch', 'observeBranch', 'refreshBranches']) assert.ok(new RegExp(`\\b${name}\\b`, 'u').test(imported), `the hook imports ${name} from the core`);
+  const commandAt = hook.indexOf('guardCommand(');
+  const checkAt = hook.indexOf('await checkBranch(');
+  const nextAt = hook.indexOf('await next(e)');
+  const refreshAt = hook.indexOf('await refreshBranches(');
+  const paneAt = hook.indexOf('options?.initiativesPane === true');
+  assert.ok(commandAt > 0 && commandAt < checkAt && checkAt < nextAt, 'the branch check runs after the command guard and before the tool is called');
+  assert.ok(nextAt < refreshAt && refreshAt < paneAt, 'the branches are looked at again after the tool, ahead of the pane and independent of its option');
+  const before = hook.slice(commandAt, nextAt);
+  assert.ok(before.includes("e.tool === 'Bash' || e.tool === 'PowerShell'"), 'both shell tools are checked');
+  assert.ok(before.includes("agentId ?? 'main'"), 'the main loop and each child have their own expected branches');
+  assert.ok(/return \{ deny: branch\.deny \}/u.test(before), 'a refusal is a deny');
+  assert.ok(/await \$\.process\.run\(\['git', \.\.\.argv\], \{ cwd \}\)/u.test(hook) && hook.includes('$.fs.read(file)'), 'Git runs through the host and the files are the fallback');
+  const afterNext = hook.slice(nextAt, refreshAt);
+  assert.ok(!/return|ran\s*=/u.test(afterNext.replace('const ran = await next(e)', '')), 'looking again never changes or ends the call');
+  assert.ok(/key: 'branches'/u.test(hooks), 'the expected branches are one plugin state key');
+  const types = await readFile(join(source, 'types/index.d.ts'), 'utf8');
+  assert.ok(/branches: IsswfBranches/u.test(types), 'the state key is declared through PluginState');
+}
+
 console.log('PASS branch guard');
