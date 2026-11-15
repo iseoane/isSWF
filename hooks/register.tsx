@@ -492,12 +492,14 @@ export const register: Register = (on, options) => {
       } catch {}
     }
     try {
+      // A denied or failed write changed no record, and `deny` declares no `context`.
+      if (ran.deny !== undefined || ran.isError) return ran
       const path = (e as { file_path?: unknown }).file_path
       if (!WRITE_TOOLS.has(e.tool) || typeof path !== 'string') return ran
       // The record check only reports, as model-visible context; the tool result stays as it was.
       // The engine refuses `$.fs` passed as a value, so each call is spelled out.
       const text = await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
-      return text ? { ...ran, context: [text] } : ran
+      return text ? { ...ran, context: [...(ran.context ?? []), text] } : ran
     } catch {
       return ran
     }
