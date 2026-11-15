@@ -39,6 +39,8 @@ Further candidates observed on 2026-11-14, to assess:
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
+- Worker shells ran python heredocs that hung until killed, once for low memory (J001 A007, J005 A001, 2026-11-15): a shell guard (J003) could refuse interactive interpreters reading a heredoc, or worker briefs could name node for scripting.
+- The selection file prescribed by a brief could not meet an operator condition, and only the review caught it (J004 V001 F1): a brief that records an operator condition could carry it as an acceptance test the worker must add.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
