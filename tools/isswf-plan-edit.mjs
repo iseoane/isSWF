@@ -10,10 +10,13 @@ const MAX_BYTES = 1024 * 1024;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = code => Object.assign(Error(code), { code });
 
-function planPath(project, initiative) {
+async function planPath(project, initiative) {
   if (!isAbsolute(project)) throw fail('invalid-project');
   if (!isIdentifier(initiative)) throw fail('invalid-initiative');
-  return join(resolve(project), stateDirectory(resolve(project)), 'initiatives', initiative, 'plan.md');
+  const root = resolve(project), state = stateDirectory(root);
+  // A mistyped project or an uninitialised one must not grow a new tree, so the state directory has to exist already.
+  if (!(await lstat(join(root, state)).catch(() => undefined))?.isDirectory()) throw fail('state-not-found');
+  return join(root, state, 'initiatives', initiative, 'plan.md');
 }
 
 /**
@@ -22,7 +25,7 @@ function planPath(project, initiative) {
  * lands between the check and the rename is still not detected, because the filesystem offers no compare-and-rename.
  */
 export async function editPlanFile({ project, initiative, edit, beforeRename }) {
-  const path = planPath(project, initiative);
+  const path = await planPath(project, initiative);
   const stat = await lstat(path).catch(error => { throw error.code === 'ENOENT' ? fail('plan-not-found') : error; });
   if (!stat.isFile() || stat.size > MAX_BYTES) throw fail('unsafe-plan');
   const original = await readFile(path);
@@ -41,7 +44,7 @@ export async function editPlanFile({ project, initiative, edit, beforeRename }) 
 }
 
 async function createPlanFile({ project, initiative, text }) {
-  const path = planPath(project, initiative);
+  const path = await planPath(project, initiative);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, text, { flag: 'wx' }).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
 }
