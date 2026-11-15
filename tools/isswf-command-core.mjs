@@ -192,6 +192,7 @@ function sleepSeconds({ command, args }) {
 
 const SHARED_NOTE = 'This is a process rule, not a retry signal: do not rephrase the command to get past it. Use the alternative, or report the blocker.';
 const CI_REASON = `Continuous CI waiting is refused. Use a native completion event, one bounded deferred check (one sleep of at most ${MAX_SLEEP_SECONDS} seconds, then one \`gh pr checks\`), or report CI as pending; see .agents/roles/references/feature-delivery.md. ${SHARED_NOTE}`;
+const PACKAGE_REASON = `Package acquisition is refused. Use the installed local tools: \`node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs\` and \`node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress\` (docs/en/development.md, Quality checks). The only installs allowed are \`npm ci --prefix tooling/quality --ignore-scripts\` and \`npm ci --prefix tooling/host-tests --ignore-scripts\`, with no package arguments. ${SHARED_NOTE}`;
 
 function ciWaiting(segments) {
   const refusal = { rule: 'ci-waiting', reason: CI_REASON };
@@ -214,7 +215,58 @@ function ciWaiting(segments) {
   return [...ghLoops].some(id => sleepLoops.has(id)) ? refusal : undefined;
 }
 
-const RULES = [ciWaiting];
+const LOCKED_PREFIXES = ['tooling/quality', 'tooling/host-tests'];
+const normalizedPath = path => (path ?? '').replaceAll('\\', '/').replace(/^(?:\.\/)+/u, '').replace(/\/+$/u, '');
+// `npm ci --prefix <locked directory> --ignore-scripts`, with no package arguments and no other flag, in any order.
+function lockedInstall(args) {
+  let prefix;
+  let ignoreScripts = false;
+  let ci = 0;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === 'ci') ci++;
+    else if (args[i] === '--ignore-scripts') ignoreScripts = true;
+    else if (args[i] === '--prefix') prefix = args[++i];
+    else if (args[i].startsWith('--prefix=')) prefix = args[i].slice('--prefix='.length);
+    else if (args[i] !== '--no-audit' && args[i] !== '--no-fund') return false;
+  }
+  return ci === 1 && ignoreScripts && LOCKED_PREFIXES.includes(normalizedPath(prefix));
+}
+
+const VALUE_FLAGS = new Set(['--prefix', '-c', '--workspace', '-w', '--registry', '--cache', '--userconfig', '--loglevel', '--cwd', '--dir']);
+// The first word that is neither a flag nor the value of a flag that takes one.
+function subcommand(args, from = 0) {
+  for (let i = from; i < args.length; i++) {
+    if (!args[i].startsWith('-')) return { name: args[i], next: i + 1 };
+    if (VALUE_FLAGS.has(args[i])) i++;
+  }
+  return { name: undefined, next: args.length };
+}
+
+const INSTALLERS = {
+  npm: ['install', 'i', 'add', 'exec', 'x'],
+  pnpm: ['dlx', 'add', 'install', 'i', 'exec'],
+  yarn: ['dlx', 'add', 'install'],
+  bun: ['add', 'install', 'i', 'x'],
+};
+const ALWAYS = new Set(['npx', 'bunx', 'uvx', 'corepack']);
+
+function acquires({ command, args }) {
+  if (ALWAYS.has(command)) return true;
+  const { name, next } = subcommand(args);
+  if (command === 'npm' && name === 'ci') return !lockedInstall(args);
+  if (command === 'yarn' && name === undefined) return !args.some(arg => /^(?:-v|--version|-h|--help)$/u.test(arg));
+  if (command === 'pip' || command === 'pip3') return name === 'install';
+  if (command === 'uv') return (name === 'pip' || name === 'tool') && subcommand(args, next).name === 'install';
+  if (/^(?:python[\d.]*|py)$/u.test(command)) {
+    const at = args.indexOf('-m');
+    return at >= 0 && /^pip[\d.]*$/u.test(args[at + 1] ?? '') && subcommand(args, at + 2).name === 'install';
+  }
+  return INSTALLERS[command]?.includes(name) ?? false;
+}
+
+const packageAcquisition = segments => (segments.some(acquires) ? { rule: 'package-acquisition', reason: PACKAGE_REASON } : undefined);
+
+const RULES = [ciWaiting, packageAcquisition];
 
 /** The first rule that refuses `command`, as `{ rule, reason }`, or undefined. `rules` is replaceable for tests. */
 export function checkCommand(command, rules = RULES) {
