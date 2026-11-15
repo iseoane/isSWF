@@ -149,7 +149,7 @@ function validateManifest(bytes) {
   let manifest;
   try { manifest = JSON.parse(bytes.toString('utf8')); }
   catch { fail('The committed package.json is not valid JSON'); }
-  const nativeProfiles = Object.hasOwn(manifest?.pi ?? {}, 'subagents') ? { subagents: { agents: ['./.agents/hosts/pi/agents'] }, extensions: ['./tools/isswf-record-guard-pi-extension.mjs'] } : {};
+  const nativeProfiles = Object.hasOwn(manifest?.pi ?? {}, 'subagents') ? { subagents: { agents: ['./.agents/hosts/pi/agents'] }, extensions: ['./tools/isswf-record-guard-pi-extension.mjs', './tools/isswf-dispatch-guard-pi-extension.mjs'] } : {};
   if (
     !plainObject(manifest) ||
     Object.keys(manifest).sort().join(',') !== 'bin,description,files,keywords,name,pi,version' ||
