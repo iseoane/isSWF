@@ -41,6 +41,7 @@ Further candidates observed on 2026-11-14, to assess:
 - A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
 - Worker shells ran python heredocs that hung until killed, once for low memory (J001 A007, J005 A001, 2026-11-15): a shell guard (J003) could refuse interactive interpreters reading a heredoc, or worker briefs could name node for scripting.
 - The selection file prescribed by a brief could not meet an operator condition, and only the review caught it (J004 V001 F1): a brief that records an operator condition could carry it as an acceptance test the worker must add.
+- The pane's Agents tab shows `unknown` for three runs and `skills: unknown` for the worker, and lists host guides (`claude-code`, `pi`) under references, since every non-skill `.agents/**` read counts as a reference (operator, 2026-11-15, after I0057): records could name the role in a field the pane reads, unresolved transcripts could be distinguished from runs that used nothing, and host guides could get their own group.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -128,13 +129,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Size: M (one flow, with one bounded risk: refusing a legitimate dispatch)
 - Objective: A delegation that fails the coordinator's pre-dispatch refusal conditions is refused by the host before the child starts.
 - Depends on: J001
 - Brief: [brief-r3.md](jobs/J004/brief-r3.md)
 - Blocker: None.
-- Next step: PR and exact-head CI; merge needs the operator's approval (grant and authority code, .agents/hosts/**, tools/factory-package.mjs, tools/build-release.mjs).
+- Next step: None.
 
 ### Acceptance
 
@@ -155,6 +156,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-15: probe ([A002](jobs/J004/A002.md)): Claude `tool.call` for Agent carries `model` and `effort`, `agent.spawn` has no effort; a spawn `deny` leaves the child unstarted and the parent sees the reason; Pi thinking is only a model suffix.
 - 2026-11-15: J009/A002 observed $.process.run running git from a Claude hooks module without a prompt, so condition 5 (brief committed) can be checked on Claude too; the brief-r3 worker uses it.
 - 2026-11-15: brief-r3 review passed in two rounds ([V001](jobs/J004/V001.md), [V002](jobs/J004/V002.md)); correction 2 (F10, F11) verified by the coordinator without a third model review: RED 8fdf459 failed, GREEN d74a2b1 passed, and on candidate 2e1d095 the guard, host-portability, release-package, record-guard and package-metadata tests, check-docs and git diff --check exited 0. Known limits: any prompt line can carry Override:, the base SHA is not checked to exist, and the initiative's observed status stays a coordinator check.
+- 2026-11-15: PR330 merged as eca5542874174573b2fa075b9a58fa8c34b979a8 with the operator's approval, after green CI on exact head dfd59ab53b4b2f9da54a209744e2d9cc51a5a2b9 (Ubuntu and Windows package and host discovery, portable checks). The deviations reported in A002, A003, V001 and V002 are in the deferred candidates.
 
 ## J005
 
