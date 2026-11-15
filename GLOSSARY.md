@@ -74,3 +74,10 @@ Analysis of a job's or session's evidence to propose improvements to the project
 **Interview**:
 An opt-in exchange in which an agent asks the operator one question at a time, each with a recommended answer, until the specification leaves nothing to presume, infer or decide. Answers are recorded as confirmed by the operator; points left open when the operator stops it are recorded as assumptions.
 _Avoid_: questionnaire when implying a fixed list or count of questions.
+
+**Selection file**:
+The project-local `dispatch-selection.json` that records, one entry per agent, the host, model and effort approved for each isSWF role agent. The dispatch guard compares a delegation against it; an `Override:` line in one prompt replaces an entry for that call only.
+_Avoid_: model table or routing file; it holds no fallback order and is not the legacy `models.json`.
+
+**Dispatch guard**:
+The host check that refuses a delegation to an isSWF role agent before the child starts when it fails the pre-dispatch conditions. Passing it is not an authorization.

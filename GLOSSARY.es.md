@@ -74,3 +74,10 @@ El análisis de evidencias de un trabajo o sesión para proponer mejoras al proy
 **Entrevista**:
 Un intercambio opcional en el que un agente hace al operador una pregunta cada vez, cada una con una respuesta recomendada, hasta que la especificación no deja nada que presuponer, inferir ni decidir. Las respuestas se registran como confirmadas por el operador; los puntos abiertos cuando el operador la detiene se registran como supuestos.
 _Avoid_: cuestionario cuando sugiera una lista o un número fijo de preguntas.
+
+**Archivo de selección**:
+El `dispatch-selection.json` local del proyecto, que registra, con una entrada por agente, el host, el modelo y el esfuerzo aprobados para cada agente de rol de isSWF. La guarda de despacho compara una delegación con él; una línea `Override:` en un prompt sustituye una entrada solo para esa llamada.
+_Avoid_: tabla de modelos o archivo de enrutamiento; no contiene un orden de reserva ni es el `models.json` heredado.
+
+**Guarda de despacho**:
+La comprobación del host que rechaza una delegación a un agente de rol de isSWF antes de que empiece el hijo cuando incumple las condiciones previas al despacho. Superarla no es una autorización.
