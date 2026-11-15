@@ -108,7 +108,7 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
 
 const INITIATIVE_JOB = /^\.(?:isswf|factory)\/initiatives\/(I\d+)\/jobs\/([^/]+)\//u;
 
-/** Reads, for every job whose records the range changed, the commits after its latest review's candidate that change more than records. */
+/** Reads, for every job whose records the range changed, the commits after its latest review's candidate that change more than records. Merge commits are left out: the commits they bring in are the ones that count. */
 export async function coverage({ project, initiative, job, base, head }) {
   if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
   checkSha(base, 'base', { optional: true });
@@ -141,9 +141,9 @@ export async function coverage({ project, initiative, job, base, head }) {
     const candidate = reviewCandidateOf(text);
     // A candidate outside this history reviewed some other code, so it covers nothing here.
     const covering = candidate !== undefined && isAncestor(candidate, tip) ? ['--not', candidate] : [];
-    const commits = git(['rev-list', '--reverse', `${from}..${tip}`, ...covering]).split('\n').filter(Boolean).map(commit => ({
+    const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`, ...covering]).split('\n').filter(Boolean).map(commit => ({
       commit,
-      paths: [...new Set(git(['diff-tree', '-r', '-m', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
+      paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
     })).filter(item => item.paths.length);
     jobs.push({ initiative: entry.initiative, job: entry.job, record: record.slice(0, 4), candidate, ...uncoveredCommits({ commits, overrides: overrideCommitsOf(text) }) });
   }
