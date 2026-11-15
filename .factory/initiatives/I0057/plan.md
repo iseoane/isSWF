@@ -96,7 +96,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J004
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation (brief-r2): worker on feat/i0057-j002-handoff, then unbound review, PR and exact-head CI; merge approved in advance by the operator.
+- Next step: Delivery: full check at the records head, PR with exact-head CI and coverage, then the merge the operator approved in advance.
 
 ### Acceptance
 
@@ -110,6 +110,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: coordinator test changes 2ac2f83 and 12efb53 were merged in PR322 before independent review (V003, J029-R4-04).
 - 2026-11-15: operator decision: deliver J002 as a distributed skill isswf-handoff backed by a tool, review mode first (the generated reviewer handoff, required by the dispatch guard for reviewer dispatches); a session-handoff mode, inspired by Matt Pocock's handoff skill (reference, do not duplicate; suggested skills; redaction), goes with J005 or a separate job.
 - 2026-11-15: research ([A001](jobs/J002/A001.md)): use the bound git-evidence diff argv and digest so unbound and bound digests match; the guard re-verifies a handoff file and SHA-256 named in a reviewer prompt; unreviewed commits are found from the latest V candidate, subtracting record paths and accepting recorded docs-only overrides; PR322 must fail and J007 d6b9844 must pass. The operator approved the J002 merge in advance (dispatch guard, packaging, host guides).
+- 2026-11-16: implementation A002-A004 (worker, two correction cycles), candidate 05a400a5f57fb89448198c0b2bd319a1ad7ea850; reviews V001 fail (F1), V002 fail (F2), V003 pass. Coordinator replayed every RED/GREEN pair on Windows; known limits S10-S12 recorded in V003 and moved to I0058.
 
 ## J003
 
