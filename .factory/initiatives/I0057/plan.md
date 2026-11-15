@@ -84,13 +84,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows, generating the review handoff and detecting unreviewed commits before delivery)
 - Objective: Delegation handoffs that the methodology requires are generated, not hand-written.
 - Depends on: J004
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Research brief r1 for the isswf-handoff skill and tool (review mode), then the implementation brief.
+- Next step: Research (brief-r1, read-only researcher), then implementation brief r2.
 
 ### Acceptance
 
@@ -214,13 +214,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J007
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows, attempt and review records, plus the launch identity)
 - Objective: New attempt and review records start with their mechanical fields filled from Git and the launch identity.
 - Depends on: J006
 - Brief: [brief-r2.md](jobs/J007/brief-r2.md)
 - Blocker: None.
-- Next step: Push, PR and exact-head CI; merge with the operator's advance approval.
+- Next step: None
 
 ### Acceptance
 
@@ -234,6 +234,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14 audit: about half of the roughly 30 fields in .factory/templates/attempt.md are copies of data already held in Git or in the launch call.
 - 2026-11-15: research ([A001](jobs/J007/A001.md)): no tool writes attempt or review records; about half the fields come from launch data or Git; reuse the exclusive link create, checkRecord and the dispatch-guard parser (export its base); the record-name pattern is defined four times and the reviewer model has two sources; create the record after a successful launch.
 - 2026-11-15: implementation ([A002](jobs/J007/A002.md), correction cycle 1 [A003](jobs/J007/A003.md)): `tools/isswf-record-new.mjs` next/create/complete, one shared record-name pattern (isswf-status made strict, accepted as a bug fix in [V001](jobs/J007/V001.md) I1), `checkReferences` returns the base, `run-id-unfilled` in the record checker. Review [V001](jobs/J007/V001.md) fail (F1 brief existence) → [V002](jobs/J007/V002.md) pass; S3 applied by the coordinator (d6b9844). The coordinator replayed every RED/GREEN pair and observed check-quality exit 0 at 34ebb37 (Windows). The operator approved the merge in advance (worker.md needs a person). V001 and V002 were created with the new command.
+- 2026-11-15: merged as PR #334 (d1d3ded10f8eb6a203c93d43bfd2919a8c889bcf) after green CI on the exact head e4c602a, with the operator's advance approval.
 
 ## J008
 
