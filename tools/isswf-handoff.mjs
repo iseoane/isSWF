@@ -4,7 +4,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
-import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
+import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewBaseOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
 import { isRecordPath, recordError } from './isswf-record-new-core.mjs';
 import { assertCommit, blobAt, briefOf, checkSha, gitIn, jobTarget, locateGit, recordNames, requireBrief, reviewIds, requireInProgress } from './isswf-record-new.mjs';
@@ -136,16 +136,26 @@ export async function coverage({ project, initiative, job, base, head }) {
     const text = record && git(['show', `${tip}:${entry.directory}${record}.md`]);
     return { ...entry, record, text, candidate: text && reviewCandidateOf(text) };
   });
-  // A reviewed candidate outside this history reviewed some other code, so it covers nothing here. A commit is covered when any job's latest candidate includes it.
-  const covering = [...new Set(reviews.map(entry => entry.candidate).filter(candidate => candidate !== undefined && isAncestor(candidate, tip)))];
-  const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`, ...(covering.length ? ['--not', ...covering] : [])]).split('\n').filter(Boolean).map(commit => ({
+  // A commit is covered when it lies in the base..candidate range of some job's latest review, so a later job's candidate does not cover an unreviewed
+  // commit before its own base. A review whose candidate is outside this history, or whose base cannot be read, reviewed other code and covers nothing here.
+  const covered = new Set();
+  for (const entry of reviews) {
+    const candidate = entry.candidate, reviewBase = entry.text && reviewBaseOf(entry.text);
+    if (candidate === undefined || reviewBase === undefined || !isAncestor(candidate, tip)) continue;
+    try {
+      for (const commit of git(['rev-list', candidate, '--not', reviewBase]).split('\n').filter(Boolean)) covered.add(commit);
+    } catch { /* a base that is not in this repository covers nothing */ }
+  }
+  // The override lines of every reviewed job apply to the one list of commits.
+  const overrides = reviews.flatMap(entry => (entry.text ? overrideCommitsOf(entry.text) : []));
+  const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`]).split('\n').filter(commit => commit && !covered.has(commit)).map(commit => ({
     commit,
     paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
   })).filter(item => item.paths.length);
   const jobs = [], skipped = [];
   for (const entry of reviews.filter(item => (!initiative || item.initiative === initiative) && (!job || item.job === job))) {
     if (!entry.record) skipped.push({ initiative: entry.initiative, job: entry.job, reason: 'no-review' });
-    else jobs.push({ initiative: entry.initiative, job: entry.job, record: entry.record, candidate: entry.candidate, ...uncoveredCommits({ commits, overrides: overrideCommitsOf(entry.text) }) });
+    else jobs.push({ initiative: entry.initiative, job: entry.job, record: entry.record, candidate: entry.candidate, ...uncoveredCommits({ commits, overrides }) });
   }
   const failed = jobs.some(item => item.uncovered.length);
   return { ok: !failed, ...(failed && { code: 'unreviewed-commits' }), base: from, head: tip, jobs, skipped };

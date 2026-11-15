@@ -107,6 +107,9 @@ export async function verifyHandoff({ prompt, host, agent, references, io }) {
 /** The commit a review record names on its candidate line, or undefined when the line is missing or names no full SHA. */
 export const reviewCandidateOf = text => /^- Candidate commit SHA, or reproducible snapshot identity: *([0-9a-f]{40})\s*$/mu.exec(text)?.[1];
 
+/** The commit a review record names on its base line, or undefined when the line is missing or names no full SHA. */
+export const reviewBaseOf = text => /^- Base commit SHA: *([0-9a-f]{40})\s*$/mu.exec(text)?.[1];
+
 /** The commit SHAs, at least seven characters each, that the review record's coordinator override lines name. */
 export const overrideCommitsOf = text => text.split(/\r?\n/u).filter(line => line.startsWith('- Coordinator override')).flatMap(line => line.match(/\b[0-9a-f]{7,40}\b/gu) ?? []);
 
