@@ -303,6 +303,24 @@ try {
   blocked(await call(good, null), 'dispatch guard error');
   blocked(await call(good, { cwd: join(temp, 'missing') }), 'dispatch guard error');
   assert.equal(await call({ agent: 'scout', task: 'x' }, null), undefined, 'another agent is unaffected by a guard failure');
+
+  // A project in a subdirectory of its repository: the commit check resolves the brief from the project, like the other Git checks.
+  const outer = join(temp, 'outer');
+  const nested = join(outer, 'sub/project');
+  for (const path of ['.factory/dispatch-selection.json', '.factory/initiatives/I0001/plan.md', BRIEF]) {
+    await mkdir(join(nested, path, '..'), { recursive: true });
+    await writeFile(join(nested, path), await readFile(join(root, path)));
+  }
+  git(outer, 'init', '-q', '.');
+  git(outer, 'add', '-A');
+  git(outer, 'commit', '-qm', 'fixture');
+  const outerHead = git(outer, 'rev-parse', 'HEAD');
+  const nestedTask = (brief = BRIEF) => dispatchPrompt('').replace(BRIEF, brief).replace(CHECKPOINT, outerHead);
+  const nestedCall = brief => call({ agent: 'isswf-worker', task: nestedTask(brief), model: `${PI_MODEL}:high` }, { cwd: nested });
+  assert.equal(await nestedCall(), undefined, 'a committed brief in a project below the repository root');
+  await writeFile(join(nested, '.factory/initiatives/I0001/jobs/J001/brief-r2.md'), '# staged only\n');
+  git(outer, 'add', 'sub/project/.factory/initiatives/I0001/jobs/J001/brief-r2.md');
+  blocked(await nestedCall(BRIEF.replace('r1', 'r2')), 'checkpoint', outerHead);
 } finally {
   await rm(temp, { recursive: true, force: true });
 }
