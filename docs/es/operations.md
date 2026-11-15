@@ -20,9 +20,21 @@ node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
-El primer comando lee el plan de una iniciativa y sus registros de apoyo. El segundo muestra una instantánea JSON de todas las iniciativas abiertas; consulta [instantánea de iniciativas](#instantánea-de-iniciativas). El tercero inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
+El primer comando lee el plan de una iniciativa y sus registros de apoyo. Termina con código 1, con el mismo JSON, cuando el plan no es válido o cambia mientras se lee (`reason: invalid-or-changing-plan`, con `planError` cuando el analizador indica dónde); cualquier otro resultado, incluido `unreadable-or-unsafe-plan`, termina con 0, porque ese resultado puede deberse al entorno (por ejemplo, un proyecto que no es la raíz de Git) y no al plan. El segundo muestra una instantánea JSON de todas las iniciativas abiertas; consulta [instantánea de iniciativas](#instantánea-de-iniciativas). El tercero inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
 
 El panel puede guardar notas locales si las evidencias mostradas siguen coincidiendo. Una nota no se aplica automáticamente, no autentica la aceptación del operador ni permite despachar trabajo. No expongas el panel públicamente ni incluyas secretos en sus registros.
+
+## Comprobación de registros
+
+```bash
+node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/project/.factory/initiatives/I0001/plan.md --file /absolute/project/.factory/initiatives/I0001/jobs/J001/A001.md
+```
+
+`tools/isswf-record-check.mjs` imprime `{ ok, files }`, con una entrada por cada `--file` y sus `violations` (`code`, `message` y, cuando se conocen, `job`, `field` y `line` desde 1), y termina con código 1 si algún archivo tiene alguna. Solo informa: nunca edita un archivo, concede permisos ni inicia trabajo. Cada `--file` debe ser una ruta absoluta a un archivo regular dentro del proyecto. Funcionan tanto `\` como `/`. `tools/isswf-record-check-core.mjs` no importa módulos de Node y comprueba el texto de un archivo a partir de su ruta, de modo que un entorno sin módulos integrados de Node puede llamar él mismo a `checkRecord({ path, text, jobFiles })`.
+
+- `plan.md`: un plan que el analizador de planes rechaza informa del código del analizador (por ejemplo `invalid-job`) con su trabajo, campo y línea. Un trabajo declarado `pending` o `blocked` cuyo directorio contiene un registro `A<nnn>.md` o `V<nnn>.md` es `records-for-unstarted-job`; la CLI lee para ello cada directorio de trabajo junto al plan.
+- `A<nnn>.md` y `V<nnn>.md`: una línea `- Run:` que el analizador de la instantánea ignoraría es `run-line-unparsed`, y una con `unknown` como ID es `run-id-unknown` (la plantilla indica omitir la línea). Un registro sin una etiqueta de la plantilla es `missing-field` con la etiqueta exacta: `Deviations from required procedure and consequence:` y `Process deviations observed:` en un intento, y `Unreviewed areas and evidence limits:`, `Convergence advice:` y `Process deviations observed:` en una revisión.
+- No se comprueban otros archivos.
 
 ## Instantánea de iniciativas
 

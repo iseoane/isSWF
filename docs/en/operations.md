@@ -20,9 +20,21 @@ node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
-The first command reads an initiative's plan and supporting records. The second prints a JSON snapshot of every open initiative; see [initiative snapshot](#initiative-snapshot). The third starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
+The first command reads an initiative's plan and supporting records. It exits 1, with the same JSON, when the plan is invalid or changes while it is read (`reason: invalid-or-changing-plan`, with `planError` when the parser says where); every other result, including `unreadable-or-unsafe-plan`, exits 0, because that result can come from the environment (for example a project that is not a Git root) rather than from the plan. The second prints a JSON snapshot of every open initiative; see [initiative snapshot](#initiative-snapshot). The third starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
 
 The panel can record local notes when the displayed evidence still matches. A note is not automatically applied, authenticated operator acceptance, or permission to dispatch work. Do not expose the panel publicly or put secrets in its records.
+
+## Record check
+
+```bash
+node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/project/.factory/initiatives/I0001/plan.md --file /absolute/project/.factory/initiatives/I0001/jobs/J001/A001.md
+```
+
+`tools/isswf-record-check.mjs` prints `{ ok, files }`, one entry per `--file` with its `violations` (`code`, `message` and, when known, `job`, `field` and 1-based `line`), and exits 1 when any file has one. It only reports: it never edits a file, grants permission or starts work. Each `--file` must be an absolute path to a regular file inside the project. Both `\` and `/` work. `tools/isswf-record-check-core.mjs` has no Node imports and checks one file's text from its path, so a runtime without Node built-ins can call `checkRecord({ path, text, jobFiles })` itself.
+
+- `plan.md`: a plan the plan parser rejects reports the parser's code (for example `invalid-job`) with its job, field and line. A job reported `pending` or `blocked` whose directory holds an `A<nnn>.md` or `V<nnn>.md` record is `records-for-unstarted-job`; the CLI reads each job directory next to the plan for this.
+- `A<nnn>.md` and `V<nnn>.md`: a `- Run:` line the snapshot's parser would ignore is `run-line-unparsed`, and one with `unknown` as its ID is `run-id-unknown` (the template says to omit the line). A record without a template label is `missing-field` with the exact label: `Deviations from required procedure and consequence:` and `Process deviations observed:` in an attempt, and `Unreviewed areas and evidence limits:`, `Convergence advice:` and `Process deviations observed:` in a review.
+- Other files are not checked.
 
 ## Initiative snapshot
 

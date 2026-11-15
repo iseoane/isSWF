@@ -21,7 +21,7 @@ Estas herramientas empaquetan la fábrica, gestionan la instalación de un proye
 | Preparar y verificar un paquete | `tools/build-release.mjs`, `tools/bun-release.mjs`, `tools/release-source.mjs`, `tools/factory-package.mjs` |
 | Inicializar, seleccionar, actualizar y recuperar la instalación de un proyecto | `tools/isswf.mjs`, `tools/project-state.mjs`, `tools/state-migration.mjs` |
 | Preparar planes y recibir issues | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-intake.mjs` |
-| Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
+| Leer registros y mostrar el panel local | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-record-check.mjs`, `tools/isswf-record-check-core.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
 
 Estas herramientas tienen contratos distintos. No des por hecho que los comandos, modelos compatibles, recuperación o permisos de un rol se aplican a otro.
 

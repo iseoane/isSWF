@@ -31,8 +31,10 @@ Further candidates observed on 2026-11-14, to assess:
 - Briefs recorded a tool limit ("effort not settable") that the tool schema contradicts: capability claims in briefs could be checked against the host's tool schema.
 - `hooks/register.test.tsx` is not run by any CI step or test (J001/A002): any hook guard needs a test that runs.
 - A wording correction dropped part of a contract definition, and the phrase tests passed (J008/V002 F4): a record field's definition could have one canonical source, with its key phrases asserted.
+- Knip and ESLint are not part of `check-quality`, so a worker's local checks can pass while CI fails (J001 PR327): the worker brief or a pre-push check could run them.
 - Unbound review handoffs carry a diff byte count and SHA-256 copied by hand (J008 V001-V003): the handoff could be generated (J002).
 - Hand-written records repeat template slips: `Run: claude agent=unknown` instead of omitting the line, and "None." followed by a narrative (J008 A002, A003): J001's validator could flag both.
+- A tool's behavior changed, and statements describing the old behavior survived the first correction, because each search covered only some directories (J001 V001 F1, V002 F6): a change to a documented contract could come with a mechanical search of every packaged text for the old statement.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -44,9 +46,9 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Size: M (two related flows, the strict status read-back and the validation on write, each on two hosts)
 - Objective: Writing initiative records gives immediate, mechanical feedback on plan and record contract violations.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: A read-only researcher answers the brief-r1 cross-host feasibility questions; the coordinator records A001, then prepares brief-r2 for the writer.
+- Next step: Integrate brief-r2 (PR from feat/i0057-j001-record-check after green exact-head CI); then run the A002 runtime probes and prepare brief-r3 for the hook and Pi wiring.
 
 ### Acceptance
 
@@ -62,6 +64,8 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14 correction to the entry above: replaying the pre-fix I0055 plan in a Git repository, `isswf-status` does detect it (`status: unknown`, `invalid-or-changing-plan`, `planError` `unsafe-brief-reference` at J001 Brief line 12), but it exits 0, so only a reader who checks the output notices. Outside a Git root it reports `unreadable-or-unsafe-plan` even for a valid plan. `tests/plan-records.mjs` catches it in about a second but runs only in CI. Plans written at 20:03 (8566437), fixed at 20:38 (03a24a8).
 - 2026-11-14: `Run:` lines with trailing notes in A003, A011 and V006 were silently ignored by the pane (tools/isswf-snapshot-core.mjs:116).
 - 2026-11-14: J029 stayed `blocked` while its worker, review and PR ran, so the pane's quota-resume prompt (hooks/register.tsx:165) never armed.
+- 2026-11-15: brief-r2 candidate 5f34fdf passed review round 3 ([V003](jobs/J001/V003.md)) after V001 (F1) and V002 (F6) failed on stale exit-code statements; attempts A003-A005. On real records the new validator flagged `J008/A002.md:7` `run-id-unknown`.
+- 2026-11-15: PR327 CI failed Knip (`REQUIRED_FIELDS` unused: the test imports the core dynamically). After V003 the coordinator added the core as a Knip entry, as for `isswf-snapshot-core.mjs`; Knip passed locally. Not independently reviewed; CI verifies it. Knip was not run locally before review although its locked install is documented.
 
 ## J002
 
@@ -120,11 +124,14 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 ### Acceptance
 
 - A delegation to an isSWF role (a Claude Agent call or the Pi subagent call) is refused, naming the failed condition, when any of these holds: the initiative status is not `observed`; the named brief is untracked, uncommitted or ignored; the prompt lacks the brief path, a full checkpoint SHA or a full base SHA; or the job is not `in-progress` in the committed plan.
+- A delegation to an isSWF role is also refused when its model or effort is missing or differs from the approved selection for that role. That selection is read from one structured, project-local source that the guard can parse. Prose in project-setup.md does not count. An operator-typed override covers a different value for a single dispatch. If no structured source exists yet, the job creates it first, migrating the approved Claude preset; it does not restore the legacy `.factory/models.json` routing.
 - A delegation that meets every condition runs unchanged, and delegations to other agents are not affected.
 - Passing the guard is not recorded or reported as authorization.
 - The coordinator skill's "Pre-dispatch refusal conditions" section is reduced to a pointer to the guard.
 
 ### Evidence
+
+- 2026-11-14: in this session every Claude dispatch (J008, J001 and its reviews) omitted effort. The briefs said effort was "not settable", although the Agent tool accepts it. The approved preset (project-setup.md:57; worker sonnet/medium, reviewer opus/medium, researcher haiku/high) exists only as prose. Operator: "El effort por defecto esta en el setup". The operator also noted that model and effort were once held in a JSON file (`.factory/models.json`, now legacy since 50b502e). They became semantic when native delegation replaced the legacy executor.
 
 - 2026-11-14: J029 was dispatched while its plan job stayed `blocked` (see J001); the conditions in .agents/skills/isswf-coordinator/SKILL.md:152-160 are held only in prose and nothing runs them at dispatch.
 - 2026-11-14 audit: the Claude plugin `tool.call` hook can return `deny` before a call runs (.claude-plugin/types/claude-code/index.d.ts, ToolCallResult); Pi 1.5.2 `tool_call` can block (installed docs/extensions.md). The Pi subagent call shape is not yet verified.
@@ -195,13 +202,13 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows: the deviations field in both templates, and per-round reviewer limits in review records)
 - Objective: Every attempt and review record reports the process deviations its author observed, and every review round records the reviewer's limits, so neither depends on the coordinator's memory.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Open the PR for candidate 62c501a, verify CI on the exact head and merge; then close J008 with the deviations copied to the deferred candidates.
+- Next step: None. The J001 validator check of these fields is J001 scope.
 
 ### Acceptance
 
@@ -221,6 +228,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
   - [V003](jobs/J008/V003.md): pass.
   - Two correction cycles: [A002](jobs/J008/A002.md) and [A003](jobs/J008/A003.md).
 - 2026-11-14: the operator approved integration of the role-profile change, which REVIEW.md lists under "Always needs a person" ("Si apruebo"). The operator also extended the review budget ("Si necesitas más rondas las tienes").
+- 2026-11-14: PR326 merged as 0d2ff5d2fc1a53b00bf422d29fc244d2dcee20ba after green CI on exact head 3d712c37da63df01a9e69c815a84710fc227fa0f (Ubuntu and Windows package and host discovery, portable checks). The deviations reported in A001-A003 and V001-V003 were copied to the deferred candidates.
 
 ## J009
 

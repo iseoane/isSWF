@@ -115,11 +115,16 @@ function parseRole(text) {
 
 const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
 
+/** The launch identity a `Run:` line records, or null when the pane would ignore the line. */
+export function parseRunLine(line) {
+  const match = line.replace(/\r$/, '').match(RUN_LINE);
+  if (!match) return null;
+  const [host, kind] = match[1].split(' ');
+  return { host, kind, id: match[2] };
+}
+
 function parseRuns(text) {
-  return text.split('\n').map(line => line.replace(/\r$/, '').match(RUN_LINE)).filter(Boolean).map(m => {
-    const [host, kind] = m[1].split(' ');
-    return { host, kind, id: m[2] };
-  });
+  return text.split('\n').map(parseRunLine).filter(Boolean);
 }
 
 function parseRecord(file, text, initiativeId, jobId) {

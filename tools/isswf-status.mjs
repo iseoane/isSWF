@@ -173,6 +173,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       args[parts[i]] = parts[i + 1];
     }
     if (!args['--project'] || !args['--initiative']) throw Error('project and initiative required');
-    console.log(JSON.stringify(await status({ project: args['--project'], initiative: args['--initiative'] }), null, 2));
+    const result = await status({ project: args['--project'], initiative: args['--initiative'] });
+    console.log(JSON.stringify(result, null, 2));
+    // An unreadable or unsafe plan stays exit 0: it can be an environment limit, not a defect in the plan.
+    if (result.reason === 'invalid-or-changing-plan') process.exitCode = 1;
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
