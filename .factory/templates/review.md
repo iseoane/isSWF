@@ -1,11 +1,11 @@
 # Review report
 
-> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from. Always fill the identity, base/candidate and pinned-input fields below with exact values, never a link in their place.
+> Link the brief, plan and earlier reports for scope, authorization, budgets, identities and limits that are unchanged; record here only what this step changed, observed or decided. Restate a fact only when this record must stand alone for an independent reader or a recovery, and then say which source it comes from. Always fill the identity, base/candidate and pinned-input fields below with exact values, never a link in their place. Write each `Run:` line as plain text without backticks, one per host launch, as docs/durable-work.md defines under Record the launch identity, and delete the line when the ID is unknown.
 
 ## Candidate identity
 
 - Job ID and review ID:
-- Run: claude agent=<id> (plain text, no backticks; one line per host launch as defined in docs/durable-work.md under Record the launch identity; omit when the ID is unknown)
+- Run: claude agent=<id>
 - Review round in this job, and prior review IDs:
 - Project `REVIEW.md` consumed (path and revision), or absent:
 - Brief path and exact revision:
