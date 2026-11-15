@@ -474,12 +474,27 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
 const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
 
 export const register: Register = (on, options) => {
-  // Runs whatever the pane option is: it reports on a plan or record the tool call just wrote, and only reports.
+  // The engine accepts one unmatched `tool.call` hook, so this one serves the record check, which runs whatever
+  // the pane option is, and the pane's observation, which runs only with the option on.
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
+    // A failure in either part must never change or repeat the tool's result.
+    if (options?.initiativesPane === true) {
+      try {
+        if ((await $.state.get(IS_ACTIVATED)).value) {
+          ensureFallback($)
+          const ids = touchedIds(e)
+          if (ids.length) {
+            await update($, TOUCHED, adding(ids))
+            scheduleRefresh($)
+          }
+        }
+      } catch {}
+    }
     try {
       const path = (e as { file_path?: unknown }).file_path
       if (!WRITE_TOOLS.has(e.tool) || typeof path !== 'string') return ran
+      // The record check only reports, as model-visible context; the tool result stays as it was.
       // The engine refuses `$.fs` passed as a value, so each call is spelled out.
       const text = await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
       return text ? { ...ran, context: [text] } : ran
@@ -508,23 +523,6 @@ export const register: Register = (on, options) => {
     }
 
     return next(e)
-  })
-
-  on('tool.call', async ($, e, next) => {
-    const ran = await next(e)
-    // Observation only: a failure here must never change or repeat the tool's result.
-    try {
-      if ((await $.state.get(IS_ACTIVATED)).value) {
-        ensureFallback($)
-        const ids = touchedIds(e)
-        if (ids.length) {
-          await update($, TOUCHED, adding(ids))
-          scheduleRefresh($)
-        }
-      }
-    } catch {}
-
-    return ran
   })
 
   on('command.run', { command: 'isswf-initiatives' }, async ($, e) => {
