@@ -163,6 +163,8 @@ try {
     'skills/isswf-interview/SKILL.md',
     '.agents/skills/isswf-howto/SKILL.md',
     'skills/isswf-howto/SKILL.md',
+    '.agents/skills/isswf-handoff/SKILL.md',
+    'skills/isswf-handoff/SKILL.md',
     '.agents/skills/isswf-coordinator/references/version-advisory.md',
   ]) {
     assert.ok(receiptA.files[path], `Utility resource missing from release: ${path}`);
