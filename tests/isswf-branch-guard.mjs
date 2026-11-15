@@ -10,6 +10,7 @@ import { promisify } from 'node:util';
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
 const { tokenize } = await load('tools/isswf-command-core.mjs');
+const { default: registerPi } = await load('tools/isswf-command-guard-pi-extension.mjs');
 const { resolveDir, observeFromFiles, observeBranch, checkBranch, refreshBranches } = await load('tools/isswf-branch-guard-core.mjs');
 
 // Git parsing: a segment whose command is `git` carries its global options and its subcommand, and every segment carries the
@@ -274,6 +275,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     'c:/r/.git': 'gitdir: ../elsewhere/gitdir\n',
     'c:/elsewhere/gitdir/HEAD': '0123456789abcdef0123456789abcdef01234567\n',
     'c:/u/.git/HEAD': 'ref: refs/remotes/origin/x\n',
+    'c:/q/.git/HEAD': 'ref: refs/heads/.invalid\n',
   };
   const read = async path => {
     if (!(path in files)) throw new Error(`ENOENT ${path}`);
@@ -284,6 +286,65 @@ for (const [mode, observe] of Object.entries(observers)) {
   assert.deepEqual(await observeFromFiles('c:/r', read), { top: 'c:/r', state: { detached: '0123456789abcdef0123456789abcdef01234567' } });
   assert.equal(await observeFromFiles('c:/u', read), undefined, 'a HEAD that is not a branch or a commit is not read');
   assert.equal(await observeFromFiles('c:/none/deeper', read), undefined);
+  assert.equal(await observeFromFiles('c:/q', read), undefined, 'a reftable repository keeps no branch in HEAD');
+}
+
+// Pi: the extension refuses on `tool_call`, looks again on `tool_result` and starts afresh on `session_start`.
+{
+  const base = realpathSync.native(mkdtempSync(join(tmpdir(), 'isswf-branch-pi-')));
+  try {
+    const repo = join(base, 'repo');
+    mkdirSync(repo);
+    sh(repo, 'init', '-q');
+    writeFileSync(join(repo, 'a.txt'), 'a\n');
+    sh(repo, 'add', '.');
+    sh(repo, 'commit', '-q', '-m', 'first');
+    const handlers = {};
+    registerPi({ on: (name, handler) => { handlers[name] = handler; } });
+    assert.deepEqual(Object.keys(handlers).sort(), ['session_start', 'tool_call', 'tool_result']);
+    const ctx = { cwd: repo };
+    const call = (toolName, id, command) => handlers.tool_call({ type: 'tool_call', toolName, toolCallId: id, input: { command } }, ctx);
+    const result = (toolName, id, command, isError = false) => handlers.tool_result({ type: 'tool_result', toolName, toolCallId: id, input: { command }, isError, content: [] }, ctx);
+    await handlers.session_start({ type: 'session_start', reason: 'startup' }, ctx);
+
+    assert.equal(await call('bash', 'c1', 'git commit -m one'), undefined);
+    sh(repo, 'switch', '-q', '-c', 'other');
+    for (const toolName of ['bash', 'powershell']) {
+      const blocked = await call(toolName, 'c2', 'git commit -m two');
+      assert.equal(blocked.block, true, toolName);
+      for (const part of ['"other"', '"main"', 'another actor', 'git switch main', 'git switch other']) assert.ok(blocked.reason.includes(part), `${toolName}: ${part}`);
+    }
+    assert.equal(await call('read', 'c3', 'git commit -m two'), undefined, 'only shell tools are guarded');
+    assert.equal(await call('bash', 'c4', 'git status'), undefined);
+    assert.match((await call('bash', 'c5', 'npx x')).reason, /package-acquisition/u, 'the command guard still refuses first');
+    assert.equal(await handlers.tool_call({ toolName: 'bash', toolCallId: 'c6', input: { command: 'git commit -m x' } }, {}), undefined, 'a call without a session directory is left alone');
+    assert.equal(await handlers.tool_call({ toolName: 'bash', input: {} }, ctx), undefined);
+    assert.equal(await handlers.tool_call(undefined, ctx), undefined);
+
+    // A failed switch still adopts the checkout's branch.
+    assert.equal(await call('bash', 'c7', 'git switch nothing'), undefined);
+    await result('bash', 'c7', 'git switch nothing', true);
+    assert.equal(await call('bash', 'c8', 'git commit -m three'), undefined, 'the checkout was adopted after the switch call');
+    sh(repo, 'switch', '-q', 'main');
+    assert.equal((await call('bash', 'c9', 'git commit -m four')).block, true);
+    assert.equal(await call('bash', 'c10', 'git switch main'), undefined);
+    await result('bash', 'c10', 'git switch main');
+    assert.equal(await call('bash', 'c11', 'git commit -m five'), undefined);
+    await result('bash', 'unknown-call', 'git commit -m five');
+    await result('bash', undefined, 'git commit -m five');
+    assert.equal(await handlers.tool_result(undefined, ctx), undefined);
+
+    // A new session expects the branch it starts on.
+    sh(repo, 'switch', '-q', 'other');
+    assert.equal((await call('bash', 'c12', 'git commit -m six')).block, true);
+    await handlers.session_start({ type: 'session_start', reason: 'new' }, ctx);
+    assert.equal(await call('bash', 'c13', 'git commit -m seven'), undefined);
+    sh(repo, 'switch', '-q', 'main');
+    const moved = await call('bash', 'c14', 'git commit -m eight');
+    assert.ok(moved.reason.includes('The checkout is on "main", but this session selected "other"'), moved.reason);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
 }
 
 console.log('PASS branch guard');

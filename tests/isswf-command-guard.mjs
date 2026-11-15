@@ -265,8 +265,8 @@ for (const command of [
 {
   const handlers = [];
   registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
-  assert.deepEqual(handlers.map(([name]) => name), ['tool_call'], 'only the call event is used');
-  const [[, handler]] = handlers;
+  assert.deepEqual(handlers.map(([name]) => name).sort(), ['session_start', 'tool_call', 'tool_result'], 'the call, result and start events are used');
+  const handler = handlers.find(([name]) => name === 'tool_call')[1];
   const call = (toolName, command) => handler({ toolName, input: { command } }, { cwd: '/work' });
   for (const toolName of ['bash', 'powershell']) {
     const blocked = await call(toolName, 'gh pr checks 1 --watch');
