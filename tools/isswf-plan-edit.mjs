@@ -43,7 +43,7 @@ export async function editPlanFile({ project, initiative, edit, beforeRename }) 
   } catch (error) { await unlink(temp).catch(() => {}); throw error; }
 }
 
-async function createPlanFile({ project, initiative, text }) {
+export async function createPlanFile({ project, initiative, text }) {
   const path = await planPath(project, initiative);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, text, { flag: 'wx' }).catch(error => { throw error.code === 'EEXIST' ? fail('plan-exists') : error; });
