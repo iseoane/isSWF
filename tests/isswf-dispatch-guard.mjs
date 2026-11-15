@@ -17,16 +17,23 @@ const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synth
 const plan = (...jobs) => `# I0001: Synthetic\n\nType: bug\n\n${jobs.join('\n')}`;
 const dispatchPrompt = (extra = '') => `Work on the brief ${BRIEF}.\nInput checkpoint ${CHECKPOINT}.\nTarget base: main ${BASE}.\n${extra}`;
 const selectionFile = agents => JSON.stringify({ schemaVersion: 1, agents });
+const PI_MODEL = 'openai-codex/gpt-6-luna';
+// Entries are keyed by host, then by agent, so one bare name can carry a different model on each host.
 const claudeAgents = {
-  'isswf:isswf-worker': { host: 'claude', model: 'sonnet', effort: 'medium' },
-  'isswf-worker': { host: 'claude', model: 'sonnet', effort: 'medium' },
-  'isswf:isswf-reviewer': { host: 'claude', model: 'opus', effort: 'medium' },
-  'isswf:isswf-researcher': { host: 'pi', model: 'openai-codex/gpt-6-luna', effort: 'high' },
+  claude: {
+    'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' },
+    'isswf-worker': { model: 'sonnet', effort: 'medium' },
+    'isswf:isswf-reviewer': { model: 'opus', effort: 'medium' },
+  },
+  pi: {
+    'isswf-worker': { model: PI_MODEL, effort: 'high' },
+    'isswf-researcher': { model: PI_MODEL, effort: 'high' },
+  },
 };
 
 // The in-memory io behaves like Claude's `$.fs` and `$.process.run`: it rejects a missing path and lists `{ name, kind }`.
 // `git` answers the two Git questions the guard asks, by exit code.
-const memoryIo = ({ project = '/work/project', files: raw = {}, dirs = ['.factory'], tracked = true, ignored = false, git } = {}) => {
+const memoryIo = ({ project = '/work/project', files: raw = {}, dirs = ['.factory'], tracked = true, ignored = false, committed = true, git } = {}) => {
   const norm = path => path.replaceAll('\\', '/');
   const files = Object.fromEntries(Object.entries(raw).map(([path, text]) => [norm(path), text]));
   const calls = { git: [], read: [] };
@@ -47,6 +54,7 @@ const memoryIo = ({ project = '/work/project', files: raw = {}, dirs = ['.factor
       calls.git.push(argv);
       if (argv[0] === 'ls-files') return tracked ? 0 : 1;
       if (argv[0] === 'check-ignore') return ignored ? 0 : 1;
+      if (argv[0] === 'cat-file') return committed ? 0 : 128;
       throw Error(`unexpected git ${argv.join(' ')}`);
     }),
   };
@@ -79,7 +87,8 @@ for (const subagent_type of [undefined, 'general-purpose', 'Explore', 'isswf:oth
 for (const subagent_type of ['isswf:isswf-worker', 'isswf-worker']) {
   const io = memoryIo(project());
   assert.deepEqual(await claude(claudeCall({ subagent_type }), io), { allow: true }, subagent_type);
-  assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '-q', '--']]);
+  assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '--no-index', '-q'], ['cat-file', '-e', `${CHECKPOINT}:${BRIEF}`]]);
+  assert.equal(io.calls.git[2][2], `${CHECKPOINT}:${BRIEF}`, 'the brief must exist at the named checkpoint');
 }
 // Windows spelling of the project root works the same.
 assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\project'))), { allow: true }, 'a backslash project root');
@@ -99,10 +108,17 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   refused(await claude(claudeCall(), withSelection('{not json')), 'selection', 'valid JSON');
   refused(await claude(claudeCall(), withSelection(JSON.stringify({ schemaVersion: 2, agents: claudeAgents }))), 'selection', 'schemaVersion');
   refused(await claude(claudeCall(), withSelection(JSON.stringify({ schemaVersion: 1 }))), 'selection', 'agents');
+  refused(await claude(claudeCall(), withSelection(JSON.stringify({ schemaVersion: 1, agents: { 'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' } } }))), 'selection', 'no entry', 'claude');
   refused(await claude(claudeCall({ subagent_type: 'isswf:isswf-planner' }), withSelection(selectionFile(claudeAgents))), 'selection', 'isswf:isswf-planner', 'no entry');
-  refused(await claude(claudeCall(), withSelection(selectionFile({ 'isswf:isswf-worker': { host: 'claude', model: 'sonnet' } }))), 'selection', 'effort', 'entry');
-  refused(await claude(claudeCall(), withSelection(selectionFile({ 'isswf:isswf-worker': { host: 'other', model: 'sonnet', effort: 'low' } }))), 'selection', 'host');
-  refused(await claude(claudeCall({ subagent_type: 'isswf:isswf-researcher', model: 'openai-codex/gpt-6-luna', effort: 'high' }), memoryIo(base)), 'selection', 'host pi', 'claude');
+  refused(await claude(claudeCall(), withSelection(selectionFile({ claude: { 'isswf:isswf-worker': { model: 'sonnet' } } }))), 'selection', 'effort', 'entry');
+  // An agent listed only under another host has no entry for this one.
+  refused(await claude(claudeCall({ subagent_type: 'isswf:isswf-researcher', model: PI_MODEL, effort: 'high' }), memoryIo(base)), 'selection', 'no entry', 'isswf:isswf-researcher', 'claude');
+  refused(await claude(claudeCall({ model: PI_MODEL, effort: 'high' }), memoryIo(base)), 'selection', 'model', 'sonnet');
+  // The same bare name carries its own model on each host.
+  const piWorker = model => guardDispatch({ host: 'pi', input: { agent: 'isswf-worker', task: dispatchPrompt(), model }, io: memoryIo(base) });
+  assert.deepEqual(await claude(claudeCall({ subagent_type: 'isswf-worker' }), memoryIo(base)), { allow: true }, 'claude entry of the bare name');
+  assert.deepEqual(await piWorker(`${PI_MODEL}:high`), { allow: true }, 'pi entry of the same bare name');
+  refused(await piWorker('sonnet:medium'), 'selection', 'model', PI_MODEL);
   refused(await claude(claudeCall(), memoryIo({ ...base, dirs: ['.factory', '.isswf'] })), 'selection', '.isswf', '.factory');
   refused(await claude(claudeCall(), memoryIo({ ...base, dirs: [] })), 'selection', 'state directory');
 
@@ -143,6 +159,16 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   assert.deepEqual(await claude(claudeCall({ prompt: `C:\\work\\project\\.factory\\initiatives\\I0001\\jobs\\J001\\brief-r1.md, checkpoint ${CHECKPOINT}, base ${BASE}` }), io()), { allow: true });
 }
 
+// A Pi management action is exempt only when it names no isSWF role agent anywhere.
+{
+  const pi = input => guardDispatch({ host: 'pi', input, io: memoryIo({ files: {}, dirs: [] }) });
+  assert.deepEqual(await pi({ action: 'list' }), { allow: true }, 'a plain management action');
+  assert.deepEqual(await pi({ action: 'list', agent: 'scout' }), { allow: true }, 'an action that names another agent');
+  for (const input of [{ action: 'run', agent: 'isswf-worker', task: 'x' }, { action: 'unknown', tasks: [{ agent: 'isswf-worker' }] }, { action: 'x', chain: [{ parallel: [{ agent: 'isswf-reviewer' }] }] }]) {
+    refused(await pi(input), 'selection', 'state directory');
+  }
+}
+
 // Condition 4: the plan parses and the named job is in-progress.
 {
   const at = text => memoryIo(project({ files: { ...project().files, '/work/project/.factory/initiatives/I0001/plan.md': text } }));
@@ -168,6 +194,7 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   refused(await claude(claudeCall(), memoryIo(project({ ignored: true }))), 'brief', 'ignored');
   refused(await claude(claudeCall(), memoryIo(project({ git: async () => { throw Error('git is not available'); } }))), 'brief', 'git is not available');
   refused(await claude(claudeCall(), memoryIo(project({ git: async argv => (argv[0] === 'ls-files' ? 0 : 128) }))), 'brief', 'check-ignore');
+  refused(await claude(claudeCall(), memoryIo(project({ committed: false }))), 'brief', 'checkpoint', CHECKPOINT);
 }
 
 // The guard fails closed for an isSWF role call and never for another agent.
@@ -187,12 +214,14 @@ const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-dispatch-guard-'
 const git = (cwd, ...args) => {
   const result = spawnSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', ...args], { cwd, encoding: 'utf8', timeout: 20000 });
   assert.equal(result.status, 0, result.stderr);
+  return result.stdout.trim();
 };
-const PI_MODEL = 'openai-codex/gpt-6-luna';
 const piAgents = {
-  'isswf-worker': { host: 'pi', model: PI_MODEL, effort: 'high' },
-  'isswf-reviewer': { host: 'pi', model: 'vendor/model:free', effort: 'low' },
-  'isswf-planner': { host: 'claude', model: 'opus', effort: 'low' },
+  pi: {
+    'isswf-worker': { model: PI_MODEL, effort: 'high' },
+    'isswf-reviewer': { model: 'vendor/model:free', effort: 'low' },
+  },
+  claude: { 'isswf-planner': { model: 'opus', effort: 'low' } },
 };
 try {
   const root = join(temp, 'project');
@@ -207,8 +236,10 @@ try {
   git(temp, 'init', '-q', 'project');
   git(root, 'add', '-A');
   git(root, 'commit', '-qm', 'fixture');
+  const head = git(root, 'rev-parse', 'HEAD');
   await write('.factory/initiatives/I0001/jobs/J001/brief-r2.md', '# untracked\n');
   await write('.factory/initiatives/I0001/jobs/J001/brief-r3.md', '# ignored\n');
+  await write('.factory/initiatives/I0001/jobs/J001/brief-r4.md', '# later\n');
 
   const handlers = [];
   registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
@@ -216,7 +247,8 @@ try {
   const [[, handler]] = handlers;
   const ctx = { cwd: root };
   const call = (input, context = ctx, toolName = 'subagent') => handler({ type: 'tool_call', toolName, toolCallId: 't1', input }, context);
-  const task = (extra = '', brief = BRIEF) => dispatchPrompt(extra).replace(BRIEF, brief);
+  // The checkpoint is the fixture commit, so the brief exists at it.
+  const task = (extra = '', brief = BRIEF) => dispatchPrompt(extra).replace(BRIEF, brief).replace(CHECKPOINT, head);
   const blocked = (result, ...parts) => {
     assert.equal(result?.block, true, `expected a block, got ${JSON.stringify(result)}`);
     for (const part of parts) assert.ok(result.reason.includes(part), `${part}\n${result.reason}`);
@@ -227,6 +259,7 @@ try {
   assert.equal(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free:low' }), undefined, 'a model id that contains a colon');
   assert.equal(await call({ agent: 'scout', task: 'look', model: 'x' }), undefined, 'another agent');
   assert.equal(await call({ action: 'list' }), undefined, 'a management call');
+  blocked(await call({ action: 'run', agent: 'isswf-worker', task: 'x' }), 'brief');
   assert.equal(await call({ agent: 'isswf-worker', task: 'x' }, ctx, 'bash'), undefined, 'another tool');
 
   // Condition 2 reads the model and the thinking suffix.
@@ -235,7 +268,7 @@ try {
   blocked(await call({ agent: 'isswf-worker', task: task(), model: 'other/model:high' }), 'model', 'other/model');
   blocked(await call({ agent: 'isswf-worker', task: task() }), 'no model');
   blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free' }), 'effort', 'no effort', 'low');
-  blocked(await call({ agent: 'isswf-planner', task: task(), model: 'opus:low' }), 'host claude');
+  blocked(await call({ agent: 'isswf-planner', task: task(), model: 'opus:low' }), 'no entry', 'pi');
   blocked(await call({ agent: 'isswf-researcher', task: task(), model: 'x:low' }), 'no entry');
   assert.equal(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: 'other/model:xhigh' }), undefined, 'the override line');
   blocked(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: `${PI_MODEL}:high` }), 'Override');
@@ -244,8 +277,12 @@ try {
   blocked(await call({ agent: 'isswf-worker', task: 'do it', model: `${PI_MODEL}:high` }), 'brief');
   blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r9')), model: `${PI_MODEL}:high` }), 'does not exist');
   blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r2')), model: `${PI_MODEL}:high` }), 'not tracked');
-  // An ignored, untracked brief fails the tracked check first; the ignore answer itself is covered with the injected Git above.
-  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r3')), model: `${PI_MODEL}:high` }), 'not tracked');
+  // A force-added brief under an ignored path is still tracked, so only `check-ignore --no-index` refuses it.
+  git(root, 'add', '-f', '.factory/initiatives/I0001/jobs/J001/brief-r3.md');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r3')), model: `${PI_MODEL}:high` }), 'ignored by Git');
+  // A brief that is only staged is not committed at the checkpoint.
+  git(root, 'add', '.factory/initiatives/I0001/jobs/J001/brief-r4.md');
+  blocked(await call({ agent: 'isswf-worker', task: task('', BRIEF.replace('r1', 'r4')), model: `${PI_MODEL}:high` }), 'checkpoint', head);
   await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'pending')));
   blocked(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` }), 'J001', 'pending');
   await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'in-progress')));
@@ -254,7 +291,7 @@ try {
   const good = { agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` };
   assert.equal(await call({ tasks: [good, { ...good, agent: 'scout' }] }), undefined, 'parallel children that pass');
   blocked(await call({ tasks: [good, { ...good, model: `${PI_MODEL}:low` }] }), 'effort');
-  blocked(await call({ chain: [{ agent: 'scout', task: 'x' }, { parallel: [good, { ...good, agent: 'isswf-planner' }] }] }), 'isswf-planner', 'host claude');
+  blocked(await call({ chain: [{ agent: 'scout', task: 'x' }, { parallel: [good, { ...good, agent: 'isswf-planner' }] }] }), 'isswf-planner', 'no entry');
   assert.equal(await call({ task: task(), chain: [{ agent: 'isswf-worker', model: `${PI_MODEL}:high` }] }), undefined, 'a step uses the original request');
   blocked(await call({ task: 'no references', chain: [{ agent: 'isswf-worker', model: `${PI_MODEL}:high` }] }), 'brief');
 
