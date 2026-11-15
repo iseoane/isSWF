@@ -234,12 +234,14 @@ try {
   assert.equal(check(tooShort).ok, false, 'a five-character prefix does not name a commit');
 
   // An override never excuses a commit that changes code, tests or agent instructions, even when it also changes documentation.
+  const refused = [];
   for (const [files, label] of [[{ 'tools/x.mjs': 'x\n' }, 'code'], [{ '.agents/skills/x/SKILL.md': 's\n' }, 'agent instructions'], [{ 'docs/en/a.md': 'a\n', 'src/y.mjs': 'y\n' }, 'documentation with code']]) {
     const mixed = await commit(files, `mixed ${label}`);
-    const excused = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second, override(docs, mixed)) }, `records: override ${label}`);
+    refused.push(mixed);
+    const excused = await commit({ [`${jobDir('J001')}/V002.md`]: reviewText(second, override(docs, ...refused)) }, `records: override ${label}`);
     const result = check(excused);
     assert.equal(result.ok, false, label);
-    assert.deepEqual(jobOf(result).uncovered.map(entry => entry.commit), [mixed], label);
+    assert.deepEqual(jobOf(result).uncovered.map(entry => entry.commit), refused, label);
   }
 
   // A candidate that is not in the branch's history leaves every commit unreviewed.

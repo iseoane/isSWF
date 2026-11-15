@@ -7,10 +7,29 @@ export const HANDOFF_SCHEMA = 'isswf.handoff/1';
 export const MAX_DIFF_BYTES = 4 * 1024 * 1024;
 export const handoffReferences = () => ({});
 export const verifyHandoff = async () => undefined;
-export const reviewCandidateOf = () => undefined;
-export const overrideCommitsOf = () => [];
-export const isDocsPath = () => false;
-export const uncoveredCommits = () => ({ uncovered: [], overridden: [] });
+
+/** The commit a review record names on its candidate line, or undefined when the line is missing or names no full SHA. */
+export const reviewCandidateOf = text => /^- Candidate commit SHA, or reproducible snapshot identity: *([0-9a-f]{40})\s*$/mu.exec(text)?.[1];
+
+/** The commit SHAs, at least seven characters each, that the review record's coordinator override lines name. */
+export const overrideCommitsOf = text => text.split(/\r?\n/u).filter(line => line.startsWith('- Coordinator override')).flatMap(line => line.match(/\b[0-9a-f]{7,40}\b/gu) ?? []);
+
+/** Documentation an override may excuse: anything under docs/ and the Markdown files at the repository root. */
+export const isDocsPath = path => path.startsWith('docs/') || (!path.includes('/') && /\.md$/iu.test(path));
+
+/**
+ * Splits commits into those that still need a review and those a coordinator override excuses.
+ * An override names a commit by SHA or by a prefix of at least seven characters and never excuses a commit that changes more than documentation.
+ * @param {{ commits: {commit: string, paths: string[]}[], overrides: string[] }} input
+ */
+export function uncoveredCommits({ commits, overrides }) {
+  const uncovered = [], overridden = [];
+  for (const entry of commits) {
+    const named = overrides.some(name => entry.commit.startsWith(name));
+    (named && entry.paths.every(isDocsPath) ? overridden : uncovered).push(entry);
+  }
+  return { uncovered, overridden };
+}
 
 const K = Uint32Array.from([
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,

@@ -4,9 +4,9 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
-import { buildEnvelope, MAX_DIFF_BYTES } from './isswf-handoff-core.mjs';
+import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
-import { recordError } from './isswf-record-new-core.mjs';
+import { isRecordPath, recordError } from './isswf-record-new-core.mjs';
 import { assertCommit, blobAt, briefOf, checkSha, gitIn, jobTarget, locateGit, recordNames, requireBrief, requireInProgress } from './isswf-record-new.mjs';
 
 const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -106,8 +106,50 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   return { ok: true, handoff, envelope, promptLines: [`handoff: ${handoff.path}`, `handoff-sha256: ${handoff.sha256}`, `candidate ${candidate}`] };
 }
 
-// Stub for the TDD cycle: the unreviewed-commit check does nothing until its behaviour is implemented.
-export const coverage = async () => ({ ok: false, code: 'not-implemented' });
+const INITIATIVE_JOB = /^\.(?:isswf|factory)\/initiatives\/(I\d+)\/jobs\/([^/]+)\//u;
+
+/** Reads, for every job whose records the range changed, the commits after its latest review's candidate that change more than records. */
+export async function coverage({ project, initiative, job, base, head }) {
+  if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
+  checkSha(base, 'base', { optional: true });
+  checkSha(head, 'head', { optional: true });
+  const git = await gitIn(resolve(project));
+  const isAncestor = (ancestor, descendant) => {
+    try { git(['merge-base', '--is-ancestor', ancestor, descendant]); return true; } catch { return false; }
+  };
+  const tip = head ?? git(['rev-parse', '--verify', 'HEAD^{commit}']).trim();
+  let from = base;
+  if (from === undefined) {
+    try { from = git(['merge-base', tip, 'refs/remotes/origin/main']).trim(); } catch { throw recordError('base-not-found'); }
+  }
+  assertCommit(git, from, 'base');
+  assertCommit(git, tip, 'head');
+
+  const touched = new Map();
+  for (const path of git(['diff', '--name-only', '-z', from, tip]).split('\0')) {
+    const match = INITIATIVE_JOB.exec(path);
+    if (match && (!initiative || match[1] === initiative) && (!job || match[2] === job)) touched.set(match[0], { initiative: match[1], job: match[2], directory: match[0] });
+  }
+  const jobs = [], skipped = [];
+  for (const entry of [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory))) {
+    const record = git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').map(path => basename(path)).filter(name => /^V\d{3}\.md$/u.test(name)).sort().at(-1);
+    if (!record) {
+      skipped.push({ initiative: entry.initiative, job: entry.job, reason: 'no-review' });
+      continue;
+    }
+    const text = git(['show', `${tip}:${entry.directory}${record}`]);
+    const candidate = reviewCandidateOf(text);
+    // A candidate outside this history reviewed some other code, so it covers nothing here.
+    const covering = candidate !== undefined && isAncestor(candidate, tip) ? ['--not', candidate] : [];
+    const commits = git(['rev-list', '--reverse', `${from}..${tip}`, ...covering]).split('\n').filter(Boolean).map(commit => ({
+      commit,
+      paths: [...new Set(git(['diff-tree', '-r', '-m', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
+    })).filter(item => item.paths.length);
+    jobs.push({ initiative: entry.initiative, job: entry.job, record: record.slice(0, 4), candidate, ...uncoveredCommits({ commits, overrides: overrideCommitsOf(text) }) });
+  }
+  const failed = jobs.some(item => item.uncovered.length);
+  return { ok: !failed, ...(failed && { code: 'unreviewed-commits' }), base: from, head: tip, jobs, skipped };
+}
 
 const LOCATION = ['--project', '--initiative', '--job'];
 const commands = {
