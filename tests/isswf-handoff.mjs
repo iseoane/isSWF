@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { resolve, join } from 'node:path';
+import { mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { isAbsolute, resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
@@ -19,6 +22,154 @@ const { sha256Hex } = await import(pathToFileURL(join(source, 'tools/isswf-hando
   }
   const bigger = randomBytes(5 * 1024 * 1024 + 3);
   assert.equal(sha256Hex(bigger), createHash('sha256').update(bigger).digest('hex'), 'a diff the size of the hook read limit');
+}
+
+const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-handoff-')));
+const git = (cwd, ...args) => {
+  const result = spawnSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.autocrlf=false', ...args], { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 64 * 1024 * 1024 });
+  assert.equal(result.status, 0, result.stderr);
+  return result.stdout.trim();
+};
+const tool = (args, env = {}) => {
+  const result = spawnSync(process.execPath, [join(source, 'tools/isswf-handoff.mjs'), ...args], { encoding: 'utf8', timeout: 60000, maxBuffer: 16 * 1024 * 1024, env: { ...process.env, ...env } });
+  assert.ifError(result.error);
+  return { ...JSON.parse(result.stdout), exitCode: result.status };
+};
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n`;
+const plan = status => `# I0001: Synthetic\n\nType: bug\n\n${job('J001', status)}`;
+const BRIEF = '.factory/initiatives/I0001/jobs/J001/brief-r1.md';
+const RESOURCES = ['.agents/roles/reviewer.md', '.agents/skills/isswf-review/SKILL.md', '.agents/roles/references/review.md', '.agents/roles/references/review-convergence.md', '.agents/hosts/claude-code.md'];
+const selection = { schemaVersion: 1, agents: { claude: { 'isswf:isswf-reviewer': { model: 'opus', effort: 'medium' }, 'isswf-reviewer': { model: 'opus', effort: 'medium' } }, pi: {} } };
+
+try {
+  // A project whose base commit holds the records and the review resources, and whose candidate changes text, binary and non-UTF-8 files.
+  const root = join(temp, 'project');
+  const write = async (path, content) => {
+    await mkdir(join(root, path, '..'), { recursive: true });
+    await writeFile(join(root, path), content);
+  };
+  await mkdir(root);
+  git(root, 'init', '-q', '-b', 'main', '.');
+  await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
+  await write(BRIEF, '# brief\n');
+  await write('.factory/initiatives/I0001/jobs/J001/V001.md', '# earlier review\n');
+  await write('.factory/dispatch-selection.json', JSON.stringify(selection));
+  await write('REVIEW.md', '# review guide\n');
+  for (const path of RESOURCES) await write(path, `# ${path}\n`);
+  await write('src/a.txt', 'one\ntwo\n');
+  await write('src/gone.txt', 'removed later\n');
+  git(root, 'add', '-A');
+  git(root, 'commit', '-qm', 'base');
+  const base = git(root, 'rev-parse', 'HEAD');
+  await write('src/mid.txt', 'between\n');
+  git(root, 'add', '-A');
+  git(root, 'commit', '-qm', 'between');
+  const mid = git(root, 'rev-parse', 'HEAD');
+  await write('src/a.txt', 'one\ntwo changed\nthree\n');
+  await write('src/binary.bin', Buffer.from(Array.from({ length: 512 }, (_, i) => i % 256)));
+  await write('src/latin1.txt', Buffer.from([0x63, 0x61, 0x66, 0xe9, 0x0a]));
+  await rm(join(root, 'src/gone.txt'));
+  git(root, 'add', '-A');
+  git(root, 'commit', '-qm', 'candidate');
+  const candidate = git(root, 'rev-parse', 'HEAD');
+  const checkpoint = candidate;
+  const out = join(temp, 'out');
+  const review = (extra = [], overrides = {}) => {
+    const flags = { '--project': root, '--initiative': 'I0001', '--job': 'J001', '--brief': BRIEF, '--checkpoint': checkpoint, '--base': base, '--candidate': candidate, '--out': out, ...overrides };
+    return tool(['review', ...Object.entries(flags).flatMap(([flag, value]) => (value === undefined ? [] : [flag, value])), ...extra]);
+  };
+
+  // The handoff names the diff, its length and digest, and the files hold what the envelope says.
+  const made = review();
+  assert.equal(made.ok, true, JSON.stringify(made));
+  assert.equal(made.exitCode, 0);
+  const diffFile = join(out, `J001-${candidate.slice(0, 12)}.diff`);
+  const handoffFile = join(out, `J001-${candidate.slice(0, 12)}.handoff.json`);
+  assert.equal(resolve(made.handoff.path), resolve(handoffFile));
+  const diffBytes = await readFile(diffFile);
+  const handoffBytes = await readFile(handoffFile);
+  assert.equal(made.handoff.sha256, sha256(handoffBytes));
+  assert.equal(made.handoff.bytes, handoffBytes.length);
+  const envelope = JSON.parse(handoffBytes.toString('utf8'));
+  assert.deepEqual(made.envelope, envelope, 'the command prints the envelope it wrote');
+  assert.equal(envelope.schema, 'isswf.handoff/1');
+  assert.deepEqual([envelope.initiative, envelope.job, envelope.base, envelope.candidate], ['I0001', 'J001', base, candidate]);
+  assert.equal(resolve(envelope.diff.path), resolve(diffFile));
+  assert.equal(envelope.diff.bytes, diffBytes.length);
+  assert.equal(envelope.diff.sha256, sha256(diffBytes));
+  for (const flag of ['--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', `--attr-source=${candidate}`]) assert.ok(envelope.diff.argv.includes(flag), flag);
+  assert.deepEqual(made.promptLines, [`handoff: ${made.handoff.path}`, `handoff-sha256: ${made.handoff.sha256}`, `candidate ${candidate}`]);
+
+  // The diff is the exact base..candidate change: applied to the base tree it reproduces the candidate tree, binary and non-UTF-8 files included.
+  {
+    const check = join(temp, 'apply');
+    git(root, 'worktree', 'add', '-q', '--detach', check, base);
+    git(check, 'apply', '--index', '--binary', diffFile);
+    assert.equal(git(check, 'write-tree'), git(root, 'rev-parse', `${candidate}^{tree}`));
+    git(root, 'worktree', 'remove', '--force', check);
+  }
+
+  // The brief, the review guide, the round and the reviewer come from the records, the candidate and the selection file.
+  assert.deepEqual(envelope.brief, { path: BRIEF, revision: '1', checkpoint, blob: git(root, 'rev-parse', `${checkpoint}:${BRIEF}`) });
+  assert.deepEqual(envelope.reviewGuide, { path: 'REVIEW.md', blob: git(root, 'rev-parse', `${candidate}:REVIEW.md`) });
+  assert.equal(envelope.round, 2);
+  assert.deepEqual(envelope.priorReviews, ['V001']);
+  assert.deepEqual(envelope.reviewer, { host: 'claude', agent: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' });
+  assert.deepEqual(envelope.resources.map(resource => resource.path), RESOURCES);
+  for (const resource of envelope.resources) {
+    assert.equal(resource.blob, git(root, 'rev-parse', `${checkpoint}:${resource.path}`), resource.path);
+    assert.equal(resolve(resource.absolutePath), join(source, ...resource.path.split('/')), 'resolved from the factory root that holds the tool');
+  }
+  assert.deepEqual(review(['--prior', 'V001', 'V002']).envelope.priorReviews, ['V001', 'V002']);
+  assert.equal(review(['--prior', 'V001', 'V002']).envelope.round, 3);
+
+  const refuses = (result, code) => {
+    assert.equal(result.ok, false, JSON.stringify(result));
+    assert.equal(result.exitCode, 1);
+    assert.equal(result.code, code, JSON.stringify(result));
+  };
+  // Running it again with the same arguments is harmless; a different base for the same candidate never overwrites the first handoff.
+  assert.deepEqual(review().handoff, made.handoff);
+  refuses(review([], { '--base': mid }), 'handoff-exists');
+
+  // Refusals leave nothing written and name the cause.
+  refuses(review([], { '--candidate': candidate.slice(0, 12) }), 'invalid-candidate');
+  refuses(review([], { '--candidate': candidate.toUpperCase() }), 'invalid-candidate');
+  refuses(review([], { '--base': `${base}0` }), 'invalid-base');
+  refuses(review([], { '--checkpoint': 'HEAD' }), 'invalid-checkpoint');
+  refuses(review([], { '--candidate': 'c3'.repeat(20) }), 'commit-not-found');
+  refuses(review([], { '--base': candidate, '--candidate': base }), 'candidate-not-descendant');
+  refuses(review([], { '--base': candidate, '--candidate': candidate }), 'diff-empty');
+  refuses(review([], { '--brief': '.factory/initiatives/I0001/jobs/J001/brief-r2.md' }), 'brief-not-found');
+  refuses(review([], { '--job': 'J002', '--brief': '.factory/initiatives/I0001/jobs/J002/brief-r1.md' }), 'job-not-found');
+  refuses(review([], { '--out': join(root, 'handoffs') }), 'out-inside-project');
+  refuses(review([], { '--out': join(root, 'src', '..', 'src') }), 'out-inside-project');
+  refuses(review([], { '--out': 'relative' }), 'invalid-out');
+  refuses(review(['--host', 'pi']), 'reviewer-selection-missing');
+  refuses(tool(['review', '--project', root]), 'usage');
+  refuses(tool(['frobnicate']), 'usage');
+  await assert.rejects(stat(join(root, 'handoffs')), 'a refused --out is not created inside the project');
+  await write('.factory/initiatives/I0001/plan.md', plan('pending'));
+  refuses(review(), 'job-not-in-progress');
+  await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
+
+  // The default directory is the OS temporary directory, and a diff the Claude hook cannot read (4 MiB) is refused at generation.
+  {
+    const scratch = join(temp, 'tmp');
+    await mkdir(scratch);
+    const env = { TMPDIR: scratch, TMP: scratch, TEMP: scratch };
+    const viaTemp = tool(['review', '--project', root, '--initiative', 'I0001', '--job', 'J001', '--brief', BRIEF, '--checkpoint', checkpoint, '--base', base, '--candidate', candidate], env);
+    assert.equal(viaTemp.ok, true, JSON.stringify(viaTemp));
+    assert.ok(isAbsolute(viaTemp.handoff.path) && viaTemp.handoff.path.startsWith(scratch), viaTemp.handoff.path);
+    await write('src/huge.txt', randomBytes(3 * 1024 * 1024).toString('hex'));
+    git(root, 'add', '-A');
+    git(root, 'commit', '-qm', 'huge');
+    const huge = git(root, 'rev-parse', 'HEAD');
+    refuses(review([], { '--candidate': huge, '--checkpoint': huge }), 'diff-too-large');
+  }
+} finally {
+  await rm(temp, { recursive: true, force: true });
 }
 
 console.log('PASS handoff');
