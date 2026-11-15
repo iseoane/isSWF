@@ -45,6 +45,10 @@ Further candidates observed on 2026-11-14, to assess:
 - Whether a child loaded the skills and references its brief selects is not checked, and for the worker it cannot even be observed today: the pane shows `skills: unknown` because its transcripts are not resolved (operator, 2026-11-15). Find why the worker transcripts are not resolved, then compare the brief's selected skills and required references with the child's observed reads and warn at attempt close when one is missing (extends the deferred "which files a child read" candidate).
 - Two sources for the reviewer's model: `tools/isswf-review-launch.mjs:59-70` reads the setup skill's preset, while the dispatch guard checks `dispatch-selection.json` (J007 A001): one source could be read by both.
 - From J007: `tools/isswf-record-new.mjs` duplicates `trustedGit` from `tools/isswf-review-launch.mjs`; the review template's profile line has commas, so `parseModel` does not read its model; `editFile` does not detect a writer that lands between its check and the rename; `runGit` sets `GIT_CONFIG_GLOBAL=NUL`, so a user's `safe.directory` is ignored and a Windows "dubious ownership" repository fails opaquely; next-ID does not see uncommitted records in other worktrees (V001 I3).
+- A read-only researcher reads the shared checkout while a worker commits, so its sources may differ from its base (J007 A001, J002 A001): researchers could read at the base through the Git evidence tools or `git show`.
+- Two record-path classifiers diverge: `isRecordPath` in `tools/isswf-record-new-core.mjs` and `RECORD_PATH` in `tools/isswf-record-guard-core.mjs` (J002 A001).
+- The host stops long background commands (CI waits, the full check) under memory pressure, and nothing resumes them (2026-11-15): the coordinator guide could say how to resume, or the CI wait could be a short foreground check.
+- Scope label for triage (operator, 2026-11-15): each candidate is either for this repository only (for example check-quality, ESLint and Knip) or for the factory, since target projects use other languages.
 
 Open operator decision, not blocking any job: under the standing grant recorded in the I0009 plan on 2026-11-14, the coordinator itself classifies a PR's risk before merging it. A guard can require a recorded risk line and green exact-head CI, but cannot judge the risk. Whether an independent reviewer must confirm that classification is a product decision.
 
@@ -90,7 +94,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Research (brief-r1, read-only researcher), then implementation brief r2.
+- Next step: Implementation brief r2 after the J005 merge (shares hooks/register.tsx and the dispatch-guard Pi extension).
 
 ### Acceptance
 
@@ -103,6 +107,7 @@ Suggested order: J008 and J001 first, then J006 and J004; J002 and J007 after th
 - 2026-11-14: J029 review call 2 stopped inconclusive because the handoff lacked the diff; one call was lost.
 - 2026-11-14: coordinator test changes 2ac2f83 and 12efb53 were merged in PR322 before independent review (V003, J029-R4-04).
 - 2026-11-15: operator decision: deliver J002 as a distributed skill isswf-handoff backed by a tool, review mode first (the generated reviewer handoff, required by the dispatch guard for reviewer dispatches); a session-handoff mode, inspired by Matt Pocock's handoff skill (reference, do not duplicate; suggested skills; redaction), goes with J005 or a separate job.
+- 2026-11-15: research ([A001](jobs/J002/A001.md)): use the bound git-evidence diff argv and digest so unbound and bound digests match; the guard re-verifies a handoff file and SHA-256 named in a reviewer prompt; unreviewed commits are found from the latest V candidate, subtracting record paths and accepting recorded docs-only overrides; PR322 must fail and J007 d6b9844 must pass. The operator approved the J002 merge in advance (dispatch guard, packaging, host guides).
 
 ## J003
 
