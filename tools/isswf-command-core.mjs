@@ -10,9 +10,9 @@ export const QUOTED = /(["'])(?:(?!\1)[\s\S])*\1/g;
 const OPAQUE = '\u0001';
 const SAFE_QUOTED = /^(["'])[\w@./:=+,-]*\1$/u;
 const ASSIGNMENT = /^[A-Za-z_]\w*=/u;
-const LOOP_KEYWORDS = new Set(['while', 'until', 'for', 'foreach', 'select']);
+const LOOP_KEYWORDS = new Set(['while', 'until', 'for', 'foreach']);
 // A `for` or `foreach` header lists values, not a command.
-const VALUE_LOOPS = new Set(['for', 'foreach', 'select']);
+const VALUE_LOOPS = new Set(['for', 'foreach']);
 const PASSTHROUGH_KEYWORDS = new Set(['if', 'then', 'else', 'elif', '!', 'time']);
 const BRACE_LOOP_COMMANDS = new Set(['foreach-object', '%']);
 
@@ -73,7 +73,8 @@ function lex(text) {
 
 const basename = word => word.split(/[\\/]/u).pop().toLowerCase().replace(/\.(?:cmd|exe|bat|ps1)$/u, '');
 
-// Drops the leading assignments and the `sudo`, `env`, `command` and `exec` prefixes; `command -v` only looks a name up.
+// Drops the leading assignments and the wrapper prefixes (`sudo`, `env`, `command`, `exec`, `timeout <n>`, `nohup`, `nice`,
+// `xargs`, `cmd /c`); `command -v` only looks a name up and `timeout /t` is a sleep, not a prefix.
 function stripPrefixes(words) {
   let rest = words;
   const dropFlags = valueFlags => {
@@ -82,6 +83,12 @@ function stripPrefixes(words) {
   for (;;) {
     const name = basename(rest[0] ?? '');
     if (ASSIGNMENT.test(rest[0] ?? '')) rest = rest.slice(1);
+    else if (name === 'timeout' && DURATION.test(timeoutOperands(rest)[0] ?? '')) rest = timeoutOperands(rest).slice(1);
+    else if (name === 'nohup') rest = rest.slice(1);
+    else if (name === 'nice' || name === 'xargs') {
+      rest = rest.slice(1);
+      dropFlags(name === 'nice' ? ['-n'] : ['-n', '-I', '-L', '-P', '-d', '-E', '-s', '-a']);
+    } else if (name === 'cmd' && /^\/[ck]$/iu.test(rest[1] ?? '')) rest = rest.slice(2);
     else if (name === 'sudo') {
       rest = rest.slice(1);
       dropFlags(['-u', '-g', '-h', '-p', '-C', '-D', '-R', '-T', '-U']);
@@ -99,6 +106,13 @@ function stripPrefixes(words) {
   }
 }
 
+// The words of a GNU `timeout` call after its flags, which are `-k <t>`, `-s <signal>` and flags without a value.
+function timeoutOperands(words) {
+  let i = 1;
+  while (words[i]?.startsWith('-')) i += words[i] === '-k' || words[i] === '-s' ? 2 : 1;
+  return words.slice(i);
+}
+
 /**
  * Splits a command into segments on `&&`, `||`, `;`, `|`, `&` and newlines, after setting aside heredocs, comments and quoted text.
  * Each segment has its `words`, its normalized `command` (a lower-case basename without `.cmd` or `.exe`) with its `args`, the
@@ -111,8 +125,17 @@ export function tokenize(command) {
   let depth = 0;
   let braces = 0;
   let current = [];
-
-  const openLoop = () => loops.push({ id: nextId++, style: undefined, base: braces });
+  // A loop opens before its body arrives: a header, then `do` (Bash) or `{` (PowerShell). One that is still waiting for its body
+  // when something else follows is no loop (`% Name`, the trailing `while (...)` of `do { } while (...)`) and is dropped.
+  let header;
+  const openLoop = () => {
+    const loop = { id: nextId++, style: undefined, base: braces, paren: undefined, awaiting: false };
+    loops.push(loop);
+    return loop;
+  };
+  const dropAwaiting = () => {
+    for (let i = loops.length - 1; i >= 0; i--) if (loops[i].awaiting) loops.splice(i, 1);
+  };
 
   const endSegment = () => {
     let rest = current;
@@ -125,38 +148,49 @@ export function tokenize(command) {
         const open = loops.findLastIndex(loop => loop.style === 'do');
         if (open >= 0) loops.length = open;
       } else if (LOOP_KEYWORDS.has(leading)) {
-        openLoop();
+        header = openLoop();
         valueHeader = valueHeader || VALUE_LOOPS.has(leading);
       } else if (leading === 'do') {
         const pending = loops.at(-1)?.style === undefined ? loops.at(-1) : undefined;
-        if (pending) pending.style = 'do';
-        else openLoop();
+        if (pending) {
+          pending.style = 'do';
+          pending.awaiting = false;
+        } else openLoop();
       } else if (!PASSTHROUGH_KEYWORDS.has(leading)) break;
       rest = rest.slice(1);
     }
     const words = valueHeader ? [] : stripPrefixes(rest);
     const name = words.length && words[0] !== OPAQUE ? basename(words[0]) : undefined;
-    if (BRACE_LOOP_COMMANDS.has(name)) openLoop();
+    if (BRACE_LOOP_COMMANDS.has(name)) openLoop().awaiting = true;
     segments.push({ words: rest, command: name, args: words.slice(1), depth, loops: loops.map(loop => loop.id) });
   };
 
   for (const token of lex(wordsOnly(command))) {
     if (token.word !== undefined) {
+      if ((current[0] ?? token.word) !== 'do') dropAwaiting();
       current.push(token.word);
       continue;
     }
+    header = undefined;
     endSegment();
-    if (token.op === '(') depth++;
-    else if (token.op === ')') depth = Math.max(0, depth - 1);
-    else if (token.op === '{') {
+    if (token.op === '(') {
+      if (header) header.paren = depth;
+      else dropAwaiting();
+      depth++;
+    } else if (token.op === ')') {
+      depth = Math.max(0, depth - 1);
+      for (const loop of loops) if (loop.paren === depth) loop.awaiting = true;
+    } else if (token.op === '{') {
       const pending = loops.findLast(loop => loop.style === undefined);
       if (pending) {
         pending.style = 'brace';
         pending.base = braces;
+        pending.awaiting = false;
       }
       depth++;
       braces++;
-    } else if (token.op === '}') {
+    } else if (token.op !== '}' && token.op !== ';') dropAwaiting();
+    if (token.op === '}') {
       depth = Math.max(0, depth - 1);
       braces = Math.max(0, braces - 1);
       const open = loops.findLastIndex(loop => loop.style === 'brace' && loop.base === braces);
@@ -217,22 +251,31 @@ function ciWaiting(segments) {
 
 const LOCKED_PREFIXES = ['tooling/quality', 'tooling/host-tests'];
 const normalizedPath = path => (path ?? '').replaceAll('\\', '/').replace(/^(?:\.\/)+/u, '').replace(/\/+$/u, '');
+// A relative locked path, or an absolute one that ends in a locked path.
+const isLockedPrefix = path => {
+  const n = normalizedPath(path);
+  return LOCKED_PREFIXES.includes(n) || (/^(?:\/|[A-Za-z]:\/)/u.test(n) && LOCKED_PREFIXES.some(l => n.endsWith(`/${l}`)));
+};
+// Redirection words are not install arguments; a lone operator also consumes its target.
+const REDIRECTION = /^(?:\d*|\*|&)?(?:>>?|<|>&|&>|>\|)/u;
+const REDIRECTION_ALONE = /^(?:\d*|\*|&)?(?:>>?|<|>&|&>|>\|)$/u;
 // `npm ci --prefix <locked directory> --ignore-scripts`, with no package arguments and no other flag, in any order.
 function lockedInstall(args) {
   let prefix;
   let ignoreScripts = false;
   let ci = 0;
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === 'ci') ci++;
+    if (REDIRECTION.test(args[i])) i += REDIRECTION_ALONE.test(args[i]) ? 1 : 0;
+    else if (args[i] === 'ci') ci++;
     else if (args[i] === '--ignore-scripts') ignoreScripts = true;
     else if (args[i] === '--prefix') prefix = args[++i];
     else if (args[i].startsWith('--prefix=')) prefix = args[i].slice('--prefix='.length);
     else if (args[i] !== '--no-audit' && args[i] !== '--no-fund') return false;
   }
-  return ci === 1 && ignoreScripts && LOCKED_PREFIXES.includes(normalizedPath(prefix));
+  return ci === 1 && ignoreScripts && isLockedPrefix(prefix);
 }
 
-const VALUE_FLAGS = new Set(['--prefix', '-c', '--workspace', '-w', '--registry', '--cache', '--userconfig', '--loglevel', '--cwd', '--dir']);
+const VALUE_FLAGS = new Set(['--prefix', '-c', '--workspace', '-w', '--registry', '--cache', '--userconfig', '--loglevel', '--cwd', '--dir', '-C', '--filter']);
 // The first word that is neither a flag nor the value of a flag that takes one.
 function subcommand(args, from = 0) {
   for (let i = from; i < args.length; i++) {

@@ -239,7 +239,7 @@ for (const command of [
   'npm ci --ignore-scripts --prefix tooling/quality *> x',
   'npm ci --prefix /home/me/repo/tooling/quality --ignore-scripts',
   'npm ci --prefix=/home/me/repo/tooling/host-tests/ --ignore-scripts',
-  'npm ci --prefix C:Usersme\repo\toolingquality --ignore-scripts',
+  'npm ci --prefix C:\\Users\\me\\repo\\tooling\\quality --ignore-scripts',
   'npm ci --prefix=C:/Users/me/repo/tooling/host-tests --ignore-scripts',
   'nice make',
   'cmd /c dir',
