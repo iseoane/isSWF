@@ -11,7 +11,7 @@ This skill covers the review handoff. A later session-handoff mode would be anot
 
 ## 1. Generate the review handoff
 
-Use this before dispatching a reviewer that has no bound git-evidence tools: a Claude Agent-tool reviewer or a Pi reviewer. A bound `claude -p` review gets its diff from the bound launch instead.
+Use this before every dispatch of an `isswf-reviewer` agent: a Claude Agent-tool reviewer, a Pi reviewer without bound git-evidence tools and a bound Pi reviewer launched with `options.extensionBindings`. The dispatch guard asks every reviewer call for the handoff lines, so a bound Pi launch carries them too (generate them with `--host pi`); the reviewer then also uses the bound `isswf_git_diff` result. Only a bound `claude -p` review, which no `Agent` or `subagent` call starts, gets its diff from the bound launch alone.
 
 Required inputs, each from the brief or the writer's report: initiative, job, the absolute project path, the brief path, and the full 40-hex checkpoint, base and candidate SHAs. If one is missing, stop and ask for it. The job must be `in-progress`, the brief must exist, and the candidate must descend from the base.
 
@@ -40,7 +40,7 @@ The step ends when the prompt carries the `handoff`, `handoff-sha256` and `candi
 | `reviewer-selection-missing` | `dispatch-selection.json` has no model and effort for the reviewer on this host. |
 | `diff-too-large` | The diff is over 4 MiB, which the Claude hook cannot read. Review a smaller candidate range. |
 | `diff-empty`, `diff-failed` | The base and candidate do not differ, or Git could not produce the diff; inspect them. |
-| `handoff-exists` | The diff file of this candidate exists with other bytes, so the base differs; use another `--out`. |
+| `handoff-exists` | The diff or handoff file of this candidate exists with other bytes (another base or other prior reviews); use another `--out`. |
 
 ## 2. What the reviewer receives
 
@@ -56,7 +56,7 @@ Run this before `gh pr create` and before a merge, and whenever commits were add
 node <factory-root>/tools/isswf-handoff.mjs coverage --project <abs>
 ```
 
-Without `--base` it uses the merge base of `HEAD` and `origin/main`, so fetch `origin/main` first; `base-not-found` means it is absent. `--head`, `--initiative` and `--job` narrow the range or the jobs. For each job whose records the range changes, it takes the latest review's candidate and lists every later commit that changes a path outside the job records.
+Without `--base` it uses the merge base of `HEAD` and `origin/main`, so fetch `origin/main` first; `base-not-found` means it is absent. `--head`, `--initiative` and `--job` narrow the range or the jobs. For each job whose records the range changes, it takes the latest review's candidate. A commit is covered when the latest candidate of any such job includes it, so a later job's review covers the commits of an earlier job in the same range; it lists every commit that no job's candidate includes and that changes a path outside the job records.
 
 - Exit 0: `jobs[].uncovered` is empty everywhere. Jobs without a review are listed under `skipped`. This shows only that recorded reviews cover the commits; it is not a review verdict.
 - Exit 1, `unreviewed-commits`: each `uncovered` entry names a commit and its paths. Obtain a delta review of those commits, record it as the next review of the job, and run the check again.
