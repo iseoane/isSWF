@@ -84,7 +84,11 @@ async function checkSelection(host, call, state, file, io) {
   }
 }
 
-// Exported so a tool that records a launch reads the checkpoint and base with the same parser as the guard.
+/**
+ * Reads the job brief path and the full checkpoint and base SHAs from a dispatch prompt, or refuses. Exported so a tool that records a
+ * launch can read them with the same parser as the guard; only the tests use it so far.
+ * @public
+ */
 export function checkReferences(prompt) {
   const body = typeof prompt === 'string' ? prompt : '';
   const brief = BRIEF_PATH.exec(body);
