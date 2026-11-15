@@ -45,7 +45,7 @@ for (const eol of ['\n', '\r\n']) {
 }
 
 // Every Unicode control character and line or paragraph separator would end the line for some reader, so a value holding one is refused.
-for (const bad of ['', ' ', ' ', '']) {
+for (const bad of [0x85, 0x2028, 0x2029, 0x9f].map(code => String.fromCharCode(code))) {
   const value = `one${bad}two`;
   const current = plan(block('J001'));
   assert.throws(() => setField(current, { job: 'J001', field: 'Next step', value }), { code: 'invalid-value' }, JSON.stringify(bad));
