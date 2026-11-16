@@ -319,12 +319,18 @@ try {
   const chained = tool(['coverage', '--project', chain, '--base', chainBase, '--head', delta]);
   assert.equal(chained.ok, true, JSON.stringify(chained));
   assert.equal(chained.jobs[0].record, 'V002');
-  // A later round whose base is not the delta's candidate breaks the chain: the first commit is uncovered again.
+  // An override line in an earlier review of the chain still excuses its documentation commit.
+  const docsFix = await chainCommit({ 'docs/en/a.md': 'a\n' }, 'docs: fix');
+  const earlyOverride = await chainCommit({ [`${jobDir('J001')}/V001.md`]: reviewText(firstCode, override(docsFix), chainBase) }, 'records: V001 override');
+  const excusedEarly = tool(['coverage', '--project', chain, '--base', chainBase, '--head', earlyOverride]);
+  assert.equal(excusedEarly.ok, true, JSON.stringify(excusedEarly));
+  assert.deepEqual(excusedEarly.jobs[0].overridden.map(entry => entry.commit), [docsFix]);
+  // A later round whose base is not the delta's candidate breaks the chain: it covers only its own range, and the earlier ranges and overrides drop out.
   const more = await chainCommit({ 'src/c.mjs': 'c\n' }, 'more code');
-  const unchained = await chainCommit({ [`${jobDir('J001')}/V003.md`]: reviewText(more, '', fix.replace(/^./u, c => (c === '0' ? '1' : '0'))) }, 'records: V003 not chained');
+  const unchained = await chainCommit({ [`${jobDir('J001')}/V003.md`]: reviewText(more, '', earlyOverride) }, 'records: V003 not chained');
   const broken = tool(['coverage', '--project', chain, '--base', chainBase, '--head', unchained]);
   assert.equal(broken.ok, false, JSON.stringify(broken));
-  assert.deepEqual(broken.jobs[0].uncovered.map(entry => entry.commit), [firstCode, fix, more]);
+  assert.deepEqual(broken.jobs[0].uncovered.map(entry => entry.commit), [firstCode, fix, docsFix]);
 
   // The PR322 shape across jobs: an unreviewed correction of one job lies before another job's candidate but outside that job's reviewed range.
   const shape = join(coverTemp, 'shape');

@@ -142,7 +142,7 @@ export async function coverage({ project, initiative, job, base, head }) {
       if (chain.length && (link.candidate === undefined || link.candidate !== chain.at(-1).base)) break;
       chain.push(link);
     }
-    return { ...entry, record: ids.at(-1), text: chain[0]?.text, candidate: chain[0]?.candidate, chain };
+    return { ...entry, record: ids.at(-1), candidate: chain[0]?.candidate, chain };
   });
   // A commit is covered when it lies in the base..candidate range of a review in some job's chain, so a later job's candidate does not cover an unreviewed
   // commit before its own base. A review whose candidate is outside this history, or whose base cannot be read, reviewed other code and covers nothing here.
