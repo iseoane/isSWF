@@ -682,6 +682,16 @@ const compact = ($: any, instructions?: string) => $.session.compact({ trigger: 
 const startAfterCompaction = ($: any) => $.classic.SessionStart({ source: 'compact' })
 const contextOf = (result: any) => (result?.additionalContext ?? []).join('\n')
 
+// The session note the post-compaction hook script reads: the mod writes it, so the tests keep it off the real disk.
+const NOTE = /isswf[\\/]compaction[\\/]sess-1\.json$/
+function noteHost(on: any, sessionId = 'sess-1') {
+  const writes: { path: string; text: string }[] = []
+  on('session.id', () => ({ value: sessionId }))
+  on('fs.write', (_: unknown, e: { path: string; text: string }) => (writes.push({ path: e.path, text: e.text }), {}))
+  const note = () => writes.filter(w => NOTE.test(w.path)).at(-1)
+  return { writes, note, assignments: () => JSON.parse(note()?.text ?? '{}').assignments }
+}
+
 test('a session that activated the coordinator adds the retention instructions to its compaction, with or without the pane option', async ($, on) => {
   const seen: (string | undefined)[] = []
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
@@ -706,35 +716,25 @@ test('a session that never activated the coordinator compacts and starts unchang
   expect(contextOf(await startAfterCompaction($))).toBe('')
 })
 
-test('after a compaction the first start of an activated session tells the model to reload the coordinator skill', async ($, on) => {
+test('the mod no longer adds the reminder on SessionStart: the plugin hook script prints it from the session note', async ($, on) => {
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('classic.SessionStart', () => ({}))
+  const host = noteHost(on)
   await activate($)
-  const reminder = contextOf(await startAfterCompaction($))
-  expect(reminder).toContain('/isswf:isswf-coordinator')
-  expect(reminder).toContain('methodology the next step requires')
-  expect(reminder).toContain('Reconcile the records')
-  expect(reminder).toContain('No dispatch was recorded')
-  // Only a start after a compaction carries it.
-  for (const source of ['startup', 'resume', 'clear'] as const) expect(contextOf(await $.classic.SessionStart({ source }))).toBe('')
+  expect(contextOf(await startAfterCompaction($))).toBe('')
+  expect(host.assignments()).toEqual([])
 })
 
-test('the reminder lists the accepted dispatches, and a refused one is not remembered', async ($, on) => {
+test('the reminder source lists the accepted dispatches, and a refused one is not remembered', async ($, on) => {
   dispatchHost(on)
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
-  on('classic.SessionStart', () => ({}))
+  const host = noteHost(on)
   await activate($)
   const ran = await $.tool.call(worker())
   expect(ran.result).toEqual({ agentId: 'agent-77' })
   const refused = await $.tool.call(worker('no references'))
   expect(refused.deny).toContain('isSWF dispatch refused')
-  const reminder = contextOf(await startAfterCompaction($))
-  expect(reminder).toContain('isswf:isswf-worker: I0001/J001')
-  expect(reminder).toContain('brief .factory/initiatives/I0001/jobs/J001/brief-r1.md')
-  expect(reminder).toContain(`checkpoint ${CHECKPOINT}`)
-  expect(reminder).toContain(`base ${BASE}`)
-  expect(reminder).toContain('run agent-77')
-  expect(reminder.match(/isswf:isswf-worker: /g)).toHaveLength(1)
+  expect(host.assignments()).toEqual([{ agent: 'isswf:isswf-worker', initiative: 'I0001', job: 'J001', path: BRIEF, checkpoint: CHECKPOINT, base: BASE, run: 'agent-77' }])
 })
 
 test('a reviewer dispatch needs a handoff whose digests verify, and the worker needs none', async ($, on) => {
@@ -763,10 +763,11 @@ test('a reviewer dispatch needs a handoff whose digests verify, and the worker n
 test('a session that never activated the coordinator remembers no dispatch', async ($, on) => {
   dispatchHost(on)
   on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
-  on('classic.SessionStart', () => ({}))
+  const host = noteHost(on)
   await $.tool.call(worker())
+  expect(host.writes).toEqual([])
   await activate($)
-  expect(contextOf(await startAfterCompaction($))).toContain('No dispatch was recorded')
+  expect(host.assignments()).toEqual([])
 })
 
 test('a fault in the compaction hooks leaves the host behaviour unchanged', async ($, on) => {
@@ -786,4 +787,54 @@ test('a fault in the compaction hooks leaves the host behaviour unchanged', asyn
   await compact($, 'keep the plan')
   expect(seen).toEqual(['keep the plan'])
   expect((await startAfterCompaction($)).additionalContext).toEqual(['other hook'])
+})
+
+// Where Claude Code seats its built-in guard, `skill.prompt` never runs for a user's mod; the Skill tool call still does.
+const loadCoordinator = (skill: string) => ({ tool: 'Skill', skill })
+for (const skill of ['isswf:isswf-coordinator', 'isswf-coordinator']) {
+  test(`the Skill tool loading ${skill} activates the coordinator without a skill.prompt event`, ON, async ($, on) => {
+    const host = engine(on, '/p')
+    noteHost(on)
+    expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'El coordinador isSWF no está activo en esta sesión.' })
+    await $.tool.call({ tool: 'Skill', skill: 'isswf:isswf-worker' })
+    expect(host.opened).toEqual([])
+    await $.tool.call(loadCoordinator(skill))
+    expect(host.opened).toEqual(['isswf-initiatives'])
+    expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'Panel de iniciativas abierto.' })
+  })
+}
+
+test('the Skill tool activation is recorded with the pane option off, and a later skill.prompt does no harm', async ($, on) => {
+  const seen: (string | undefined)[] = []
+  on('tool.call', () => ({ result: {} }))
+  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
+  const host = noteHost(on)
+  await $.tool.call(loadCoordinator('isswf:isswf-coordinator'))
+  await compact($)
+  await activate($)
+  await compact($)
+  expect(seen[0]).toContain('child agent IDs')
+  expect(seen[1]).toEqual(seen[0])
+  expect(host.assignments()).toEqual([])
+})
+
+test('a failed Skill tool call and another skill record nothing', async ($, on) => {
+  on('tool.call', (_: unknown, e: { skill?: string }) => (e.skill === 'isswf:isswf-coordinator' ? { isError: true, result: {} } : { result: {} }))
+  const host = noteHost(on)
+  await $.tool.call(loadCoordinator('isswf:isswf-coordinator'))
+  await $.tool.call(loadCoordinator('other'))
+  expect(host.writes).toEqual([])
+})
+
+test('an unsafe session id is never turned into a file name', async ($, on) => {
+  on('tool.call', () => ({ result: {} }))
+  const host = noteHost(on, '../../escape')
+  await $.tool.call(loadCoordinator('isswf-coordinator'))
+  expect(host.writes).toEqual([])
+})
+
+test('an unreadable language setting falls back to English instead of failing the command', ON, async ($, on) => {
+  on('settings.read', () => { throw new Error('bypassed') })
+  expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'The isSWF coordinator is not active in this session.' })
 })

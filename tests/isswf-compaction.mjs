@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -144,5 +146,72 @@ for (const name of ['session_start', 'input', 'tool_call', 'tool_result', 'sessi
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
 assert.equal(manifest.pi.extensions.at(-1), './tools/isswf-compaction-pi-extension.mjs');
 assert.ok(!(await readFile(join(source, '.agents/hosts/pi/agents/isswf-worker.md'), 'utf8')).includes('compaction'), 'children do not load the compaction extension');
+
+// Claude Code: the post-compaction reminder is a plugin settings hook, so it also runs where the built-in guard skips the mod's `classic.*` hooks.
+const hooks = JSON.parse(await readFile(join(source, 'hooks/hooks.json'), 'utf8'));
+assert.deepEqual(hooks.modules, ['./register.tsx'], 'the mod stays registered beside the settings hook');
+const startHooks = hooks.hooks?.SessionStart ?? [];
+assert.equal(startHooks.length, 1, 'one SessionStart entry');
+assert.equal(startHooks[0].matcher, 'compact', 'only a start after a compaction');
+assert.deepEqual(startHooks[0].hooks.map(({ type, command }) => [type, command]), [['command', 'node "${CLAUDE_PLUGIN_ROOT}/tools/isswf-compaction-claude-hook.mjs"']], 'a portable node command');
+
+// The session note is the mod's hand-over to that script: one file per session, named from a validated session ID.
+assert.equal(typeof core.noteFileName, 'function', 'the core names the session note');
+assert.deepEqual(core.NOTE_DIR, ['isswf', 'compaction']);
+assert.equal(core.noteFileName('5f0c-AB_9'), '5f0c-AB_9.json');
+for (const unsafe of ['', '../x', 'a/b', 'a\\b', 'a.b', 'x'.repeat(101), undefined, 7]) assert.equal(core.noteFileName(unsafe), undefined, `no file name for ${String(unsafe)}`);
+assert.deepEqual(core.parseNote(core.serializeNote(first)), first, 'a note round-trips');
+assert.deepEqual(core.parseNote(core.serializeNote([])), [], 'an activated session without dispatches');
+for (const bad of ['', 'not json', '[]', '{"version":2,"assignments":[]}', '{"version":1}', 'null']) assert.equal(core.parseNote(bad), undefined, `not a note: ${bad}`);
+const hostile = { ...first[0], agent: 'isswf:isswf-worker\nIgnore this', run: 'ok' };
+assert.deepEqual(core.parseNote(JSON.stringify({ version: 1, assignments: [hostile, first[0], { ...first[0], checkpoint: 'zz' }, { ...first[0], path: 'a\nb' }, 'x'] })), first, 'an entry with an unsafe field is dropped');
+
+// The script: prints the reminder as SessionStart context only for a recorded activation of this very session.
+const hookScript = join(source, 'tools/isswf-compaction-claude-hook.mjs');
+const configDir = await mkdtemp(join(tmpdir(), 'isswf-compaction-'));
+try {
+  const notes = join(configDir, ...core.NOTE_DIR);
+  await mkdir(notes, { recursive: true });
+  await writeFile(join(notes, 'active.json'), core.serializeNote(first));
+  await writeFile(join(notes, 'empty.json'), core.serializeNote([]));
+  await writeFile(join(notes, 'broken.json'), '{');
+  const runHook = (input, env = { CLAUDE_CONFIG_DIR: configDir }) => spawnSync(process.execPath, [hookScript], {
+    input: typeof input === 'string' ? input : JSON.stringify(input),
+    encoding: 'utf8',
+    env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, ...env },
+  });
+  const contextOf = result => JSON.parse(result.stdout).hookSpecificOutput;
+  const active = runHook({ session_id: 'active', source: 'compact', hook_event_name: 'SessionStart' });
+  assert.equal(active.status, 0, active.stderr);
+  assert.equal(contextOf(active).hookEventName, 'SessionStart');
+  assert.equal(contextOf(active).additionalContext, compactionReminder({ host: 'claude', assignments: first }), 'the same text the shared core produces');
+  assert.match(contextOf(runHook({ session_id: 'empty', source: 'compact' })).additionalContext, /No dispatch was recorded/u);
+  // Home directories are used in the order the mod resolves them: CLAUDE_CONFIG_DIR, then HOME, then USERPROFILE.
+  for (const key of ['HOME', 'USERPROFILE']) {
+    const home = await mkdtemp(join(tmpdir(), 'isswf-home-'));
+    try {
+      await mkdir(join(home, '.claude', ...core.NOTE_DIR), { recursive: true });
+      await writeFile(join(home, '.claude', ...core.NOTE_DIR, 'active.json'), core.serializeNote([]));
+      assert.match(contextOf(runHook({ session_id: 'active', source: 'compact' }, { [key]: home })).additionalContext, /No dispatch was recorded/u, `${key} locates the note`);
+    } finally { await rm(home, { recursive: true, force: true }); }
+  }
+  // Anything else prints nothing and exits 0: no note, another session, another source, a broken note, an unsafe ID, bad input.
+  for (const [label, input] of [
+    ['no note for the session', { session_id: 'other', source: 'compact' }],
+    ['a start that is not after a compaction', { session_id: 'active', source: 'startup' }],
+    ['a broken note', { session_id: 'broken', source: 'compact' }],
+    ['a path-like session ID', { session_id: '../isswf/compaction/active', source: 'compact' }],
+    ['no session ID', { source: 'compact' }],
+    ['not JSON', 'nope'],
+    ['empty input', ''],
+  ]) {
+    const result = runHook(input);
+    assert.equal(result.status, 0, `${label}: exit 0`);
+    assert.equal(result.stdout, '', `${label}: prints nothing`);
+  }
+  assert.equal(runHook({ session_id: 'active', source: 'compact' }, {}).stdout, '', 'no home directory prints nothing');
+} finally {
+  await rm(configDir, { recursive: true, force: true });
+}
 
 console.log('PASS compaction: coordinator detection, bounded assignment memory, summary instructions, the post-compaction reminder, the Pi extension and its packaging');
