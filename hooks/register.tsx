@@ -123,7 +123,7 @@ type Labels = typeof LABELS.en
 
 // Claude Code's `language` setting is free text, so any Spanish spelling selects Spanish; English is the default.
 async function labelsFor($: EngineInterface): Promise<Labels> {
-  // Where the built-in guard is seated it skips this read, and the call can fail: English is the fallback.
+  // If the read fails or returns nothing usable (the built-in guard skips hooks on `settings.read`, not this read), English is the fallback.
   let language: unknown
   try {
     language = await $.settings.read({ key: 'language' })
@@ -622,6 +622,20 @@ export const register: Register = (on, options) => {
       if (e.agentId === undefined && (await $.state.get(IS_ACTIVATED)).value) steered = { ...e, instructions: compactionInstructions(e.instructions) }
     } catch {}
     return next(steered)
+  })
+
+  // A typed `/isswf:isswf-coordinator` raises `command.run` and no Skill tool call, and the guard skips `skill.prompt`. It runs the
+  // command first, then marks the session exactly as the Skill tool call does; a fault never changes the command's output.
+  on('command.run', { command: /^(isswf:)?isswf-coordinator$/ }, async ($, e, next) => {
+    const result = await next(e)
+    if (isCoordinatorSkill(e.command)) {
+      try {
+        await activateCoordinator($)
+        if (options?.initiativesPane === true) await openPane($)
+      } catch {}
+    }
+
+    return result
   })
 
   // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.
