@@ -298,6 +298,34 @@ try {
   assert.equal(unreviewed.ok, false);
   assert.deepEqual(unreviewed.jobs.map(entry => entry.uncovered.map(item => item.commit)), [[extra], [extra]], 'a commit no job reviewed stays uncovered for each');
 
+  // A delta review chains to the review whose candidate is its base, so their ranges together cover the job; an unchained earlier review covers nothing.
+  const chain = join(coverTemp, 'chain');
+  await mkdir(chain);
+  git(chain, 'init', '-q', '-b', 'main', '.');
+  const chainCommit = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(chain, path, '..'), { recursive: true });
+      await writeFile(join(chain, path), content);
+    }
+    git(chain, 'add', '-A');
+    git(chain, 'commit', '-qm', message);
+    return git(chain, 'rev-parse', 'HEAD');
+  };
+  const chainBase = await chainCommit({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const firstCode = await chainCommit({ 'src/a.mjs': 'a\n' }, 'first code');
+  await chainCommit({ [`${jobDir('J001')}/V001.md`]: reviewText(firstCode, '', chainBase) }, 'records: V001');
+  const fix = await chainCommit({ 'src/a.mjs': 'b\n' }, 'correction');
+  const delta = await chainCommit({ [`${jobDir('J001')}/V002.md`]: reviewText(fix, '', firstCode) }, 'records: V002 delta');
+  const chained = tool(['coverage', '--project', chain, '--base', chainBase, '--head', delta]);
+  assert.equal(chained.ok, true, JSON.stringify(chained));
+  assert.equal(chained.jobs[0].record, 'V002');
+  // A later round whose base is not the delta's candidate breaks the chain: the first commit is uncovered again.
+  const more = await chainCommit({ 'src/c.mjs': 'c\n' }, 'more code');
+  const unchained = await chainCommit({ [`${jobDir('J001')}/V003.md`]: reviewText(more, '', fix.replace(/^./u, c => (c === '0' ? '1' : '0'))) }, 'records: V003 not chained');
+  const broken = tool(['coverage', '--project', chain, '--base', chainBase, '--head', unchained]);
+  assert.equal(broken.ok, false, JSON.stringify(broken));
+  assert.deepEqual(broken.jobs[0].uncovered.map(entry => entry.commit), [firstCode, fix, more]);
+
   // The PR322 shape across jobs: an unreviewed correction of one job lies before another job's candidate but outside that job's reviewed range.
   const shape = join(coverTemp, 'shape');
   await mkdir(shape);
