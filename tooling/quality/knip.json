@@ -28,6 +28,7 @@
     "tools/isswf-compaction-claude-hook.mjs",
     "tools/isswf-command-core.mjs",
     "tools/isswf-branch-guard-core.mjs",
+    "tools/isswf-plan-commit-guard-core.mjs",
     "tools/isswf-command-guard-pi-extension.mjs",
     "tools/token-native-pi.mjs",
     "tools/token-native-claude.mjs",

@@ -73,7 +73,7 @@ export async function observeBranch(dir, { git, read }) {
 }
 
 // The directory a `git` segment acts on, or undefined when the command does not spell it out.
-function targetDir(cwd, { cd, git }) {
+export function targetDir(cwd, { cd, git }) {
   let dir = resolveDir(cwd, '.');
   for (const path of [...cd, ...git.dirs]) {
     if (path === null) return undefined;

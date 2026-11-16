@@ -8,7 +8,7 @@ const ending = line => line.slice(content(line).length);
 const identifier = /^[A-Z][A-Z0-9-]{0,63}$/u;
 const header = /^## ([A-Z][A-Z0-9-]{0,63})$/u;
 const eolOf = text => (text.includes('\r\n') ? '\r\n' : '\n');
-const editableFields = ['Status', 'Blocker', 'Next step'];
+const editableFields = ['Status', 'Brief', 'Blocker', 'Next step'];
 
 export const isIdentifier = value => identifier.test(value);
 const editError = (code, where = {}) => Object.assign(Error(code), { code }, where);
