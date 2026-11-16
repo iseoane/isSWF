@@ -684,10 +684,11 @@ const contextOf = (result: any) => (result?.additionalContext ?? []).join('\n')
 
 // The session note the post-compaction hook script reads: the mod writes it, so the tests keep it off the real disk.
 const NOTE = /isswf[\\/]compaction[\\/]sess-1\.json$/
-function noteHost(on: any, sessionId = 'sess-1') {
+function noteHost(on: any, sessionId = 'sess-1', { hasEnv = true } = {}) {
   const writes: { path: string; text: string }[] = []
   on('session.id', () => ({ value: sessionId }))
-  on('fs.write', (_: unknown, e: { path: string; text: string }) => (writes.push({ path: e.path, text: e.text }), {}))
+  if (hasEnv) on('env.get', (_: unknown, e: { name: string }) => ({ value: { CLAUDE_CONFIG_DIR: '/c' }[e.name] }))
+  on('fs.write', (_: unknown, e: { path: string; text: string }) => (writes.push({ path: e.path, text: e.text }), { value: undefined }))
   const note = () => writes.filter(w => NOTE.test(w.path)).at(-1)
   return { writes, note, assignments: () => JSON.parse(note()?.text ?? '{}').assignments }
 }
@@ -794,7 +795,7 @@ const loadCoordinator = (skill: string) => ({ tool: 'Skill', skill })
 for (const skill of ['isswf:isswf-coordinator', 'isswf-coordinator']) {
   test(`the Skill tool loading ${skill} activates the coordinator without a skill.prompt event`, ON, async ($, on) => {
     const host = engine(on, '/p')
-    noteHost(on)
+    noteHost(on, 'sess-1', { hasEnv: false })
     expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'El coordinador isSWF no está activo en esta sesión.' })
     await $.tool.call({ tool: 'Skill', skill: 'isswf:isswf-worker' })
     expect(host.opened).toEqual([])

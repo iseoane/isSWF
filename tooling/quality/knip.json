@@ -25,6 +25,7 @@
     "tools/isswf-dispatch-guard-pi-extension.mjs",
     "tools/isswf-compaction-core.mjs",
     "tools/isswf-compaction-pi-extension.mjs",
+    "tools/isswf-compaction-claude-hook.mjs",
     "tools/isswf-command-core.mjs",
     "tools/isswf-branch-guard-core.mjs",
     "tools/isswf-command-guard-pi-extension.mjs",
