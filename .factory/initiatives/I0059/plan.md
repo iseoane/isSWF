@@ -13,7 +13,7 @@ Claude Code seats the built-in guard `cc-plugin-sec-default@builtin` ahead of ev
 - Scope: factory (Claude Code mod; Pi unaffected, to be confirmed in the brief).
 - Objective: Where the guard is seated, `/isswf-initiatives` and the pane work after the coordinator loads, and a session resumed after compaction is still told to reload the coordinator.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) 
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
 - Next step: None. Closed 2026-11-16 by the operator ("dalos por cerradas"), merged in #339, released in v1.9.4. The operator approved the `.agents/hosts/**` change. Live Team/Enterprise and Windows checks were not observed before closing; reopen with new evidence if they fail.
 
@@ -38,7 +38,7 @@ Claude Code seats the built-in guard `cc-plugin-sec-default@builtin` ahead of ev
 - Scope: factory (Claude Code plugin manifest).
 - Objective: An ordinary Claude Code session with the isSWF plugin, where no review binding is set, no longer reports `mcp-config-invalid` errors for `isswf_git_evidence`; a bound review still receives its binding, and an unbound call still fails closed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) 
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
 - Next step: None. Closed 2026-11-16 by the operator, merged in #339, released in v1.9.4. Reviews V001–V003 pass; the Windows debug-log check was not observed before closing.
 
