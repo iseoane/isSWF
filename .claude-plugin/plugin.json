@@ -19,7 +19,7 @@
         "${CLAUDE_PLUGIN_ROOT}/tools/git-evidence-mcp.mjs"
       ],
       "env": {
-        "ISSWF_GIT_EVIDENCE_BINDINGS": "${ISSWF_GIT_EVIDENCE_BINDINGS}"
+        "ISSWF_GIT_EVIDENCE_BINDINGS": "${ISSWF_GIT_EVIDENCE_BINDINGS:-}"
       }
     }
   }

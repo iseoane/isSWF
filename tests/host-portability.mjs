@@ -10,7 +10,7 @@ const manifest = JSON.parse(await read('.claude-plugin/plugin.json'));
 assert.equal(manifest.name, 'isswf');
 assert.ok(manifest.skills.includes('./skills/isswf-coordinator'));
 assert.equal(manifest.agents, undefined, 'Use Claude default-directory discovery, not per-file manifest entries');
-assert.deepEqual(manifest.mcpServers, { isswf_git_evidence: { command: 'node', args: ['${CLAUDE_PLUGIN_ROOT}/tools/git-evidence-mcp.mjs'], env: { ISSWF_GIT_EVIDENCE_BINDINGS: '${ISSWF_GIT_EVIDENCE_BINDINGS}' } } }, 'Plugin registers only the bound evidence server; its binding comes from the launching process environment');
+assert.deepEqual(manifest.mcpServers, { isswf_git_evidence: { command: 'node', args: ['${CLAUDE_PLUGIN_ROOT}/tools/git-evidence-mcp.mjs'], env: { ISSWF_GIT_EVIDENCE_BINDINGS: '${ISSWF_GIT_EVIDENCE_BINDINGS:-}' } } }, 'Plugin registers only the bound evidence server; its binding comes from the launching process environment');
 assert.deepEqual((await readdir(path.join(root, 'agents'))).sort(), ['isswf-planner.md', 'isswf-researcher.md', 'isswf-reviewer.md', 'isswf-worker.md']);
 for (const file of manifest.skills.map(skill => `${skill}/SKILL.md`)) {
   assert.ok((await read(file)).length > 0, `missing manifest entry ${file}`);
