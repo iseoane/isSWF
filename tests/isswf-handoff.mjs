@@ -298,6 +298,40 @@ try {
   assert.equal(unreviewed.ok, false);
   assert.deepEqual(unreviewed.jobs.map(entry => entry.uncovered.map(item => item.commit)), [[extra], [extra]], 'a commit no job reviewed stays uncovered for each');
 
+  // A delta review chains to the review whose candidate is its base, so their ranges together cover the job; an unchained earlier review covers nothing.
+  const chain = join(coverTemp, 'chain');
+  await mkdir(chain);
+  git(chain, 'init', '-q', '-b', 'main', '.');
+  const chainCommit = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(chain, path, '..'), { recursive: true });
+      await writeFile(join(chain, path), content);
+    }
+    git(chain, 'add', '-A');
+    git(chain, 'commit', '-qm', message);
+    return git(chain, 'rev-parse', 'HEAD');
+  };
+  const chainBase = await chainCommit({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const firstCode = await chainCommit({ 'src/a.mjs': 'a\n' }, 'first code');
+  await chainCommit({ [`${jobDir('J001')}/V001.md`]: reviewText(firstCode, '', chainBase) }, 'records: V001');
+  const fix = await chainCommit({ 'src/a.mjs': 'b\n' }, 'correction');
+  const delta = await chainCommit({ [`${jobDir('J001')}/V002.md`]: reviewText(fix, '', firstCode) }, 'records: V002 delta');
+  const chained = tool(['coverage', '--project', chain, '--base', chainBase, '--head', delta]);
+  assert.equal(chained.ok, true, JSON.stringify(chained));
+  assert.equal(chained.jobs[0].record, 'V002');
+  // An override line in an earlier review of the chain still excuses its documentation commit.
+  const docsFix = await chainCommit({ 'docs/en/a.md': 'a\n' }, 'docs: fix');
+  const earlyOverride = await chainCommit({ [`${jobDir('J001')}/V001.md`]: reviewText(firstCode, override(docsFix), chainBase) }, 'records: V001 override');
+  const excusedEarly = tool(['coverage', '--project', chain, '--base', chainBase, '--head', earlyOverride]);
+  assert.equal(excusedEarly.ok, true, JSON.stringify(excusedEarly));
+  assert.deepEqual(excusedEarly.jobs[0].overridden.map(entry => entry.commit), [docsFix]);
+  // A later round whose base is not the delta's candidate breaks the chain: it covers only its own range, and the earlier ranges and overrides drop out.
+  const more = await chainCommit({ 'src/c.mjs': 'c\n' }, 'more code');
+  const unchained = await chainCommit({ [`${jobDir('J001')}/V003.md`]: reviewText(more, '', earlyOverride) }, 'records: V003 not chained');
+  const broken = tool(['coverage', '--project', chain, '--base', chainBase, '--head', unchained]);
+  assert.equal(broken.ok, false, JSON.stringify(broken));
+  assert.deepEqual(broken.jobs[0].uncovered.map(entry => entry.commit), [firstCode, fix, docsFix]);
+
   // The PR322 shape across jobs: an unreviewed correction of one job lies before another job's candidate but outside that job's reviewed range.
   const shape = join(coverTemp, 'shape');
   await mkdir(shape);
