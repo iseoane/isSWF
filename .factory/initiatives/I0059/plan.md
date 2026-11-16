@@ -8,14 +8,14 @@ Claude Code seats the built-in guard `cc-plugin-sec-default@builtin` ahead of ev
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows: coordinator activation and post-compaction continuity)
 - Scope: factory (Claude Code mod; Pi unaffected, to be confirmed in the brief).
 - Objective: Where the guard is seated, `/isswf-initiatives` and the pane work after the coordinator loads, and a session resumed after compaction is still told to reload the coordinator.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md) 
 - Blocker: None.
-- Next step: Prepare the implementation brief. Do not dispatch until the operator gives an explicit start.
+- Next step: None. Closed 2026-11-16 by the operator ("dalos por cerradas"), merged in #339, released in v1.9.4. The operator approved the `.agents/hosts/**` change. Live Team/Enterprise and Windows checks were not observed before closing; reopen with new evidence if they fail.
 
 ### Acceptance
 
@@ -33,14 +33,14 @@ Claude Code seats the built-in guard `cc-plugin-sec-default@builtin` ahead of ev
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow: how the plugin declares the evidence server's environment)
 - Scope: factory (Claude Code plugin manifest).
 - Objective: An ordinary Claude Code session with the isSWF plugin, where no review binding is set, no longer reports `mcp-config-invalid` errors for `isswf_git_evidence`; a bound review still receives its binding, and an unbound call still fails closed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md) 
 - Blocker: None.
-- Next step: Verify that Claude Code expands `${VAR:-default}` in a plugin's MCP `env`, then prepare the brief. Do not dispatch until the operator gives an explicit start.
+- Next step: None. Closed 2026-11-16 by the operator, merged in #339, released in v1.9.4. Reviews V001–V003 pass; the Windows debug-log check was not observed before closing.
 
 ### Acceptance
 

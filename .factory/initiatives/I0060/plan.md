@@ -6,14 +6,14 @@ On 2026-11-16, during I0059, `node tools/isswf-handoff.mjs coverage` failed with
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow: how coverage collects reviewed ranges)
 - Scope: factory (`tools/isswf-handoff.mjs`, used by `check-quality` and CI in target projects).
 - Objective: A commit is covered when it lies in the base..candidate range of any review in its job's review chain (brief r1), not only the latest one, so delta review rounds do not force a full-range re-review.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Implement under brief r1 (operator start 2026-11-16: "atacala por favor!").
+- Next step: None. Closed 2026-11-16 by the operator ("dalos por cerradas"), merged in #341, released in v1.9.5. Reviews V001 and V002 pass; known limit V002 F6 (no test for an ancestor candidate with a base outside the repository).
 
 ### Acceptance
 
