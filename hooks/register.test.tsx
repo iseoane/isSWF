@@ -839,3 +839,31 @@ test('an unreadable language setting falls back to English instead of failing th
   on('settings.read', () => { throw new Error('bypassed') })
   expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'The isSWF coordinator is not active in this session.' })
 })
+
+// A typed `/isswf:isswf-coordinator` raises `command.run`, never a Skill tool call, and `skill.prompt` is skipped under the guard.
+for (const command of ['isswf:isswf-coordinator', 'isswf-coordinator']) {
+  test(`a typed /${command} activates the coordinator and opens the pane without a skill.prompt event`, ON, async ($, on) => {
+    const host = engine(on, '/p')
+    noteHost(on, 'sess-1', { hasEnv: false })
+    on('command.run', () => ({ text: 'skill expanded' }))
+    expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'El coordinador isSWF no está activo en esta sesión.' })
+    expect(await $.command.run({ command: 'isswf:isswf-worker', args: '' })).toEqual({ text: 'skill expanded' })
+    expect(host.opened).toEqual([])
+    expect(await $.command.run({ command, args: 'plan this' })).toEqual({ text: 'skill expanded' })
+    expect(host.opened).toEqual(['isswf-initiatives'])
+    expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'Panel de iniciativas abierto.' })
+  })
+}
+
+test('a typed coordinator command is recorded with the pane option off, and only after the command ran', async ($, on) => {
+  const seen: (string | undefined)[] = []
+  on('command.run', () => ({ text: 'ok' }))
+  on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
+  const host = noteHost(on)
+  await $.command.run({ command: 'isswf:isswf-worker', args: '' })
+  expect(host.writes).toEqual([])
+  await $.command.run({ command: 'isswf:isswf-coordinator', args: '' })
+  await compact($)
+  expect(seen[0]).toContain('child agent IDs')
+  expect(host.assignments()).toEqual([])
+})
