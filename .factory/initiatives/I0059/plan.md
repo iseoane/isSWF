@@ -8,7 +8,7 @@ Claude Code seats the built-in guard `cc-plugin-sec-default@builtin` ahead of ev
 
 ## J001
 
-- Status: review-complete, awaiting operator acceptance
+- Status: in-progress
 - Size: M (two related flows: coordinator activation and post-compaction continuity)
 - Scope: factory (Claude Code mod; Pi unaffected, to be confirmed in the brief).
 - Objective: Where the guard is seated, `/isswf-initiatives` and the pane work after the coordinator loads, and a session resumed after compaction is still told to reload the coordinator.
@@ -33,7 +33,7 @@ Claude Code seats the built-in guard `cc-plugin-sec-default@builtin` ahead of ev
 
 ## J002
 
-- Status: review-complete, awaiting operator acceptance
+- Status: in-progress
 - Size: S (one flow: how the plugin declares the evidence server's environment)
 - Scope: factory (Claude Code plugin manifest).
 - Objective: An ordinary Claude Code session with the isSWF plugin, where no review binding is set, no longer reports `mcp-config-invalid` errors for `isswf_git_evidence`; a bound review still receives its binding, and an unbound call still fails closed.
