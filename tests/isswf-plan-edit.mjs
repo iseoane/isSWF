@@ -33,6 +33,9 @@ for (const eol of ['\n', '\r\n']) {
   expectEdit(setField(base, { job: 'J002', field: 'Blocker', value: 'Waiting for $& and $1' }), plan(block('J001'), block('J002', { blocker: 'Waiting for $& and $1' })));
   expectEdit(setField(base, { job: 'J001', field: 'Next step', value: 'Dispatch the worker.' }), plan(block('J001', { next: 'Dispatch the worker.' }), block('J002')));
 
+  // The brief field is set by the tool too; a revision that the parser refuses as a reference is refused before writing.
+  expectEdit(setField(withEol(plan(block('J001'), block('J002', { pending: ' (pending until prepared)' }))), { job: 'J002', field: 'Brief', value: '[brief-r1.md](jobs/J002/brief-r1.md)' }), plan(block('J001'), block('J002')));
+  assert.throws(() => setField(base, { job: 'J002', field: 'Brief', value: '[brief-r1.md](jobs/J002/brief-r1.md) ' }), label);
   expectEdit(appendEvidence(base, { job: 'J001', value: '2026-11-15: ran the focused test' }), plan(block('J001', { evidence: ['2026-11-15: ran the focused test'] }), block('J002')));
   const evidenced = withEol(plan(block('J001', { evidence: ['first'] }), block('J002')));
   expectEdit(appendEvidence(evidenced, { job: 'J001', value: 'second' }), plan(block('J001', { evidence: ['first', 'second'] }), block('J002')));
