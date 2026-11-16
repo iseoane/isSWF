@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -28,7 +28,7 @@ try {
   writeFileSync(join(repo, 'README.md'), 'x\n');
   run(repo, 'add', '-A');
   run(repo, 'commit', '-qm', 'start');
-  const check = command => checkPlanCommit({ command, cwd: repo, git });
+  const check = command => checkPlanCommit({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8') });
 
   // A staged plan that parses passes; one the parser refuses is refused with its error and line.
   writeFileSync(planPath, good.replace('Prepare.', 'Dispatch.'));
@@ -64,7 +64,7 @@ try {
   assert.equal((await check('git status')).deny, undefined);
   run(repo, 'rm', '-q', '.factory/initiatives/I0001/plan.md');
   assert.equal((await check('git commit -m removed')).deny, undefined);
-  assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: repo, git: async () => { throw Error('no git'); } })).deny, undefined);
+  assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: repo, git: async () => { throw Error('no git'); }, read: async () => '' })).deny, undefined);
   console.log('PASS plan commit guard');
 } finally {
   rmSync(temp, { recursive: true, force: true });
