@@ -113,7 +113,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Implement under brief r1 (operator start 2026-11-16).
+- Next step: Push, open the PR and merge after green CI (operator authorized 2026-11-16).
 
 ### Acceptance
 
@@ -124,6 +124,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 - 2026-11-15: every brief revision in I0057 changed the `Brief:` line with `sed`.
 - 2026-11-14: a records commit chained after a failed scripted edit still ran (I0057 candidates).
+- 2026-11-16: J005 V002 pass (V001 F1 fixed). Known limits deferred to a follow-up: the working-tree mode is chosen too broadly (`cd <repo> && git commit`, other broken plans, untracked new plans, `-qm` clusters), and edits earlier in the same call are not seen; the guard fails open and CI's plan check still runs.
 
 ## J006
 
