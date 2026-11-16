@@ -51,6 +51,10 @@ try {
   assert.equal((await check('git commit -m unstaged')).deny, undefined, 'an unstaged change is not committed');
   assert.ok((await check('git commit -qam all')).deny, '-am commits the working tree');
   assert.ok((await check('git commit --all -m all')).deny);
+  // Before the command runs, a chained `git add` has not staged the plan yet, and a pathspec commits the working-tree file.
+  assert.ok((await check('git add -A && git commit -m chained')).deny, 'a chained add commits the working tree');
+  assert.ok((await check('git commit -m path .factory/initiatives/I0001/plan.md')).deny, 'a pathspec commits the working tree');
+  assert.ok((await check('git commit -m path -- .factory')).deny);
   writeFileSync(planPath, good);
 
   // The heading must carry a title, as isswf-status reads it.

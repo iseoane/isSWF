@@ -5,6 +5,19 @@ import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 
 const PLAN_PATH = /^(?:\.isswf|\.factory)\/initiatives\/(I\d+)\/plan\.md$/u;
 const ALL_FLAG = arg => arg === '--all' || /^-[a-zA-Z]*a[a-zA-Z]*$/u.test(arg);
+const VALUE_OPTIONS = new Set(['-m', '-F', '-C', '-c', '-t', '--message', '--file', '--author', '--date', '--template', '--reuse-message', '--reedit-message', '--fixup', '--squash', '--cleanup', '--trailer']);
+
+/** True when the commit records working-tree files: -a/--all, a pathspec, or --pathspec-from-file. */
+function readsWorkingTree(args) {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === '--') return index + 1 < args.length;
+    if (ALL_FLAG(arg) || arg.startsWith('--pathspec-from-file')) return true;
+    if (VALUE_OPTIONS.has(arg)) { index += 1; continue; }
+    if (!arg.startsWith('-')) return true;
+  }
+  return false;
+}
 
 /** Reads a plan as isswf-status does: the parser accepts it and the heading names the initiative with a title. */
 function readBack(text, initiative) {
@@ -17,18 +30,20 @@ function readBack(text, initiative) {
 const describe = (path, { code, job, field, line }) => `${path}: ${code}${[job, field].filter(Boolean).length ? ` at ${[job, field].filter(Boolean).join(' ')}` : ''}${line === undefined ? '' : ` (line ${line})`}`;
 
 /**
- * Refuses a `git commit` that would record a plan `isswf-status` cannot read back, before it runs: the staged plan, or the working-tree plan with `-a`.
+ * Refuses a `git commit` that would record a plan `isswf-status` cannot read back, before it runs: the staged plan, or the working-tree plan with `-a`, a pathspec, or an earlier command in the same call.
  * It fails open: this guard enforces a process rule, not an authority, so a fault allows the command.
  * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text.
  */
 export async function checkPlanCommit({ command, cwd, git, read }) {
   try {
     const problems = [];
-    for (const segment of tokenize(command)) {
+    const segments = tokenize(command);
+    for (const [position, segment] of segments.entries()) {
       if (segment.git?.subcommand !== 'commit') continue;
       const dir = targetDir(cwd, segment);
       if (dir === undefined) continue;
-      const all = segment.git.args.some(ALL_FLAG);
+      // Before the command runs, an earlier segment (a `git add`, an edit) has not changed the index yet, so read the working tree then too.
+      const all = position > 0 || readsWorkingTree(segment.git.args);
       const top = await git(['rev-parse', '--show-toplevel'], dir);
       if (top.exitCode !== 0) continue;
       const root = top.stdout.trim();
