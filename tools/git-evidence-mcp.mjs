@@ -7,10 +7,10 @@ import { captureBinding, checkArguments, diffChunkParameters, invokeEvidence } f
 // ISSWF_GIT_EVIDENCE_BINDINGS (the three Pi namespaces); it is captured once here and never re-read.
 const cli = join(dirname(fileURLToPath(import.meta.url)), 'git-evidence.mjs');
 const notBound = 'not bound for this dispatch (an Agent-tool reviewer is never bound); review the exact diff supplied in the review handoff';
-// Observed on Linux: Claude passes an empty or literal "${ISSWF_GIT_EVIDENCE_BINDINGS}" value when the launcher did not set it;
-// both mean no binding, and are handled the same way defensively for Windows.
+// With the variable unset, Claude passes an empty value (manifest form `${ISSWF_GIT_EVIDENCE_BINDINGS:-}`). A host that does not
+// expand the placeholder would pass it literally, in either form; every such value means no binding.
 const raw = process.env.ISSWF_GIT_EVIDENCE_BINDINGS;
-const supplied = raw === '' || raw === '${ISSWF_GIT_EVIDENCE_BINDINGS}' ? undefined : raw;
+const supplied = ['', '${ISSWF_GIT_EVIDENCE_BINDINGS}', '${ISSWF_GIT_EVIDENCE_BINDINGS:-}'].includes(raw) ? undefined : raw;
 const bindings = Object.fromEntries(['identity', 'diff', 'content'].map(operation => [operation, captureBinding(supplied, operation, supplied === undefined ? notBound : 'trusted launch binding is missing')]));
 delete process.env.ISSWF_GIT_EVIDENCE_BINDINGS;
 

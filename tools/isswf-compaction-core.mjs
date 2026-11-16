@@ -31,6 +31,40 @@ export function rememberDispatch(assignments, { host, input, runId } = {}) {
   return [...(assignments ?? []), ...kept].slice(-MAX_ASSIGNMENTS);
 }
 
+/** The directory under the Claude config directory that holds one note per session. */
+export const NOTE_DIR = ['isswf', 'compaction'];
+const SESSION_ID = /^[A-Za-z0-9_-]{1,100}$/u;
+const SHA = /^[0-9a-f]{40,64}$/iu;
+// A brief path is one line of printable text; anything else never reaches model text.
+const SAFE_PATH = /^[^\u0000-\u001f\u007f]{1,300}$/u;
+
+/** The note's file name for a session, or undefined when the ID is not a plain token (it becomes a path segment). */
+export const noteFileName = sessionId => (typeof sessionId === 'string' && SESSION_ID.test(sessionId) ? `${sessionId}.json` : undefined);
+
+/** The note the Claude mod writes for an activated session: the assignment list its `$.state` holds. */
+export const serializeNote = assignments => JSON.stringify({ version: 1, assignments: assignments ?? [] });
+
+const validEntry = entry => entry !== null && typeof entry === 'object'
+  && typeof entry.agent === 'string' && SAFE_NAME.test(entry.agent)
+  && /^I\d+$/u.test(entry.initiative) && /^J\d+$/u.test(entry.job)
+  && typeof entry.path === 'string' && SAFE_PATH.test(entry.path)
+  && SHA.test(entry.checkpoint) && SHA.test(entry.base)
+  && (entry.run === undefined || (typeof entry.run === 'string' && SAFE_RUN.test(entry.run)));
+
+/**
+ * The assignments of a note, or undefined when the text is not a note (the session never recorded an activation). The note is
+ * a file another process could have changed, so each entry is checked again and an entry with an unsafe field is dropped.
+ */
+export function parseNote(text) {
+  try {
+    const note = JSON.parse(text);
+    if (note?.version !== 1 || !Array.isArray(note.assignments)) return undefined;
+    return note.assignments.filter(validEntry).map(({ agent, initiative, job, path, checkpoint, base, run }) => ({ agent, initiative, job, path, checkpoint, base, ...(run === undefined ? {} : { run }) })).slice(-MAX_ASSIGNMENTS);
+  } catch {
+    return undefined;
+  }
+}
+
 const KEEP = [
   'the active initiative and job, and the brief in use',
   'the child agent IDs, each with its role and the task it was given',

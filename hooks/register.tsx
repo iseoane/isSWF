@@ -3,7 +3,7 @@ import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import { checkBranch, observeBranch, refreshBranches } from '../tools/isswf-branch-guard-core.mjs'
 import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
-import { compactionInstructions, compactionReminder, isCoordinatorSkill, rememberDispatch } from '../tools/isswf-compaction-core.mjs'
+import { compactionInstructions, isCoordinatorSkill, noteFileName, NOTE_DIR, rememberDispatch, serializeNote } from '../tools/isswf-compaction-core.mjs'
 import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
@@ -123,7 +123,11 @@ type Labels = typeof LABELS.en
 
 // Claude Code's `language` setting is free text, so any Spanish spelling selects Spanish; English is the default.
 async function labelsFor($: EngineInterface): Promise<Labels> {
-  const language = await $.settings.read({ key: 'language' })
+  // If the read fails or returns nothing usable (the built-in guard skips hooks on `settings.read`, not this read), English is the fallback.
+  let language: unknown
+  try {
+    language = await $.settings.read({ key: 'language' })
+  } catch {}
   return typeof language === 'string' && /^(es\b|españ|espan|spanish|castellano)/i.test(language.trim()) ? LABELS.es : LABELS.en
 }
 const PILL_COLORS: Record<string, string> = {
@@ -230,6 +234,30 @@ function findHomes($: EngineInterface) {
     }
   })()
   return homes
+}
+
+// The plugin's SessionStart settings hook (tools/isswf-compaction-claude-hook.mjs) prints the post-compaction reminder from this
+// note. A settings hook runs where the built-in guard skips the mod's own `classic.SessionStart`, but it cannot read `$.state`,
+// so the mod keeps the note in the Claude config directory, one file per session ID, the ID the hook receives as `session_id`
+// (the transcript's file name, as `$.session.id()` documents; not observed live). Its presence means the coordinator was activated.
+async function writeNote($: EngineInterface) {
+  const name = noteFileName(await $.session.id())
+  const { claudeDir } = await findHomes($)
+  if (!name || !claudeDir) return
+  const { value: assignments } = await $.state.get(ASSIGNMENTS)
+  await $.fs.write(joiner(claudeDir)(claudeDir, ...NOTE_DIR, name), serializeNote(assignments))
+}
+
+async function activateCoordinator($: EngineInterface) {
+  try {
+    await $.state.set(IS_ACTIVATED, true)
+    await writeNote($)
+  } catch {}
+}
+
+const openPane = async ($: EngineInterface) => {
+  ensureFallback($)
+  await $.ui.open(await paneSpec($))
 }
 
 const runKey = (run: { host: string; kind: string; id: string }) => `${run.host} ${run.kind} ${run.id}`
@@ -534,6 +562,7 @@ export const register: Register = (on, options) => {
         if ((await $.state.get(IS_ACTIVATED)).value) {
           const runId = (ran.result as { agentId?: unknown } | undefined)?.agentId
           await update($, ASSIGNMENTS, (list: unknown[] | undefined) => rememberDispatch(list, { host: 'claude', input: e, runId }))
+          await writeNote($)
         }
       } catch {}
     }
@@ -552,6 +581,13 @@ export const register: Register = (on, options) => {
         }
       } catch {}
     }
+    // Where the built-in guard is seated `skill.prompt` never runs for this mod, but the Skill tool call does.
+    if (e.tool === 'Skill' && isCoordinatorSkill((e as { skill?: unknown }).skill) && ran.deny === undefined && !ran.isError) {
+      try {
+        await activateCoordinator($)
+        if (options?.initiativesPane === true) await openPane($)
+      } catch {}
+    }
     try {
       // A denied or failed write changed no record, and `deny` declares no `context`.
       if (ran.deny !== undefined || ran.isError) return ran
@@ -567,16 +603,12 @@ export const register: Register = (on, options) => {
   })
 
   // The coordinator's activation is recorded whatever the pane option is: compaction reads it. With the option off nothing else
-  // happens here, so nothing schedules, registers or draws.
+  // happens here, so nothing schedules, registers or draws. Both entry points are idempotent: where the guard is absent both
+  // fire, and the second only sets the same state, rewrites the same note and opens the same pane.
   on('skill.prompt', async ($, e, next) => {
     if (isCoordinatorSkill(e.skill)) {
-      try {
-        await $.state.set(IS_ACTIVATED, true)
-      } catch {}
-      if (options?.initiativesPane === true) {
-        ensureFallback($)
-        void paneSpec($).then(spec => $.ui.open(spec))
-      }
+      await activateCoordinator($)
+      if (options?.initiativesPane === true) void openPane($).catch(() => {})
     }
 
     return next(e)
@@ -592,18 +624,18 @@ export const register: Register = (on, options) => {
     return next(steered)
   })
 
-  // The first start after a compaction tells the model to reload the coordinator skill. `additionalContext` reaches the model there
-  // (J005/A002); a message appended after /compact does not.
-  on('classic.SessionStart', async ($, e, next) => {
+  // A typed `/isswf:isswf-coordinator` raises `command.run` and no Skill tool call, and the guard skips `skill.prompt`. It runs the
+  // command first, then marks the session exactly as the Skill tool call does; a fault never changes the command's output.
+  on('command.run', { command: /^(isswf:)?isswf-coordinator$/ }, async ($, e, next) => {
     const result = await next(e)
-    if (e.source !== 'compact') return result
-    try {
-      if (!(await $.state.get(IS_ACTIVATED)).value) return result
-      const { value: assignments } = await $.state.get(ASSIGNMENTS)
-      return { ...result, additionalContext: [...(result.additionalContext ?? []), compactionReminder({ host: 'claude', assignments })] }
-    } catch {
-      return result
+    if (isCoordinatorSkill(e.command)) {
+      try {
+        await activateCoordinator($)
+        if (options?.initiativesPane === true) await openPane($)
+      } catch {}
     }
+
+    return result
   })
 
   // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.

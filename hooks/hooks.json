@@ -1,4 +1,19 @@
 {
-  "description": "Opt-in isSWF initiatives pane: opens once the isswf-coordinator skill loads, and on /isswf-initiatives",
-  "modules": ["./register.tsx"]
+  "description": "Opt-in isSWF initiatives pane: opens once the isswf-coordinator skill loads, and on /isswf-initiatives. A SessionStart settings hook reminds a compacted coordinator session to reload its skill",
+  "modules": [
+    "./register.tsx"
+  ],
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/tools/isswf-compaction-claude-hook.mjs\""
+          }
+        ]
+      }
+    ]
+  }
 }
