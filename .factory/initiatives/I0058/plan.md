@@ -20,6 +20,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Capability claims in briefs could be checked against the host's tool schema; a brief that records an operator condition could carry it as an acceptance test.
 - Repository only: a `tests/*.mjs` file that no check runs; ESLint and Knip outside `check-quality`.
 - From I0057 J002 (V003 known limits and coordinator observations): `coverage` reads only each job's latest review, so a latest record whose base line is a delta base or carries trailing text covers too little (S10; union of every V record's range); the package import-closure check misses multi-line, side-effect and dynamic imports (S11); no test for a review without a base or with an unknown base (S12); delta reviews sent with SendMessage to an existing reviewer bypass the dispatch guard's handoff check; `isswf-record-new` and `isswf-record-check` answer a missing flag with a bare `usage` code; the compaction reminder listed a reviewer dispatch with `brief undefined`; the full `check-quality` fails its coverage step at a candidate until the covering review record is committed, so it must run at the head that holds that record.
+- Untested live (I0057 J002): a real Pi reviewer dispatch carrying the generated handoff lines, through the Pi dispatch guard and the bound and unbound Pi routes, has never run; Pi rests on extension tests. On Claude Code the guard accepted a live reviewer dispatch with the handoff (J002 V001).
 
 ## J001
 
