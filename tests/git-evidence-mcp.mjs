@@ -233,6 +233,7 @@ try {
       ['unset', undefined, {}],
       ['empty', undefined, { raw: '' }],
       ['unexpanded placeholder', undefined, { raw: '${ISSWF_GIT_EVIDENCE_BINDINGS}' }],
+      ['unexpanded default placeholder', undefined, { raw: '${ISSWF_GIT_EVIDENCE_BINDINGS:-}' }],
       ['malformed JSON', undefined, { raw: '{not json' }],
       ['empty object', {}, {}],
       ['relative repository', Object.fromEntries(Object.entries(bindings).map(([key, value]) => [key, { ...value, repository: 'repo' }])), {}],
@@ -248,7 +249,7 @@ try {
         }
         if (label !== 'relative repository') assert.match(textOf(results[0]).join(' '), /binding is missing|invalid|JSON|not bound/u, label);
         // An Agent-tool dispatch starts the server with no binding; it must say so, not report a JSON parse error.
-        if (['unset', 'empty', 'unexpanded placeholder'].includes(label)) {
+        if (['unset', 'empty', 'unexpanded placeholder', 'unexpanded default placeholder'].includes(label)) {
           for (const result of results) {
             const text = textOf(result).join(' ');
             assert.match(text, /not bound for this dispatch.*exact diff supplied in the review handoff/u, label);
