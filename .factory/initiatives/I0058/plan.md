@@ -106,14 +106,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Scope: factory.
 - Objective: Plan edits are fully scripted and verified before they are committed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Implement under brief r1 (operator start 2026-11-16).
 
 ### Acceptance
 
