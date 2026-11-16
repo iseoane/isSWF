@@ -566,13 +566,6 @@ export const register: Register = (on, options) => {
         }
       } catch {}
     }
-    // Where the built-in guard is seated `skill.prompt` never runs for this mod, but the Skill tool call does.
-    if (e.tool === 'Skill' && isCoordinatorSkill((e as { skill?: unknown }).skill) && ran.deny === undefined && !ran.isError) {
-      try {
-        await activateCoordinator($)
-        if (options?.initiativesPane === true) await openPane($)
-      } catch {}
-    }
     // A session's own `git switch` or `git checkout` selects the branch the checkout is on now, whatever the call's outcome.
     if (reobserve.length) await refreshBranches({ dirs: reobserve, ...branches })
     // A failure in either part must never change or repeat the tool's result.
@@ -586,6 +579,13 @@ export const register: Register = (on, options) => {
             scheduleRefresh($)
           }
         }
+      } catch {}
+    }
+    // Where the built-in guard is seated `skill.prompt` never runs for this mod, but the Skill tool call does.
+    if (e.tool === 'Skill' && isCoordinatorSkill((e as { skill?: unknown }).skill) && ran.deny === undefined && !ran.isError) {
+      try {
+        await activateCoordinator($)
+        if (options?.initiativesPane === true) await openPane($)
       } catch {}
     }
     try {
