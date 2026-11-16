@@ -6,19 +6,19 @@ On 2026-11-16, during I0059, `node tools/isswf-handoff.mjs coverage` failed with
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow: how coverage collects reviewed ranges)
 - Scope: factory (`tools/isswf-handoff.mjs`, used by `check-quality` and CI in target projects).
 - Objective: A commit is covered when it lies in the base..candidate range of any passing review of its job, not only the latest one, so delta review rounds do not force a full-range re-review.
 - Depends on: None
-- Brief: pending
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Decide which earlier reviews count (for example, only those whose verdict is pass or pass-with-notes, or any review followed by a passing delta that chains to it), then prepare the brief. Do not dispatch until the operator gives an explicit start.
+- Next step: Implement under brief r1 (operator start 2026-11-16: "atacala por favor!").
 
 ### Acceptance
 
 - A job whose reviews are V001 (base A, candidate B) and a delta V002 (base B, candidate C) covers every commit in A..C.
-- A commit reviewed only by a failing review whose range is not chained to a later passing review stays uncovered, so a failed round cannot hide unreviewed code.
+- A commit reviewed only by an earlier review that is not chained to the latest review (its candidate is not the next review's base) stays uncovered, so a stale or abandoned round cannot hide unreviewed code.
 - Existing coverage tests still pass; new tests cover the chained-delta case and the failed-review case.
 - The coverage section of the operations guide (English and Spanish) describes the rule.
 
