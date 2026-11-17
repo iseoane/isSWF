@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -36,8 +36,9 @@ assert.equal(nextJob([job('J1', 'completed')]).state, 'none');
 assert.equal(nextJob([]).state, 'none');
 
 // The CLI prints it for an observed plan.
-const temp = mkdtempSync(join(tmpdir(), 'isswf-next-job-'));
+const temp = realpathSync(mkdtempSync(join(tmpdir(), 'isswf-next-job-')));
 try {
+  assert.equal(spawnSync('git', ['init', '-q', temp]).status, 0);
   const plan = join(temp, '.factory/initiatives/I0001');
   mkdirSync(plan, { recursive: true });
   const block = (id, state, deps) => `## ${id}\n\n- Status: ${state}\n- Objective: ${id} objective\n- Depends on: ${deps}\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: Go.\n\n### Acceptance\n\n- Outcome\n\n### Evidence\n\n- ${state === 'completed' ? 'Merged in #1.' : 'None.'}\n\n`;

@@ -12,6 +12,29 @@ import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+/**
+ * The job to start after a job closes: the first pending job whose dependencies are all completed. When none is, the state says why,
+ * in this order: an operator decision, work in flight, a blocker, unmet dependencies, or nothing left. Reported plan state only; it grants no execution.
+ */
+export function nextJob(jobs = []) {
+  const byId = new Map(jobs.map(job => [job.id, job]));
+  const unmet = job => (job.dependencies ?? []).filter(dep => byId.get(dep)?.reportedStatus !== 'completed');
+  const eligible = jobs.find(job => job.reportedStatus === 'pending' && !unmet(job).length);
+  if (eligible) return { state: 'eligible', job: eligible.id, objective: eligible.objective, executionAuthorized: false };
+  const list = (state, reason) => jobs.filter(job => job.reportedStatus === state || (state === 'in-flight' && ['in-progress', 'in-review'].includes(job.reportedStatus))).map(job => ({ job: job.id, status: job.reportedStatus, reason: reason(job) }));
+  for (const [state, reason] of [
+    ['awaiting-human', job => `Operator decision (untrusted data): ${job.blocker}`],
+    ['in-flight', job => `${job.reportedStatus}; finish or close it first`],
+    ['blocked', job => `Blocker (untrusted data): ${job.blocker}`],
+  ]) {
+    const waiting = list(state, reason);
+    if (waiting.length) return { state, jobs: waiting, executionAuthorized: false };
+  }
+  const pending = jobs.filter(job => job.reportedStatus === 'pending').map(job => ({ job: job.id, status: 'pending', reason: `Waiting on ${unmet(job).join(', ')}` }));
+  if (pending.length) return { state: 'waiting-on-dependencies', jobs: pending, executionAuthorized: false };
+  return { state: 'none', jobs: [], executionAuthorized: false };
+}
+
 export function recommendation(jobs = []) {
   const priorities = [
     ['awaiting-human', 'human', 'Resolve the operator decision'],
@@ -169,13 +192,15 @@ export async function status({ project, initiative }) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const args = {}, parts = process.argv.slice(2);
+    const next = parts.includes('--next');
+    if (next) parts.splice(parts.indexOf('--next'), 1);
     for (let i = 0; i < parts.length; i += 2) {
       if (!['--project', '--initiative'].includes(parts[i]) || !parts[i + 1] || Object.hasOwn(args, parts[i])) throw Error('invalid status option');
       args[parts[i]] = parts[i + 1];
     }
     if (!args['--project'] || !args['--initiative']) throw Error('project and initiative required');
     const result = await status({ project: args['--project'], initiative: args['--initiative'] });
-    console.log(JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(next && result.status === 'observed' ? { status: result.status, initiative: result.initiative, next: nextJob(result.jobs) } : result, null, 2));
     // An unreadable or unsafe plan stays exit 0: it can be an environment limit, not a defect in the plan.
     if (result.reason === 'invalid-or-changing-plan') process.exitCode = 1;
   } catch (error) { console.error(error.message); process.exitCode = 1; }
