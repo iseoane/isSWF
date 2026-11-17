@@ -212,13 +212,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J010
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: A test file that no check runs is caught before review.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief.
+- Next step: Implement brief r1 on feat/i0058-j010-unrun-tests.
 
 ### Acceptance
 
