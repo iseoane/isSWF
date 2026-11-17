@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { verifyPackage } from './factory-package.mjs';
+import { unrunTests } from '../tooling/quality/unrun-tests.mjs';
+import { existsSync } from 'node:fs';
 
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 function run(binary, args, win32Timeout = 300000) {
@@ -25,6 +27,8 @@ async function filesUnder(directory) {
   }
   return files;
 }
+const unrun = await unrunTests(source);
+assert.deepEqual(unrun, [], `tests run by neither check-quality nor CI (add them to a check, or exempt them with a reason in tooling/quality/unrun-tests.mjs): ${unrun.join(', ')}`);
 const syntaxFiles = (await Promise.all(['tools', 'tests'].map(path => filesUnder(join(source, path)))))
   .flat().filter(path => path.endsWith('.mjs')).sort();
 for (const path of syntaxFiles) run(process.execPath, ['--check', path]);
@@ -105,5 +109,16 @@ const skillWrapperResult = run(process.execPath, [join(source, 'tests/skill-wrap
 const hostPrerequisiteResult = run(process.execPath, [join(source, 'tests/host-prerequisites.mjs'), source]);
 const worktreeLocationResult = run(process.execPath, [join(source, 'tests/worktree-location.mjs'), source]);
 const releasePackageResult = run(process.execPath, [join(source, 'tests/release-package.mjs'), source], 600000);
+const unrunTestsResult = run(process.execPath, [join(source, 'tests/unrun-tests.mjs'), source]);
+const planCommitGuardResult = run(process.execPath, [join(source, 'tests/isswf-plan-commit-guard.mjs'), source]);
 const bunReleaseResult = run(process.execPath, [join(source, 'tests/bun-release.mjs'), source]);
-console.log(JSON.stringify({ status: 'PASS', docsResult, documentationResult, workflowDiagramsResult, releaseSourceBatchResult, toolsInstallResult, statusResult, snapshotResult, planEditResult, recordCheckResult, recordNewResult, recordGuardResult, dispatchGuardResult, handoffResult, coverageResult, commandGuardResult, branchGuardResult, compactionResult, runUsageResult, pathContainmentResult, directorySyncResult, literalPathspecsResult, tokenReportResult, tokenNativeUsageResult, tokenNativeClaudeResult, tokenNativeClaudeTranscriptResult, tokenNativeAutoPiResult, panelResult, nextActionResult, gitFixtureResult, gitIdentityResult, gitContentResult, reviewChecksResult, reviewLaunchResult, gitMcpResult, planGrantBoundaryResult, planPublicationResult, reviewGuidanceResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, checkoutLineEndingsResult, hostPortabilityResult, skillWrapperResult, worktreeLocationResult, releasePackageResult, bunReleaseResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', hostPrerequisiteResult, nativeHostDelegation: { status: 'NOT_RUN', reason: 'Required separate host-native CI check; not covered by portable quality run' }, limits: 'ESLint and Knip run separately. Providers, Python and external-service behavior are not checked. The required host-native delegation check is separate and NOT_RUN here; a BLOCKED result from that check is nonzero and is not a pass. When Bun is available, bunReleaseResult checks a real compiled artifact; otherwise that artifact check is explicitly skipped. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));
+const qualityModules = join(source, 'tooling/quality/node_modules');
+function optionalTool(name, args) {
+  const binary = join(qualityModules, name, 'bin', `${name}.js`);
+  if (!existsSync(binary)) return `SKIPPED: ${name} is not installed; run npm ci --prefix tooling/quality --ignore-scripts`;
+  run(process.execPath, [binary, ...args]);
+  return 'PASS';
+}
+const eslintResult = optionalTool('eslint', ['--config', 'tooling/quality/eslint.config.mjs', 'tools', 'tests', ...(await readdir(join(source, 'tooling/quality'))).filter(name => name.endsWith('.mjs')).map(name => `tooling/quality/${name}`)]);
+const knipResult = optionalTool('knip', ['--config', 'tooling/quality/knip.json', '--no-progress']);
+console.log(JSON.stringify({ status: 'PASS', unrunTestsResult, planCommitGuardResult, eslintResult, knipResult, docsResult, documentationResult, workflowDiagramsResult, releaseSourceBatchResult, toolsInstallResult, statusResult, snapshotResult, planEditResult, recordCheckResult, recordNewResult, recordGuardResult, dispatchGuardResult, handoffResult, coverageResult, commandGuardResult, branchGuardResult, compactionResult, runUsageResult, pathContainmentResult, directorySyncResult, literalPathspecsResult, tokenReportResult, tokenNativeUsageResult, tokenNativeClaudeResult, tokenNativeClaudeTranscriptResult, tokenNativeAutoPiResult, panelResult, nextActionResult, gitFixtureResult, gitIdentityResult, gitContentResult, reviewChecksResult, reviewLaunchResult, gitMcpResult, planGrantBoundaryResult, planPublicationResult, reviewGuidanceResult, planResult, dependencyPlanResult, inventoryResult, auditArchiveResult, intakeResult, methodologyResult, checkoutLineEndingsResult, hostPortabilityResult, skillWrapperResult, worktreeLocationResult, releasePackageResult, bunReleaseResult, revision, syntaxFiles: syntaxFiles.length, markdownFiles: markdownFiles.length, checkedLinks, package: 'materialized committed HEAD and verified receipt/payload', hostPrerequisiteResult, nativeHostDelegation: { status: 'NOT_RUN', reason: 'Required separate host-native CI check; not covered by portable quality run' }, limits: 'ESLint and Knip run only when installed under tooling/quality; otherwise eslintResult and knipResult say SKIPPED. Providers, Python and external-service behavior are not checked. The required host-native delegation check is separate and NOT_RUN here; a BLOCKED result from that check is nonzero and is not a pass. When Bun is available, bunReleaseResult checks a real compiled artifact; otherwise that artifact check is explicitly skipped. Optional real Pi package-manager installation is reported by releasePackageResult.' }, null, 2));

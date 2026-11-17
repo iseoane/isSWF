@@ -85,6 +85,8 @@ node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/
 node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress
 ```
 
+`node tools/check-quality.mjs` runs both commands when they are installed and otherwise reports each as `SKIPPED`. It also fails when a top-level `tests/*.mjs` file is run by neither `check-quality` nor a CI workflow nor imported or run by path by another test; a test that needs an external tool is exempted, with its reason, in `tooling/quality/unrun-tests.mjs`.
+
 ESLint performs lint and static checks; Knip reports unused files, dependencies, exports, and unresolved references within its configured scope. Neither is a proof that every dead-code path has been found. Source checks have no separate compilation or type-check step. Constructing a standalone release adds the explicit Bun compilation step.
 
 These tools help find mistakes and unused code. They do not replace the checks needed for a particular feature or prove that a real agent run succeeded.
