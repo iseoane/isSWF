@@ -193,13 +193,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J009
 
-- Status: in-progress
+- Status: in-review
 - Size: S (one flow)
 - Objective: A change cannot edit the review rules that judge it: the handoff reads the review guide from the base, not the candidate.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Implement brief r1 on feat/i0058-j009-base-review-guide.
+- Next step: PR, CI, operator merge go.
 
 ### Acceptance
 
@@ -209,6 +209,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-17: `tools/isswf-handoff.mjs:96` reads `REVIEW.md` at the candidate; the Claude Code team reads it from the base so a change cannot modify its own judge.
+- 2026-11-17: J009 V001 pass. Known limits: no handoff test for a guide absent at the base (S3); a delta round reads the guide at its new base, so a round-1 edit is not re-flagged (I1); the copy is UTF-8-decoded (I2); the guard does not require the review-guide line.
 
 ## J010
 
