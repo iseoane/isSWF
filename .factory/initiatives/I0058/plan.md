@@ -212,13 +212,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J010
 
-- Status: in-progress
+- Status: in-review
 - Size: S (one flow)
 - Objective: A test file that no check runs is caught before review.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Implement brief r1 on feat/i0058-j010-unrun-tests.
+- Next step: PR, CI, operator merge go.
 
 ### Acceptance
 
@@ -228,3 +228,4 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-17: I0058 J002 V001 (a new test ran in no check) and V002 (an unused import only CI's ESLint caught).
+- 2026-11-17: J010 V001 pass. Known limit: a test mentioned only by another unrun test counts as run (V001-S2).
