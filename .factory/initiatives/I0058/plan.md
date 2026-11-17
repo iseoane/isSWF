@@ -18,7 +18,6 @@ Deferred candidates (low value; add a job only after another occurrence):
 - `gh issue create` without `needs-triage`; `gh pr merge` without `--match-head-commit` or with `--auto`; a warning at the fourth material brief revision; a pre-commit run of `check-docs` and `git diff --check`.
 - `isswf-status` outside a Git root reports a generic error; transient `.git/index.lock` errors in the shared checkout (a commit helper could retry once); `runGit` sets `GIT_CONFIG_GLOBAL=NUL`, so a user's `safe.directory` is ignored on Windows; the review template's profile line has commas, so `parseModel` does not read it; a brief path containing a space is stored from after the space; next-ID does not see uncommitted records in other worktrees; `editFile` does not detect a writer between its check and the rename.
 - Capability claims in briefs could be checked against the host's tool schema; a brief that records an operator condition could carry it as an acceptance test.
-- Repository only: a `tests/*.mjs` file that no check runs; ESLint and Knip outside `check-quality`.
 - From I0057 J002 (V003 known limits and coordinator observations): `coverage` reads only each job's latest review, so a latest record whose base line is a delta base or carries trailing text covers too little (S10; union of every V record's range); the package import-closure check misses multi-line, side-effect and dynamic imports (S11); no test for a review without a base or with an unknown base (S12); delta reviews sent with SendMessage to an existing reviewer bypass the dispatch guard's handoff check; `isswf-record-new` and `isswf-record-check` answer a missing flag with a bare `usage` code; the compaction reminder listed a reviewer dispatch with `brief undefined`; the full `check-quality` fails its coverage step at a candidate until the covering review record is committed, so it must run at the head that holds that record.
 
 ## J001
@@ -37,24 +36,27 @@ Deferred candidates (low value; add a job only after another occurrence):
 - For each child run, the hooks record which files it read and which commands it ran, on Claude Code and Pi, or the gap is recorded per host.
 - At attempt close, the brief's selected skills and required references are compared with the observed reads, and a missing one is reported.
 - A check that an attempt record reports as run names the commit it ran at, and an observed command run supports it.
+- Each commit of a job carries a verification stamp: the checks observed for it (or `none`), recorded by a tool, not typed by the writer.
+- A commit gate reads the stamp and has three modes: `off`, `observe` (logs what it would refuse) and `enforce` (refuses an unstamped code commit unless its message states why). The project setup selects the mode; the default is `observe`.
 - The pane's Agents tab names each run's role, distinguishes an unresolved transcript from a run that used nothing, and lists host guides apart from references.
 
 ### Evidence
 
 - 2026-11-15: J005 A003 reported `host-portability` as passing, but it was not run at the candidate, where it fails (I0057 J005 V002).
 - 2026-11-15: J003 A003 declared no deviations although required references were unread (I0057).
+- 2026-11-17: verification practice of the Claude Code team ("stamp and gate commits", observe/enforce modes) adopted as the target for this job by the operator.
 - 2026-11-15: the operator saw `unknown` roles, `skills: unknown` and host guides under references in the pane (`tools/isswf-run-usage-core.mjs:152-158`; `hooks/register.tsx` groups by record role).
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Scope: factory.
 - Objective: When a job closes, the coordinator is told which job to start next.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Push, open the PR; merge needs the operator's go.
+- Next step: None; merged in #348.
 
 ### Acceptance
 
@@ -64,6 +66,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-15: after a merge the coordinator stopped and asked whether to continue, although the standing grant covered it (operator: "el avanzar con los jobs no es algo que necesite de mi").
+- 2026-11-17: merged in #348 (V003 pass after V001/V002 fixes).
 
 ## J003
 
@@ -187,3 +190,41 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 - 2026-11-14: a wording correction dropped part of a contract definition and the phrase tests passed (I0057 J008 V002 F4).
 - 2026-11-14: statements of a tool's old behaviour survived the first correction (I0057 J001 V001 F1, V002 F6).
+
+## J009
+
+- Status: pending
+- Size: S (one flow)
+- Objective: A change cannot edit the review rules that judge it: the handoff reads the review guide from the base, not the candidate.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief.
+
+### Acceptance
+
+- The handoff records REVIEW.md from the base commit, and a candidate that changes REVIEW.md is flagged in the envelope as needing a person.
+- The reviewer prompt and docs name the base revision of the guide.
+
+### Evidence
+
+- 2026-11-17: `tools/isswf-handoff.mjs:96` reads `REVIEW.md` at the candidate; the Claude Code team reads it from the base so a change cannot modify its own judge.
+
+## J010
+
+- Status: pending
+- Size: S (one flow)
+- Objective: A test file that no check runs is caught before review.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Prepare a brief.
+
+### Acceptance
+
+- check-quality fails when a tests/*.mjs file (outside tests/support/) is run by neither check-quality nor the CI workflow, and names it.
+- check-quality runs ESLint and Knip with the CI commands when their tools are installed, or says it skipped them.
+
+### Evidence
+
+- 2026-11-17: I0058 J002 V001 (a new test ran in no check) and V002 (an unused import only CI's ESLint caught).
