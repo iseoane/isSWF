@@ -212,13 +212,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J010
 
-- Status: in-review
+- Status: completed
 - Size: S (one flow)
 - Objective: A test file that no check runs is caught before review.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: PR, CI, operator merge go.
+- Next step: None; merged in #350.
 
 ### Acceptance
 
