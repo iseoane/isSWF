@@ -79,3 +79,7 @@ try {
   }
   console.log('PASS: actual plan and artifacts summarized without writes; absent/malformed/unsafe records visible; reported progress never becomes liveness or acceptance');
 } finally { await rm(root, { recursive: true, force: true }); }
+
+// isswf-status --next: the next eligible job, or why none is.
+const { checkNextJob } = await import('./support/next-job.mjs');
+await checkNextJob(source);

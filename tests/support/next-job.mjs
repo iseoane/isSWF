@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const source = resolve(process.argv[2] || '.');
+export async function checkNextJob(source) {
 const module = await import(pathToFileURL(join(source, 'tools/isswf-status.mjs')));
 assert.equal(typeof module.nextJob, 'function', 'isswf-status exports nextJob(jobs)');
 const { nextJob } = module;
@@ -53,3 +53,4 @@ try {
   rmSync(temp, { recursive: true, force: true });
 }
 console.log('PASS next job');
+}
