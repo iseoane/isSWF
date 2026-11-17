@@ -89,21 +89,28 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   const priorReviews = prior ?? reviewIds(names);
   const stem = `${job}-${candidate.slice(0, 12)}`;
   const diffPath = join(directory, `${stem}.diff`);
+  // REVIEW.md is read at the base, so a candidate cannot change the rules that judge it.
+  const guideBlob = blobAt(git, base, 'REVIEW.md');
+  const guideCopy = guideBlob ? join(directory, `${stem}.REVIEW.md`) : null;
+  const guideChanged = guideBlob !== blobAt(git, candidate, 'REVIEW.md');
   const envelope = buildEnvelope({
     initiative, job, base, candidate,
     diff: { path: diffPath, argv, bytes: patch.length, sha256: createHash('sha256').update(patch).digest('hex') },
     brief: { path: brief.path, revision: brief.revision, checkpoint, blob: blobAt(git, checkpoint, brief.path) },
-    reviewGuide: blobAt(git, candidate, 'REVIEW.md'),
+    reviewGuide: { revision: base, blob: guideBlob, copy: guideCopy, changed: guideChanged },
     round: priorReviews.length + 1, priorReviews, reviewer,
     resources: resources.map(path => ({ path, absolutePath: join(FACTORY_ROOT, ...path.split('/')), blob: blobAt(git, checkpoint, path) })),
   });
   const text = Buffer.from(`${JSON.stringify(envelope, null, 2)}\n`, 'utf8');
   await mkdir(directory, { recursive: true });
   await writeOnce(diffPath, patch);
+  if (guideCopy) await writeOnce(guideCopy, Buffer.from(git(['cat-file', 'blob', guideBlob]), 'utf8'));
   const handoffPath = join(directory, `${stem}.handoff.json`);
   await writeOnce(handoffPath, text);
   const handoff = { path: handoffPath, sha256: createHash('sha256').update(text).digest('hex'), bytes: text.length };
-  return { ok: true, handoff, envelope, promptLines: [`handoff: ${handoff.path}`, `handoff-sha256: ${handoff.sha256}`, `candidate ${candidate}`] };
+  return { ok: true, handoff, envelope, promptLines: [`handoff: ${handoff.path}`, `handoff-sha256: ${handoff.sha256}`, `candidate ${candidate}`,
+    guideCopy ? `review-guide: ${guideCopy} (REVIEW.md at base ${base})` : `review-guide: absent at base ${base}`,
+    ...(guideChanged ? ["review-guide-changed: the candidate changes REVIEW.md; it needs a person's approval"] : [])] };
 }
 
 const INITIATIVE_JOB = /^\.(?:isswf|factory)\/initiatives\/(I\d+)\/jobs\/([^/]+)\//u;

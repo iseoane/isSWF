@@ -149,7 +149,7 @@ export async function createRecord(input) {
     selection: { path: selectionPath, blob: blobAt(git, checkpoint, selectionPath) },
     checkout: workDir,
     branch: currentBranch,
-    reviewGuide: candidate === undefined ? undefined : blobAt(git, candidate, 'REVIEW.md'),
+    reviewGuide: candidate === undefined ? undefined : blobAt(git, base, 'REVIEW.md'),
     priorReviews: reviewIds(names),
     timestamp: `${new Date().toISOString().replace(/\.\d+Z$/u, 'Z')} (UTC)`,
   };

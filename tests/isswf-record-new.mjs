@@ -258,25 +258,25 @@ try {
       'Requested model and effort:': ' `sonnet`/`medium`',
     }));
 
-    // A review fills its candidate, REVIEW.md at the candidate, the round and the earlier reviews of the job.
+    // A review fills its candidate, REVIEW.md at the base (absent here although the candidate has it), the round and the earlier reviews of the job.
     const review1 = cli('create', { ...reviewArgs, '--run': 'claude session=s-9', '--round': '1' });
     assert.equal(review1.status, 0, JSON.stringify(review1));
     assert.equal(await read('V001.md'), await expected('review.md', {
       'Job ID and review ID:': ' I0001/J001, V001',
       'Run:': ' claude session=s-9',
       'Review round in this job, and prior review IDs:': ' 1; prior reviews: none',
-      'Project `REVIEW.md` consumed (path and revision), or absent:': ` REVIEW.md, blob ${blob(candidate, 'REVIEW.md')}`,
+      'Project `REVIEW.md` consumed (path and revision), or absent:': ' absent',
       'Brief path and exact revision:': ` ${brief}, r1, ${checkpoint}`,
       'Base commit SHA:': ` ${base}`,
       'Candidate commit SHA, or reproducible snapshot identity:': ` ${candidate}`,
       'Reviewer profile, model, and effort:': ` .agents/roles/reviewer.md, blob ${blob(checkpoint, '.agents/roles/reviewer.md')}, requested \`haiku\`/\`high\``,
       'Review timestamp:': ' <now>',
     }));
-    const review2 = cli('create', { ...reviewArgs, '--id': 'V002', '--round': '2', '--candidate': base });
+    const review2 = cli('create', { ...reviewArgs, '--id': 'V002', '--round': '2', '--base': candidate, '--candidate': candidate });
     assert.equal(review2.status, 0, JSON.stringify(review2));
     const second = await read('V002.md');
     assert.ok(second.includes('- Review round in this job, and prior review IDs: 2; prior reviews: V001\n'));
-    assert.ok(second.includes('consumed (path and revision), or absent: absent\n'), 'REVIEW.md is absent at that candidate');
+    assert.ok(second.includes(`consumed (path and revision), or absent: REVIEW.md, blob ${blob(candidate, 'REVIEW.md')}\n`), 'REVIEW.md is read at the base');
     assert.ok(!second.includes('- Run: claude agent=<id>'), 'an unknown run leaves no Run line');
 
     // Every created record is clean for the checker, has a Run line the pane accepts and a model and effort the pane reads.
