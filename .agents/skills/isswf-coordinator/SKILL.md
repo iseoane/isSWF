@@ -191,7 +191,7 @@ At the end, return the brief or result, blockers, observed evidence, and the nex
 
 ## Unit boundary handoff
 
-For multi-unit work, close each functional unit with the [compact handoff](../../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) and continue the next unit in a fresh coordinator context.
+For multi-unit work, close each functional unit with the [compact handoff](../../roles/references/feature-delivery.md#close-each-functional-unit-with-a-compact-handoff) and continue the next unit in a fresh coordinator context. To choose that unit, run the initiative status command with `--next`: it prints the next `eligible` job (pending, every dependency completed), or why none is (`awaiting-human`, `in-flight`, `blocked`, `waiting-on-dependencies` or `none`) with the jobs involved. Start an eligible job when the current grant covers it, without asking again; otherwise report that state.
 
 ## Independent findings and new proposals
 

@@ -47,14 +47,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Scope: factory.
 - Objective: When a job closes, the coordinator is told which job to start next.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Push, open the PR; merge needs the operator's go.
 
 ### Acceptance
 
@@ -128,14 +128,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J006
 
-- Status: in-progress
+- Status: completed
 - Size: S (guidance only, unless a mechanism exists)
 - Scope: factory.
 - Objective: Long background work that the host stops under memory pressure is noticed and resumed.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Push, open the PR and merge after green CI (operator authorized 2026-11-17).
+- Next step: None; merged in #347.
 
 ### Acceptance
 
@@ -144,6 +144,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-15: Claude Code stopped a worker's full check and the coordinator's CI wait for low memory, and the work waited until someone looked.
+- 2026-11-17: merged in #347 (V002 pass). Known limit: a worker's own stopped check is not covered.
 
 ## J007
 

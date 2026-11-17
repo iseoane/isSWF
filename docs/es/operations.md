@@ -22,6 +22,8 @@ node tools/isswf-panel.mjs --project /absolute/project --port 0
 
 El primer comando lee el plan de una iniciativa y sus registros de apoyo. Termina con código 1, con el mismo JSON, cuando el plan no es válido o cambia mientras se lee (`reason: invalid-or-changing-plan`, con `planError` cuando el analizador indica dónde); cualquier otro resultado, incluido `unreadable-or-unsafe-plan`, termina con 0, porque ese resultado puede deberse al entorno (por ejemplo, un proyecto que no es la raíz de Git) y no al plan. El segundo muestra una instantánea JSON de todas las iniciativas abiertas; consulta [instantánea de iniciativas](#instantánea-de-iniciativas). El tercero inicia un servidor en primer plano en `127.0.0.1` y muestra su dirección. Deténlo con Ctrl-C. Permite consultar las iniciativas, sus trabajos, las evidencias y las decisiones registradas.
 
+Añade `--next` a `isswf-status` para imprimir solo el trabajo que toca empezar: el primer trabajo pendiente cuyas dependencias estén todas en `completed` (`eligible`), o el motivo de que no haya ninguno (`awaiting-human`, `in-flight`, `blocked`, `waiting-on-dependencies` o `none`) con los trabajos implicados. Solo lee el estado declarado en el plan y no autoriza ninguna ejecución.
+
 El panel puede guardar notas locales si las evidencias mostradas siguen coincidiendo. Una nota no se aplica automáticamente, no autentica la aceptación del operador ni permite despachar trabajo. No expongas el panel públicamente ni incluyas secretos en sus registros.
 
 ## Comprobación de registros
