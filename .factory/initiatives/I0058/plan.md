@@ -135,7 +135,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Implement under brief r1 (operator start 2026-11-17).
+- Next step: Push, open the PR and merge after green CI (operator authorized 2026-11-17).
 
 ### Acceptance
 
