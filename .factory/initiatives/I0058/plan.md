@@ -193,13 +193,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J009
 
-- Status: in-review
+- Status: completed
 - Size: S (one flow)
 - Objective: A change cannot edit the review rules that judge it: the handoff reads the review guide from the base, not the candidate.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: PR, CI, operator merge go.
+- Next step: None; merged in #352.
 
 ### Acceptance
 
