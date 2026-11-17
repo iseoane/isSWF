@@ -170,13 +170,13 @@ export function sha256Hex(bytes) {
   return Array.from(state, word => word.toString(16).padStart(8, '0')).join('');
 }
 
-/** The `isswf.handoff/1` envelope for a review: the one place that fixes its keys and their order. */
+/** The `isswf.handoff/1` envelope for a review: the one place that fixes its keys and their order. `reviewGuide` is REVIEW.md at the base, its copy, and whether the candidate changes it. */
 export function buildEnvelope({ initiative, job, base, candidate, diff, brief, reviewGuide, round, priorReviews, reviewer, resources }) {
   return {
     schema: HANDOFF_SCHEMA, kind: 'review', initiative, job, base, candidate,
     diff: { path: diff.path, argv: diff.argv, bytes: diff.bytes, sha256: diff.sha256 },
     brief: { path: brief.path, revision: brief.revision, checkpoint: brief.checkpoint, blob: brief.blob ?? null },
-    reviewGuide: { path: 'REVIEW.md', blob: reviewGuide ?? null },
+    reviewGuide: { path: 'REVIEW.md', revision: reviewGuide?.revision ?? null, blob: reviewGuide?.blob ?? null, copy: reviewGuide?.copy ?? null, changed: reviewGuide?.changed ?? false },
     round, priorReviews: [...priorReviews],
     reviewer: { host: reviewer.host, agent: reviewer.agent, model: reviewer.model, effort: reviewer.effort },
     resources: resources.map(({ path, absolutePath, blob }) => ({ path, absolutePath, blob: blob ?? null })),
