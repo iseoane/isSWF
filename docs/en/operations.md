@@ -20,6 +20,8 @@ node tools/isswf-snapshot.mjs --project /absolute/project
 node tools/isswf-panel.mjs --project /absolute/project --port 0
 ```
 
+Add `--next` to `isswf-status` to print only the job to start next: the first pending job whose dependencies are all `completed` (`eligible`), or the reason none is (`awaiting-human`, `in-flight`, `blocked`, `waiting-on-dependencies` or `none`) with the jobs involved. It reads reported plan state only and grants no execution.
+
 The first command reads an initiative's plan and supporting records. It exits 1, with the same JSON, when the plan is invalid or changes while it is read (`reason: invalid-or-changing-plan`, with `planError` when the parser says where); every other result, including `unreadable-or-unsafe-plan`, exits 0, because that result can come from the environment (for example a project that is not a Git root) rather than from the plan. The second prints a JSON snapshot of every open initiative; see [initiative snapshot](#initiative-snapshot). The third starts a foreground server on `127.0.0.1` and prints its URL. Stop it with Ctrl-C. It lists initiatives and lets you inspect their jobs, evidence, and recorded decisions.
 
 The panel can record local notes when the displayed evidence still matches. A note is not automatically applied, authenticated operator acceptance, or permission to dispatch work. Do not expose the panel publicly or put secrets in its records.
