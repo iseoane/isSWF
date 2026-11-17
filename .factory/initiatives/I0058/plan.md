@@ -106,14 +106,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Scope: factory.
 - Objective: Plan edits are fully scripted and verified before they are committed.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Push, open the PR and merge after green CI (operator authorized 2026-11-16).
+- Next step: None; merged in #344 (f3d81d2); known limits recorded in Evidence for a follow-up.
 
 ### Acceptance
 
