@@ -67,6 +67,7 @@ try {
   git(root, 'commit', '-qm', 'between');
   const mid = git(root, 'rev-parse', 'HEAD');
   await write('src/a.txt', 'one\ntwo changed\nthree\n');
+  await write('REVIEW.md', '# review guide edited by the candidate\n');
   await write('src/binary.bin', Buffer.from(Array.from({ length: 512 }, (_, i) => i % 256)));
   await write('src/latin1.txt', Buffer.from([0x63, 0x61, 0x66, 0xe9, 0x0a]));
   await rm(join(root, 'src/gone.txt'));
@@ -99,7 +100,9 @@ try {
   assert.equal(envelope.diff.bytes, diffBytes.length);
   assert.equal(envelope.diff.sha256, sha256(diffBytes));
   for (const flag of ['--no-color', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', `--attr-source=${candidate}`]) assert.ok(envelope.diff.argv.includes(flag), flag);
-  assert.deepEqual(made.promptLines, [`handoff: ${made.handoff.path}`, `handoff-sha256: ${made.handoff.sha256}`, `candidate ${candidate}`]);
+  const guideCopy = envelope.reviewGuide.copy;
+  assert.deepEqual(made.promptLines, [`handoff: ${made.handoff.path}`, `handoff-sha256: ${made.handoff.sha256}`, `candidate ${candidate}`,
+    `review-guide: ${guideCopy} (REVIEW.md at base ${base})`, 'review-guide-changed: the candidate changes REVIEW.md; it needs a person\'s approval']);
 
   // The diff is the exact base..candidate change: applied to the base tree it reproduces the candidate tree, binary and non-UTF-8 files included.
   {
@@ -112,7 +115,9 @@ try {
 
   // The brief, the review guide, the round and the reviewer come from the records, the candidate and the selection file.
   assert.deepEqual(envelope.brief, { path: BRIEF, revision: '1', checkpoint, blob: git(root, 'rev-parse', `${checkpoint}:${BRIEF}`) });
-  assert.deepEqual(envelope.reviewGuide, { path: 'REVIEW.md', blob: git(root, 'rev-parse', `${candidate}:REVIEW.md`) });
+  // The review guide is read at the base, so a candidate cannot change the rules that judge it.
+  assert.deepEqual(envelope.reviewGuide, { path: 'REVIEW.md', revision: base, blob: git(root, 'rev-parse', `${base}:REVIEW.md`), copy: guideCopy, changed: true });
+  assert.equal(await readFile(guideCopy, 'utf8'), '# review guide\n');
   assert.equal(envelope.round, 2);
   assert.deepEqual(envelope.priorReviews, ['V001']);
   assert.deepEqual(envelope.reviewer, { host: 'claude', agent: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' });
