@@ -128,14 +128,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Size: S (guidance only, unless a mechanism exists)
 - Scope: factory.
 - Objective: Long background work that the host stops under memory pressure is noticed and resumed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Research what each host reports when it stops a background command.
+- Next step: Implement under brief r1 (operator start 2026-11-17).
 
 ### Acceptance
 
