@@ -100,3 +100,23 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-18: operator report: in a factory-driven project about 15 of a 30-minute job is repeated full-suite and E2E runs locally and again in CI; private-repo CI minutes are limited. Operator accepted the tiers and asked to keep project rules ahead of factory defaults. Operator then asked that setup not simply keep existing project rules but compare them with the factory proposal and let the operator choose either or a merge. 2026-11-18: operator asked to adopt three practices observed in a private factory-driven project: a path-keyed check table, checks in a pinned worktree while the next worker continues, and a manually dispatched close-suite workflow.
+
+## J006
+
+- Status: pending
+- Size: S (setup grant, path guard, delivery step)
+- Objective: Records-only commits (triage, plans, briefs, attempt and review records, job and initiative close) go directly to the base branch when the operator grants it, so record bookkeeping does not cost a PR and a CI run.
+- Depends on: None.
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Implementation brief.
+
+### Acceptance
+
+- Setup offers a separate remote grant, "push records-only commits directly to the base branch", recorded in project-setup.md; without it the PR path stays.
+- A mechanical guard allows the direct push only when every path in the pushed commits is under the selected state directory (`.isswf/` or legacy `.factory/initiatives/`); any other path refuses and points to the PR path.
+- The delivery flow uses the grant for job and initiative close records; code, docs, agent instructions, templates and tests always keep PR and CI.
+
+### Evidence
+
+- 2026-11-18: operator, after a plan-only edit was sent through PR #360: "esto es una locura... pensaba que ya habíamos dicho que estas cosas iban directas a origin main"; asked that the factory apply the same in the projects it runs.
