@@ -27,14 +27,14 @@ On 2026-11-18 the operator asked to triage the new issues and authorized labels 
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Size: S (methodology text)
 - Scope: factory.
 - Objective: TDD and review weigh each proposed test's value against its cost (#354).
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation after J001's PR.
+- Next step: None.
 
 ### Acceptance
 
@@ -46,3 +46,4 @@ On 2026-11-18 the operator asked to triage the new issues and authorized labels 
 
 - 2026-11-18: downstream suite growth and a duplicated parametrized test reported in #354; `.agents/roles/references/tdd.md:3` has only a ritual warning.
 - 2026-11-18: operator decisions recorded in brief r2 (suggestion rule; thin TDD skill).
+- 2026-11-18: merged in #359 (CI 3/3 at dc595c8a; V001 fail fixed, V002 pass; full check-quality PASS locally, about 11 min); #354 closed.
