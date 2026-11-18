@@ -31,14 +31,17 @@ On 2026-11-18 the operator asked to triage the new issues and authorized labels 
 - Scope: factory.
 - Objective: TDD and review weigh each proposed test's value against its cost (#354).
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
-- Blocker: Operator product decisions recorded as brief questions.
-- Next step: Operator answers the brief questions.
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
+- Blocker: None.
+- Next step: Implementation after J001's PR.
 
 ### Acceptance
 
-- To be set after the operator's decisions.
+- `tdd.md` asks the three test-value questions before a test is written, and the attempt report justifies each new test in one line.
+- A review finding that requests a test names the mistake it would catch and is `blocking` only for a stated acceptance criterion or a declared mandatory evidence class; otherwise it is a `suggestion` the coordinator accepts or declines with a reason.
+- Every TDD rule is stated once, in `tdd.md`; `isswf-tdd/SKILL.md` is a thin entry point and no rule is lost.
 
 ### Evidence
 
 - 2026-11-18: downstream suite growth and a duplicated parametrized test reported in #354; `.agents/roles/references/tdd.md:3` has only a ritual warning.
+- 2026-11-18: operator decisions recorded in brief r2 (suggestion rule; thin TDD skill).
