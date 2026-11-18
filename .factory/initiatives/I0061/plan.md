@@ -90,10 +90,10 @@ Type: enhancement
 ### Acceptance
 
 - Without a project check rule, when the project's CI runs the full suite, a job runs locally only the focused checks and those of affected consumers, and leaves the full suite to CI; the full suite runs locally only when there is neither a rule nor such CI.
-- Setup proposes a check rule for the project's AGENTS.md from the detected test commands and their cost class; the operator approves it, and the project rule then overrides the factory default.
+- Setup proposes a check rule for the project's AGENTS.md from the detected test commands and their cost class. When the project already has check rules, setup shows a side-by-side comparison of the existing rules and the factory proposal and the operator chooses the existing rules, the proposal, or a merge they edit; nothing is written without that choice, and the chosen rule then overrides the factory default.
 - The full suite and E2E run once at initiative close (or on merge to main) as an integration gate, and the close is refused until that run is recorded at the closing head.
 - A guide describes tiered CI for private repositories: a fast tier per PR with path filters and cancel-in-progress, the full tier on main, manual dispatch or schedule, and the runner-minute multipliers of Windows and macOS.
 
 ### Evidence
 
-- 2026-11-18: operator report: in a factory-driven project about 15 of a 30-minute job is repeated full-suite and E2E runs locally and again in CI; private-repo CI minutes are limited. Operator accepted the tiers and asked to keep project rules ahead of factory defaults.
+- 2026-11-18: operator report: in a factory-driven project about 15 of a 30-minute job is repeated full-suite and E2E runs locally and again in CI; private-repo CI minutes are limited. Operator accepted the tiers and asked to keep project rules ahead of factory defaults. Operator then asked that setup not simply keep existing project rules but compare them with the factory proposal and let the operator choose either or a merge.
