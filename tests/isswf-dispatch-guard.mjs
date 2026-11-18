@@ -167,6 +167,42 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   assert.deepEqual(await claude(claudeCall({ prompt: `C:\\work\\project\\.factory\\initiatives\\I0001\\jobs\\J001\\brief-r1.md, checkpoint ${CHECKPOINT}, base ${BASE}` }), io()), { allow: true });
 }
 
+// A read-only role (researcher, planner) may name a committed retrospective record instead of a job brief (#355).
+{
+  const RETRO = '.factory/retrospectives/2026-11-18-session.md';
+  const readOnly = { 'isswf:isswf-researcher': { model: 'haiku', effort: 'high' }, 'isswf-planner': { model: 'opus', effort: 'low' } };
+  const retroProject = (overrides = {}) => project({ files: {
+    '/work/project/.factory/dispatch-selection.json': selectionFile({ ...claudeAgents, claude: { ...claudeAgents.claude, ...readOnly } }),
+    [`/work/project/${RETRO}`]: '# retrospective\n',
+  }, ...overrides });
+  const retroPrompt = (path = RETRO) => `Analyse for the retrospective ${path}.\nInput checkpoint ${CHECKPOINT}.\n`;
+  const researcher = (prompt = retroPrompt(), call = {}) => claudeCall({ subagent_type: 'isswf:isswf-researcher', model: 'haiku', effort: 'high', prompt, ...call });
+  {
+    const io = memoryIo(retroProject());
+    assert.deepEqual(await claude(researcher(), io), { allow: true }, 'a researcher with a committed retrospective record');
+    assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '--no-index', '-q'], ['cat-file', '-e', `${CHECKPOINT}:./${RETRO}`]]);
+  }
+  assert.deepEqual(await claude(researcher(retroPrompt(), { subagent_type: 'isswf-planner', model: 'opus', effort: 'low' }), memoryIo(retroProject())), { allow: true }, 'a bare-name planner');
+  assert.deepEqual(await claude(researcher(retroPrompt(RETRO.replaceAll('/', '\\'))), memoryIo(retroProject())), { allow: true }, 'a Windows-spelled record path');
+  // Model and effort are still enforced.
+  refused(await claude(researcher(retroPrompt(), { effort: 'low' }), memoryIo(retroProject())), 'selection', 'effort');
+  // A worker or a reviewer without a job brief is still refused for the brief.
+  refused(await claude(researcher(retroPrompt(), { subagent_type: 'isswf:isswf-worker', model: 'sonnet', effort: 'medium' }), memoryIo(retroProject())), 'references', 'brief');
+  refused(await claude(researcher(retroPrompt(), { subagent_type: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' }), memoryIo(retroProject())), 'references', 'brief');
+  // The record needs a full checkpoint, must exist, be tracked, not ignored and committed at the checkpoint.
+  refused(await claude(researcher(`retrospective ${RETRO} checkpoint ${CHECKPOINT.slice(0, 12)}`), memoryIo(retroProject())), 'references', 'checkpoint');
+  refused(await claude(researcher(retroPrompt('.factory/retrospectives/missing.md')), memoryIo(retroProject())), 'brief', 'missing.md', 'does not exist');
+  refused(await claude(researcher(), memoryIo(retroProject({ tracked: false }))), 'brief', 'not tracked');
+  refused(await claude(researcher(), memoryIo(retroProject({ ignored: true }))), 'brief', 'ignored');
+  refused(await claude(researcher(), memoryIo(retroProject({ committed: false }))), 'brief', 'checkpoint', CHECKPOINT);
+  // A path outside retrospectives/ or with a traversal is not a record.
+  refused(await claude(researcher(retroPrompt('.factory/notes/2026.md')), memoryIo(retroProject())), 'references', 'brief');
+  refused(await claude(researcher(retroPrompt('.factory/retrospectives/../plan.md')), memoryIo(retroProject())), 'references', 'brief');
+  // Pi takes the same path through its extension's core.
+  const pi = await guardDispatch({ host: 'pi', input: { agent: 'isswf-researcher', task: retroPrompt(), model: `${PI_MODEL}:high` }, io: memoryIo(retroProject()) });
+  assert.deepEqual(pi, { allow: true }, 'pi researcher with a retrospective record');
+}
+
 // A Pi management action is exempt only when it names no isSWF role agent anywhere.
 {
   const pi = input => guardDispatch({ host: 'pi', input, io: memoryIo({ files: {}, dirs: [] }) });
