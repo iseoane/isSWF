@@ -170,7 +170,7 @@ async function checkBrief(project, relative, checkpoint, join, io, label = 'brie
   }
   if (tracked !== 0) refuse(5, `the ${label} ${relative} is not tracked by Git (untracked or never committed)`);
   if (ignored === 0) refuse(5, `the ${label} ${relative} is ignored by Git`);
-  if (ignored !== 1) refuse(5, `git check-ignore could not decide for the brief ${relative}`);
+  if (ignored !== 1) refuse(5, `git check-ignore could not decide for the ${label} ${relative}`);
   if (committed !== 0) refuse(5, `the ${label} ${relative} is not committed at the checkpoint ${checkpoint}`);
 }
 

@@ -198,6 +198,9 @@ assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\proj
   // A path outside retrospectives/ or with a traversal is not a record.
   refused(await claude(researcher(retroPrompt('.factory/notes/2026.md')), memoryIo(retroProject())), 'references', 'brief');
   refused(await claude(researcher(retroPrompt('.factory/retrospectives/../plan.md')), memoryIo(retroProject())), 'references', 'brief');
+  // A prompt that also names a job brief keeps the job path: the brief's plan decides.
+  const both = retroProject({ files: { ...retroProject().files, '/work/project/.factory/initiatives/I0001/plan.md': plan(job('J001', 'pending')), [`/work/project/${BRIEF}`]: '# brief\n' } });
+  refused(await claude(researcher(`${retroPrompt()}${BRIEF} base ${BASE}`), memoryIo(both)), 'plan', 'pending');
   // Pi takes the same path through its extension's core.
   const pi = await guardDispatch({ host: 'pi', input: { agent: 'isswf-researcher', task: retroPrompt(), model: `${PI_MODEL}:high` }, io: memoryIo(retroProject()) });
   assert.deepEqual(pi, { allow: true }, 'pi researcher with a retrospective record');
@@ -366,6 +369,7 @@ const piAgents = {
   pi: {
     'isswf-worker': { model: PI_MODEL, effort: 'high' },
     'isswf-reviewer': { model: 'vendor/model:free', effort: 'low' },
+    'isswf-researcher': { model: PI_MODEL, effort: 'high' },
   },
   claude: { 'isswf-planner': { model: 'opus', effort: 'low' } },
 };
@@ -379,6 +383,7 @@ try {
   await write('.factory/initiatives/I0001/plan.md', plan(job('J001', 'in-progress')));
   await write(BRIEF, '# brief\n');
   await write('.gitignore', 'brief-r3.md\n');
+  await write('.factory/retrospectives/session.md', '# retrospective\n');
   git(temp, 'init', '-q', 'project');
   git(root, 'add', '-A');
   git(root, 'commit', '-qm', 'fixture');
@@ -402,6 +407,9 @@ try {
 
   // An allowed call, and the calls the guard does not own, return nothing so the tool runs unchanged.
   assert.equal(await call({ agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` }), undefined, 'a call that meets every condition');
+  // A researcher may name a committed retrospective record instead of a job brief (#355), through real Git.
+  assert.equal(await call({ agent: 'isswf-researcher', task: `retrospective .factory/retrospectives/session.md checkpoint ${head}`, model: `${PI_MODEL}:high` }), undefined, 'a researcher with a committed retrospective record');
+  blocked(await call({ agent: 'isswf-researcher', task: `retrospective .factory/retrospectives/later.md checkpoint ${head}`, model: `${PI_MODEL}:high` }), 'retrospective record', 'does not exist');
   // A reviewer call also needs a handoff that verifies against the real files, which live outside the project.
   const handoffDir = join(temp, 'handoffs');
   await mkdir(handoffDir);
@@ -437,7 +445,7 @@ try {
   blocked(await call({ agent: 'isswf-worker', task: task() }), 'no model');
   blocked(await call({ agent: 'isswf-reviewer', task: task(), model: 'vendor/model:free' }), 'effort', 'no effort', 'low');
   blocked(await call({ agent: 'isswf-planner', task: task(), model: 'opus:low' }), 'no entry', 'pi');
-  blocked(await call({ agent: 'isswf-researcher', task: task(), model: 'x:low' }), 'no entry');
+  blocked(await call({ agent: 'isswf-researcher', task: task(), model: 'x:low' }), 'selection', 'model x', PI_MODEL);
   assert.equal(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: 'other/model:xhigh' }), undefined, 'the override line');
   blocked(await call({ agent: 'isswf-worker', task: task('Override: model=other/model effort=xhigh'), model: `${PI_MODEL}:high` }), 'Override');
 
