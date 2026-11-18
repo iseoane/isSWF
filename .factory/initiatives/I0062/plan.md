@@ -6,14 +6,14 @@ On 2026-11-18 the operator asked to triage the new issues and authorized labels 
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Scope: factory.
 - Objective: A read-only role can be dispatched for a retrospective or other non-job analysis without a job brief, while writers keep the brief requirement (#355).
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation brief; recommended substitute evidence is a committed retrospective record path, which the guard can verify in Git.
+- Next step: None.
 
 ### Acceptance
 
@@ -23,10 +23,11 @@ On 2026-11-18 the operator asked to triage the new issues and authorized labels 
 ### Evidence
 
 - 2026-11-18: three successive refusals while dispatching researchers for a retrospective (#355); `tools/isswf-dispatch-guard-core.mjs:103` requires the brief for every role.
+- 2026-11-18: merged in #357 (CI 3/3 at 676d634a; V001 and V002 pass); #355 closed.
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: S (methodology text)
 - Scope: factory.
 - Objective: TDD and review weigh each proposed test's value against its cost (#354).
