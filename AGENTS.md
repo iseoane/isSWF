@@ -29,7 +29,7 @@ See `docs/en/architecture.md` for tool ownership. Consult the glossary before in
 
 ## Common commands
 
-Run checks from the repository root with Node.js 24+, npm and Git. Locally, run the focused tests for the changed behavior and the documentation check. Run the full check only when the change touches packaging, as `docs/en/development.md` under "Quality checks" lists, and say in the report when you skipped it. CI runs the full check on every pull request.
+Run checks from the repository root with Node.js 24+, npm and Git. Locally, run the focused tests for the changed behavior and the documentation check. Run the full check locally once per initiative, at its closing head, or earlier only when the change touches packaging, as `docs/en/development.md` under "Quality checks" lists; say in the report when you skipped it. CI runs the full check on every pull request. Record the wall-clock time of each local check run in the attempt or close report (for example `check-docs: 12 s`) so the tiered-verification trial in I0061 J005 can be measured.
 
 ```sh
 node tests/<name>.mjs .
