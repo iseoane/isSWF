@@ -1,5 +1,7 @@
 # Retrospective
 
+Stored as `<selected-state>/retrospectives/<name>.md`.
+
 ## Review identity
 
 - Trigger: completed feature, completed bug, or explicit work-session close

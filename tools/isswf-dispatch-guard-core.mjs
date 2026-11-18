@@ -8,10 +8,13 @@ import { joiner } from './isswf-snapshot-core.mjs';
 const MAX_CHARS = 1024 * 1024;
 const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
 const REVIEWER_AGENT = /^(?:isswf:)?isswf-reviewer$/u;
+// Read-only roles that may analyse a committed retrospective record instead of a job (#355).
+const READ_ONLY_AGENT = /^(?:isswf:)?isswf-(?:researcher|planner)$/u;
 const STATE_DIRECTORIES = ['.isswf', '.factory'];
 // Pi has no thinking field: the level is a suffix of the model, and a model id may contain ':' itself.
 const PI_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
 const PATH_CHAR = /[\w.:\\/-]/u;
+const RETROSPECTIVE_PATH = /(?<![\w.-])retrospectives[\\/]([A-Za-z0-9_][\w.-]{0,127})\.md(?![\w-])/u;
 const BRIEF_PATH = /initiatives[\\/](I\d+)[\\/]jobs[\\/]([A-Z][A-Z0-9-]{0,63})[\\/]brief-r([1-9]\d*)\.md(?![\w-])/u;
 // The first hex token on the same line after the word that names it; only a full 40-hex token counts, so a short SHA is not
 // rescued by a full one that follows it.
@@ -112,6 +115,20 @@ export function checkReferences(prompt) {
   return { initiative: brief[1], job: brief[2], revision: brief[3], path: body.slice(start, brief.index + brief[0].length), checkpoint: shas.checkpoint, base: shas.base };
 }
 
+/**
+ * A read-only role's prompt that names no job brief but a retrospective record and a full checkpoint SHA, or undefined
+ * when it names a job brief or no record; condition 3 then decides as for any other role.
+ */
+function retrospectiveOf(prompt) {
+  const body = typeof prompt === 'string' ? prompt : '';
+  if (BRIEF_PATH.test(body)) return undefined;
+  const record = RETROSPECTIVE_PATH.exec(body);
+  if (!record) return undefined;
+  const checkpoint = fullShaAfter(body, 'checkpoint');
+  if (!checkpoint) refuse(3, 'the prompt does not give the full 40-hex document-input checkpoint SHA after the word "checkpoint"');
+  return { name: record[1], checkpoint };
+}
+
 async function checkPlan(planPath, job, io) {
   let markdown;
   try {
@@ -133,14 +150,14 @@ async function checkPlan(planPath, job, io) {
 }
 
 // Git answers by exit code; a runtime that cannot run it makes the check fail, not pass.
-async function checkBrief(project, relative, checkpoint, join, io) {
+async function checkBrief(project, relative, checkpoint, join, io, label = 'brief') {
   let info;
   try {
     info = await io.stat(join(project, ...relative.split('/')));
   } catch {
     info = undefined;
   }
-  if (info?.kind !== 'file') refuse(5, `the brief ${relative} does not exist as a file`);
+  if (info?.kind !== 'file') refuse(5, `the ${label} ${relative} does not exist as a file`);
   let tracked, ignored, committed;
   try {
     tracked = await io.git(['ls-files', '--error-unmatch', '--', relative], project);
@@ -149,12 +166,12 @@ async function checkBrief(project, relative, checkpoint, join, io) {
     // `./` makes Git resolve the path from the project directory, as the checks above do, not from the repository root.
     committed = await io.git(['cat-file', '-e', `${checkpoint}:./${relative}`], project);
   } catch (error) {
-    refuse(5, `Git could not check the brief: ${error?.message ?? error}`);
+    refuse(5, `Git could not check the ${label}: ${error?.message ?? error}`);
   }
-  if (tracked !== 0) refuse(5, `the brief ${relative} is not tracked by Git (untracked or never committed)`);
-  if (ignored === 0) refuse(5, `the brief ${relative} is ignored by Git`);
+  if (tracked !== 0) refuse(5, `the ${label} ${relative} is not tracked by Git (untracked or never committed)`);
+  if (ignored === 0) refuse(5, `the ${label} ${relative} is ignored by Git`);
   if (ignored !== 1) refuse(5, `git check-ignore could not decide for the brief ${relative}`);
-  if (committed !== 0) refuse(5, `the brief ${relative} is not committed at the checkpoint ${checkpoint}`);
+  if (committed !== 0) refuse(5, `the ${label} ${relative} is not committed at the checkpoint ${checkpoint}`);
 }
 
 async function checkCall(host, call, io) {
@@ -162,6 +179,11 @@ async function checkCall(host, call, io) {
   const join = joiner(project);
   const state = await stateDirectory(project, io);
   await checkSelection(host, call, state, join(project, state, 'dispatch-selection.json'), io);
+  const retrospective = READ_ONLY_AGENT.test(call.agent) ? retrospectiveOf(call.prompt) : undefined;
+  if (retrospective) {
+    await checkBrief(project, `${state}/retrospectives/${retrospective.name}.md`, retrospective.checkpoint, join, io, 'retrospective record');
+    return;
+  }
   const references = checkReferences(call.prompt);
   const { initiative, job, revision, checkpoint } = references;
   await checkPlan(join(project, state, 'initiatives', initiative, 'plan.md'), job, io);
