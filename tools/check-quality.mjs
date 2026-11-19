@@ -72,7 +72,7 @@ const recordNewResult = run(process.execPath, [join(source, 'tests/isswf-record-
 const recordGuardResult = run(process.execPath, [join(source, 'tests/isswf-record-guard.mjs'), source]);
 const dispatchGuardResult = run(process.execPath, [join(source, 'tests/isswf-dispatch-guard.mjs'), source]);
 const handoffResult = run(process.execPath, [join(source, 'tests/isswf-handoff.mjs'), source]);
-// Every commit after a job's last reviewed candidate must be covered by a review; CI fetches the full history this reads.
+// Fails when a commit after a job's last reviewed candidate is not covered by a review; CI fetches the full history this reads.
 const coverageResult = run(process.execPath, [join(source, 'tools/isswf-handoff.mjs'), 'coverage', '--project', source]);
 const commandGuardResult = run(process.execPath, [join(source, 'tests/isswf-command-guard.mjs'), source]);
 const branchGuardResult = run(process.execPath, [join(source, 'tests/isswf-branch-guard.mjs'), source]);

@@ -26,7 +26,7 @@ async function planPath(project, initiative) {
   if (!isAbsolute(project)) throw fail('invalid-project');
   if (!isIdentifier(initiative)) throw fail('invalid-initiative');
   const root = resolve(project), state = stateDirectory(root);
-  // A mistyped project or an uninitialised one must not grow a new tree, so the state directory has to exist already.
+  // A mistyped or uninitialised project fails with `state-not-found` instead of growing a new tree.
   if (!(await lstat(join(root, state)).catch(() => undefined))?.isDirectory()) throw fail('state-not-found');
   return join(root, state, 'initiatives', initiative, 'plan.md');
 }

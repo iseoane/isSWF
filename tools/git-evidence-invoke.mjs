@@ -72,8 +72,8 @@ function chunkBoundaries(patch, size) {
 
 const decodeUtf8 = bytes => { try { return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes); } catch { return null; } };
 
-// A successful result must carry the bound provenance and the operation's own fields; a refusal may omit fields
-// (the CLI bounds its error output) but must not report any that contradict the binding.
+// Throws unless a successful result carries the bound provenance and the operation's own fields; a refusal may omit fields
+// (the CLI bounds its error output), but any field it reports that contradicts the binding also throws.
 function checkProvenance(operation, evidence, binding, { slot, path, offset, length }) {
   const expected = { repository: binding.repository, baseSha: binding.baseSha, candidateSha: binding.candidateSha, bindingSha256: createHash('sha256').update(JSON.stringify(binding)).digest('hex') };
   if (operation === 'identity') expected.gitExecutable = binding.gitExecutable;
