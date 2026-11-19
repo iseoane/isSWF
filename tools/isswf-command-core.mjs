@@ -273,7 +273,7 @@ function sleepSeconds({ command, args }) {
 }
 
 const SHARED_NOTE = 'This is a process rule, not a retry signal: do not rephrase the command to get past it. Use the alternative, or report the blocker.';
-const CI_REASON = `Continuous CI waiting is refused. Use a native completion event, one bounded deferred check (one sleep of at most ${MAX_SLEEP_SECONDS} seconds, then one \`gh pr checks\`), or report CI as pending; see .agents/roles/references/feature-delivery.md. ${SHARED_NOTE}`;
+const CI_REASON = `Continuous CI waiting is refused. Use a native completion event (\`gh pr checks --watch\` or \`gh run watch\`, in the background where the host supports it), one bounded deferred check (one sleep of at most ${MAX_SLEEP_SECONDS} seconds, then one \`gh pr checks\`), or report CI as pending; see .agents/roles/references/feature-delivery.md. ${SHARED_NOTE}`;
 const PACKAGE_REASON = `Package acquisition is refused. Use the installed local tools: \`node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs\` and \`node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress\` (docs/en/development.md, Quality checks). The only installs allowed are \`npm ci --prefix tooling/quality --ignore-scripts\` and \`npm ci --prefix tooling/host-tests --ignore-scripts\`, with no package arguments. ${SHARED_NOTE}`;
 
 function ciWaiting(segments) {
@@ -282,9 +282,9 @@ function ciWaiting(segments) {
   const sleepLoops = new Set();
   const ghLoops = new Set();
   for (const { command, args, loops } of segments) {
-    const text = ` ${args.join(' ').toLowerCase()} `;
     if (command === 'gh') {
-      if (/ run watch /u.test(text) || (/ pr checks /u.test(text) && / --watch(?:=\S+)? /u.test(text)) || slept > MAX_SLEEP_SECONDS) return refusal;
+      // `gh pr checks --watch` and `gh run watch` end when the checks finish, so they count as a native completion event.
+      if (slept > MAX_SLEEP_SECONDS) return refusal;
       for (const id of loops) ghLoops.add(id);
     }
     if (command === 'watch' && args.some(arg => basename(arg) === 'gh')) return refusal;
