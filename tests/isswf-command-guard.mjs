@@ -40,15 +40,7 @@ assert.deepEqual(tokenize('(npx a); echo $(npx b)').map(segment => [segment.comm
 
 // CI waiting.
 for (const command of [
-  'gh pr checks 1 --watch',
-  'gh pr checks --watch --repo a/b',
-  'gh run watch 123',
   'watch -n 30 gh pr checks',
-  'gh pr checks 1 --watch | cat',
-  'env GH_TOKEN=x gh pr checks --watch',
-  'sudo gh run watch',
-  '/usr/bin/gh.exe run watch 1',
-  'cd tmp && gh pr checks 1 --watch',
   'while true; do gh pr checks 1; sleep 30; done',
   'until gh pr checks 1; do sleep 10; done',
   'while ! gh pr checks 1 | grep -q pass; do sleep 10; done',
@@ -67,10 +59,6 @@ for (const command of [
   'Start-Sleep -Seconds 901; gh pr checks',
   'Start-Sleep -Milliseconds 901000; gh pr checks',
   'timeout /t 901 /nobreak; gh pr checks',
-  'timeout 600 gh pr checks 1 --watch',
-  'timeout -k 5 600 gh run watch 1',
-  'nohup gh run watch 1',
-  'xargs -n 1 gh run watch',
   'while (( i < 3 )); do sleep 1; gh pr checks; done',
   'while ($true)\n{ gh pr checks; Start-Sleep 5 }',
   'Get-Process | ForEach-Object Name; foreach ($i in 1..3) { Start-Sleep 60; gh pr checks 1 }',
@@ -107,13 +95,25 @@ for (const command of [
   'Get-Process | ForEach-Object Name; Start-Sleep 60; gh pr checks 1',
   'for i in 1 2; do echo $i; done; sleep 60; gh pr checks 1',
   'timeout 30 make test',
+  'gh pr checks 1 --watch',
+  'gh pr checks --watch --repo a/b',
+  'gh run watch 123',
+  'gh pr checks 1 --watch | cat',
+  'env GH_TOKEN=x gh pr checks --watch',
+  'sudo gh run watch',
+  '/usr/bin/gh.exe run watch 1',
+  'cd tmp && gh pr checks 1 --watch',
+  'timeout 600 gh pr checks 1 --watch',
+  'timeout -k 5 600 gh run watch 1',
+  'nohup gh run watch 1',
+  'xargs -n 1 gh run watch',
 ]) allowed(command);
 
 // The refusal names the rule, the documented alternatives and that it is not a retry signal.
 {
-  const verdict = guardCommand('gh pr checks 1 --watch');
+  const verdict = guardCommand('watch -n 30 gh pr checks');
   assert.equal(typeof verdict.deny, 'string');
-  for (const part of ['ci-waiting', 'native completion event', 'one bounded deferred check', 'pending', 'feature-delivery.md', 'not a retry signal']) assert.ok(verdict.deny.includes(part), part);
+  for (const part of ['ci-waiting', 'native completion event', 'gh run watch', 'one bounded deferred check', 'pending', 'feature-delivery.md', 'not a retry signal']) assert.ok(verdict.deny.includes(part), part);
   assert.deepEqual(guardCommand('gh pr checks 1'), {});
 }
 
@@ -269,9 +269,9 @@ for (const command of [
   const handler = handlers.find(([name]) => name === 'tool_call')[1];
   const call = (toolName, command) => handler({ toolName, input: { command } }, { cwd: '/work' });
   for (const toolName of ['bash', 'powershell']) {
-    const blocked = await call(toolName, 'gh pr checks 1 --watch');
+    const blocked = await call(toolName, 'watch -n 30 gh pr checks');
     assert.equal(blocked.block, true, toolName);
-    assert.equal(blocked.reason, guardCommand('gh pr checks 1 --watch').deny, toolName);
+    assert.equal(blocked.reason, guardCommand('watch -n 30 gh pr checks').deny, toolName);
     assert.match((await call(toolName, 'npx --version')).reason, /package-acquisition/u, toolName);
     assert.equal(await call(toolName, 'node --version'), undefined, toolName);
     assert.equal(await call(toolName, 'sleep 900 && gh pr checks 1'), undefined, toolName);
