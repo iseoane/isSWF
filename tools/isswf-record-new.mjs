@@ -35,7 +35,7 @@ export async function jobTarget({ project, initiative, job }) {
   if (!/^I\d+$/u.test(initiative ?? '')) throw recordError('invalid-initiative');
   if (!isIdentifier(job ?? '')) throw recordError('invalid-job');
   const root = resolve(project), state = stateDirectory(root);
-  // A mistyped project must not be mistaken for a project whose job has no records yet.
+  // A mistyped project fails with `state-not-found` instead of passing for a project whose job has no records yet.
   if (!(await lstat(join(root, state)).catch(() => undefined))?.isDirectory()) throw recordError('state-not-found');
   return { root, state, relative: `${state}/initiatives/${initiative}/jobs/${job}` };
 }

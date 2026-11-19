@@ -32,7 +32,7 @@ function single(values) {
 /**
  * The handoff path, its SHA-256 and the candidate a reviewer prompt names, each on its own line as `handoff: <absolute path>`,
  * `handoff-sha256: <64 hex>` and `candidate <40 hex>` (a colon after the label is optional), or `{ error }` naming what is missing or ambiguous.
- * A label given on several lines must have the same value each time.
+ * A label given on several lines with different values returns an error.
  */
 export function handoffReferences(prompt) {
   const body = typeof prompt === 'string' ? prompt : '';
