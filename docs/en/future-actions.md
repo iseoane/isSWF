@@ -17,3 +17,7 @@ Pilot formal verification for one high-risk invariant, after the empirical revie
 Let a target project declare numeric quality gates for changed code in its `REVIEW.md` or setup record: a complexity score such as CRAP, duplication, and differential mutation testing. The worker would run them before hand-off and the reviewer would check the results. Costs: new locked development dependencies, slow mutation runs with noise from equivalent mutants, and thresholds that can be gamed. Pilot on `tools/` first. Source: [unclebob/ub-mode](https://github.com/unclebob/ub-mode) (3da62bf3) and [unclebob/swarm-forge](https://github.com/unclebob/swarm-forge) (f4f5fbca).
 
 Offer an optional refactor assignment after the tests pass, selected by the coordinator for larger features, with behavior pinned by the existing tests. Costs: an extra model call and code churn. It would never be a mandatory stage. Source: the same repositories.
+
+## Records-only pushes
+
+Check plan records before a records-only commit goes to `main` without a pull request. A guard would parse each changed `plan.md` with `parsePlan` and each changed record with the record check, and refuse the push when one fails. Today these commits skip review, so a malformed record reaches `main` and breaks CI for every open pull request, as `None.` in an I0061 dependency field did on 2026-11-18.
