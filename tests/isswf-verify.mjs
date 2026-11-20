@@ -125,6 +125,27 @@ try {
   write(fresh.repo, 'tools/a.txt', 'one');
   write(fresh.repo, 'tools/b.txt', 'one');
   assert.deepEqual([verify(fresh.repo, '--base', fresh.head, '--stale').status, verify(fresh.repo, '--base', fresh.head, '--stale').out.ok], [0, true]);
+  // A manifest change whose refreshed file is committed is fresh: derivedFrom comes from the candidate, the checks from the base.
+  write(fresh.repo, 'tools/a.txt', 'two');
+  write(fresh.repo, '.factory/verification.json', file([check('other', node('-e', 'process.exit(7)'))], [{ path: 'tools/a.txt', sha256: sha256('two') }, recorded('tools/b.txt')]));
+  git(fresh.repo, 'add', '-A');
+  git(fresh.repo, 'commit', '-qm', 'manifest changed and file refreshed');
+  const refreshed = verify(fresh.repo, '--base', fresh.head, '--stale');
+  assert.deepEqual([refreshed.status, refreshed.out.ok, refreshed.out.stale], [0, true, []]);
+  assert.deepEqual(statusOf(verify(fresh.repo, '--base', fresh.head, '--tier', 'job').out), { ok: 'passed' }, 'the checks still come from the base');
+  write(fresh.repo, 'tools/a.txt', 'three');
+  assert.equal(verify(fresh.repo, '--base', fresh.head, '--stale').out.stale[0].path, 'tools/a.txt');
+  write(fresh.repo, 'tools/a.txt', 'two');
+  // A nested path with two-character segments is valid; the unreadable and non-canonical spellings are refused.
+  const nested = makeRepo('nested', [check('ok', node('-e', ''))], [recorded('docs/en/x.md')], { 'docs/en/x.md': 'one' });
+  assert.deepEqual([verify(nested.repo, '--base', nested.head, '--stale').status, verify(nested.repo, '--base', nested.head, '--stale').out.ok], [0, true]);
+  const unreadable = makeRepo('unreadable', [check('ok', node('-e', ''))], [recorded('a\0b')]);
+  assert.equal(verify(unreadable.repo, '--base', unreadable.head, '--stale').out.code, 'derivedfrom-unreadable');
+  for (const path of ['..\\x', 'docs\\..\\..\\x', './tools/a.txt', 'tools\\a.txt']) {
+    const odd = makeRepo('odd', [check('ok', node('-e', ''))], [recorded(path)]);
+    assert.equal(verify(odd.repo, '--base', odd.head, '--stale').out.code, 'verification-invalid', path);
+    rmSync(odd.repo, { recursive: true, force: true });
+  }
   // A derivedFrom path must stay inside the project.
   for (const path of ['../outside.txt', '/etc/passwd', 'C:/Windows/win.ini']) {
     const escaping = makeRepo('escape', [check('ok', node('-e', ''))], [recorded(path)]);
