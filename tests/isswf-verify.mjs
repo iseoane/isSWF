@@ -197,7 +197,7 @@ try {
   const printed = spawnSync(process.execPath, [runner, '--project', table.repo, '--base', table.head, '--table'], { encoding: 'utf8', timeout: 60000 });
   assert.equal(printed.status, 0, printed.stdout);
   const rows = Object.fromEntries(printed.stdout.split('\n').filter(line => line.startsWith('| ') && !line.startsWith('| Path class') && !line.startsWith('| ---')).map(line => {
-    const [pathClass, , checks] = line.split('|').slice(1).map(cell => cell.trim());
+    const [pathClass, checks] = line.split('|').slice(1).map(cell => cell.trim());
     return [pathClass, checks];
   }));
   assert.equal(rows.code, 'unit (job)');
