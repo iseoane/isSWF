@@ -63,6 +63,9 @@ try {
   assert.match(mixed.deny, /pull request/u);
   assert.ok((await check('git push')).deny, 'a bare push from main is a push to main');
   assert.ok((await check('git push origin HEAD:refs/heads/main')).deny);
+  assert.ok((await check('git push origin HEAD')).deny, 'a colon-less HEAD pushes the current branch');
+  assert.ok((await check('git push -u origin HEAD')).deny);
+  assert.ok((await check('git push origin @')).deny);
   assert.ok((await check('git status && git push origin main')).deny, 'a chained push is checked');
   // The setup record itself is not a work record, so changing it keeps the PR path.
   run(granted, 'reset', '-q', '--hard', 'origin/main');
@@ -100,6 +103,10 @@ try {
   write(noSetup, record, 'b\n');
   commit(noSetup, 'records');
   assert.ok((await checker(noSetup)('git push origin main')).deny, 'a missing setup record is no grant');
+  // The grant is read from the base branch on the remote, so a grant only in the working tree is none.
+  write(ungranted, '.factory/project-setup.md', `# Setup\n\n${GRANT}`);
+  assert.match((await checker(ungranted)('git push origin main')).deny ?? '', /Records-only direct push: granted/u, 'a working-tree grant is no grant');
+  run(ungranted, 'checkout', '--', '.factory/project-setup.md');
 
   // isswf.baseBranch names the base branch.
   const based = makeRepo('based', GRANT);
@@ -121,6 +128,14 @@ try {
   commit(modern, 'records');
   assert.match((await checker(modern)('git push origin main')).deny ?? '', /Records-only direct push: granted/u, 'the legacy setup record is ignored once .isswf/ exists');
   write(modern, '.isswf/project-setup.md', `# Setup\n\n${GRANT}`);
+  assert.ok((await checker(modern)('git push origin main')).deny, 'a grant that is not on the remote yet is none');
+  run(modern, 'checkout', '--', '.isswf/project-setup.md');
+  run(modern, 'reset', '-q', '--hard', 'origin/main');
+  write(modern, '.isswf/project-setup.md', `# Setup\n\n${GRANT}`);
+  commit(modern, 'grant');
+  run(modern, 'push', '-q', 'origin', 'main');
+  write(modern, '.isswf/initiatives/I0001/plan.md', 'zzz\n');
+  commit(modern, 'records after the grant');
   assert.equal((await checker(modern)('git push origin main')).deny, undefined);
 
   // A git fault allows the command.
