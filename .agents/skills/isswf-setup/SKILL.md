@@ -102,6 +102,8 @@ Check whether the selected state directory, or any part of it beyond its `local/
 
 Inspect available project checks for lint, tests, build, dead code and duplicated logic without running untrusted scripts. Record evidence and a recommendation for missing checks. Configuration is not a passing execution result. A build may be explicitly not applicable with a reason; missing detection alone does not establish that. Propose dependencies only when useful and install only under a separate covered grant. The optional native `tools/project-quality.mjs` discovery helper ships with the source checkout and the Claude Code plugin or Pi resource package; run it from the trusted factory root.
 
+From that inventory, propose `<selected-state>/verification.json` (`schemaVersion: 1`, `derivedFrom`, and per check `id`, `argv`, `platforms`, `cost`, `covers`, `timeoutSeconds`; `docs/en/operations.md` under "Verification runner" defines each field) with `argv` arrays and `node <cli.js>` instead of `npm` or `npx`, and platforms only where the project actually runs the check. Show the proposal and write the file only on the operator's approval; never write it from detection alone. Record the file's SHA-256 as the approved digest in `project-setup.md`. `tools/isswf-verify.mjs` runs it from the base ref, never from the candidate.
+
 ### Establish readiness for normal feature delivery
 
 Resolve the stable prerequisites once during setup, using [the feature-to-PR contract](../../roles/references/feature-delivery.md#start-from-a-prepared-setup):

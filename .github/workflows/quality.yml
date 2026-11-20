@@ -73,6 +73,8 @@ jobs:
         run: node tests/state-interruption.mjs .
       - name: Verify factory tool installation
         run: node tests/factory-tools-install.mjs .
+      - name: Verify the verification runner reads the base file and reports each check
+        run: node tests/isswf-verify.mjs .
       - name: Verify initiative plan boundaries
         run: node tests/initiative-plan.mjs .
       - name: Verify canonical plan parser invariants

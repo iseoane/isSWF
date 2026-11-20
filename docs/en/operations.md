@@ -195,6 +195,24 @@ node tools/isswf-handoff.mjs coverage --project /absolute/project
 
 `tools/check-quality.mjs` runs `tests/isswf-handoff.mjs` and `coverage`, so CI, which fetches the full history, fails a pull request with an unreviewed commit. The coordinator skill runs `coverage` before `gh pr create` and before a merge. A passing check shows that recorded reviews cover the commits; it is not a review verdict.
 
+## Verification runner
+
+```bash
+node tools/isswf-verify.mjs --project /absolute/project --tier job
+node tools/isswf-verify.mjs --project /absolute/project --tier initiative --base <ref>
+node tools/isswf-verify.mjs --project /absolute/project --only <check-id>
+```
+
+`tools/isswf-verify.mjs` runs the checks listed in `<state directory>/verification.json` and prints one JSON object with one result per check. It never starts a shell, writes nothing and grants nothing. The file is tracked in Git and is read at the base, `--base <ref>` or by default the merge base of `HEAD` and `origin/main`, never from the candidate, so a change cannot rewrite the checks that judge it. A refusal prints `{ ok: false, code, ... }` and exits 1: `verification-not-found`, `verification-invalid`, `base-not-found`, `check-not-found` or `tier-required` (pass `--tier` or `--only`).
+
+- The file has `schemaVersion: 1`, `derivedFrom` (`{ path, sha256 }` of the files the checks came from) and `checks`. Each check has `id` (lowercase, digits and hyphens), `argv` (a command and its arguments; `node` means the running Node.js), `platforms` (`process.platform` names), `cost` (`job`, `initiative` or `ci`), `covers` (paths the check protects) and `timeoutSeconds` (1 to 3600).
+- `--tier job` runs the `job` checks; `--tier initiative` runs `job` and `initiative` checks; `ci` checks are left to CI. `--only` runs one check whatever its cost. A check outside the tier, or not listed for the current platform, is `not run`, never `passed`.
+- Each result has `checkId`, `status` (`passed`, `failed`, `timeout`, `refused`, `unavailable` or `not run`), `exitCode`, `durationMs`, `platform`, `argvSha256`, `candidate` (the `HEAD` commit), `dirty` (uncommitted changes) and `verificationSha256` (the file at the base), plus the last 4096 bytes of `stdoutTail` and `stderrTail` for a check that ran and a `message` for a refused, unavailable or timed-out one. The exit code is 1 when any check ended `failed`, `timeout`, `refused` or `unavailable`.
+- `npm`, `npx` and `.cmd` or `.bat` launchers are `refused` on every platform, because Windows starts them only through a shell: write `node <cli.js>` instead.
+- Limits: a timeout stops the started process, and a descendant it started on Windows can outlive it. The runner executes the base-approved argv against the working tree, so it shows what passed for that `candidate` and `dirty` state, not that the argv is safe.
+
+The skill `isswf-setup` proposes the file from the project's quality inventory and writes it only when the operator approves it; the approved digest goes in `project-setup.md`. `tools/check-quality.mjs` and the platform CI job run `tests/isswf-verify.mjs`.
+
 ## Initiative snapshot
 
 `tools/isswf-snapshot.mjs` reads every initiative under the active state directory (`.isswf` or `.factory`) and prints one JSON object with `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` and `skipped`. It is read-only and calls no model or network. It wraps `tools/isswf-snapshot-core.mjs`, which has no Node imports and does every read, including the state-directory choice, through an injected object with async `exists`, `list`, `stat` and `read`. Runtimes without Node built-ins import the core and call `readSnapshot(project, fs)` with their own `fs`. The Node wrapper's `readSnapshot(project, fs)` defaults `fs` to Node and also applies the regular-directory check from `tools/project-state.mjs`, which the core cannot do.

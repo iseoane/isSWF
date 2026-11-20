@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "derivedFrom": [
+    {
+      "path": "tools/check-quality.mjs",
+      "sha256": "90ccc00fbc6c8648a12b5ddb56801c12dfafe1fc52c834a39b9b64d02895d29a"
+    },
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "19f7cd5ac3b1ca36870a4624fa10f678a984109b94dcab070bd31a5132650620"
+    }
+  ],
+  "checks": [
+    {
+      "id": "check-docs",
+      "argv": [
+        "node",
+        "tooling/quality/check-docs.mjs"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "cost": "job",
+      "covers": [
+        "docs/",
+        "README.md",
+        "README.es.md",
+        "GLOSSARY.md",
+        "GLOSSARY.es.md"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "checkout-line-endings",
+      "argv": [
+        "node",
+        "tests/checkout-line-endings.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tests/",
+        "tools/"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "factory-tools-install",
+      "argv": [
+        "node",
+        "tests/factory-tools-install.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/factory-package.mjs",
+        "tools/"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "isswf-verify",
+      "argv": [
+        "node",
+        "tests/isswf-verify.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-verify.mjs"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "host-portability",
+      "argv": [
+        "node",
+        "tests/host-portability.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/",
+        "hooks/",
+        ".agents/hosts/"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "check-quality",
+      "argv": [
+        "node",
+        "tools/check-quality.mjs"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "cost": "initiative",
+      "covers": [
+        "tools/",
+        "tests/",
+        ".agents/",
+        "docs/"
+      ],
+      "timeoutSeconds": 900
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "node",
+        "tooling/quality/node_modules/eslint/bin/eslint.js",
+        "--config",
+        "tooling/quality/eslint.config.mjs",
+        "tools",
+        "tests"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "cost": "ci",
+      "covers": [
+        "tools/",
+        "tests/"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "dead-code",
+      "argv": [
+        "node",
+        "tooling/quality/node_modules/knip/bin/knip.js",
+        "--config",
+        "tooling/quality/knip.json",
+        "--no-progress"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "cost": "ci",
+      "covers": [
+        "tools/",
+        "tests/"
+      ],
+      "timeoutSeconds": 300
+    }
+  ]
+}

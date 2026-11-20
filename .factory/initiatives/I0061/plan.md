@@ -120,3 +120,24 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-18: operator, after a plan-only edit was sent through PR #360: "esto es una locura... pensaba que ya habíamos dicho que estas cosas iban directas a origin main"; asked that the factory apply the same in the projects it runs.
+
+## J007
+
+- Status: pending
+- Size: S (follow-ups)
+- Objective: The verification runner reports only what it observed and its docs match its output.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Implementation brief from J001 V001 S1-S4.
+
+### Acceptance
+
+- A failed or oversized `git status` yields `dirty: null` or a refusal, never `false` (V001 S1).
+- The npm/npx refusal tests the command basename on every platform (S2).
+- The seeded lint check covers `tooling/quality` like CI (S3).
+- Docs list every refusal code, state `durationMs` presence accurately, and the architecture ownership table names the runner in EN and ES (S4).
+
+### Evidence
+
+- 2026-11-20: J001 V001 suggestions, deferred to keep J001 within the session quota.
