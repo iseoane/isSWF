@@ -144,13 +144,13 @@ Type: enhancement
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Size: S (template and procedure)
 - Objective: Every observed miss is recorded with its attribution when it is found, and the retrospective collects them.
 - Depends on: J004
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1.
+- Next step: None. Merged through PR #366 (V001 pass, CI green); suggestions in J009.
 
 ### Acceptance
 
