@@ -16,17 +16,18 @@ const write = (repo, path, text) => {
   writeFileSync(join(repo, path), text);
 };
 const node = (...argv) => ['node', ...argv];
-const file = checks => `${JSON.stringify({ schemaVersion: 1, derivedFrom: [], checks }, null, 2)}\n`;
+const file = (checks, derivedFrom = []) => `${JSON.stringify({ schemaVersion: 1, derivedFrom, checks }, null, 2)}\n`;
 const check = (id, argv, extra = {}) => ({ id, argv, platforms: [process.platform], cost: 'job', covers: ['tools/'], timeoutSeconds: 20, ...extra });
 
 // A repository whose HEAD commit holds `.factory/verification.json` with `checks`.
-function makeRepo(name, checks) {
+function makeRepo(name, checks, derivedFrom = [], files = {}) {
   const repo = join(temp, name);
   mkdirSync(repo, { recursive: true });
   git(repo, 'init', '-q', '-b', 'main', '.');
   git(repo, 'config', 'user.email', 't@example.invalid');
   git(repo, 'config', 'user.name', 'T');
-  write(repo, '.factory/verification.json', file(checks));
+  for (const [path, text] of Object.entries(files)) write(repo, path, text);
+  write(repo, '.factory/verification.json', file(checks, derivedFrom));
   git(repo, 'add', '-A');
   git(repo, 'commit', '-qm', 'base');
   return { repo, head: git(repo, 'rev-parse', 'HEAD') };
@@ -101,6 +102,35 @@ try {
   // Without --base the base is the merge base with origin/main.
   git(approved.repo, 'update-ref', 'refs/remotes/origin/main', approved.head);
   assert.equal(verify(approved.repo, '--tier', 'job').out.base, approved.head);
+
+  // Staleness: a derivedFrom file whose working-tree hash differs from the recorded one, or is missing, is reported with both hashes.
+  const recorded = path => ({ path, sha256: sha256('one') });
+  const fresh = makeRepo('stale', [check('ok', node('-e', ''))], [recorded('tools/a.txt'), recorded('tools/b.txt')], { 'tools/a.txt': 'one', 'tools/b.txt': 'one' });
+  const current = verify(fresh.repo, '--base', fresh.head, '--tier', 'job');
+  assert.deepEqual([current.status, current.out.ok, current.out.stale], [0, true, []]);
+  write(fresh.repo, 'tools/a.txt', 'two');
+  rmSync(join(fresh.repo, 'tools/b.txt'));
+  const stale = verify(fresh.repo, '--base', fresh.head, '--tier', 'job');
+  assert.deepEqual(stale.out.stale, [
+    { path: 'tools/a.txt', recorded: sha256('one'), current: sha256('two') },
+    { path: 'tools/b.txt', recorded: sha256('one'), current: null },
+  ]);
+  assert.deepEqual([stale.status, stale.out.ok, stale.out.code], [2, false, 'stale']);
+  assert.equal(stale.out.results[0].status, 'passed', 'results still print when stale');
+  const allowed = verify(fresh.repo, '--base', fresh.head, '--tier', 'job', '--allow-stale');
+  assert.deepEqual([allowed.status, allowed.out.ok, allowed.out.stale.length], [0, true, 2]);
+  // --stale reports the verdict alone: no tier, no checks run.
+  const verdict = verify(fresh.repo, '--base', fresh.head, '--stale');
+  assert.deepEqual([verdict.status, verdict.out.code, verdict.out.stale.length, verdict.out.results], [2, 'stale', 2, []]);
+  write(fresh.repo, 'tools/a.txt', 'one');
+  write(fresh.repo, 'tools/b.txt', 'one');
+  assert.deepEqual([verify(fresh.repo, '--base', fresh.head, '--stale').status, verify(fresh.repo, '--base', fresh.head, '--stale').out.ok], [0, true]);
+  // A derivedFrom path must stay inside the project.
+  for (const path of ['../outside.txt', '/etc/passwd', 'C:/Windows/win.ini']) {
+    const escaping = makeRepo('escape', [check('ok', node('-e', ''))], [recorded(path)]);
+    assert.equal(verify(escaping.repo, '--base', escaping.head, '--stale').out.code, 'verification-invalid', path);
+    rmSync(escaping.repo, { recursive: true, force: true });
+  }
 
   // Output is bounded to tails.
   const noisy = makeRepo('noisy', [check('noisy', node('-e', 'process.stdout.write("a".repeat(500000) + "END")'))]);
