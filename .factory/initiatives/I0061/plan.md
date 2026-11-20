@@ -103,13 +103,13 @@ Type: enhancement
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Size: S (setup grant, path guard, delivery step)
 - Objective: Records-only commits (triage, plans, briefs, attempt and review records, job and initiative close) go directly to the base branch when the operator grants it, so record bookkeeping does not cost a PR and a CI run.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J006/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Worker implements brief r1 on feat/i0061-j006-records-push.
 
 ### Acceptance
 
