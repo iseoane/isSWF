@@ -390,6 +390,12 @@ for (const [mode, observe] of Object.entries(observers)) {
   label(await guarded(assignment, at('/p'), 'git switch feat/a && git commit -m x', '/p'), '/wt', '/p');
   assert.equal((await guarded(assignment, at('/wt', { branch: 'other' }), 'git switch feat/a && git commit -m x', '/wt')).deny, undefined, 'a switch in the same command re-selects the assigned branch');
   assert.equal((await guarded({ checkout: 'C:\\Work\\Wt\\', branch: 'feat/a' }, at('c:/work/wt'), 'git commit -m x', 'C:\\Work\\Wt')).deny, undefined, 'a Windows spelling of the assigned checkout is the same checkout');
+  // Git reports its own spelling of a Windows path, so the host answers that spelling while the assignment names the same checkout in another case.
+  const reported = { top: 'c:/Users/Me/Repo', state: { branch: 'feat/a' } };
+  const spelled = path => (path.startsWith('c:/') ? reported : undefined);
+  assert.equal((await guarded({ checkout: 'C:\\users\\me\\REPO', branch: 'feat/a' }, spelled, 'git commit -m x', 'c:/Users/Me/Repo')).deny, undefined, 'a drive path differing only in case is the same checkout');
+  label(await guarded({ checkout: 'C:\\Users\\Me\\Other', branch: 'feat/a' }, spelled, 'git commit -m x', 'c:/Users/Me/Repo'), 'c:/Users/Me/Other', 'c:/Users/Me/Repo');
+  label(await guarded({ checkout: '/Wt', branch: 'feat/a' }, at('/wt'), 'git commit -m x', '/wt'), '/Wt', '/wt');
   assert.equal((await guarded(assignment, async () => undefined, 'git commit -m x', '/p')).deny, undefined, 'an unreadable checkout fails open');
 }
 
