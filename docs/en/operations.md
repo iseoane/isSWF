@@ -112,6 +112,12 @@ Before a shell command runs, the host also checks each `git commit` that would r
 
 It runs right after the branch guard, in the same places. Claude Code runs `git` through the host. Pi runs `git` through `execFile` without a shell and reads the working tree with `node:fs`. The logic is in `tools/isswf-plan-commit-guard-core.mjs`. Like the branch guard it is a process rule, not an authority. It fails open: a missing `git` or a fault allows the commit, and CI's plan check still runs.
 
+## Records push guard
+
+Before a shell command runs, the host also checks each `git push` to the base branch (`main`, or the branch named by the `isswf.baseBranch` git config). It lists the paths of `<remote>/<base>..<source>`, where the source is the refspec's left side (or `HEAD` for a bare push while on the base branch), and allows the push only when every path is under the selected state's `initiatives/` directory (`.isswf/initiatives/`, or legacy `.factory/initiatives/` when `.isswf/project-setup.md` does not exist) and that state's `project-setup.md` has the line `- Records-only direct push: granted`. Otherwise it refuses and names the first offending path, or the missing grant, and points to the pull request path. Pushes to other branches, deletes, `--tags`, `--all` and `--mirror` are not checked.
+
+It runs after the plan commit guard, in the same places, with the same `git` and file access. The logic is in `tools/isswf-records-push-guard-core.mjs`. It is a process rule, not an authority, and it fails open: a missing `git`, a stale or missing remote-tracking ref or any other fault allows the push. It does not parse plans or records; that remains a proposal in `docs/en/future-actions.md`.
+
 The guard fails open: if it cannot read the branch, cannot read or write its state, or fails itself, it allows the command and leaves the expected branches as they were. A command whose directory it cannot read, such as one given by a variable, `~`, `-` or quoted text with spaces, or an MSYS-style path such as `/c/repo`, runs unchecked.
 
 Known limits:

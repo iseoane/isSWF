@@ -6,6 +6,7 @@ import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
 import { compactionInstructions, isCoordinatorSkill, noteFileName, NOTE_DIR, rememberDispatch, serializeNote } from '../tools/isswf-compaction-core.mjs'
 import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
 import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
+import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
@@ -548,6 +549,16 @@ export const register: Register = (on, options) => {
           read: (file: string) => $.fs.read(file),
         })
         if (plans.deny !== undefined) return { deny: plans.deny }
+        const pushes = await checkRecordsPush({
+          command,
+          cwd: await $.session.cwd(),
+          git: async (argv: string[], cwd: string) => {
+            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            return { exitCode, stdout }
+          },
+          read: (file: string) => $.fs.read(file),
+        })
+        if (pushes.deny !== undefined) return { deny: pushes.deny }
       } catch {}
     }
     // The guard refuses before the child starts, so it runs ahead of `next(e)`; `$.fs` and `$.process` are spelled out per call.
