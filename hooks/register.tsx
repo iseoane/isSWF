@@ -1,10 +1,10 @@
 import { update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
-import { checkBranch, observeBranch, refreshBranches } from '../tools/isswf-branch-guard-core.mjs'
+import { assignmentOf, checkBranch, observeBranch, refreshBranches } from '../tools/isswf-branch-guard-core.mjs'
 import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
 import { compactionInstructions, isCoordinatorSkill, noteFileName, NOTE_DIR, rememberDispatch, serializeNote } from '../tools/isswf-compaction-core.mjs'
-import { guardDispatch } from '../tools/isswf-dispatch-guard-core.mjs'
+import { callsOf, guardDispatch, isRoleAgent } from '../tools/isswf-dispatch-guard-core.mjs'
 import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
@@ -23,6 +23,7 @@ const TREE = { plugin: 'isswf', key: 'tree' } as const
 const BRANCHES = { plugin: 'isswf', key: 'branches' } as const
 // The last accepted dispatches of a session that activated the coordinator; the post-compaction reminder lists them.
 const ASSIGNMENTS = { plugin: 'isswf', key: 'assignments' } as const
+const ASSIGNED = { plugin: 'isswf', key: 'assigned' } as const
 // A file is shown up to this many characters; one drawing holds 100000 in all.
 const FILE_CHARS = 60_000
 const READ_LIMIT = 4 * 1024 * 1024
@@ -537,7 +538,8 @@ export const register: Register = (on, options) => {
       const verdict = guardCommand(command)
       if ('deny' in verdict) return { deny: verdict.deny }
       try {
-        const branch = await checkBranch({ command, cwd: await $.session.cwd(), ...branches })
+        const assignment = e.agentId === undefined ? undefined : (await $.state.get(ASSIGNED)).value?.[e.agentId]
+        const branch = await checkBranch({ command, cwd: await $.session.cwd(), assignment, ...branches })
         if (branch.deny !== undefined) return { deny: branch.deny }
         reobserve = branch.reobserve
         const plans = await checkPlanCommit({
@@ -595,6 +597,14 @@ export const register: Register = (on, options) => {
           await update($, ASSIGNMENTS, (list: unknown[] | undefined) => rememberDispatch(list, { host: 'claude', input: e, runId }))
           await writeNote($)
         }
+      } catch {}
+    }
+    // A role agent's checkout and branch are known under the run id the host gave, which a foreground call gives only once the child has finished.
+    if (e.tool === 'Agent' && ran.deny === undefined && !ran.isError) {
+      try {
+        const runId = (ran.result as { agentId?: unknown } | undefined)?.agentId
+        const assignment = callsOf('claude', e).filter(call => isRoleAgent(call.agent)).map(call => assignmentOf(call.prompt)).find(Boolean)
+        if (typeof runId === 'string' && assignment) await update($, ASSIGNED, (all: Record<string, unknown> | undefined) => ({ ...all, [runId]: assignment }))
       } catch {}
     }
     // A session's own `git switch` or `git checkout` selects the branch the checkout is on now, whatever the call's outcome.

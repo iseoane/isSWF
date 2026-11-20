@@ -319,7 +319,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     sh(repo, 'commit', '-q', '-m', 'first');
     const handlers = {};
     registerPi({ on: (name, handler) => { handlers[name] = handler; } });
-    assert.deepEqual(Object.keys(handlers).sort(), ['session_start', 'tool_call', 'tool_result']);
+    assert.deepEqual(Object.keys(handlers).sort(), ['input', 'session_start', 'tool_call', 'tool_result']);
     const ctx = { cwd: repo };
     const call = (toolName, id, command) => handlers.tool_call({ type: 'tool_call', toolName, toolCallId: id, input: { command } }, ctx);
     const result = (toolName, id, command, isError = false) => handlers.tool_result({ type: 'tool_result', toolName, toolCallId: id, input: { command }, isError, content: [] }, ctx);
@@ -365,6 +365,89 @@ for (const [mode, observe] of Object.entries(observers)) {
   }
 }
 
+// An assigned loop (a worker the coordinator bound to a checkout and branch) may commit only there, whatever branch the loop selected first.
+{
+  const repos = {
+    '/p': { top: '/p', state: { branch: 'feat/a' } },
+    '/wt': { top: '/wt', state: { branch: 'feat/a' } },
+    'c:/work/wt': { top: 'c:/work/wt', state: { branch: 'feat/a' } },
+  };
+  const at = (dir, state) => async path => (path === dir || path.startsWith(`${dir}/`) ? { ...repos[dir], state: state ?? repos[dir].state } : undefined);
+  const guarded = (assignment, observe, command, cwd) => checkBranch({ command, cwd, loop: 'agent-1', store: makeStore(), observe, assignment });
+  const assignment = { checkout: '/wt', branch: 'feat/a' };
+  const label = (verdict, ...parts) => {
+    assert.equal(typeof verdict.deny, 'string');
+    for (const part of parts) assert.ok(verdict.deny.includes(part), `${part} in ${verdict.deny}`);
+  };
+
+  assert.equal((await guarded(assignment, at('/wt'), 'git commit -m x', '/wt')).deny, undefined, 'a commit in the assigned checkout on the assigned branch runs');
+  label(await guarded(assignment, at('/p'), 'git commit -m x', '/p'), '/wt', '/p', 'feat/a', 'not a retry signal');
+  label(await guarded(assignment, observe => at('/p')(observe), 'git -C /p commit -m x', '/wt'), '/wt', '/p');
+  assert.equal((await guarded(assignment, at('/p'), 'git status', '/p')).deny, undefined, 'only a commit is refused');
+  assert.equal((await guarded(undefined, at('/p'), 'git commit -m x', '/p')).deny, undefined, 'a loop without an assignment is unchanged');
+  label(await guarded(assignment, at('/wt', { branch: 'other' }), 'git commit -m x', '/wt'), '"other"', '"feat/a"', '/wt');
+  label(await guarded(assignment, at('/wt', { detached: 'a'.repeat(40) }), 'git commit -m x', '/wt'), 'detached HEAD', '"feat/a"');
+  label(await guarded(assignment, at('/p'), 'git switch feat/a && git commit -m x', '/p'), '/wt', '/p');
+  assert.equal((await guarded(assignment, at('/wt', { branch: 'other' }), 'git switch feat/a && git commit -m x', '/wt')).deny, undefined, 'a switch in the same command re-selects the assigned branch');
+  assert.equal((await guarded({ checkout: 'C:\\Work\\Wt\\', branch: 'feat/a' }, at('c:/work/wt'), 'git commit -m x', 'C:\\Work\\Wt')).deny, undefined, 'a Windows spelling of the assigned checkout is the same checkout');
+  // Git reports its own spelling of a Windows path, so the host answers that spelling while the assignment names the same checkout in another case.
+  const reported = { top: 'c:/Users/Me/Repo', state: { branch: 'feat/a' } };
+  const spelled = path => (path.startsWith('c:/') ? reported : undefined);
+  assert.equal((await guarded({ checkout: 'C:\\users\\me\\REPO', branch: 'feat/a' }, spelled, 'git commit -m x', 'c:/Users/Me/Repo')).deny, undefined, 'a drive path differing only in case is the same checkout');
+  label(await guarded({ checkout: 'C:\\Users\\Me\\Other', branch: 'feat/a' }, spelled, 'git commit -m x', 'c:/Users/Me/Repo'), 'c:/Users/Me/Other', 'c:/Users/Me/Repo');
+  label(await guarded({ checkout: '/Wt', branch: 'feat/a' }, at('/wt'), 'git commit -m x', '/wt'), '/Wt', '/wt');
+  assert.equal((await guarded(assignment, async () => undefined, 'git commit -m x', '/p')).deny, undefined, 'an unreadable checkout fails open');
+}
+
+// The assignment is two lines of a dispatch prompt: an absolute checkout path and a branch name.
+{
+  const { assignmentOf } = await load('tools/isswf-branch-guard-core.mjs');
+  assert.deepEqual(assignmentOf('Work on J001.\ncheckout: /work/wt\nbranch: feat/a\nmore'), { checkout: '/work/wt', branch: 'feat/a' });
+  assert.deepEqual(assignmentOf('checkout: C:\\work\\wt \r\nbranch: feat/a\r\n'), { checkout: 'C:\\work\\wt', branch: 'feat/a' });
+  for (const text of ['branch: feat/a', 'checkout: /w', 'checkout: relative/wt\nbranch: feat/a', 'checkout: /w\nbranch: bad name', 'checkout: /w\nbranch: -x', 'see checkout: /w and branch: x', undefined, 42]) {
+    assert.equal(assignmentOf(text), undefined, String(text));
+  }
+}
+
+// Pi: a worker's extension binds the session to the checkout and branch its task names, on the first task that is an isSWF dispatch.
+{
+  const base = realpathSync.native(mkdtempSync(join(tmpdir(), 'isswf-assign-pi-')));
+  try {
+    const repo = join(base, 'repo');
+    const tree = join(base, 'wt');
+    mkdirSync(repo);
+    sh(repo, 'init', '-q');
+    writeFileSync(join(repo, 'a.txt'), 'a\n');
+    sh(repo, 'add', '.');
+    sh(repo, 'commit', '-q', '-m', 'first');
+    sh(repo, 'worktree', 'add', '-q', '-b', 'feat/a', tree);
+    const handlers = {};
+    registerPi({ on: (name, handler) => { handlers[name] = handler; } });
+    const task = (checkout, branch) => `Work on the brief .factory/initiatives/I0001/jobs/J001/brief-r1.md.\nInput checkpoint ${'a1'.repeat(20)}.\nTarget base: main ${'b2'.repeat(20)}.\ncheckout: ${checkout}\nbranch: ${branch}`;
+    const call = (cwd, command) => handlers.tool_call({ type: 'tool_call', toolName: 'bash', toolCallId: 'c', input: { command } }, { cwd });
+    const start = () => handlers.session_start({ type: 'session_start', reason: 'startup' }, { cwd: repo });
+
+    await start();
+    assert.equal(await call(repo, 'git commit --allow-empty -m x'), undefined, 'an unassigned session commits where it is');
+    await start();
+    await handlers.input({ type: 'input', text: 'checkout: ' + repo + '\nbranch: main', source: 'interactive' });
+    assert.equal(await call(tree, 'git commit --allow-empty -m x'), undefined, 'text that is not a dispatch assigns nothing');
+    await handlers.input({ type: 'input', text: task(tree, 'feat/a'), source: 'rpc' });
+    assert.equal(await call(tree, 'git commit --allow-empty -m x'), undefined, 'the assigned checkout and branch commit');
+    const blocked = await call(repo, 'git commit --allow-empty -m x');
+    assert.equal(blocked.block, true, 'another checkout is refused');
+    for (const part of [tree.replaceAll('\\', '/').toLowerCase(), 'feat/a']) assert.ok(blocked.reason.toLowerCase().includes(part), `${part} in ${blocked.reason}`);
+    assert.equal((await call(tree, `git -C ${repo.replaceAll('\\', '/')} commit --allow-empty -m x`)).block, true, 'a -C into another checkout is refused');
+    await handlers.input({ type: 'input', text: task(repo, 'main'), source: 'rpc' });
+    assert.equal((await call(repo, 'git commit --allow-empty -m x')).block, true, 'a later task does not rebind the session');
+    await start();
+    assert.equal(await call(repo, 'git commit --allow-empty -m x'), undefined, 'a new session starts unassigned');
+    assert.equal(await handlers.input(undefined), undefined);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+}
+
 // Claude: the one `tool.call` hook refuses `Bash` and `PowerShell` after the command guard and before `next(e)`, whatever the pane option
 // is, for the main loop (`main`) and for a child (`agentId`), and looks again after `next(e)` without touching its result.
 // register.tsx has no runner here, so the hook is a source check; the live check covers the host.
@@ -385,6 +468,12 @@ for (const [mode, observe] of Object.entries(observers)) {
   assert.ok(hooks.includes("loop: e.agentId ?? 'main'"), 'the main loop and each child have their own expected branches');
   assert.ok(/return \{ deny: branch\.deny \}/u.test(before), 'a refusal is a deny');
   assert.ok(/await \$\.process\.run\(\['git', \.\.\.argv\], \{ cwd \}\)/u.test(hook) && hook.includes('$.fs.read(file)'), 'Git runs through the host and the files are the fallback');
+  assert.ok(/assignmentOf/u.test(imported), 'the hook imports assignmentOf from the core');
+  assert.ok(/key: 'assigned'/u.test(hooks) && /assigned: IsswfAssigned/u.test(await readFile(join(source, 'types/index.d.ts'), 'utf8')), 'the assignments are one declared plugin state key');
+  const checked = before.slice(checkAt, before.indexOf('\n', checkAt));
+  assert.ok(checked.includes('assignment') && before.includes('(await $.state.get(ASSIGNED)).value?.[e.agentId]'), 'a child is checked against the assignment stored under its agent id');
+  const remembered = hook.slice(nextAt, refreshAt);
+  assert.ok(remembered.includes('ran.deny === undefined && !ran.isError') && remembered.includes('assignmentOf(') && remembered.includes('update($, ASSIGNED'), 'an accepted role dispatch stores its assignment under the run id the host returned');
   const afterNext = hook.slice(nextAt, refreshAt);
   assert.ok(!/return|ran\s*=/u.test(afterNext.replace('const ran = await next(e)', '')), 'looking again never changes or ends the call');
   assert.ok(/key: 'branches'/u.test(hooks), 'the expected branches are one plugin state key');

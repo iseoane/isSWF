@@ -97,14 +97,36 @@ function refusal(top, current, expected) {
   return `isSWF branch guard: git commit refused in ${top}. The checkout is on ${describe(current)}, but this session selected ${describe(expected)}; another actor may have switched the checkout. The guard switches, stashes or resets nothing. To commit on the selected branch, run your own \`${adoption(expected)}\` first; to continue on the current one on purpose, run \`${adoption(current)}\`, which adopts it. This is a process rule, not a retry signal: do not rephrase the command to get past it.`;
 }
 
+const CHECKOUT_LINE = /^checkout:[ \t]*(\S.*?)[ \t]*$/mu;
+const BRANCH_LINE = /^branch:[ \t]*([A-Za-z0-9._/][A-Za-z0-9._/-]*)[ \t]*$/mu;
+
+/** The checkout and branch a dispatch prompt assigns, from its `checkout: <absolute path>` and `branch: <name>` lines, or undefined when it has not both. */
+export function assignmentOf(text) {
+  if (typeof text !== 'string') return undefined;
+  const lines = text.replaceAll('\r', '');
+  const checkout = CHECKOUT_LINE.exec(lines)?.[1];
+  const branch = BRANCH_LINE.exec(lines)?.[1];
+  return checkout && ABSOLUTE.test(checkout.replaceAll('\\', '/')) && branch ? { checkout, branch } : undefined;
+}
+
+// Windows paths (a drive letter) are case-insensitive and git reports its own spelling; other paths compare exactly.
+const samePath = (a, b) => (/^[a-z]:/u.test(a) ? a.toLowerCase() === b.toLowerCase() : a === b);
+
+function assignmentRefusal(top, current, assigned) {
+  return `isSWF branch guard: git commit refused in ${top}. This session is assigned checkout ${assigned.top} on branch "${assigned.branch}", but the commit would land in ${top} on ${describe(current)}. The guard switches, stashes or resets nothing. Commit in the assigned checkout on the assigned branch, or ask the coordinator to change the assignment. This is a process rule, not a retry signal: do not rephrase the command to get past it.`;
+}
+
 /**
  * Decides, before a shell command runs, whether a `git commit` in it would land on a branch the session did not select.
  * Returns `{ deny, reobserve: [] }` with the refusal text, or `{ reobserve }` with the directories where the command contains a
  * `git switch` or `git checkout`, which `refreshBranches` looks at again after the call.
+ * A loop with an `assignment` (`{ checkout, branch }`, from `assignmentOf`) may commit only in that checkout, and there only on that branch
+ * unless the same command switches first; a loop without one is checked against the branch it selected.
  * It fails open: this guard enforces a process rule, not an authority, so a fault allows the command and updates nothing.
  */
-export async function checkBranch({ command, cwd, loop, store, observe }) {
+export async function checkBranch({ command, cwd, loop, store, observe, assignment }) {
   try {
+    const assigned = assignment && { top: resolveDir(assignment.checkout, '.'), branch: assignment.branch };
     const calls = tokenize(command)
       .filter(segment => segment.git && (segment.git.subcommand === 'commit' || SWITCHERS.has(segment.git.subcommand)))
       .map(segment => ({ commit: segment.git.subcommand === 'commit', dir: targetDir(cwd, segment) }))
@@ -135,6 +157,7 @@ export async function checkBranch({ command, cwd, loop, store, observe }) {
         continue;
       }
       const found = await look(dir);
+      if (found && assigned && (!samePath(found.top, assigned.top) || (!switched.has(found.top) && found.state.branch !== assigned.branch))) return { deny: assignmentRefusal(found.top, found.state, assigned), reobserve: [] };
       // A switch earlier in the same command re-selects the branch of that repository, so a commit after it is not checked.
       if (found && switched.has(found.top)) continue;
       if (found && !sameState(entries[keyOf(loop, found.top)], found.state)) return { deny: refusal(found.top, found.state, entries[keyOf(loop, found.top)]), reobserve: [] };
