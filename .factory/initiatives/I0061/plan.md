@@ -178,3 +178,4 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: J004 research; operator ok.
+- 2026-11-20: also fold J008 V001 S1 (name the review record location exactly) and S2 (retrospective may add a late-recorded miss) into .agents/roles/references/retrospective.md.
