@@ -109,6 +109,9 @@ export function assignmentOf(text) {
   return checkout && ABSOLUTE.test(checkout.replaceAll('\\', '/')) && branch ? { checkout, branch } : undefined;
 }
 
+// Windows paths (a drive letter) are case-insensitive and git reports its own spelling; other paths compare exactly.
+const samePath = (a, b) => (/^[a-z]:/u.test(a) ? a.toLowerCase() === b.toLowerCase() : a === b);
+
 function assignmentRefusal(top, current, assigned) {
   return `isSWF branch guard: git commit refused in ${top}. This session is assigned checkout ${assigned.top} on branch "${assigned.branch}", but the commit would land in ${top} on ${describe(current)}. The guard switches, stashes or resets nothing. Commit in the assigned checkout on the assigned branch, or ask the coordinator to change the assignment. This is a process rule, not a retry signal: do not rephrase the command to get past it.`;
 }
@@ -154,7 +157,7 @@ export async function checkBranch({ command, cwd, loop, store, observe, assignme
         continue;
       }
       const found = await look(dir);
-      if (found && assigned && (found.top !== assigned.top || (!switched.has(found.top) && found.state.branch !== assigned.branch))) return { deny: assignmentRefusal(found.top, found.state, assigned), reobserve: [] };
+      if (found && assigned && (!samePath(found.top, assigned.top) || (!switched.has(found.top) && found.state.branch !== assigned.branch))) return { deny: assignmentRefusal(found.top, found.state, assigned), reobserve: [] };
       // A switch earlier in the same command re-selects the branch of that repository, so a commit after it is not checked.
       if (found && switched.has(found.top)) continue;
       if (found && !sameState(entries[keyOf(loop, found.top)], found.state)) return { deny: refusal(found.top, found.state, entries[keyOf(loop, found.top)]), reobserve: [] };
