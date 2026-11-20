@@ -8,9 +8,9 @@ Type: enhancement
 - Size: M (skill and runner)
 - Objective: A skill decides which checks a target project needs and writes them to a project verification file that a factory runner executes deterministically.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Researcher answers brief r1; operator reviews the design before an implementation brief.
+- Next step: Worker implements brief r2 on feat/i0061-j001-verification after PR #364 merges.
 
 ### Acceptance
 
