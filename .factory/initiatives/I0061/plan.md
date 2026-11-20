@@ -202,6 +202,7 @@ Type: enhancement
 - 2026-11-20: J005 V001 S2: the --table initiative-close row omits ci-cost checks (E2E may be ci cost); revisit here.
 - 2026-11-20: J007 V001 F4: the tier-required message omits --stale.
 - 2026-11-20: J009 V002 N1 (assert the template resolution line exists in tests/isswf-record-check.mjs) and N2 (review.md record-check command lacks <factory-root>/).
+- 2026-11-20: J010 V002 known limits: the close gate in working-tree mode does not see an untracked file staged by a chained git add (N1); a filesystem read fault on the close record refuses instead of failing open (N2); a rebase or merge after the close commit is not re-checked.
 
 ## J011
 
