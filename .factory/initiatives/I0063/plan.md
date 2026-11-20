@@ -38,3 +38,21 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: moved from I0061 J011 (pinned worktree checks), operator decision.
+
+## J003
+
+- Status: in-progress
+- Size: S (close gate fix)
+- Objective: An initiative close is refused when any check in its close record did not run, so a platform-limited full suite cannot be skipped silently.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Worker implements brief r1 on feat/i0063-j003-close-not-run.
+
+### Acceptance
+
+- The plan commit guard refuses a close whose record has any check not passed, including `not run`; the refusal names those checks and points to a CI record or a platform that runs them; `isswf-verify --record` reports the same outcome; EN/ES docs match.
+
+### Evidence
+
+- 2026-11-20: I0061 close: a local --record on Windows passed 6 checks and left check-docs, check-quality, lint and dead-code not run (Linux-only); the gate accepted such a record by design (J010: at least one passed). Closed with a source ci record instead (Quality run 44796797130 at 66f83049). Operator asked to fix it first in I0063.
