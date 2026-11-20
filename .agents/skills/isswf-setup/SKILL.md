@@ -106,6 +106,8 @@ From that inventory, propose `<selected-state>/verification.json` (`schemaVersio
 
 Then propose a check rule for the target `AGENTS.md`: the table `node tools/isswf-verify.mjs --project <project> --base HEAD --table` prints from the approved file (run it after that file is committed), keyed by path class (code, tests, E2E harness, packaging or CI, docs or records only, initiative close) with the check ids and cost tier each requires. When `AGENTS.md` already has check rules, show them and the proposal side by side and let the operator choose the existing rules, the proposal, or a merge they edit. Write nothing to `AGENTS.md` before that choice; the chosen rule overrides the coordinator's default verification tiers.
 
+Offer, as an operator choice, how the initiative close suite (the full suite and E2E, which a close gate requires recorded at the closing head: `isswf-verify --tier initiative --record <initiative>`) runs: locally, or as a manually dispatched CI workflow (`workflow_dispatch`) whose passing run the coordinator records with `source: "ci"`. The per-PR fast tier stays automatic. Give the workflow shape from the "Tiered CI for private repositories" section of `docs/en/development.md`; write no workflow file and record the choice in `project-setup.md` only after the operator picks.
+
 ### Establish readiness for normal feature delivery
 
 Resolve the stable prerequisites once during setup, using [the feature-to-PR contract](../../roles/references/feature-delivery.md#start-from-a-prepared-setup):
