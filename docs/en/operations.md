@@ -36,6 +36,7 @@ node tools/isswf-record-check.mjs --project /absolute/project --file /absolute/p
 
 - `plan.md`: a plan the plan parser rejects reports the parser's code (for example `invalid-job`) with its job, field and line. A job reported `pending` or `blocked` whose directory holds an `A<nnn>.md` or `V<nnn>.md` record is `records-for-unstarted-job`; the CLI reads each job directory next to the plan for this.
 - `A<nnn>.md` and `V<nnn>.md`: a `- Run:` line the snapshot's parser would ignore is `run-line-unparsed`, and one with `unknown` as its ID is `run-id-unknown` (the template says to omit the line), and one that keeps the template's `<id>` is `run-id-unfilled`. A record without a template label is `missing-field` with the exact label: `Deviations from required procedure and consequence:` and `Process deviations observed:` in an attempt, and `Unreviewed areas and evidence limits:`, `Convergence advice:` and `Process deviations observed:` in a review.
+- A new review record (one absent at the commit named by `--base REV`; without `--base` none is new) is also held to the finding resolution vocabulary: each entry of its `Finding resolutions` line, or of the bullets nested under it, is `<ID> <fixed|wrong|known-limit|not-material|dismissed>: <reason>`, otherwise `finding-resolution-invalid`. An unfilled template line and `None.` pass. Records present at the base keep their wording, and the automatic check after a write does not apply this rule because it has no base.
 - Other files are not checked.
 
 ### Automatic check after a write

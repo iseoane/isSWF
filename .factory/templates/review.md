@@ -21,7 +21,7 @@
 
 - Verdict: pass, fail, or inconclusive:
 - Finding count by severity and origin (`introduced`, `pre-existing`, `unknown origin`):
-- Findings with ID, path, location, severity, origin, evidence and defect class instances:
+- Findings with ID, path, location, severity, origin, evidence and defect class instances, and the `rule:` or `check:` ID that produced the finding when one applies:
 - Earlier findings carried forward (ID and current state: resolved, open or changed):
 - Selected-method evidence assessment: `<under Standards, assess each selected method's required evidence and any disclosed deviation against the brief; missing required evidence with no declared deviation is a supported finding or inconclusive, never silent pass. Disclosure alone does not waive the accepted requirement. For selected TDD, verify each named test-only RED commit fails at the asserted behavioral result and its following GREEN commit passes; record exact command, assertion and provenance, or “not re-run” with the actual CI/coordinator evidence relied upon>`.
 - Retained substitute evidence assessment, when used for missing RED: `<verify the harness and run log are retained in committed tests/ evidence or ignored tooling/.local/<job>/; check both artifact paths in the attempt/review record, archived commit and an unmutated baseline run, injected change and result. Record personal verification or attribute supplied observations; missing retention is not satisfied by scratch-only evidence>`.
@@ -48,5 +48,5 @@
 - Required corrections or unresolved questions:
 - Return this artifact to the coordinator. Do not edit the candidate or disposition your own findings.
 - Coordinator override, recorded afterwards by the coordinator and never written into the verdicts above: `<decision, reason, evidence and authority, or None.>`
-- Finding resolutions, recorded afterwards by the coordinator: `<finding ID → fixed, wrong, intentional or not material, with the reason>`.
+- Finding resolutions, recorded afterwards by the coordinator: `<one entry per finding, as "<ID> <resolution>: <reason>", separated by "; " or as nested bullets; resolution is fixed, wrong, known-limit, not-material or dismissed; a deferral to a tracked job is known-limit naming the job>`.
 - A changed candidate requires a new review identifying its exact base and candidate.
