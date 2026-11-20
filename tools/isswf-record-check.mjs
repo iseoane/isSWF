@@ -16,11 +16,11 @@ async function jobFilesFor(planPath) {
   return jobFiles;
 }
 
-// A record is new when the base commit has no file at its project-relative path. A base that is not a commit refuses.
+// A record is new when the base commit has no file at its project-relative path (`./` resolves from the project, which may sit below the repository top level). A base that is not a commit refuses.
 function newAt(project, base) {
   const git = (...args) => spawnSync('git', ['-C', project, ...args], { encoding: 'utf8', timeout: 15000 });
   if (git('rev-parse', '--verify', '--quiet', `${base}^{commit}`).status !== 0) throw Error(`--base is not a commit: ${base}`);
-  return path => git('cat-file', '-e', `${base}:${relative(project, path).split(sep).join('/')}`).status !== 0;
+  return path => git('cat-file', '-e', `${base}:./${relative(project, path).split(sep).join('/')}`).status !== 0;
 }
 
 async function checkFile(project, file, isNew) {

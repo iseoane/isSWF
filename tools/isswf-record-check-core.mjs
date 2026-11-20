@@ -72,7 +72,7 @@ function resolutionViolations(text) {
   if (start < 0) return [];
   const entries = [];
   const add = (index, raw) => {
-    const value = raw.trim().replace(/^`([^`]*)`$/u, '$1');
+    const value = raw.trim().replace(/^`([^`]*)`\.?$/u, '$1');
     if (value === '' || value.startsWith('<') || value === 'None.') return;
     for (const entry of value.split(/;\s+(?=[A-Za-z]+\d+ )/u)) entries.push({ index, entry: entry.trim() });
   };
