@@ -15,7 +15,9 @@ const OUTPUT_LIMIT = 16 * 1024 * 1024;
 const ID = /^[a-z0-9][a-z0-9-]*$/u;
 const REF = /^[^-\s][^\s]*$/u;
 // Windows cannot start these without a shell, and a shell would make a check differ between platforms.
-const LAUNCHER = /^(?:npm|npx)$|\.(?:cmd|bat)$/iu;
+const LAUNCHER = /^(?:(?:npm|npx)(?:\.(?:cmd|bat|exe))?|.*\.(?:cmd|bat))$/iu;
+// The basename is taken with both separators so the same argv is judged alike on every platform.
+const isLauncher = command => LAUNCHER.test(command.split(/[\\/]/u).pop());
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = (code, message) => Object.assign(new Error(message ?? code), { code });
@@ -53,7 +55,7 @@ function parseVerification(bytes) {
   let file;
   try { file = JSON.parse(bytes.toString('utf8')); } catch { throw invalid('not JSON'); }
   if (file?.schemaVersion !== 1) throw invalid('schemaVersion must be 1');
-  if (!Array.isArray(file.derivedFrom) || !file.derivedFrom.every(entry => typeof entry?.path === 'string' && isCanonicalPath(entry.path) &&/^[0-9a-f]{64}$/u.test(entry.sha256))) throw invalid('derivedFrom needs {path, sha256} entries');
+  if (!Array.isArray(file.derivedFrom) || !file.derivedFrom.every(entry => typeof entry?.path === 'string' && isCanonicalPath(entry.path) && /^[0-9a-f]{64}$/u.test(entry.sha256))) throw invalid('derivedFrom needs {path, sha256} entries');
   if (!Array.isArray(file.checks)) throw invalid('checks must be an array');
   const seen = new Set();
   for (const entry of file.checks) {
@@ -84,7 +86,7 @@ const tail = bytes => (bytes ?? Buffer.alloc(0)).subarray(-TAIL_BYTES).toString(
 
 function execute(check, project) {
   const [command, ...args] = check.argv;
-  if (LAUNCHER.test(command)) return { status: 'refused', exitCode: null, message: `${command} needs a shell on Windows; call \`node <cli.js>\` instead` };
+  if (isLauncher(command)) return { status: 'refused', exitCode: null, message: `${command} needs a shell on Windows; call \`node <cli.js>\` instead` };
   const started = Date.now();
   const result = spawnSync(command === 'node' ? process.execPath : command, args, {
     cwd: project, shell: false, windowsHide: true, encoding: 'buffer', maxBuffer: OUTPUT_LIMIT, timeout: check.timeoutSeconds * 1000, stdio: ['ignore', 'pipe', 'pipe'],
@@ -143,7 +145,9 @@ function verify(options) {
   const stale = staleEntries(derivedFrom, project);
   if (options.stale) return { ok: stale.length === 0, ...(stale.length ? { code: 'stale' } : {}), base, stale, results: [] };
   if (options.only !== undefined && !checks.some(entry => entry.id === options.only)) throw fail('check-not-found', `no check ${options.only}`);
-  const dirty = (gitText(project, ['status', '--porcelain']) ?? '') !== '';
+  // A status that fails or overflows is unknown, so the stamp says `null` rather than claiming a clean tree.
+  const status = gitText(project, ['status', '--porcelain']);
+  const dirty = status === undefined ? null : status !== '';
   const verificationSha256 = sha256(blob.stdout);
   const selected = options.only === undefined ? checks : checks.filter(entry => entry.id === options.only);
   const results = selected.map(check => {
