@@ -23,13 +23,13 @@ Type: enhancement
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Objective: The verification file is refreshed by mechanical triggers, not by memory.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0061-j002-verification-stale.
+- Next step: None. Merged through PR #367 (V002 pass, CI green).
 
 ### Acceptance
 
@@ -38,7 +38,7 @@ Type: enhancement
 
 ### Evidence
 
-- None.
+- 2026-11-20: PR #367; V001 fail (base/working-tree staleness mismatch, path regex) fixed, V002 pass. Known limit: an uncommitted working-tree verification.json counts as refreshed.
 
 ## J003
 
