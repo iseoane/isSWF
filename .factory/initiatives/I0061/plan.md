@@ -183,13 +183,13 @@ Type: enhancement
 
 ## J010
 
-- Status: pending
+- Status: in-progress
 - Size: M (close gate and optional CI dispatch)
 - Objective: An initiative closes only after the full suite and E2E ran at its closing head.
 - Depends on: J005
-- Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief after J005.
+- Next step: Worker implements brief r1 on feat/i0061-j010-close-gate.
 
 ### Acceptance
 
