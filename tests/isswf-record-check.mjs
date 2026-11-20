@@ -126,7 +126,8 @@ const resolutionCodes = (resolutions, newRecord = true) => resolutionViolations(
 for (const resolution of ['fixed', 'wrong', 'known-limit', 'not-material', 'dismissed']) assert.deepEqual(resolutionCodes(`F1 ${resolution}: the reason`), [], resolution);
 assert.deepEqual(resolutionCodes('F1 fixed: reason one; S1 known-limit: tracked by J012; N2 dismissed: a reason, with a comma'), [], 'several entries on one line');
 assert.deepEqual(resolutionCodes('None.'), []);
-assert.deepEqual(resolutionCodes('`<finding ID, resolution and reason>`'), [], 'the unfilled template line');
+const templateLine = (await readFile(join(source, '.factory/templates/review.md'), 'utf8')).split('\n').find(line => line.includes(resolutionLabel));
+assert.deepEqual(resolutionViolations(`${attempt([], reviewFields).replace('# Attempt report', '# Review report')}${templateLine}\n`), [], 'the unfilled line of the real template');
 for (const bad of ['F1 intentional: reason', 'F1 fixed', 'F1 fixed:', 'F1 not material: reason', 'fixed: reason', 'F1 fixed: ok; S1 wrong']) assert.deepEqual(resolutionCodes(bad), ['finding-resolution-invalid'], bad);
 assert.deepEqual(resolutionCodes('F1 intentional: reason', false), [], 'a record that existed at the base keeps its wording');
 assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: reviewWith('F1 intentional: reason') }).violations, [], 'without a base nothing is new');
@@ -191,6 +192,19 @@ try {
   await writeFile(newReview, reviewWith('F1 fixed: kept'));
   assert.equal(checked(oldReview, newReview).status, 0);
   assert.equal(cli('--project', root, '--file', newReview).status, 0, 'without --base nothing is new');
+  // A project below the repository top level resolves its records from the project directory, not the top level.
+  const nested = join(root, 'sub');
+  const nestedState = join(nested, '.factory/initiatives/I0001/jobs/J001');
+  await mkdir(nestedState, { recursive: true });
+  const nestedOld = join(nestedState, 'V001.md');
+  const nestedNew = join(nestedState, 'V002.md');
+  await writeFile(nestedOld, reviewWith('F1 intentional: kept'));
+  assert.equal(git('add', '-A').status, 0);
+  assert.equal(git('commit', '-q', '-m', 'nested base').status, 0);
+  await writeFile(nestedNew, reviewWith('F1 intentional: kept'));
+  const nestedRun = cli('--project', nested, '--base', 'HEAD', '--file', nestedOld, '--file', nestedNew);
+  assert.equal(nestedRun.status, 1, nestedRun.stderr);
+  assert.deepEqual(JSON.parse(nestedRun.stdout).files.map(({ violations }) => violations.map(({ code }) => code)), [[], ['finding-resolution-invalid']]);
   for (const base of ['no-such-rev', '--file']) assert.equal(cli('--project', root, '--base', base, '--file', newReview).status, 1, `refuses base ${base}`);
 } finally { await rm(root, { recursive: true, force: true }); }
 
