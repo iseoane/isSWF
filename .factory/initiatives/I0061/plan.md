@@ -48,7 +48,7 @@ Type: enhancement
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Researcher answers brief r1; implementation brief follows.
+- Next step: Operator decides the proposed split (J003a one-shot expected output S, J003b service lifecycle M, J003c panel pilot and docs S).
 
 ### Acceptance
 
@@ -57,7 +57,7 @@ Type: enhancement
 
 ### Evidence
 
-- None.
+- 2026-11-20: research report (brief r1) delivered in conversation: CLI one-shot first (runner lacks only an expected-output assertion), HTTP service second (needs async lifecycle, readiness, GET-only smoke, tree stop, env allowlist, ${project} placeholder), dev-server web apps deferred (npm refused, Windows descendants, browser install grant), libraries need no recipe; this repository fits as a panel pilot. Windows tree stop unverified.
 
 ## J004
 
