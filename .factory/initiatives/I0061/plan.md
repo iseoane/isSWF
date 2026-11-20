@@ -195,6 +195,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: split from J005.
+- 2026-11-20: J005 V001 S2: the --table initiative-close row omits ci-cost checks (E2E may be ci cost); revisit here.
 
 ## J011
 
