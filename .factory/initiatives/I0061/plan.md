@@ -61,13 +61,13 @@ Type: enhancement
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Size: M (research)
 - Objective: Reviewer and check quality are measured against the defects that mattered.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Researcher answers brief r1; operator decides placement.
+- Next step: None. Operator accepted the recommendations on 2026-11-20: misses table in the retrospective now (J008), recorded when observed, closed resolution vocabulary as J009; derived tool, model evals and rule pruning deferred.
 
 ### Acceptance
 
@@ -141,3 +141,40 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: J001 V001 suggestions, deferred to keep J001 within the session quota.
+
+## J008
+
+- Status: in-progress
+- Size: S (template and procedure)
+- Objective: Every observed miss is recorded with its attribution when it is found, and the retrospective collects them.
+- Depends on: J004
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Blocker: None.
+- Next step: Worker implements brief r1.
+
+### Acceptance
+
+- The retrospective template has a Misses section with the J004 miss shape.
+- The coordinator procedure records a miss block when a CI-only failure or revert is observed, without editing reviewer verdicts.
+
+### Evidence
+
+- 2026-11-20: J004 research; operator ok.
+
+## J009
+
+- Status: pending
+- Size: S (template)
+- Objective: Review finding resolutions use a closed vocabulary with the rule or check that produced each finding, so dismissed findings and silent rules can be counted.
+- Depends on: J008
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Implementation brief.
+
+### Acceptance
+
+- The review template resolution line accepts only fixed, wrong, known-limit, not-material or dismissed, each with a reason, and findings carry a rule or check ID when one applies; the record check enforces the vocabulary on new records only.
+
+### Evidence
+
+- 2026-11-20: J004 research; operator ok.
