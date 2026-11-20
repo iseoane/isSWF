@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { checkBranch, observeFromFiles, refreshBranches } from './isswf-branch-guard-core.mjs';
 import { guardCommand } from './isswf-command-core.mjs';
 import { checkPlanCommit } from './isswf-plan-commit-guard-core.mjs';
+import { checkVerificationCommit } from './isswf-verification-guard-core.mjs';
 import { checkRecordsPush } from './isswf-records-push-guard-core.mjs';
 
 const SHELL_TOOLS = new Set(['bash', 'powershell']);
@@ -39,6 +40,8 @@ export default function (pi) {
     if (branch.deny !== undefined) return { block: true, reason: branch.deny };
     const plans = await checkPlanCommit({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
     if (plans.deny !== undefined) return { block: true, reason: plans.deny };
+    const verification = await checkVerificationCommit({ command, cwd: ctx.cwd, git });
+    if (verification.deny !== undefined) return { block: true, reason: verification.deny };
     const pushes = await checkRecordsPush({ command, cwd: ctx.cwd, git });
     if (pushes.deny !== undefined) return { block: true, reason: pushes.deny };
     if (branch.reobserve.length && event.toolCallId !== undefined) switching.set(event.toolCallId, branch.reobserve);

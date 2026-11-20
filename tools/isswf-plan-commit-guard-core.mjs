@@ -8,7 +8,7 @@ const ALL_FLAG = arg => arg === '--all' || /^-[a-zA-Z]*a[a-zA-Z]*$/u.test(arg);
 const VALUE_OPTIONS = new Set(['-m', '-F', '-C', '-c', '-t', '--message', '--file', '--author', '--date', '--template', '--reuse-message', '--reedit-message', '--fixup', '--squash', '--cleanup', '--trailer']);
 
 /** True when the commit records working-tree files: -a/--all, a pathspec, or --pathspec-from-file. */
-function readsWorkingTree(args) {
+export function readsWorkingTree(args) {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--') return index + 1 < args.length;
