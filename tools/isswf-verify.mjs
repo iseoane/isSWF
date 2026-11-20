@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
@@ -29,7 +29,7 @@ const gitText = (cwd, args) => {
 
 function parseArguments(argv) {
   const options = {};
-  const flags = new Set(['--project', '--base', '--tier', '--only']);
+  const flags = new Set(['--project', '--base', '--tier', '--only', '--record']);
   const switches = new Set(['--stale', '--allow-stale', '--table']);
   for (let index = 0; index < argv.length; index += 1) {
     if (switches.has(argv[index])) { options[argv[index].slice(2)] = true; continue; }
@@ -40,7 +40,11 @@ function parseArguments(argv) {
   if (typeof options.project !== 'string' || !isAbsolute(options.project)) throw fail('invalid-project', '--project needs an absolute path');
   if (options.tier !== undefined && !Object.hasOwn(TIER_COSTS, options.tier)) throw fail('invalid-tier', '--tier is job or initiative');
   if (options.base !== undefined && !REF.test(options.base)) throw fail('invalid-base');
-  if (options.tier === undefined && options.only === undefined && !options.stale && !options.table) throw fail('tier-required', 'pass --tier job|initiative, --only <id> or --table');
+  if (options.tier === undefined && options.only === undefined && !options.stale && !options.table) throw fail('tier-required', 'pass --tier job|initiative, --only <id>, --stale or --table');
+  if (options.record !== undefined) {
+    if (options.tier !== 'initiative' || options.only !== undefined || options.stale || options.table || options['allow-stale']) throw fail('record-needs-initiative-tier', '--record needs --tier initiative, without --only, --stale, --allow-stale or --table');
+    if (!/^I\d+$/u.test(options.record)) throw fail('invalid-initiative', '--record needs an initiative ID such as I0001');
+  }
   return options;
 }
 
@@ -113,7 +117,7 @@ function readApproved(options) {
   const path = `${state}/verification.json`;
   const blob = git(project, ['show', `${base}:${path}`]);
   if (blob.status !== 0) throw fail('verification-not-found', `${path} is not committed at the base`);
-  return { project, candidate, base, path, blob };
+  return { project, candidate, base, path, blob, state };
 }
 
 // First matching class wins, so a cover path counts for one row; a path matching none is code.
@@ -125,18 +129,32 @@ const PATH_CLASSES = [
   ['code', () => true],
 ];
 
-/** Renders the checks as a Markdown table keyed by path class; the initiative-close row lists the initiative tier, and `ci` checks run only in CI. */
+/** Renders the checks as a Markdown table keyed by path class; the initiative-close row lists every check, because `--record` runs the `ci` ones too. */
 function renderTable(checks) {
   const label = check => `${check.id} (${check.cost})`;
   const rowFor = (name, chosen) => `| ${name} | ${chosen.length ? chosen.map(label).join(', ') : 'none'} |`;
   const rows = PATH_CLASSES.map(([name], index) => rowFor(name, checks.filter(check => check.covers.some(path => PATH_CLASSES.findIndex(([, matches]) => matches(path)) === index))));
-  rows.push(rowFor('initiative close', checks.filter(check => TIER_COSTS.initiative.includes(check.cost))));
+  rows.push(rowFor('initiative close', checks));
   return ['| Path class | Checks (cost) |', '| --- | --- |', ...rows].join('\n');
 }
 
-/** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. */
+const RECORD_SCHEMA = 'isswf.close-verification';
+
+/** The initiative's record directory, or a refusal when it is missing or the tree outside the initiatives is not clean at the verified head. */
+function closeRecordTarget(options, project, state) {
+  const directory = `${state}/initiatives/${options.record}`;
+  let found = false;
+  try { found = statSync(resolve(project, directory)).isDirectory(); } catch { /* reported below */ }
+  if (!found) throw fail('initiative-not-found', `${directory} does not exist`);
+  // Records are the one place a run may leave changes; a tracked change elsewhere would make the verified head differ from the tree that ran. Untracked files are the operator's and are ignored.
+  const outside = gitText(project, ['status', '--porcelain', '--untracked-files=no', '--', '.', `:(exclude)${state}/initiatives`]);
+  if (outside !== '') throw fail('dirty-tree', 'commit or stash tracked changes outside the initiatives directory before recording a close verification');
+  return `${directory}/close-verification.json`;
+}
+
+/** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. With `record`, runs every cost and writes the initiative's close record. */
 function verify(options) {
-  const { project, candidate, base, path, blob } = readApproved(options);
+  const { project, candidate, base, path, blob, state } = readApproved(options);
   const { checks } = parseVerification(blob.stdout);
   // Staleness compares the candidate's own derivedFrom, so a branch that refreshes the file is fresh; the base file falls back when the candidate has none.
   let candidateFile;
@@ -149,14 +167,22 @@ function verify(options) {
   const status = gitText(project, ['status', '--porcelain']);
   const dirty = status === undefined ? null : status !== '';
   const verificationSha256 = sha256(blob.stdout);
+  const recordPath = options.record === undefined ? undefined : closeRecordTarget(options, project, state);
+  // A stale manifest means the approved checks may not match the project, so a record run stops before it spends any check.
+  if (recordPath !== undefined && stale.length > 0) return { ok: false, code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files before recording', base, tier: options.tier, stale, results: [] };
+  const costs = options.record === undefined ? TIER_COSTS[options.tier] : COSTS;
   const selected = options.only === undefined ? checks : checks.filter(entry => entry.id === options.only);
   const results = selected.map(check => {
     const stamp = { checkId: check.id, platform: process.platform, argvSha256: sha256(JSON.stringify(check.argv)), candidate, dirty, verificationSha256 };
-    const applies = check.platforms.includes(process.platform) && (options.only !== undefined || TIER_COSTS[options.tier].includes(check.cost));
+    const applies = check.platforms.includes(process.platform) && (options.only !== undefined || costs.includes(check.cost));
     return { ...stamp, ...(applies ? execute(check, project) : { status: 'not run', exitCode: null }) };
   });
   const refused = stale.length > 0 && !options['allow-stale'];
-  return { ok: !refused, ...(refused ? { code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files or pass --allow-stale' } : {}), base, tier: options.tier ?? null, stale, results };
+  if (recordPath !== undefined && !refused) {
+    const record = { schema: RECORD_SCHEMA, schemaVersion: 1, source: 'local', initiative: options.record, head: candidate, verificationSha256, checks: results.map(({ checkId, status }) => ({ id: checkId, status })) };
+    writeFileSync(resolve(project, recordPath), `${JSON.stringify(record, null, 2)}\n`);
+  }
+  return { ok: !refused, ...(refused ? { code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files or pass --allow-stale' } : {}), base, tier: options.tier ?? null, ...(recordPath !== undefined && !refused ? { record: recordPath } : {}), stale, results };
 }
 
 const FAILURES = new Set(['failed', 'timeout', 'refused', 'unavailable']);

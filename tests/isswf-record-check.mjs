@@ -127,6 +127,7 @@ for (const resolution of ['fixed', 'wrong', 'known-limit', 'not-material', 'dism
 assert.deepEqual(resolutionCodes('F1 fixed: reason one; S1 known-limit: tracked by J012; N2 dismissed: a reason, with a comma'), [], 'several entries on one line');
 assert.deepEqual(resolutionCodes('None.'), []);
 const templateLine = (await readFile(join(source, '.factory/templates/review.md'), 'utf8')).split('\n').find(line => line.includes(resolutionLabel));
+assert.ok(templateLine, 'the real template carries the resolution line');
 assert.deepEqual(resolutionViolations(`${attempt([], reviewFields).replace('# Attempt report', '# Review report')}${templateLine}\n`), [], 'the unfilled line of the real template');
 for (const bad of ['F1 intentional: reason', 'F1 fixed', 'F1 fixed:', 'F1 not material: reason', 'fixed: reason', 'F1 fixed: ok; S1 wrong']) assert.deepEqual(resolutionCodes(bad), ['finding-resolution-invalid'], bad);
 assert.deepEqual(resolutionCodes('F1 intentional: reason', false), [], 'a record that existed at the base keeps its wording');
