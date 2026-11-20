@@ -44,9 +44,9 @@ function recordProblems(text, initiative) {
   else if (record.source === 'ci' && !/^https?:\/\//u.test(record.runUrl)) problems.push('a ci record needs the run URL');
   if (!Array.isArray(record.checks) || record.checks.some(check => typeof check?.id !== 'string' || typeof check.status !== 'string')) problems.push('the record is invalid: checks must list {id, status}');
   else {
-    const bad = record.checks.filter(check => !['passed', 'not run'].includes(check.status));
-    if (bad.length) problems.push(`checks did not pass: ${bad.map(check => `${check.id} (${check.status})`).join(', ')}`);
-    else if (!record.checks.some(check => check.status === 'passed')) problems.push('the record has no passed check');
+    const bad = record.checks.filter(check => check.status !== 'passed');
+    if (!record.checks.length) problems.push('the record has no checks');
+    else if (bad.length) problems.push(`checks are not passed: ${bad.map(check => `${check.id} (${check.status})`).join(', ')}; record a passing CI run (source "ci") or run isswf-verify --record on a platform where those checks run`);
   }
   return problems.length ? problems : record;
 }
@@ -54,7 +54,7 @@ function recordProblems(text, initiative) {
 /**
  * The problems that keep a commit from closing an initiative, or [] when it is not a close.
  * A close is a plan whose jobs are all completed where HEAD's plan was not. It needs a passing record whose head is at or after the newest commit outside the initiatives directory, and changes nothing outside that directory itself.
- * A `not run` check is one the approved file limits to another platform; at least one check must have passed.
+ * Every check must have passed; a `not run` check refuses the record.
  */
 async function closeProblems({ state, initiative, path, plan, all, root, listed, git, read }) {
   if (!allCompleted(plan)) return [];

@@ -195,8 +195,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     } else {
       const report = verify(options);
       console.log(JSON.stringify(report, null, 2));
-      // 1 for a failed check, 2 for staleness alone.
-      process.exitCode = report.results.some(result => FAILURES.has(result.status)) ? 1 : report.ok ? 0 : 2;
+      // 1 for a failed check, or for a recorded check that did not run (the close gate refuses that record), 2 for staleness alone.
+      const unrun = report.record === undefined ? [] : report.results.filter(result => result.status === 'not run');
+      if (unrun.length) console.error(`the close record lists checks that did not run: ${unrun.map(result => result.checkId).join(', ')}; the close gate refuses it until a passing CI run or a run on a platform where they run is recorded`);
+      process.exitCode = report.results.some(result => FAILURES.has(result.status)) || unrun.length ? 1 : report.ok ? 0 : 2;
     }
   } catch (error) {
     if (!error.code) throw error;

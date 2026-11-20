@@ -37,7 +37,7 @@ function verify(repo, ...args) {
   assert.equal(result.error, undefined);
   let out;
   try { out = JSON.parse(result.stdout); } catch { assert.fail(`no JSON output (exit ${result.status}): ${result.stderr}`); }
-  return { status: result.status, out };
+  return { status: result.status, out, stderr: result.stderr };
 }
 const statusOf = out => Object.fromEntries(out.results.map(result => [result.checkId, result.status]));
 
@@ -228,7 +228,8 @@ try {
   ], [], { '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
   const recordPath = join(closing.repo, '.factory/initiatives/I0001/close-verification.json');
   const closed = verify(closing.repo, '--base', closing.head, '--tier', 'initiative', '--record', 'I0001');
-  assert.equal(closed.status, 0);
+  assert.equal(closed.status, 1, 'a record with a check that did not run exits non-zero');
+  assert.match(closed.stderr, /elsewhere/u);
   assert.equal(closed.out.record, '.factory/initiatives/I0001/close-verification.json');
   assert.deepEqual(statusOf(closed.out), { 'job-one': 'passed', 'init-one': 'passed', 'ci-one': 'passed', elsewhere: 'not run' });
   assert.deepEqual(JSON.parse(readFileSync(recordPath, 'utf8')), {
@@ -241,7 +242,7 @@ try {
     checks: [{ id: 'job-one', status: 'passed' }, { id: 'init-one', status: 'passed' }, { id: 'ci-one', status: 'passed' }, { id: 'elsewhere', status: 'not run' }],
   });
   // The record is an initiatives file, so it does not make the tree dirty for the next run, and a failed check is recorded as failed.
-  assert.equal(verify(closing.repo, '--base', closing.head, '--tier', 'initiative', '--record', 'I0001').status, 0);
+  assert.equal(verify(closing.repo, '--base', closing.head, '--tier', 'initiative', '--record', 'I0001').out.ok, true);
   const failing = makeRepo('closing-failed', [check('bad', node('-e', 'process.exit(1)'), { cost: 'ci' })], [], { '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
   const failed = verify(failing.repo, '--base', failing.head, '--tier', 'initiative', '--record', 'I0001');
   assert.equal(failed.status, 1);
