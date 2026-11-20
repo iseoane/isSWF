@@ -121,13 +121,13 @@ Type: enhancement
 
 ## J007
 
-- Status: pending
+- Status: in-progress
 - Size: S (follow-ups)
 - Objective: The verification runner reports only what it observed and its docs match its output.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief from J001 V001 S1-S4.
+- Next step: Worker implements brief r1 on feat/i0061-j007-runner-followups.
 
 ### Acceptance
 
