@@ -107,7 +107,7 @@ Private repositories pay for runner minutes, so run the full suite once instead 
 - **Full tier, on `main`, by manual dispatch or on a schedule.** Run the complete suite, the end-to-end harness and the Windows and macOS jobs through `push` to `main`, `workflow_dispatch` or `schedule`.
 - **Runner minutes.** GitHub bills Windows and macOS runners at higher per-minute multipliers than Linux, so put the cross-platform matrix in the full tier. Read the current multipliers in GitHub's [billing documentation for GitHub Actions](https://docs.github.com/en/billing/managing-billing-for-your-products/about-billing-for-github-actions); they can change.
 
-`node tools/isswf-verify.mjs --project /absolute/project --table` prints which approved checks each kind of change requires, which is a starting point for choosing the fast and full tiers. This repository's own workflows are unchanged by this guide.
+`node tools/isswf-verify.mjs --project /absolute/project --base HEAD --table` prints which approved checks each kind of change requires, which is a starting point for choosing the fast and full tiers. This repository's own workflows are unchanged by this guide.
 
 ## Platform and host discovery checks
 

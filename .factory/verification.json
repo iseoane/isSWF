@@ -145,7 +145,11 @@
         "--config",
         "tooling/quality/eslint.config.mjs",
         "tools",
-        "tests"
+        "tests",
+        "tooling/quality/check-docs.mjs",
+        "tooling/quality/eslint.config.mjs",
+        "tooling/quality/host-checks.mjs",
+        "tooling/quality/unrun-tests.mjs"
       ],
       "platforms": [
         "linux"
@@ -153,7 +157,8 @@
       "cost": "ci",
       "covers": [
         "tools/",
-        "tests/"
+        "tests/",
+        "tooling/quality/"
       ],
       "timeoutSeconds": 300
     },
