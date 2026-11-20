@@ -128,7 +128,7 @@ When Engram or Codegraph is installed and available, use it: Codegraph first for
 
 ## 4. Prepare a decision-ready brief
 
-Before preparing a new brief, record the five quality areas that [isswf-setup](../isswf-setup/SKILL.md#tracking-and-project-checks) inspects (lint, tests, build, dead code and duplicated logic) with observed evidence, missing checks and proportional recommendations. Do not claim configured checks passed, force a clone detector, or install tools implicitly. Immutable prepared briefs keep their original inventory; a material change uses explicit reconciliation rather than editing old inputs.
+Before preparing a new brief, record the five quality areas that [isswf-setup](../isswf-setup/SKILL.md#tracking-and-project-checks) inspects (lint, tests, build, dead code and duplicated logic) with observed evidence, missing checks and proportional recommendations. Do not claim configured checks passed, force a clone detector, or install tools implicitly. Immutable prepared briefs keep their original inventory; a material change uses explicit reconciliation rather than editing old inputs. When the project has a verification file, run `node <factory-root>/tools/isswf-verify.mjs --project <project> --stale` first and refresh the file before the brief if it reports stale (`docs/en/operations.md`, Verification runner).
 
 Write a concise brief. Link earlier briefs, the plan and prior reports instead of copying their history; a revised brief states what changed. It contains:
 

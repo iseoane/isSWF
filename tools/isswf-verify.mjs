@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
@@ -27,26 +28,32 @@ const gitText = (cwd, args) => {
 function parseArguments(argv) {
   const options = {};
   const flags = new Set(['--project', '--base', '--tier', '--only']);
-  for (let index = 0; index < argv.length; index += 2) {
+  const switches = new Set(['--stale', '--allow-stale']);
+  for (let index = 0; index < argv.length; index += 1) {
+    if (switches.has(argv[index])) { options[argv[index].slice(2)] = true; continue; }
     if (!flags.has(argv[index]) || argv[index + 1] === undefined) throw fail('invalid-arguments', `unknown or incomplete argument: ${argv[index]}`);
     options[argv[index].slice(2)] = argv[index + 1];
+    index += 1;
   }
   if (typeof options.project !== 'string' || !isAbsolute(options.project)) throw fail('invalid-project', '--project needs an absolute path');
   if (options.tier !== undefined && !Object.hasOwn(TIER_COSTS, options.tier)) throw fail('invalid-tier', '--tier is job or initiative');
   if (options.base !== undefined && !REF.test(options.base)) throw fail('invalid-base');
-  if (options.tier === undefined && options.only === undefined) throw fail('tier-required', 'pass --tier job|initiative or --only <id>');
+  if (options.tier === undefined && options.only === undefined && !options.stale) throw fail('tier-required', 'pass --tier job|initiative or --only <id>');
   return options;
 }
 
+// A project-relative path spelled one way, with `/` and no `.` or `..` segment, so equal paths compare equal.
+const isCanonicalPath = path => !isAbsolute(path) && !/^[A-Za-z]:|\\/u.test(path) && path.split('/').every(segment => segment !== '' && segment !== '.' && segment !== '..');
+
 const isStrings = value => Array.isArray(value) && value.every(item => typeof item === 'string');
 
-/** Returns the checks of an `isswf.verification` schemaVersion 1 file, or throws `verification-invalid` naming the first fault. */
+/** Returns the `derivedFrom` entries and checks of an `isswf.verification` schemaVersion 1 file, or throws `verification-invalid` naming the first fault. */
 function parseVerification(bytes) {
   const invalid = reason => fail('verification-invalid', `verification file is invalid: ${reason}`);
   let file;
   try { file = JSON.parse(bytes.toString('utf8')); } catch { throw invalid('not JSON'); }
   if (file?.schemaVersion !== 1) throw invalid('schemaVersion must be 1');
-  if (!Array.isArray(file.derivedFrom) || !file.derivedFrom.every(entry => typeof entry?.path === 'string' && /^[0-9a-f]{64}$/u.test(entry.sha256))) throw invalid('derivedFrom needs {path, sha256} entries');
+  if (!Array.isArray(file.derivedFrom) || !file.derivedFrom.every(entry => typeof entry?.path === 'string' && isCanonicalPath(entry.path) &&/^[0-9a-f]{64}$/u.test(entry.sha256))) throw invalid('derivedFrom needs {path, sha256} entries');
   if (!Array.isArray(file.checks)) throw invalid('checks must be an array');
   const seen = new Set();
   for (const entry of file.checks) {
@@ -59,7 +66,18 @@ function parseVerification(bytes) {
     if (!isStrings(entry.covers)) throw invalid(`${id}: covers must be an array of paths`);
     if (!Number.isInteger(entry.timeoutSeconds) || entry.timeoutSeconds < 1 || entry.timeoutSeconds > 3600) throw invalid(`${id}: timeoutSeconds must be an integer from 1 to 3600`);
   }
-  return file.checks;
+  return file;
+}
+
+/** Hashes each `derivedFrom` path in the working tree; a changed or missing file is stale (`current: null` when missing). */
+function staleEntries(derivedFrom, project) {
+  const stale = [];
+  for (const { path, sha256: recorded } of derivedFrom) {
+    let current = null;
+    try { current = sha256(readFileSync(resolve(project, path))); } catch (error) { if (error.code !== 'ENOENT' && error.code !== 'EISDIR') throw fail('derivedfrom-unreadable', `${path} cannot be read: ${error.code ?? error.message}`); }
+    if (current !== recorded) stale.push({ path, recorded, current });
+  }
+  return stale;
 }
 
 const tail = bytes => (bytes ?? Buffer.alloc(0)).subarray(-TAIL_BYTES).toString('utf8');
@@ -87,13 +105,19 @@ function verify(options) {
     ? gitText(project, ['merge-base', 'HEAD', 'refs/remotes/origin/main'])
     : gitText(project, ['rev-parse', '--verify', `${options.base}^{commit}`]);
   if (base === undefined || base === '') throw fail('base-not-found', 'the base ref does not resolve; pass --base <ref>');
-  // The file is read at the base, so the candidate cannot rewrite the checks that judge it.
+  // The checks are read at the base, so the candidate cannot rewrite the checks that judge it.
   let state;
   try { state = stateDirectory(project); } catch (error) { throw fail('state-not-found', error.message); }
   const path = `${state}/verification.json`;
   const blob = git(project, ['show', `${base}:${path}`]);
   if (blob.status !== 0) throw fail('verification-not-found', `${path} is not committed at the base`);
-  const checks = parseVerification(blob.stdout);
+  const { checks } = parseVerification(blob.stdout);
+  // Staleness compares the candidate's own derivedFrom, so a branch that refreshes the file is fresh; the base file falls back when the candidate has none.
+  let candidateFile;
+  try { candidateFile = readFileSync(resolve(project, path)); } catch (error) { if (error.code !== 'ENOENT') throw fail('verification-invalid', `${path} cannot be read: ${error.code ?? error.message}`); }
+  const { derivedFrom } = candidateFile === undefined ? parseVerification(blob.stdout) : parseVerification(candidateFile);
+  const stale = staleEntries(derivedFrom, project);
+  if (options.stale) return { ok: stale.length === 0, ...(stale.length ? { code: 'stale' } : {}), base, stale, results: [] };
   if (options.only !== undefined && !checks.some(entry => entry.id === options.only)) throw fail('check-not-found', `no check ${options.only}`);
   const dirty = (gitText(project, ['status', '--porcelain']) ?? '') !== '';
   const verificationSha256 = sha256(blob.stdout);
@@ -103,7 +127,8 @@ function verify(options) {
     const applies = check.platforms.includes(process.platform) && (options.only !== undefined || TIER_COSTS[options.tier].includes(check.cost));
     return { ...stamp, ...(applies ? execute(check, project) : { status: 'not run', exitCode: null }) };
   });
-  return { ok: true, base, tier: options.tier ?? null, results };
+  const refused = stale.length > 0 && !options['allow-stale'];
+  return { ok: !refused, ...(refused ? { code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files or pass --allow-stale' } : {}), base, tier: options.tier ?? null, stale, results };
 }
 
 const FAILURES = new Set(['failed', 'timeout', 'refused', 'unavailable']);
@@ -112,7 +137,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   try {
     const report = verify(parseArguments(process.argv.slice(2)));
     console.log(JSON.stringify(report, null, 2));
-    process.exitCode = report.results.some(result => FAILURES.has(result.status)) ? 1 : 0;
+    // 1 for a failed check, 2 for staleness alone.
+    process.exitCode = report.results.some(result => FAILURES.has(result.status)) ? 1 : report.ok ? 0 : 2;
   } catch (error) {
     if (!error.code) throw error;
     console.log(JSON.stringify({ ok: false, code: error.code, message: error.message }, null, 2));

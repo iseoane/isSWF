@@ -201,6 +201,7 @@ node tools/isswf-handoff.mjs coverage --project /absolute/project
 node tools/isswf-verify.mjs --project /absolute/project --tier job
 node tools/isswf-verify.mjs --project /absolute/project --tier initiative --base <ref>
 node tools/isswf-verify.mjs --project /absolute/project --only <check-id>
+node tools/isswf-verify.mjs --project /absolute/project --stale
 ```
 
 `tools/isswf-verify.mjs` runs the checks listed in `<state directory>/verification.json` and prints one JSON object with one result per check. It never starts a shell, writes nothing and grants nothing. The file is tracked in Git and is read at the base, `--base <ref>` or by default the merge base of `HEAD` and `origin/main`, never from the candidate, so a change cannot rewrite the checks that judge it. A refusal prints `{ ok: false, code, ... }` and exits 1: `verification-not-found`, `verification-invalid`, `base-not-found`, `check-not-found` or `tier-required` (pass `--tier` or `--only`).
@@ -208,10 +209,15 @@ node tools/isswf-verify.mjs --project /absolute/project --only <check-id>
 - The file has `schemaVersion: 1`, `derivedFrom` (`{ path, sha256 }` of the files the checks came from) and `checks`. Each check has `id` (lowercase, digits and hyphens), `argv` (a command and its arguments; `node` means the running Node.js), `platforms` (`process.platform` names), `cost` (`job`, `initiative` or `ci`), `covers` (paths the check protects) and `timeoutSeconds` (1 to 3600).
 - `--tier job` runs the `job` checks; `--tier initiative` runs `job` and `initiative` checks; `ci` checks are left to CI. `--only` runs one check whatever its cost. A check outside the tier, or not listed for the current platform, is `not run`, never `passed`.
 - Each result has `checkId`, `status` (`passed`, `failed`, `timeout`, `refused`, `unavailable` or `not run`), `exitCode`, `durationMs`, `platform`, `argvSha256`, `candidate` (the `HEAD` commit), `dirty` (uncommitted changes) and `verificationSha256` (the file at the base), plus the last 4096 bytes of `stdoutTail` and `stderrTail` for a check that ran and a `message` for a refused, unavailable or timed-out one. The exit code is 1 when any check ended `failed`, `timeout`, `refused` or `unavailable`.
+- Staleness: the runner hashes each `derivedFrom` path in the working tree and lists `stale: [{ path, recorded, current }]` in its output; `current` is `null` for a missing file. When any entry is stale it prints `{ ok: false, code: "stale" }` with the results and exits 2 (a failed check still exits 1), unless `--allow-stale` is passed. `--stale` prints only that verdict, runs no check and needs no `--tier`, so a gate can call it cheaply. Staleness compares the checkout's own `derivedFrom`, so a branch that refreshes the file is fresh, while the checks still come from the base. A `derivedFrom` path must be a relative path written with `/` and no `.` or `..` segment, or the file is `verification-invalid`; one that cannot be read is refused as `derivedfrom-unreadable`. Refresh the file by updating its checks and the hashes together.
 - `npm`, `npx` and `.cmd` or `.bat` launchers are `refused` on every platform, because Windows starts them only through a shell: write `node <cli.js>` instead.
 - Limits: a timeout stops the started process, and a descendant it started on Windows can outlive it. The runner executes the base-approved argv against the working tree, so it shows what passed for that `candidate` and `dirty` state, not that the argv is safe.
 
 The skill `isswf-setup` proposes the file from the project's quality inventory and writes it only when the operator approves it; the approved digest goes in `project-setup.md`. `tools/check-quality.mjs` and the platform CI job run `tests/isswf-verify.mjs`.
+
+### Verification commit guard
+
+Before a shell command runs, the host also checks each `git commit`, with the same working-tree rules as the plan commit guard. It refuses the commit when it changes a path listed in `derivedFrom` of the committed `<state directory>/verification.json` and does not also change that file; the refusal names the manifest and tells you to run `isswf-verify --stale`, update the checks and hashes, stage the file and commit again. A repository without the file is not checked. The logic is in `tools/isswf-verification-guard-core.mjs`, wired next to the plan commit guard for Claude Code and Pi. It is a process rule, not an authority, and fails open on a fault.
 
 ## Initiative snapshot
 

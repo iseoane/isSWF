@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "90ccc00fbc6c8648a12b5ddb56801c12dfafe1fc52c834a39b9b64d02895d29a"
+      "sha256": "61d86328f57b498b4746c246d2c2f5d0a60e068821083df8b2fa37047b3442a9"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -80,6 +80,23 @@
       "cost": "job",
       "covers": [
         "tools/isswf-verify.mjs"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "isswf-verification-guard",
+      "argv": [
+        "node",
+        "tests/isswf-verification-guard.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-verification-guard-core.mjs"
       ],
       "timeoutSeconds": 180
     },
