@@ -61,13 +61,13 @@ Type: enhancement
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Size: M (research)
 - Objective: Reviewer and check quality are measured against the defects that mattered.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Research only; decide later whether this extends retrospective or becomes its own skill.
+- Next step: Researcher answers brief r1; operator decides placement.
 
 ### Acceptance
 
