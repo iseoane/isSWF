@@ -12,6 +12,10 @@ Record failures, decisions, friction, and outcomes with the source that supports
 
 Record each job's last known state and the evidence and time that support it. Mark liveness or completion unknown unless directly verified through an authorized live source. Do not stop, restart, replace, or otherwise affect active workers. Do not rewrite pinned briefs or their inputs. Session close is an analysis boundary, not a lifecycle command.
 
+## Misses
+
+A miss is a defect that passed review and local checks and was found later: a CI failure on a reviewed candidate that local checks did not report, a revert, a later contradiction, a commit no review covered, a bug issue, or a false pass. The coordinator records each miss block (template `Misses` section) when it observes it, in the job's records: append to the latest review record's coordinator section or to the attempt record. The retrospective collects those blocks, checks their attribution against the sources, and does not rediscover misses from broad history. Never edit a reviewer's verdict.
+
 ## Find useful changes
 
 For each proposed improvement, state the observed problem, evidence, impact, affected project or factory process, proposed destination, and a check that would show whether the change helps. Separate a project-specific fix from an improvement to the factory process. State whether it fits the current grant or needs a new grant; never infer permission from the retrospective.
