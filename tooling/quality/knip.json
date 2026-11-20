@@ -13,6 +13,7 @@
     "tools/isswf-record-new-core.mjs",
     "tools/isswf-handoff.mjs",
     "tools/isswf-handoff-core.mjs",
+    "tools/isswf-verify.mjs",
     "tools/isswf-snapshot.mjs",
     "tools/isswf-snapshot-core.mjs",
     "tools/isswf-run-usage-core.mjs",
