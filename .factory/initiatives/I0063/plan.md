@@ -4,13 +4,13 @@ Type: enhancement
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: S (guard)
 - Objective: A worker's commits are refused outside the worktree and branch the coordinator assigned to it, so parallel writers cannot mix changes.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Worker implements brief r1 on feat/i0063-j001-worktree-binding.
 
 ### Acceptance
 
