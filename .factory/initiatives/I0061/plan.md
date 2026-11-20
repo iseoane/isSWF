@@ -4,13 +4,13 @@ Type: enhancement
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: M (skill and runner)
 - Objective: A skill decides which checks a target project needs and writes them to a project verification file that a factory runner executes deterministically.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Research: study the existing setup quality areas and design the file format; operator review before a brief.
+- Next step: Researcher answers brief r1; operator reviews the design before an implementation brief.
 
 ### Acceptance
 
