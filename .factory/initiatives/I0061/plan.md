@@ -183,13 +183,13 @@ Type: enhancement
 
 ## J010
 
-- Status: in-progress
+- Status: completed
 - Size: M (close gate and optional CI dispatch)
 - Objective: An initiative closes only after the full suite and E2E ran at its closing head.
 - Depends on: J005
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0061-j010-close-gate.
+- Next step: None.
 
 ### Acceptance
 
@@ -203,6 +203,7 @@ Type: enhancement
 - 2026-11-20: J007 V001 F4: the tier-required message omits --stale.
 - 2026-11-20: J009 V002 N1 (assert the template resolution line exists in tests/isswf-record-check.mjs) and N2 (review.md record-check command lacks <factory-root>/).
 - 2026-11-20: J010 V002 known limits: the close gate in working-tree mode does not see an untracked file staged by a chained git add (N1); a filesystem read fault on the close record refuses instead of failing open (N2); a rebase or merge after the close commit is not re-checked.
+- 2026-11-20: PR #371 merged (close record via isswf-verify --record, plan commit close gate, setup CI close-suite option, deferred small items); review V001 inconclusive with correction 1, V002 pass; CI green on 4d859baf.
 
 ## J011
 
