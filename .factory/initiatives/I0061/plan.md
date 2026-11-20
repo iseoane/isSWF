@@ -79,13 +79,13 @@ Type: enhancement
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Size: M (coordinator default, setup proposal and CI guide; split 2026-11-20 into J005, J010, J011)
 - Objective: Jobs run only their focused tier locally and setup proposes a path-keyed check rule the operator chooses, so repeated full runs stop.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0061-j005-tiers.
+- Next step: None.
 
 ### Acceptance
 
@@ -97,6 +97,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-18: operator report: in a factory-driven project about 15 of a 30-minute job is repeated full-suite and E2E runs locally and again in CI; private-repo CI minutes are limited. Operator accepted the tiers and asked to keep project rules ahead of factory defaults. Operator then asked that setup not simply keep existing project rules but compare them with the factory proposal and let the operator choose either or a merge. 2026-11-18: operator asked to adopt three practices observed in a private factory-driven project: a path-keyed check table, checks in a pinned worktree while the next worker continues, and a manually dispatched close-suite workflow.
+- 2026-11-20: PR #368 merged as fdae6080 (isswf-verify --table, coordinator focused-tier default, setup check-rule proposal, tiered CI guide en/es); review V001 fail fixed, V002 pass; CI green on 0deb5f94.
 
 ## J006
 
