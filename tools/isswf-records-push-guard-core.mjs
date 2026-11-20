@@ -1,4 +1,4 @@
-// No Node imports, like isswf-plan-commit-guard-core.mjs: the Claude hooks module passes `$.process` and `$.fs`, and Pi passes `execFile` and `readFile`.
+// No Node imports, like isswf-plan-commit-guard-core.mjs: the caller passes a `git` runner (the Claude hooks module builds it from `$.process`, Pi from `execFile`).
 import { targetDir } from './isswf-branch-guard-core.mjs';
 import { tokenize } from './isswf-command-core.mjs';
 
