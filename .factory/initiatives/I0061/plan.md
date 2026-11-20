@@ -121,13 +121,13 @@ Type: enhancement
 
 ## J007
 
-- Status: in-progress
+- Status: completed
 - Size: S (follow-ups)
 - Objective: The verification runner reports only what it observed and its docs match its output.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0061-j007-runner-followups.
+- Next step: None.
 
 ### Acceptance
 
@@ -140,6 +140,7 @@ Type: enhancement
 
 - 2026-11-20: J001 V001 suggestions, deferred to keep J001 within the session quota.
 - 2026-11-20: J002 V002 N1 (missing space at tools/isswf-verify.mjs:56) and J005 V002 I2 (docs show --table without --base HEAD).
+- 2026-11-20: PR #369 merged (dirty null, basename launcher refusal, lint covers tooling/quality, docs refusal codes and durationMs); review V001 pass; CI green on 4f6a5a44. Known limit: lint lists tooling/quality files explicitly.
 
 ## J008
 
