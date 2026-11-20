@@ -31,6 +31,19 @@ Record failures, decisions, friction, and outcomes. Separate observed facts from
 | --- | --- | --- | --- |
 | | | |
 
+## Misses
+
+One block per miss: a defect that passed review and local checks and was found later. Copy the blocks the coordinator recorded when it observed each miss; an empty list is valid. Never edit a reviewer's verdict.
+
+- Kind: revert, ci-only, later-contradicted, uncovered-commit, bug-issue, or false-pass
+- Observer and evidence:
+- Candidate SHA that passed and passing review (verdict quoted):
+- Local checks on that candidate:
+- Missed defect (path:line, class, origin):
+- Why not caught:
+- Attribution: review-round, check <argv>, rule <id>, or none
+- Fix and regression, with status:
+
 ## Improvement proposals
 
 For each proposal, inspect the actual source it targets and check authorized local records for duplicates. Do not query a tracker unless the grant authorizes it. Keep factory issue proposals local and mark them `DRAFT`.
