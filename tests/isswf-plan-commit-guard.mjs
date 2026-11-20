@@ -156,7 +156,33 @@ ${good.slice(good.indexOf('## J001')).replaceAll('J001', 'J002')}`;
   writeFileSync(closePlan, `${completed}\n- Later note.\n`);
   run(closeRepo, 'add', '-A');
   assert.equal((await closeCheck('git commit -m edit')).deny, undefined);
-  assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: closeRepo, git: async (argv, cwd) => (argv[0] === 'log' ? { exitCode: 128, stdout: '' } : git(argv, cwd)), read: async path => readFileSync(path, 'utf8') })).deny, undefined, 'a failed git lookup fails open');
+
+  // A real close transition: reopen the plan, then close it again. Each lookup the gate makes allows the commit when git itself faults, while a genuine answer still refuses.
+  writeFileSync(closePlan, good);
+  commitAll('reopen');
+  const faultOn = (matches, exitCode = 128) => async (argv, cwd) => (matches(argv) ? { exitCode, stdout: '' } : git(argv, cwd));
+  const guarded = (command, runGit) => checkPlanCommit({ command, cwd: closeRepo, git: runGit, read: async path => readFileSync(path, 'utf8') });
+  const lookups = {
+    log: [recordFor(first), argv => argv[0] === 'log', /newest/u],
+    'merge-base': [recordFor(first), argv => argv[0] === 'merge-base', /newest/u],
+    'ls-files': [undefined, argv => argv[0] === 'ls-files', /missing/u],
+    'rev-parse': [recordFor('b'.repeat(40)), argv => argv[0] === 'rev-parse' && argv.includes('--verify'), /head/u],
+  };
+  for (const [name, [record, matches, pattern]] of Object.entries(lookups)) {
+    if (record === undefined) rmSync(closeRecord, { force: true }); else writeFileSync(closeRecord, record);
+    stageClose();
+    assert.match((await guarded('git commit -m close', git)).deny ?? '', pattern, `${name}: a genuine answer refuses`);
+    assert.equal((await guarded('git commit -m close', faultOn(matches))).deny, undefined, `${name}: a git fault fails open`);
+    unstageClose();
+  }
+  // A staged-only commit counts what it records: an unstaged code change does not refuse, while a chained commit that stages everything does and says why.
+  writeFileSync(closeRecord, recordFor(laterHead));
+  stageClose();
+  writeFileSync(join(closeRepo, 'code.txt'), 'unstaged\n');
+  assert.equal((await closeCheck('git commit -m close')).deny, undefined, 'an unstaged change is not in the commit');
+  const chained = await closeCheck('git add -A && git commit -m close');
+  assert.match(chained.deny ?? '', /code\.txt/u);
+  assert.match(chained.deny, /working tree/u, 'the refusal says it counted the working tree');
   console.log('PASS plan commit guard');
 } finally {
   rmSync(temp, { recursive: true, force: true });

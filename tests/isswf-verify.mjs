@@ -260,11 +260,23 @@ try {
     const refused = verify(unrecorded.repo, '--base', unrecorded.head, ...args);
     assert.deepEqual([refused.status, refused.out.code], [1, code], label);
   }
-  write(unrecorded.repo, 'tools/dirty.txt', 'x');
-  assert.equal(verify(unrecorded.repo, '--base', unrecorded.head, '--tier', 'initiative', '--record', 'I0001').out.code, 'dirty-tree');
-  rmSync(join(unrecorded.repo, 'tools'), { recursive: true });
-  const staleRecord = makeRepo('closing-stale', [check('ok', node('-e', ''))], [recorded('tools/a.txt')], { 'tools/a.txt': 'two', '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
-  assert.equal(verify(staleRecord.repo, '--base', staleRecord.head, '--tier', 'initiative', '--record', 'I0001').status, 2);
+  assert.equal(verify(unrecorded.repo, '--base', unrecorded.head, '--tier', 'initiative', '--record', 'I0001', '--allow-stale').out.code, 'record-needs-initiative-tier', '--allow-stale would record a stale manifest');
+  // An untracked file belongs to the operator and does not block a record; a tracked change outside the initiatives does.
+  const tracked = makeRepo('closing-dirty', [check('ok', node('-e', ''))], [], { 'tools/t.txt': 'one', '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
+  write(tracked.repo, 'tools/untracked.txt', 'x');
+  assert.equal(verify(tracked.repo, '--base', tracked.head, '--tier', 'initiative', '--record', 'I0001').status, 0, 'untracked files do not block');
+  write(tracked.repo, 'tools/t.txt', 'two');
+  const dirtyRun = verify(tracked.repo, '--base', tracked.head, '--tier', 'initiative', '--record', 'I0001');
+  assert.deepEqual([dirtyRun.status, dirtyRun.out.code], [1, 'dirty-tree']);
+  write(tracked.repo, 'tools/t.txt', 'one');
+  rmSync(join(tracked.repo, '.factory/initiatives/I0001/close-verification.json'));
+  write(tracked.repo, '.factory/initiatives/I0001/plan.md', '# I0001: y\n');
+  assert.equal(verify(tracked.repo, '--base', tracked.head, '--tier', 'initiative', '--record', 'I0001').status, 0, 'a changed record file does not block');
+  // A stale manifest is refused before any check runs, so a stale record run costs nothing.
+  const staleRecord = makeRepo('closing-stale', [check('ok', node('-e', 'require("fs").writeFileSync("ran.txt", "x")'))], [recorded('tools/a.txt')], { 'tools/a.txt': 'two', '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
+  const staleRun = verify(staleRecord.repo, '--base', staleRecord.head, '--tier', 'initiative', '--record', 'I0001');
+  assert.deepEqual([staleRun.status, staleRun.out.code, staleRun.out.results], [2, 'stale', []]);
+  assert.equal(existsSync(join(staleRecord.repo, 'ran.txt')), false, 'no check ran');
   assert.equal(existsSync(join(staleRecord.repo, '.factory/initiatives/I0001/close-verification.json')), false);
   assert.equal(existsSync(join(unrecorded.repo, '.factory/initiatives/I0001/close-verification.json')), false);
 
