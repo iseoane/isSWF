@@ -79,23 +79,20 @@ Type: enhancement
 
 ## J005
 
-- Status: pending
-- Size: M (coordinator default, setup proposal and CI guidance)
-- Objective: Verification runs in cost tiers: cheap checks per job, the full suite and E2E once per initiative or merge, and CI follows the same tiers, so jobs and private-repo CI minutes are not spent on repeated full runs.
+- Status: in-progress
+- Size: M (coordinator default, setup proposal and CI guide; split 2026-11-20 into J005, J010, J011)
+- Objective: Jobs run only their focused tier locally and setup proposes a path-keyed check rule the operator chooses, so repeated full runs stop.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J005/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief after J001 defines the cost class.
+- Next step: Worker implements brief r1 on feat/i0061-j005-tiers.
 
 ### Acceptance
 
 - Without a project check rule, when the project's CI runs the full suite, a job runs locally only the focused checks and those of affected consumers, and leaves the full suite to CI; the full suite runs locally only when there is neither a rule nor such CI.
 - Setup proposes a check rule for the project's AGENTS.md from the detected test commands and their cost class. When the project already has check rules, setup shows a side-by-side comparison of the existing rules and the factory proposal and the operator chooses the existing rules, the proposal, or a merge they edit; nothing is written without that choice, and the chosen rule then overrides the factory default.
-- The full suite and E2E run once at initiative close (or on merge to main) as an integration gate, and the close is refused until that run is recorded at the closing head.
 - A guide describes tiered CI for private repositories: a fast tier per PR with path filters and cancel-in-progress, the full tier on main, manual dispatch or schedule, and the runner-minute multipliers of Windows and macOS.
 - The proposed check rule is a table keyed by the paths a change touches (code, tests, E2E harness, packaging or CI, docs or records only, initiative close) giving the tests and build each requires, so the selection is derivable from the diff.
-- The coordinator runs a job's checks in a disposable worktree pinned to the exact candidate SHA while the next independent job's worker continues; a job integrates only when its checks and review are green, and dependent jobs do not run in parallel.
-- Setup offers, as an operator choice, running the initiative-close full suite as a manually dispatched CI workflow instead of locally; the per-PR fast tier stays automatic unless the operator decides otherwise.
 
 ### Evidence
 
@@ -179,3 +176,40 @@ Type: enhancement
 
 - 2026-11-20: J004 research; operator ok.
 - 2026-11-20: also fold J008 V001 S1 (name the review record location exactly) and S2 (retrospective may add a late-recorded miss) into .agents/roles/references/retrospective.md.
+
+## J010
+
+- Status: pending
+- Size: M (close gate and optional CI dispatch)
+- Objective: An initiative closes only after the full suite and E2E ran at its closing head.
+- Depends on: J005
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Implementation brief after J005.
+
+### Acceptance
+
+- The full suite and E2E run once at initiative close (or on merge to main) as an integration gate, and the close is refused until that run is recorded at the closing head.
+- Setup offers, as an operator choice, running the initiative-close full suite as a manually dispatched CI workflow instead of locally; the per-PR fast tier stays automatic unless the operator decides otherwise.
+
+### Evidence
+
+- 2026-11-20: split from J005.
+
+## J011
+
+- Status: pending
+- Size: M (pinned worktree checks)
+- Objective: A job's checks run on its pinned candidate while the next independent worker continues.
+- Depends on: J010
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
+- Blocker: Claude per-child checkout binding is unverified (project-setup.md).
+- Next step: Deferred; revisit after J010.
+
+### Acceptance
+
+- The coordinator runs a job's checks in a disposable worktree pinned to the exact candidate SHA while the next independent job's worker continues; a job integrates only when its checks and review are green, and dependent jobs do not run in parallel.
+
+### Evidence
+
+- 2026-11-20: split from J005.
