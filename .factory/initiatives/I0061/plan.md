@@ -75,7 +75,7 @@ Type: enhancement
 
 ### Evidence
 
-- None.
+- 2026-11-20: research report (miss signals, retrospective Misses table, deferred derived tool and evals) delivered in conversation; operator accepted.
 
 ## J005
 
