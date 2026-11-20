@@ -431,7 +431,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     const blocked = await call(repo, 'git commit --allow-empty -m x');
     assert.equal(blocked.block, true, 'another checkout is refused');
     for (const part of [tree.replaceAll('\\', '/').toLowerCase(), 'feat/a']) assert.ok(blocked.reason.toLowerCase().includes(part), `${part} in ${blocked.reason}`);
-    assert.equal((await call(tree, `git -C ${JSON.stringify(repo)} commit --allow-empty -m x`)).block, true, 'a -C into another checkout is refused');
+    assert.equal((await call(tree, `git -C ${repo.replaceAll('\\', '/')} commit --allow-empty -m x`)).block, true, 'a -C into another checkout is refused');
     await handlers.input({ type: 'input', text: task(repo, 'main'), source: 'rpc' });
     assert.equal((await call(repo, 'git commit --allow-empty -m x')).block, true, 'a later task does not rebind the session');
     await start();
