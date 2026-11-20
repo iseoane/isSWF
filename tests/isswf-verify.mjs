@@ -48,15 +48,18 @@ try {
     check('bad', node('-e', 'process.stderr.write("broken thing"); process.exit(3)')),
     check('slow', node('-e', 'setInterval(() => {}, 1000)'), { timeoutSeconds: 1 }),
     check('launcher', ['npm', 'test']),
+    check('unix-npm', ['/usr/bin/npm', 'test']),
+    check('win-npx', ['C:\\x\\NPX.CMD']),
+    check('exe-npm', ['C:/x/npm.exe']),
     check('batch', ['tool.cmd']),
     check('missing', ['isswf-no-such-executable-xyz']),
     check('elsewhere', node('-e', 'process.exit(0)'), { platforms: ['plan9'] }),
   ]);
   const ran = verify(all.repo, '--base', all.head, '--tier', 'job');
   assert.equal(ran.out.ok, true);
-  assert.deepEqual(ran.out.results.map(result => result.checkId), ['ok', 'bad', 'slow', 'launcher', 'batch', 'missing', 'elsewhere']);
+  assert.deepEqual(ran.out.results.map(result => result.checkId), ['ok', 'bad', 'slow', 'launcher', 'unix-npm', 'win-npx', 'exe-npm', 'batch', 'missing', 'elsewhere']);
   assert.deepEqual(statusOf(ran.out), {
-    ok: 'passed', bad: 'failed', slow: 'timeout', launcher: 'refused', batch: 'refused', missing: 'unavailable', elsewhere: 'not run',
+    ok: 'passed', bad: 'failed', slow: 'timeout', launcher: 'refused', 'unix-npm': 'refused', 'win-npx': 'refused', 'exe-npm': 'refused', batch: 'refused', missing: 'unavailable', elsewhere: 'not run',
   });
   const byId = Object.fromEntries(ran.out.results.map(result => [result.checkId, result]));
   assert.equal(byId.ok.exitCode, 0);
@@ -65,6 +68,7 @@ try {
   assert.equal(byId.elsewhere.exitCode, null);
   assert.match(byId.launcher.message, /node <cli\.js>/u);
   assert.match(byId.batch.message, /node <cli\.js>/u);
+  assert.equal(byId['unix-npm'].durationMs, undefined, 'a refused check never started');
   assert.equal(ran.status, 1, 'a failed, timed out, refused or unavailable check fails the run');
   // The stamp fields identify the platform, the argv, the candidate and the approved file.
   assert.equal(byId.ok.platform, process.platform);
@@ -72,6 +76,11 @@ try {
   assert.equal(byId.ok.candidate, all.head);
   assert.equal(byId.ok.dirty, false);
   assert.equal(byId.ok.verificationSha256, sha256(git(all.repo, 'show', 'HEAD:.factory/verification.json') + '\n'));
+
+  // A git status that cannot be read is unknown, not clean.
+  const broken = makeRepo('broken-status', [check('ok', node('-e', ''))]);
+  writeFileSync(join(broken.repo, '.git/index'), 'not an index');
+  assert.equal(verify(broken.repo, '--base', broken.head, '--tier', 'job').out.results[0].dirty, null);
 
   // Tiers select by cost; a check outside the tier is reported as not run.
   const tiers = makeRepo('tiers', [
