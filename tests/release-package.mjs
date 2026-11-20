@@ -117,7 +117,7 @@ try {
     assert.equal(receiptA.files[path], undefined, `Retired legacy path is not packaged: ${path}`);
     assert.equal(existsSync(join(installed, path)), false, `Retired legacy path is absent from the installed npm package: ${path}`);
   }
-  for (const name of ['isswf', 'isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-snapshot', 'isswf-response', 'isswf-intake', 'project-quality', 'state-migration', 'release-source']) assert.ok(receiptA.files[`tools/${name}.mjs`] && existsSync(join(installed, 'tools', name + '.mjs')), `Current tool ships: ${name}`);
+  for (const name of ['isswf', 'isswf-plan', 'isswf-status', 'isswf-panel', 'isswf-snapshot', 'isswf-response', 'isswf-intake', 'project-quality', 'isswf-verify', 'state-migration', 'release-source']) assert.ok(receiptA.files[`tools/${name}.mjs`] && existsSync(join(installed, 'tools', name + '.mjs')), `Current tool ships: ${name}`);
   for (const path of [
     '.agents/skills/isswf-security/SKILL.md',
     'skills/isswf-security/SKILL.md',

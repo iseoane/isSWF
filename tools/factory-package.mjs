@@ -111,7 +111,7 @@ const taskPayloadPaths = {
   howto: [".agents/skills/isswf-howto/SKILL.md"],
   handoff: [".agents/skills/isswf-handoff/SKILL.md"],
 };
-const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-snapshot.mjs", "isswf-snapshot-core.mjs", "isswf-run-usage-core.mjs", "isswf-prices.mjs", "token-native-transcript-core.mjs", "isswf-plan-core.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs"];
+const installedToolNames = ["isswf-plan.mjs", "isswf-status.mjs", "isswf-snapshot.mjs", "isswf-snapshot-core.mjs", "isswf-run-usage-core.mjs", "isswf-prices.mjs", "token-native-transcript-core.mjs", "isswf-plan-core.mjs", "isswf-panel.mjs", "isswf-response.mjs", "isswf-intake.mjs", "project-quality.mjs", "project-state.mjs", "isswf-verify.mjs"];
 const toolsReceiptName = ".isswf-tools-receipt.json";
 const expectedSkills = [
   "./.agents/skills/isswf-coordinator",

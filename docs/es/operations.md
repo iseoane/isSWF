@@ -195,6 +195,24 @@ node tools/isswf-handoff.mjs coverage --project /absolute/project
 
 `tools/check-quality.mjs` ejecuta `tests/isswf-handoff.mjs` y `coverage`, así que el CI, que descarga el historial completo, hace fallar un pull request con un commit sin revisar. La skill del coordinador ejecuta `coverage` antes de `gh pr create` y antes de una fusión. Que la comprobación pase solo muestra que las revisiones registradas cubren los commits; no es un veredicto de revisión.
 
+## Ejecutor de verificación
+
+```bash
+node tools/isswf-verify.mjs --project /absolute/project --tier job
+node tools/isswf-verify.mjs --project /absolute/project --tier initiative --base <ref>
+node tools/isswf-verify.mjs --project /absolute/project --only <check-id>
+```
+
+`tools/isswf-verify.mjs` ejecuta las comprobaciones que enumera `<directorio de estado>/verification.json` e imprime un objeto JSON con un resultado por comprobación. Nunca inicia un shell, no escribe nada y no concede nada. El archivo está versionado en Git y se lee en la base, `--base <ref>` o, por defecto, la base de fusión de `HEAD` y `origin/main`, nunca desde el candidato, de modo que un cambio no puede reescribir las comprobaciones que lo juzgan. Un rechazo imprime `{ ok: false, code, ... }` y termina con código 1: `verification-not-found`, `verification-invalid`, `base-not-found`, `check-not-found` o `tier-required` (pasa `--tier` o `--only`).
+
+- El archivo tiene `schemaVersion: 1`, `derivedFrom` (`{ path, sha256 }` de los archivos de los que salieron las comprobaciones) y `checks`. Cada comprobación tiene `id` (minúsculas, dígitos y guiones), `argv` (un comando y sus argumentos; `node` significa el Node.js en ejecución), `platforms` (nombres de `process.platform`), `cost` (`job`, `initiative` o `ci`), `covers` (rutas que protege la comprobación) y `timeoutSeconds` (de 1 a 3600).
+- `--tier job` ejecuta las comprobaciones `job`; `--tier initiative` ejecuta las `job` y las `initiative`; las `ci` se dejan al CI. `--only` ejecuta una sola comprobación sea cual sea su coste. Una comprobación fuera del nivel, o no listada para la plataforma actual, queda `not run`, nunca `passed`.
+- Cada resultado tiene `checkId`, `status` (`passed`, `failed`, `timeout`, `refused`, `unavailable` o `not run`), `exitCode`, `durationMs`, `platform`, `argvSha256`, `candidate` (el commit de `HEAD`), `dirty` (cambios sin confirmar) y `verificationSha256` (el archivo en la base), además de los últimos 4096 bytes de `stdoutTail` y `stderrTail` en una comprobación que se ejecutó y un `message` en una rechazada, no disponible o con tiempo agotado. El código de salida es 1 cuando alguna comprobación terminó `failed`, `timeout`, `refused` o `unavailable`.
+- `npm`, `npx` y los lanzadores `.cmd` o `.bat` quedan `refused` en todas las plataformas, porque Windows solo los inicia mediante un shell: escribe `node <cli.js>`.
+- Límites: un tiempo agotado detiene el proceso iniciado, y un descendiente que este haya iniciado en Windows puede sobrevivirle. El ejecutor corre el argv aprobado en la base contra el árbol de trabajo, así que muestra qué pasó para ese `candidate` y estado `dirty`, no que el argv sea seguro.
+
+La skill `isswf-setup` propone el archivo a partir del inventario de calidad del proyecto y lo escribe solo cuando el operador lo aprueba; el resumen aprobado va en `project-setup.md`. `tools/check-quality.mjs` y el trabajo de CI de plataformas ejecutan `tests/isswf-verify.mjs`.
+
 ## Instantánea de iniciativas
 
 `tools/isswf-snapshot.mjs` lee todas las iniciativas del directorio de estado activo (`.isswf` o `.factory`) y muestra un único objeto JSON con `schemaVersion: 1`, `project`, `stateDir`, `initiatives`, `unopened` y `skipped`. Es de solo lectura y no llama a ningún modelo ni a la red. Envuelve `tools/isswf-snapshot-core.mjs`, que no importa nada de Node y hace todas las lecturas, incluida la elección del directorio de estado, a través de un objeto inyectado con `exists`, `list`, `stat` y `read` asíncronos. Los entornos sin módulos integrados de Node importan el núcleo y llaman a `readSnapshot(project, fs)` con su propio `fs`. El `readSnapshot(project, fs)` del envoltorio de Node usa Node como `fs` por defecto y además aplica la comprobación de directorio regular de `tools/project-state.mjs`, que el núcleo no puede hacer.
