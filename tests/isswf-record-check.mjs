@@ -129,11 +129,11 @@ assert.deepEqual(resolutionCodes('None.'), []);
 assert.deepEqual(resolutionCodes('`<finding ID, resolution and reason>`'), [], 'the unfilled template line');
 for (const bad of ['F1 intentional: reason', 'F1 fixed', 'F1 fixed:', 'F1 not material: reason', 'fixed: reason', 'F1 fixed: ok; S1 wrong']) assert.deepEqual(resolutionCodes(bad), ['finding-resolution-invalid'], bad);
 assert.deepEqual(resolutionCodes('F1 intentional: reason', false), [], 'a record that existed at the base keeps its wording');
-assert.deepEqual(resolutionCodes('F1 intentional: reason', undefined), [], 'without a base nothing is new');
+assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: reviewWith('F1 intentional: reason') }).violations, [], 'without a base nothing is new');
 const badLine = reviewWith('F1 fixed: ok; S1 wrong');
 assert.deepEqual(resolutionViolations(badLine), [{ code: 'finding-resolution-invalid', field: 'Finding resolutions', line: lineOf(badLine, 'Finding resolutions'), message: 'finding resolution "S1 wrong" is not "<ID> <fixed|wrong|known-limit|not-material|dismissed>: <reason>"' }]);
 const nested = `${reviewWith('')}  - F1 fixed: reason\n  - S1 maybe: reason\n`;
-assert.deepEqual(resolutionViolations(nested).map(({ message, line }) => [message.slice(0, 34), line]), [['finding resolution "S1 maybe: reason', lineOf(nested, 'S1 maybe')]], 'nested bullets are entries');
+assert.deepEqual(resolutionViolations(nested).map(({ message, line }) => [message.slice(0, 36), line]), [['finding resolution "S1 maybe: reason', lineOf(nested, 'S1 maybe')]], 'nested bullets are entries');
 assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: `${attempt([])}- Finding resolutions: F1 bogus\n`, newRecord: true }).violations, [], 'attempts have no resolutions');
 assert.ok((await readFile(join(source, '.factory/templates/review.md'), 'utf8')).includes(resolutionLabel), 'the template carries the label the check reads');
 
