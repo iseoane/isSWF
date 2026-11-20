@@ -26,7 +26,9 @@ function sourcesFor(refspecs, base, current) {
   if (!refspecs.length) return current === base ? ['HEAD'] : [];
   const sources = [];
   for (const refspec of refspecs) {
-    const [from, to = from] = refspec.replace(/^\+/u, '').split(':');
+    const [from, named] = refspec.replace(/^\+/u, '').split(':');
+    // A colon-less `HEAD` or `@` updates the current branch; any other colon-less name updates its own branch.
+    const to = named ?? (from === 'HEAD' || from === '@' ? current : from);
     if (from && (to === base || to === `refs/heads/${base}`)) sources.push(from);
   }
   return sources;
@@ -34,12 +36,12 @@ function sourcesFor(refspecs, base, current) {
 
 /**
  * Refuses a `git push` to the base branch that carries anything but work records, before it runs: every path of `<remote>/<base>..<source>` must be
- * under the selected state's `initiatives/` directory, and the selected state's `project-setup.md` must record the records-only grant.
- * The state is `.isswf/` when its `project-setup.md` is readable, else the legacy `.factory/`; a missing setup record is no grant.
- * It fails open on a git or read fault: this guard enforces a process rule, not an authority.
- * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text.
+ * under the selected state's `initiatives/` directory, and the selected state's `project-setup.md` on `<remote>/<base>` must record the records-only grant.
+ * The state is `.isswf/` when its `project-setup.md` exists on that ref, else the legacy `.factory/`; a missing setup record is no grant.
+ * It fails open on a git fault: this guard enforces a process rule, not an authority.
+ * `git(argv, cwd)` resolves to `{ exitCode, stdout }`.
  */
-export async function checkRecordsPush({ command, cwd, git, read }) {
+export async function checkRecordsPush({ command, cwd, git }) {
   try {
     for (const segment of tokenize(command)) {
       if (segment.git?.subcommand !== 'push') continue;
@@ -56,7 +58,7 @@ export async function checkRecordsPush({ command, cwd, git, read }) {
       for (const from of sources) {
         const listed = await git(['diff', '--name-only', '-z', '--no-renames', `${push.remote}/${base}..${from}`], root);
         if (listed.exitCode !== 0) continue;
-        const setup = await readSetup(root, read);
+        const setup = await readSetup(root, `${push.remote}/${base}`, git);
         const offending = listed.stdout.split('\0').find(path => path && !path.startsWith(`${setup.state}/initiatives/`));
         if (offending !== undefined) return { deny: `isSWF records push guard: git push to ${base} refused. ${offending} is not a work record under ${setup.state}/initiatives/, so the change keeps the pull request path: ${PR_PATH}. This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
         if (!setup.granted) return { deny: `isSWF records push guard: git push to ${base} refused. ${setup.state}/project-setup.md does not record the grant "- Records-only direct push: granted", so even a records-only change keeps the pull request path: ${PR_PATH}. This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
@@ -68,16 +70,14 @@ export async function checkRecordsPush({ command, cwd, git, read }) {
   }
 }
 
-const readGrant = async (path, read) => {
-  try {
-    return GRANT_LINE.test(await read(path));
-  } catch {
-    return undefined;
-  }
+// Whether the setup record on `ref` has the grant line, or undefined when the ref has no such record.
+const readGrant = async (root, ref, state, git) => {
+  const shown = await git(['show', `${ref}:${state}/project-setup.md`], root);
+  return shown.exitCode === 0 ? GRANT_LINE.test(shown.stdout) : undefined;
 };
 
-async function readSetup(root, read) {
-  const modern = await readGrant(`${root}/.isswf/project-setup.md`, read);
+async function readSetup(root, ref, git) {
+  const modern = await readGrant(root, ref, '.isswf', git);
   if (modern !== undefined) return { state: '.isswf', granted: modern };
-  return { state: '.factory', granted: (await readGrant(`${root}/.factory/project-setup.md`, read)) === true };
+  return { state: '.factory', granted: (await readGrant(root, ref, '.factory', git)) === true };
 }

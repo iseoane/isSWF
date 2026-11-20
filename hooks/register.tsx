@@ -556,7 +556,6 @@ export const register: Register = (on, options) => {
             const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
             return { exitCode, stdout }
           },
-          read: (file: string) => $.fs.read(file),
         })
         if (pushes.deny !== undefined) return { deny: pushes.deny }
       } catch {}

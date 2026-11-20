@@ -39,7 +39,7 @@ export default function (pi) {
     if (branch.deny !== undefined) return { block: true, reason: branch.deny };
     const plans = await checkPlanCommit({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
     if (plans.deny !== undefined) return { block: true, reason: plans.deny };
-    const pushes = await checkRecordsPush({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
+    const pushes = await checkRecordsPush({ command, cwd: ctx.cwd, git });
     if (pushes.deny !== undefined) return { block: true, reason: pushes.deny };
     if (branch.reobserve.length && event.toolCallId !== undefined) switching.set(event.toolCallId, branch.reobserve);
     return undefined;
