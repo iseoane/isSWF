@@ -40,25 +40,6 @@ Type: enhancement
 
 - 2026-11-20: PR #367; V001 fail (base/working-tree staleness mismatch, path regex) fixed, V002 pass. Known limit: an uncommitted working-tree verification.json counts as refreshed.
 
-## J003
-
-- Status: in-progress
-- Size: M (recipe and runner)
-- Objective: A change is verified by running it, through a declared recipe rather than model judgment.
-- Depends on: J001
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: None.
-- Next step: Operator decides the proposed split (J003a one-shot expected output S, J003b service lifecycle M, J003c panel pilot and docs S).
-
-### Acceptance
-
-- The verification file can declare a run recipe: start, readiness probe, smoke steps with expected output, stop.
-- The runner executes the recipe and stamps the result; the model only writes and maintains the recipe.
-
-### Evidence
-
-- 2026-11-20: research report (brief r1) delivered in conversation: CLI one-shot first (runner lacks only an expected-output assertion), HTTP service second (needs async lifecycle, readiness, GET-only smoke, tree stop, env allowlist, ${project} placeholder), dev-server web apps deferred (npm refused, Windows descendants, browser install grant), libraries need no recipe; this repository fits as a panel pilot. Windows tree stop unverified.
-
 ## J004
 
 - Status: completed
