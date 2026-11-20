@@ -4,13 +4,13 @@ Type: enhancement
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: S (guard)
 - Objective: A worker's commits are refused outside the worktree and branch the coordinator assigned to it, so parallel writers cannot mix changes.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0063-j001-worktree-binding.
+- Next step: None; J002 confirms live binding.
 
 ### Acceptance
 
@@ -19,6 +19,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: operator: the real problem is no parallel development; asked why a job cannot open a worktree, develop and test there until integration, then remove it. Coordinator found the blocker is the host-guide rule `.agents/hosts/claude-code.md:28` (binding by instruction not accepted), not a Git limit; operator accepted a guard plus pilot.
+- 2026-11-20: PR #373 merged as efdff44f5ef676aa6cf83a50e97977484e3215b1 after green CI on 9a28aac13241d0bf87c36018ada71eeb6a328854. Attempts A001, A002. Reviews: V001 fail (Windows case compare, overstated docs; F1-F4 fixed), V002 fail (N1 fixed: out-of-scope project-release copy removed; N2, N3 fixed), V003 pass. Operator approved the host-guide change. Known limits: unit tests with a stubbed host only, live binding unobserved; background Claude workers only; Pi unobserved.
 
 ## J002
 
