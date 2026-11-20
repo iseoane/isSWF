@@ -163,13 +163,13 @@ Type: enhancement
 
 ## J009
 
-- Status: in-progress
+- Status: completed
 - Size: S (template)
 - Objective: Review finding resolutions use a closed vocabulary with the rule or check that produced each finding, so dismissed findings and silent rules can be counted.
 - Depends on: J008
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0061-j009-resolutions.
+- Next step: None.
 
 ### Acceptance
 
@@ -179,6 +179,7 @@ Type: enhancement
 
 - 2026-11-20: J004 research; operator ok.
 - 2026-11-20: also fold J008 V001 S1 (name the review record location exactly) and S2 (retrospective may add a late-recorded miss) into .agents/roles/references/retrospective.md.
+- 2026-11-20: PR #370 merged (closed resolution vocabulary, record-check --base on new reviews, coordinator runs it, retrospective wording); review V001 fail fixed, V002 pass; CI green on 2692c73a.
 
 ## J010
 
