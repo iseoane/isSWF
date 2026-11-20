@@ -1,0 +1,47 @@
+{
+  "schema": "isswf.close-verification",
+  "schemaVersion": 1,
+  "source": "ci",
+  "initiative": "I0061",
+  "head": "66f83049a8525a7428560312f0f1f5762ac7d197",
+  "verificationSha256": "8001e22eb92df48fe8ec1f2436586dad983bda98841f145fb03bf91d18ae689f",
+  "checks": [
+    {
+      "id": "check-docs",
+      "status": "passed"
+    },
+    {
+      "id": "checkout-line-endings",
+      "status": "passed"
+    },
+    {
+      "id": "factory-tools-install",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-verify",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-verification-guard",
+      "status": "passed"
+    },
+    {
+      "id": "host-portability",
+      "status": "passed"
+    },
+    {
+      "id": "check-quality",
+      "status": "passed"
+    },
+    {
+      "id": "lint",
+      "status": "passed"
+    },
+    {
+      "id": "dead-code",
+      "status": "passed"
+    }
+  ],
+  "runUrl": "https://github.com/iseoane/isSWF/actions/runs/44796797130"
+}
