@@ -99,6 +99,16 @@ node tests/review-guidance.mjs . /absolute/absent/review-fixtures
 
 Keep `oracle.json` and `probes/` out of a blinded review package. Live comparisons require separately authorized native calls with the same candidate, context, model and effort. Report missed defects and false alarms, preserve inconclusive results, and do not infer general improvement from one small sample.
 
+## Tiered CI for private repositories
+
+Private repositories pay for runner minutes, so run the full suite once instead of on every push. A tiered layout keeps feedback fast:
+
+- **Fast tier, every pull request.** Run the focused checks, such as lint, the documentation check and the tests whose paths the change touches. Use `paths` filters so a documentation-only change skips code jobs, and set `concurrency` with `cancel-in-progress: true` so a new push cancels the run it replaces. A path-filtered required check needs a skip-aware design; see GitHub's documentation on required status checks and path filters.
+- **Full tier, on `main`, by manual dispatch or on a schedule.** Run the complete suite, the end-to-end harness and the Windows and macOS jobs through `push` to `main`, `workflow_dispatch` or `schedule`.
+- **Runner minutes.** GitHub bills Windows and macOS runners at higher per-minute multipliers than Linux, so put the cross-platform matrix in the full tier. Read the current multipliers in GitHub's [billing documentation for GitHub Actions](https://docs.github.com/en/billing/managing-billing-for-your-products/about-billing-for-github-actions); they can change.
+
+`node tools/isswf-verify.mjs --project /absolute/project --table` prints which approved checks each kind of change requires, which is a starting point for choosing the fast and full tiers. This repository's own workflows are unchanged by this guide.
+
 ## Platform and host discovery checks
 
 The host-native integration check uses the locked host dependencies, an isolated profile and a loopback synthetic provider. It discovers the packaged roles and checks worker/reviewer model and effort, tools, workspace effects, returned errors and cancellation without real model calls. Missing required host prerequisites are reported as structured `BLOCKED` with exit code 2; existing but broken dependencies remain failures. Pi-only mode does not require the unused Claude executable. The portable quality summary explicitly marks this separate required check `NOT_RUN`; the CI native-host check must pass and a `BLOCKED` result cannot pass its gate. It does not certify Claude live delegation, background execution or OS containment.

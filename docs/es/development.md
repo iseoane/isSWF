@@ -99,6 +99,16 @@ node tests/review-guidance.mjs . /absolute/absent/review-fixtures
 
 Excluye `oracle.json` y `probes/` del paquete de una revisión a ciegas. Las comparaciones reales requieren llamadas nativas autorizadas por separado con el mismo candidato, contexto, modelo y esfuerzo. Informa de los defectos omitidos y las falsas alarmas, conserva los resultados inconclusos y no deduzcas una mejora general a partir de una única muestra pequeña.
 
+## CI por niveles para repositorios privados
+
+Los repositorios privados pagan los minutos de ejecución, así que ejecuta la suite completa una vez en lugar de en cada push. Una organización por niveles mantiene el feedback rápido:
+
+- **Nivel rápido, en cada pull request.** Ejecuta las comprobaciones centradas, como lint, la comprobación de documentación y los tests de las rutas que toca el cambio. Usa filtros `paths` para que un cambio solo de documentación omita los trabajos de código, y define `concurrency` con `cancel-in-progress: true` para que un push nuevo cancele la ejecución a la que sustituye. Una comprobación obligatoria con filtro de rutas necesita un diseño que contemple la omisión; consulta la documentación de GitHub sobre comprobaciones de estado obligatorias y filtros de rutas.
+- **Nivel completo, en `main`, por despacho manual o programado.** Ejecuta la suite completa, el arnés de extremo a extremo y los trabajos de Windows y macOS mediante `push` a `main`, `workflow_dispatch` o `schedule`.
+- **Minutos de ejecución.** GitHub factura los runners de Windows y macOS con multiplicadores por minuto superiores a los de Linux, así que coloca la matriz multiplataforma en el nivel completo. Consulta los multiplicadores vigentes en la [documentación de facturación de GitHub Actions](https://docs.github.com/en/billing/managing-billing-for-your-products/about-billing-for-github-actions); pueden cambiar.
+
+`node tools/isswf-verify.mjs --project /absolute/project --table` imprime qué comprobaciones aprobadas exige cada tipo de cambio, como punto de partida para elegir los niveles rápido y completo. Esta guía no modifica los workflows de este repositorio.
+
 ## Comprobaciones de plataforma y descubrimiento de skills
 
 La comprobación de integración con el host utiliza las dependencias fijadas, un perfil aislado y un proveedor simulado en loopback. Descubre los roles empaquetados y comprueba el modelo y el esfuerzo del worker y del reviewer, las herramientas, los cambios en el directorio asignado, los errores y la cancelación sin llamadas a modelos reales. Los requisitos previos obligatorios ausentes del host se informan como `BLOCKED` estructurado con código de salida 2; las dependencias existentes pero defectuosas siguen siendo fallos. El modo solo Pi no requiere el ejecutable de Claude que no utiliza. El resumen portable de calidad marca explícitamente esta comprobación obligatoria y separada como `NOT_RUN`; la comprobación nativa del host en CI debe aprobarse y un resultado `BLOCKED` no puede aprobar su gate. No certifica la delegación real de Claude, la ejecución en segundo plano ni el aislamiento del sistema operativo.
