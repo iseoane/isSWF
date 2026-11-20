@@ -138,6 +138,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: J001 V001 suggestions, deferred to keep J001 within the session quota.
+- 2026-11-20: J002 V002 N1 (missing space at tools/isswf-verify.mjs:56) and J005 V002 I2 (docs show --table without --base HEAD).
 
 ## J008
 
