@@ -23,13 +23,13 @@ Type: enhancement
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: The verification file is refreshed by mechanical triggers, not by memory.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Prepare a brief after J001.
+- Next step: Worker implements brief r1 on feat/i0061-j002-verification-stale.
 
 ### Acceptance
 
