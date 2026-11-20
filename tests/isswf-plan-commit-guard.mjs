@@ -69,6 +69,94 @@ try {
   run(repo, 'rm', '-q', '.factory/initiatives/I0001/plan.md');
   assert.equal((await check('git commit -m removed')).deny, undefined);
   assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: repo, git: async () => { throw Error('no git'); }, read: async () => '' })).deny, undefined);
+  // Close gate: the commit that makes every job completed needs a passing close record at the newest non-records commit.
+  const closeRepo = join(temp, 'close');
+  mkdirSync(join(closeRepo, '.factory/initiatives/I0001'), { recursive: true });
+  run(closeRepo, 'init', '-q', '-b', 'main', '.');
+  run(closeRepo, 'config', 'user.email', 't@example.invalid');
+  run(closeRepo, 'config', 'user.name', 'T');
+  const closePlan = join(closeRepo, '.factory/initiatives/I0001/plan.md');
+  const closeRecord = join(closeRepo, '.factory/initiatives/I0001/close-verification.json');
+  const completed = good.replace('Status: pending', 'Status: completed').replace('### Evidence\n\n- None.', '### Evidence\n\n- Merged.');
+  const commitAll = message => { run(closeRepo, 'add', '-A'); run(closeRepo, 'commit', '-qm', message); return run(closeRepo, 'rev-parse', 'HEAD').trim(); };
+  const closeCheck = command => checkPlanCommit({ command, cwd: closeRepo, git, read: async path => readFileSync(path, 'utf8') });
+  const recordFor = (head, extra = {}) => `${JSON.stringify({ schema: 'isswf.close-verification', schemaVersion: 1, source: 'local', initiative: 'I0001', head, verificationSha256: 'a'.repeat(64), checks: [{ id: 'unit', status: 'passed' }, { id: 'e2e', status: 'passed' }], ...extra })}\n`;
+  writeFileSync(closePlan, good);
+  writeFileSync(join(closeRepo, 'code.txt'), 'one\n');
+  const first = commitAll('start');
+  writeFileSync(join(closeRepo, 'code.txt'), 'two\n');
+  const codeHead = commitAll('code');
+  const stageClose = () => { writeFileSync(closePlan, completed); run(closeRepo, 'add', '-A'); };
+  const unstageClose = () => { run(closeRepo, 'reset', '-q', '--hard'); };
+
+  // No record: refused, naming the record and the command that writes it.
+  stageClose();
+  const unrecorded = await closeCheck('git commit -m close');
+  assert.match(unrecorded.deny ?? '', /close-verification\.json/u);
+  assert.match(unrecorded.deny, /isswf-verify/u);
+  unstageClose();
+  // A job that is still open is not a close.
+  const open = `
+${good.slice(good.indexOf('## J001')).replaceAll('J001', 'J002')}`;
+  writeFileSync(closePlan, completed + open);
+  run(closeRepo, 'add', '-A');
+  assert.equal((await closeCheck('git commit -m partial')).deny, undefined);
+  unstageClose();
+
+  // A passing record at the newest code commit lets the close through.
+  writeFileSync(closeRecord, recordFor(codeHead));
+  stageClose();
+  assert.equal((await closeCheck('git commit -m close')).deny, undefined);
+  unstageClose();
+
+  // A record that is invalid, failed, partial or for a stale head refuses the close.
+  const refusedWith = async (text, pattern) => {
+    writeFileSync(closeRecord, text);
+    stageClose();
+    assert.match((await closeCheck('git commit -m close')).deny ?? '', pattern, text);
+    unstageClose();
+  };
+  await refusedWith('not json', /invalid/u);
+  await refusedWith(recordFor(codeHead, { checks: [{ id: 'unit', status: 'passed' }, { id: 'e2e', status: 'failed' }] }), /e2e/u);
+  await refusedWith(recordFor(codeHead, { checks: [{ id: 'unit', status: 'not run' }] }), /passed/u);
+  await refusedWith(recordFor(codeHead, { initiative: 'I0002' }), /I0001/u);
+  await refusedWith(recordFor(first), /newest/u);
+  await refusedWith(recordFor('b'.repeat(40)), /head/u);
+  await refusedWith(recordFor(codeHead, { source: 'ci' }), /run URL/u);
+  writeFileSync(closeRecord, recordFor(codeHead, { source: 'ci', runUrl: 'https://example.invalid/run/1' }));
+  stageClose();
+  assert.equal((await closeCheck('git commit -m close')).deny, undefined, 'a CI record names its run');
+  unstageClose();
+
+  // Records-only commits after the verified head are fine; a code change in the closing commit, or after the verified head, is not.
+  writeFileSync(closeRecord, recordFor(codeHead));
+  const recordHead = commitAll('record');
+  assert.notEqual(recordHead, codeHead);
+  stageClose();
+  assert.equal((await closeCheck('git commit -m close')).deny, undefined, 'a records-only commit follows the verified head');
+  unstageClose();
+  writeFileSync(closePlan, completed);
+  assert.equal((await closeCheck('git commit -am close')).deny, undefined, 'with -a the working-tree plan and record are read');
+  unstageClose();
+  stageClose();
+  writeFileSync(join(closeRepo, 'code.txt'), 'three\n');
+  run(closeRepo, 'add', '-A');
+  assert.match((await closeCheck('git commit -m close')).deny ?? '', /code\.txt/u, 'the closing commit changes code');
+  unstageClose();
+  writeFileSync(join(closeRepo, 'code.txt'), 'three\n');
+  const laterHead = commitAll('more code');
+  stageClose();
+  assert.match((await closeCheck('git commit -m close')).deny ?? '', /newest/u, 'code changed after the verified head');
+  writeFileSync(closeRecord, recordFor(laterHead));
+  run(closeRepo, 'add', '-A');
+  assert.equal((await closeCheck('git commit -m close')).deny, undefined, 're-verified at the new head');
+
+  // The gate applies to the transition only: a plan that HEAD already had completed is edited freely, and a git fault allows.
+  run(closeRepo, 'commit', '-qm', 'closed');
+  writeFileSync(closePlan, `${completed}\n- Later note.\n`);
+  run(closeRepo, 'add', '-A');
+  assert.equal((await closeCheck('git commit -m edit')).deny, undefined);
+  assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: closeRepo, git: async (argv, cwd) => (argv[0] === 'log' ? { exitCode: 128, stdout: '' } : git(argv, cwd)), read: async path => readFileSync(path, 'utf8') })).deny, undefined, 'a failed git lookup fails open');
   console.log('PASS plan commit guard');
 } finally {
   rmSync(temp, { recursive: true, force: true });

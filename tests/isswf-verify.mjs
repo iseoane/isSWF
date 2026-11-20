@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { gitFixtureArgs } from './support/git-fixture.mjs';
@@ -195,7 +195,9 @@ try {
     assert.deepEqual([refused.status, refused.out.ok, refused.out.code], [1, false, 'verification-invalid'], label);
   }
   assert.equal(verify(bare, '--tier', 'job').out.code, 'base-not-found');
-  assert.equal(verify(bare, '--base', bareHead).out.code, 'tier-required');
+  const required = verify(bare, '--base', bareHead).out;
+  assert.equal(required.code, 'tier-required');
+  assert.match(required.message, /--stale/u, 'the message lists every selector');
   // --table prints the approved checks as a Markdown table keyed by path class, from `covers` and `cost`.
   const table = makeRepo('table', [
     check('unit', node('-e', ''), { covers: ['tools/', 'tests/'] }),
@@ -214,8 +216,57 @@ try {
   assert.equal(rows['E2E harness'], 'e2e-run (ci)');
   assert.equal(rows['packaging or CI'], 'pack (initiative)');
   assert.equal(rows['docs or records only'], 'docs-lint (job)');
-  assert.equal(rows['initiative close'], 'unit (job), docs-lint (job), pack (initiative)', 'close runs the initiative tier; ci-cost checks stay in CI');
+  assert.equal(rows['initiative close'], 'unit (job), docs-lint (job), pack (initiative), e2e-run (ci)', 'the close suite includes ci-cost checks such as E2E');
   assert.equal(verify(bare, '--base', git(bare, 'rev-parse', 'HEAD'), '--table').out.code, 'verification-invalid', 'the last bare commit holds a malformed file');
+
+  // --record writes the close record for an initiative: the whole suite, ci-cost checks included, at the verified head.
+  const closing = makeRepo('closing', [
+    check('job-one', node('-e', '')),
+    check('init-one', node('-e', ''), { cost: 'initiative' }),
+    check('ci-one', node('-e', ''), { cost: 'ci' }),
+    check('elsewhere', node('-e', ''), { platforms: ['plan9'] }),
+  ], [], { '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
+  const recordPath = join(closing.repo, '.factory/initiatives/I0001/close-verification.json');
+  const closed = verify(closing.repo, '--base', closing.head, '--tier', 'initiative', '--record', 'I0001');
+  assert.equal(closed.status, 0);
+  assert.equal(closed.out.record, '.factory/initiatives/I0001/close-verification.json');
+  assert.deepEqual(statusOf(closed.out), { 'job-one': 'passed', 'init-one': 'passed', 'ci-one': 'passed', elsewhere: 'not run' });
+  assert.deepEqual(JSON.parse(readFileSync(recordPath, 'utf8')), {
+    schema: 'isswf.close-verification',
+    schemaVersion: 1,
+    source: 'local',
+    initiative: 'I0001',
+    head: closing.head,
+    verificationSha256: sha256(git(closing.repo, 'show', 'HEAD:.factory/verification.json') + '\n'),
+    checks: [{ id: 'job-one', status: 'passed' }, { id: 'init-one', status: 'passed' }, { id: 'ci-one', status: 'passed' }, { id: 'elsewhere', status: 'not run' }],
+  });
+  // The record is an initiatives file, so it does not make the tree dirty for the next run, and a failed check is recorded as failed.
+  assert.equal(verify(closing.repo, '--base', closing.head, '--tier', 'initiative', '--record', 'I0001').status, 0);
+  const failing = makeRepo('closing-failed', [check('bad', node('-e', 'process.exit(1)'), { cost: 'ci' })], [], { '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
+  const failed = verify(failing.repo, '--base', failing.head, '--tier', 'initiative', '--record', 'I0001');
+  assert.equal(failed.status, 1);
+  assert.deepEqual(JSON.parse(readFileSync(join(failing.repo, '.factory/initiatives/I0001/close-verification.json'), 'utf8')).checks, [{ id: 'bad', status: 'failed' }]);
+  // Without --record the run writes nothing and ci-cost checks stay out of the initiative tier.
+  const unrecorded = makeRepo('closing-plain', [check('ci-one', node('-e', ''), { cost: 'ci' })], [], { '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
+  assert.deepEqual(statusOf(verify(unrecorded.repo, '--base', unrecorded.head, '--tier', 'initiative').out), { 'ci-one': 'not run' });
+  assert.equal(existsSync(join(unrecorded.repo, '.factory/initiatives/I0001/close-verification.json')), false);
+  // Refusals write nothing: the wrong tier, a malformed or unknown initiative, a dirty tree outside the initiatives and a stale manifest.
+  for (const [label, args, code] of [
+    ['job tier', ['--tier', 'job', '--record', 'I0001'], 'record-needs-initiative-tier'],
+    ['only', ['--only', 'ci-one', '--record', 'I0001'], 'record-needs-initiative-tier'],
+    ['id', ['--tier', 'initiative', '--record', '../I0001'], 'invalid-initiative'],
+    ['unknown', ['--tier', 'initiative', '--record', 'I0002'], 'initiative-not-found'],
+  ]) {
+    const refused = verify(unrecorded.repo, '--base', unrecorded.head, ...args);
+    assert.deepEqual([refused.status, refused.out.code], [1, code], label);
+  }
+  write(unrecorded.repo, 'tools/dirty.txt', 'x');
+  assert.equal(verify(unrecorded.repo, '--base', unrecorded.head, '--tier', 'initiative', '--record', 'I0001').out.code, 'dirty-tree');
+  rmSync(join(unrecorded.repo, 'tools'), { recursive: true });
+  const staleRecord = makeRepo('closing-stale', [check('ok', node('-e', ''))], [recorded('tools/a.txt')], { 'tools/a.txt': 'two', '.factory/initiatives/I0001/plan.md': '# I0001: x\n' });
+  assert.equal(verify(staleRecord.repo, '--base', staleRecord.head, '--tier', 'initiative', '--record', 'I0001').status, 2);
+  assert.equal(existsSync(join(staleRecord.repo, '.factory/initiatives/I0001/close-verification.json')), false);
+  assert.equal(existsSync(join(unrecorded.repo, '.factory/initiatives/I0001/close-verification.json')), false);
 
   console.log('PASS isswf-verify statuses, tiers, base-read file, bounded output and refusals');
 } finally {
