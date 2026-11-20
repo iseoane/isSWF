@@ -41,13 +41,13 @@ Type: enhancement
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Size: S (close gate fix)
 - Objective: An initiative close is refused when any check in its close record did not run, so a platform-limited full suite cannot be skipped silently.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1 on feat/i0063-j003-close-not-run.
+- Next step: None.
 
 ### Acceptance
 
@@ -56,3 +56,4 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: I0061 close: a local --record on Windows passed 6 checks and left check-docs, check-quality, lint and dead-code not run (Linux-only); the gate accepted such a record by design (J010: at least one passed). Closed with a source ci record instead (Quality run 44796797130 at 66f83049). Operator asked to fix it first in I0063.
+- 2026-11-20: PR #372 merged (close record needs every check passed; --record exits 1 on not-run); review V001 pass; coordinator observed focused tests; CI green on 09d272a8.
