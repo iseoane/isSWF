@@ -162,13 +162,13 @@ Type: enhancement
 
 ## J009
 
-- Status: pending
+- Status: in-progress
 - Size: S (template)
 - Objective: Review finding resolutions use a closed vocabulary with the rule or check that produced each finding, so dismissed findings and silent rules can be counted.
 - Depends on: J008
-- Brief: [brief-r1.md](jobs/J009/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Worker implements brief r1 on feat/i0061-j009-resolutions.
 
 ### Acceptance
 
