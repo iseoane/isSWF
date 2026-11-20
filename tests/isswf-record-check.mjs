@@ -118,6 +118,26 @@ assert.deepEqual(missing('A001.md', attempt([], ['Process deviations observed:']
 assert.deepEqual(missing('brief-r1.md', ''), [], 'briefs have no required labels');
 assert.deepEqual(missing('A001.md', attempt([], reviewFields)).map(({ field }) => field), ['Deviations from required procedure and consequence:'], 'an attempt does not need review labels');
 
+// A review record that is new relative to the base carries finding resolutions from the closed vocabulary, each with a reason; older records keep their wording.
+const resolutionLabel = 'Finding resolutions, recorded afterwards by the coordinator:';
+const reviewWith = resolutions => `${attempt([], reviewFields).replace('# Attempt report', '# Review report')}- ${resolutionLabel} ${resolutions}\n`;
+const resolutionViolations = (text, newRecord = true) => checkRecord({ path: recordPaths('V001.md')[0], text, newRecord }).violations;
+const resolutionCodes = (resolutions, newRecord = true) => resolutionViolations(reviewWith(resolutions), newRecord).map(({ code }) => code);
+for (const resolution of ['fixed', 'wrong', 'known-limit', 'not-material', 'dismissed']) assert.deepEqual(resolutionCodes(`F1 ${resolution}: the reason`), [], resolution);
+assert.deepEqual(resolutionCodes('F1 fixed: reason one; S1 known-limit: tracked by J012; N2 dismissed: a reason, with a comma'), [], 'several entries on one line');
+assert.deepEqual(resolutionCodes('None.'), []);
+const templateLine = (await readFile(join(source, '.factory/templates/review.md'), 'utf8')).split('\n').find(line => line.includes(resolutionLabel));
+assert.deepEqual(resolutionViolations(`${attempt([], reviewFields).replace('# Attempt report', '# Review report')}${templateLine}\n`), [], 'the unfilled line of the real template');
+for (const bad of ['F1 intentional: reason', 'F1 fixed', 'F1 fixed:', 'F1 not material: reason', 'fixed: reason', 'F1 fixed: ok; S1 wrong']) assert.deepEqual(resolutionCodes(bad), ['finding-resolution-invalid'], bad);
+assert.deepEqual(resolutionCodes('F1 intentional: reason', false), [], 'a record that existed at the base keeps its wording');
+assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: reviewWith('F1 intentional: reason') }).violations, [], 'without a base nothing is new');
+const badLine = reviewWith('F1 fixed: ok; S1 wrong');
+assert.deepEqual(resolutionViolations(badLine), [{ code: 'finding-resolution-invalid', field: 'Finding resolutions', line: lineOf(badLine, 'Finding resolutions'), message: 'finding resolution "S1 wrong" is not "<ID> <fixed|wrong|known-limit|not-material|dismissed>: <reason>"' }]);
+const nested = `${reviewWith('')}  - F1 fixed: reason\n  - S1 maybe: reason\n`;
+assert.deepEqual(resolutionViolations(nested).map(({ message, line }) => [message.slice(0, 36), line]), [['finding resolution "S1 maybe: reason', lineOf(nested, 'S1 maybe')]], 'nested bullets are entries');
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: `${attempt([])}- Finding resolutions: F1 bogus\n`, newRecord: true }).violations, [], 'attempts have no resolutions');
+assert.ok((await readFile(join(source, '.factory/templates/review.md'), 'utf8')).includes(resolutionLabel), 'the template carries the label the check reads');
+
 // The CLI reads files, adds the job directory listing for a plan, prints JSON and exits 1 on any violation.
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-check-')));
 try {
@@ -156,6 +176,36 @@ try {
     assert.equal(refused.status, 1, args.join(' '));
     assert.equal(refused.stdout, '', args.join(' '));
   }
+  // `--base REV` marks the records absent at REV as new: only they must use the resolution vocabulary.
+  const git = (...args) => spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', '-C', root, ...args], { encoding: 'utf8', timeout: 15000 });
+  const oldReview = join(state, 'jobs/J001/V001.md');
+  const newReview = join(state, 'jobs/J001/V002.md');
+  await writeFile(oldReview, reviewWith('F1 intentional: kept'));
+  assert.equal(git('init', '-q').status, 0);
+  assert.equal(git('add', '-A').status, 0);
+  assert.equal(git('commit', '-q', '-m', 'base').status, 0);
+  await writeFile(newReview, reviewWith('F1 intentional: kept'));
+  const checked = (...files) => cli('--project', root, '--base', 'HEAD', ...files.flatMap(file => ['--file', file]));
+  const judged = checked(oldReview, newReview);
+  assert.equal(judged.status, 1, judged.stderr);
+  assert.deepEqual(JSON.parse(judged.stdout).files.map(({ file, violations }) => [file, violations.map(({ code }) => code)]), [[oldReview, []], [newReview, ['finding-resolution-invalid']]]);
+  await writeFile(newReview, reviewWith('F1 fixed: kept'));
+  assert.equal(checked(oldReview, newReview).status, 0);
+  assert.equal(cli('--project', root, '--file', newReview).status, 0, 'without --base nothing is new');
+  // A project below the repository top level resolves its records from the project directory, not the top level.
+  const nested = join(root, 'sub');
+  const nestedState = join(nested, '.factory/initiatives/I0001/jobs/J001');
+  await mkdir(nestedState, { recursive: true });
+  const nestedOld = join(nestedState, 'V001.md');
+  const nestedNew = join(nestedState, 'V002.md');
+  await writeFile(nestedOld, reviewWith('F1 intentional: kept'));
+  assert.equal(git('add', '-A').status, 0);
+  assert.equal(git('commit', '-q', '-m', 'nested base').status, 0);
+  await writeFile(nestedNew, reviewWith('F1 intentional: kept'));
+  const nestedRun = cli('--project', nested, '--base', 'HEAD', '--file', nestedOld, '--file', nestedNew);
+  assert.equal(nestedRun.status, 1, nestedRun.stderr);
+  assert.deepEqual(JSON.parse(nestedRun.stdout).files.map(({ violations }) => violations.map(({ code }) => code)), [[], ['finding-resolution-invalid']]);
+  for (const base of ['no-such-rev', '--file']) assert.equal(cli('--project', root, '--base', base, '--file', newReview).status, 1, `refuses base ${base}`);
 } finally { await rm(root, { recursive: true, force: true }); }
 
 console.log('record check tests passed');

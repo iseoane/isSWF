@@ -60,16 +60,40 @@ function fieldViolations(kind, text) {
     .map(label => ({ code: 'missing-field', field: label, message: `record lacks the template field "${label}"` }));
 }
 
+export const RESOLUTIONS = ['fixed', 'wrong', 'known-limit', 'not-material', 'dismissed'];
+const RESOLUTION_LABEL = /^\s*(?:[-*]\s+)?Finding resolutions\b[^:]*:/u;
+const RESOLUTION_ENTRY = new RegExp(`^[A-Z]+\\d+ (?:${RESOLUTIONS.join('|')}): \\S`, 'u');
+
+// The label's own text plus the nested bullets under it, each split into entries at "; <ID> ". An unfilled
+// template placeholder or "None." names no resolution.
+function resolutionViolations(text) {
+  const lines = text.split('\n');
+  const start = lines.findIndex(line => RESOLUTION_LABEL.test(line));
+  if (start < 0) return [];
+  const entries = [];
+  const add = (index, raw) => {
+    const value = raw.trim().replace(/^`([^`]*)`\.?$/u, '$1');
+    if (value === '' || value.startsWith('<') || value === 'None.') return;
+    for (const entry of value.split(/;\s+(?=[A-Za-z]+\d+ )/u)) entries.push({ index, entry: entry.trim() });
+  };
+  add(start, lines[start].replace(RESOLUTION_LABEL, ''));
+  for (let index = start + 1; index < lines.length && /^\s+[-*]\s/u.test(lines[index]); index++) add(index, lines[index].replace(/^\s+[-*]\s+/u, ''));
+  return entries
+    .filter(({ entry }) => !RESOLUTION_ENTRY.test(entry))
+    .map(({ index, entry }) => ({ code: 'finding-resolution-invalid', field: 'Finding resolutions', line: index + 1, message: `finding resolution "${entry}" is not "<ID> <${RESOLUTIONS.join('|')}>: <reason>"` }));
+}
+
 /**
  * Checks one plan or record file and only reports: it never edits, grants or starts anything.
  * `path` may use `\` or `/`. `jobFiles` maps a job ID to the file names in its directory and is
- * only read when `path` is a plan.
+ * only read when `path` is a plan. `newRecord` is true for a record absent at the base; only a new
+ * review is held to the finding resolution vocabulary.
  * @returns {{ ok: boolean, violations: { code: string, job?: string, field?: string, line?: number, message: string }[] }}
  */
-export function checkRecord({ path, text, jobFiles }) {
+export function checkRecord({ path, text, jobFiles, newRecord }) {
   const name = baseName(path);
   let violations = [];
   if (name === 'plan.md') violations = planViolations(text, jobFiles);
-  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...fieldViolations(name[0], text)];
+  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? resolutionViolations(text) : [])];
   return { ok: violations.length === 0, violations };
 }
