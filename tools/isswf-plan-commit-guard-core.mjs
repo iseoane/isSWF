@@ -63,15 +63,27 @@ async function closeProblems({ state, initiative, path, plan, all, root, listed,
   const recordPath = `${state}/initiatives/${initiative}/close-verification.json`;
   let text;
   if (all) { try { text = await read(`${root}/${recordPath}`); } catch { /* reported as missing */ } }
-  else { const staged = await git(['show', `:${recordPath}`], root); if (staged.exitCode === 0) text = staged.stdout; }
+  else {
+    // An empty listing means the index has no record; a failed lookup is a fault, which allows the commit.
+    const listing = await git(['ls-files', '--', recordPath], root);
+    if (listing.exitCode !== 0) throw Error('git ls-files failed');
+    if (listing.stdout.trim()) {
+      const staged = await git(['show', `:${recordPath}`], root);
+      if (staged.exitCode !== 0) throw Error('git show failed');
+      text = staged.stdout;
+    }
+  }
   if (text === undefined) return [`${recordPath} is missing`];
   const record = recordProblems(text, initiative);
   if (Array.isArray(record)) return record;
   const problems = [];
   const outside = listed.filter(item => !item.startsWith(`${state}/initiatives/`));
-  if (outside.length) problems.push(`this commit also changes files outside the initiatives directory (${outside.join(', ')}), which the verified head does not cover`);
-  const known = await git(['cat-file', '-e', `${record.head}^{commit}`], root);
-  if (known.exitCode !== 0) return [...problems, `the record head ${record.head} is not a commit of this repository`];
+  // A commit that reads the working tree (-a, a pathspec, a chained command) lists its tracked changes, which can include ones it will not record.
+  if (outside.length) problems.push(`this commit also changes files outside the initiatives directory (${outside.join(', ')}), which the verified head does not cover${all ? '; this commit reads the working tree, so unstaged changes count: stage only the plan and the record and commit them alone' : ''}`);
+  // With --quiet, exit 1 means the object is absent; any other failure is a fault.
+  const known = await git(['rev-parse', '--verify', '--quiet', `${record.head}^{commit}`], root);
+  if (known.exitCode === 1) return [...problems, `the record head ${record.head} is not a commit of this repository`];
+  if (known.exitCode !== 0) throw Error('git rev-parse failed');
   const inHistory = await git(['merge-base', '--is-ancestor', record.head, 'HEAD'], root);
   if (inHistory.exitCode === 1) problems.push(`the record head ${record.head} is not in the history of HEAD`);
   else if (inHistory.exitCode !== 0) throw Error('git history lookup failed');
@@ -86,7 +98,7 @@ async function closeProblems({ state, initiative, path, plan, all, root, listed,
   return problems;
 }
 
-const describe =(path, { code, job, field, line }) => `${path}: ${code}${[job, field].filter(Boolean).length ? ` at ${[job, field].filter(Boolean).join(' ')}` : ''}${line === undefined ? '' : ` (line ${line})`}`;
+const describe = (path, { code, job, field, line }) => `${path}: ${code}${[job, field].filter(Boolean).length ? ` at ${[job, field].filter(Boolean).join(' ')}` : ''}${line === undefined ? '' : ` (line ${line})`}`;
 
 /**
  * Refuses a `git commit` that would record a plan `isswf-status` cannot read back, before it runs: the staged plan, or the working-tree plan with `-a`, a pathspec, or an earlier command in the same call.

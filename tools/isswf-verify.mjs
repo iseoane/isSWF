@@ -42,7 +42,7 @@ function parseArguments(argv) {
   if (options.base !== undefined && !REF.test(options.base)) throw fail('invalid-base');
   if (options.tier === undefined && options.only === undefined && !options.stale && !options.table) throw fail('tier-required', 'pass --tier job|initiative, --only <id>, --stale or --table');
   if (options.record !== undefined) {
-    if (options.tier !== 'initiative' || options.only !== undefined || options.stale || options.table) throw fail('record-needs-initiative-tier', '--record needs --tier initiative, without --only, --stale or --table');
+    if (options.tier !== 'initiative' || options.only !== undefined || options.stale || options.table || options['allow-stale']) throw fail('record-needs-initiative-tier', '--record needs --tier initiative, without --only, --stale, --allow-stale or --table');
     if (!/^I\d+$/u.test(options.record)) throw fail('invalid-initiative', '--record needs an initiative ID such as I0001');
   }
   return options;
@@ -146,9 +146,9 @@ function closeRecordTarget(options, project, state) {
   let found = false;
   try { found = statSync(resolve(project, directory)).isDirectory(); } catch { /* reported below */ }
   if (!found) throw fail('initiative-not-found', `${directory} does not exist`);
-  // Records are the one place a run may leave changes; anything else would make the verified head differ from the tree that ran.
-  const outside = gitText(project, ['status', '--porcelain', '--', '.', `:(exclude)${state}/initiatives`]);
-  if (outside !== '') throw fail('dirty-tree', 'commit or stash changes outside the initiatives directory before recording a close verification');
+  // Records are the one place a run may leave changes; a tracked change elsewhere would make the verified head differ from the tree that ran. Untracked files are the operator's and are ignored.
+  const outside = gitText(project, ['status', '--porcelain', '--untracked-files=no', '--', '.', `:(exclude)${state}/initiatives`]);
+  if (outside !== '') throw fail('dirty-tree', 'commit or stash tracked changes outside the initiatives directory before recording a close verification');
   return `${directory}/close-verification.json`;
 }
 
@@ -168,6 +168,8 @@ function verify(options) {
   const dirty = status === undefined ? null : status !== '';
   const verificationSha256 = sha256(blob.stdout);
   const recordPath = options.record === undefined ? undefined : closeRecordTarget(options, project, state);
+  // A stale manifest means the approved checks may not match the project, so a record run stops before it spends any check.
+  if (recordPath !== undefined && stale.length > 0) return { ok: false, code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files before recording', base, tier: options.tier, stale, results: [] };
   const costs = options.record === undefined ? TIER_COSTS[options.tier] : COSTS;
   const selected = options.only === undefined ? checks : checks.filter(entry => entry.id === options.only);
   const results = selected.map(check => {
@@ -176,7 +178,6 @@ function verify(options) {
     return { ...stamp, ...(applies ? execute(check, project) : { status: 'not run', exitCode: null }) };
   });
   const refused = stale.length > 0 && !options['allow-stale'];
-  // A stale manifest means the approved checks may not match the project, so it leaves no record to close on.
   if (recordPath !== undefined && !refused) {
     const record = { schema: RECORD_SCHEMA, schemaVersion: 1, source: 'local', initiative: options.record, head: candidate, verificationSha256, checks: results.map(({ checkId, status }) => ({ id: checkId, status })) };
     writeFileSync(resolve(project, recordPath), `${JSON.stringify(record, null, 2)}\n`);

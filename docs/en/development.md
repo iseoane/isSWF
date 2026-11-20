@@ -117,10 +117,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: node tools/isswf-verify.mjs --project "$PWD" --tier initiative --record I0001
+      - run: <pinned-launcher: the project's pinned command for isswf-verify> --project "$PWD" --tier initiative --record I0001
 ```
 
-Use the project's own full-suite and E2E commands in place of the `isswf-verify` step when they do not fit the approved checks, and add Windows or macOS jobs only when the close needs them. The per-pull-request fast tier stays automatic. This repository's own workflows are unchanged by this guide.
+The placeholder stands for the pinned launcher form that the operations guide describes for installed projects; the source-checkout path is not a version-selection shortcut. A record written in the runner is discarded with it: after the run passes, the coordinator writes the `source: "ci"` record in the project and commits it. Use the project's own full-suite and E2E commands in place of the `isswf-verify` step when they do not fit the approved checks, and add Windows or macOS jobs only when the close needs them. The per-pull-request fast tier stays automatic. This repository's own workflows are unchanged by this guide.
 
 ## Platform and host discovery checks
 

@@ -117,10 +117,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: node tools/isswf-verify.mjs --project "$PWD" --tier initiative --record I0001
+      - run: <launcher-fijado: el comando fijado del proyecto para isswf-verify> --project "$PWD" --tier initiative --record I0001
 ```
 
-Usa los comandos propios del proyecto para la suite completa y E2E en lugar del paso `isswf-verify` cuando no encajen en las comprobaciones aprobadas, y añade trabajos de Windows o macOS solo cuando el cierre los necesite. El nivel rápido por pull request sigue siendo automático. Esta guía no modifica los workflows de este repositorio.
+El marcador representa la forma del launcher fijado que la guía de operaciones describe para proyectos instalados; la ruta del checkout de código fuente no es un atajo para elegir versión. Un registro escrito en el runner se descarta con él: cuando la ejecución pasa, el coordinador escribe en el proyecto el registro `source: "ci"` y lo confirma. Usa los comandos propios del proyecto para la suite completa y E2E en lugar del paso `isswf-verify` cuando no encajen en las comprobaciones aprobadas, y añade trabajos de Windows o macOS solo cuando el cierre los necesite. El nivel rápido por pull request sigue siendo automático. Esta guía no modifica los workflows de este repositorio.
 
 ## Comprobaciones de plataforma y descubrimiento de skills
 
