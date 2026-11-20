@@ -138,6 +138,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: J001 V001 suggestions, deferred to keep J001 within the session quota.
+- 2026-11-20: J002 V002 N1 (missing space at tools/isswf-verify.mjs:56) and J005 V002 I2 (docs show --table without --base HEAD).
 
 ## J008
 
@@ -195,6 +196,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: split from J005.
+- 2026-11-20: J005 V001 S2: the --table initiative-close row omits ci-cost checks (E2E may be ci cost); revisit here.
 
 ## J011
 

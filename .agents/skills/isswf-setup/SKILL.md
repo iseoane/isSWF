@@ -104,6 +104,8 @@ Inspect available project checks for lint, tests, build, dead code and duplicate
 
 From that inventory, propose `<selected-state>/verification.json` (`schemaVersion: 1`, `derivedFrom`, and per check `id`, `argv`, `platforms`, `cost`, `covers`, `timeoutSeconds`; `docs/en/operations.md` under "Verification runner" defines each field) with `argv` arrays and `node <cli.js>` instead of `npm` or `npx`, and platforms only where the project actually runs the check. Show the proposal and write the file only on the operator's approval; never write it from detection alone. Record the file's SHA-256 as the approved digest in `project-setup.md`. `tools/isswf-verify.mjs` runs it from the base ref, never from the candidate.
 
+Then propose a check rule for the target `AGENTS.md`: the table `node tools/isswf-verify.mjs --project <project> --base HEAD --table` prints from the approved file (run it after that file is committed), keyed by path class (code, tests, E2E harness, packaging or CI, docs or records only, initiative close) with the check ids and cost tier each requires. When `AGENTS.md` already has check rules, show them and the proposal side by side and let the operator choose the existing rules, the proposal, or a merge they edit. Write nothing to `AGENTS.md` before that choice; the chosen rule overrides the coordinator's default verification tiers.
+
 ### Establish readiness for normal feature delivery
 
 Resolve the stable prerequisites once during setup, using [the feature-to-PR contract](../../roles/references/feature-delivery.md#start-from-a-prepared-setup):

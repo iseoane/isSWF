@@ -202,6 +202,7 @@ node tools/isswf-verify.mjs --project /absolute/project --tier job
 node tools/isswf-verify.mjs --project /absolute/project --tier initiative --base <ref>
 node tools/isswf-verify.mjs --project /absolute/project --only <check-id>
 node tools/isswf-verify.mjs --project /absolute/project --stale
+node tools/isswf-verify.mjs --project /absolute/project --table
 ```
 
 `tools/isswf-verify.mjs` ejecuta las comprobaciones que enumera `<directorio de estado>/verification.json` e imprime un objeto JSON con un resultado por comprobación. Nunca inicia un shell, no escribe nada y no concede nada. El archivo está versionado en Git y se lee en la base, `--base <ref>` o, por defecto, la base de fusión de `HEAD` y `origin/main`, nunca desde el candidato, de modo que un cambio no puede reescribir las comprobaciones que lo juzgan. Un rechazo imprime `{ ok: false, code, ... }` y termina con código 1: `verification-not-found`, `verification-invalid`, `base-not-found`, `check-not-found` o `tier-required` (pasa `--tier` o `--only`).
@@ -212,6 +213,8 @@ node tools/isswf-verify.mjs --project /absolute/project --stale
 - Obsolescencia: el ejecutor calcula el hash de cada ruta de `derivedFrom` en el árbol de trabajo y lista `stale: [{ path, recorded, current }]` en su salida; `current` es `null` si falta el archivo. Cuando alguna entrada está obsoleta imprime `{ ok: false, code: "stale" }` con los resultados y termina con código 2 (una comprobación fallida sigue dando 1), salvo que se pase `--allow-stale`. `--stale` imprime solo ese veredicto, no ejecuta ninguna comprobación y no necesita `--tier`, así que una puerta puede llamarlo a bajo coste. La obsolescencia compara el `derivedFrom` del propio checkout, así que una rama que refresca el archivo queda al día, mientras que las comprobaciones siguen viniendo de la base. Una ruta de `derivedFrom` debe ser relativa, escrita con `/` y sin segmentos `.` ni `..`, o el archivo es `verification-invalid`; una que no se pueda leer se rechaza como `derivedfrom-unreadable`. Para refrescar el archivo, actualiza a la vez sus comprobaciones y los hashes.
 - `npm`, `npx` y los lanzadores `.cmd` o `.bat` quedan `refused` en todas las plataformas, porque Windows solo los inicia mediante un shell: escribe `node <cli.js>`.
 - Límites: un tiempo agotado detiene el proceso iniciado, y un descendiente que este haya iniciado en Windows puede sobrevivirle. El ejecutor corre el argv aprobado en la base contra el árbol de trabajo, así que muestra qué pasó para ese `candidate` y estado `dirty`, no que el argv sea seguro.
+
+`--table` no ejecuta nada: imprime las comprobaciones aprobadas como una tabla Markdown por clase de ruta (arnés E2E, empaquetado o CI, solo documentación o registros, tests, código, cierre de iniciativa), derivada de `covers` y `cost` de cada comprobación. Una ruta de `covers` cuenta para la primera clase que coincide, y la fila de cierre de iniciativa lista el nivel de iniciativa. Setup ofrece la tabla como regla de comprobaciones del proyecto.
 
 La skill `isswf-setup` propone el archivo a partir del inventario de calidad del proyecto y lo escribe solo cuando el operador lo aprueba; el resumen aprobado va en `project-setup.md`. `tools/check-quality.mjs` y el trabajo de CI de plataformas ejecutan `tests/isswf-verify.mjs`.
 

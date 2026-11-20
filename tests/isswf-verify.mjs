@@ -187,6 +187,27 @@ try {
   }
   assert.equal(verify(bare, '--tier', 'job').out.code, 'base-not-found');
   assert.equal(verify(bare, '--base', bareHead).out.code, 'tier-required');
+  // --table prints the approved checks as a Markdown table keyed by path class, from `covers` and `cost`.
+  const table = makeRepo('table', [
+    check('unit', node('-e', ''), { covers: ['tools/', 'tests/'] }),
+    check('docs-lint', node('-e', ''), { covers: ['docs/', 'README.md'] }),
+    check('pack', node('-e', ''), { covers: ['.github/', 'package.json'], cost: 'initiative' }),
+    check('e2e-run', node('-e', ''), { covers: ['tests/e2e/'], cost: 'ci' }),
+  ]);
+  const printed = spawnSync(process.execPath, [runner, '--project', table.repo, '--base', table.head, '--table'], { encoding: 'utf8', timeout: 60000 });
+  assert.equal(printed.status, 0, printed.stdout);
+  const rows = Object.fromEntries(printed.stdout.split('\n').filter(line => line.startsWith('| ') && !line.startsWith('| Path class') && !line.startsWith('| ---')).map(line => {
+    const [pathClass, checks] = line.split('|').slice(1).map(cell => cell.trim());
+    return [pathClass, checks];
+  }));
+  assert.equal(rows.code, 'unit (job)');
+  assert.equal(rows.tests, 'unit (job)', 'a cover path counts for its first matching class only');
+  assert.equal(rows['E2E harness'], 'e2e-run (ci)');
+  assert.equal(rows['packaging or CI'], 'pack (initiative)');
+  assert.equal(rows['docs or records only'], 'docs-lint (job)');
+  assert.equal(rows['initiative close'], 'unit (job), docs-lint (job), pack (initiative)', 'close runs the initiative tier; ci-cost checks stay in CI');
+  assert.equal(verify(bare, '--base', git(bare, 'rev-parse', 'HEAD'), '--table').out.code, 'verification-invalid', 'the last bare commit holds a malformed file');
+
   console.log('PASS isswf-verify statuses, tiers, base-read file, bounded output and refusals');
 } finally {
   rmSync(temp, { recursive: true, force: true });

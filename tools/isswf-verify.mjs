@@ -28,7 +28,7 @@ const gitText = (cwd, args) => {
 function parseArguments(argv) {
   const options = {};
   const flags = new Set(['--project', '--base', '--tier', '--only']);
-  const switches = new Set(['--stale', '--allow-stale']);
+  const switches = new Set(['--stale', '--allow-stale', '--table']);
   for (let index = 0; index < argv.length; index += 1) {
     if (switches.has(argv[index])) { options[argv[index].slice(2)] = true; continue; }
     if (!flags.has(argv[index]) || argv[index + 1] === undefined) throw fail('invalid-arguments', `unknown or incomplete argument: ${argv[index]}`);
@@ -38,7 +38,7 @@ function parseArguments(argv) {
   if (typeof options.project !== 'string' || !isAbsolute(options.project)) throw fail('invalid-project', '--project needs an absolute path');
   if (options.tier !== undefined && !Object.hasOwn(TIER_COSTS, options.tier)) throw fail('invalid-tier', '--tier is job or initiative');
   if (options.base !== undefined && !REF.test(options.base)) throw fail('invalid-base');
-  if (options.tier === undefined && options.only === undefined && !options.stale) throw fail('tier-required', 'pass --tier job|initiative or --only <id>');
+  if (options.tier === undefined && options.only === undefined && !options.stale && !options.table) throw fail('tier-required', 'pass --tier job|initiative, --only <id> or --table');
   return options;
 }
 
@@ -96,8 +96,8 @@ function execute(check, project) {
   return { ...outcome, status: result.status === 0 ? 'passed' : 'failed' };
 }
 
-/** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. */
-function verify(options) {
+/** Resolves the candidate and base commits and reads the approved verification file at the base. */
+function readApproved(options) {
   const project = resolve(options.project);
   const candidate = gitText(project, ['rev-parse', '--verify', 'HEAD^{commit}']);
   if (candidate === undefined) throw fail('not-a-repository');
@@ -111,6 +111,30 @@ function verify(options) {
   const path = `${state}/verification.json`;
   const blob = git(project, ['show', `${base}:${path}`]);
   if (blob.status !== 0) throw fail('verification-not-found', `${path} is not committed at the base`);
+  return { project, candidate, base, path, blob };
+}
+
+// First matching class wins, so a cover path counts for one row; a path matching none is code.
+const PATH_CLASSES = [
+  ['E2E harness', path => /(?:^|\/)e2e(?:\/|-|\.|$)/iu.test(path)],
+  ['packaging or CI', path => /^(?:\.github\/|package(?:-lock)?\.json$|\.claude-plugin\/)/u.test(path)],
+  ['docs or records only', path => /^(?:docs\/|[^/]+\.md$|\.factory\/|\.isswf\/)/u.test(path)],
+  ['tests', path => /^tests?\//u.test(path)],
+  ['code', () => true],
+];
+
+/** Renders the checks as a Markdown table keyed by path class; the initiative-close row lists the initiative tier, and `ci` checks run only in CI. */
+function renderTable(checks) {
+  const label = check => `${check.id} (${check.cost})`;
+  const rowFor = (name, chosen) => `| ${name} | ${chosen.length ? chosen.map(label).join(', ') : 'none'} |`;
+  const rows = PATH_CLASSES.map(([name], index) => rowFor(name, checks.filter(check => check.covers.some(path => PATH_CLASSES.findIndex(([, matches]) => matches(path)) === index))));
+  rows.push(rowFor('initiative close', checks.filter(check => TIER_COSTS.initiative.includes(check.cost))));
+  return ['| Path class | Checks (cost) |', '| --- | --- |', ...rows].join('\n');
+}
+
+/** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. */
+function verify(options) {
+  const { project, candidate, base, path, blob } = readApproved(options);
   const { checks } = parseVerification(blob.stdout);
   // Staleness compares the candidate's own derivedFrom, so a branch that refreshes the file is fresh; the base file falls back when the candidate has none.
   let candidateFile;
@@ -135,10 +159,15 @@ const FAILURES = new Set(['failed', 'timeout', 'refused', 'unavailable']);
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   try {
-    const report = verify(parseArguments(process.argv.slice(2)));
-    console.log(JSON.stringify(report, null, 2));
-    // 1 for a failed check, 2 for staleness alone.
-    process.exitCode = report.results.some(result => FAILURES.has(result.status)) ? 1 : report.ok ? 0 : 2;
+    const options = parseArguments(process.argv.slice(2));
+    if (options.table) {
+      console.log(renderTable(parseVerification(readApproved(options).blob.stdout).checks));
+    } else {
+      const report = verify(options);
+      console.log(JSON.stringify(report, null, 2));
+      // 1 for a failed check, 2 for staleness alone.
+      process.exitCode = report.results.some(result => FAILURES.has(result.status)) ? 1 : report.ok ? 0 : 2;
+    }
   } catch (error) {
     if (!error.code) throw error;
     console.log(JSON.stringify({ ok: false, code: error.code, message: error.message }, null, 2));

@@ -202,6 +202,7 @@ node tools/isswf-verify.mjs --project /absolute/project --tier job
 node tools/isswf-verify.mjs --project /absolute/project --tier initiative --base <ref>
 node tools/isswf-verify.mjs --project /absolute/project --only <check-id>
 node tools/isswf-verify.mjs --project /absolute/project --stale
+node tools/isswf-verify.mjs --project /absolute/project --table
 ```
 
 `tools/isswf-verify.mjs` runs the checks listed in `<state directory>/verification.json` and prints one JSON object with one result per check. It never starts a shell, writes nothing and grants nothing. The file is tracked in Git and is read at the base, `--base <ref>` or by default the merge base of `HEAD` and `origin/main`, never from the candidate, so a change cannot rewrite the checks that judge it. A refusal prints `{ ok: false, code, ... }` and exits 1: `verification-not-found`, `verification-invalid`, `base-not-found`, `check-not-found` or `tier-required` (pass `--tier` or `--only`).
@@ -212,6 +213,8 @@ node tools/isswf-verify.mjs --project /absolute/project --stale
 - Staleness: the runner hashes each `derivedFrom` path in the working tree and lists `stale: [{ path, recorded, current }]` in its output; `current` is `null` for a missing file. When any entry is stale it prints `{ ok: false, code: "stale" }` with the results and exits 2 (a failed check still exits 1), unless `--allow-stale` is passed. `--stale` prints only that verdict, runs no check and needs no `--tier`, so a gate can call it cheaply. Staleness compares the checkout's own `derivedFrom`, so a branch that refreshes the file is fresh, while the checks still come from the base. A `derivedFrom` path must be a relative path written with `/` and no `.` or `..` segment, or the file is `verification-invalid`; one that cannot be read is refused as `derivedfrom-unreadable`. Refresh the file by updating its checks and the hashes together.
 - `npm`, `npx` and `.cmd` or `.bat` launchers are `refused` on every platform, because Windows starts them only through a shell: write `node <cli.js>` instead.
 - Limits: a timeout stops the started process, and a descendant it started on Windows can outlive it. The runner executes the base-approved argv against the working tree, so it shows what passed for that `candidate` and `dirty` state, not that the argv is safe.
+
+`--table` runs nothing: it prints the approved checks as a Markdown table keyed by path class (E2E harness, packaging or CI, docs or records only, tests, code, initiative close), derived from each check's `covers` and `cost`. A cover path counts for the first class it matches, and the initiative-close row lists the initiative tier. Setup offers the table as the project's check rule.
 
 The skill `isswf-setup` proposes the file from the project's quality inventory and writes it only when the operator approves it; the approved digest goes in `project-setup.md`. `tools/check-quality.mjs` and the platform CI job run `tests/isswf-verify.mjs`.
 
