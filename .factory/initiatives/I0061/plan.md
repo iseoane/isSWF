@@ -42,13 +42,13 @@ Type: enhancement
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Size: M (recipe and runner)
 - Objective: A change is verified by running it, through a declared recipe rather than model judgment.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Research which project types to support first.
+- Next step: Researcher answers brief r1; implementation brief follows.
 
 ### Acceptance
 
