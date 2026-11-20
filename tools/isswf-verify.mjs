@@ -42,6 +42,9 @@ function parseArguments(argv) {
   return options;
 }
 
+// A project-relative path spelled one way, with `/` and no `.` or `..` segment, so equal paths compare equal.
+const isCanonicalPath = path => !isAbsolute(path) && !/^[A-Za-z]:|\\/u.test(path) && path.split('/').every(segment => segment !== '' && segment !== '.' && segment !== '..');
+
 const isStrings = value => Array.isArray(value) && value.every(item => typeof item === 'string');
 
 /** Returns the `derivedFrom` entries and checks of an `isswf.verification` schemaVersion 1 file, or throws `verification-invalid` naming the first fault. */
@@ -50,7 +53,7 @@ function parseVerification(bytes) {
   let file;
   try { file = JSON.parse(bytes.toString('utf8')); } catch { throw invalid('not JSON'); }
   if (file?.schemaVersion !== 1) throw invalid('schemaVersion must be 1');
-  if (!Array.isArray(file.derivedFrom) || !file.derivedFrom.every(entry => typeof entry?.path === 'string' && !isAbsolute(entry.path) && !/^[A-Za-z]:|(?:^|[\/])..(?:[\/]|$)/u.test(entry.path) && /^[0-9a-f]{64}$/u.test(entry.sha256))) throw invalid('derivedFrom needs {path, sha256} entries');
+  if (!Array.isArray(file.derivedFrom) || !file.derivedFrom.every(entry => typeof entry?.path === 'string' && isCanonicalPath(entry.path) &&/^[0-9a-f]{64}$/u.test(entry.sha256))) throw invalid('derivedFrom needs {path, sha256} entries');
   if (!Array.isArray(file.checks)) throw invalid('checks must be an array');
   const seen = new Set();
   for (const entry of file.checks) {
@@ -71,7 +74,7 @@ function staleEntries(derivedFrom, project) {
   const stale = [];
   for (const { path, sha256: recorded } of derivedFrom) {
     let current = null;
-    try { current = sha256(readFileSync(resolve(project, path))); } catch (error) { if (error.code !== 'ENOENT' && error.code !== 'EISDIR') throw error; }
+    try { current = sha256(readFileSync(resolve(project, path))); } catch (error) { if (error.code !== 'ENOENT' && error.code !== 'EISDIR') throw fail('derivedfrom-unreadable', `${path} cannot be read: ${error.code ?? error.message}`); }
     if (current !== recorded) stale.push({ path, recorded, current });
   }
   return stale;
@@ -102,13 +105,17 @@ function verify(options) {
     ? gitText(project, ['merge-base', 'HEAD', 'refs/remotes/origin/main'])
     : gitText(project, ['rev-parse', '--verify', `${options.base}^{commit}`]);
   if (base === undefined || base === '') throw fail('base-not-found', 'the base ref does not resolve; pass --base <ref>');
-  // The file is read at the base, so the candidate cannot rewrite the checks that judge it.
+  // The checks are read at the base, so the candidate cannot rewrite the checks that judge it.
   let state;
   try { state = stateDirectory(project); } catch (error) { throw fail('state-not-found', error.message); }
   const path = `${state}/verification.json`;
   const blob = git(project, ['show', `${base}:${path}`]);
   if (blob.status !== 0) throw fail('verification-not-found', `${path} is not committed at the base`);
-  const { checks, derivedFrom } = parseVerification(blob.stdout);
+  const { checks } = parseVerification(blob.stdout);
+  // Staleness compares the candidate's own derivedFrom, so a branch that refreshes the file is fresh; the base file falls back when the candidate has none.
+  let candidateFile;
+  try { candidateFile = readFileSync(resolve(project, path)); } catch (error) { if (error.code !== 'ENOENT') throw fail('verification-invalid', `${path} cannot be read: ${error.code ?? error.message}`); }
+  const { derivedFrom } = candidateFile === undefined ? parseVerification(blob.stdout) : parseVerification(candidateFile);
   const stale = staleEntries(derivedFrom, project);
   if (options.stale) return { ok: stale.length === 0, ...(stale.length ? { code: 'stale' } : {}), base, stale, results: [] };
   if (options.only !== undefined && !checks.some(entry => entry.id === options.only)) throw fail('check-not-found', `no check ${options.only}`);
