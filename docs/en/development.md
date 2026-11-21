@@ -191,6 +191,14 @@ node tooling/maintenance/workflow-citations.mjs --write <new-revision>
 
 Each cited line range is looked up by exact text in the new revision. A range that occurs exactly once moves with its text. A range whose text changed, disappeared or occurs more than once is listed as `UNRESOLVED` with its path, old range and enclosing heading, is never guessed, and makes the command exit nonzero. `--write` updates the moved citations and the pinned revision, so fix the unresolved ones by hand and then regenerate the diagrams.
 
+To measure CI wall-clock minutes per pull request branch and per push (development only; the script makes no network calls):
+
+```sh
+gh run list --limit 100 --json event,headBranch,conclusion,createdAt,updatedAt,databaseId | node tooling/maintenance/ci-minutes.mjs
+```
+
+It prints the run count, cancelled count and total minutes for each `<event> <branch>` group, and a grand total.
+
 ## Source of truth and history
 
 Check actual tools, manifests, and tests before documenting current behaviour. Use [the source map](architecture.md) to find the owner. Keep accepted objectives distinct from implementation evidence and [future proposals](future-actions.md).
