@@ -7,6 +7,8 @@ import { readFile, realpath, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runGit } from './git-evidence.mjs';
+import { selectionEntry, REVIEWER_AGENTS } from './isswf-dispatch-guard-core.mjs';
+import { stateDirectory } from './project-state.mjs';
 import { locateGit } from './trusted-git.mjs';
 
 const KIND = 'isswf.review-launch';
@@ -57,11 +59,25 @@ export async function presetReviewer(factoryRoot) {
   return { model: match[1], effort: match[2] };
 }
 
-export async function launch({ bindings, task, trace, factoryRoot, model, effort, claude = 'claude', claudePrefix = [] }) {
+// The approved selection of the project the prepared bindings name (or `project`): the project's dispatch-selection.json when it exists,
+// refused as the guard refuses it when malformed, and the shipped preset only when there is no such file.
+async function reviewerSelection(bindingsData, project, factoryRoot) {
+  const root = project ?? bindingsData['isswf.git-evidence/1']?.repository;
+  const file = join(root, stateDirectory(root), 'dispatch-selection.json');
+  const content = await readFile(file, 'utf8').catch(error => { if (error.code === 'ENOENT') return undefined; throw error; });
+  if (content === undefined) return { ...await presetReviewer(factoryRoot), source: 'preset' };
+  let selection;
+  try { selection = JSON.parse(content); } catch { throw Error('dispatch-selection-not-valid-json'); }
+  const { model, effort } = selectionEntry(selection, 'claude', REVIEWER_AGENTS.claude, 'dispatch-selection.json');
+  return { model, effort, source: 'selection' };
+}
+
+export async function launch({ bindings, task, trace, factoryRoot, project, model, effort, claude = 'claude', claudePrefix = [] }) {
   if (!bindings || !task || !trace || !factoryRoot) throw Error('bindings-task-trace-and-factory-root-required');
   if (Boolean(model) !== Boolean(effort)) throw Error('pass-both-model-and-effort-or-neither');
-  const selection = model ? { model, effort, source: 'operator' } : { ...await presetReviewer(factoryRoot), source: 'preset' };
-  const bindingText = JSON.stringify(JSON.parse(await readFile(bindings, 'utf8')));
+  const bindingData = JSON.parse(await readFile(bindings, 'utf8'));
+  const selection = model ? { model, effort, source: 'operator' } : await reviewerSelection(bindingData, project, factoryRoot);
+  const bindingText = JSON.stringify(bindingData);
   // Flag order matters: --allowedTools is variadic and would swallow later arguments, so it comes last and the task goes on stdin.
   const args = ['-p', '--agent', 'isswf:isswf-reviewer', '--plugin-dir', factoryRoot, '--model', selection.model, '--effort', selection.effort,
     '--output-format', 'stream-json', '--verbose', '--allowedTools', EVIDENCE_TOOLS.join(' ')];
@@ -140,7 +156,7 @@ function parse(args) {
 
 const USAGE = `Usage:
   node tools/isswf-review-launch.mjs prepare --repository <primary-clone> --candidate <ref> [--base <ref> | --main <ref>] [--path <file>]... --out <bindings.json> [--git <exe>]
-  node tools/isswf-review-launch.mjs launch --bindings <bindings.json> --task <task.md> --trace <trace.jsonl> --factory-root <dir> [--model <m> --effort <e>] [--claude <exe>]
+  node tools/isswf-review-launch.mjs launch --bindings <bindings.json> --task <task.md> --trace <trace.jsonl> --factory-root <dir> [--project <dir>] [--model <m> --effort <e>] [--claude <exe>]
   node tools/isswf-review-launch.mjs record --trace <trace.jsonl>
 `;
 

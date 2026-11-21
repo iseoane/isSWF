@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
 import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewBaseOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
+import { REVIEWER_AGENTS, selectionEntry } from './isswf-dispatch-guard-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
 import { recordError } from './isswf-record-new-core.mjs';
 import { isInitiativePath } from './isswf-snapshot-core.mjs';
@@ -15,8 +16,6 @@ const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const GIT_TIMEOUT_MS = 30000;
 const REVIEW_RESOURCES = ['.agents/roles/reviewer.md', '.agents/skills/isswf-review/SKILL.md', '.agents/roles/references/review.md', '.agents/roles/references/review-convergence.md'];
 const HOST_GUIDES = { claude: '.agents/hosts/claude-code.md', pi: '.agents/hosts/pi.md' };
-// The agent names a selection file may key the reviewer by, in the order the dispatch guard's two spellings are tried.
-const REVIEWER_AGENTS = { claude: ['isswf:isswf-reviewer', 'isswf-reviewer'], pi: ['isswf-reviewer'] };
 
 const isInside = (parent, child) => {
   const path = relative(parent, child);
@@ -38,12 +37,10 @@ async function realLocation(path) {
 
 async function reviewerSelection({ root, state }, host) {
   const selection = await readFile(join(root, state, 'dispatch-selection.json'), 'utf8').then(JSON.parse, () => undefined);
-  const agents = selection?.agents?.[host];
-  for (const agent of REVIEWER_AGENTS[host]) {
-    const { model, effort } = agents?.[agent] ?? {};
-    if (typeof model === 'string' && model && typeof effort === 'string' && effort) return { host, agent, model, effort };
-  }
-  throw recordError('reviewer-selection-missing', { field: host });
+  try {
+    const { agent, model, effort } = selectionEntry(selection, host, REVIEWER_AGENTS[host], 'dispatch-selection.json');
+    return { host, agent, model, effort };
+  } catch { throw recordError('reviewer-selection-missing', { field: host }); }
 }
 
 // Both files are write-once: a second handoff for the same candidate and base finds the same bytes, and anything else under that name is refused.

@@ -118,7 +118,7 @@ process.stdout.write(lines.map(l => JSON.stringify(l)).join('\\n') + '\\n');
   await writeFile(selectionFile, reviewerSelection({ 'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' } }));
   assert.match(await reason(launch(launchOptions('trace-noentry.jsonl'))), /has no entry for isswf:isswf-reviewer for host claude/u);
   await writeFile(selectionFile, reviewerSelection({ 'isswf:isswf-reviewer': { model: 'opus' } }));
-  assert.match(await reason(launch(launchOptions('trace-noeffort.jsonl'))), /needs a model and an effort (effort is missing)/u);
+  assert.match(await reason(launch(launchOptions('trace-noeffort.jsonl'))), /needs a model and an effort \(effort is missing\)/u);
   await rm(join(repo, '.factory'), { recursive: true });
 
   // Without a Git on the path, each caller keeps its own error code.
