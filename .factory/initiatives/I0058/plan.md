@@ -257,23 +257,25 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-21: J008 A002, J003 A001 and J007 A001 were written in the primary checkout; J008 V004 N2; J007 V002 F6, F8.
+- 2026-11-21: J003 V001-V002, J007 V001-V002 and J008 V003-V004 state a reference-application outcome their reviewers did not report (J012 V002 D1); correct with a coordinator note.
 
 ## J012
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Objective: The number of workers running at once is bounded by a per-machine limit that setup asks for.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J012/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements the per-clone limit in observe mode (brief r2).
+- Next step: None; merged in #379 (V001, V002, V003).
 
 ### Acceptance
 
-- Setup asks for the maximum number of parallel jobs, default 2, and stores it locally under the Git common directory (never committed, shared by worktrees).
-- The dispatch guard refuses a worker dispatch that exceeds the limit; a missing file means 2.
+- Setup asks for the maximum number of parallel workers, default 2, stored with `git config --local isswf.maxParallelWorkers` (never committed, shared by worktrees); absent or invalid means 2.
+- The dispatch guard counts open worker entries in a ledger under the Git common directory; `observe` mode (default) allows with a note, `enforce` refuses with `parallel-limit`.
 
 ### Evidence
 
 - 2026-11-21: four parallel workers made job-tier verify take 6-7 min, timed out isswf-verify at 180 s and Claude Code stopped background shells for low memory. Operator: default 2, a local per-machine limit.
 - 2026-11-21: brief r1 research: Claude background completion is documented (turn.complete with agentId) but unobserved; Pi async completion observed on Linux only; local answers use git config --local. Decision: per-clone limit, observe mode by default.
+- 2026-11-21: merged in #379. V002 pass after one correction; V003 passed a CI fix (test registered in check-quality). Known limits: completion events and the Claude rmSync close not observed live; parallel launches can exceed the limit in enforce; reviewers, bound reviews, verify runs and SendMessage continuations are not counted.
