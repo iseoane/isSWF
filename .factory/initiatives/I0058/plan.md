@@ -20,6 +20,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Capability claims in briefs could be checked against the host's tool schema; a brief that records an operator condition could carry it as an acceptance test.
 - From I0057 J002 (V003 known limits and coordinator observations): `coverage` reads only each job's latest review, so a latest record whose base line is a delta base or carries trailing text covers too little (S10; union of every V record's range); the package import-closure check misses multi-line, side-effect and dynamic imports (S11); no test for a review without a base or with an unknown base (S12); delta reviews sent with SendMessage to an existing reviewer bypass the dispatch guard's handoff check; `isswf-record-new` and `isswf-record-check` answer a missing flag with a bare `usage` code; the compaction reminder listed a reviewer dispatch with `brief undefined`; the full `check-quality` fails its coverage step at a candidate until the covering review record is committed, so it must run at the head that holds that record.
 - From I0062 J002 (test value): once a record shows a new test without justification or a test request without a classification, check mechanically that each test file the diff adds is named in the attempt's test-justification field and that each review finding requesting a test is marked `blocking` or `suggestion`. Per-case checks inside existing files and the quality of a justification stay semantic.
+- From batch 3 and J013 (2026-11-21): `isswf-handoff coverage` breaks the review chain at a merge of main into a job branch, so a delta review must take the earlier candidate as its base (J013 V003); `isswf-record-new create` needs the current brief and plan in the worker checkout (J011 V002 N1, documented); the host reaped two CI watchers under memory pressure.
 
 ## J001
 
@@ -299,3 +300,10 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-21: `index.lock` blocked coordinator commits in the primary checkout four times; global `core.fsmonitor=true`; read-only Git without `GIT_OPTIONAL_LOCKS=0` may refresh the index (only `tools/git-evidence.mjs` sets it). 38 `git fsmonitor--daemon` processes were alive (killed by the operator's go), and Claude Code stopped background shells for low memory. The Engram Stop hook runs Git only in its own repository and is not the cause.
+
+## Close
+
+- Status: closed, 2026-11-21. Every job is completed; J001 to J013 merged in #376 to #381.
+- Full check: `node tools/check-quality.mjs` exit 0 in 967 s on Windows 11 at 46ce6434 (local; ESLint and Knip installed; host-native delegation is a separate check).
+- CI close verification: main at 46ce6434 completed success (Portable checks, Package and host discovery on ubuntu-latest and windows-latest).
+- Not done: no release; publication and version bump need a separate operator request.
