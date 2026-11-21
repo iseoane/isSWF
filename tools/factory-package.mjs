@@ -129,7 +129,9 @@ const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-co
  */
 export function packagedFileSet(trackedPaths) {
   const exact = new Set([...payloadPaths, ...writingPayloadPaths, ...understandingPayloadPaths, ...prPayloadPaths, ...issuePayloadPaths, ...e2ePayloadPaths, ...Object.values(taskPayloadPaths).flat(), ...nativePiResources, featureDeliveryPath]);
-  const entries = releaseFiles.map(entry => entry.includes("*") ? new RegExp(`^${entry.replace(/[.+?^${}()|[\]\\]/gu, "\\$&").replaceAll("*", "[^/]*")}$`, "u") : entry);
+  // The release ships a selected conditional skill as a whole directory, so every optional skill directory counts.
+  const conditionalSkills = ["writing", "understanding", "pr", "issue", "e2e", ...taskSkills].map(name => `.agents/skills/isswf-${name}`);
+  const entries = [...releaseFiles, ...conditionalSkills].map(entry => entry.includes("*") ? new RegExp(`^${entry.replace(/[.+?^${}()|[\]\\]/gu, "\\$&").replaceAll("*", "[^/]*")}$`, "u") : entry);
   const inRelease = path => entries.some(entry => typeof entry === "string" ? path === entry || path.startsWith(`${entry}/`) : entry.test(path));
   return trackedPaths.filter(path => exact.has(path) || inRelease(path)).sort();
 }

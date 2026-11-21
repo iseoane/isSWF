@@ -7,10 +7,12 @@ const listPath = 'tooling/quality/stale-statements.json';
 export async function loadStatements(root) {
   const list = JSON.parse(await readFile(join(root, listPath), 'utf8'));
   if (!Array.isArray(list.statements)) throw new Error(`${listPath}: statements must be an array`);
-  for (const entry of list.statements) {
+  for (const [index, entry] of list.statements.entries()) {
     for (const field of ['phrase', 'reason', 'since']) {
       if (typeof entry[field] !== 'string' || entry[field] === '') throw new Error(`${listPath}: every statement needs a non-empty ${field}`);
     }
+    if (entry.regex !== undefined && typeof entry.regex !== 'boolean') throw new Error(`${listPath}: statement ${index} regex must be a boolean`);
+    if (entry.scope !== undefined && typeof entry.scope !== 'string') throw new Error(`${listPath}: statement ${index} scope must be a string`);
   }
   return list.statements;
 }
@@ -24,7 +26,7 @@ function scopeMatches(scope, path) {
 
 /**
  * Finds the listed statements in the given texts. `files` maps a repository path to its text; CRLF is normalized
- * before matching, and an entry's phrase is literal unless it sets `regex`.
+ * before matching, and an entry's phrase is literal unless it sets `regex`; both kinds ignore case.
  */
 export function findStale(statements, files) {
   const hits = [];
@@ -32,7 +34,7 @@ export function findStale(statements, files) {
     const text = raw.replaceAll('\r\n', '\n');
     for (const entry of statements) {
       if (!scopeMatches(entry.scope, path)) continue;
-      const found = entry.regex === true ? new RegExp(entry.phrase, 'iu').test(text) : text.includes(entry.phrase);
+      const found = entry.regex === true ? new RegExp(entry.phrase, 'iu').test(text) : text.toLowerCase().includes(entry.phrase.toLowerCase());
       if (found) hits.push({ path, phrase: entry.phrase, reason: entry.reason, since: entry.since });
     }
   }
