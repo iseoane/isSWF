@@ -238,3 +238,41 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 - 2026-11-17: I0058 J002 V001 (a new test ran in no check) and V002 (an unused import only CI's ESLint caught).
 - 2026-11-17: J010 V001 pass. Known limit: a test mentioned only by another unrun test counts as run (V001-S2).
+
+## J011
+
+- Status: pending
+- Size: S (one flow)
+- Objective: Batch-2 follow-ups: a job's records cannot be written outside its assigned worktree, and missing tests are added.
+- Depends on: None
+- Brief: None
+- Blocker: None.
+- Next step: Write brief r1.
+
+### Acceptance
+
+- A worker's attempt or review record written in a checkout other than its `checkout:` binding is refused or flagged by a check.
+- Tests assert the researcher and planner tools lists lack Write, Edit and Bash; the review launcher's `--project`; the handoff refusing an incomplete first reviewer spelling.
+
+### Evidence
+
+- 2026-11-21: J008 A002, J003 A001 and J007 A001 were written in the primary checkout; J008 V004 N2; J007 V002 F6, F8.
+
+## J012
+
+- Status: pending
+- Size: S (one flow)
+- Objective: The number of workers running at once is bounded by a per-machine limit that setup asks for.
+- Depends on: None
+- Brief: None
+- Blocker: None.
+- Next step: Write brief r1.
+
+### Acceptance
+
+- Setup asks for the maximum number of parallel jobs, default 2, and stores it locally under the Git common directory (never committed, shared by worktrees).
+- The dispatch guard refuses a worker dispatch that exceeds the limit; a missing file means 2.
+
+### Evidence
+
+- 2026-11-21: four parallel workers made job-tier verify take 6-7 min, timed out isswf-verify at 180 s and Claude Code stopped background shells for low memory. Operator: default 2, a local per-machine limit.
