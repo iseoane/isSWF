@@ -101,6 +101,8 @@ Before binding, launching or checking a bound Pi review, read the shared [bound 
 
 The child-only extension exposes `isswf_git_identity`, `isswf_git_diff` and `isswf_git_content`. Identity and diff accept no arguments; content accepts the path, slot and optional range the shared reference defines.
 
+`isswf-researcher` and `isswf-planner` load the same extension and tools, read-only, as an optional extra when bound. When a writer may be active in the same checkout, the coordinator creates a detached read-only worktree at the brief's base (`git worktree add --detach <isswf.worktreeRoot>/<initiative>-<job>-base <base>`), passes it as the child's checkout, and removes it after the child returns. The child reads in that checkout; a source read from the live primary checkout is named as such in the report.
+
 - **Native caps.** The diff tool returns the whole patch; its complete displayed result is capped at 512 KiB. The native content result is capped at 192 KiB. The base64 appears once in the model-visible text, not again in the structured details, so a 65,536-byte ordinary text blob fits; text dominated by characters that JSON escapes can exceed the native cap and then fails closed without truncation.
 - **Fresh launch.** The coordinator supplies `options.extensionBindings` on a **fresh** `subagent` launch, with full exact commit IDs, canonical paths and the trusted Git executable it selected. All three namespaces, including content path selection, appear in this example:
 
