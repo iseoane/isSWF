@@ -203,7 +203,7 @@ node tools/isswf-handoff.mjs coverage --project /absolute/project
 
 Independent jobs can run at the same time, each in its own worktree and on its own branch. A job that depends on another waits for it. The coordinator creates each worktree under `isswf.worktreeRoot` and dispatches the worker in the background with `checkout:` and `branch:` lines, so the [branch guard](#branch-guard) refuses the worker's commits anywhere else.
 
-1. **Check each branch.** Run `isswf-verify --tier job` and the focused tests of the change on the branch, then review the job on that branch. A delta review takes the earlier candidate as its base.
+1. **Check each branch.** In a new worktree, first install the quality tools with `npm ci --prefix tooling/quality --ignore-scripts --no-audit --no-fund` (see [Quality checks](development.md#quality-checks)), because lint is a job-tier check. Then run `isswf-verify --tier job` and the focused tests of the change on the branch, then review the job on that branch. A delta review takes the earlier candidate as its base.
 2. **Integrate.** Open one PR per job, or one batched PR. For a batch, merge the reviewed branches into a batch branch with merge commits, never a rebase. A CI failure is fixed forward on a new branch that joins the batch; a reviewed branch is never rewritten. Run `isswf-handoff coverage` on the batch before `gh pr create` and before the merge, and let CI run once on the batch head.
 3. **Clean up.** After the merge, remove each worktree with `git worktree remove`. On Windows a finished child's shell can hold the directory, so `git worktree remove` may leave an empty one; check that it is gone.
 
