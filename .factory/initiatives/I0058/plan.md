@@ -28,9 +28,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
 - Depends on: None
-- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
+- Brief: [brief-r4.md](jobs/J001/brief-r4.md)
 - Blocker: None.
-- Next step: Pane merged in #377 (b0042ca2, V004). Remaining units: observed reads and commands from transcripts, brief comparison, SHA record rule.
+- Next step: Worker records observed reads and commands and compares them with the brief (brief r4, batch 2); SHA record rule follows.
 
 ### Acceptance
 
@@ -80,9 +80,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: An in-progress job with a committed brief and no recorded launch is caught before the turn ends.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: Implementation brief r2 (turn.complete in hooks/register.tsx; agent_settled in the Pi compaction extension); J001 pane merged in #377.
+- Next step: Worker implements the turn-end warning (brief r2, batch 2).
 
 ### Acceptance
 
@@ -158,14 +158,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J007
 
-- Status: pending
+- Status: in-progress
 - Size: S (consolidation)
 - Scope: factory.
 - Objective: Each shared fact has one source in code.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief (RECORD_PATH also in hooks/register.tsx); J001 pane merged in #377.
+- Next step: Worker consolidates the three shared facts (brief r1, batch 2).
 
 ### Acceptance
 
@@ -184,9 +184,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: A changed contract leaves no stale statement in any packaged text.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J008/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J008/brief-r3.md)
 - Blocker: None.
-- Next step: Stale-statement search merged in #377 (b0042ca2, V002). Unit 1: canonical definitions, including J004 V002 N1 and N2 wording.
+- Next step: Worker writes canonical definitions (brief r3, batch 2); unit 2 merged in #377.
 
 ### Acceptance
 
