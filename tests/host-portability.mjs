@@ -27,6 +27,7 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   const toolLine = body.match(/^tools: (.*)$/m)?.[1] ?? '';
   if (role === 'reviewer') assert.ok(knowledge.every(tool => !toolLine.includes(tool)), 'Claude reviewer must not read the live index or memory instead of the bound candidate');
   else assert.ok(knowledge.every(tool => toolLine.includes(tool)), `${role} must be able to use installed CodeGraph and Engram`);
+  if (role === "researcher" || role === "planner") assert.match(toolLine, /mcp__plugin_isswf_isswf_git_evidence__identity, mcp__plugin_isswf_isswf_git_evidence__diff, mcp__plugin_isswf_isswf_git_evidence__content$/u, `${role} reads its base through the three evidence tools`);
   assert.ok(body.length < 1500, `${file} should remain a thin wrapper`);
 }
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
@@ -327,7 +328,10 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
   if (role === 'reviewer') {
     assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff, isswf_git_content$/mu);
     assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
-  } else if (role !== 'worker') assert.match(body, /^tools: read, grep, find, ls$/mu);
+  } else if (role !== 'worker') {
+    assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff, isswf_git_content$/mu);
+    assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
+  }
 }
 {
   const coordinator = await read('.agents/skills/isswf-coordinator/SKILL.md');

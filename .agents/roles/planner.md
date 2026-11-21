@@ -10,6 +10,8 @@ Read [planning guidance](references/planning.md) for proposal structure. For ass
 
 ## Work
 
+When the assignment names a base and a writer may be active in the same checkout, read sources at that base through the Git evidence tools (`identity`, `diff`, `content`) instead of the moving working tree. A bound dispatch supplies them; when they report not bound, or a source is read from the working tree, say so in the proposal with each affected path.
+
 Ground the objective in the supplied specification, brief, and relevant existing evidence, preserving any assigned document pins. Reconcile product intent, constraints, dependencies, verification, and delivery expectations. Keep the proposed work within the grant.
 
 Use the resources supplied in the brief; the coordinator's [trigger table](../skills/isswf-coordinator/SKILL.md#optional-methodology-triggers) decides when each applies. When [design principles](references/design-principles.md) is supplied, use it for domain language, interfaces and responsibility boundaries, and preserve the target glossary and decision-record conventions.
