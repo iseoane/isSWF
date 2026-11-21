@@ -183,9 +183,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: A changed contract leaves no stale statement in any packaged text.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J008/brief-r2.md)
 - Blocker: None.
-- Next step: Researcher maps repeated record-field definitions (brief r1).
+- Next step: Worker adds the stale-statement search over the package (brief r2, batch 1); canonical definitions after J004 merges.
 
 ### Acceptance
 
@@ -196,6 +196,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 - 2026-11-14: a wording correction dropped part of a contract definition and the phrase tests passed (I0057 J008 V002 F4).
 - 2026-11-14: statements of a tool's old behaviour survived the first correction (I0057 J001 V001 F1, V002 F6).
+- 2026-11-21: research (brief r1) found definitions repeated across templates, roles, skills, host guides and docs; split into unit 2 (package-wide stale-statement search, S, now) and unit 1 (canonical definitions, M, after J004: shared files).
 
 ## J009
 
