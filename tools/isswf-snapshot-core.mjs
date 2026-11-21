@@ -115,6 +115,11 @@ function parseRole(text) {
   return any ? (any[1] ?? any[2]) : UNKNOWN;
 }
 
+const AGENT_ROLE = new RegExp(`\\bisswf-(${ROLES})\\b`);
+
+/** The role a host agent name (`isswf:isswf-worker`, `isswf-worker`) stands for, or undefined for any other agent. */
+export const roleOfAgent = name => (typeof name === 'string' ? name.match(AGENT_ROLE)?.[1] : undefined);
+
 const RUN_LINE = /^\s*-\s*Run:\s*(claude (?:agent|session)|pi child)=(\S+)\s*$/;
 
 /** The launch identity a `Run:` line records, or null when the pane would ignore the line. */

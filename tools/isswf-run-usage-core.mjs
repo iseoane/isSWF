@@ -1,6 +1,6 @@
 // No Node imports and no Node globals: hook runtimes that only offer an injected fs (the Claude Code
 // pane's `$.fs`) load this module. tools/isswf-snapshot.mjs --usage is the Node entry point.
-import { joiner } from './isswf-snapshot-core.mjs';
+import { joiner, roleOfAgent } from './isswf-snapshot-core.mjs';
 import { PRICES } from './isswf-prices.mjs';
 import { LIMITS, USAGE_KEYS, integer, parseTranscript, piUsage, safe, single } from './token-native-transcript-core.mjs';
 
@@ -12,7 +12,7 @@ const ID = {
 };
 const COUNTERS = ['input', 'output', 'cacheRead', 'cacheWrite'];
 
-const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, costUsd: UNKNOWN });
+const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, usedHostGuides: UNKNOWN, costUsd: UNKNOWN });
 
 async function listDirs(fs, dir) {
   try {
@@ -54,7 +54,8 @@ async function locatePi(fs, piDir, project, id) {
     for (const { name, kind } of entries) {
       if (kind === 'file' && name.startsWith(`${id}_`) && name.endsWith('_transcript.jsonl')) {
         const path = joiner(dir)(dir, name);
-        found.push({ path, meta: path.replace(/_transcript\.jsonl$/u, '_meta.json') });
+        // The agent is what follows the run id, without the parallel index.
+        found.push({ path, meta: path.replace(/_transcript\.jsonl$/u, '_meta.json'), agent: name.slice(id.length + 1).replace(/(?:_\d+)?_transcript\.jsonl$/u, '') });
       }
     }
   }
@@ -150,13 +151,15 @@ function methodology(state, assigned) {
   }
   const usedSkills = { ...state.invoked };
   const usedReferences = {};
+  const usedHostGuides = {};
   for (const rel of state.reads) {
     if (state.edited.has(rel) || !named.has(rel)) continue;
     const skill = rel.match(/\/([^/]+)\/SKILL\.md$/u);
     if (skill) usedSkills[skill[1]] = (usedSkills[skill[1]] ?? 0) + 1;
+    else if (rel.startsWith('.agents/hosts/')) usedHostGuides[rel] = (usedHostGuides[rel] ?? 0) + 1;
     else usedReferences[rel] = (usedReferences[rel] ?? 0) + 1;
   }
-  return { usedSkills, usedReferences };
+  return { usedSkills, usedReferences, usedHostGuides };
 }
 
 /** Counts skills and `.agents/` reads in a session's own tool uses (`{ tool, input }`), as a transcript is counted. */
@@ -325,6 +328,7 @@ export async function resolveRunUsage({ host, kind, id }, { fs, claudeDir, piDir
   } catch {
     return { ...unknownUsage('unreadable-transcript'), found: true };
   }
+  if (located.agent) usage = { ...usage, agent: located.agent };
   if (usage.finished && cache) cache.set(`${key} ${id}`, { path: located.path, size: read.size, usage });
   return usage;
 }
@@ -341,4 +345,24 @@ export async function addRunUsage(snapshot, options) {
     }
   }
   return snapshot;
+}
+
+const sumInto = (all, map) => { for (const [key, n] of Object.entries(map)) all[key] = (all[key] ?? 0) + n; };
+
+/**
+ * Combines the usage of one agent role's runs. An unresolved run (not found, unreadable) is counted
+ * apart and leaves the other runs' maps intact; with none resolved the maps are undefined (unknown).
+ * `noReads` is set when every resolved run used nothing.
+ */
+export function summarizeRuns(usages) {
+  const resolved = usages.filter(u => u?.found && typeof u.usedReferences === 'object');
+  const total = key => (resolved.length ? resolved.reduce((all, u) => { sumInto(all, u[key]); return all; }, {}) : undefined);
+  const [skills, references, hostGuides] = [total('usedSkills'), total('usedReferences'), total('usedHostGuides')];
+  const noReads = resolved.length > 0 && [skills, references, hostGuides].every(map => Object.keys(map).length === 0);
+  return { skills, references, hostGuides, resolved: resolved.length, unresolved: usages.length - resolved.length, noReads };
+}
+
+/** A run's role: the record's role, else the agent name the host gave the run (`names` holds Claude's, by run id), else unknown. */
+export function fallbackRole(role, run, usage, names) {
+  return role !== UNKNOWN ? role : roleOfAgent(names?.[run.id]) ?? roleOfAgent(usage?.agent) ?? UNKNOWN;
 }

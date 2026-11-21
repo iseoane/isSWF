@@ -11,7 +11,7 @@ import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
-import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
+import { countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
@@ -25,6 +25,8 @@ const BRANCHES = { plugin: 'isswf', key: 'branches' } as const
 // The last accepted dispatches of a session that activated the coordinator; the post-compaction reminder lists them.
 const ASSIGNMENTS = { plugin: 'isswf', key: 'assignments' } as const
 const ASSIGNED = { plugin: 'isswf', key: 'assigned' } as const
+// The agent name the host gave each role run, by run id; a record that names no role falls back to it.
+const AGENT_NAMES = { plugin: 'isswf', key: 'agent-names' } as const
 // A file is shown up to this many characters; one drawing holds 100000 in all.
 const FILE_CHARS = 60_000
 const READ_LIMIT = 4 * 1024 * 1024
@@ -41,6 +43,9 @@ const LABELS = {
     notActive: 'El coordinador isSWF no está activo en esta sesión.',
     unknown: 'desconocido',
     references: 'referencias',
+    hostGuides: 'guías de host',
+    noReads: 'sin lecturas',
+    unresolved: 'sin resolver',
     verdicts: { passed: 'aprobado', 'changes-requested': 'cambios pedidos', failed: 'fallido', partial: 'parcial', running: 'en curso' } as Record<string, string>,
     blocked: 'bloqueados',
     open: 'sin cerrar',
@@ -73,7 +78,6 @@ const LABELS = {
     tooLarge: 'archivo de más de 4 MiB: no se muestra',
     noIndex: 'sin índice: codegraph init',
     coordinator: 'coordinador (esta sesión)',
-    noAgents: 'ningún agente ha usado skills ni referencias',
     run: 'ejecución',
     runs: 'ejecuciones',
     profile: 'perfil',
@@ -84,6 +88,9 @@ const LABELS = {
     notActive: 'The isSWF coordinator is not active in this session.',
     unknown: 'unknown',
     references: 'references',
+    hostGuides: 'host guides',
+    noReads: 'no reads',
+    unresolved: 'unresolved',
     verdicts: { passed: 'passed', 'changes-requested': 'changes requested', failed: 'failed', partial: 'partial', running: 'running' } as Record<string, string>,
     blocked: 'blocked',
     open: 'open',
@@ -116,7 +123,6 @@ const LABELS = {
     tooLarge: 'file over 4 MiB: not shown',
     noIndex: 'no index: codegraph init',
     coordinator: 'coordinator (this session)',
-    noAgents: 'no agent has used skills or references',
     run: 'run',
     runs: 'runs',
     profile: 'profile',
@@ -619,6 +625,8 @@ export const register: Register = (on, options) => {
         const runId = (ran.result as { agentId?: unknown } | undefined)?.agentId
         const assignment = callsOf('claude', e).filter(call => isRoleAgent(call.agent)).map(call => assignmentOf(call.prompt)).find(Boolean)
         if (typeof runId === 'string' && assignment) await update($, ASSIGNED, (all: Record<string, unknown> | undefined) => ({ ...all, [runId]: assignment }))
+        const agent = callsOf('claude', e).find(call => isRoleAgent(call.agent))?.agent
+        if (typeof runId === 'string' && agent) await update($, AGENT_NAMES, (all: Record<string, unknown> | undefined) => ({ ...all, [runId]: agent }))
       } catch {}
     }
     // A session's own `git switch` or `git checkout` selects the branch the checkout is on now, whatever the call's outcome.
@@ -858,11 +866,12 @@ export const register: Register = (on, options) => {
           .catch(() => {})
           .finally(() => { countingOwn = false })
       }
-      const own = ownCounts ?? { usedSkills: undefined, usedReferences: undefined }
+      const own: any = ownCounts ?? {}
       // One accumulated row per agent role: every run of that role across the visible cards, each run counted once.
+      const agentNames = (await $.state.get(AGENT_NAMES)).value as Record<string, string> | undefined
       const byRole = new Map<string, Map<string, any>>()
       for (const i of cards) for (const j of i.jobs) for (const r of j.rounds) for (const x of r.entries) for (const run of x.runs) {
-        const role = x.role === 'unknown' ? 'unknown' : x.role
+        const role = fallbackRole(x.role, run, usage.get(runKey(run)), agentNames)
         if (!byRole.has(role)) byRole.set(role, new Map())
         byRole.get(role)!.set(runKey(run), run)
       }
@@ -887,26 +896,27 @@ export const register: Register = (on, options) => {
         : undefined
       // Every listed run is resolved here, including completed jobs the initiatives tab leaves folded.
       resolveUsage($, agents.flatMap((a: any) => a.runs), snapshot.project)
-      const merge = (maps: any[]) => (maps.some(m => !m || typeof m !== 'object') ? undefined : maps.reduce((all, m) => { for (const [k, n] of Object.entries(m)) all[k] = (all[k] ?? 0) + (n as number); return all }, {}))
-      // Only what was used is drawn: an empty section is left out, and so is an agent that used nothing.
-      const used = (map: any) => !map || typeof map !== 'object' || Object.keys(map).length > 0
-      // A warning keeps a row that used nothing, since its absence is the news.
-      const row = (key: string, label: string, skills: any, reads: any, mark?: { text: string; isOk: boolean }) => ((!mark || mark.isOk) && !used(skills) && !used(reads) ? null : (
+      // A run that resolved to nothing says so; one that did not resolve stays unknown, and only the role with no resolved run is wholly unknown.
+      const row = (key: string, label: string, sum: ReturnType<typeof summarizeRuns>, mark?: { text: string; isOk: boolean }) => (
         <Box key={key} borderStyle="round" borderColor="subtle" flexDirection="column">
-          <Text bold color="claude">{label}{mark && <Text bold={false} color={mark.isOk ? 'success' : 'warning'}> · {mark.text}</Text>}</Text>
-          {tallyBlock({ Box, Text }, 'skills', skills, t)}
-          {tallyBlock({ Box, Text }, t.references, reads, t)}
+          <Text bold color="claude">{label}{mark && <Text bold={false} color={mark.isOk ? 'success' : 'warning'}> · {mark.text}</Text>}{sum.unresolved > 0 && sum.resolved > 0 && <Text bold={false} dimColor> · {sum.unresolved} {t.unresolved}</Text>}</Text>
+          {sum.noReads ? <Text dimColor>{t.noReads}</Text> : (
+            <>
+              {tallyBlock({ Box, Text }, 'skills', sum.skills, t)}
+              {tallyBlock({ Box, Text }, t.references, sum.references, t)}
+              {tallyBlock({ Box, Text }, t.hostGuides, sum.hostGuides, t)}
+            </>
+          )}
         </Box>
-      ))
+      )
       const rows = [
-        row('coordinator', t.coordinator, own.usedSkills, own.usedReferences, ownMark),
-        ...agents.map((a: any) => row(a.key, a.label, merge(a.found.map((u: any) => u?.found ? u.usedSkills : undefined)), merge(a.found.map((u: any) => u?.found ? u.usedReferences : undefined)), a.mark)),
-      ].filter(Boolean)
+        row('coordinator', t.coordinator, summarizeRuns([own.usedSkills ? { found: true, usedSkills: own.usedSkills, usedReferences: own.usedReferences, usedHostGuides: own.usedHostGuides } : undefined]), ownMark),
+        ...agents.map((a: any) => row(a.key, a.label, summarizeRuns(a.found), a.mark)),
+      ]
       return (
         <Box flexDirection="column">
           {header}
           {rows}
-          {rows.length === 0 && <Text dimColor>{t.noAgents}</Text>}
         </Box>
       )
     }
