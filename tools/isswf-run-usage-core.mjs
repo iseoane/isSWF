@@ -328,8 +328,9 @@ export async function resolveRunUsage({ host, kind, id }, { fs, claudeDir, piDir
   } catch {
     return { ...unknownUsage('unreadable-transcript'), found: true };
   }
+  if (located.agent) usage = { ...usage, agent: located.agent };
   if (usage.finished && cache) cache.set(`${key} ${id}`, { path: located.path, size: read.size, usage });
-  return located.agent ? { ...usage, agent: located.agent } : usage;
+  return usage;
 }
 
 /** Adds `usage` to every `runs` entry of a snapshot from tools/isswf-snapshot-core.mjs. */
