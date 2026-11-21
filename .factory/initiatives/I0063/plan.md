@@ -64,13 +64,13 @@ Type: enhancement
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: A push to main that changes only initiative records does not start the Quality workflow.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Worker in its own worktree, parallel to J005.
+- Next step: None.
 
 ### Acceptance
 
@@ -79,16 +79,17 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-21: operator approved, see J002.
+- 2026-11-21: merged through batched PR #374 as c57f55d731dfc3cbfd8217e6fdb8a95031b8bd1a, CI green on 886edb8214264259ffddfa0f7651669f96de8f55. Worker in worktree i0063-j004 (A001, A002). V001 fail (F1 ci/** wording fixed; F2 deviation recorded; F3, F4 not-material), V002 pass. Live skip observed on the push of this close commit (see J002).
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: A development script reports CI wall-clock minutes per job from GitHub run data, so the pilot can compare batched and single-PR delivery.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Worker in its own worktree, parallel to J004.
+- Next step: None.
 
 ### Acceptance
 
@@ -97,3 +98,4 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-21: operator approved, see J002.
+- 2026-11-21: merged through batched PR #374 as c57f55d731dfc3cbfd8217e6fdb8a95031b8bd1a. Worker in worktree i0063-j005, TDD RED 1f3750a3 exit 1, GREEN exit 0 (A001, A002). V001 fail (F1 Spanish mirror order fixed; F2 fixed; F3 not-material), V002 pass.
