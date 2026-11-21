@@ -139,6 +139,31 @@ assert.deepEqual(resolutionViolations(nested).map(({ message, line }) => [messag
 assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: `${attempt([])}- Finding resolutions: F1 bogus\n`, newRecord: true }).violations, [], 'attempts have no resolutions');
 assert.ok((await readFile(join(source, '.factory/templates/review.md'), 'utf8')).includes(resolutionLabel), 'the template carries the label the check reads');
 
+// A check an attempt record reports as run names the full commit it ran at; a new record only, and a check reported as not run or skipped needs none.
+const sha = 'a'.repeat(40);
+const checksLabel = 'Checks run and observed results';
+const withChecks = checks => `${attempt([])}- ${checksLabel}${checks}\n`;
+const checkCodes = (checks, newRecord = true, path = recordPaths('A001.md')[0]) => checkRecord({ path, text: withChecks(checks), newRecord }).violations.map(({ code }) => code);
+for (const path of recordPaths('A001.md')) {
+  assert.deepEqual(checkCodes(`: \`node tests/x.mjs .\` exit 0 at ${sha}`, true, path), [], 'a run check naming its commit');
+  assert.deepEqual(checkCodes(': `node tests/x.mjs .` exit 0', true, path), ['check-without-commit'], 'a run check without a commit');
+}
+assert.deepEqual(checkCodes(': `node tests/x.mjs .` exit 0', false), [], 'a record that existed at the base keeps its wording');
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: withChecks(': `node tests/x.mjs .` exit 0') }).violations, [], 'without a base nothing is new');
+for (const short of ['abc1234', 'a'.repeat(39), 'a'.repeat(41)]) assert.deepEqual(checkCodes(`: node tests/x.mjs . exit 0 at ${short}`), ['check-without-commit'], `not a full commit: ${short.length} hex`);
+for (const skipped of ['Not run: node tests/x.mjs . (needs a live host)', 'node tests/x.mjs . skipped: outside the tier', 'tests/x.mjs not run, check-quality is a close check', 'None.']) assert.deepEqual(checkCodes(`: ${skipped}`), [], skipped);
+// Other wordings of an outcome count as a run, and "skipped" beside an outcome does not exempt the entry.
+for (const reported of ['node tests/x.mjs . exits 0', 'node tests/x.mjs . passes', 'node tests/x.mjs . fails', 'node tests/x.mjs . exit 0, 2 skipped']) assert.deepEqual(checkCodes(`: ${reported}`), ['check-without-commit'], reported);
+const lineChecks = withChecks(`: node tests/a.mjs . exit 0 at ${sha}; node tests/b.mjs . exit 0; not run: tests/c.mjs`);
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: lineChecks, newRecord: true }).violations, [{ code: 'check-without-commit', field: checksLabel, line: lineOf(lineChecks, checksLabel), message: 'check reported as run names no full commit SHA: "node tests/b.mjs . exit 0"' }], 'entries split at semicolons');
+const listed = withChecks(` (code head ${sha}):\n  - node tests/a.mjs . exit 0\n  - git diff --check clean`);
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: listed, newRecord: true }).violations, [], 'a head named on the label line covers its bullets');
+const bare = withChecks(`:\n  - node tests/a.mjs . exit 0\n  - node tests/b.mjs . exit 0 at ${sha}`);
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: bare, newRecord: true }).violations.map(({ line }) => line), [lineOf(bare, 'tests/a.mjs')], 'each bullet needs its own commit without a head');
+const attemptTemplate = await readFile(join(source, '.factory/templates/attempt.md'), 'utf8');
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: `${attempt([])}${attemptTemplate.split('\n').find(line => line.includes(checksLabel))}\n`, newRecord: true }).violations, [], 'the unfilled field of the real template');
+assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: `${attempt([], reviewFields).replace('# Attempt report', '# Review report')}- ${checksLabel}: node tests/x.mjs . exit 0\n`, newRecord: true }).violations, [], 'reviews are not held to it');
+
 // The CLI reads files, adds the job directory listing for a plan, prints JSON and exits 1 on any violation.
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-check-')));
 try {
@@ -193,6 +218,16 @@ try {
   await writeFile(newReview, reviewWith('F1 fixed: kept'));
   assert.equal(checked(oldReview, newReview).status, 0);
   assert.equal(cli('--project', root, '--file', newReview).status, 0, 'without --base nothing is new');
+  // The commit rule holds for an attempt new at the base and not for one that existed there.
+  const oldAttempt = join(state, 'jobs/J001/A001.md');
+  const newAttempt = join(state, 'jobs/J001/A002.md');
+  await writeFile(oldAttempt, withChecks(': node tests/x.mjs . exit 0'));
+  assert.equal(git('add', '-A').status, 0);
+  assert.equal(git('commit', '-q', '-m', 'attempt base').status, 0);
+  await writeFile(newAttempt, withChecks(': node tests/x.mjs . exit 0'));
+  const attempts = checked(oldAttempt, newAttempt);
+  assert.equal(attempts.status, 1, attempts.stderr);
+  assert.deepEqual(JSON.parse(attempts.stdout).files.map(({ violations }) => violations.map(({ code }) => code)), [[], ['check-without-commit']]);
   // A project below the repository top level resolves its records from the project directory, not the top level.
   const nested = join(root, 'sub');
   const nestedState = join(nested, '.factory/initiatives/I0001/jobs/J001');

@@ -76,6 +76,12 @@
       "phrase": "not inside a separate candidate worktree's tree",
       "reason": "a worker's attempt record is written in its assigned checkout; the record location guard refuses a write outside it",
       "since": "I0058/J011"
+    },
+    {
+      "phrase": "Report what ran and its observed result",
+      "scope": ".agents/**",
+      "reason": "a check reported as run names the commit it ran at; the attempt template field Checks run and observed results defines it",
+      "since": "I0058/J001"
     }
   ]
 }

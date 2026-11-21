@@ -270,7 +270,11 @@ try {
   assert.equal(compareBrief(brief, [run([], { commandsTruncated: true })]).partial, false, 'a cut command list does not make the reads partial');
   assert.equal(compareBrief(brief, [run([], { tokensPartial: true })]).partial, true, 'a partly read transcript is partial');
   // A file the run wrote is its work, not methodology it read.
-  assert.deepEqual(compareBrief(brief, [run(['/r/.agents/roles/worker.md', '/r/.agents/roles/references/comments.md'], { editedPaths: ['/r/.agents/roles/references/comments.md'] })]).unread, ['.agents/skills/isswf-tdd/SKILL.md', '.agents/roles/references/comments.md', 'skills/isswf-coordinator/SKILL.md']);
+  assert.deepEqual(compareBrief(brief, [run(['/r/.agents/roles/worker.md', '/r/.agents/roles/references/comments.md'], { editedPaths: ['/r/.agents/roles/references/comments.md'] })]).unread, ['.agents/skills/isswf-tdd/SKILL.md', 'skills/isswf-coordinator/SKILL.md']);
+  // A file both read and edited counts as read, and an edited file the run never read is its work, not methodology it skipped.
+  const edits = compareBrief(brief, [run(['/r/.agents/roles/worker.md'], { editedPaths: ['/r/.agents/roles/worker.md', '/r/skills/isswf-coordinator/SKILL.md'] })]);
+  assert.deepEqual(edits.named, ['.agents/skills/isswf-tdd/SKILL.md', '.agents/roles/references/comments.md']);
+  assert.deepEqual(edits.unread, ['.agents/skills/isswf-tdd/SKILL.md', '.agents/roles/references/comments.md']);
 }
 
 // A non-blocking note on an attempt record that cites a brief: the record check names the unread methodology and still exits on its own verdict.
@@ -288,6 +292,30 @@ try {
     const noted = JSON.parse(check('A001.md').stdout).files[0];
     assert.deepEqual(noted.notes, ['brief names methodology the run never read: .agents/roles/references/comments.md']);
     assert.equal('notes' in JSON.parse(check('A002.md').stdout).files[0], false, 'a run without a transcript gives no note');
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+}
+// The record check notes each check an attempt reports as run whose script its run never ran; the note never blocks.
+{
+  const tmp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-check-note-')));
+  try {
+    const jobDir = join(tmp, 'project/.factory/initiatives/I0002/jobs/J001');
+    await mkdir(jobDir, { recursive: true });
+    await mkdir(join(tmp, 'claude/projects/-p/9d9d/subagents'), { recursive: true });
+    await writeFile(join(tmp, 'claude/projects/-p/9d9d/subagents/agent-a1b2c3.jsonl'), agentTranscript);
+    const head = 'b'.repeat(40);
+    const fields = '- Deviations from required procedure and consequence: None.\n- Process deviations observed: None.\n';
+    const record = (run, checks) => `# Attempt\n\n- Run: ${run}\n${fields}- Checks run and observed results: ${checks}\n`;
+    await writeFile(join(jobDir, 'A001.md'), record('claude agent=a1b2c3', `node tests/run-usage.mjs . exit 0 at ${head}; node tests\\other.mjs . exit 0 at ${head}; not run: tests/never.mjs`));
+    await writeFile(join(jobDir, 'A002.md'), record('claude agent=missing99', `node tests/run-usage.mjs . exit 0 at ${head}`));
+    await writeFile(join(jobDir, 'A003.md'), record('claude agent=a1b2c3', `node tests/run-usage.mjs . exit 0 at ${head}`));
+    const check = file => spawnSync(process.execPath, [join(source, 'tools/isswf-record-check.mjs'), '--project', join(tmp, 'project'), '--file', join(jobDir, file)], { encoding: 'utf8', timeout: 15000, env: { ...process.env, CLAUDE_CONFIG_DIR: join(tmp, 'claude'), PI_CODING_AGENT_DIR: join(tmp, 'pi') } });
+    const noted = check('A001.md');
+    assert.equal(noted.status, 0, noted.stderr);
+    assert.deepEqual(JSON.parse(noted.stdout).files[0].notes, [`reported check not among the run's observed commands: node tests\\other.mjs . exit 0 at ${head}`]);
+    assert.equal('notes' in JSON.parse(check('A003.md').stdout).files[0], false, 'an observed command needs no note');
+    assert.deepEqual(JSON.parse(check('A002.md').stdout).files[0].notes, ['reported checks cannot be compared with observed commands: no run transcript is available']);
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }

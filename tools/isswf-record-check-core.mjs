@@ -83,17 +83,51 @@ function resolutionViolations(text) {
     .map(({ index, entry }) => ({ code: 'finding-resolution-invalid', field: 'Finding resolutions', line: index + 1, message: `finding resolution "${entry}" is not "<ID> <${RESOLUTIONS.join('|')}>: <reason>"` }));
 }
 
+const CHECKS_LABEL = /^\s*(?:[-*]\s+)?Checks run and observed results\b[^:]*:/u;
+const COMMIT = /(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])/u;
+// An entry reports a check as run when it states an outcome; "not run" or "skipped" beside an outcome does not exempt it.
+const OUTCOME = /\bexits? \d+\b|\b(?:pass(?:es|ed)?|fail(?:s|ed)?|clean|ok)\b/iu;
+
+/**
+ * The checks an attempt record reports as run: the entries of its checks field (the label's own text and the bullets nested
+ * under it, each split at "; ") that state an outcome. `named` is set when the entry or the
+ * label's own text carries a full commit SHA.
+ * @returns {{ line: number, entry: string, named: boolean }[]}
+ */
+export function reportedChecks(text) {
+  const lines = text.split('\n');
+  const start = lines.findIndex(line => CHECKS_LABEL.test(line));
+  if (start < 0) return [];
+  const [label] = CHECKS_LABEL.exec(lines[start]);
+  const checks = [];
+  const add = (index, raw) => {
+    for (const piece of raw.split(/;\s+/u)) {
+      const entry = piece.trim();
+      if (entry !== '' && !/^`?</u.test(entry) && OUTCOME.test(entry)) checks.push({ line: index + 1, entry, named: COMMIT.test(label) || COMMIT.test(entry) });
+    }
+  };
+  add(start, lines[start].slice(label.length));
+  for (let index = start + 1; index < lines.length && /^\s+[-*]\s/u.test(lines[index]); index++) add(index, lines[index].replace(/^\s+[-*]\s+/u, ''));
+  return checks;
+}
+
+function checkViolations(text) {
+  return reportedChecks(text)
+    .filter(({ named }) => !named)
+    .map(({ line, entry }) => ({ code: 'check-without-commit', field: 'Checks run and observed results', line, message: `check reported as run names no full commit SHA: "${entry.slice(0, 160)}"` }));
+}
+
 /**
  * Checks one plan or record file and only reports: it never edits, grants or starts anything.
  * `path` may use `\` or `/`. `jobFiles` maps a job ID to the file names in its directory and is
  * only read when `path` is a plan. `newRecord` is true for a record absent at the base; only a new
- * review is held to the finding resolution vocabulary.
+ * review is held to the finding resolution vocabulary and only a new attempt to naming the commit of each check it reports as run.
  * @returns {{ ok: boolean, violations: { code: string, job?: string, field?: string, line?: number, message: string }[] }}
  */
 export function checkRecord({ path, text, jobFiles, newRecord }) {
   const name = baseName(path);
   let violations = [];
   if (name === 'plan.md') violations = planViolations(text, jobFiles);
-  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? resolutionViolations(text) : [])];
+  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? resolutionViolations(text) : []), ...(newRecord === true && name[0] === 'A' ? checkViolations(text) : [])];
   return { ok: violations.length === 0, violations };
 }
