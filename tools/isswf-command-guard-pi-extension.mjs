@@ -6,6 +6,7 @@ import { checkReferences } from './isswf-dispatch-guard-core.mjs';
 import { checkPlanCommit } from './isswf-plan-commit-guard-core.mjs';
 import { checkVerificationCommit } from './isswf-verification-guard-core.mjs';
 import { checkRecordsPush } from './isswf-records-push-guard-core.mjs';
+import { checkIntegrationGate } from './isswf-integration-gate-core.mjs';
 
 const SHELL_TOOLS = new Set(['bash', 'powershell']);
 
@@ -15,7 +16,8 @@ const git = (argv, cwd) => new Promise(done => {
 });
 
 // Refuses a CI-waiting or package-acquisition shell command, a `git commit` on a branch the session did not select, and one that records a plan
-// isswf-status cannot read back, or a `git push` to the base branch that carries more than work records without the recorded grant, before it runs.
+// isswf-status cannot read back, a `git push` to the base branch that carries more than work records without the recorded grant, or (in enforce mode) an integration
+// command for a head without a verification stamp, before it runs. Observe mode adds the gate's note to the result of that command.
 // Both cores fail open, so a fault never blocks a call. It is registered through the package for the main session and declared by the
 // worker profile for its child; each session is one instance, so one set of expected branches serves one agent loop.
 // A child whose task carries `checkout:` and `branch:` lines may commit only there. A message to the main session assigns only when it also reads as an isSWF dispatch.
@@ -27,11 +29,14 @@ export default function (pi) {
   const observe = dir => observeFromFiles(dir, path => readFile(path, 'utf8'));
   // The directories a call must look at again once it has run, by tool call id.
   const switching = new Map();
+  // The gate's observe-mode note for a call, by tool call id, appended to the call's result.
+  const notes = new Map();
 
   pi.on('session_start', () => {
     expected = {};
     assignment = undefined;
     switching.clear();
+    notes.clear();
   });
 
   // The task text reaches the child as its input; only a task that is an isSWF dispatch (it names the brief, checkpoint and base) assigns, and the first one that carries the lines.
@@ -59,14 +64,22 @@ export default function (pi) {
     if (verification.deny !== undefined) return { block: true, reason: verification.deny };
     const pushes = await checkRecordsPush({ command, cwd: ctx.cwd, git });
     if (pushes.deny !== undefined) return { block: true, reason: pushes.deny };
+    const gate = await checkIntegrationGate({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
+    if (gate.deny !== undefined) return { block: true, reason: gate.deny };
+    if (gate.note !== undefined && event.toolCallId !== undefined) notes.set(event.toolCallId, gate.note);
     if (branch.reobserve.length && event.toolCallId !== undefined) switching.set(event.toolCallId, branch.reobserve);
     return undefined;
   });
 
   pi.on('tool_result', async event => {
+    const note = notes.get(event?.toolCallId);
+    notes.delete(event?.toolCallId);
     const dirs = switching.get(event?.toolCallId);
-    if (dirs === undefined) return;
-    switching.delete(event.toolCallId);
-    await refreshBranches({ dirs, loop: 'main', store, observe });
+    if (dirs !== undefined) {
+      switching.delete(event.toolCallId);
+      await refreshBranches({ dirs, loop: 'main', store, observe });
+    }
+    if (note !== undefined && !event.isError) return { content: [...(event.content ?? []), { type: 'text', text: note }] };
+    return undefined;
   });
 }

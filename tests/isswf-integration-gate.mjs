@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSy
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { readFile } from 'node:fs/promises';
 
 const source = resolve(process.argv[2] || '.');
 const { checkIntegrationGate } = await import(pathToFileURL(join(source, 'tools/isswf-integration-gate-core.mjs')));
@@ -167,6 +168,29 @@ try {
   assert.ok((await checker(bad)('git push origin feat')).deny, 'a stamp naming another candidate is no stamp');
   writeFileSync(badFile, 'not json');
   assert.ok((await checker(bad)('git push origin feat')).deny, 'an unreadable stamp is no stamp');
+
+  // Pi: the extension refuses on `tool_call` in enforce mode, and appends the observe-mode note to the result of the command it allowed.
+  const handlers = {};
+  (await import(pathToFileURL(join(source, 'tools/isswf-command-guard-pi-extension.mjs')))).default({ on: (name, handler) => { handlers[name] = handler; } });
+  const piCall = (repo, id, command) => handlers.tool_call({ type: 'tool_call', toolName: 'bash', toolCallId: id, input: { command } }, { cwd: repo });
+  const piResult = (repo, id, isError = false) => handlers.tool_result({ type: 'tool_result', toolName: 'bash', toolCallId: id, input: {}, isError, content: [{ type: 'text', text: 'pushed' }] }, { cwd: repo });
+  assert.match((await piCall(bad, 'p1', 'git push origin feat')).reason, /integration gate: refused/u);
+  assert.equal((await piCall(observed, 'p2', 'git push origin feat')), undefined, 'observe allows');
+  const appended = await piResult(observed, 'p2');
+  assert.deepEqual(appended.content.map(part => part.text).slice(0, 1), ['pushed']);
+  assert.match(appended.content.at(-1).text, /integration gate \(observe\)/u);
+  assert.equal(await piResult(observed, 'p2'), undefined, 'the note is shown once');
+  assert.equal(await piCall(observed, 'p3', 'git push origin feat'), undefined);
+  assert.equal(await piResult(observed, 'p3', true), undefined, 'a failed command gets no note');
+  assert.equal(await piCall(tiers, 'p4', 'git push origin feat'), undefined, 'a stamped head passes');
+  assert.equal(await piResult(tiers, 'p4'), undefined);
+
+  // register.tsx has no runner here, so the Claude hook is a source check: the gate runs after the records push guard, refuses before the call and adds its note after it.
+  const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');
+  assert.ok(hooks.indexOf('await checkRecordsPush(') < hooks.indexOf('await checkIntegrationGate('), 'the gate runs after the records push guard');
+  assert.ok(hooks.indexOf('await checkIntegrationGate(') < hooks.indexOf('await next(e)'), 'the gate decides before the call');
+  assert.ok(hooks.includes('if (gate.deny !== undefined) return { deny: gate.deny }'));
+  assert.ok(hooks.includes('const notes = [gateNote, text]') && hooks.indexOf('await next(e)') < hooks.indexOf('const notes = [gateNote, text]'));
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

@@ -8,6 +8,7 @@ import { callsOf, guardDispatch, isRoleAgent } from '../tools/isswf-dispatch-gua
 import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
+import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, resolveRunUsage } from '../tools/isswf-run-usage-core.mjs'
@@ -531,6 +532,8 @@ export const register: Register = (on, options) => {
   on('tool.call', async ($, e, next) => {
     // The directories the shell call must look at again once it has run.
     let reobserve: string[] = []
+    // The integration gate's observe-mode note, shown as context once the command has run.
+    let gateNote: string | undefined
     const branches = branchHost($, e)
     // A delegated child's shell calls reach this hook too. Both cores fail open, so a fault in them never blocks a call.
     if (e.tool === 'Bash' || e.tool === 'PowerShell') {
@@ -570,6 +573,17 @@ export const register: Register = (on, options) => {
           },
         })
         if (pushes.deny !== undefined) return { deny: pushes.deny }
+        const gate = await checkIntegrationGate({
+          command,
+          cwd: await $.session.cwd(),
+          git: async (argv: string[], cwd: string) => {
+            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            return { exitCode, stdout }
+          },
+          read: (file: string) => $.fs.read(file),
+        })
+        if (gate.deny !== undefined) return { deny: gate.deny }
+        gateNote = gate.note
       } catch {}
     }
     // The guard refuses before the child starts, so it runs ahead of `next(e)`; `$.fs` and `$.process` are spelled out per call.
@@ -633,11 +647,13 @@ export const register: Register = (on, options) => {
       // A denied or failed write changed no record, and `deny` declares no `context`.
       if (ran.deny !== undefined || ran.isError) return ran
       const path = (e as { file_path?: unknown }).file_path
-      if (!WRITE_TOOLS.has(e.tool) || typeof path !== 'string') return ran
-      // The record check only reports, as model-visible context; the tool result stays as it was.
+      // The record check and the integration gate only report, as model-visible context; the tool result stays as it was.
       // The engine refuses `$.fs` passed as a value, so each call is spelled out.
-      const text = await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
-      return text ? { ...ran, context: [...(ran.context ?? []), text] } : ran
+      const text = WRITE_TOOLS.has(e.tool) && typeof path === 'string'
+        ? await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
+        : undefined
+      const notes = [gateNote, text].filter((note): note is string => Boolean(note))
+      return notes.length ? { ...ran, context: [...(ran.context ?? []), ...notes] } : ran
     } catch {
       return ran
     }

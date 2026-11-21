@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "9395c20ad2c4a4ef7009cffa66937b11beb730176b0c528f4434e408a7ddcca8"
+      "sha256": "d46153e862e08077656eefd879abbce1eba27f8fe16a4d8052f2da0be951a42c"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -100,6 +100,25 @@
         "tools/isswf-verification-guard-core.mjs"
       ],
       "timeoutSeconds": 180
+    },
+    {
+      "id": "isswf-integration-gate",
+      "argv": [
+        "node",
+        "tests/isswf-integration-gate.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-integration-gate-core.mjs",
+        "tools/isswf-command-guard-pi-extension.mjs",
+        "hooks/register.tsx"
+      ],
+      "timeoutSeconds": 300
     },
     {
       "id": "host-portability",

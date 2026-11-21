@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, statSync, writeFileSync } from 'node:fs';
-import { isAbsolute, resolve } from 'node:path';
+import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
 
@@ -140,6 +140,27 @@ function renderTable(checks) {
 
 const RECORD_SCHEMA = 'isswf.close-verification';
 
+/**
+ * Records that this head passed the checks of its tier, in the store under the common git directory that every worktree of the repository shares; the integration gate reads it.
+ * Nothing is written for a dirty or unknown tree, a stale manifest or a check that failed or did not run where it should have (a platform skip is fine), so a stamp
+ * means the whole tier ran clean at exactly this commit. A write fault is reported on stderr and never changes the run's result.
+ */
+function writeStamp({ project, candidate, tier, costs, selected, results, verificationSha256 }) {
+  const ran = selected.every((check, index) => !costs.includes(check.cost) || !check.platforms.includes(process.platform) || results[index].status === 'passed');
+  const common = gitText(project, ['rev-parse', '--git-common-dir']);
+  const tree = gitText(project, ['rev-parse', 'HEAD^{tree}']);
+  if (!ran || common === undefined || tree === undefined) return;
+  const directory = join(resolve(project, common), 'isswf', 'verification-stamps');
+  try {
+    mkdirSync(directory, { recursive: true });
+    const stamp = { candidate, tree, platform: process.platform, tier, verificationSha256, checks: results.map(({ checkId, status }) => ({ id: checkId, status })) };
+    writeFileSync(join(directory, `${candidate}.json`), `${JSON.stringify(stamp, null, 2)}
+`);
+  } catch (error) {
+    console.error(`could not write the verification stamp: ${error.message}`);
+  }
+}
+
 /** The initiative's record directory, or a refusal when it is missing or the tree outside the initiatives is not clean at the verified head. */
 function closeRecordTarget(options, project, state) {
   const directory = `${state}/initiatives/${options.record}`;
@@ -182,6 +203,7 @@ function verify(options) {
     const record = { schema: RECORD_SCHEMA, schemaVersion: 1, source: 'local', initiative: options.record, head: candidate, verificationSha256, checks: results.map(({ checkId, status }) => ({ id: checkId, status })) };
     writeFileSync(resolve(project, recordPath), `${JSON.stringify(record, null, 2)}\n`);
   }
+  if (!refused && dirty === false && options.tier !== undefined && options.only === undefined && stale.length === 0) writeStamp({ project, candidate, tier: options.tier, costs, selected, results, verificationSha256 });
   return { ok: !refused, ...(refused ? { code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files or pass --allow-stale' } : {}), base, tier: options.tier ?? null, ...(recordPath !== undefined && !refused ? { record: recordPath } : {}), stale, results };
 }
 

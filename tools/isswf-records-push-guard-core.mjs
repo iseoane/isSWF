@@ -9,7 +9,7 @@ const SKIPPED_OPTIONS = new Set(['-d', '--delete', '--tags', '--mirror', '--all'
 const PR_PATH = 'open a pull request for this change, or ask the operator to grant records-only direct pushes in the selected state\'s project-setup.md';
 
 /** The remote and the refspecs of a `git push`, or undefined when it is a delete, tags or a mass push. */
-function parsePush(args) {
+export function parsePush(args) {
   const operands = [];
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
