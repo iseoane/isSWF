@@ -29,6 +29,22 @@ assert.equal((await summarize(view(context('ci/x', 'SUCCESS')))).state, 'success
 assert.equal((await summarize(view(context('ci/x', 'PENDING')))).state, 'pending');
 assert.equal((await summarize(view(context('ci/x', 'ERROR')))).state, 'failure');
 assert.deepEqual((await summarize(view(context('ci/x', 'FAILURE')))).checks, [{ name: 'ci/x', conclusion: 'failure' }]);
+// A re-run adds a second entry for the same workflow and check: only the latest, by startedAt and then by order, counts.
+const at = (entry, startedAt, workflowName = 'Quality') => ({ ...entry, startedAt, workflowName });
+{
+  const rerun = await summarize(view(at(run('test', 'FAILURE'), '2026-11-21T10:00:00Z'), at(run('test', 'SUCCESS'), '2026-11-21T10:30:00Z')));
+  assert.equal(rerun.state, 'success');
+  assert.deepEqual(rerun.checks, [{ name: 'test', conclusion: 'success' }]);
+  assert.equal((await summarize(view(at(run('test', 'SUCCESS'), '2026-11-21T10:30:00Z'), at(run('test', 'FAILURE'), '2026-11-21T10:00:00Z')))).state, 'success', 'startedAt decides, not order');
+  assert.equal((await summarize(view(at(run('test', 'SUCCESS'), '2026-11-21T10:00:00Z'), at(run('test', 'FAILURE'), '2026-11-21T10:30:00Z')))).state, 'failure');
+  assert.equal((await summarize(view(run('test', 'FAILURE'), run('test', 'SUCCESS')))).state, 'success', 'order decides without startedAt');
+  assert.equal((await summarize(view(context('ci/x', 'FAILURE'), context('ci/x', 'SUCCESS')))).state, 'success');
+  const apart = await summarize(view(at(run('test', 'FAILURE'), '2026-11-21T10:00:00Z', 'Quality'), at(run('test', 'SUCCESS'), '2026-11-21T10:30:00Z', 'Other')));
+  assert.equal(apart.state, 'failure', 'the same name in another workflow is another check');
+  assert.equal(apart.checks.length, 2);
+}
+// STALE is pending, as gh reads it.
+assert.equal((await summarize(view(run('a', 'STALE')))).state, 'pending');
 // No registered check yet is not a pass.
 assert.equal((await summarize(view())).state, 'pending');
 // A reply the tool cannot read is refused, never read as pending or success.
