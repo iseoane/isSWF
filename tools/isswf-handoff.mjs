@@ -139,9 +139,17 @@ export async function coverage({ project, initiative, job, base, head }) {
   }
   // Each job's review chain: the latest review, then each earlier review whose candidate is the base of the review after it. A delta review carries the
   // earlier round forward, so the chain together reviewed its ranges; the first review that does not chain ends it. A base after the earlier candidate
-  // still chains when the commits between them change only records, such as the earlier review's own record.
+  // still chains when the commits between them change only records, such as the earlier review's own record. Merges of main are allowed too: a merge whose other
+  // parents are on main, and the commits it brings in from main, change nothing the job branch needs reviewed.
+  const mainRef = 'refs/remotes/origin/main';
+  const hasMain = (() => { try { git(['rev-parse', '--verify', '--quiet', `${mainRef}^{commit}`]); return true; } catch { return false; } })();
+  const onlyRecordsOrMainMerges = (candidate, laterBase) => git(['rev-list', '--parents', `${candidate}..${laterBase}`, ...(hasMain ? ['--not', mainRef] : [])]).split('\n').filter(Boolean).every(line => {
+    const [commit, , ...otherParents] = line.split(' ');
+    if (otherParents.length) return otherParents.every(parent => hasMain && isAncestor(parent, mainRef));
+    return git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(Boolean).every(isInitiativePath);
+  });
   const chainsTo = (candidate, laterBase) => candidate !== undefined && laterBase !== undefined && (candidate === laterBase || (isAncestor(candidate, laterBase)
-    && git(['log', '--format=', '--name-only', '-z', `${candidate}..${laterBase}`]).split(/[\0\n]/u).filter(Boolean).every(isInitiativePath)));
+    && onlyRecordsOrMainMerges(candidate, laterBase)));
   const reviews = [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory)).map(entry => {
     const ids = reviewIds(git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').filter(Boolean).map(path => basename(path)));
     const chain = [];
