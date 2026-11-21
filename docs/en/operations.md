@@ -215,6 +215,17 @@ Independent jobs can run at the same time, each in its own worktree and on its o
 
 A push to `main` that changes only initiative records starts no Quality run. Observed once on Claude Code 2.1.330 on Windows 11 (2026-11-21): two background workers in parallel worktrees, one batched PR with CI 5.3 minutes for three units, and the branch guard refusing a commit into the other worktree. Foreground workers, live Linux and Pi were not observed.
 
+### Parallel worker limit
+
+A worker dispatch is counted against a limit local to the clone, so that a few parallel workers do not exhaust the machine's memory. The limit is `git config --local isswf.maxParallelWorkers` (a positive integer; absent or invalid means 2). Setup asks for it. It is never committed, and every worktree of the clone shares it. `git config --local isswf.parallelWorkersMode` is `observe` (the default) or `enforce`.
+
+- **What counts.** One ledger file per open `isswf-worker` dispatch under `<git-common-dir>/isswf/parallel-workers/` records the agent, job, brief, host, start time and, once launched, the run ID. The dispatch guard (`tools/isswf-dispatch-guard-core.mjs`, with the count in `tools/isswf-parallel-workers-core.mjs`) compares the open entries plus the workers of the call with the limit. Reviewers, bound `claude -p` reviews, verify runs and `SendMessage` continuations are not counted, and there is no per-machine store outside the clone.
+- **Modes.** In `observe` mode a dispatch over the limit is allowed and the host shows a note with the count and the clear command; any Git or ledger fault allows the dispatch. In `enforce` mode the guard refuses it with the condition `parallel-limit`, and a fault that stops the count refuses too. The default is `observe` because the completion events below are not yet observed live on both hosts: a missed close leaves a stale entry, and `enforce` would then refuse work. Changing a clone to `enforce` is the operator's choice.
+- **When an entry closes.** Claude Code opens it before the `Agent` call runs and closes it when a foreground call returns or fails. A background launch (`status: async_launched`) keeps it under the returned `agentId` until that child's `turn.complete` carries the same `agentId`. Pi closes it on the `subagent` result, or for an async launch on `subagent:async-complete` with the same `runId`. None of these events was observed live for this feature: Claude's `turn.complete` for a child and Pi's async details are read from the host types and the extension's own tests, Windows included; Pi's async flag is read from the call's `async` field or the result's `asyncId`.
+- **Stale entries.** A crash or a missed event leaves an entry. List and remove them with `node tools/isswf-parallel-workers.mjs list` and `clear [--token <token>]` (`--project <dir>` names another checkout of the clone). Claude Code has no file delete in its hook engine, so its close runs one `node -e` `rmSync` through the host's process call.
+- **Known limits.** An entry opened by an accepted call stays if a later hook refuses the call. A directory the hook cannot list counts as empty.
+
+
 ## Verification runner
 
 ```bash

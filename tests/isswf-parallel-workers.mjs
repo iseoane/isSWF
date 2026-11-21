@@ -123,7 +123,7 @@ try {
   assert.notEqual(tool(main, 'frobnicate').status, 0, 'an unknown verb is refused');
 
   // The guard reads worker calls only, with their job and brief, for both hosts.
-  const prompt = 'brief .factory/initiatives/I0058/jobs/J012/brief-r2.md checkpoint';
+  const prompt = `brief .factory/initiatives/I0058/jobs/J012/brief-r2.md checkpoint ${"a1".repeat(20)} base ${"b2".repeat(20)}`;
   assert.deepEqual(workerCalls('claude', { subagent_type: 'isswf:isswf-worker', prompt }), [{ agent: 'isswf:isswf-worker', job: 'I0058/J012', brief: '.factory/initiatives/I0058/jobs/J012/brief-r2.md' }]);
   assert.deepEqual(workerCalls('claude', { subagent_type: 'isswf:isswf-reviewer', prompt }), [], 'a reviewer is not counted');
   assert.deepEqual(workerCalls('claude', { subagent_type: 'general-purpose', prompt }), []);
