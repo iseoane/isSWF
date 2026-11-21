@@ -4,7 +4,7 @@ const USAGE = 'Usage: node tools/isswf-ci-state.mjs --pr <number> [--repo <owner
 
 const FIELDS = 'headRefOid,statusCheckRollup';
 const SUCCESSFUL = new Set(['SUCCESS', 'NEUTRAL', 'SKIPPED']);
-const PENDING_STATUS = new Set(['PENDING', 'EXPECTED', 'QUEUED', 'IN_PROGRESS', 'WAITING', 'REQUESTED']);
+const PENDING_STATUS = new Set(['PENDING', 'EXPECTED', 'QUEUED', 'IN_PROGRESS', 'WAITING', 'REQUESTED', 'STALE']);
 const unreadable = reason => new Error(`unreadable: ${reason}`);
 
 export function parseArgs(argv) {
@@ -28,13 +28,18 @@ function checkOf(entry) {
   const result = entry.conclusion || entry.state;
   if (typeof result !== 'string' && !PENDING_STATUS.has(entry.status)) throw unreadable(`check ${name} has no result`);
   const outcome = typeof result !== 'string' || PENDING_STATUS.has(result) ? 'pending' : SUCCESSFUL.has(result) ? 'success' : 'failure';
-  return { name, conclusion: outcome === 'pending' ? 'pending' : result.toLowerCase(), outcome };
+  return { name, conclusion: outcome === 'pending' ? 'pending' : result.toLowerCase(), outcome, key: `${entry.workflowName ?? ''}\0${name}`, startedAt: entry.startedAt };
 }
 
 // The worst check decides: a failure outranks a pending check, and no check yet is pending, not a pass.
 function summarize(view) {
   if (typeof view?.headRefOid !== 'string' || !/^[0-9a-f]{40}$/u.test(view.headRefOid) || !Array.isArray(view.statusCheckRollup)) throw unreadable('no head or check list');
-  const checks = view.statusCheckRollup.map(checkOf);
+  // A re-run adds another entry for the same workflow and check; the latest by startedAt (then by order) is its result.
+  const latest = new Map();
+  for (const check of view.statusCheckRollup.map(checkOf)) {
+    if (!(latest.get(check.key)?.startedAt > check.startedAt)) latest.set(check.key, check);
+  }
+  const checks = [...latest.values()];
   const state = checks.some(check => check.outcome === 'failure') ? 'failure' : checks.length === 0 || checks.some(check => check.outcome === 'pending') ? 'pending' : 'success';
   return { head: view.headRefOid, state, checks: checks.map(({ name, conclusion }) => ({ name, conclusion })) };
 }

@@ -16,10 +16,14 @@ const VALUE_LOOPS = new Set(['for', 'foreach']);
 const PASSTHROUGH_KEYWORDS = new Set(['if', 'then', 'else', 'elif', '!', 'time']);
 const BRACE_LOOP_COMMANDS = new Set(['foreach-object', '%']);
 
+// A quoted script path with spaces stays one word that ends in the tool name, so the CI-wait rule still sees it.
+const CI_STATE_QUOTED = /^(["'])[^"']*[\\/]isswf-ci-state\.mjs\1$/u;
+const maskQuoted = quoted => (CI_STATE_QUOTED.test(quoted) ? 'isswf-ci-state.mjs' : SAFE_QUOTED.test(quoted) ? quoted.slice(1, -1) : OPAQUE);
+
 const wordsOnly = command => command
   .replace(/\\\r?\n/gu, ' ')
   .replace(HEREDOC, '$3\n')
-  .replace(QUOTED, quoted => (SAFE_QUOTED.test(quoted) ? quoted.slice(1, -1) : OPAQUE));
+  .replace(QUOTED, maskQuoted);
 
 // Splits masked text into words and the operators that end a segment.
 function lex(text) {
