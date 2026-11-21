@@ -12,7 +12,7 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 - Size: S (one flow)
 - Objective: `isswf-handoff coverage` keeps a job's review chain intact when the job branch merges the main branch, so a delta review after the merge can use its true diff base.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
 - Next step: Worker implements brief r1.
 
