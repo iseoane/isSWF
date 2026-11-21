@@ -8,13 +8,13 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: `isswf-handoff coverage` keeps a job's review chain intact when the job branch merges the main branch, so a delta review after the merge can use its true diff base.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Write brief r1.
+- Next step: Worker implements brief r1.
 
 ### Acceptance
 
@@ -28,13 +28,13 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: The coordinator can create a worker's record skeleton in the worker's checkout without first copying the brief or plan onto the job branch.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Write brief r1.
+- Next step: Worker implements brief r1.
 
 ### Acceptance
 
