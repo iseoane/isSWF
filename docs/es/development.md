@@ -68,6 +68,8 @@ Los comandos Git que lanzan los hooks, las guardas, el panel y sus ejecutores es
 node tooling/quality/fsmonitor-daemons.mjs --project /absolute/checkout
 ```
 
+Ambos análisis son heurísticos y tienen límites conocidos. `tests/git-optional-locks.mjs` reconoce una llamada a Git solo como un comando `git` literal pasado a `execFile`, `execFileSync`, `spawn`, `spawnSync`, `run`, `runAsync` o `$.process.run`, y solo en las fuentes indicadas de hooks, guardas, panel, plan, intake, verify y record-check; no ve una llamada a Git mediante otro ejecutor ni con un ejecutable calculado. `tests/fixture-repositories.mjs` detecta un argumento `init` o `clone` entre comillas en la misma línea que un ejecutor con nombre tipo git, sh, run o command, así que no ve un repositorio creado con otra forma de línea.
+
 Cuando Bun está disponible, la comprobación portable también construye e instala un paquete Bun real en directorios temporales. Prueba las exportaciones de paquetes externos similares a un SDK y sus dependencias transitivas, los scripts `.mjs` con rutas absolutas y relativas y el traspaso al binario fijado. Sin Bun, la prueba de artefacto indica SKIP. Asigna a `ISSWF_TEST_BUN` la ruta de un compilador para exigirla. CI instala el compilador Bun fijado y exige la prueba de artefacto. En local, `ISSWF_TEST_BUN_TMPDIR` permite ubicar los datos de prueba binarios grandes en otro disco. Estos datos de prueba no ejecutan Claude ni proveedores reales.
 
 CI también ejecuta dos comprobaciones de host fuera de la comprobación portable: `tests/host-prerequisites.mjs` y `tests/source-host-isolation.mjs`. Ejecuta ambas en local con un solo comando:

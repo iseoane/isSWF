@@ -26,7 +26,7 @@ async function synced(path, bytes) {
   try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }
 }
 async function checkpoint(root, path, old) {
-  const result = spawnSync('git', ['-C', root, 'show', 'HEAD:' + relative(root, path).split('\\').join('/')], { timeout: 10000, maxBuffer: 256001, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const result = spawnSync('git', ['-C', root, 'show', 'HEAD:' + relative(root, path).split('\\').join('/')], { timeout: 10000, maxBuffer: 256001, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_NO_REPLACE_OBJECTS: '1', GIT_OPTIONAL_LOCKS: '0' } });
   const bytes = await readFile(path);
   if (result.error || result.status !== 0 || !bytes.equals(Buffer.from(old)) || !result.stdout.equals(bytes)) throw Error('Git checkpoint required: commit the exact current plan before revise');
 }
@@ -45,7 +45,7 @@ function render(value, initiative) {
 export async function plan({ action, project, initiative, proposalPath, grantPath, expectedSha256 }) {
   if (!['prepare', 'read', 'revise'].includes(action) || !isAbsolute(project ?? '') || !id(initiative)) throw Error('valid action, absolute project and stable initiative ID required');
   const root = await realpath(project);
-  const git = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' } });
+  const git = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_OPTIONAL_LOCKS: '0' } });
   if (git.status !== 0 || await realpath(git.stdout.trim()) !== root) throw Error('project must be Git root');
   const parents = [join(root, stateDirectory(root)), join(root, stateDirectory(root), 'initiatives'), join(root, stateDirectory(root), 'initiatives', initiative)];
   const path = join(parents[2], 'plan.md');
