@@ -25,9 +25,21 @@ assert.deepEqual(unlockedSpawns('a', "execFile('git', argv, { cwd });"), ['a:1']
 assert.deepEqual(unlockedSpawns('a', "spawnSync('git', args, { cwd, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } });"), []);
 assert.deepEqual(unlockedSpawns('a', "\n$.process.run(['git', ...argv], { cwd })\n;"), ['a:2']);
 assert.deepEqual(unlockedSpawns('a', "$.process.run(['git', '--no-optional-locks', ...argv], { cwd });"), []);
+// A raw call before a marked one in a file without semicolons is reported, and so is a marker that appears only in a comment.
+assert.deepEqual(unlockedSpawns('a', "$.process.run(['git', 'status'], { cwd })
+const g = () => $.process.run(['git', '--no-optional-locks'], { cwd })
+"), ['a:1']);
+assert.deepEqual(unlockedSpawns('a', "// GIT_OPTIONAL_LOCKS=0
+execFile('git', argv, { cwd })
+"), ['a:2']);
+assert.deepEqual(unlockedSpawns('a', "execFile('git', argv, { cwd, /* --no-optional-locks */ })"), ['a:1']);
+assert.deepEqual(unlockedSpawns('a', "spawnSync('git', ['status'], { env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } })
+spawnSync('git', ['log'])"), ['a:2']);
 
 const scanned = [
   ...(await readdir(join(source, 'hooks'))).filter(name => name.endsWith('.tsx') && !name.endsWith('.test.tsx')).map(name => `hooks/${name}`),
+  'tools/isswf-plan.mjs',
+  'tools/isswf-intake.mjs',
   ...(await readdir(join(source, 'tools'))).filter(name => /guard|pi-extension|parallel-workers|panel|verify|record-check/u.test(name)).map(name => `tools/${name}`),
 ];
 const violations = [];

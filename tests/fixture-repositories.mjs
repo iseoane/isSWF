@@ -22,8 +22,8 @@ assert.deepEqual(rawRepositories('a', "gitIn('commit', '-q', '-m', 'init');"), [
 assert.deepEqual(rawRepositories('a', "cli('init', ['--tracking', 'local']);"), []);
 assert.deepEqual(rawRepositories('a', "initRepository(root, ['-b', 'main']);"), []);
 
-const files = async directory => (await readdir(join(source, directory), { withFileTypes: true }))
-  .flatMap(entry => (entry.isFile() && /\.(?:mjs|tsx)$/u.test(entry.name) ? [`${directory}/${entry.name}`] : []));
+const files = async directory => (await Promise.all((await readdir(join(source, directory), { withFileTypes: true }))
+  .map(async entry => (entry.isDirectory() ? files(`${directory}/${entry.name}`) : /\.(?:mjs|tsx)$/u.test(entry.name) ? [`${directory}/${entry.name}`] : [])))).flat();
 const scanned = [...await files('tests'), ...await files('hooks')].filter(file => file !== 'tests/support/git-fixture.mjs' && file !== 'tests/fixture-repositories.mjs');
 const violations = [];
 for (const file of scanned) violations.push(...rawRepositories(file, await readFile(join(source, file), 'utf8')));
