@@ -22,6 +22,9 @@ for (const path of ['tests/stale-statements.mjs', 'docs/en/development.md', 'too
   assert.ok(!packaged.includes(path), `not packaged: ${path}`);
 }
 
+// A conditional skill ships as a whole directory, so a file the Pi lists omit is still selected.
+assert.deepEqual(packaging.packagedFileSet(['.agents/skills/isswf-e2e/references/unlisted.md', '.agents/skills/isswf-debug/extra.md', '.agents/skills/isswf-unknown/SKILL.md']), ['.agents/skills/isswf-debug/extra.md', '.agents/skills/isswf-e2e/references/unlisted.md']);
+
 const statements = await loadStatements(source);
 assert.ok(statements.length > 0, 'the phrase list is seeded');
 
@@ -37,5 +40,22 @@ assert.deepEqual(findStale([{ ...probe, phrase: 'exits 0 even for an invalid pla
 assert.deepEqual(findStale([{ ...probe, phrase: 'exits 0 even\nfor an invalid plan' }], seeded).map(hit => hit.path), ['.agents/skills/isswf-coordinator/SKILL.md']);
 assert.deepEqual(findStale([{ ...probe, scope: 'docs/*.md' }], new Map([['docs/x.md', probe.phrase], ['.agents/x.md', probe.phrase], ['docs/en/x.md', probe.phrase]])).map(hit => hit.path), ['docs/x.md']);
 assert.deepEqual(findStale([{ phrase: 'pending in J[0-9]', regex: true, reason: 'probe', since: 'I0000/J000' }], new Map([['b.md', 'remain pending in J12']])).map(hit => hit.path), ['b.md']);
+
+// Literal matching ignores case like regex matching does.
+assert.deepEqual(findStale([{ ...probe, phrase: 'Exits 0 Even For An Invalid Plan' }], new Map([['a.md', probe.phrase]])).map(hit => hit.path), ['a.md']);
+
+// A malformed entry is refused with its index.
+const { mkdtemp, mkdir, writeFile, rm } = await import('node:fs/promises');
+const { tmpdir } = await import('node:os');
+const scratch = await mkdtemp(join(tmpdir(), 'isswf-stale-'));
+try {
+  await mkdir(join(scratch, 'tooling/quality'), { recursive: true });
+  for (const [bad, pattern] of [[{ regex: 'yes' }, /statement 1.*regex/u], [{ scope: 3 }, /statement 1.*scope/u]]) {
+    await writeFile(join(scratch, 'tooling/quality/stale-statements.json'), JSON.stringify({ statements: [{ ...probe }, { ...probe, ...bad }] }));
+    await assert.rejects(loadStatements(scratch), pattern);
+  }
+} finally {
+  await rm(scratch, { recursive: true, force: true });
+}
 
 console.log(`PASS ${statements.length} stale statements searched in ${files.size} packaged text files`);
