@@ -29,6 +29,11 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   else assert.ok(knowledge.every(tool => toolLine.includes(tool)), `${role} must be able to use installed CodeGraph and Engram`);
   if (role === "researcher" || role === "planner") assert.match(toolLine, /mcp__plugin_isswf_isswf_git_evidence__identity, mcp__plugin_isswf_isswf_git_evidence__diff, mcp__plugin_isswf_isswf_git_evidence__content$/u, `${role} reads its base through the three evidence tools`);
   assert.ok(body.length < 1500, `${file} should remain a thin wrapper`);
+  if (role === 'researcher' || role === 'planner') {
+    const profile = await read(`.agents/roles/${role}.md`);
+    assert.match(profile, /read in the assigned base checkout/u, `${role} reads in the base checkout`);
+    assert.match(profile, /working-tree sources/u, `${role} reports working-tree sources`);
+  }
 }
 const skill = await read('.agents/skills/isswf-coordinator/SKILL.md');
 const completionGate = skill.slice(skill.indexOf('A candidate commit is not terminal execution status'), skill.indexOf('\n\nA plan, partial commit'));
