@@ -164,13 +164,17 @@ try {
   refuses(tool(['review', '--project', root]), 'usage');
   refuses(tool(['frobnicate']), 'usage');
   await assert.rejects(stat(join(root, 'handoffs')), 'a refused --out is not created inside the project');
-  // A checkout without the brief, or with a plan that does not mark the job in progress, is served from the checkpoint, as `isswf-record-new create` does.
-  await write('.factory/initiatives/I0001/plan.md', plan('pending'));
-  assert.deepEqual(review().handoff, made.handoff, 'the plan is read at the checkpoint');
-  await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
+  // A checkout without the brief is served from the checkpoint, as `isswf-record-new create` does.
   await rm(join(root, BRIEF));
   assert.deepEqual(review().handoff, made.handoff, 'the brief is read at the checkpoint');
   await write(BRIEF, '# brief\n');
+  // A plan that lists the job as pending yields to the checkpoint only when the checkpoint is not in the tree's history; an older checkpoint in that history is refused.
+  await write('.factory/initiatives/I0001/plan.md', plan('pending'));
+  refuses(review(), 'job-not-in-progress');
+  const sibling = git(root, 'commit-tree', `${candidate}^{tree}`, '-p', base, '-m', 'checkpoint outside the tree history');
+  const sideOut = review([], { '--checkpoint': sibling, '--out': join(temp, 'out-side') });
+  assert.equal(sideOut.ok, true, JSON.stringify(sideOut));
+  await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
 
   // The default directory is the OS temporary directory, and a diff the Claude hook cannot read (4 MiB) is refused at generation.
   {

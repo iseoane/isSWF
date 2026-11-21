@@ -345,37 +345,61 @@ try {
     git(project, 'add', '-A');
     git(project, 'commit', '-q', '-m', 'bare');
     const bare = git(project, 'rev-parse', 'HEAD');
-    await writeFile(planPath, planText());
-    await writeFile(briefPath, '# Brief\n');
-    git(project, 'add', '-A');
-    git(project, 'commit', '-q', '-m', 'checkpoint');
-    const checkpoint = git(project, 'rev-parse', 'HEAD');
+    // main: the checkpoint marks the job in progress, then a later commit marks it pending again. Each side branch leaves `bare` and is not an ancestor of main.
+    const commitPlan = async (text, message) => {
+      await mkdir(join(project, jobRel), { recursive: true });
+      await writeFile(planPath, text);
+      await writeFile(briefPath, '# Brief\n');
+      git(project, 'add', '-A');
+      git(project, 'commit', '-q', '-m', message);
+      return git(project, 'rev-parse', 'HEAD');
+    };
+    const checkpoint = await commitPlan(planText(), 'checkpoint');
+    await commitPlan(planText('pending'), 'later');
+    const sideCommit = async (name, text) => {
+      git(project, 'checkout', '-q', '-b', name, bare);
+      const sha = await commitPlan(text, name);
+      git(project, 'checkout', '-q', 'main');
+      return sha;
+    };
+    const sideInProgress = await sideCommit('side-in-progress', planText());
+    const sidePending = await sideCommit('side-pending', planText('pending'));
+    const sideUnparsable = await sideCommit('side-unparsable', 'not a plan\n');
     const args = (id, at = checkpoint) => ['create', '--project', project, '--initiative', 'I0001', '--job', 'J001', '--kind', 'attempt', '--id', id, '--role', 'worker', '--brief', `${jobRel}/brief-r1.md`, '--checkpoint', at, '--base', bare, '--model', 'sonnet', '--effort', 'medium'];
     const cli = argv => {
       const result = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), ...argv], { encoding: 'utf8', timeout: 30000 });
       return { status: result.status, out: JSON.parse(result.stdout || 'null') };
     };
-    const created = (id, label) => {
-      const done = cli(args(id));
+    const created = (id, at, label) => {
+      const done = cli(args(id, at));
       assert.deepEqual([done.status, done.out.ok, done.out.id], [0, true, id], `${label}: ${JSON.stringify(done)}`);
+    };
+    const refuses = (at, code, label) => {
+      const done = cli(args('A003', at));
+      assert.deepEqual([done.status, done.out.ok, done.out.code], [1, false, code], `${label}: ${JSON.stringify(done)}`);
     };
     const attempts = async () => (await readdir(join(project, jobRel))).filter(name => /^A\d{3}\.md$/u.test(name)).sort();
 
     // The brief is only at the checkpoint, and the skeleton is written in the project tree.
-    await rm(briefPath);
-    created('A001', 'brief only at the checkpoint');
-    assert.ok((await readFile(join(project, jobRel, 'A001.md'), 'utf8')).includes(`- Brief path, revision, and input checkpoint (full Git SHA): ${jobRel}/brief-r1.md, r1, ${checkpoint}\n`));
-    // The tree's plan does not mark the job in progress; the checkpoint's does.
-    await writeFile(briefPath, '# Brief\n');
-    await writeFile(planPath, planText('pending'));
-    created('A002', 'plan in progress only at the checkpoint');
-    // Neither the tree nor the checkpoint has the in-progress job, or the brief.
-    const refused = cli(args('A003', bare));
-    assert.deepEqual([refused.status, refused.out.ok, refused.out.code], [1, false, 'job-not-in-progress'], 'neither has the job in progress');
     await writeFile(planPath, planText());
     await rm(briefPath);
-    const noBrief = cli(args('A003', bare));
-    assert.deepEqual([noBrief.status, noBrief.out.ok, noBrief.out.code], [1, false, 'brief-not-found'], 'neither has the brief');
+    created('A001', checkpoint, 'brief only at the checkpoint');
+    assert.ok((await readFile(join(project, jobRel, 'A001.md'), 'utf8')).includes(`- Brief path, revision, and input checkpoint (full Git SHA): ${jobRel}/brief-r1.md, r1, ${checkpoint}\n`));
+    // The tree's plan lists the job as pending (the branch was cut before the coordinator started it): a checkpoint that is not in the tree's history may start it.
+    await writeFile(briefPath, '# Brief\n');
+    await writeFile(planPath, planText('pending'));
+    created('A002', sideInProgress, 'plan in progress only at a checkpoint outside the tree history');
+    // A checkpoint already in the tree's history is older than the tree's plan, so its in-progress plan does not override it.
+    refuses(checkpoint, 'job-not-in-progress', 'stale checkpoint');
+    // A checkpoint plan that lists the job as pending, or cannot be parsed, grants nothing.
+    refuses(sidePending, 'job-not-in-progress', 'checkpoint lists the job pending');
+    refuses(sideUnparsable, 'job-not-in-progress', 'checkpoint plan unparsable');
+    // A checkpoint that is not a commit is refused as such, before the plan or the brief is looked up.
+    refuses('f'.repeat(40), 'commit-not-found', 'checkpoint not a commit');
+    // Neither the tree nor the checkpoint has the brief.
+    await writeFile(planPath, planText());
+    await rm(briefPath);
+    refuses(bare, 'brief-not-found', 'neither has the brief');
     assert.deepEqual(await attempts(), ['A001.md', 'A002.md'], 'a refusal creates nothing');
   }
   // `complete` fills the candidate, the changed paths and the commits from Git, and refuses to overwrite what the author wrote.
