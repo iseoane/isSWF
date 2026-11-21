@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { gitFixtureArgs } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
+const { gitIn } = await import(pathToFileURL(join(source, 'tools/isswf-record-new.mjs')).href);
 const { prepare, presetReviewer, launch, record } = await import(pathToFileURL(join(source, 'tools/isswf-review-launch.mjs')).href);
 const locator = process.platform === 'win32' ? 'where.exe' : 'which';
 const git = await realpath(spawnSync(locator, ['git'], { encoding: 'utf8' }).stdout.trim().split(/\r?\n/u)[0]);
@@ -100,6 +101,33 @@ process.stdout.write(lines.map(l => JSON.stringify(l)).join('\\n') + '\\n');
   const explicit = await launch({ bindings: bindingsFile, task, trace: join(root, 'trace2.jsonl'), factoryRoot: source, model: 'sonnet', effort: 'high', claude: process.execPath, claudePrefix: [fake] });
   assert.equal(explicit.source, 'operator');
   assert.equal(await reason(launch({ bindings: bindingsFile, task, trace, factoryRoot: source, model: 'sonnet', claude: process.execPath, claudePrefix: [fake] })), 'pass-both-model-and-effort-or-neither');
+
+  // The project's approved selection is the reviewer's one source; the preset applies only when the file is absent.
+  const selectionFile = join(repo, '.factory', 'dispatch-selection.json');
+  await mkdir(join(repo, '.factory'), { recursive: true });
+  const reviewerSelection = agents => JSON.stringify({ schemaVersion: 1, agents: { claude: agents } });
+  const launchOptions = name => ({ bindings: bindingsFile, task, trace: join(root, name), factoryRoot: source, claude: process.execPath, claudePrefix: [fake] });
+  await writeFile(selectionFile, reviewerSelection({ 'isswf-reviewer': { model: 'sonnet', effort: 'high' } }));
+  const selected = await launch(launchOptions('trace-selection.jsonl'));
+  assert.deepEqual([selected.model, selected.effort, selected.source], ['sonnet', 'high', 'selection']);
+  assert.equal((await record({ trace: join(root, 'trace-selection.jsonl') })).requested.source, 'selection');
+  const overridden = await launch({ ...launchOptions('trace-operator.jsonl'), model: 'haiku', effort: 'low' });
+  assert.deepEqual([overridden.model, overridden.effort, overridden.source], ['haiku', 'low', 'operator']);
+  await writeFile(selectionFile, '{ not json');
+  assert.equal(await reason(launch(launchOptions('trace-bad.jsonl'))), 'dispatch-selection-not-valid-json');
+  await writeFile(selectionFile, reviewerSelection({ 'isswf:isswf-worker': { model: 'sonnet', effort: 'medium' } }));
+  assert.match(await reason(launch(launchOptions('trace-noentry.jsonl'))), /has no entry for isswf:isswf-reviewer for host claude/u);
+  await writeFile(selectionFile, reviewerSelection({ 'isswf:isswf-reviewer': { model: 'opus' } }));
+  assert.match(await reason(launch(launchOptions('trace-noeffort.jsonl'))), /needs a model and an effort \(effort is missing\)/u);
+  await rm(join(repo, '.factory'), { recursive: true });
+
+  // Without a Git on the path, each caller keeps its own error code.
+  const savedPath = process.env.PATH;
+  process.env.PATH = '';
+  try {
+    assert.equal(await reason(prepare({ repository: repo, candidate: second })), 'git-executable-not-found');
+    await assert.rejects(gitIn(repo), { code: 'git-not-found' });
+  } finally { process.env.PATH = savedPath; }
 
   // The trace gives the Run line, the requested selection and whether every diff chunk was fetched.
   const read = await record({ trace });

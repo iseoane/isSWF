@@ -28,6 +28,7 @@ These tools package the factory, manage a project's installation and read or pre
 | Refuse a failing dispatch to an isSWF role agent | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Refuse a CI-waiting or package-acquiring shell command | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Keep the coordinator's assignment through a compaction | `tools/isswf-compaction-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
+| Warn at turn end about an in-progress job with a committed brief and no launch | `tools/isswf-undispatched-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
 | Refuse a `git commit` on a branch the session did not select | `tools/isswf-branch-guard-core.mjs`, `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 
 The release compiler bundles tool entrypoints into one Bun executable and supplies each module's original identity and package-root paths. Original source files remain verified provenance. Source development still runs on Node.js.

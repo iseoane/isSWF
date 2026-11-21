@@ -33,7 +33,7 @@ const agentTranscript = jsonl([
   assistant('req_a1', '2026-01-01T00:00:01.000Z', claudeUsage(10, 20, 30, 40), [{ type: 'tool_use', name: 'Skill', input: { skill: 'isswf:isswf-review' } }, { type: 'tool_use', name: 'Read', input: { file_path: '/repo/.agents/roles/worker.md' } }]),
   assistant('req_a1', '2026-01-01T00:00:01.500Z', claudeUsage(10, 20, 30, 40), [{ type: 'tool_use', name: 'Read', input: { file_path: 'C:\\repo\\.agents\\skills\\isswf-tdd\\SKILL.md' } }]),
   user('2026-01-01T00:00:02.000Z'),
-  assistant('req_a2', '2026-01-01T00:00:05.000Z', claudeUsage(1, 2, 3, 4), [{ type: 'tool_use', name: 'Read', input: { file_path: '/repo/.agents/roles/worker.md' } }, { type: 'tool_use', name: 'Read', input: { file_path: '/repo/README.md' } }, { type: 'text', text: 'done' }], 'end_turn'),
+  assistant('req_a2', '2026-01-01T00:00:05.000Z', claudeUsage(1, 2, 3, 4), [{ type: 'tool_use', name: 'Read', input: { file_path: '/repo/.agents/roles/worker.md' } }, { type: 'tool_use', name: 'Read', input: { file_path: '/repo/README.md' } }, { type: 'tool_use', name: 'Read', input: { file_path: join(root, 'project', 'src', 'a.mjs') } }, { type: 'tool_use', name: 'Bash', input: { command: 'node tests/run-usage.mjs .' } }, { type: 'tool_use', name: 'PowerShell', input: { command: 'Get-Content README.md' } }, { type: 'text', text: 'done' }], 'end_turn'),
 ]);
 const sessionTranscript = jsonl([
   user('2026-01-02T00:00:00.000Z'),
@@ -46,7 +46,7 @@ const piTranscript = jsonl([
   { recordType: 'message', role: 'user', ts: 1000, message: { role: 'user', content: [{ type: 'text', text: '[prompt redacted]' }] } },
   // The prompt is redacted; the system sections carry the profile, which names the debug skill.
   { recordType: 'message', role: 'system', ts: 1500, message: { role: 'system', content: '', sections: { preamble: 'Use .agents/skills/isswf-debug/SKILL.md for bugs.' } } },
-  piRecord(2000, { input: 100, output: 10, cacheRead: 50, cacheWrite: 5, cost: 0.1 }, [{ type: 'toolCall', name: 'read', arguments: { path: '/repo/.agents/skills/isswf-debug/SKILL.md' } }]),
+  piRecord(2000, { input: 100, output: 10, cacheRead: 50, cacheWrite: 5, cost: 0.1 }, [{ type: 'toolCall', name: 'read', arguments: { path: '/repo/.agents/skills/isswf-debug/SKILL.md' } }, { type: 'toolCall', name: 'bash', arguments: { command: 'git status', timeout: 5 } }]),
   { recordType: 'tool_start', ts: 2500 },
   piRecord(4000, { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 }, [{ type: 'text', text: 'done' }]),
 ]) + '{"recordType":"mess';
@@ -96,21 +96,24 @@ try {
     skills: { 'isswf-review': 1, 'isswf-tdd': 1, 'isswf-coordinator': 1 },
     agentsReads: { '.agents/roles/references/review.md': 1, '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1, '.agents/skills/isswf-coordinator/SKILL.md': 1, '.agents/skills/isswf-tdd/SKILL.md': 1 },
     usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, usedHostGuides: {}, costUsd: 'unknown',
+    readPaths: ['/repo/.factory/initiatives/I0001/jobs/J001/brief-r1.md', '/repo/.agents/roles/references/review.md', '/repo/.agents/roles/references/design-principles.md', '/repo/.agents/roles/worker.md', '/repo/.agents/roles/references/execution-principles.md', '/repo/.agents/skills/isswf-coordinator/SKILL.md', 'C:/repo/.agents/skills/isswf-tdd/SKILL.md', '/repo/README.md', 'src/a.mjs'],
+    commands: ['node tests/run-usage.mjs .', 'Get-Content README.md'],
+    editedPaths: ['/repo/.agents/roles/references/review.md'],
   });
   // The advisor iteration is billed on top of the request's top-level usage.
-  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown' });
+  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', readPaths: [], commands: [], editedPaths: [] });
   assert.deepEqual(pi, {
     found: true, finished: true, model: 'pi-test-1',
     tokens: { input: 101, output: 12, cacheRead: 53, cacheWrite: 9 }, durationMs: 3000,
-    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', agent: 'isswf-worker',
+    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', agent: 'isswf-worker', readPaths: ['/repo/.agents/skills/isswf-debug/SKILL.md'], commands: ['git status'], editedPaths: [],
   });
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
-  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', usedHostGuides: 'unknown', costUsd: 'unknown' };
+  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', usedHostGuides: 'unknown', costUsd: 'unknown', readPaths: 'unknown', commands: 'unknown', editedPaths: 'unknown' };
   assert.deepEqual(missing, { found: false, reason: 'transcript-not-found', ...unknown });
   // Valid entries of a found transcript are still summed and the result is marked partial.
   assert.deepEqual(broken, {
     found: true, finished: true, model: 'claude-test-1', tokens: { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 },
-    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', tokensPartial: true, reason: 'malformed-line',
+    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', readPaths: [], commands: [], editedPaths: [], tokensPartial: true, reason: 'malformed-line',
   });
   assert.deepEqual(escape, { found: false, reason: 'invalid-id', ...unknown });
   assert.equal(openPi.finished, false, 'a Pi child without its meta file is unfinished');
@@ -210,3 +213,83 @@ try {
   assert.equal(fallbackRole('unknown', { id: 'x' }, { agent: 'general-purpose' }, {}), 'unknown');
   console.log('run usage pane summary tests passed');
 }
+
+// Observed reads and commands: Windows paths inside the project become relative, a similarly named sibling
+// stays absolute, and the lists are bounded with the cut disclosed.
+{
+  const memoryFs = files => {
+    const names = Object.keys(files);
+    return {
+      exists: async path => names.includes(path),
+      list: async dir => {
+        const kids = new Map();
+        for (const name of names) if (name.startsWith(`${dir}/`)) { const [head, ...tail] = name.slice(dir.length + 1).split('/'); kids.set(head, tail.length ? 'dir' : 'file'); }
+        if (!kids.size) throw Error('ENOENT');
+        return [...kids].map(([name, kind]) => ({ name, kind }));
+      },
+      stat: async path => ({ size: files[path].length }),
+      read: async path => files[path],
+    };
+  };
+  const call = (name, input) => ({ type: 'tool_use', name, input });
+  const transcript = content => jsonl([user('2026-01-01T00:00:00.000Z'), assistant('req_w1', '2026-01-01T00:00:01.000Z', claudeUsage(1, 1, 0, 0), content, 'end_turn')]);
+  const resolve1 = (content, project = 'C:\\work\\proj') => resolveRunUsage({ host: 'claude', kind: 'agent', id: 'win1' }, { fs: memoryFs({ '/c/projects/-p/s1/subagents/agent-win1.jsonl': transcript(content) }), claudeDir: '/c', piDir: '/pi', project });
+  const windows = await resolve1([call('Read', { file_path: 'C:\\work\\proj\\src\\a.mjs' }), call('Read', { file_path: 'c:\\work\\PROJ\\docs\\b.md' }), call('Read', { file_path: 'C:\\work\\project2\\x.md' }), call('Read', { file_path: 'C:\\work\\proj\\src\\a.mjs' }), call('Bash', { command: 'dir' })]);
+  assert.deepEqual(windows.readPaths, ['src/a.mjs', 'docs/b.md', 'C:/work/project2/x.md']);
+  assert.deepEqual(windows.commands, ['dir']);
+  assert.deepEqual([windows.readsTruncated, windows.commandsTruncated, windows.editsTruncated], [undefined, undefined, undefined]);
+
+  const many = await resolve1([...Array.from({ length: 205 }, (_, i) => call('Read', { file_path: `/repo/f${i}.md` })), ...Array.from({ length: 105 }, (_, i) => call('Bash', { command: i === 0 ? 'x'.repeat(400) : `echo ${i}` }))]);
+  assert.equal(many.readPaths.length, 200);
+  assert.equal(many.readPaths[199], '/repo/f199.md');
+  assert.equal(many.commands.length, 100);
+  assert.equal(many.commands[0], 'x'.repeat(300));
+  assert.deepEqual([many.readsTruncated, many.commandsTruncated], [true, true]);
+  // Each cut is flagged on its own: a command-only cut leaves the read list complete.
+  const shell = await resolve1(Array.from({ length: 105 }, (_, i) => call('Bash', { command: `echo ${i}` })));
+  assert.deepEqual([shell.readsTruncated, shell.commandsTruncated], [undefined, true]);
+  const wrote = await resolve1([call('Write', { file_path: 'C:\\work\\proj\\notes.md' }), call('Edit', { file_path: '/repo/.agents/roles/worker.md' })]);
+  assert.deepEqual(wrote.editedPaths, ['notes.md', '/repo/.agents/roles/worker.md']);
+}
+
+// The brief comparison names each `.agents/` or `skills/` file the brief mentions that the run never read.
+{
+  const { compareBrief } = await import(pathToFileURL(join(source, 'tools/isswf-run-usage-core.mjs')).href);
+  const brief = 'Read `.agents/roles/worker.md`, [tdd](../../.agents/skills/isswf-tdd/SKILL.md), .agents\\roles\\references\\comments.md and skills/isswf-coordinator/SKILL.md. Also .agents/roles/worker.md again and docs/en/x.md.';
+  const run = (readPaths, extra = {}) => ({ found: true, readPaths, commands: [], skills: {}, agentsReads: {}, ...extra });
+  assert.deepEqual(compareBrief(brief, [run(['C:/repo/.agents/roles/worker.md'], { skills: { 'isswf-tdd': 1 } })]), {
+    named: ['.agents/roles/worker.md', '.agents/skills/isswf-tdd/SKILL.md', '.agents/roles/references/comments.md', 'skills/isswf-coordinator/SKILL.md'],
+    unread: ['.agents/roles/references/comments.md', 'skills/isswf-coordinator/SKILL.md'], partial: false,
+  });
+  // Several runs of one attempt pool their reads; a path that only ends alike (`my.agents/...`) is not a read.
+  assert.deepEqual(compareBrief(brief, [run(['/r/.agents/roles/worker.md']), run(['/r/skills/isswf-coordinator/SKILL.md', '/r/.agents/skills/isswf-tdd/SKILL.md', 'my.agents/roles/references/comments.md'])]).unread, ['.agents/roles/references/comments.md']);
+  assert.equal(compareBrief(brief, [{ found: false, readPaths: 'unknown' }]), undefined, 'an unresolved run compares nothing');
+  assert.equal(compareBrief(brief, []), undefined);
+  assert.equal(compareBrief('nothing to read', [run([])]).unread.length, 0);
+  assert.equal(compareBrief(brief, [run([], { readsTruncated: true })]).partial, true);
+  assert.equal(compareBrief(brief, [run([], { commandsTruncated: true })]).partial, false, 'a cut command list does not make the reads partial');
+  assert.equal(compareBrief(brief, [run([], { tokensPartial: true })]).partial, true, 'a partly read transcript is partial');
+  // A file the run wrote is its work, not methodology it read.
+  assert.deepEqual(compareBrief(brief, [run(['/r/.agents/roles/worker.md', '/r/.agents/roles/references/comments.md'], { editedPaths: ['/r/.agents/roles/references/comments.md'] })]).unread, ['.agents/skills/isswf-tdd/SKILL.md', '.agents/roles/references/comments.md', 'skills/isswf-coordinator/SKILL.md']);
+}
+
+// A non-blocking note on an attempt record that cites a brief: the record check names the unread methodology and still exits on its own verdict.
+{
+  const tmp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-brief-note-')));
+  try {
+    const jobDir = join(tmp, 'project/.factory/initiatives/I0002/jobs/J001');
+    await mkdir(jobDir, { recursive: true });
+    await mkdir(join(tmp, 'claude/projects/-p/9d9d/subagents'), { recursive: true });
+    await writeFile(join(tmp, 'claude/projects/-p/9d9d/subagents/agent-a1b2c3.jsonl'), agentTranscript);
+    await writeFile(join(jobDir, 'brief-r1.md'), 'Use .agents/roles/worker.md and .agents/roles/references/comments.md.\n');
+    await writeFile(join(jobDir, 'A001.md'), '# Attempt\n\n- Brief path: I0002/jobs/J001/brief-r1.md\n- Run: claude agent=a1b2c3\n');
+    await writeFile(join(jobDir, 'A002.md'), '# Attempt\n\n- Brief path: I0002/jobs/J001/brief-r1.md\n- Run: claude agent=missing99\n');
+    const check = file => spawnSync(process.execPath, [join(source, 'tools/isswf-record-check.mjs'), '--project', join(tmp, 'project'), '--file', join(jobDir, file)], { encoding: 'utf8', timeout: 15000, env: { ...process.env, CLAUDE_CONFIG_DIR: join(tmp, 'claude'), PI_CODING_AGENT_DIR: join(tmp, 'pi') } });
+    const noted = JSON.parse(check('A001.md').stdout).files[0];
+    assert.deepEqual(noted.notes, ['brief names methodology the run never read: .agents/roles/references/comments.md']);
+    assert.equal('notes' in JSON.parse(check('A002.md').stdout).files[0], false, 'a run without a transcript gives no note');
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+}
+console.log('run usage observed tests passed');

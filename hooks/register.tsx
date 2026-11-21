@@ -9,9 +9,10 @@ import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
+import { findUndispatched, freshUndispatched, undispatchedWarning } from '../tools/isswf-undispatched-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
-import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
-import { countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
+import { initiativeIdsIn, initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
+import { compareBrief, countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
@@ -25,6 +26,8 @@ const BRANCHES = { plugin: 'isswf', key: 'branches' } as const
 // The last accepted dispatches of a session that activated the coordinator; the post-compaction reminder lists them.
 const ASSIGNMENTS = { plugin: 'isswf', key: 'assignments' } as const
 const ASSIGNED = { plugin: 'isswf', key: 'assigned' } as const
+// The job and brief revisions already warned about in this session (isswf-undispatched-core).
+const WARNED = { plugin: 'isswf', key: 'warned' } as const
 // The agent name the host gave each role run, by run id; a record that names no role falls back to it.
 const AGENT_NAMES = { plugin: 'isswf', key: 'agent-names' } as const
 // A file is shown up to this many characters; one drawing holds 100000 in all.
@@ -34,7 +37,6 @@ const RESUME_THRESHOLD = 90
 const RESUME_DELAY_MS = 5 * 60_000
 // Delegated roles with a shared profile under `.agents/roles/`.
 const PROFILES = new Set(['worker', 'reviewer', 'researcher', 'planner', 'diagnostician'])
-const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
 const RECENT_COMPLETED = 2
@@ -50,6 +52,8 @@ const LABELS = {
     blocked: 'bloqueados',
     open: 'sin cerrar',
     usage: 'consumo',
+    briefUnread: 'el brief nombra y la ejecución no leyó',
+    briefRead: 'el brief nombra: todo leído',
     partial: 'parcial',
     duration: 'duración',
     cost: 'coste',
@@ -95,6 +99,8 @@ const LABELS = {
     blocked: 'blocked',
     open: 'open',
     usage: 'usage',
+    briefUnread: 'brief names, run did not read',
+    briefRead: 'brief names: all read',
     partial: 'partial',
     duration: 'duration',
     cost: 'cost',
@@ -160,6 +166,9 @@ let homes: Promise<{ claudeDir?: string; piDir?: string }> | undefined
 // The coordinator's own counts, refreshed after each Agents draw so drawing never waits on the transcript.
 let ownCounts: { usedSkills: any; usedReferences: any } | undefined
 let countingOwn = false
+// Brief texts by path, read once after a draw; the job view compares each with its attempt's runs.
+const briefs = new Map<string, string>()
+const briefsLoading = new Set<string>()
 // One resume per usage window: the timer lives only in this session, and `resumeFor` is the window's reset time.
 let resumeTimer: Timer | undefined
 let resumeFor: string | undefined
@@ -204,6 +213,16 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
       })
     })
     scheduleRefresh($)
+  })().catch(() => {})
+}
+
+function loadBriefs($: EngineInterface, paths: string[]) {
+  const pending = paths.filter(path => !briefs.has(path) && !briefsLoading.has(path))
+  for (const path of pending) briefsLoading.add(path)
+  void (async () => {
+    for (const path of pending) briefs.set(path, await $.fs.read(path).catch(() => ''))
+    for (const path of pending) briefsLoading.delete(path)
+    if (pending.length) scheduleRefresh($)
   })().catch(() => {})
 }
 
@@ -309,7 +328,7 @@ function touchedIds(e: { tool: string; file_path?: unknown; command?: unknown })
   const raw = e.tool === 'Bash' ? e.command : ['Read', 'Edit', 'Write'].includes(e.tool) ? e.file_path : undefined
   if (typeof raw !== 'string') return []
   const text = e.tool === 'Bash' ? raw.replace(HEREDOC, '$3\n').replace(QUOTED, q => (/\s/.test(q) ? '""' : q)) : raw
-  const ids = [...text.replace(/\\/g, '/').matchAll(RECORD_PATH)].map(m => m[1])
+  const ids = initiativeIdsIn(text.replace(/\\/g, '/'))
   if (e.tool === 'Bash') ids.push(...[...text.matchAll(INITIATIVE_FLAG)].map(m => m[1]))
   return ids
 }
@@ -385,18 +404,23 @@ function roundLabel(job: any, round: any) {
 }
 
 // Only what the record or its transcript says is listed; a record with nothing beyond its name has no detail.
-function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
+function pillView(initiativeId: string, jobId: string, entry: any, t: Labels, brief?: string) {
   const resolved = entry.runs.length ? usageLines(entry, t) : { model: undefined, lines: [] as string[] }
   const model = resolved.model
     ? `${t.model}: ${resolved.model} (transcript)`
     : entry.model !== 'unknown' && entry.model ? `${t.model}: ${entry.model}${entry.modelSource === 'unknown' ? '' : ` (${entry.modelSource})`}` : undefined
   const effort = entry.effort !== 'unknown' && entry.effort ? `${t.effort}: ${entry.effort}` : undefined
+  const compared = brief && entry.kind === 'attempt' ? compareBrief(brief, entry.runs.map((run: any) => usage.get(runKey(run)))) : undefined
+  const briefLine = compared?.named.length
+    ? compared.unread.length ? `${t.briefUnread}: ${compared.unread.join(', ')}${compared.partial ? ` (${t.partial})` : ''}` : t.briefRead
+    : undefined
   // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
   const verdict = entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict]
   const facts = [
     [model, effort].filter(Boolean).join(' · '),
     verdict && `${t.verdict}: ${verdict}`,
     ...resolved.lines,
+    briefLine,
   ].filter(Boolean) as string[]
   return {
     key: `${initiativeId}-${jobId}-${entry.id}`,
@@ -703,6 +727,35 @@ export const register: Register = (on, options) => {
     return result
   })
 
+  // After a turn of the main conversation that was not aborted or failed, a coordinator session is told once about an in-progress job whose
+  // committed brief has no attempt record and no accepted dispatch. The warning is a status line only and a fault never changes the turn.
+  on('turn.complete', async ($, e, next) => {
+    try {
+      const turn = e as { agentId?: unknown; aborted?: unknown; error?: unknown; isError?: unknown }
+      if (turn.agentId === undefined && turn.aborted !== true && turn.error == null && turn.isError !== true && (await $.state.get(IS_ACTIVATED)).value) {
+        const cwd = await $.session.cwd()
+        const found = await findUndispatched({
+          assignments: (await $.state.get(ASSIGNMENTS)).value ?? [],
+          warned: new Set<string>((await $.state.get(WARNED)).value ?? []),
+          io: {
+            project: () => cwd,
+            list: (dir: string) => $.fs.list(dir),
+            read: (file: string) => $.fs.read(file),
+            git: async (argv: string[], at: string) => (await $.process.run(['git', ...argv], { cwd: at })).exitCode,
+          },
+        })
+        const warned = new Set<string>((await $.state.get(WARNED)).value ?? [])
+        const text = undispatchedWarning(freshUndispatched(found, warned))
+        if (text) {
+          await $.state.set(WARNED, [...warned])
+          $.ui.status(text)
+        } else if (!found.length && warned.size) $.ui.status(undefined)
+      }
+    } catch {}
+
+    return next(e)
+  })
+
   // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.
   if (options?.initiativesPane !== true) return
 
@@ -763,6 +816,8 @@ export const register: Register = (on, options) => {
     const isExpanded = (initiative: any, job: any) => expanded.includes(`${initiative.id}-${job.id}`)
     resolveUsage($, cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status !== 'completed' || isExpanded(i, j)))
       .flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries.flatMap((x: any) => x.runs))), snapshot.project)
+    const briefPath = (initiative: any, job: any, round: any) => joiner(snapshot.stateDir)(snapshot.stateDir, initiative.id, 'jobs', job.id, `brief-r${round.round}.md`)
+    loadBriefs($, cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status !== 'completed' || isExpanded(i, j)).flatMap((j: any) => j.rounds.filter((r: any) => r.round !== 'unknown').map((r: any) => briefPath(i, j, r)))))
 
     // One completed job is unfolded at a time: unfolding one folds the other and closes any open record detail.
     const toggle = (key: string) => () => update($, EXPANDED, (list: string[] | undefined) => (list ?? []).includes(key) ? (list ?? []).filter(k => k !== key) : [key])
@@ -785,7 +840,7 @@ export const register: Register = (on, options) => {
       </Box>
     )
     const rounds = (initiative: any, job: any) => job.rounds.map((round: any) => {
-      const pills = round.entries.map((entry: any) => pillView(initiative.id, job.id, entry, t))
+      const pills = round.entries.map((entry: any) => pillView(initiative.id, job.id, entry, t, round.round === 'unknown' ? undefined : briefs.get(briefPath(initiative, job, round))))
       return (
         <Box flexDirection="column">
           <Box flexDirection="row" gap={1} alignItems="center">

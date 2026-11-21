@@ -25,6 +25,47 @@
       "scope": "docs/*.md",
       "reason": "job-status wording belongs in plans, not current guides",
       "since": "I0057"
+    },
+    {
+      "phrase": "trace proves a read",
+      "scope": ".agents/**",
+      "reason": "the trace rule is defined once, by the attempt template field Required-resource consumption",
+      "since": "I0058/J008"
+    },
+    {
+      "phrase": "read trace does not prove understanding",
+      "scope": ".agents/**",
+      "reason": "the trace rule is defined once, by the attempt template field Required-resource consumption",
+      "since": "I0058/J008"
+    },
+    {
+      "phrase": "harness and run log",
+      "scope": ".agents/**",
+      "reason": "retained substitute evidence is defined once, by the attempt template field",
+      "since": "I0058/J008"
+    },
+    {
+      "phrase": "claimed application is visible",
+      "scope": ".agents/**",
+      "reason": "reference-application outcomes are defined once, by the review template",
+      "since": "I0058/J008"
+    },
+    {
+      "phrase": "detached read-only worktree",
+      "reason": "the base worktree is read-only by instruction, not enforced; the coordinator skill defines it",
+      "since": "I0058/J008"
+    },
+    {
+      "phrase": "--detach <isswf.worktreeRoot>",
+      "scope": ".agents/hosts/**",
+      "reason": "the base worktree command is defined once, in the coordinator skill",
+      "since": "I0058/J008"
+    },
+    {
+      "phrase": "command,? and failing assertion",
+      "regex": true,
+      "reason": "TDD evidence is defined once, by the attempt template Method application report",
+      "since": "I0058/J008"
     }
   ]
 }

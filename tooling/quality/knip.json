@@ -33,6 +33,7 @@
     "tools/isswf-verification-guard-core.mjs",
     "tools/isswf-records-push-guard-core.mjs",
     "tools/isswf-integration-gate-core.mjs",
+    "tools/isswf-undispatched-core.mjs",
     "tools/isswf-command-guard-pi-extension.mjs",
     "tools/token-native-pi.mjs",
     "tools/token-native-claude.mjs",

@@ -167,4 +167,35 @@ const body = hooks.slice(hooks.indexOf('export const register'));
 const beforePane = body.slice(0, body.indexOf('options?.initiativesPane !== true'));
 assert.ok(hooks.includes('guardRecord(') && beforePane.includes("on('tool.call'"), 'the guard is registered whatever the pane option is');
 for (const tool of ['Edit', 'Write', 'MultiEdit']) assert.ok(hooks.includes(`'${tool}'`), tool);
+
+// One classifier answers three questions about a path. The table holds what the earlier copies (the guard's strict test,
+// the Git-relative `isRecordPath` of record-new-core and the pane's `RECORD_PATH`) accepted and rejected.
+const { isInitiativePath, isRecordPath, initiativeIdsIn } = await load('tools/isswf-snapshot-core.mjs');
+for (const [path, strict, loose] of [
+  ['.factory/initiatives/I0058/plan.md', true, true],
+  ['.isswf/initiatives/I1/jobs/J001/A001.md', true, true],
+  ['.isswf/initiatives/I1/jobs/J001/V999.md', true, true],
+  ['C:/p/.isswf/initiatives/I0058/plan.md', true, false],
+  ['sub/dir/.factory/initiatives/I1/jobs/J12/A001.md', true, false],
+  ['x.factory/initiatives/I1/plan.md', false, false],
+  ['.factory/initiatives/I1/jobs/J001/brief-r1.md', false, true],
+  ['.factory/initiatives/I1/jobs/J001/A01.md', false, true],
+  ['.factory/initiatives/I1/jobs/J001/a001.md', false, true],
+  ['.factory/initiatives/I1/jobs/J001/sub/A001.md', false, true],
+  ['.factory/initiatives/I1/plan.md.bak', false, true],
+  ['.factory/initiatives/', false, true],
+  ['.factory/initiative/I1/plan.md', false, false],
+  ['.agents/initiatives/I1/plan.md', false, false],
+]) {
+  assert.equal(isRecordPath(path), strict, `isRecordPath ${path}`);
+  assert.equal(isInitiativePath(path), loose, `isInitiativePath ${path}`);
+}
+for (const [text, ids] of [
+  ['cat .factory/initiatives/I0046/plan.md', ['I0046']],
+  ['a/.isswf/initiatives/I1/jobs/J1 b/.factory/initiatives/I22/plan.md', ['I1', 'I22']],
+  ['.factory/initiatives/I12x/plan.md', []],
+  ['initiatives/I0046/plan.md', []],
+  ['.factory/initiatives/J0046', []],
+]) assert.deepEqual(initiativeIdsIn(text), ids, `initiativeIdsIn ${text}`);
+
 console.log('PASS record guard: shared core, Pi extension, packaging declarations and Claude registration order');

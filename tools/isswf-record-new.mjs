@@ -1,5 +1,4 @@
-import { spawnSync } from 'node:child_process';
-import { lstat, mkdir, readdir, readFile, realpath } from 'node:fs/promises';
+import { lstat, mkdir, readdir, readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runGit } from './git-evidence.mjs';
@@ -10,19 +9,13 @@ import { checkRecord } from './isswf-record-check-core.mjs';
 import { completeText, nextRecordId, recordBase, recordError, recordPrefix, renderRecord } from './isswf-record-new-core.mjs';
 import { parseRunLine } from './isswf-snapshot-core.mjs';
 import { stateDirectory } from './project-state.mjs';
+import { locateGit } from './trusted-git.mjs';
 
 const GIT_TIMEOUT_MS = 20000;
 const GIT_MAX_BUFFER = 16 * 1024 * 1024;
 const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SHA = /^[0-9a-f]{40}$/u;
 const ROLES = { attempt: ['worker', 'researcher', 'planner'], review: ['reviewer'] };
-
-export async function locateGit() {
-  const locator = process.platform === 'win32' ? 'where.exe' : 'which';
-  const found = spawnSync(locator, ['git'], { encoding: 'utf8', windowsHide: true }).stdout?.trim().split(/\r?\n/u)[0];
-  if (!found) throw recordError('git-not-found');
-  return realpath(found);
-}
 
 /** Runs Git in `cwd` through the shared runner with literal pathspecs and returns its stdout as text. */
 export async function gitIn(cwd) {

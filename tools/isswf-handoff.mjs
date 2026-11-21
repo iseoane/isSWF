@@ -5,16 +5,17 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
 import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewBaseOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
+import { REVIEWER_AGENTS, selectionEntry } from './isswf-dispatch-guard-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
-import { isRecordPath, recordError } from './isswf-record-new-core.mjs';
-import { assertCommit, blobAt, briefOf, checkSha, gitIn, jobTarget, locateGit, recordNames, requireBrief, reviewIds, requireInProgress } from './isswf-record-new.mjs';
+import { recordError } from './isswf-record-new-core.mjs';
+import { isInitiativePath } from './isswf-snapshot-core.mjs';
+import { assertCommit, blobAt, briefOf, checkSha, gitIn, jobTarget, recordNames, requireBrief, reviewIds, requireInProgress } from './isswf-record-new.mjs';
+import { locateGit } from './trusted-git.mjs';
 
 const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const GIT_TIMEOUT_MS = 30000;
 const REVIEW_RESOURCES = ['.agents/roles/reviewer.md', '.agents/skills/isswf-review/SKILL.md', '.agents/roles/references/review.md', '.agents/roles/references/review-convergence.md'];
 const HOST_GUIDES = { claude: '.agents/hosts/claude-code.md', pi: '.agents/hosts/pi.md' };
-// The agent names a selection file may key the reviewer by, in the order the dispatch guard's two spellings are tried.
-const REVIEWER_AGENTS = { claude: ['isswf:isswf-reviewer', 'isswf-reviewer'], pi: ['isswf-reviewer'] };
 
 const isInside = (parent, child) => {
   const path = relative(parent, child);
@@ -36,12 +37,10 @@ async function realLocation(path) {
 
 async function reviewerSelection({ root, state }, host) {
   const selection = await readFile(join(root, state, 'dispatch-selection.json'), 'utf8').then(JSON.parse, () => undefined);
-  const agents = selection?.agents?.[host];
-  for (const agent of REVIEWER_AGENTS[host]) {
-    const { model, effort } = agents?.[agent] ?? {};
-    if (typeof model === 'string' && model && typeof effort === 'string' && effort) return { host, agent, model, effort };
-  }
-  throw recordError('reviewer-selection-missing', { field: host });
+  try {
+    const { agent, model, effort } = selectionEntry(selection, host, REVIEWER_AGENTS[host], 'dispatch-selection.json');
+    return { host, agent, model, effort };
+  } catch { throw recordError('reviewer-selection-missing', { field: host }); }
 }
 
 // Both files are write-once: a second handoff for the same candidate and base finds the same bytes, and anything else under that name is refused.
@@ -142,7 +141,7 @@ export async function coverage({ project, initiative, job, base, head }) {
   // earlier round forward, so the chain together reviewed its ranges; the first review that does not chain ends it. A base after the earlier candidate
   // still chains when the commits between them change only records, such as the earlier review's own record.
   const chainsTo = (candidate, laterBase) => candidate !== undefined && laterBase !== undefined && (candidate === laterBase || (isAncestor(candidate, laterBase)
-    && git(['log', '--format=', '--name-only', '-z', `${candidate}..${laterBase}`]).split(/[\0\n]/u).filter(Boolean).every(isRecordPath)));
+    && git(['log', '--format=', '--name-only', '-z', `${candidate}..${laterBase}`]).split(/[\0\n]/u).filter(Boolean).every(isInitiativePath)));
   const reviews = [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory)).map(entry => {
     const ids = reviewIds(git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').filter(Boolean).map(path => basename(path)));
     const chain = [];
@@ -167,7 +166,7 @@ export async function coverage({ project, initiative, job, base, head }) {
   const overrides = reviews.flatMap(entry => entry.chain.flatMap(link => overrideCommitsOf(link.text)));
   const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`]).split('\n').filter(commit => commit && !covered.has(commit)).map(commit => ({
     commit,
-    paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isRecordPath(path)))].sort(),
+    paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isInitiativePath(path)))].sort(),
   })).filter(item => item.paths.length);
   const jobs = [], skipped = [];
   for (const entry of reviews.filter(item => (!initiative || item.initiative === initiative) && (!job || item.job === job))) {

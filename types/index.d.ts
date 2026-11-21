@@ -24,6 +24,6 @@ export type IsswfAssignment = { agent: string; initiative: string; job: string; 
 
 declare module 'claude-code' {
   interface PluginState {
-    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree; branches: IsswfBranches; assignments: IsswfAssignment[]; assigned: IsswfAssigned }
+    isswf: { isActivated: boolean; touched: IsswfPaneTouched; pinned: IsswfPanePinned; expanded: IsswfPaneExpanded; tab: IsswfPaneTab; resumeOnQuota: boolean; tree: IsswfPaneTree; branches: IsswfBranches; assignments: IsswfAssignment[]; assigned: IsswfAssigned; warned: string[] }
   }
 }
