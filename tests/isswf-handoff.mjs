@@ -164,8 +164,16 @@ try {
   refuses(tool(['review', '--project', root]), 'usage');
   refuses(tool(['frobnicate']), 'usage');
   await assert.rejects(stat(join(root, 'handoffs')), 'a refused --out is not created inside the project');
+  // A checkout without the brief is served from the checkpoint, as `isswf-record-new create` does.
+  await rm(join(root, BRIEF));
+  assert.deepEqual(review().handoff, made.handoff, 'the brief is read at the checkpoint');
+  await write(BRIEF, '# brief\n');
+  // A plan that lists the job as pending yields to the checkpoint only when the checkpoint is not in the tree's history; an older checkpoint in that history is refused.
   await write('.factory/initiatives/I0001/plan.md', plan('pending'));
   refuses(review(), 'job-not-in-progress');
+  const sibling = git(root, 'commit-tree', `${candidate}^{tree}`, '-p', base, '-m', 'checkpoint outside the tree history');
+  const sideOut = review([], { '--checkpoint': sibling, '--out': join(temp, 'out-side') });
+  assert.equal(sideOut.ok, true, JSON.stringify(sideOut));
   await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
 
   // The default directory is the OS temporary directory, and a diff the Claude hook cannot read (4 MiB) is refused at generation.
@@ -442,6 +450,97 @@ try {
   const viaMerge = tool(['coverage', '--project', merged, '--base', origin, '--head', git(merged, 'rev-parse', 'HEAD')]);
   assert.equal(viaMerge.ok, false, 'the docs commit made on main after the base is not reviewed');
   assert.deepEqual(viaMerge.jobs[0].uncovered.map(entry => entry.paths), [['docs/en/other.md']], 'only the docs commit, not the merge commit that brings in the reviewed one');
+
+  // A job branch that merges main keeps its review chain: the I0058 J013 shape, V002 on a candidate, a records commit, a merge of main, a fix, then V003 based on the merge.
+  // `resolve` adds files inside the merge itself, as a conflict resolution does; `reviewed: false` stops after the merge with only an attempt record following.
+  // `edits` makes main and the job both edit src/a.mjs: `hunks` in different hunks (a clean merge), `lines` on the same line (a conflict that `resolve` settles).
+  const mergeShape = async (name, between, { resolve: resolution, reviewed = true, edits, octopus = false } = {}) => {
+    const dir = join(coverTemp, name);
+    await mkdir(dir);
+    initRepository(dir, ['-b', 'main']);
+    const save = async (files, message) => {
+      for (const [path, content] of Object.entries(files)) {
+        await mkdir(join(dir, path, '..'), { recursive: true });
+        await writeFile(join(dir, path), content);
+      }
+      git(dir, 'add', '-A');
+      git(dir, 'commit', '-qm', message);
+      return git(dir, 'rev-parse', 'HEAD');
+    };
+    const body = (first, last) => [first, ...Array.from({ length: 18 }, (_, index) => `line ${index}`), last].join('\n') + '\n';
+    const versions = { hunks: [body('x', 'y'), body('x', 'a'), body('m', 'y')], lines: ['x\n', 'a\n', 'm\n'] }[edits];
+    const root = await save({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress'), ...(versions && { 'src/a.mjs': versions[0] }) }, 'main');
+    git(dir, 'checkout', '-q', '-b', 'job');
+    const code = await save({ 'src/a.mjs': versions?.[1] ?? 'a\n' }, 'job code');
+    await save({ [`${jobDir('J001')}/V002.md`]: reviewText(code, '', root) }, 'records: V002');
+    const extra = await between({ dir, save });
+    git(dir, 'checkout', '-q', 'main');
+    await save({ 'src/main-only.mjs': 'm\n', ...(versions && { 'src/a.mjs': versions[2] }) }, 'code on main');
+    git(dir, 'update-ref', 'refs/remotes/origin/main', 'main');
+    git(dir, 'checkout', '-q', 'job');
+    if (octopus) {
+      git(dir, 'checkout', '-q', '-b', 'side', root);
+      await save({ 'src/side.mjs': 's\n' }, 'code on a side branch');
+      git(dir, 'checkout', '-q', 'job');
+    }
+    // A conflicted merge exits 1 and leaves its markers in the work tree for `resolve` to replace. The flags are the file's `git` helper's, so the merge needs no global identity.
+    const merging = spawnSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.autocrlf=false', 'merge', '--no-ff', '-q', ...(resolution ? ['--no-commit'] : []), '-m', 'merge main', 'main', ...(octopus ? ['side'] : [])], { cwd: dir, encoding: 'utf8' });
+    assert.equal(merging.status, edits === 'lines' ? 1 : 0, merging.stderr);
+    if (resolution) {
+      for (const [path, content] of Object.entries(resolution)) await writeFile(join(dir, path), content);
+      git(dir, 'add', '-A');
+      git(dir, 'commit', '-qm', 'merge main');
+    }
+    const merge = git(dir, 'rev-parse', 'HEAD');
+    if (!reviewed) {
+      await save({ [`${jobDir('J001')}/A001.md`]: '# attempt\n' }, 'records: attempt');
+      return { dir, code, extra, merge, root, result: tool(['coverage', '--project', dir]) };
+    }
+    const fix = await save({ 'src/a.mjs': 'b\n' }, 'job fix');
+    await save({ [`${jobDir('J001')}/V003.md`]: reviewText(fix, '', merge) }, 'records: V003 based on the merge');
+    return { dir, code, extra, merge, root, result: tool(['coverage', '--project', dir]) };
+  };
+  const throughMain = await mergeShape('merge-main', async () => undefined);
+  assert.equal(throughMain.result.ok, true, JSON.stringify(throughMain.result));
+  assert.equal(throughMain.result.jobs[0].record, 'V003');
+  // A merge of a branch that is not on main breaks the chain, even when that branch changes only records.
+  const sideMerge = await mergeShape('merge-side', async ({ dir, save }) => {
+    git(dir, 'checkout', '-q', '-b', 'side');
+    await save({ '.factory/initiatives/I0001/notes.md': 'side\n' }, 'records on a side branch');
+    git(dir, 'checkout', '-q', 'job');
+    git(dir, 'merge', '--no-ff', '-q', '-m', 'merge side', 'side');
+  });
+  assert.equal(sideMerge.result.ok, false, JSON.stringify(sideMerge.result));
+  assert.deepEqual(sideMerge.result.jobs[0].uncovered.map(entry => entry.commit), [sideMerge.code]);
+  // A code commit between the earlier candidate and the merge was reviewed by neither round.
+  const codeBetween = await mergeShape('merge-code-between', ({ save }) => save({ 'src/b.mjs': 'b\n' }, 'code between the rounds'));
+  assert.equal(codeBetween.result.ok, false, JSON.stringify(codeBetween.result));
+  assert.deepEqual(codeBetween.result.jobs[0].uncovered.map(entry => entry.commit), [codeBetween.code, codeBetween.extra]);
+  // A merge of main that adds code of its own, as a conflict resolution can, was reviewed by nobody: it breaks the chain, and with no later review it is listed with its combined-diff paths.
+  const evil = { 'src/evil.mjs': 'e\n' };
+  const evilChain = await mergeShape('merge-evil', async () => undefined, { resolve: evil });
+  assert.equal(evilChain.result.ok, false, JSON.stringify(evilChain.result));
+  assert.deepEqual(evilChain.result.jobs[0].uncovered, [{ commit: evilChain.code, paths: ['src/a.mjs'] }, { commit: evilChain.merge, paths: ['src/evil.mjs'] }]);
+  const evilOpen = await mergeShape('merge-evil-open', async () => undefined, { resolve: evil, reviewed: false });
+  assert.deepEqual(evilOpen.result.jobs[0].uncovered, [{ commit: evilOpen.merge, paths: ['src/evil.mjs'] }]);
+  // A merge of main that both sides edited in different hunks is clean: nothing in it needs review, in the chain or as the tip after the last candidate.
+  const hunksChain = await mergeShape('merge-hunks', async () => undefined, { edits: 'hunks' });
+  assert.equal(hunksChain.result.ok, true, JSON.stringify(hunksChain.result));
+  const hunksOpen = await mergeShape('merge-hunks-open', async () => undefined, { edits: 'hunks', reviewed: false });
+  assert.equal(hunksOpen.result.ok, true, JSON.stringify(hunksOpen.result));
+  // A conflicted merge is judged by its resolution: the conflicted file and the code the resolution adds are the merge's own changes.
+  const conflicted = await mergeShape('merge-conflict', async () => undefined, { edits: 'lines', resolve: { 'src/a.mjs': 'r\n', ...evil }, reviewed: false });
+  assert.deepEqual(conflicted.result.jobs[0].uncovered, [{ commit: conflicted.merge, paths: ['src/a.mjs', 'src/evil.mjs'] }]);
+  // A merge of more than two parents cannot be judged against one automatic merge, so it is listed rather than trusted. A failing `merge-tree` takes the same path; it is not tested because it needs a broken object store.
+  const octopus = await mergeShape('merge-octopus', async () => undefined, { octopus: true, reviewed: false });
+  const octopusUncovered = octopus.result.jobs[0].uncovered;
+  assert.deepEqual(octopusUncovered.map(entry => entry.paths), [['src/side.mjs'], ['(merge not judged)']], 'the side branch commit it brings in, then the merge');
+  assert.equal(octopusUncovered[1].commit, octopus.merge);
+  // Without an origin/main ref no merge can be shown to bring in only main's commits, so the chain breaks.
+  git(throughMain.dir, 'update-ref', '-d', 'refs/remotes/origin/main');
+  const noMain = tool(['coverage', '--project', throughMain.dir, '--base', throughMain.root]);
+  assert.equal(noMain.ok, false, JSON.stringify(noMain));
+  assert.ok(noMain.jobs[0].uncovered.some(entry => entry.commit === throughMain.code), 'the first candidate is no longer covered');
 } finally {
   await rm(coverTemp, { recursive: true, force: true });
 }

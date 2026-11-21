@@ -1,9 +1,10 @@
+import { spawnSync } from 'node:child_process';
 import { lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
+import { diffArguments, diffEnvironment, gitEnvironment, runGit } from './git-evidence.mjs';
 import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewBaseOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
 import { REVIEWER_AGENTS, selectionEntry } from './isswf-dispatch-guard-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
@@ -61,13 +62,14 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   checkSha(checkpoint, 'checkpoint');
   checkSha(base, 'base');
   checkSha(candidate, 'candidate');
-  await requireInProgress(target, initiative, job);
-  await requireBrief(target, brief);
+  const git = await gitIn(target.root);
+  assertCommit(git, checkpoint, 'checkpoint');
+  await requireInProgress(target, initiative, job, git, checkpoint);
+  await requireBrief(target, brief, git, checkpoint);
   const directory = resolve(out ?? tmpdir());
   if (isInside(await realpath(target.root), await realLocation(directory))) throw recordError('out-inside-project');
 
-  const git = await gitIn(target.root);
-  for (const [sha, flag] of [[checkpoint, 'checkpoint'], [base, 'base'], [candidate, 'candidate']]) assertCommit(git, sha, flag);
+  for (const [sha, flag] of [[base, 'base'], [candidate, 'candidate']]) assertCommit(git, sha, flag);
   try { git(['merge-base', '--is-ancestor', base, candidate]); } catch { throw recordError('candidate-not-descendant'); }
   const reviewer = await reviewerSelection(target, host);
   const resources = [...REVIEW_RESOURCES, HOST_GUIDES[host]];
@@ -114,12 +116,14 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
 
 const INITIATIVE_JOB = /^\.(?:isswf|factory)\/initiatives\/(I\d+)\/jobs\/([^/]+)\//u;
 
-/** Reads, for every job whose records the range changed, the commits outside its review chain's ranges that change more than records. Merge commits are left out: the commits they bring in are the ones that count. */
+/** Reads, for every job whose records the range changed, the commits outside its review chain's ranges that change more than records. A merge counts by what it adds beyond the automatic merge of its parents, so a clean merge adds nothing and a conflict resolution that adds code is listed. */
 export async function coverage({ project, initiative, job, base, head }) {
   if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
   checkSha(base, 'base', { optional: true });
   checkSha(head, 'head', { optional: true });
-  const git = await gitIn(resolve(project));
+  const root = resolve(project);
+  const git = await gitIn(root);
+  const gitExecutable = await locateGit();
   const isAncestor = (ancestor, descendant) => {
     try { git(['merge-base', '--is-ancestor', ancestor, descendant]); return true; } catch { return false; }
   };
@@ -139,9 +143,28 @@ export async function coverage({ project, initiative, job, base, head }) {
   }
   // Each job's review chain: the latest review, then each earlier review whose candidate is the base of the review after it. A delta review carries the
   // earlier round forward, so the chain together reviewed its ranges; the first review that does not chain ends it. A base after the earlier candidate
-  // still chains when the commits between them change only records, such as the earlier review's own record.
+  // still chains when the commits between them change only records, such as the earlier review's own record. Merges of main are allowed too: a merge whose other
+  // parents are on main and whose own changes are records only, and the commits it brings in from main, change nothing the job branch needs reviewed.
+  // A merge's own changes are its difference from the automatic merge of its two parents, with the conflicted files counted as changed so that their resolution
+  // is reviewed. A merge of more than two parents, or one the automatic merge cannot be computed for, has unknown changes and counts as unreviewed.
+  const UNJUDGED_MERGE = '(merge not judged)';
+  const ownPaths = (commit, parents) => {
+    if (parents.length < 2) return git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(Boolean);
+    if (parents.length > 2) return [UNJUDGED_MERGE];
+    const auto = spawnSync(gitExecutable, ['-C', root, 'merge-tree', '--write-tree', '--name-only', '--no-messages', '-z', ...parents], { encoding: 'buffer', env: gitEnvironment(gitExecutable, { GIT_LITERAL_PATHSPECS: '1' }), timeout: 20000, maxBuffer: 16 * 1024 * 1024, windowsHide: true });
+    if (auto.error || (auto.status !== 0 && auto.status !== 1)) return [UNJUDGED_MERGE];
+    const [tree, ...conflicted] = auto.stdout.toString('utf8').split('\0').filter(Boolean);
+    try { return [...new Set([...conflicted, ...git(['diff', '--no-renames', '--name-only', '-z', tree, commit]).split('\0').filter(Boolean)])]; } catch { return [UNJUDGED_MERGE]; }
+  };
+  const mainRef = 'refs/remotes/origin/main';
+  const hasMain = (() => { try { git(['rev-parse', '--verify', '--quiet', `${mainRef}^{commit}`]); return true; } catch { return false; } })();
+  const onlyRecordsOrMainMerges = (candidate, laterBase) => git(['rev-list', '--parents', `${candidate}..${laterBase}`, ...(hasMain ? ['--not', mainRef] : [])]).split('\n').filter(Boolean).every(line => {
+    const [commit, first, ...otherParents] = line.split(' ');
+    if (otherParents.length && !otherParents.every(parent => hasMain && isAncestor(parent, mainRef))) return false;
+    return ownPaths(commit, first ? [first, ...otherParents] : []).every(isInitiativePath);
+  });
   const chainsTo = (candidate, laterBase) => candidate !== undefined && laterBase !== undefined && (candidate === laterBase || (isAncestor(candidate, laterBase)
-    && git(['log', '--format=', '--name-only', '-z', `${candidate}..${laterBase}`]).split(/[\0\n]/u).filter(Boolean).every(isInitiativePath)));
+    && onlyRecordsOrMainMerges(candidate, laterBase)));
   const reviews = [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory)).map(entry => {
     const ids = reviewIds(git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').filter(Boolean).map(path => basename(path)));
     const chain = [];
@@ -164,9 +187,9 @@ export async function coverage({ project, initiative, job, base, head }) {
   }
   // The override lines of every review in every chain apply to the one list of commits.
   const overrides = reviews.flatMap(entry => entry.chain.flatMap(link => overrideCommitsOf(link.text)));
-  const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`]).split('\n').filter(commit => commit && !covered.has(commit)).map(commit => ({
+  const commits = git(['rev-list', '--reverse', '--parents', `${from}..${tip}`]).split('\n').filter(Boolean).map(line => line.split(' ')).filter(([commit]) => !covered.has(commit)).map(([commit, ...parents]) => ({
     commit,
-    paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isInitiativePath(path)))].sort(),
+    paths: [...new Set(ownPaths(commit, parents).filter(path => !isInitiativePath(path)))].sort(),
   })).filter(item => item.paths.length);
   const jobs = [], skipped = [];
   for (const entry of reviews.filter(item => (!initiative || item.initiative === initiative) && (!job || item.job === job))) {
