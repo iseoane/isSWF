@@ -28,9 +28,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
 - Depends on: None
-- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
+- Brief: [brief-r3.md](jobs/J001/brief-r3.md)
 - Blocker: None.
-- Next step: Pane units (roles, host guides, no-reads line) in batch 1; then observed reads and brief comparison.
+- Next step: Worker fixes the pane roles, host guides and empty runs (brief r3), batch 1 with J004.
 
 ### Acceptance
 
@@ -94,14 +94,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Scope: factory.
 - Objective: A read-only child that runs in parallel with a writer reads its pinned base, not the moving working tree.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J004/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Worker gives researcher and planner the Git evidence tools (brief r1), batch 1 with J001 pane.
 
 ### Acceptance
 
@@ -111,6 +111,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-15: I0057 J007 A001 and J002 A001 read the shared checkout while a worker committed, so their sources could differ from their base.
+- 2026-11-21: operator accepted the batch distribution: batch 1 J004 and J001 pane; batch 2 J003, J007, J008.
 
 ## J005
 
