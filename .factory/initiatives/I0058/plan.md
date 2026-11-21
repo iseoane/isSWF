@@ -30,7 +30,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J001/brief-r3.md)
 - Blocker: None.
-- Next step: Worker fixes the pane roles, host guides and empty runs (brief r3), batch 1 with J004.
+- Next step: Pane merged in #377 (b0042ca2, V004). Remaining units: observed reads and commands from transcripts, brief comparison, SHA record rule.
 
 ### Acceptance
 
@@ -82,7 +82,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Implementation brief r2 after the J001 pane merges (turn.complete in hooks/register.tsx; agent_settled in the Pi compaction extension).
+- Next step: Implementation brief r2 (turn.complete in hooks/register.tsx; agent_settled in the Pi compaction extension); J001 pane merged in #377.
 
 ### Acceptance
 
@@ -95,14 +95,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Scope: factory.
 - Objective: A read-only child that runs in parallel with a writer reads its pinned base, not the moving working tree.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Worker gives researcher and planner the Git evidence tools (brief r1), batch 1 with J001 pane.
+- Next step: None; merged in #377 (b0042ca2, V002). Known limits: base-worktree route documented, not run live; Pi project overrides need setup reconciliation (F5); ES "separado" and "read-only" wording (V002 N1, N2) go to J008 unit 1.
 
 ### Acceptance
 
@@ -165,7 +165,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
 - Blocker: None.
-- Next step: Implementation brief after the J001 pane merges (RECORD_PATH also in hooks/register.tsx).
+- Next step: Implementation brief (RECORD_PATH also in hooks/register.tsx); J001 pane merged in #377.
 
 ### Acceptance
 
@@ -186,7 +186,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J008/brief-r2.md)
 - Blocker: None.
-- Next step: Worker adds the stale-statement search over the package (brief r2, batch 1); canonical definitions after J004 merges.
+- Next step: Stale-statement search merged in #377 (b0042ca2, V002). Unit 1: canonical definitions, including J004 V002 N1 and N2 wording.
 
 ### Acceptance
 
