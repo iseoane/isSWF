@@ -37,8 +37,8 @@ Deferred candidates (low value; add a job only after another occurrence):
 - For each child run, the hooks record which files it read and which commands it ran, on Claude Code and Pi, or the gap is recorded per host.
 - At attempt close, the brief's selected skills and required references are compared with the observed reads, and a missing one is reported.
 - A check that an attempt record reports as run names the commit it ran at, and an observed command run supports it.
-- Each commit of a job carries a verification stamp: the checks observed for it (or `none`), recorded by a tool, not typed by the writer.
-- A commit gate reads the stamp and has three modes: `off`, `observe` (logs what it would refuse) and `enforce` (refuses an unstamped code commit unless its message states why). The project setup selects the mode; the default is `observe`.
+- A branch head offered for integration carries a verification stamp: the job-tier checks observed for that commit, recorded by a tool, not typed by the writer; records-only commits on top inherit the stamp below them.
+- An integration gate (merge of a branch, push of a non-main branch, PR creation) reads the stamp and has three modes: `off`, `observe` (notes what it would refuse) and `enforce` (refuses an unstamped head). The project setup at the base selects the mode; the default is `observe`.
 - The pane's Agents tab names each run's role, distinguishes an unresolved transcript from a run that used nothing, and lists host guides apart from references.
 
 ### Evidence
@@ -49,6 +49,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - 2026-11-15: the operator saw `unknown` roles, `skills: unknown` and host guides under references in the pane (`tools/isswf-run-usage-core.mjs:152-158`; `hooks/register.tsx` groups by record role).
 - 2026-11-21: operator: after closing I0063, do all of I0058 starting with J001; the stamp and commit gate make the per-branch `isswf-verify --tier job` run deterministic (the coordinator skipped it in the I0063 pilot).
 - 2026-11-21: research (brief r1, researcher run, read-only) proposed seven units: pane fixes, role source, transcript-based observation, brief comparison, stamp, gate, SHA record rule. Operator chose the stamp at branch integration (batching model). Gate mode default observe.
+- 2026-11-21: acceptance reworded from per-commit stamp and commit gate to branch-head stamp and integration gate, per the operator decision (V001 F7).
 
 ## J002
 
