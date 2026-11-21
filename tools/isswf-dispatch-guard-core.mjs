@@ -34,6 +34,8 @@ class Refusal extends Error {
 const refuse = (condition, detail) => {
   throw new Refusal(condition, detail);
 };
+/** RED stub. */
+export const workerCalls = () => [];
 /** Whether an agent name is an isSWF role agent, the only kind the guard checks. */
 export const isRoleAgent = agent => typeof agent === 'string' && ROLE_AGENT.test(agent);
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
