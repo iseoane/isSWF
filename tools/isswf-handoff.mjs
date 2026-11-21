@@ -114,7 +114,7 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
 
 const INITIATIVE_JOB = /^\.(?:isswf|factory)\/initiatives\/(I\d+)\/jobs\/([^/]+)\//u;
 
-/** Reads, for every job whose records the range changed, the commits outside its review chain's ranges that change more than records. Merge commits are left out: the commits they bring in are the ones that count. */
+/** Reads, for every job whose records the range changed, the commits outside its review chain's ranges that change more than records. A merge counts by its combined diff, so a clean merge adds nothing and a conflict resolution that adds code is listed. */
 export async function coverage({ project, initiative, job, base, head }) {
   if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
   checkSha(base, 'base', { optional: true });
@@ -140,13 +140,15 @@ export async function coverage({ project, initiative, job, base, head }) {
   // Each job's review chain: the latest review, then each earlier review whose candidate is the base of the review after it. A delta review carries the
   // earlier round forward, so the chain together reviewed its ranges; the first review that does not chain ends it. A base after the earlier candidate
   // still chains when the commits between them change only records, such as the earlier review's own record. Merges of main are allowed too: a merge whose other
-  // parents are on main, and the commits it brings in from main, change nothing the job branch needs reviewed.
+  // parents are on main and whose combined diff changes only records, and the commits it brings in from main, change nothing the job branch needs reviewed.
+  // `-c` lists a merge's combined diff, the paths that differ from every parent, and behaves as a plain diff-tree for any other commit.
+  const changedPaths = commit => git(['diff-tree', '-c', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(Boolean);
   const mainRef = 'refs/remotes/origin/main';
   const hasMain = (() => { try { git(['rev-parse', '--verify', '--quiet', `${mainRef}^{commit}`]); return true; } catch { return false; } })();
   const onlyRecordsOrMainMerges = (candidate, laterBase) => git(['rev-list', '--parents', `${candidate}..${laterBase}`, ...(hasMain ? ['--not', mainRef] : [])]).split('\n').filter(Boolean).every(line => {
     const [commit, , ...otherParents] = line.split(' ');
-    if (otherParents.length) return otherParents.every(parent => hasMain && isAncestor(parent, mainRef));
-    return git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(Boolean).every(isInitiativePath);
+    if (otherParents.length && !otherParents.every(parent => hasMain && isAncestor(parent, mainRef))) return false;
+    return changedPaths(commit).every(isInitiativePath);
   });
   const chainsTo = (candidate, laterBase) => candidate !== undefined && laterBase !== undefined && (candidate === laterBase || (isAncestor(candidate, laterBase)
     && onlyRecordsOrMainMerges(candidate, laterBase)));
@@ -172,9 +174,9 @@ export async function coverage({ project, initiative, job, base, head }) {
   }
   // The override lines of every review in every chain apply to the one list of commits.
   const overrides = reviews.flatMap(entry => entry.chain.flatMap(link => overrideCommitsOf(link.text)));
-  const commits = git(['rev-list', '--reverse', '--no-merges', `${from}..${tip}`]).split('\n').filter(commit => commit && !covered.has(commit)).map(commit => ({
+  const commits = git(['rev-list', '--reverse', `${from}..${tip}`]).split('\n').filter(commit => commit && !covered.has(commit)).map(commit => ({
     commit,
-    paths: [...new Set(git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(path => path && !isInitiativePath(path)))].sort(),
+    paths: [...new Set(changedPaths(commit).filter(path => !isInitiativePath(path)))].sort(),
   })).filter(item => item.paths.length);
   const jobs = [], skipped = [];
   for (const entry of reviews.filter(item => (!initiative || item.initiative === initiative) && (!job || item.job === job))) {
