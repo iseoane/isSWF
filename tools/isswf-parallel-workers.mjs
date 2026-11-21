@@ -27,10 +27,17 @@ const io = {
 
 const USAGE = 'Usage: node tools/isswf-parallel-workers.mjs list|clear [--token <token>] [--project <dir>]';
 const [verb, ...rest] = process.argv.slice(2);
-const option = name => (rest.includes(name) ? rest[rest.indexOf(name) + 1] : undefined);
 const fail = message => {
   console.error(message);
   process.exit(2);
+};
+
+// An option that is present needs a value: `clear --token` must not read as `clear` everything.
+const option = name => {
+  if (!rest.includes(name)) return undefined;
+  const value = rest[rest.indexOf(name) + 1];
+  if (value === undefined || value.startsWith('--')) fail(`${name} needs a value. ${USAGE}`);
+  return value;
 };
 
 if (!['list', 'clear'].includes(verb)) fail(USAGE);

@@ -585,6 +585,7 @@ assert.ok(hook.slice(0, guardAt).includes("e.tool === 'Agent'"), 'only the Agent
 for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', "as: 'bytes'", 'readBytes', 'return { deny:']) assert.ok(hook.includes(part), part);
 for (const part of ['openWorkers(', 'closeWorker(', 'markWorkerRun(', 'closeWorkerRun(', "status === 'async_launched'", 'gitOut']) assert.ok(hooks.includes(part), part);
 assert.ok(hooks.slice(hooks.indexOf("on('turn.complete'")).includes('closeWorkerRun('), 'a child turn closes its ledger entry');
+assert.ok(hooks.includes('if (exitCode !== 0) throw'), 'a failed removal leaves the entry'); // source check: register.tsx has no runner
 // The reference parser stays linear on a long unbroken token and still returns the brief path with its state root.
 {
   const { checkReferences } = await load('tools/isswf-dispatch-guard-core.mjs');

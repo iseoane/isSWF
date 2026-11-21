@@ -568,7 +568,9 @@ function ledgerIo($: EngineInterface) {
     read: (file: string) => $.fs.read(file),
     write: (file: string, text: string) => $.fs.write(file, text),
     remove: async (file: string) => {
-      await $.process.run(['node', '-e', "require('node:fs').rmSync(process.argv[1], { force: true })", file], { cwd: await $.session.cwd() })
+      const { exitCode } = await $.process.run(['node', '-e', "require('node:fs').rmSync(process.argv[1], { force: true })", file], { cwd: await $.session.cwd() })
+      // A failed removal (for example no `node` on the hook's PATH) leaves the entry for the operator's `clear`.
+      if (exitCode !== 0) throw new Error(`could not remove ${file}`)
     },
   }
 }

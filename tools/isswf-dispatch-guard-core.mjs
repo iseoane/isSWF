@@ -57,12 +57,25 @@ export function callsOf(host, input) {
   const children = [input];
   if (Array.isArray(input.tasks)) children.push(...input.tasks);
   if (Array.isArray(input.chain)) for (const step of input.chain) children.push(step, ...(isObject(step) && Array.isArray(step.parallel) ? step.parallel : []));
-  return children.filter(isObject).map(child => ({ agent: child.agent, ...splitPiModel(child.model), prompt: typeof child.task === 'string' ? child.task : input.task }));
+  return children.filter(isObject).map(child => piCall(input, child));
+}
+const piCall = (input, child) => ({ agent: child.agent, ...splitPiModel(child.model), prompt: typeof child.task === 'string' ? child.task : input.task });
+
+// Pi runs `tasks` and a step's `parallel` group at once and the steps of a `chain` one after another, so a chain adds the workers of its widest step.
+function concurrentCalls(host, input) {
+  if (host !== 'pi' || !isObject(input)) return callsOf(host, input);
+  const calls = [piCall(input, input)];
+  if (Array.isArray(input.tasks)) calls.push(...input.tasks.filter(isObject).map(task => piCall(input, task)));
+  if (Array.isArray(input.chain)) {
+    const widest = input.chain.filter(isObject).map(step => (Array.isArray(step.parallel) ? step.parallel.filter(isObject) : [step]).map(child => piCall(input, child)).filter(call => WORKER_AGENT.test(call.agent)));
+    calls.push(...widest.reduce((best, group) => (group.length > best.length ? group : best), []));
+  }
+  return calls;
 }
 
-/** The worker calls one tool call names, as `{ agent, job, brief }`; the parallel-worker ledger counts these and no other agent. */
+/** The workers one tool call runs at once, as `{ agent, job, brief }`; the parallel-worker ledger counts these and no other agent. */
 export function workerCalls(host, input) {
-  return callsOf(host, input).filter(call => WORKER_AGENT.test(call.agent)).map(call => {
+  return concurrentCalls(host, input).filter(call => WORKER_AGENT.test(call.agent)).map(call => {
     let references;
     try {
       references = checkReferences(call.prompt);
