@@ -1,6 +1,6 @@
 // No Node imports and no Node globals: hook runtimes that only offer an injected fs (the Claude Code
 // pane's `$.fs`) load this module. tools/isswf-snapshot.mjs --usage is the Node entry point.
-import { joiner, roleOfAgent } from './isswf-snapshot-core.mjs';
+import { joiner, parseRunLine, roleOfAgent } from './isswf-snapshot-core.mjs';
 import { PRICES } from './isswf-prices.mjs';
 import { LIMITS, USAGE_KEYS, integer, parseTranscript, piUsage, safe, single } from './token-native-transcript-core.mjs';
 
@@ -12,7 +12,7 @@ const ID = {
 };
 const COUNTERS = ['input', 'output', 'cacheRead', 'cacheWrite'];
 
-const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, usedHostGuides: UNKNOWN, costUsd: UNKNOWN });
+const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, usedHostGuides: UNKNOWN, costUsd: UNKNOWN, readPaths: UNKNOWN, commands: UNKNOWN });
 
 async function listDirs(fs, dir) {
   try {
@@ -63,12 +63,25 @@ async function locatePi(fs, piDir, project, id) {
   return found[0] ?? null;
 }
 
-const BRIEF = /\/jobs\/J\d+\/brief-r\d+\.md$/u;
+// Bounds of the observed lists; a cut is disclosed as `observedTruncated`.
+const OBSERVED = { reads: 200, commands: 100, commandChars: 300 };
+
+// Forward slashes always; project-relative when inside it. A Windows drive path matches its project without regard to case.
+function projectRelative(path, project) {
+  const normalized = path.replace(/\\/g, '/');
+  const root = typeof project === 'string' ? project.replace(/\\/g, '/').replace(/\/+$/u, '') : '';
+  if (!root) return normalized;
+  const drive = /^[A-Za-z]:\//u.test(normalized) && /^[A-Za-z]:(?:\/|$)/u.test(root);
+  const [a, b] = drive ? [normalized.toLowerCase(), root.toLowerCase()] : [normalized, root];
+  return a.startsWith(`${b}/`) ? normalized.slice(root.length + 1) : normalized;
+}
+
+const BRIEF =/\/jobs\/J\d+\/brief-r\d+\.md$/u;
 const blockText = content => (typeof content === 'string' ? content
   : Array.isArray(content) ? content.map(b => (typeof b === 'string' ? b : typeof b?.text === 'string' ? b.text : '')).join('\n') : '');
 
-function collector() {
-  const state = { first: null, last: null, models: new Set(), skills: {}, agentsReads: {}, invoked: {}, reads: [], edited: new Set(), assigned: [], briefCalls: new Set(), readCalls: new Map(), contents: new Map() };
+function collector(project) {
+  const state = { observed: { reads: [], commands: [], truncated: false }, first: null, last: null, models: new Set(), skills: {}, agentsReads: {}, invoked: {}, reads: [], edited: new Set(), assigned: [], briefCalls: new Set(), readCalls: new Map(), contents: new Map() };
   const count = (map, key) => { map[key] = (map[key] ?? 0) + 1; };
   const relative = path => {
     if (typeof path !== 'string') return null;
@@ -87,7 +100,22 @@ function collector() {
     // `Skill` calls name a plugin skill `<plugin>:<skill>`; a SKILL.md read gives the bare name.
     skill: name => { if (safe(name)) count(state.skills, name.replace(/^[^:]*:/u, '')); },
     invoke(name) { if (safe(name)) { this.skill(name); count(state.invoked, name.replace(/^[^:]*:/u, '')); } },
+    command(text) {
+      const { commands } = state.observed;
+      if (typeof text !== 'string') return;
+      if (commands.length >= OBSERVED.commands) { state.observed.truncated = true; return; }
+      if (text.length > OBSERVED.commandChars) state.observed.truncated = true;
+      commands.push(text.slice(0, OBSERVED.commandChars));
+    },
     read(path, callId) {
+      if (typeof path === 'string') {
+        const shown = projectRelative(path, project);
+        const { reads } = state.observed;
+        if (!reads.includes(shown)) {
+          if (reads.length < OBSERVED.reads) reads.push(shown);
+          else state.observed.truncated = true;
+        }
+      }
       if (typeof path === 'string' && BRIEF.test(path.replace(/\\/g, '/')) && callId) state.briefCalls.add(callId);
       const rel = relative(path);
       if (!rel) return;
@@ -183,8 +211,8 @@ function costUsd(tokens, model) {
 
 // `invalid` names the first failing check of a found transcript whose valid entries were still summed.
 function finish(collected, counters, model, finished, invalid) {
-  const { first, last, skills, agentsReads } = collected.state;
-  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, ...methodology(collected.state, true), costUsd: costUsd(counters, model) };
+  const { first, last, skills, agentsReads, observed } = collected.state;
+  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, ...methodology(collected.state, true), costUsd: costUsd(counters, model), readPaths: observed.reads, commands: observed.commands, ...(observed.truncated && { observedTruncated: true }) };
   return invalid ? { ...usage, tokensPartial: true, ...(usage.costUsd !== UNKNOWN && { costPartial: true }), reason: invalid } : usage;
 }
 
@@ -204,8 +232,8 @@ function tailFinished(text, kind) {
 }
 
 // `full` is the untruncated text of an oversized transcript; only `text` is summed.
-function claudeUsage(text, kind, invalid, full) {
-  const collected = collector();
+function claudeUsage(text, kind, invalid, full, project) {
+  const collected = collector(project);
   // A request's top-level usage sums only its `message` iterations; server-side sub-inferences such as
   // `advisor_message` are billed as extra iterations, repeated on every entry of that request.
   const extra = new Map();
@@ -227,6 +255,7 @@ function claudeUsage(text, kind, invalid, full) {
       if (block?.type !== 'tool_use') continue;
       if (block.name === 'Skill') collected.invoke(block.input?.skill);
       if (block.name === 'Read') collected.read(block.input?.file_path, block.id);
+      if (block.name === 'Bash' || block.name === 'PowerShell') collected.command(block.input?.command);
       if (block.name === 'Edit' || block.name === 'Write') collected.edit(block.input?.file_path);
     }
   }, true);
@@ -247,8 +276,8 @@ function claudeUsage(text, kind, invalid, full) {
   return finish(collected, counters, single(parsed.models), tailFinished(full ?? text, kind), invalid);
 }
 
-function piTranscriptUsage(text, finished, invalid) {
-  const collected = collector();
+function piTranscriptUsage(text, finished, invalid, project) {
+  const collected = collector(project);
   const counters = Object.fromEntries(COUNTERS.map(key => [key, 0]));
   const lines = text.split('\n');
   const trailing = lines.pop();
@@ -282,6 +311,7 @@ function piTranscriptUsage(text, finished, invalid) {
     collected.state.models.add(safe(record.model) ?? UNKNOWN);
     for (const block of Array.isArray(record.message?.content) ? record.message.content : []) {
       if (block?.type === 'toolCall' && block.name === 'read') collected.read(block.arguments?.path, block.id);
+      if (block?.type === 'toolCall' && (block.name === 'bash' || block.name === 'powershell')) collected.command(block.arguments?.command);
       if (block?.type === 'toolCall' && (block.name === 'edit' || block.name === 'write')) collected.edit(block.arguments?.path);
     }
   }
@@ -324,7 +354,7 @@ export async function resolveRunUsage({ host, kind, id }, { fs, claudeDir, piDir
   let read, usage;
   try {
     read = await readFile(fs, located.path);
-    usage = host === 'claude' ? claudeUsage(read.text, kind, read.invalid, read.full) : piTranscriptUsage(read.text, await piFinished(fs, located.meta), read.invalid);
+    usage = host === 'claude' ? claudeUsage(read.text, kind, read.invalid, read.full, project) : piTranscriptUsage(read.text, await piFinished(fs, located.meta), read.invalid, project);
   } catch {
     return { ...unknownUsage('unreadable-transcript'), found: true };
   }
@@ -360,6 +390,37 @@ export function summarizeRuns(usages) {
   const [skills, references, hostGuides] = [total('usedSkills'), total('usedReferences'), total('usedHostGuides')];
   const noReads = resolved.length > 0 && [skills, references, hostGuides].every(map => Object.keys(map).length === 0);
   return { skills, references, hostGuides, resolved: resolved.length, unresolved: usages.length - resolved.length, noReads };
+}
+
+// `.agents/` files and top-level `skills/` files a brief names, whatever link or code span names them.
+const BRIEF_NAMES = /\.agents\/[\w./-]+\.md|(?<![\w./-])skills\/[\w./-]+\.md/gu;
+
+/**
+ * The methodology files a brief names that none of an attempt's runs read. A skill invoked through the Skill tool
+ * counts as read. `partial` is set when a run is unresolved or its read list was cut; with no resolved run the
+ * result is undefined, as nothing can be compared.
+ */
+export function compareBrief(briefText, usages) {
+  const resolved = usages.filter(u => u?.found && Array.isArray(u.readPaths));
+  if (!resolved.length) return undefined;
+  const read = new Set(resolved.flatMap(u => [...u.readPaths, ...Object.keys(u.agentsReads ?? {})]));
+  const invoked = new Set(resolved.flatMap(u => Object.keys(u.skills ?? {})));
+  const seen = path => [...read].some(p => p === path || p.endsWith(`/${path}`)) || invoked.has(path.match(/^(?:\.agents\/)?skills\/([^/]+)\/SKILL\.md$/u)?.[1]);
+  const named = [...new Set(briefText.replace(/\\/g, '/').match(BRIEF_NAMES) ?? [])];
+  return { named, unread: named.filter(path => !seen(path)), partial: resolved.length < usages.length || resolved.some(u => u.observedTruncated) };
+}
+
+/** The non-blocking note for a comparison with something unread, else undefined. */
+export function briefNote(comparison) {
+  if (!comparison?.unread.length) return undefined;
+  return `brief names methodology the run never read: ${comparison.unread.join(', ')}${comparison.partial ? ' (run data incomplete)' : ''}`;
+}
+
+/** The note for an attempt record's text and the text of the brief it cites; `options` are those of resolveRunUsage. */
+export async function attemptBriefNote(recordText, briefText, options) {
+  const usages = [];
+  for (const run of recordText.split('\n').map(parseRunLine).filter(Boolean)) usages.push(await resolveRunUsage(run, options));
+  return briefNote(compareBrief(briefText, usages));
 }
 
 /** A run's role: the record's role, else the agent name the host gave the run (`names` holds Claude's, by run id), else unknown. */
