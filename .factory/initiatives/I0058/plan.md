@@ -28,9 +28,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
 - Depends on: None
-- Brief: [brief-r4.md](jobs/J001/brief-r4.md)
+- Brief: [brief-r5.md](jobs/J001/brief-r5.md)
 - Blocker: None.
-- Next step: Worker records observed reads and commands and compares them with the brief (brief r4, batch 2); SHA record rule follows.
+- Next step: Worker adds the commit-SHA record rule and the read-and-edited fix (brief r5).
 
 ### Acceptance
 
@@ -241,13 +241,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J011
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: Batch-2 follow-ups: a job's records cannot be written outside its assigned worktree, and missing tests are added.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Write brief r1.
+- Next step: Worker adds the record-location guard and missing tests (brief r1).
 
 ### Acceptance
 
