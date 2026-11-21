@@ -446,7 +446,7 @@ try {
   // A job branch that merges main keeps its review chain: the I0058 J013 shape, V002 on a candidate, a records commit, a merge of main, a fix, then V003 based on the merge.
   // `resolve` adds files inside the merge itself, as a conflict resolution does; `reviewed: false` stops after the merge with only an attempt record following.
   // `edits` makes main and the job both edit src/a.mjs: `hunks` in different hunks (a clean merge), `lines` on the same line (a conflict that `resolve` settles).
-  const mergeShape = async (name, between, { resolve: resolution, reviewed = true, edits } = {}) => {
+  const mergeShape = async (name, between, { resolve: resolution, reviewed = true, edits, octopus = false } = {}) => {
     const dir = join(coverTemp, name);
     await mkdir(dir);
     initRepository(dir, ['-b', 'main']);
@@ -470,8 +470,13 @@ try {
     await save({ 'src/main-only.mjs': 'm\n', ...(versions && { 'src/a.mjs': versions[2] }) }, 'code on main');
     git(dir, 'update-ref', 'refs/remotes/origin/main', 'main');
     git(dir, 'checkout', '-q', 'job');
-    // A conflicted merge exits 1 and leaves its markers in the work tree for `resolve` to replace.
-    const merging = spawnSync('git', ['-c', 'core.autocrlf=false', 'merge', '--no-ff', '-q', ...(resolution ? ['--no-commit'] : []), '-m', 'merge main', 'main'], { cwd: dir, encoding: 'utf8' });
+    if (octopus) {
+      git(dir, 'checkout', '-q', '-b', 'side', root);
+      await save({ 'src/side.mjs': 's\n' }, 'code on a side branch');
+      git(dir, 'checkout', '-q', 'job');
+    }
+    // A conflicted merge exits 1 and leaves its markers in the work tree for `resolve` to replace. The flags are the file's `git` helper's, so the merge needs no global identity.
+    const merging = spawnSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.autocrlf=false', 'merge', '--no-ff', '-q', ...(resolution ? ['--no-commit'] : []), '-m', 'merge main', 'main', ...(octopus ? ['side'] : [])], { cwd: dir, encoding: 'utf8' });
     assert.equal(merging.status, edits === 'lines' ? 1 : 0, merging.stderr);
     if (resolution) {
       for (const [path, content] of Object.entries(resolution)) await writeFile(join(dir, path), content);
@@ -518,6 +523,11 @@ try {
   // A conflicted merge is judged by its resolution: the conflicted file and the code the resolution adds are the merge's own changes.
   const conflicted = await mergeShape('merge-conflict', async () => undefined, { edits: 'lines', resolve: { 'src/a.mjs': 'r\n', ...evil }, reviewed: false });
   assert.deepEqual(conflicted.result.jobs[0].uncovered, [{ commit: conflicted.merge, paths: ['src/a.mjs', 'src/evil.mjs'] }]);
+  // A merge of more than two parents cannot be judged against one automatic merge, so it is listed rather than trusted. A failing `merge-tree` takes the same path; it is not tested because it needs a broken object store.
+  const octopus = await mergeShape('merge-octopus', async () => undefined, { octopus: true, reviewed: false });
+  const octopusUncovered = octopus.result.jobs[0].uncovered;
+  assert.deepEqual(octopusUncovered.map(entry => entry.paths), [['src/side.mjs'], ['(merge not judged)']], 'the side branch commit it brings in, then the merge');
+  assert.equal(octopusUncovered[1].commit, octopus.merge);
   // Without an origin/main ref no merge can be shown to bring in only main's commits, so the chain breaks.
   git(throughMain.dir, 'update-ref', '-d', 'refs/remotes/origin/main');
   const noMain = tool(['coverage', '--project', throughMain.dir, '--base', throughMain.root]);

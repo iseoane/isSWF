@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { diffArguments, diffEnvironment, runGit } from './git-evidence.mjs';
+import { diffArguments, diffEnvironment, gitEnvironment, runGit } from './git-evidence.mjs';
 import { buildEnvelope, MAX_DIFF_BYTES, overrideCommitsOf, reviewBaseOf, reviewCandidateOf, uncoveredCommits } from './isswf-handoff-core.mjs';
 import { REVIEWER_AGENTS, selectionEntry } from './isswf-dispatch-guard-core.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
@@ -150,7 +150,7 @@ export async function coverage({ project, initiative, job, base, head }) {
   const ownPaths = (commit, parents) => {
     if (parents.length < 2) return git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', commit]).split('\0').filter(Boolean);
     if (parents.length > 2) return [UNJUDGED_MERGE];
-    const auto = spawnSync(gitExecutable, ['-C', root, 'merge-tree', '--write-tree', '--name-only', '--no-messages', '-z', ...parents], { encoding: 'buffer', env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' }, timeout: 20000, maxBuffer: 16 * 1024 * 1024, windowsHide: true });
+    const auto = spawnSync(gitExecutable, ['-C', root, 'merge-tree', '--write-tree', '--name-only', '--no-messages', '-z', ...parents], { encoding: 'buffer', env: gitEnvironment(gitExecutable, { GIT_LITERAL_PATHSPECS: '1' }), timeout: 20000, maxBuffer: 16 * 1024 * 1024, windowsHide: true });
     if (auto.error || (auto.status !== 0 && auto.status !== 1)) return [UNJUDGED_MERGE];
     const [tree, ...conflicted] = auto.stdout.toString('utf8').split('\0').filter(Boolean);
     try { return [...new Set([...conflicted, ...git(['diff', '--no-renames', '--name-only', '-z', tree, commit]).split('\0').filter(Boolean)])]; } catch { return [UNJUDGED_MERGE]; }
