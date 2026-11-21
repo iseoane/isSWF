@@ -10,7 +10,7 @@ Read [planning guidance](references/planning.md) for proposal structure. For ass
 
 ## Work
 
-When the assignment names a base and a writer may be active in the same checkout, read in the assigned base checkout (the coordinator's detached base worktree, read-only by instruction), not the moving primary checkout. The Git evidence tools (`identity`, `diff`, `content`) are an optional extra when bound. CodeGraph and Engram results reflect the live primary checkout, so report what you took from them, and any source read from the working tree, as working-tree sources with each affected path in the proposal.
+When the assignment names a base and a writer may be active in the same checkout, read in the assigned base checkout (the coordinator's detached base worktree, which is not write-protected; you have no file-writing tool), not the moving primary checkout. The Git evidence tools (`identity`, `diff`, `content`) are an optional extra when bound. CodeGraph and Engram results reflect the live primary checkout, so report what you took from them, and any source read from the working tree, as working-tree sources with each affected path in the proposal.
 
 Ground the objective in the supplied specification, brief, and relevant existing evidence, preserving any assigned document pins. Reconcile product intent, constraints, dependencies, verification, and delivery expectations. Keep the proposed work within the grant.
 

@@ -14,7 +14,6 @@ assert.match(briefTemplate, /Selected methods and required evidence[\s\S]*Do not
 assert.match(attemptTemplate, /distinguish reading\/receipt from application[\s\S]*disclosure does not waive a required method[\s\S]*no method was selected/u);
 assert.match(reviewGuidance, /### Selected-method evidence[\s\S]*under \*\*Standards\*\*[\s\S]*missing and no deviation is declared[\s\S]*inconclusive[\s\S]*unselected methods/u);
 assert.match(briefTemplate, /TDD red result before implementation[\s\S]*debug reproduction[\s\S]*E2E journey/u);
-assert.match(reviewTemplate, /Selected-method evidence assessment[\s\S]*never silent pass[\s\S]*does not waive/u);
 assert.match(reviewTemplate, /Exact diff source and consumed[\s\S]*Candidate paths reviewed/u);
 assert.match(reviewerRole, /selected-method evidence[\s\S]*separately from Spec/u);
 assert.match(reviewerRole, /unbound Agent-tool review of a commit or snapshot candidate without the exact diff[\s\S]*exact diff not supplied[\s\S]*Bound Pi\/Claude/u);
@@ -47,7 +46,7 @@ const fieldDefinitions = [
   [reviewTemplate, 'Retained substitute evidence assessment', /Retained substitute evidence assessment[^\n]*what the attempt template's Retained substitute evidence field requires[^\n]*harness and run log[^\n]*committed tests\/ evidence or ignored tooling\/\.local\/<job>\/[^\n]*disposable scratch space does not satisfy it[^\n]*attribute supplied observations/u],
   [reviewTemplate, 'Reference-application outcomes', /Reference-application outcomes:[^\n]*“observed in candidate” \(the claimed application is visible[^\n]*“claimed, not visible” \(no application is visible[^\n]*only a concrete violation[^\n]*“not applicable accepted” \(the stated reason is sound/u],
   [reviewTemplate, 'Required-resource consumption', /Required-resource consumption:[^\n]*attempt template's Required-resource consumption field defines[^\n]*do not infer understanding or application from a read trace/u],
-  [reviewGuidance, 'Selected-method evidence', /### Selected-method evidence[\s\S]*not re-run[\s\S]*do not silently pass[\s\S]*inconclusive[\s\S]*disclosure is not a waiver/u],
+  [reviewGuidance, 'Selected-method evidence', /### Selected-method evidence[\s\S]*not re-run[\s\S]*disclosure is not a waiver[\s\S]*do not silently pass[\s\S]*inconclusive/u],
   [reviewTemplate, 'Selected-method evidence assessment', /Selected-method evidence assessment:[^\n]*review guide's Selected-method evidence section defines[^\n]*not re-run/u],
   [coordinatorSkill, 'Base worktree', /detached worktree at the brief's base \(`git worktree add --detach[^\n]*passes it as the child's checkout, and removes it after the child returns\. The base worktree is not write-protected; the researcher's and planner's tool lists have no file-writing tool/u],
 ];
