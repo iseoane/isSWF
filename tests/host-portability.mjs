@@ -336,7 +336,6 @@ for (const role of ['worker', 'reviewer', 'researcher', 'planner']) {
     assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff, isswf_git_content$/mu);
     assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
   } else if (role !== 'worker') {
-    assert.ok(!(/^tools: (.*)$/mu.exec(body)?.[1] ?? '').split(',').some(tool => ['write', 'edit', 'bash'].includes(tool.trim())), `Pi ${role} lists no write, edit or bash tool`);
     assert.match(body, /^tools: read, grep, find, ls, isswf_git_identity, isswf_git_diff, isswf_git_content$/mu);
     assert.match(body, /^subagentOnlyExtensions: \.\.\/\.\.\/\.\.\/\.\.\/tools\/git-evidence-pi-extension\.mjs$/mu);
   }

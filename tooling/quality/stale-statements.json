@@ -66,6 +66,16 @@
       "regex": true,
       "reason": "TDD evidence is defined once, by the attempt template Method application report",
       "since": "I0058/J008"
+    },
+    {
+      "phrase": "in the primary checkout's assigned state directory named in the brief",
+      "reason": "a worker's attempt record is written in its assigned checkout; the record location guard refuses a write outside it",
+      "since": "I0058/J011"
+    },
+    {
+      "phrase": "not inside a separate candidate worktree's tree",
+      "reason": "a worker's attempt record is written in its assigned checkout; the record location guard refuses a write outside it",
+      "since": "I0058/J011"
     }
   ]
 }
