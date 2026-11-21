@@ -75,14 +75,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Scope: factory.
 - Objective: An in-progress job with a committed brief and no recorded launch is caught before the turn ends.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Research the turn-end hook on each host.
+- Next step: Researcher grounds the turn-end check (brief r1); implementation after the J001 pane merges (shared hooks/register.tsx).
 
 ### Acceptance
 
@@ -164,7 +164,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md) (pending until prepared)
 - Blocker: None.
-- Next step: Implementation brief.
+- Next step: Implementation brief after the J001 pane merges (RECORD_PATH also in hooks/register.tsx).
 
 ### Acceptance
 
@@ -178,14 +178,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J008
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows: one canonical definition per contract field, and a search for old statements)
 - Scope: factory.
 - Objective: A changed contract leaves no stale statement in any packaged text.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J008/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Research where record-field definitions are repeated.
+- Next step: Researcher maps repeated record-field definitions (brief r1).
 
 ### Acceptance
 
