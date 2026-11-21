@@ -27,9 +27,9 @@ Type: enhancement
 - Size: M (pilot and rule update)
 - Objective: Two independent jobs run in parallel, each in its own worktree and branch through test and review, are integrated together in one batched PR with one CI run, and the worktrees are removed after integration.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J002/brief-r2.md)
 - Blocker: None.
-- Next step: Run J004 and J005 concurrently in worktrees, then the batched PR.
+- Next step: Worker updates the host guide, coordinator skill, docs and verification tiers (brief r2).
 
 ### Acceptance
 
@@ -41,6 +41,7 @@ Type: enhancement
 ### Evidence
 
 - 2026-11-20: moved from I0061 J011 (pinned worktree checks), operator decision.
+- 2026-11-21: pilot run: J004 and J005 in parallel worktrees, live branch-guard refusal observed, batched PR #374 merged as c57f55d731dfc3cbfd8217e6fdb8a95031b8bd1a with a coverage-chain fix forward (V001 pass); records-only push b729cf5a started no CI; worktrees removed. CI: batch 5.3 min for three units, single PRs 3.7 and 5.4 min, push main 131 min over 44 runs.
 - 2026-11-21: operator added batched PRs (per-branch light checks and review, one heavier CI per batch, fix forward) and skipping CI for records-only pushes to the scope, after a public post on batching branches. Reason: about 4-5 min of CI per run and several runs per job, against jobs of about 30 min of worker and review. #278 was checked and is already implemented (I0050 J001, J002; V record verdict field), so the pilot uses J004 and J005.
 
 ## J003
