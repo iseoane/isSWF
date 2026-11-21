@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "dd6842d7bd8d6b8c60146752ce02628c351daea6f0e5047ce155389606036d35"
+      "sha256": "cc32a4a9a08fdcbd5291bbe4d89ddd60944393ce39b35e96cb8b365c206e8465"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -116,6 +116,43 @@
       "covers": [
         "tools/isswf-integration-gate-core.mjs",
         "tools/isswf-command-guard-pi-extension.mjs",
+        "hooks/register.tsx"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "isswf-undispatched",
+      "argv": [
+        "node",
+        "tests/isswf-undispatched.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-undispatched-core.mjs"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "isswf-compaction",
+      "argv": [
+        "node",
+        "tests/isswf-compaction.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-compaction-core.mjs",
+        "tools/isswf-compaction-pi-extension.mjs",
+        "tools/isswf-undispatched-core.mjs",
         "hooks/register.tsx"
       ],
       "timeoutSeconds": 300

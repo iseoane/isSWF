@@ -9,6 +9,7 @@ import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
+import { findUndispatched, freshUndispatched, undispatchedWarning } from '../tools/isswf-undispatched-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
@@ -25,6 +26,8 @@ const BRANCHES = { plugin: 'isswf', key: 'branches' } as const
 // The last accepted dispatches of a session that activated the coordinator; the post-compaction reminder lists them.
 const ASSIGNMENTS = { plugin: 'isswf', key: 'assignments' } as const
 const ASSIGNED = { plugin: 'isswf', key: 'assigned' } as const
+// The job and brief revisions already warned about in this session (isswf-undispatched-core).
+const WARNED = { plugin: 'isswf', key: 'warned' } as const
 // The agent name the host gave each role run, by run id; a record that names no role falls back to it.
 const AGENT_NAMES = { plugin: 'isswf', key: 'agent-names' } as const
 // A file is shown up to this many characters; one drawing holds 100000 in all.
@@ -701,6 +704,34 @@ export const register: Register = (on, options) => {
     }
 
     return result
+  })
+
+  // After a turn of the main conversation that was not aborted or failed, a coordinator session is told once about an in-progress job whose
+  // committed brief has no attempt record and no accepted dispatch. The warning is a status line only and a fault never changes the turn.
+  on('turn.complete', async ($, e, next) => {
+    try {
+      const turn = e as { agentId?: unknown; aborted?: unknown; error?: unknown; isError?: unknown }
+      if (turn.agentId === undefined && turn.aborted !== true && turn.error === undefined && turn.isError !== true && (await $.state.get(IS_ACTIVATED)).value) {
+        const cwd = await $.session.cwd()
+        const found = await findUndispatched({
+          assignments: (await $.state.get(ASSIGNMENTS)).value ?? [],
+          io: {
+            project: () => cwd,
+            list: (dir: string) => $.fs.list(dir),
+            read: (file: string) => $.fs.read(file),
+            git: async (argv: string[], at: string) => (await $.process.run(['git', ...argv], { cwd: at })).exitCode,
+          },
+        })
+        const warned = new Set<string>((await $.state.get(WARNED)).value ?? [])
+        const text = undispatchedWarning(freshUndispatched(found, warned))
+        if (text) {
+          await $.state.set(WARNED, [...warned])
+          $.ui.status(text)
+        }
+      }
+    } catch {}
+
+    return next(e)
   })
 
   // Opt-in: with the option off no pane hook is added, so nothing reads, schedules, registers or draws.

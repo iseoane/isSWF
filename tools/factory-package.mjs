@@ -40,6 +40,7 @@ export const nativePiResources = [
   "tools/isswf-verification-guard-core.mjs",
   "tools/isswf-records-push-guard-core.mjs",
   "tools/isswf-integration-gate-core.mjs",
+  "tools/isswf-undispatched-core.mjs",
   "tools/isswf-compaction-pi-extension.mjs",
   "tools/isswf-compaction-core.mjs",
   "tools/isswf-record-check-core.mjs",

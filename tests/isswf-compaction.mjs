@@ -142,6 +142,32 @@ for (const name of ['session_start', 'input', 'tool_call', 'tool_result', 'sessi
   for (const event of [undefined, null, {}, { text: 7, toolName: 'read', input: null, details: 'x' }]) await assert.doesNotReject(async () => faulty.emit(name, event), `${name} survives ${JSON.stringify(event)}`);
 }
 
+// Pi: after a settled run of a coordinator session, a committed brief with no attempt and no dispatch is announced once, on the status line.
+const repo = await mkdtemp(join(tmpdir(), 'isswf-undispatched-'));
+try {
+  const gitIn = (...argv) => spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.invalid', ...argv], { cwd: repo, encoding: 'utf8' });
+  const jobDir = join(repo, '.factory', 'initiatives', 'I0001', 'jobs', 'J001');
+  await mkdir(jobDir, { recursive: true });
+  await writeFile(join(repo, '.factory', 'initiatives', 'I0001', 'plan.md'), '# I0001: Synthetic\n\nType: bug\n\n## J001\n\n- Status: in-progress\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/J001/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n');
+  await writeFile(join(jobDir, 'brief-r1.md'), 'brief');
+  assert.equal(gitIn('init', '-q').status, 0);
+  assert.equal(gitIn('add', '-A').status, 0);
+  assert.equal(gitIn('commit', '-q', '-m', 'init').status, 0);
+  const statuses = [];
+  const handlers = new Map();
+  extension.default({ on: (name, handler) => handlers.set(name, handler) });
+  const run = (name, event, ctx = { cwd: repo, ui: { setStatus: (key, text) => statuses.push([key, text]) } }) => handlers.get(name)?.(event, ctx);
+  await run('agent_settled', { aborted: false });
+  assert.deepEqual(statuses, [], 'no warning before the coordinator is active');
+  await run('input', { text: '/skill:isswf-coordinator' });
+  await run('agent_settled', { aborted: true });
+  assert.deepEqual(statuses, [], 'an aborted run does not warn');
+  await run('agent_settled', { aborted: false });
+  assert.deepEqual(statuses, [['isswf-undispatched', 'isSWF: I0001/J001 is in-progress with a committed brief (.factory/initiatives/I0001/jobs/J001/brief-r1.md) and no recorded launch or dispatch. Dispatch it, or record why not, before ending the turn.']]);
+  await run('agent_settled', { aborted: false });
+  assert.equal(statuses.length, 1, 'the same job and brief warn once per session');
+} finally { await rm(repo, { recursive: true, force: true }); }
+
 // Packaging: the package declares the extension for the main session, after the guards', and the worker child does not load it.
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
 assert.equal(manifest.pi.extensions.at(-1), './tools/isswf-compaction-pi-extension.mjs');
