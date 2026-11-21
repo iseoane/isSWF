@@ -245,7 +245,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Size: S (one flow)
 - Objective: Batch-2 follow-ups: a job's records cannot be written outside its assigned worktree, and missing tests are added.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J011/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J011/brief-r2.md)
 - Blocker: None.
 - Next step: Worker adds the record-location guard and missing tests (brief r1).
 
