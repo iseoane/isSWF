@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -12,7 +13,7 @@ const dispatched = (initiative, id, revision = 1) => ({ agent: 'isswf:isswf-work
 
 // The in-memory io answers like the Claude `$.fs` and `$.process.run`: a missing path rejects, `list` returns `{ name, kind }`, and `git` answers by exit code.
 // `committed` holds the project-relative paths that exist at HEAD; `gitFails` makes Git itself unavailable.
-const memoryIo = ({ project = '/work/project', files = {}, committed = Object.keys(files), gitFails = false } = {}) => {
+const memoryIo = ({ gitCalls = [], project = '/work/project', files = {}, committed = Object.keys(files), gitFails = false } = {}) => {
   const norm = path => path.replaceAll('\\', '/');
   const root = `${norm(project)}/`;
   const all = Object.fromEntries(Object.entries(files).map(([path, text]) => [`${root}${path}`, text]));
@@ -34,6 +35,7 @@ const memoryIo = ({ project = '/work/project', files = {}, committed = Object.ke
       return [...entries].map(([name, kind]) => ({ name, kind }));
     },
     git: async argv => {
+      gitCalls.push(argv);
       if (gitFails) throw Error('git is not installed');
       const [command, ...rest] = argv;
       assert.equal(command, 'cat-file', 'the core asks Git only whether the brief exists at HEAD');
@@ -80,5 +82,24 @@ assert.equal(freshUndispatched(second, warned).length, 1, 'a new revision warns 
 // The line names the job and its brief, on one line.
 assert.equal(undispatchedWarning(expected), `isSWF: I0001/J001 is in-progress with a committed brief (${BRIEF}) and no recorded launch or dispatch. Dispatch it, or record why not, before ending the turn.`);
 assert.equal(undispatchedWarning([]), undefined);
+
+// Cheap records are read before Git: a job with an attempt or a dispatch costs no Git call, and an already-warned gap that is still open is reported again without one.
+{
+  const gitCalls = [];
+  assert.deepEqual(await findUndispatched({ io: memoryIo({ gitCalls, files: base({ '.factory/initiatives/I0001/jobs/J001/A001.md': 'attempt' }) }), assignments: [] }), []);
+  assert.deepEqual(await findUndispatched({ io: memoryIo({ gitCalls, files: base() }), assignments: [dispatched('I0001', 'J001')] }), []);
+  assert.deepEqual(gitCalls, [], 'no Git call for a job already launched');
+  assert.deepEqual(await findUndispatched({ io: memoryIo({ gitCalls, files: base() }), assignments: [], warned: new Set(['I0001/J001/brief-r1.md']) }), expected, 'a warned gap still open is reported');
+  assert.deepEqual(gitCalls, [], 'no Git call for an already-warned job');
+}
+
+// Claude's `turn.complete` wiring has no runner here, so it is a source check: the coordinator must be active, only the main conversation counts, the line is shown and cleared through `$.ui.status`, and a null error is not an error.
+{
+  const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');
+  const at = hooks.indexOf("on('turn.complete'");
+  assert.ok(at > 0 && at < hooks.indexOf('options?.initiativesPane !== true'), 'registered whatever the pane option is');
+  const hook = hooks.slice(at, hooks.indexOf('return next(e)', at));
+  for (const part of ['IS_ACTIVATED', 'turn.agentId === undefined', 'turn.aborted !== true', 'turn.error == null', 'turn.isError !== true', 'findUndispatched(', 'warned', '$.ui.status(text)', '$.ui.status(undefined)']) assert.ok(hook.includes(part), part);
+}
 assert.match(undispatchedWarning([...expected, { initiative: 'I0001', job: 'J002', briefName: 'brief-r1.md', path: '.factory/initiatives/I0001/jobs/J002/brief-r1.md' }]), /^isSWF: I0001\/J001, I0001\/J002 are in-progress/);
 console.log('isswf-undispatched: ok');

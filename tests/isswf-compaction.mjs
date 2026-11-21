@@ -166,6 +166,17 @@ try {
   assert.deepEqual(statuses, [['isswf-undispatched', 'isSWF: I0001/J001 is in-progress with a committed brief (.factory/initiatives/I0001/jobs/J001/brief-r1.md) and no recorded launch or dispatch. Dispatch it, or record why not, before ending the turn.']]);
   await run('agent_settled', { aborted: false });
   assert.equal(statuses.length, 1, 'the same job and brief warn once per session');
+  await writeFile(join(jobDir, 'A001.md'), 'attempt');
+  await run('agent_settled', { aborted: false });
+  assert.deepEqual(statuses.at(-1), ['isswf-undispatched', undefined], 'the line is cleared once the job has an attempt');
+  assert.equal(statuses.length, 2);
+  await rm(join(jobDir, 'A001.md'));
+  const nullError = {};
+  const second = new Map();
+  extension.default({ on: (name, handler) => second.set(name, handler) });
+  await second.get('input')({ text: '/skill:isswf-coordinator' });
+  await second.get('agent_settled')({ aborted: false, error: null }, { cwd: repo, ui: { setStatus: (key, text) => { nullError.text = text; } } });
+  assert.match(nullError.text, /I0001\/J001/u, 'a null error is not an error');
 } finally { await rm(repo, { recursive: true, force: true }); }
 
 // Packaging: the package declares the extension for the main session, after the guards', and the worker child does not load it.
