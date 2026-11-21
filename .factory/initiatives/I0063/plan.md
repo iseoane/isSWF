@@ -23,7 +23,7 @@ Type: enhancement
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: M (pilot and rule update)
 - Objective: Two independent jobs run in parallel, each in its own worktree and branch through test and review, are integrated together in one batched PR with one CI run, and the worktrees are removed after integration.
 - Depends on: J001
@@ -64,7 +64,7 @@ Type: enhancement
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: A push to main that changes only initiative records does not start the Quality workflow.
 - Depends on: None
@@ -82,7 +82,7 @@ Type: enhancement
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: A development script reports CI wall-clock minutes per job from GitHub run data, so the pilot can compare batched and single-PR delivery.
 - Depends on: None
