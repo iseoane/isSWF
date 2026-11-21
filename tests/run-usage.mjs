@@ -185,7 +185,7 @@ try {
     skills: { 'isswf-review': 1, 'isswf-tdd': 1, 'isswf-coordinator': 1 },
     agentsReads: { '.agents/skills/isswf-tdd/SKILL.md': 1, '.agents/roles/reviewer.md': 1, '.agents/skills/isswf-coordinator/SKILL.md': 1 },
     // Without an assignment every `.agents/` read counts, except a file the session changed.
-    usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/reviewer.md': 1 },
+    usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/reviewer.md': 1 }, usedHostGuides: {},
   });
 }
 
