@@ -23,14 +23,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: M (two related flows: recording a child's reads and commands, and comparing them with its brief)
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Research why the worker's transcripts are not resolved for the pane, and what each host exposes about a child's file reads and commands.
+- Next step: Researcher grounds the design (brief r1); then implementation brief r2.
 
 ### Acceptance
 
@@ -47,6 +47,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - 2026-11-15: J003 A003 declared no deviations although required references were unread (I0057).
 - 2026-11-17: verification practice of the Claude Code team ("stamp and gate commits", observe/enforce modes) adopted as the target for this job by the operator.
 - 2026-11-15: the operator saw `unknown` roles, `skills: unknown` and host guides under references in the pane (`tools/isswf-run-usage-core.mjs:152-158`; `hooks/register.tsx` groups by record role).
+- 2026-11-21: operator: after closing I0063, do all of I0058 starting with J001; the stamp and commit gate make the per-branch `isswf-verify --tier job` run deterministic (the coordinator skipped it in the I0063 pilot).
 
 ## J002
 
