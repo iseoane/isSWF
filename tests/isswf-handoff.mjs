@@ -445,7 +445,8 @@ try {
 
   // A job branch that merges main keeps its review chain: the I0058 J013 shape, V002 on a candidate, a records commit, a merge of main, a fix, then V003 based on the merge.
   // `resolve` adds files inside the merge itself, as a conflict resolution does; `reviewed: false` stops after the merge with only an attempt record following.
-  const mergeShape = async (name, between, { resolve: resolution, reviewed = true } = {}) => {
+  // `edits` makes main and the job both edit src/a.mjs: `hunks` in different hunks (a clean merge), `lines` on the same line (a conflict that `resolve` settles).
+  const mergeShape = async (name, between, { resolve: resolution, reviewed = true, edits } = {}) => {
     const dir = join(coverTemp, name);
     await mkdir(dir);
     initRepository(dir, ['-b', 'main']);
@@ -458,16 +459,20 @@ try {
       git(dir, 'commit', '-qm', message);
       return git(dir, 'rev-parse', 'HEAD');
     };
-    const root = await save({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+    const body = (first, last) => [first, ...Array.from({ length: 18 }, (_, index) => `line ${index}`), last].join('\n') + '\n';
+    const versions = { hunks: [body('x', 'y'), body('x', 'a'), body('m', 'y')], lines: ['x\n', 'a\n', 'm\n'] }[edits];
+    const root = await save({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress'), ...(versions && { 'src/a.mjs': versions[0] }) }, 'main');
     git(dir, 'checkout', '-q', '-b', 'job');
-    const code = await save({ 'src/a.mjs': 'a\n' }, 'job code');
+    const code = await save({ 'src/a.mjs': versions?.[1] ?? 'a\n' }, 'job code');
     await save({ [`${jobDir('J001')}/V002.md`]: reviewText(code, '', root) }, 'records: V002');
     const extra = await between({ dir, save });
     git(dir, 'checkout', '-q', 'main');
-    await save({ 'src/main-only.mjs': 'm\n' }, 'code on main');
+    await save({ 'src/main-only.mjs': 'm\n', ...(versions && { 'src/a.mjs': versions[2] }) }, 'code on main');
     git(dir, 'update-ref', 'refs/remotes/origin/main', 'main');
     git(dir, 'checkout', '-q', 'job');
-    git(dir, 'merge', '--no-ff', '-q', ...(resolution ? ['--no-commit'] : []), '-m', 'merge main', 'main');
+    // A conflicted merge exits 1 and leaves its markers in the work tree for `resolve` to replace.
+    const merging = spawnSync('git', ['-c', 'core.autocrlf=false', 'merge', '--no-ff', '-q', ...(resolution ? ['--no-commit'] : []), '-m', 'merge main', 'main'], { cwd: dir, encoding: 'utf8' });
+    assert.equal(merging.status, edits === 'lines' ? 1 : 0, merging.stderr);
     if (resolution) {
       for (const [path, content] of Object.entries(resolution)) await writeFile(join(dir, path), content);
       git(dir, 'add', '-A');
@@ -505,6 +510,14 @@ try {
   assert.deepEqual(evilChain.result.jobs[0].uncovered, [{ commit: evilChain.code, paths: ['src/a.mjs'] }, { commit: evilChain.merge, paths: ['src/evil.mjs'] }]);
   const evilOpen = await mergeShape('merge-evil-open', async () => undefined, { resolve: evil, reviewed: false });
   assert.deepEqual(evilOpen.result.jobs[0].uncovered, [{ commit: evilOpen.merge, paths: ['src/evil.mjs'] }]);
+  // A merge of main that both sides edited in different hunks is clean: nothing in it needs review, in the chain or as the tip after the last candidate.
+  const hunksChain = await mergeShape('merge-hunks', async () => undefined, { edits: 'hunks' });
+  assert.equal(hunksChain.result.ok, true, JSON.stringify(hunksChain.result));
+  const hunksOpen = await mergeShape('merge-hunks-open', async () => undefined, { edits: 'hunks', reviewed: false });
+  assert.equal(hunksOpen.result.ok, true, JSON.stringify(hunksOpen.result));
+  // A conflicted merge is judged by its resolution: the conflicted file and the code the resolution adds are the merge's own changes.
+  const conflicted = await mergeShape('merge-conflict', async () => undefined, { edits: 'lines', resolve: { 'src/a.mjs': 'r\n', ...evil }, reviewed: false });
+  assert.deepEqual(conflicted.result.jobs[0].uncovered, [{ commit: conflicted.merge, paths: ['src/a.mjs', 'src/evil.mjs'] }]);
   // Without an origin/main ref no merge can be shown to bring in only main's commits, so the chain breaks.
   git(throughMain.dir, 'update-ref', '-d', 'refs/remotes/origin/main');
   const noMain = tool(['coverage', '--project', throughMain.dir, '--base', throughMain.root]);
