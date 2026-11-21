@@ -279,3 +279,23 @@ Deferred candidates (low value; add a job only after another occurrence):
 - 2026-11-21: four parallel workers made job-tier verify take 6-7 min, timed out isswf-verify at 180 s and Claude Code stopped background shells for low memory. Operator: default 2, a local per-machine limit.
 - 2026-11-21: brief r1 research: Claude background completion is documented (turn.complete with agentId) but unobserved; Pi async completion observed on Linux only; local answers use git config --local. Decision: per-clone limit, observe mode by default.
 - 2026-11-21: merged in #379. V002 pass after one correction; V003 passed a CI fix (test registered in check-quality). Known limits: completion events and the Claude rmSync close not observed live; parallel launches can exceed the limit in enforce; reviewers, bound reviews, verify runs and SendMessage continuations are not counted.
+
+## J013
+
+- Status: pending
+- Size: S (one flow)
+- Objective: isSWF's own Git calls and tests never hold the index lock opportunistically or leave fsmonitor daemons running, and a check keeps it that way.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J013/brief-r1.md) (pending until prepared)
+- Blocker: None.
+- Next step: Write brief r1 after J001 r5 and J011 (2-worker limit).
+
+### Acceptance
+
+- Every Git call made by the hooks, guards and pane (Claude and Pi) runs with `GIT_OPTIONAL_LOCKS=0`, and a test fails when a hook or guard Git runner omits it.
+- Test fixture repositories are created with `core.fsmonitor=false` through a shared helper, and a check fails when a test creates a repository without it.
+- A Windows check runs the job-tier tests and observes that no new `git fsmonitor--daemon` process is left alive, reporting any it finds.
+
+### Evidence
+
+- 2026-11-21: `index.lock` blocked coordinator commits in the primary checkout four times; global `core.fsmonitor=true`; read-only Git without `GIT_OPTIONAL_LOCKS=0` may refresh the index (only `tools/git-evidence.mjs` sets it). 38 `git fsmonitor--daemon` processes were alive (killed by the operator's go), and Claude Code stopped background shells for low memory. The Engram Stop hook runs Git only in its own repository and is not the cause.
