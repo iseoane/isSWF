@@ -122,6 +122,20 @@ const expectedSkills = [
 
 const releaseFiles = [".agents/roles", ".agents/hosts", ".agents/skills/isswf-coordinator", ".agents/skills/isswf-setup", ".claude-plugin", ".factory/templates", ".isswf-release.json", ".isswf-sources", "agents", "skills", "hooks/hooks.json", "hooks/register.tsx", "types/index.d.ts", "tools/*.mjs", "docs/installation.md", "docs/durable-work.md", "docs/host-portability.md", "docs/source-activation.md", "docs/issue-intake.md"];
 
+/**
+ * Selects, from tracked repository paths, every file either packaging route can ship: the Pi payload with all
+ * optional skill sets, and the plugin/release entries (directories, files and the `tools/*.mjs` glob).
+ * Generated release entries such as `.isswf-release.json` are not tracked and so never match.
+ */
+export function packagedFileSet(trackedPaths) {
+  const exact = new Set([...payloadPaths, ...writingPayloadPaths, ...understandingPayloadPaths, ...prPayloadPaths, ...issuePayloadPaths, ...e2ePayloadPaths, ...Object.values(taskPayloadPaths).flat(), ...nativePiResources, featureDeliveryPath]);
+  // The release ships a selected conditional skill as a whole directory, so every optional skill directory counts.
+  const conditionalSkills = ["writing", "understanding", "pr", "issue", "e2e", ...taskSkills].map(name => `.agents/skills/isswf-${name}`);
+  const entries = [...releaseFiles, ...conditionalSkills].map(entry => entry.includes("*") ? new RegExp(`^${entry.replace(/[.+?^${}()|[\]\\]/gu, "\\$&").replaceAll("*", "[^/]*")}$`, "u") : entry);
+  const inRelease = path => entries.some(entry => typeof entry === "string" ? path === entry || path.startsWith(`${entry}/`) : entry.test(path));
+  return trackedPaths.filter(path => exact.has(path) || inRelease(path)).sort();
+}
+
 function fail(message) {
   throw new Error(message);
 }
