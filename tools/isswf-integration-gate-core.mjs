@@ -8,9 +8,9 @@ const STATE_DIRECTORIES = ['.isswf', '.factory'];
 const STAMP_TIERS = new Set(['job', 'initiative']);
 // Without a base ref to stop at, a walk looks at this many commits of the head's history.
 const WALK_LIMIT = 200;
-const MERGE_VALUE_OPTIONS = new Set(['-m', '-F', '-s', '-X', '--message', '--file', '--strategy', '--strategy-option', '--into-name']);
+const MERGE_VALUE_OPTIONS = new Set(['-m', '-F', '-s', '-X', '--message', '--file', '--strategy', '--strategy-option', '--into-name', '--cleanup']);
 const MERGE_CONTROL = new Set(['--abort', '--continue', '--quit']);
-const isRecordPath = path => STATE_DIRECTORIES.some(state => path.startsWith(`${state}/initiatives/`));
+const GH_VALUE_FLAGS = new Set(['-R', '--repo']);
 
 /** The commit operands of a `git merge`, or none for a control flag. */
 function mergeOperands(args) {
@@ -38,6 +38,17 @@ function pushedRefs(refspecs, base, current) {
   return refs;
 }
 
+/** The `--head` branch of a `gh pr create` (after gh's own flags such as `--repo X`), or undefined for another command; `head` is undefined without the flag or for a `owner:branch` fork head. */
+function ghPrCreate(args) {
+  let index = 0;
+  while (args[index]?.startsWith('-')) index += GH_VALUE_FLAGS.has(args[index]) ? 2 : 1;
+  if (args[index] !== 'pr' || args[index + 1] !== 'create') return undefined;
+  const rest = args.slice(index + 2);
+  const at = rest.findIndex(arg => arg === '--head' || arg === '-H' || arg.startsWith('--head='));
+  const value = at < 0 ? undefined : rest[at].startsWith('--head=') ? rest[at].slice('--head='.length) : rest[at + 1];
+  return { head: value === undefined || value.includes(':') ? undefined : value, forked: value?.includes(':') === true };
+}
+
 /** The integration commands of `command` as `{ kind, dir, remote, refs }`; `refs` are the heads they publish or merge, resolved later against the checkout's HEAD. */
 async function integrationsIn(command, cwd, git) {
   const found = [];
@@ -54,9 +65,11 @@ async function integrationsIn(command, cwd, git) {
       kind = 'git push';
       remote = push.remote;
       operands = push.refspecs;
-    } else if (segment.command === 'gh' && segment.args[0] === 'pr' && segment.args[1] === 'create') {
+    } else if (segment.command === 'gh') {
+      const create = ghPrCreate(segment.args);
+      if (create === undefined) continue;
       kind = 'gh pr create';
-      operands = ['HEAD'];
+      operands = create.forked ? [] : [create.head ?? 'HEAD'];
     } else continue;
     const dir = targetDir(cwd, segment.git ? segment : { cd: segment.cd, git: { dirs: [] } });
     if (dir === undefined) continue;
@@ -69,18 +82,24 @@ async function integrationsIn(command, cwd, git) {
     const branch = current.exitCode === 0 ? current.stdout.trim() : undefined;
     let refs = operands;
     if (kind === 'git push') refs = pushedRefs(operands, base, branch);
-    else if (kind === 'gh pr create' && (branch === undefined || branch === base)) refs = [];
+    else if (kind === 'gh pr create' && operands[0] === 'HEAD' && (branch === undefined || branch === base)) refs = [];
     found.push({ kind, root, remote, base, refs: refs.filter(ref => !ref.startsWith('-')) });
   }
   return found;
 }
 
-async function readMode(root, git) {
+// The selected state and gate mode from the setup record on `ref`: `.isswf` when its project-setup.md exists there, else `.factory`; undefined when the ref has neither.
+async function readSetupAt(root, ref, git) {
   for (const state of STATE_DIRECTORIES) {
-    const shown = await git(['show', `HEAD:${state}/project-setup.md`], root);
-    if (shown.exitCode === 0) return MODE_LINE.exec(shown.stdout)?.[1] ?? 'observe';
+    const shown = await git(['show', `${ref}:${state}/project-setup.md`], root);
+    if (shown.exitCode === 0) return { state, mode: MODE_LINE.exec(shown.stdout)?.[1] ?? 'observe' };
   }
-  return 'observe';
+  return undefined;
+}
+
+// The base ref decides, so a commit of the branch under review cannot change the rule it is judged by; HEAD answers only when the base ref is missing.
+async function readSetup(root, baseRef, git) {
+  return (await readSetupAt(root, baseRef, git)) ?? (await readSetupAt(root, 'HEAD', git)) ?? { state: '.factory', mode: 'observe' };
 }
 
 async function hasStamp(root, sha, git, read) {
@@ -97,7 +116,7 @@ async function hasStamp(root, sha, git, read) {
 }
 
 /** The first commit that needs a stamp and has none on the first-parent history of `sha` above `baseRef`, or undefined when the head is covered. */
-async function unstampedCommit(root, sha, baseRef, git, read) {
+async function unstampedCommit(root, sha, baseRef, state, git, read) {
   const onBase = await git(['merge-base', '--is-ancestor', sha, baseRef], root);
   if (onBase.exitCode === 0) return undefined;
   const walk = await git(['rev-list', '--first-parent', ...(onBase.exitCode === 1 ? [sha, '--not', baseRef] : ['-n', String(WALK_LIMIT), sha])], root);
@@ -107,7 +126,7 @@ async function unstampedCommit(root, sha, baseRef, git, read) {
     const listed = await git(['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-z', '-m', commit], root);
     if (listed.exitCode !== 0) return undefined;
     // A records-only commit needs no stamp of its own when the code commit below it has one.
-    if (listed.stdout.split('\0').some(path => path && !isRecordPath(path))) return commit;
+    if (listed.stdout.split('\0').some(path => path && !path.startsWith(`${state}/initiatives/`))) return commit;
   }
   return undefined;
 }
@@ -116,30 +135,29 @@ async function unstampedCommit(root, sha, baseRef, git, read) {
  * Warns about, or refuses, an integration command whose branch head has no verification stamp, before it runs: `git merge <branch>`, a `git push` of a branch other than
  * the base, and `gh pr create`. The stamp is the file `isswf-verify --tier job` writes for a clean, fully passing run at that commit. A head that is already on
  * `<remote>/<base>` is integrated; a records-only head is covered by the stamp of the first commit below it that changes anything but work records.
- * The mode is the `- Integration gate: off|observe|enforce` line of the selected state's `project-setup.md` at HEAD (a missing line is `observe`): `observe` returns a
+ * The mode is the `- Integration gate: off|observe|enforce` line of the selected state's `project-setup.md` on `<remote>/<base>`, or at HEAD when that ref is missing (a missing line is `observe`): `observe` returns a
  * `note` for the caller to show after the run, `enforce` a `deny`. It fails open on a git fault: this guard enforces a process rule, not an authority.
  * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a file's text or rejects.
  */
 export async function checkIntegrationGate({ command, cwd, git, read }) {
   try {
     const problems = [];
-    let mode;
     for (const { kind, root, remote, base, refs } of await integrationsIn(command, cwd, git)) {
       if (!refs.length) continue;
-      mode ??= await readMode(root, git);
-      if (mode === 'off') return {};
+      const baseRef = `${remote}/${base}`;
+      const { state, mode } = await readSetup(root, baseRef, git);
+      if (mode === 'off') continue;
       for (const ref of refs) {
         const resolved = await git(['rev-parse', '--verify', '-q', `${ref}^{commit}`], root);
         if (resolved.exitCode !== 0) continue;
-        const sha = resolved.stdout.trim();
-        const missing = await unstampedCommit(root, sha, `${remote}/${base}`, git, read);
-        if (missing !== undefined && !problems.some(problem => problem.sha === missing)) problems.push({ kind, sha: missing });
+        const missing = await unstampedCommit(root, resolved.stdout.trim(), baseRef, state, git, read);
+        if (missing !== undefined && !problems.some(problem => problem.sha === missing)) problems.push({ kind, sha: missing, mode });
       }
     }
     if (!problems.length) return {};
     const what = problems.map(({ kind, sha }) => `${kind}: ${sha.slice(0, 7)}`).join('; ');
     const fix = 'Run `node tools/isswf-verify.mjs --project <project> --tier job` on a clean tree at that commit, which writes the stamp, then repeat the command.';
-    if (mode === 'enforce') return { deny: `isSWF integration gate: refused. No verification stamp for ${what}. ${fix} This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
+    if (problems.some(problem => problem.mode === 'enforce')) return { deny: `isSWF integration gate: refused. No verification stamp for ${what}. ${fix} This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
     return { note: `isSWF integration gate (observe): the command ran, and enforce mode would refuse it. No verification stamp for ${what}. ${fix}` };
   } catch {
     return {};
