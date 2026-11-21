@@ -11,7 +11,7 @@ import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
 import { findUndispatched, freshUndispatched, undispatchedWarning } from '../tools/isswf-undispatched-core.mjs'
-import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
+import { checkRecordLocation, guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativeIdsIn, initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { compareBrief, countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
 
@@ -675,6 +675,15 @@ export const register: Register = (on, options) => {
       try {
         const workers = workerCalls('claude', e)
         if (workers.length) workerTokens = await openWorkers({ workers, host: 'claude', cwd: await $.session.cwd(), io: ledgerIo($) })
+      } catch {}
+    }
+    // A child's attempt or review record must land in the checkout its prompt assigned, known under its agent id. A coordinator write carries no agent id.
+    const writePath = (e as { file_path?: unknown }).file_path
+    if (WRITE_TOOLS.has(e.tool) && e.agentId !== undefined && typeof writePath === 'string') {
+      try {
+        const assignment = (await $.state.get(ASSIGNED)).value?.[e.agentId]
+        const location = checkRecordLocation({ path: writePath, assignment })
+        if (location.deny !== undefined) return { deny: location.deny }
       } catch {}
     }
     let ran

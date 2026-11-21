@@ -43,7 +43,7 @@
 - Outcome: complete, partial, blocked, failed, or cancelled (one value):
 - Summary of work and unresolved decisions:
 - Changed paths:
-- Checks run and observed results:
+- Checks run and observed results: `<one entry per check, each a command with its observed result and the full 40-hex commit SHA it ran at, separated by a semicolon and a space or written as nested bullets. A SHA named once in this label's own text covers every entry. A check not run or skipped needs no SHA, only its reason. The record check refuses a new attempt whose run check names no SHA and notes a check whose command no observed run command matches>`
 - Required red/green commit pairs and reviewer reproduction command/results (if TDD selected):
 - Deviations from required procedure and consequence: `<your own departures from this assignment's procedure, or None.>`
 - Process deviations observed: `<self-reported, not observed evidence. None., or one entry per deviation: a written rule that was not followed, or mechanical data copied by hand that could have been derived, by another actor (the coordinator's handoff included) or by you. Your own departures from this assignment's procedure belong only in the field above; never list one incident in both fields.>`

@@ -28,6 +28,8 @@ for (const [file, role] of [['agents/isswf-worker.md','worker'],['agents/isswf-r
   if (role === 'reviewer') assert.ok(knowledge.every(tool => !toolLine.includes(tool)), 'Claude reviewer must not read the live index or memory instead of the bound candidate');
   else assert.ok(knowledge.every(tool => toolLine.includes(tool)), `${role} must be able to use installed CodeGraph and Engram`);
   if (role === "researcher" || role === "planner") assert.match(toolLine, /mcp__plugin_isswf_isswf_git_evidence__identity, mcp__plugin_isswf_isswf_git_evidence__diff, mcp__plugin_isswf_isswf_git_evidence__content$/u, `${role} reads its base through the three evidence tools`);
+  // J008 V004 N2: the planner and researcher write nothing and run no shell, so their records come back in the handoff.
+  if (role === 'researcher' || role === 'planner') assert.ok(!toolLine.split(',').some(tool => ['Write', 'Edit', 'MultiEdit', 'Bash', 'PowerShell'].includes(tool.trim())), `${role} lists no Write, Edit or Bash tool`);
   assert.ok(body.length < 1500, `${file} should remain a thin wrapper`);
   if (role === 'researcher' || role === 'planner') {
     const profile = await read(`.agents/roles/${role}.md`);

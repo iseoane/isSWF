@@ -2,7 +2,8 @@
 // only an injected fs. The Pi extension and hooks/register.tsx pass their own `read` and `list` and share this
 // path matching and message.
 import { checkRecord } from './isswf-record-check-core.mjs';
-import { isRecordPath, joiner } from './isswf-snapshot-core.mjs';
+import { resolveDir } from './isswf-branch-guard-core.mjs';
+import { isRecordPath, joiner, RECORD_NAME } from './isswf-snapshot-core.mjs';
 
 // The same ceiling as tools/isswf-record-check.mjs.
 const MAX_CHARS = 1024 * 1024;
@@ -47,5 +48,30 @@ export async function guardRecord({ path, read, list } = {}) {
     return [`The isSWF record check found ${violations.length} violation(s) in ${path}. It only reports: nothing was changed.`, ...violations.map(describe)].join('\n');
   } catch {
     return undefined;
+  }
+}
+
+// Windows paths (a drive letter) are case-insensitive; other paths compare exactly.
+const within = (path, directory) => (/^[a-z]:/u.test(directory) ? path.toLowerCase().startsWith(`${directory.toLowerCase()}/`) : path.startsWith(`${directory}/`));
+
+/**
+ * Decides, before a write, whether a child bound to a checkout (`assignment` as `assignmentOf` returns it) writes an attempt or review record
+ * (`A###.md` or `V###.md` under a state directory's initiatives folder) outside that checkout: `{ deny }` names the checkout, `{}` allows.
+ * Without an assignment (the coordinator, or a child whose binding is unknown), for another file, for a relative `path` or on any fault it allows,
+ * because this is a process rule and not an authority. `path` may use `\` or `/`.
+ * @returns {{ deny?: string }}
+ */
+export function checkRecordLocation({ path, assignment } = {}) {
+  try {
+    if (typeof path !== 'string' || typeof assignment?.checkout !== 'string') return {};
+    const slashed = path.replaceAll('\\', '/');
+    if (!isRecordPath(slashed) || !RECORD_NAME.test(slashed.slice(slashed.lastIndexOf('/') + 1))) return {};
+    if (!/^(?:\/|[A-Za-z]:\/)/u.test(slashed)) return {};
+    const bound = assignment.checkout.replaceAll('\\', '/');
+    const checkout = resolveDir(bound, '.');
+    if (within(resolveDir(checkout, slashed), checkout)) return {};
+    return { deny: `isSWF record guard: writing ${path} refused. This session is assigned checkout ${bound}, and an attempt or review record belongs inside it. Write the record in the assigned checkout, or ask the coordinator to change the assignment. This is a process rule, not a retry signal: do not rephrase the write to get past it.` };
+  } catch {
+    return {};
   }
 }
