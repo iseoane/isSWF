@@ -139,6 +139,44 @@
       "timeoutSeconds": 300
     },
     {
+      "id": "isswf-parallel-workers",
+      "argv": [
+        "node",
+        "tests/isswf-parallel-workers.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-parallel-workers-core.mjs",
+        "tools/isswf-parallel-workers.mjs"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "isswf-dispatch-guard",
+      "argv": [
+        "node",
+        "tests/isswf-dispatch-guard.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-dispatch-guard-core.mjs",
+        "tools/isswf-dispatch-guard-pi-extension.mjs",
+        "tools/isswf-parallel-workers-core.mjs",
+        "hooks/register.tsx"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
       "id": "isswf-compaction",
       "argv": [
         "node",

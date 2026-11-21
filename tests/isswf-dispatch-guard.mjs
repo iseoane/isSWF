@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -97,6 +97,30 @@ for (const subagent_type of ['isswf:isswf-worker', 'isswf-worker']) {
   assert.deepEqual(await claude(claudeCall({ subagent_type }), io), { allow: true }, subagent_type);
   assert.deepEqual(io.calls.git.map(argv => argv.slice(0, 3)), [['ls-files', '--error-unmatch', '--'], ['check-ignore', '--no-index', '-q'], ['cat-file', '-e', `${CHECKPOINT}:./${BRIEF}`]]);
   assert.equal(io.calls.git[2][2], `${CHECKPOINT}:./${BRIEF}`, 'the brief must exist at the named checkpoint');
+}
+// The parallel-worker limit: a worker call counts the ledger entries; reviewers and other agents are not counted.
+{
+  const gitAnswers = mode => async argv => {
+    if (argv[0] === 'rev-parse') return { exitCode: 0, stdout: '.git\n' };
+    const value = { 'isswf.maxParallelWorkers': '1', 'isswf.parallelWorkersMode': mode }[argv.at(-1)];
+    return value === undefined ? { exitCode: 1, stdout: '' } : { exitCode: 0, stdout: `${value}\n` };
+  };
+  const counted = (mode, open = 1) => {
+    const io = memoryIo(project());
+    const names = Array.from({ length: open }, (_, index) => ({ name: `t${index}.json`, kind: 'file' }));
+    io.gitOut = gitAnswers(mode);
+    io.list = async dir => (dir === '/work/project/.git/isswf/parallel-workers' ? names : [{ name: '.factory', kind: 'dir' }]);
+    return io;
+  };
+  refused(await claude(claudeCall(), counted('enforce')), 'parallel-limit', '1 open', 'limit 1');
+  const noted = await claude(claudeCall(), counted('observe'));
+  assert.equal(noted.deny, undefined);
+  assert.ok(noted.allow && noted.note.includes('1 open') && noted.note.includes('clear'), JSON.stringify(noted));
+  assert.deepEqual(await claude(claudeCall(), counted('enforce', 0)), { allow: true }, 'below the limit');
+  const down = counted('enforce');
+  down.gitOut = async () => { throw Error('git is not available'); };
+  assert.deepEqual(await claude(claudeCall(), Object.assign(counted('observe'), { gitOut: down.gitOut })), { allow: true }, 'a Git fault in observe mode');
+  assert.deepEqual(await claude(claudeCall({ subagent_type: 'isswf:isswf-planner', prompt: dispatchPrompt() }), counted('enforce')).then(verdict => verdict.condition === 'parallel-limit'), false, 'only workers are counted');
 }
 // Windows spelling of the project root works the same.
 assert.deepEqual(await claude(claudeCall(), memoryIo(project({}, 'C:\\work\\project'))), { allow: true }, 'a backslash project root');
@@ -394,7 +418,7 @@ try {
 
   const handlers = [];
   registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
-  assert.deepEqual(handlers.map(([name]) => name), ['tool_call'], 'only the call event is used');
+  assert.deepEqual(handlers.map(([name]) => name), ['tool_call', 'tool_result'], 'the call event refuses and opens; the result event closes');
   const [[, handler]] = handlers;
   const ctx = { cwd: root };
   const call = (input, context = ctx, toolName = 'subagent') => handler({ type: 'tool_call', toolName, toolCallId: 't1', input }, context);
@@ -471,6 +495,50 @@ try {
   assert.equal(await call({ task: task(), chain: [{ agent: 'isswf-worker', model: `${PI_MODEL}:high` }] }), undefined, 'a step uses the original request');
   blocked(await call({ task: 'no references', chain: [{ agent: 'isswf-worker', model: `${PI_MODEL}:high` }] }), 'brief');
 
+  // The parallel-worker limit through the extension and real Git: open on an accepted call, close on the result or the async completion.
+  {
+    const ledger = join(root, '.git', 'isswf', 'parallel-workers');
+    await rm(ledger, { recursive: true, force: true });
+    const notes = [];
+    const piHandlers = new Map();
+    const piEvents = new Map();
+    registerGuard({ on: (name, handler) => piHandlers.set(name, handler), events: { on: (name, handler) => piEvents.set(name, handler) } });
+    const piCtx = { cwd: root, ui: { notify: message => notes.push(message) } };
+    const open = async () => (await readdir(ledger).catch(() => [])).length;
+    const dispatch = (input, id) => piHandlers.get('tool_call')({ type: 'tool_call', toolName: 'subagent', toolCallId: id, input }, piCtx);
+    const finish = (input, id, details = {}, isError = false) => piHandlers.get('tool_result')({ type: 'tool_result', toolName: 'subagent', toolCallId: id, input, isError, details });
+    const one = { agent: 'isswf-worker', task: task(), model: `${PI_MODEL}:high` };
+    git(root, 'config', '--local', 'isswf.maxParallelWorkers', '1');
+
+    assert.equal(await dispatch(one, 'a'), undefined);
+    assert.equal(await open(), 1);
+    assert.deepEqual(notes, [], 'one worker fits a limit of 1');
+    assert.equal(await dispatch(one, 'b'), undefined, 'observe mode allows a worker over the limit');
+    assert.equal(await open(), 2);
+    assert.ok(notes.length === 1 && notes[0].includes('1 open') && notes[0].includes('limit 1'), notes.join('\n'));
+    await finish(one, 'b');
+    assert.equal(await open(), 1, 'a synchronous result closes its entry');
+    git(root, 'config', '--local', 'isswf.parallelWorkersMode', 'enforce');
+    blocked(await dispatch(one, 'c'), '1 open', 'limit 1');
+    assert.equal(await open(), 1, 'a refused call opens nothing');
+    await finish(one, 'a');
+    blocked(await dispatch({ tasks: [one, one] }, 'd'), '2 requested', 'limit 1');
+    assert.equal(await dispatch({ ...one, async: true }, 'e'), undefined);
+    await finish({ ...one, async: true }, 'e', { asyncId: 'run-9' });
+    assert.equal(await open(), 1, 'an async launch stays open until its completion');
+    await piEvents.get('subagent:async-complete')({ runId: 'other' });
+    assert.equal(await open(), 1, 'another run does not close it');
+    await piEvents.get('subagent:async-complete')({ runId: 'run-9' });
+    assert.equal(await open(), 0, 'the async completion closes it');
+    assert.equal(await dispatch(one, 'f'), undefined);
+    await finish(one, 'f', {}, true);
+    assert.equal(await open(), 0, 'a failed call closes its entry');
+    assert.equal(await dispatch({ agent: 'isswf-researcher', task: `retrospective .factory/retrospectives/session.md checkpoint ${head}`, model: `${PI_MODEL}:high` }, 'g'), undefined);
+    assert.equal(await open(), 0, 'a researcher is not counted');
+    git(root, 'config', '--local', '--unset', 'isswf.parallelWorkersMode');
+    git(root, 'config', '--local', '--unset', 'isswf.maxParallelWorkers');
+  }
+
   // Without a Git repository the brief check cannot pass; a guard failure refuses the isSWF role call only.
   const plain = join(temp, 'plain');
   await mkdir(join(plain, '.factory/initiatives/I0001/jobs/J001'), { recursive: true });
@@ -515,6 +583,9 @@ const guardAt = hook.indexOf('guardDispatch(');
 assert.ok(guardAt > 0 && guardAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
 assert.ok(hook.slice(0, guardAt).includes("e.tool === 'Agent'"), 'only the Agent tool is guarded');
 for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', "as: 'bytes'", 'readBytes', 'return { deny:']) assert.ok(hook.includes(part), part);
+for (const part of ['openWorkers(', 'closeWorker(', 'markWorkerRun(', 'closeWorkerRun(', "status === 'async_launched'", 'gitOut']) assert.ok(hooks.includes(part), part);
+assert.ok(hooks.slice(hooks.indexOf("on('turn.complete'")).includes('closeWorkerRun('), 'a child turn closes its ledger entry');
+assert.ok(hooks.includes('if (exitCode !== 0) throw'), 'a failed removal leaves the entry'); // source check: register.tsx has no runner
 // The reference parser stays linear on a long unbroken token and still returns the brief path with its state root.
 {
   const { checkReferences } = await load('tools/isswf-dispatch-guard-core.mjs');

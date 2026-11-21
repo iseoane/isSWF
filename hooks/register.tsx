@@ -4,7 +4,8 @@ import type { EngineInterface, Register, Timer } from 'claude-code'
 import { assignmentOf, checkBranch, observeBranch, refreshBranches } from '../tools/isswf-branch-guard-core.mjs'
 import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
 import { compactionInstructions, isCoordinatorSkill, noteFileName, NOTE_DIR, rememberDispatch, serializeNote } from '../tools/isswf-compaction-core.mjs'
-import { callsOf, guardDispatch, isRoleAgent } from '../tools/isswf-dispatch-guard-core.mjs'
+import { callsOf, guardDispatch, isRoleAgent, workerCalls } from '../tools/isswf-dispatch-guard-core.mjs'
+import { closeWorker, closeWorkerRun, markWorkerRun, openWorkers } from '../tools/isswf-parallel-workers-core.mjs'
 import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
@@ -556,6 +557,38 @@ function branchHost($: EngineInterface, e: { agentId?: string }) {
   }
 }
 
+// The parallel-worker ledger's io. The engine has no way to delete a file, so `remove` runs one `rmSync` in Node, with the path as an argument.
+function ledgerIo($: EngineInterface) {
+  return {
+    gitOut: async (argv: string[], cwd: string) => {
+      const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+      return { exitCode, stdout }
+    },
+    list: (dir: string) => $.fs.list(dir),
+    read: (file: string) => $.fs.read(file),
+    write: (file: string, text: string) => $.fs.write(file, text),
+    remove: async (file: string) => {
+      const { exitCode } = await $.process.run(['node', '-e', "require('node:fs').rmSync(process.argv[1], { force: true })", file], { cwd: await $.session.cwd() })
+      // A failed removal (for example no `node` on the hook's PATH) leaves the entry for the operator's `clear`.
+      if (exitCode !== 0) throw new Error(`could not remove ${file}`)
+    },
+  }
+}
+
+// A worker's ledger entries once its `Agent` call has returned: a background launch keeps them under its agent id until that child's
+// `turn.complete`; a foreground result, a refusal or an error closes them. A fault never changes the tool's result.
+async function settleWorkers($: EngineInterface, tokens: string[], ran: { deny?: unknown; isError?: boolean; result?: unknown } | undefined) {
+  const result = ran?.result as { status?: unknown; agentId?: unknown } | undefined
+  const run = ran?.deny === undefined && !ran?.isError && result?.status === 'async_launched' && typeof result.agentId === 'string' ? result.agentId : undefined
+  for (const token of tokens) {
+    try {
+      const cwd = await $.session.cwd()
+      if (run !== undefined) await markWorkerRun({ token, run, cwd, io: ledgerIo($) })
+      else await closeWorker({ token, cwd, io: ledgerIo($) })
+    } catch {}
+  }
+}
+
 export const register: Register = (on, options) => {
   // The engine accepts one unmatched `tool.call` hook, so this one serves the shell and dispatch guards and the record check,
   // which run whatever the pane option is, and the pane's observation, which runs only with the option on.
@@ -564,6 +597,9 @@ export const register: Register = (on, options) => {
     let reobserve: string[] = []
     // The integration gate's observe-mode note, shown as context once the command has run.
     let gateNote: string | undefined
+    // The parallel-worker limit's observe-mode note, and the ledger entries opened for this call's workers.
+    let workerNote: string | undefined
+    let workerTokens: string[] = []
     const branches = branchHost($, e)
     // A delegated child's shell calls reach this hook too. Both cores fail open, so a fault in them never blocks a call.
     if (e.tool === 'Bash' || e.tool === 'PowerShell') {
@@ -628,11 +664,27 @@ export const register: Register = (on, options) => {
           list: (dir: string) => $.fs.list(dir),
           stat: (file: string) => $.fs.stat(file),
           git: async (argv: string[], cwd: string) => (await $.process.run(['git', ...argv], { cwd })).exitCode,
+          gitOut: async (argv: string[], cwd: string) => {
+            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            return { exitCode, stdout }
+          },
         },
       })
       if ('deny' in verdict) return { deny: verdict.deny }
+      workerNote = verdict.note
+      try {
+        const workers = workerCalls('claude', e)
+        if (workers.length) workerTokens = await openWorkers({ workers, host: 'claude', cwd: await $.session.cwd(), io: ledgerIo($) })
+      } catch {}
     }
-    const ran = await next(e)
+    let ran
+    try {
+      ran = await next(e)
+    } catch (error) {
+      await settleWorkers($, workerTokens, undefined)
+      throw error
+    }
+    await settleWorkers($, workerTokens, ran)
     // The coordinator's accepted dispatches outlive a compaction in `$.state`; a failure here never changes the tool's result.
     if (e.tool === 'Agent' && ran.deny === undefined && !ran.isError) {
       try {
@@ -684,7 +736,7 @@ export const register: Register = (on, options) => {
       const text = WRITE_TOOLS.has(e.tool) && typeof path === 'string'
         ? await guardRecord({ path, read: (file: string) => $.fs.read(file), list: (dir: string) => $.fs.list(dir) })
         : undefined
-      const notes = [gateNote, text].filter((note): note is string => Boolean(note))
+      const notes = [gateNote, workerNote, text].filter((note): note is string => Boolean(note))
       return notes.length ? { ...ran, context: [...(ran.context ?? []), ...notes] } : ran
     } catch {
       return ran
@@ -730,6 +782,11 @@ export const register: Register = (on, options) => {
   // After a turn of the main conversation that was not aborted or failed, a coordinator session is told once about an in-progress job whose
   // committed brief has no attempt record and no accepted dispatch. The warning is a status line only and a fault never changes the turn.
   on('turn.complete', async ($, e, next) => {
+    // A background worker's turn is its run's end: its ledger entry closes whatever the turn's outcome.
+    try {
+      const agentId = (e as { agentId?: unknown }).agentId
+      if (typeof agentId === 'string') await closeWorkerRun({ run: agentId, cwd: await $.session.cwd(), io: ledgerIo($) })
+    } catch {}
     try {
       const turn = e as { agentId?: unknown; aborted?: unknown; error?: unknown; isError?: unknown }
       if (turn.agentId === undefined && turn.aborted !== true && turn.error == null && turn.isError !== true && (await $.state.get(IS_ACTIVATED)).value) {

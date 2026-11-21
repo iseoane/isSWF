@@ -71,6 +71,7 @@ Use the plugin's `isswf-worker`, `isswf-reviewer`, `isswf-researcher` and `isswf
 
 - **Background capability.** Background Agent-tool children run concurrently and report completion notifications (documented in the official [sub-agents documentation](https://code.claude.com/docs/en/sub-agents.md#run-subagents-in-foreground-or-background), unverified per host). When the installed Claude version and effective configuration support it, launch long work through that mechanism; verify actual capability and permissions first. CLI background-session help does not establish Agent API support. Do not invent API parameters or claim a live/platform guarantee.
 - **Missing capability.** If background support is missing or unverified, block that async outcome; continue only safe independent work.
+- **Parallel limit.** The dispatch guard counts open workers against the clone's local limit (`git config --local isswf.maxParallelWorkers`, default 2) and, in the default `observe` mode, only notes an excess; read the note and wait before launching more. A background worker's entry closes on its `turn.complete`, which has not been observed live; see "Parallel worker limit" in `docs/en/operations.md`.
 - **Return control.** After launching a background child, report its agent ID and expected result, then return control to the operator. Do not sleep or poll to watch it; consume its completion notification.
 
 ### Live direction and eligible continuation

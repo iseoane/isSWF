@@ -1,12 +1,14 @@
 // No Node imports and no `process` access, like tools/isswf-record-guard-core.mjs: the Claude hooks module has
 // only an injected fs. The Pi extension and hooks/register.tsx pass their own `io`.
 import { verifyHandoff } from './isswf-handoff-core.mjs';
+import { checkWorkerLimit } from './isswf-parallel-workers-core.mjs';
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 import { joiner } from './isswf-snapshot-core.mjs';
 
 // The same ceiling as tools/isswf-record-guard-core.mjs.
 const MAX_CHARS = 1024 * 1024;
 const ROLE_AGENT = /^(?:isswf:)?isswf-/u;
+const WORKER_AGENT = /^(?:isswf:)?isswf-worker$/u;
 const REVIEWER_AGENT = /^(?:isswf:)?isswf-reviewer$/u;
 // Read-only roles that may analyse a committed retrospective record instead of a job (#355).
 const READ_ONLY_AGENT = /^(?:isswf:)?isswf-(?:researcher|planner)$/u;
@@ -55,7 +57,33 @@ export function callsOf(host, input) {
   const children = [input];
   if (Array.isArray(input.tasks)) children.push(...input.tasks);
   if (Array.isArray(input.chain)) for (const step of input.chain) children.push(step, ...(isObject(step) && Array.isArray(step.parallel) ? step.parallel : []));
-  return children.filter(isObject).map(child => ({ agent: child.agent, ...splitPiModel(child.model), prompt: typeof child.task === 'string' ? child.task : input.task }));
+  return children.filter(isObject).map(child => piCall(input, child));
+}
+const piCall = (input, child) => ({ agent: child.agent, ...splitPiModel(child.model), prompt: typeof child.task === 'string' ? child.task : input.task });
+
+// Pi runs `tasks` and a step's `parallel` group at once and the steps of a `chain` one after another, so a chain adds the workers of its widest step.
+function concurrentCalls(host, input) {
+  if (host !== 'pi' || !isObject(input)) return callsOf(host, input);
+  const calls = [piCall(input, input)];
+  if (Array.isArray(input.tasks)) calls.push(...input.tasks.filter(isObject).map(task => piCall(input, task)));
+  if (Array.isArray(input.chain)) {
+    const widest = input.chain.filter(isObject).map(step => (Array.isArray(step.parallel) ? step.parallel.filter(isObject) : [step]).map(child => piCall(input, child)).filter(call => WORKER_AGENT.test(call.agent)));
+    calls.push(...widest.reduce((best, group) => (group.length > best.length ? group : best), []));
+  }
+  return calls;
+}
+
+/** The workers one tool call runs at once, as `{ agent, job, brief }`; the parallel-worker ledger counts these and no other agent. */
+export function workerCalls(host, input) {
+  return concurrentCalls(host, input).filter(call => WORKER_AGENT.test(call.agent)).map(call => {
+    let references;
+    try {
+      references = checkReferences(call.prompt);
+    } catch {
+      // A worker call without a brief is refused by condition 3; the count only needs what it can read.
+    }
+    return { agent: call.agent, job: references && `${references.initiative}/${references.job}`, brief: references?.path };
+  });
 }
 
 async function stateDirectory(project, io) {
@@ -214,8 +242,8 @@ async function checkCall(host, call, io) {
  * `model` with an optional `:level` suffix, and the `tasks` and `chain` forms). `io` supplies `project()`,
  * `read(path)`, `readBytes(path)` (the file's bytes, for a reviewer's handoff), `list(dir)` as `{ name, kind }` entries, `stat(path)` as `{ kind }` and `git(argv, cwd)`, which resolves with the
  * exit code. Another agent is allowed without reading anything. A failure of the guard itself refuses the isSWF
- * role call, never any other. The verdict only refuses: `{ allow: true }` is not an authorization to dispatch.
- * @returns {Promise<{ allow: true } | { deny: string, condition: string }>}
+ * role call, never any other. The verdict only refuses: `{ allow: true }` is not an authorization to dispatch. A worker call also counts the clone's open workers (`io.gitOut(argv, cwd)` as `{ exitCode, stdout }`); over the limit, `observe` mode allows with a `note` and `enforce` mode refuses with condition `parallel-limit`.
+ * @returns {Promise<{ allow: true, note?: string } | { deny: string, condition: string }>}
  */
 export async function guardDispatch({ host, input, io } = {}) {
   for (const call of callsOf(host, input).filter(candidate => isRoleAgent(candidate.agent))) {
@@ -225,6 +253,14 @@ export async function guardDispatch({ host, input, io } = {}) {
       if (error instanceof Refusal) return { deny: `isSWF dispatch refused for ${call.agent}: condition ${error.condition} (${CONDITION_NAMES[error.condition]}): ${error.message}. Fix it and dispatch again.`, condition: CONDITION_NAMES[error.condition] };
       return { deny: `isSWF dispatch refused for ${call.agent}: dispatch guard error: ${error?.message ?? error}`, condition: 'error' };
     }
+  }
+  // The count only reads the ledger: `io.gitOut` is how a host opts in, and a host without it is not counted.
+  const workers = typeof io?.gitOut === 'function' ? workerCalls(host, input) : [];
+  if (workers.length) {
+    // The project was resolved above for each role call, so a fault here is the count's own and observe mode never refuses on it.
+    const verdict = await (async () => checkWorkerLimit({ count: workers.length, cwd: await io.project(), io }))().catch(() => ({}));
+    if (verdict.deny !== undefined) return { deny: `isSWF dispatch refused for ${workers[0].agent}: ${verdict.deny}`, condition: 'parallel-limit' };
+    if (verdict.note !== undefined) return { allow: true, note: verdict.note };
   }
   return { allow: true };
 }

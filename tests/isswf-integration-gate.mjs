@@ -237,7 +237,7 @@ try {
   assert.ok(hooks.indexOf('await checkRecordsPush(') < hooks.indexOf('await checkIntegrationGate('), 'the gate runs after the records push guard');
   assert.ok(hooks.indexOf('await checkIntegrationGate(') < hooks.indexOf('await next(e)'), 'the gate decides before the call');
   assert.ok(hooks.includes('if (gate.deny !== undefined) return { deny: gate.deny }'));
-  assert.ok(hooks.includes('const notes = [gateNote, text]') && hooks.indexOf('await next(e)') < hooks.indexOf('const notes = [gateNote, text]'));
+  assert.ok(hooks.includes('const notes = [gateNote, workerNote, text]') && hooks.indexOf('await next(e)') < hooks.indexOf('const notes = [gateNote, workerNote, text]'));
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
