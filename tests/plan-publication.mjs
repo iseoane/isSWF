@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
@@ -15,15 +16,10 @@ function run(project, grant, preload) {
   assert.ifError(result.error);
   return result;
 }
-function gitInit(project) {
-  const result = spawnSync('git', ['init', '-q', project], { encoding: 'utf8', timeout: 15000 });
-  assert.ifError(result.error);
-  assert.equal(result.status, 0, `git init failed\n${result.stderr}\n${result.stdout}`);
-}
 async function fixture(name) {
   const project = join(root, name), grant = join(root, name + '-grant.json');
   await mkdir(project);
-  gitInit(project);
+  initRepository(project);
   await writeFile(grant, JSON.stringify({ version: 1, project: await realpath(project), initiative: 'I0042', reference: 'Synthetic plan-only publication check', permissions: ['plan'] }));
   return { project, grant, path: join(project, '.factory/initiatives/I0042/plan.md'), lock: join(project, '.factory/initiatives/I0042/.plan-write') };
 }

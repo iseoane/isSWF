@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, realpath, mkdir, writeFile, readFile, readdir, lstat, rm, symlink } from 'node:fs/promises';
@@ -7,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { fileSymlinkOrSkip } from './support/file-symlink.mjs';
 const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-status-test-')));
 const project = join(root, 'project'); await mkdir(project);
-assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);
+initRepository(project);
 const invoke = (tool, args) => spawnSync(process.execPath, [join(source, 'tools', tool), ...args], { encoding: 'utf8', timeout: 15000 });
 // A plan that does not parse exits 1 with the same JSON; every other result exits 0.
 const inspect = (exit = 0) => { const result = invoke('isswf-status.mjs', ['--project', project, '--initiative', 'I0001']); assert.equal(result.status, exit, result.stderr); return JSON.parse(result.stdout); };

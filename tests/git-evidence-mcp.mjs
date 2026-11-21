@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readdir, readFile, realpath, rm, stat, writeF
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 // Journeys through the real stdio MCP server process that the Claude reviewer route launches.
 const source = resolve(process.argv[2] ?? '.');
@@ -106,7 +106,7 @@ const snapshot = async directory => {
 
 try {
   await mkdir(workspace);
-  gitRun(['init', '-q']);
+  initRepository(workspace, [], { git, localConfig: false });
   await writeFile(join(workspace, 'tracked.txt'), 'bound MCP identity\n');
   await writeFile(join(workspace, 'binary.dat'), Buffer.from([0, 255, 10]));
   await writeFile(join(workspace, 'exact.txt'), Buffer.from([0xef, 0xbb, 0xbf, 0x62, 0x61, 0x73, 0x65, 0x0d, 0x0a]));

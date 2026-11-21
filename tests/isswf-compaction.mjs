@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -150,7 +151,7 @@ try {
   await mkdir(jobDir, { recursive: true });
   await writeFile(join(repo, '.factory', 'initiatives', 'I0001', 'plan.md'), '# I0001: Synthetic\n\nType: bug\n\n## J001\n\n- Status: in-progress\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/J001/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n');
   await writeFile(join(jobDir, 'brief-r1.md'), 'brief');
-  assert.equal(gitIn('init', '-q').status, 0);
+  initRepository(repo);
   assert.equal(gitIn('add', '-A').status, 0);
   assert.equal(gitIn('commit', '-q', '-m', 'init').status, 0);
   const statuses = [];

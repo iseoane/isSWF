@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, realpath, rm, symlink, lstat } from 'node:fs/promises';
@@ -7,7 +8,7 @@ import { join, resolve } from 'node:path';
 const source = resolve(process.argv[2] || '.'), root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-plan-test-')));
 const project = join(root, 'project'), proposal = join(root, 'proposal.json'), grant = join(root, 'grant.json');
 await mkdir(project);
-assert.equal(spawnSync('git', ['init', '-q', project]).status, 0);
+initRepository(project);
 const input = { version: 1, initiative: 'I0042', title: 'A bounded feature', type: 'enhancement', jobs: [
   { id: 'J001', objective: 'First unit', status: 'pending', dependsOn: [], acceptance: ['Observable result'], nextStep: 'Prepare first brief', blocker: 'None', evidence: [] },
   { id: 'J002', objective: 'Dependent unit', status: 'pending', dependsOn: ['J001'], acceptance: ['Second result'], nextStep: 'Wait for J001', blocker: 'J001 is not complete', evidence: [] },

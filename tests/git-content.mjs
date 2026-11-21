@@ -4,7 +4,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const locator = process.platform === 'win32' ? 'where.exe' : 'which';
@@ -54,7 +54,7 @@ function invoke(binding, args = ['content']) {
 }
 try {
   await assertStalledContentInput();
-  gitRun(['init', '-q']);
+  initRepository(root, [], { git, localConfig: false });
   const bytes = Buffer.from([0xef, 0xbb, 0xbf, 0x41, 0x0d, 0x0a, 0xff, 0x00]);
   await writeFile(join(root, 'known file.txt'), bytes);
   await writeFile(join(root, 'empty.bin'), Buffer.alloc(0));

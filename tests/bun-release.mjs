@@ -1,3 +1,4 @@
+import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFile, spawn, spawnSync } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -44,7 +45,7 @@ if (available.error || available.status !== 0) {
     // Independent project/store; never shares mutable state with modern migration or worker checks.
     const legacy = join(temp, 'legacy-release'), legacyProject = join(temp, 'legacy-project'), legacyStore = join(temp, 'legacy-store');
     await runAsync(process.execPath, [builder, '--source', fixture, '--revision', revisionA, '--output', legacy, '--runtime', 'node']);
-    await mkdir(legacyProject); await runAsync('git', ['init', '-q', legacyProject]);
+    await mkdir(legacyProject); initRepository(legacyProject);
     await runAsync(process.execPath, [join(legacy, 'tools/isswf.mjs'), 'init', '--project', legacyProject, '--store', legacyStore, '--tracking', 'local']);
     const legacyArgs = ['exec', '--project', legacyProject, '--store', legacyStore, '--', 'isswf-status', '--initiative', 'I0001'];
     assert.equal(JSON.parse((await runAsync(executable, legacyArgs)).stdout).status, 'absent');
@@ -65,7 +66,7 @@ if (available.error || available.status !== 0) {
   }
   let passed = false, installation, newerBuild, legacyCheck;
   try {
-    run('git', ['clone', '-q', '--shared', source, fixture]);
+    cloneRepository(source, fixture, ['--shared']);
     for (const path of ['tools', '.agents', 'agents', 'skills', 'hooks', 'types', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
     const revisionA = commit('Bun release candidate A'), releaseA = join(temp, 'release-a');
     const builder = join(source, 'tools/build-release.mjs');
@@ -128,7 +129,7 @@ console.log('PASS external SDK exports and transitive dependency');\n`);
     await symlink(run('which', ['git']).stdout.trim(), join(restricted, 'git'));
     const noRuntime = { ...env, PATH: restricted };
     legacyCheck = Promise.allSettled([verifyLegacy(builder, revisionA, executable, noRuntime)]);
-    await mkdir(project); run('git', ['init', '-q', project]);
+    await mkdir(project); initRepository(project);
     const cli = (command, args = [], ok = true, binary = executable) => run(binary, [command, '--project', project, '--store', store, ...args], ok, noRuntime);
     assert.equal(JSON.parse(cli('inspect').stdout).status, 'not-initialized');
     assert.deepEqual(await readdir(project), ['.git']);

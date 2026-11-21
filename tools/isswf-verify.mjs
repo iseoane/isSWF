@@ -21,7 +21,7 @@ const isLauncher = command => LAUNCHER.test(command.split(/[\\/]/u).pop());
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = (code, message) => Object.assign(new Error(message ?? code), { code });
-const git = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'buffer', maxBuffer: FILE_LIMIT, windowsHide: true, timeout: 30000 });
+const git = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'buffer', maxBuffer: FILE_LIMIT, windowsHide: true, timeout: 30000, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } });
 const gitText = (cwd, args) => {
   const result = git(cwd, args);
   return result.status === 0 ? result.stdout.toString('utf8').trim() : undefined;

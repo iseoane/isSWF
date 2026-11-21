@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { gitIn } = await import(pathToFileURL(join(source, 'tools/isswf-record-new.mjs')).href);
@@ -24,7 +24,7 @@ const commitFile = async (name, text) => { await writeFile(join(repo, name), tex
 
 try {
   await mkdir(repo);
-  gitRun(['init', '-q', '-b', 'main']);
+  initRepository(repo, ['-b', 'main'], { git });
   gitRun(['config', 'user.email', 'fixture@example.invalid']);
   gitRun(['config', 'user.name', 'Fixture']);
   const parent = await commitFile('a.txt', 'a\n');

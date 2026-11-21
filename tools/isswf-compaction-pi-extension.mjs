@@ -11,7 +11,7 @@ const GIT_TIMEOUT_MS = 20_000;
 const list = async dir => (await readdir(dir, { withFileTypes: true })).map(entry => ({ name: entry.name, kind: entry.isDirectory() ? 'dir' : entry.isFile() ? 'file' : 'other' }));
 // A Git exit code answers the question; a failure to run Git at all (missing executable, timeout) rejects.
 const git = (argv, cwd) => new Promise((resolve, reject) => {
-  execFile('git', argv, { cwd, timeout: GIT_TIMEOUT_MS, windowsHide: true }, error => (!error ? resolve(0) : typeof error.code === 'number' ? resolve(error.code) : reject(error)));
+  execFile('git', argv, { cwd, timeout: GIT_TIMEOUT_MS, windowsHide: true, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } }, error => (!error ? resolve(0) : typeof error.code === 'number' ? resolve(error.code) : reject(error)));
 });
 
 // After a compaction of a session whose coordinator skill was loaded, the first run gets a message that tells the model to reload the

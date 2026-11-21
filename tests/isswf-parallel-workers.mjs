@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
@@ -33,7 +34,7 @@ const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-parallel-workers
 try {
   const main = join(temp, 'main');
   await mkdir(main);
-  git(main, 'init', '-q', '.');
+  initRepository(main);
   await writeFile(join(main, 'a.txt'), 'a\n');
   git(main, 'add', '-A');
   git(main, 'commit', '-qm', 'fixture');

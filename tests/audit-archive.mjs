@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
@@ -11,7 +12,7 @@ const roots = [];
 async function fixture({ ignore = true } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'isswf-audit-archive-')); roots.push(root);
   const git = (...args) => { const r = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); return r.stdout.trim(); };
-  git('init', '-q'); git('remote', 'add', 'origin', 'https://github.com/fixture/repo.git'); await fs.mkdir(join(root, '.audit'));
+  initRepository(root); git('remote', 'add', 'origin', 'https://github.com/fixture/repo.git'); await fs.mkdir(join(root, '.audit'));
   await fs.mkdir(join(root, 'docs'));
   await fs.mkdir(join(root, '.factory/initiatives/I0001/jobs/J001'), { recursive: true });
   await fs.writeFile(join(root, '.factory/initiatives/I0001/jobs/J001/V001.md'), '# Historical report\n\nObserved [.audit evidence](../../../../../.audit/tracked.json). Verdict unchanged.\n');

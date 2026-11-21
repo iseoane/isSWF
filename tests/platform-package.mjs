@@ -1,3 +1,4 @@
+import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -44,7 +45,7 @@ assert.equal(run(binary, ['--version']), manifest.version);
 assert.match(run(binary, ['--help'], root, 1), /Usage: isswf/u);
 const project = join(root, 'project spaces ñ');
 await mkdir(project);
-run('git', ['init', '-q', project]);
+initRepository(project);
 await writeFile(join(project, 'baseline.txt'), 'baseline\n');
 run('git', ['-C', project, 'add', '.']);
 run('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'baseline']);
@@ -67,7 +68,7 @@ if (process.platform === 'win32') {
 async function planJourney(name, launcher, nodeLauncher = false) {
   const target = join(root, name), targetStore = join(root, 'store spaces ñ');
   await mkdir(target);
-  run('git', ['init', '-q', target]);
+  initRepository(target);
   await writeFile(join(target, 'baseline.txt'), 'baseline\n');
   run('git', ['-C', target, 'add', '.']);
   run('git', ['-C', target, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'baseline']);
@@ -151,7 +152,7 @@ async function stateMigrationJourney(name, launcher, nodeLauncher = false) {
   ]);
   for (const [path, bytes] of payloads) await writeFile(path, bytes);
   if (process.platform !== 'win32') await chmod(payloadPath, 0o640);
-  run('git', ['init', '-q', target]);
+  initRepository(target);
   run('git', ['-C', target, 'add', '-f', '.factory']);
   run('git', ['-C', target, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'legacy state fixture']);
   const invoke = (args, expectedStatus = 0) => nodeLauncher ? run(process.execPath, [launcher, ...args], root, expectedStatus) : run(launcher, args, root, expectedStatus);
@@ -239,7 +240,7 @@ const nodeStateMigration = await stateMigrationJourney('node migration project s
 async function legacyExecutorJourney() {
   const legacyRevision = 'c8259b9b7699bf7afdf1be9895f97d6d69b39e38', legacySource = join(root, 'legacy source spaces ñ'), legacyRelease = join(root, 'legacy release spaces ñ');
   const target = join(root, 'legacy executor project spaces ñ'), targetStore = join(root, 'legacy executor store spaces ñ');
-  run('git', ['clone', '-q', '--shared', '--no-checkout', source, legacySource]);
+  cloneRepository(source, legacySource, ['--shared', '--no-checkout']);
   run('git', ['-C', legacySource, 'checkout', '-q', legacyRevision]);
   run(process.execPath, [join(legacySource, 'tools/build-release.mjs'), '--source', legacySource, '--revision', legacyRevision, '--output', legacyRelease, '--runtime', 'node']);
   const legacyReceipt = verifyRelease(legacyRelease);
@@ -247,7 +248,7 @@ async function legacyExecutorJourney() {
     assert.ok(legacyReceipt.files[path], `Positive control: the historical release ships ${path}`);
     assert.equal(built.files[path], undefined, `The current release does not ship ${path}`);
   }
-  await mkdir(target); run('git', ['init', '-q', target]);
+  await mkdir(target); initRepository(target);
   const legacy = args => run(process.execPath, [join(legacyRelease, 'tools/isswf.mjs'), ...args, '--project', target, '--store', targetStore]);
   const current = ([command, ...args], expectedStatus = 0) => run(binary, [command, '--project', target, '--store', targetStore, ...args], root, expectedStatus);
   assert.equal(JSON.parse(legacy(['init', '--tracking', 'local'])).status, 'initialized');

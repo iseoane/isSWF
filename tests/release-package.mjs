@@ -1,3 +1,4 @@
+import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -49,7 +50,7 @@ const cli = (root, command, args = [], ok = true) => run(process.execPath, [join
 const checkpoint = () => { run('git', ['-C', project, 'add', '.']); run('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'Checkpoint project setup']); };
 let keep = false;
 try {
-  run('git', ['clone', '-q', '--shared', source, fixture]);
+  cloneRepository(source, fixture, ['--shared']);
   for (const path of ['tools', '.agents', 'agents', 'skills', 'hooks', 'types', '.claude-plugin', 'package.json', 'docs', '.factory/templates']) await cp(join(source, path), join(fixture, path), { recursive: true, force: true });
   const revisionA = commit('Fixture installable release A');
   const releaseA = join(temp, 'release-a');
@@ -173,7 +174,7 @@ try {
   }
   if (process.env.ISSWF_TEST_PI) {
     const managerAgent = join(temp, 'pi-agent'), managerProject = join(temp, 'pi-project');
-    await mkdir(managerProject); run('git', ['init', '-q', managerProject]);
+    await mkdir(managerProject); initRepository(managerProject);
     const managerEnv = { ...env, PI_CODING_AGENT_DIR: managerAgent, PI_OFFLINE: '1', PI_SKIP_VERSION_CHECK: '1', PI_TELEMETRY: '0' };
     for (const scope of [[], ['--local']]) {
       const result = spawnSync(process.env.ISSWF_TEST_PI, ['install', installed, ...scope], { cwd: managerProject, env: managerEnv, encoding: 'utf8', timeout: 30000 });
@@ -187,7 +188,7 @@ try {
     console.log('PASS real Pi manager global and project scopes in isolated temporary config; no project state initialized by package installation');
   }
   assert.deepEqual(await inventory(releaseA), packageFiles, 'Packing does not modify release');
-  await mkdir(project); run('git', ['init', '-q', project]);
+  await mkdir(project); initRepository(project);
   const beforeInspect = await inventory(project);
   const fresh = JSON.parse(cli(installed, 'inspect').stdout);
   assert.equal(fresh.status, 'not-initialized');
@@ -221,13 +222,13 @@ try {
   // An existing project pinned to a historical release that still shipped the legacy executor (J002 merge on main)
   // must update to the current release; its gate loads the legacy effect and cessation modules from that retained runtime.
   const legacyRevision = 'c8259b9b7699bf7afdf1be9895f97d6d69b39e38', legacySource = join(temp, 'legacy-source'), releaseL = join(temp, 'release-legacy');
-  run('git', ['clone', '-q', '--shared', '--no-checkout', source, legacySource]);
+  cloneRepository(source, legacySource, ['--shared', '--no-checkout']);
   run('git', ['-C', legacySource, 'checkout', '-q', legacyRevision]);
   run(process.execPath, [join(legacySource, 'tools/build-release.mjs'), '--source', legacySource, '--revision', legacyRevision, '--output', releaseL, '--runtime', 'node']);
   const receiptL = verifyRelease(releaseL);
   for (const path of removedPaths) assert.ok(receiptL.files[path], `Positive control: the historical release ships ${path}`);
   project = join(temp, 'legacy-project');
-  await mkdir(project); run('git', ['init', '-q', project]);
+  await mkdir(project); initRepository(project);
   assert.equal(JSON.parse(cli(releaseL, 'init', ['--tracking', 'local']).stdout).status, 'initialized');
   const pinFile = join(project, '.isswf/install.json'), pinA = await readFile(pinFile);
   assert.equal((await readJSON(pinFile)).runtimeId, receiptL.runtimeId);

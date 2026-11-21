@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawnSync, spawn } from 'node:child_process';
@@ -19,7 +20,7 @@ function cli(action, args = [], expected = 0) {
 }
 try {
   await mkdir(project);
-  assert.equal(command('git', ['-C', project, 'init', '-q']).status, 0);
+  initRepository(project);
   await writeFile(join(project, 'README.md'), 'Fixture project.\n');
   assert.equal(command('git', ['-C', project, 'add', '.']).status, 0);
   assert.equal(command('git', ['-C', project, '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'fixture']).status, 0);
@@ -219,7 +220,7 @@ try {
   const reverseCall = command(process.execPath, [tool, 'link-duplicate', '--project', project, '--repository', 'factory/demo', '--issue', '22', '--duplicate', decisionPath]);
   assert.notEqual(reverseCall.status, 0); assert.match(reverseCall.stderr, /already linked/u);
   const alias = join(root, 'symlink-project'); await mkdir(alias);
-  assert.equal(command('git', ['-C', alias, 'init', '-q']).status, 0);
+  initRepository(alias);
   await symlink(join(project, '.factory'), join(alias, '.factory'), process.platform === 'win32' ? 'junction' : 'dir');
   const unsafe = command(process.execPath, [tool, 'read', '--project', alias, '--repository', 'factory/demo', '--issue', '21']);
   assert.equal(JSON.parse(unsafe.stdout).status, 'unknown-incomplete-or-corrupt');

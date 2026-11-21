@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises';
@@ -18,7 +19,7 @@ const git = (...args) => {
   assert.equal(result.status, 0, result.stderr);
   return result.stdout.trim();
 };
-git('init', '-q');
+initRepository(root);
 const cases = [
   ['native', () => {}, true],
   ['legacy', manifest => { delete manifest.pi.subagents; delete manifest.pi.extensions; }, true],

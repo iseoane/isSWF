@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile, realpath } from 'node:fs/promises';
@@ -47,7 +48,7 @@ if (process.argv[3] === '--pi-loader') {
   for (const local of [false, true]) {
     const home = join(hosts, local ? 'pi-project' : 'pi-user');
     await mkdir(home);
-    run('git', ['init', '-q', home], home);
+    initRepository(home);
     assert.equal(run(process.execPath, [piCli, '--version'], home), piManifest.version);
     const probe = [join(source, 'tests/host-discovery.mjs'), source, '--pi-loader'];
     assert.deepEqual(JSON.parse(run(process.execPath, [...probe, 'empty'], home)).skills, []);

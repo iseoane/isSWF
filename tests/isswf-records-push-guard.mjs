@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
@@ -29,8 +30,8 @@ function makeRepo(name, setup) {
   const remote = join(temp, `${name}-remote.git`);
   const repo = join(temp, name);
   mkdirSync(repo, { recursive: true });
-  run(temp, 'init', '-q', '--bare', '-b', 'main', remote);
-  run(repo, 'init', '-q', '-b', 'main', '.');
+  initRepository(remote, ['--bare', '-b', 'main']);
+  initRepository(repo, ['-b', 'main']);
   run(repo, 'config', 'user.email', 't@example.invalid');
   run(repo, 'config', 'user.name', 'T');
   run(repo, 'remote', 'add', 'origin', remote);

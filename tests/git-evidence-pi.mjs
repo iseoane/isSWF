@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const sdkRoot = join(source, 'tooling/host-tests/node_modules/@earendil-works/pi-coding-agent');
@@ -27,7 +27,7 @@ let session;
 const originalBinding = process.env.PI_SUBAGENT_EXTENSION_BINDINGS;
 try {
   await Promise.all([mkdir(workspace), mkdir(profile)]);
-  command(git, ['init', '-q'], workspace);
+  initRepository(workspace, [], { git, localConfig: false });
   await writeFile(join(workspace, 'tracked.txt'), 'bound Pi identity\n');
   await writeFile(join(workspace, 'binary.dat'), Buffer.from([0, 255, 10]));
   await writeFile(join(workspace, 'exact.txt'), Buffer.from([0xef, 0xbb, 0xbf, 0x62, 0x61, 0x73, 0x65, 0x0d, 0x0a]));

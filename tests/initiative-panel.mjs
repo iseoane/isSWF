@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -14,7 +15,7 @@ const { status } = await import(pathToFileURL(join(source, 'tools/isswf-status.m
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-panel-test-'))), project = join(root, 'project');
 await mkdir(project);
 const run = (binary, args) => { const r = spawnSync(binary, args, { encoding: 'utf8', timeout: 15000 }); assert.equal(r.status, 0, r.stderr); return r; };
-run('git', ['init', '-q', project]);
+initRepository(project);
 async function tree(path) {
   const output = {};
   for (const name of (await readdir(path)).sort()) {

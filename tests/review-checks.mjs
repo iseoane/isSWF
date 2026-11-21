@@ -4,7 +4,7 @@ import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] ?? '.');
 const { runReviewChecks } = await import(pathToFileURL(join(source, 'tools/review-checks.mjs')).href);
@@ -25,7 +25,7 @@ const reason = async spec => {
 };
 
 try {
-  gitRun(['init', '-q']);
+  initRepository(root, [], { git });
   gitRun(['config', 'user.email', 'fixture@example.invalid']);
   gitRun(['config', 'user.name', 'Fixture']);
   await writeFile(join(root, 'file.txt'), 'one\n');

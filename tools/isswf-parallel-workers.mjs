@@ -10,7 +10,7 @@ const run = promisify(execFile);
 const io = {
   gitOut: async (argv, cwd) => {
     try {
-      return { exitCode: 0, stdout: (await run('git', argv, { cwd, timeout: 20_000, windowsHide: true })).stdout };
+      return { exitCode: 0, stdout: (await run('git', argv, { cwd, timeout: 20_000, windowsHide: true, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } })).stdout };
     } catch (error) {
       if (typeof error.code === 'number') return { exitCode: error.code, stdout: '' };
       throw error;

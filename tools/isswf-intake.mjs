@@ -29,7 +29,7 @@ async function json(path) { return JSON.parse(await regular(path)); }
 async function projectRoot(project) {
   if (!isAbsolute(project ?? '')) throw Error('project must be absolute');
   const root = await realpath(project);
-  const result = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const result = spawnSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1', GIT_OPTIONAL_LOCKS: '0' } });
   if (result.status !== 0 || await realpath(result.stdout.trim()) !== root) throw Error('project must be a Git root');
   return root;
 }
@@ -55,7 +55,7 @@ async function proposalAt(path, project) {
   if (Object.keys(value).sort().join(',') !== 'acceptance,exclusions,nextStep,objective,questions,scope,targetBase' || !text(value.objective) || !text(value.nextStep) || !/^[0-9a-f]{40}$/u.test(value.targetBase)) throw Error('complete curated proposal required');
   for (const field of ['scope', 'exclusions', 'acceptance', 'questions']) if (!Array.isArray(value[field]) || value[field].length > 30 || value[field].some(item => !text(item))) throw Error('invalid proposal list');
   if (!value.scope.length || (!value.questions.length && !value.acceptance.length)) throw Error('observable acceptance or pending questions required');
-  const base = spawnSync('git', ['-C', project, 'cat-file', '-e', `${value.targetBase}^{commit}`], { timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1' } });
+  const base = spawnSync('git', ['-C', project, 'cat-file', '-e', `${value.targetBase}^{commit}`], { timeout: 10000, env: { PATH: process.env.PATH, HOME: '/nonexistent', GIT_CONFIG_NOSYSTEM: '1', GIT_NO_REPLACE_OBJECTS: '1', GIT_OPTIONAL_LOCKS: '0' } });
   if (base.status !== 0) throw Error('proposal target base must exist');
   return Object.fromEntries(['objective', 'scope', 'exclusions', 'acceptance', 'questions', 'nextStep', 'targetBase'].map(key => [key, value[key]]));
 }

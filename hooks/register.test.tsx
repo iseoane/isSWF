@@ -672,7 +672,7 @@ function dispatchHost(on: any, extra: Record<string, string | Uint8Array> = {}) 
     if (!(native(path) in files)) throw new Error('ENOENT')
     return { value: { kind: 'file', size: files[native(path)].length, mtimeMs: 0, isLink: false } }
   })
-  on('process.run', (_: unknown, e: { argv: string[] }) => ({ value: { exitCode: e.argv[1] === 'check-ignore' ? 1 : 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('process.run', (_: unknown, e: { argv: string[] }) => ({ value: { exitCode: e.argv.includes('check-ignore') ? 1 : 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
   on('tool.call', () => ({ result: { agentId: 'agent-77' } }))
 }
 const worker = (prompt = DISPATCH) => ({ tool: 'Agent', subagent_type: 'isswf:isswf-worker', model: 'sonnet', effort: 'medium', prompt })

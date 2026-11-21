@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
@@ -10,7 +11,7 @@ const source = resolve(process.argv[2] ?? '.');
 const root = await mkdtemp(join(tmpdir(), 'isswf-literal-pathspecs-'));
 try {
   const git = (env, ...args) => spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', ...env } });
-  assert.equal(git({}, 'init', '-q').status, 0);
+  initRepository(root);
   await writeFile(join(root, 'x'), 'x\n');
   assert.equal(git({}, 'add', 'x').status, 0);
   assert.equal(git({}, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'x').status, 0);
@@ -23,11 +24,11 @@ try {
   await mkdir(join(toolSource, 'tools/isswf-plan.mjs'), { recursive: true });
   await writeFile(join(toolSource, 'tools/isswf-plan.mjs/inner.mjs'), 'export {};\n');
   const sourceGit = (...args) => spawnSync('git', ['-C', toolSource, ...args], { encoding: 'utf8', env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1' } });
-  assert.equal(sourceGit('init', '-q').status, 0);
+  initRepository(toolSource);
   assert.equal(sourceGit('add', '.').status, 0);
   assert.equal(sourceGit('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'tools').status, 0);
   await mkdir(toolProject);
-  assert.equal(spawnSync('git', ['-C', toolProject, 'init', '-q']).status, 0);
+  initRepository(toolProject);
   const installed = spawnSync(process.execPath, [join(source, 'tools/factory-package.mjs'), 'install-tools', '--source', await realpath(toolSource), '--revision', sourceGit('rev-parse', 'HEAD').stdout.trim(), '--project', await realpath(toolProject)], { encoding: 'utf8' });
   assert.notEqual(installed.status, 0, 'factory-package must refuse a tool committed as a directory');
   assert.match(installed.stderr, /Missing regular committed tool: isswf-plan\.mjs/u, `factory-package must refuse the directory entry: ${installed.stderr}`);

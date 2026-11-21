@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -23,7 +24,7 @@ const manifest = state => `${JSON.stringify({ schemaVersion: 1, derivedFrom: [{ 
 const start = (name, state) => {
   const repo = join(temp, name);
   mkdirSync(repo, { recursive: true });
-  run(repo, 'init', '-q', '-b', 'main', '.');
+  initRepository(repo, ['-b', 'main']);
   run(repo, 'config', 'user.email', 't@example.invalid');
   run(repo, 'config', 'user.name', 'T');
   write(repo, 'tools/check.mjs', 'one');
