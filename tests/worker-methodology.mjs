@@ -14,7 +14,6 @@ assert.match(briefTemplate, /Selected methods and required evidence[\s\S]*Do not
 assert.match(attemptTemplate, /distinguish reading\/receipt from application[\s\S]*disclosure does not waive a required method[\s\S]*no method was selected/u);
 assert.match(reviewGuidance, /### Selected-method evidence[\s\S]*under \*\*Standards\*\*[\s\S]*missing and no deviation is declared[\s\S]*inconclusive[\s\S]*unselected methods/u);
 assert.match(briefTemplate, /TDD red result before implementation[\s\S]*debug reproduction[\s\S]*E2E journey/u);
-assert.match(reviewTemplate, /Selected-method evidence assessment[\s\S]*never silent pass[\s\S]*does not waive/u);
 assert.match(reviewTemplate, /Exact diff source and consumed[\s\S]*Candidate paths reviewed/u);
 assert.match(reviewerRole, /selected-method evidence[\s\S]*separately from Spec/u);
 assert.match(reviewerRole, /unbound Agent-tool review of a commit or snapshot candidate without the exact diff[\s\S]*exact diff not supplied[\s\S]*Bound Pi\/Claude/u);
@@ -37,4 +36,31 @@ assert.match(coordinatorSkill, /For coordinator-owned PR\/delivery, apply the ex
 const claudeHost = await readFile(join(source, '.agents/hosts/claude-code.md'), 'utf8');
 assert.match(claudeHost, /An Agent-tool reviewer is unbound[\s\S]*reviewer\.md#required-input[\s\S]*exact base\.\.head committed diff/u);
 assert.match(actualWorker, /For each selected method[\s\S]*required observed evidence[\s\S]*retrospective red-first proof/u);
+// Record fields keep one canonical definition, in the template. Dropping part of it fails here; the files that
+// name the field must not restate it (their old wording is listed in tooling/quality/stale-statements.json).
+const fieldDefinitions = [
+  [attemptTemplate, 'Required-resource consumption', /Required-resource consumption:[^\n]*consumed\/missing[^\n]*observed \(host trace\) or self-reported; a trace proves a read, not understanding or application\. Name unreadable required resources explicitly/u],
+  [attemptTemplate, 'Retained substitute evidence', /Retained substitute evidence, when[^\n]*retain the harness and run log in committed tests\/ evidence or ignored tooling\/\.local\/<job>\/, never only disposable scratch space; link both paths[^\n]*archived commit and an unmutated baseline run, injected change and result\. Retrospective evidence is not red-first proof/u],
+  [attemptTemplate, 'Method application report (TDD)', /Method application report:[^\n]*state applied\/not applied[^\n]*distinguish reading\/receipt from application[^\n]*full commit IDs of the test-only RED commit and the subsequent GREEN commit, the exact command and the failing assertion \(path:line\/message\)[^\n]*reruns the named command at both commits[^\n]*syntax\/setup failure is not RED\. If an honest RED is impossible, disclose the requirement, reason, and consequence; disclosure does not waive a required method or criterion\. Do not claim a retrospective red-first cycle\. For TDD, justify each new test in one line: the mistake it catches and why no existing test does\. State explicitly when no method was selected/u],
+  [attemptTemplate, 'Required-reference application map', /Required-reference application map:[^\n]*concrete application in candidate \(path\/line or commit\), or not applicable \/ deliberately not applied → reason\. Do not list optional references/u],
+  [reviewTemplate, 'Retained substitute evidence assessment', /Retained substitute evidence assessment[^\n]*what the attempt template's Retained substitute evidence field requires[^\n]*harness and run log[^\n]*committed tests\/ evidence or ignored tooling\/\.local\/<job>\/[^\n]*disposable scratch space does not satisfy it[^\n]*attribute supplied observations/u],
+  [reviewTemplate, 'Reference-application outcomes', /Reference-application outcomes:[^\n]*“observed in candidate” \(the claimed application is visible[^\n]*“claimed, not visible” \(no application is visible[^\n]*only a concrete violation[^\n]*“not applicable accepted” \(the stated reason is sound/u],
+  [reviewTemplate, 'Required-resource consumption', /Required-resource consumption:[^\n]*attempt template's Required-resource consumption field defines[^\n]*do not infer understanding or application from a read trace/u],
+  [reviewGuidance, 'Selected-method evidence', /### Selected-method evidence[\s\S]*not re-run[\s\S]*disclosure is not a waiver[\s\S]*do not silently pass[\s\S]*inconclusive/u],
+  [reviewTemplate, 'Selected-method evidence assessment', /Selected-method evidence assessment:[^\n]*review guide's Selected-method evidence section defines[^\n]*not re-run/u],
+  [coordinatorSkill, 'Base worktree', /detached worktree at the brief's base \(`git worktree add --detach[^\n]*passes it as the child's checkout, and removes it after the child returns\. The base worktree is not write-protected; the researcher's and planner's tool lists have no file-writing tool/u],
+];
+for (const [text, field, pattern] of fieldDefinitions) assert.match(text, pattern, `canonical definition of ${field}`);
+for (const [path, names] of [
+  ['.agents/roles/worker.md', ['Retained substitute evidence', 'Required-resource consumption', 'Method application report']],
+  ['.agents/roles/references/tdd.md', ['Method application report']],
+  ['.agents/roles/references/review.md', ['Retained substitute evidence assessment', 'Reference-application outcomes', 'Required-resource consumption']],
+  ['.agents/hosts/claude-code.md', ['Required-resource consumption', 'not write-protected']],
+  ['.agents/hosts/pi.md', ['Required-resource consumption', 'not write-protected']],
+  ['docs/en/installation.md', ['not write-protected']],
+  ['docs/es/installation.md', ['worktree desacoplado (`--detach`)', 'sin protección contra escritura']],
+]) {
+  const body = await readFile(join(source, path), 'utf8');
+  for (const name of names) assert.ok(body.includes(name), `${path} names ${name} instead of redefining it`);
+}
 console.log('PASS worker instructions and brief/attempt/review contracts distinguish selected-method evidence from consumption, deviations and unselected methods; assertions are static contract checks, not live reviewer behavior');
