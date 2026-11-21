@@ -281,6 +281,53 @@ try {
   assert.equal(existsSync(join(staleRecord.repo, '.factory/initiatives/I0001/close-verification.json')), false);
   assert.equal(existsSync(join(unrecorded.repo, '.factory/initiatives/I0001/close-verification.json')), false);
 
+  // A clean tier run whose checks all passed (or are skipped for the platform) leaves one stamp per head in the store shared by the worktrees; stdout keeps its shape.
+  const stampPath = (repo, sha) => {
+    const common = git(repo, 'rev-parse', '--git-common-dir');
+    return join(resolve(repo, common), 'isswf', 'verification-stamps', `${sha}.json`);
+  };
+  const stamped = makeRepo('stamp', [check('ok', node('-e', '')), check('elsewhere', node('-e', 'process.exit(1)'), { platforms: ['plan9'] }), check('ci-only', node('-e', 'process.exit(1)'), { cost: 'ci' })]);
+  const stampRun = verify(stamped.repo, '--base', stamped.head, '--tier', 'job');
+  assert.equal(stampRun.status, 0);
+  assert.equal(stampRun.out.stamp, undefined, 'stdout is unchanged');
+  assert.deepEqual(JSON.parse(readFileSync(stampPath(stamped.repo, stamped.head), 'utf8')), {
+    candidate: stamped.head,
+    tree: git(stamped.repo, 'rev-parse', 'HEAD^{tree}'),
+    platform: process.platform,
+    tier: 'job',
+    verificationSha256: sha256(git(stamped.repo, 'show', 'HEAD:.factory/verification.json') + '\n'),
+    checks: [{ id: 'ok', status: 'passed' }, { id: 'elsewhere', status: 'not run' }, { id: 'ci-only', status: 'not run' }],
+  });
+  assert.equal(verify(stamped.repo, '--base', stamped.head, '--tier', 'initiative').status, 0);
+  assert.equal(JSON.parse(readFileSync(stampPath(stamped.repo, stamped.head), 'utf8')).tier, 'initiative');
+
+  // No stamp for a failed check, a dirty tree, --only, a stale manifest or a stale record run.
+  const unstamped = (label, repo, head, ...args) => {
+    verify(repo, '--base', head, ...args);
+    assert.equal(existsSync(stampPath(repo, head)), false, label);
+  };
+  const failing2 = makeRepo('stamp-failed', [check('ok', node('-e', '')), check('bad', node('-e', 'process.exit(1)'))]);
+  unstamped('failed check', failing2.repo, failing2.head, '--tier', 'job');
+  const dirty2 = makeRepo('stamp-dirty', [check('ok', node('-e', ''))]);
+  write(dirty2.repo, 'untracked.txt', 'x');
+  unstamped('dirty tree', dirty2.repo, dirty2.head, '--tier', 'job');
+  const only = makeRepo('stamp-only', [check('ok', node('-e', '')), check('other', node('-e', ''))]);
+  unstamped('--only', only.repo, only.head, '--only', 'ok');
+  const stale2 = makeRepo('stamp-stale', [check('ok', node('-e', ''))], [recorded('tools/a.txt')], { 'tools/a.txt': 'two' });
+  unstamped('stale manifest', stale2.repo, stale2.head, '--tier', 'job');
+
+  // A linked worktree writes to the store of the main repository, so either checkout finds it.
+  const linkedDir = join(temp, 'stamp-linked');
+  git(stamped.repo, 'worktree', 'add', '-q', '-b', 'w', linkedDir);
+  git(linkedDir, 'config', 'user.email', 't@example.invalid');
+  git(linkedDir, 'config', 'user.name', 'T');
+  write(linkedDir, 'tools/new.txt', 'n');
+  git(linkedDir, 'add', '-A');
+  git(linkedDir, 'commit', '-qm', 'w');
+  const linkedHead = git(linkedDir, 'rev-parse', 'HEAD');
+  assert.equal(verify(linkedDir, '--base', stamped.head, '--tier', 'job').status, 0);
+  assert.ok(existsSync(stampPath(stamped.repo, linkedHead)), 'the main checkout sees the stamp of the linked worktree');
+
   console.log('PASS isswf-verify statuses, tiers, base-read file, bounded output and refusals');
 } finally {
   rmSync(temp, { recursive: true, force: true });
