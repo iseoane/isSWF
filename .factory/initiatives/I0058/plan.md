@@ -264,9 +264,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Size: S (one flow)
 - Objective: The number of workers running at once is bounded by a per-machine limit that setup asks for.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J012/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J012/brief-r2.md)
 - Blocker: None.
-- Next step: Researcher grounds the design (brief r1).
+- Next step: Worker implements the per-clone limit in observe mode (brief r2).
 
 ### Acceptance
 
@@ -276,3 +276,4 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-21: four parallel workers made job-tier verify take 6-7 min, timed out isswf-verify at 180 s and Claude Code stopped background shells for low memory. Operator: default 2, a local per-machine limit.
+- 2026-11-21: brief r1 research: Claude background completion is documented (turn.complete with agentId) but unobserved; Pi async completion observed on Linux only; local answers use git config --local. Decision: per-clone limit, observe mode by default.
