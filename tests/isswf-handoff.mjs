@@ -324,6 +324,33 @@ try {
   const chained = tool(['coverage', '--project', chain, '--base', chainBase, '--head', delta]);
   assert.equal(chained.ok, true, JSON.stringify(chained));
   assert.equal(chained.jobs[0].record, 'V002');
+  // A delta review whose base is the earlier review's record commit still chains: the commits between that candidate and the base change only records.
+  const recordsGap = join(coverTemp, 'records-gap');
+  await mkdir(recordsGap);
+  git(recordsGap, 'init', '-q', '-b', 'main', '.');
+  const gapCommit = async (files, message) => {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(recordsGap, path, '..'), { recursive: true });
+      await writeFile(join(recordsGap, path), content);
+    }
+    git(recordsGap, 'add', '-A');
+    git(recordsGap, 'commit', '-qm', message);
+    return git(recordsGap, 'rev-parse', 'HEAD');
+  };
+  const gapBase = await gapCommit({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+  const gapCode = await gapCommit({ 'src/a.mjs': 'a\n' }, 'first code');
+  const gapRecord = await gapCommit({ [`${jobDir('J001')}/V001.md`]: reviewText(gapCode, '', gapBase) }, 'records: V001');
+  const gapFix = await gapCommit({ 'src/a.mjs': 'b\n' }, 'correction');
+  const gapDelta = await gapCommit({ [`${jobDir('J001')}/V002.md`]: reviewText(gapFix, '', gapRecord) }, 'records: V002 delta from the record commit');
+  const gapChained = tool(['coverage', '--project', recordsGap, '--base', gapBase, '--head', gapDelta]);
+  assert.equal(gapChained.ok, true, JSON.stringify(gapChained));
+  // A code commit in that gap was reviewed by neither round, so the chain breaks there.
+  const gapCode2 = await gapCommit({ 'src/b.mjs': 'b\n' }, 'code between the rounds');
+  const gapFix2 = await gapCommit({ 'src/a.mjs': 'c\n' }, 'second correction');
+  const gapBroken = await gapCommit({ [`${jobDir('J001')}/V003.md`]: reviewText(gapFix2, '', gapCode2) }, 'records: V003');
+  const gapOpen = tool(['coverage', '--project', recordsGap, '--base', gapBase, '--head', gapBroken]);
+  assert.equal(gapOpen.ok, false, JSON.stringify(gapOpen));
+  assert.deepEqual(gapOpen.jobs[0].uncovered.map(entry => entry.commit), [gapCode, gapFix, gapCode2]);
   // An override line in an earlier review of the chain still excuses its documentation commit.
   const docsFix = await chainCommit({ 'docs/en/a.md': 'a\n' }, 'docs: fix');
   const earlyOverride = await chainCommit({ [`${jobDir('J001')}/V001.md`]: reviewText(firstCode, override(docsFix), chainBase) }, 'records: V001 override');

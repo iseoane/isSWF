@@ -139,14 +139,17 @@ export async function coverage({ project, initiative, job, base, head }) {
     if (match) touched.set(match[0], { initiative: match[1], job: match[2], directory: match[0] });
   }
   // Each job's review chain: the latest review, then each earlier review whose candidate is the base of the review after it. A delta review carries the
-  // earlier round forward, so the chain together reviewed its ranges; the first review that does not chain ends it.
+  // earlier round forward, so the chain together reviewed its ranges; the first review that does not chain ends it. A base after the earlier candidate
+  // still chains when the commits between them change only records, such as the earlier review's own record.
+  const chainsTo = (candidate, laterBase) => candidate !== undefined && laterBase !== undefined && (candidate === laterBase || (isAncestor(candidate, laterBase)
+    && git(['log', '--format=', '--name-only', '-z', `${candidate}..${laterBase}`]).split(/[\0\n]/u).filter(Boolean).every(isRecordPath)));
   const reviews = [...touched.values()].sort((a, b) => a.directory.localeCompare(b.directory)).map(entry => {
     const ids = reviewIds(git(['ls-tree', '--name-only', '-z', tip, '--', entry.directory]).split('\0').filter(Boolean).map(path => basename(path)));
     const chain = [];
     for (const id of ids.toReversed()) {
       const text = git(['show', `${tip}:${entry.directory}${id}.md`]);
       const link = { text, candidate: reviewCandidateOf(text), base: reviewBaseOf(text) };
-      if (chain.length && (link.candidate === undefined || link.candidate !== chain.at(-1).base)) break;
+      if (chain.length && !chainsTo(link.candidate, chain.at(-1).base)) break;
       chain.push(link);
     }
     return { ...entry, record: ids.at(-1), candidate: chain[0]?.candidate, chain };

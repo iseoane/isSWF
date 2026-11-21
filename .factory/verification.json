@@ -3,11 +3,11 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "61d86328f57b498b4746c246d2c2f5d0a60e068821083df8b2fa37047b3442a9"
+      "sha256": "9395c20ad2c4a4ef7009cffa66937b11beb730176b0c528f4434e408a7ddcca8"
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "19f7cd5ac3b1ca36870a4624fa10f678a984109b94dcab070bd31a5132650620"
+      "sha256": "5f246bd66519d349ee075b42bfa1b8b8cd2cc24988c6394b1ade46b4b85cbc9b"
     }
   ],
   "checks": [

@@ -106,6 +106,7 @@ Los repositorios privados pagan los minutos de ejecución, así que ejecuta la s
 - **Nivel rápido, en cada pull request.** Ejecuta las comprobaciones centradas, como lint, la comprobación de documentación y los tests de las rutas que toca el cambio. Usa filtros `paths` para que un cambio solo de documentación omita los trabajos de código, y define `concurrency` con `cancel-in-progress: true` para que un push nuevo cancele la ejecución a la que sustituye. Una comprobación obligatoria con filtro de rutas necesita un diseño que contemple la omisión; consulta la documentación de GitHub sobre comprobaciones de estado obligatorias y filtros de rutas.
 - **Nivel completo, en `main`, por despacho manual o programado.** Ejecuta la suite completa, el arnés de extremo a extremo y los trabajos de Windows y macOS mediante `push` a `main`, `workflow_dispatch` o `schedule`.
 - **Minutos de ejecución.** GitHub factura los runners de Windows y macOS con multiplicadores por minuto superiores a los de Linux, así que coloca la matriz multiplataforma en el nivel completo. Consulta los multiplicadores vigentes en la [documentación de facturación de GitHub Actions](https://docs.github.com/en/billing/managing-billing-for-your-products/about-billing-for-github-actions); pueden cambiar.
+- **Pushes solo de registros.** El disparador `push` del workflow `Quality` ignora un push cuyas rutas modificadas están todas bajo `.factory/initiatives/` o `.isswf/initiatives/`, así que un push solo de registros a `main` o `ci/**` no inicia ninguna ejecución. Los pull requests, y los pushes a `main` o `ci/**` que cambien cualquier otra ruta, siguen ejecutándolo, y el disparador `pull_request` no se filtra porque una comprobación obligatoria omitida quedaría pendiente.
 
 `node tools/isswf-verify.mjs --project /absolute/project --base HEAD --table` imprime qué comprobaciones aprobadas exige cada tipo de cambio, como punto de partida para elegir los niveles rápido y completo. El cierre de iniciativa puede ejecutarse como un workflow lanzado a mano en lugar de en local. El workflow descarga la cabeza de cierre, ejecuta en ella la suite completa y E2E del proyecto, y después el coordinador registra la ejecución que pasa (`source: "ci"`, `runUrl` y SHA de cabeza) como describe "Ejecutor de verificación" en la guía de operaciones. Una forma mínima:
 
@@ -189,6 +190,14 @@ node tooling/maintenance/workflow-citations.mjs --write <new-revision>
 ```
 
 Cada rango de líneas citado se busca por texto exacto en la nueva revisión. Un rango que aparece exactamente una vez se mueve con su texto. Un rango cuyo texto cambió, desapareció o aparece más de una vez se lista como `UNRESOLVED` con su ruta, el rango anterior y el encabezado que lo contiene, nunca se adivina y hace que el comando termine con código distinto de cero. `--write` actualiza las citas movidas y la revisión fijada, así que corrige a mano las no resueltas y después regenera los diagramas.
+
+Para medir los minutos de reloj de CI por rama de pull request y por push (solo desarrollo; el script no hace llamadas de red):
+
+```sh
+gh run list --limit 100 --json event,headBranch,conclusion,createdAt,updatedAt,databaseId | node tooling/maintenance/ci-minutes.mjs
+```
+
+Muestra el número de ejecuciones, las canceladas y los minutos totales de cada grupo `<evento> <rama>`, y un total general.
 
 ## Fuente de la verdad e historial
 
