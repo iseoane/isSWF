@@ -27,6 +27,7 @@ These tools package the factory, manage a project's installation and read or pre
 | Read records and show the local panel | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-record-check.mjs`, `tools/isswf-record-check-core.mjs`, `tools/isswf-record-guard-core.mjs`, `tools/isswf-record-guard-pi-extension.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
 | Refuse a failing dispatch to an isSWF role agent | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Count open workers against the clone's local limit and list or clear stale entries | `tools/isswf-parallel-workers-core.mjs`, `tools/isswf-parallel-workers.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
+| Read a pull request's CI state once for its exact head | `tools/isswf-ci-state-core.mjs`, `tools/isswf-ci-state.mjs` |
 | Refuse a CI-waiting or package-acquiring shell command | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Keep the coordinator's assignment through a compaction | `tools/isswf-compaction-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
 | Warn at turn end about an in-progress job with a committed brief and no launch | `tools/isswf-undispatched-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |

@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "588b6baa16bc57fdd2bc16d8277c2ca01148ae07bc1311e8ed79c65ccd135a33"
+      "sha256": "3d578b811fcb10ee13cc4e8a717a5a7bf20ac93257c463c5f44502b996d90c8b"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -155,6 +155,42 @@
         "tools/isswf-parallel-workers.mjs"
       ],
       "timeoutSeconds": 300
+    },
+    {
+      "id": "isswf-ci-state",
+      "argv": [
+        "node",
+        "tests/isswf-ci-state.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-ci-state-core.mjs",
+        "tools/isswf-ci-state.mjs"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "isswf-command-guard",
+      "argv": [
+        "node",
+        "tests/isswf-command-guard.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-command-core.mjs",
+        "tools/isswf-command-guard-pi-extension.mjs"
+      ],
+      "timeoutSeconds": 120
     },
     {
       "id": "isswf-dispatch-guard",

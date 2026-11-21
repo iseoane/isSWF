@@ -6,33 +6,34 @@ import { delimiter, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
-const { parseArgs, summarize, readCiState } = await import(pathToFileURL(join(source, 'tools/isswf-ci-state-core.mjs')).href);
+const { parseArgs, readCiState } = await import(pathToFileURL(join(source, 'tools/isswf-ci-state-core.mjs')).href);
 
 const HEAD = 'a'.repeat(40);
 const run = (name, conclusion, status = 'COMPLETED') => ({ __typename: 'CheckRun', name, status, conclusion });
 const context = (name, state) => ({ __typename: 'StatusContext', context: name, state });
+const summarize = async reply => readCiState({ pr: '1', gh: async () => ({ exitCode: 0, stdout: JSON.stringify(reply) }) });
 const view = (...rollup) => ({ headRefOid: HEAD, statusCheckRollup: rollup });
 
 // The state is the worst check: a failure outranks a pending check, and a pending check outranks success.
-assert.deepEqual(summarize(view(run('lint', 'SUCCESS'), run('test', 'SKIPPED'), run('docs', 'NEUTRAL'))), {
+assert.deepEqual(await summarize(view(run('lint', 'SUCCESS'), run('test', 'SKIPPED'), run('docs', 'NEUTRAL'))), {
   head: HEAD,
   state: 'success',
   checks: [{ name: 'lint', conclusion: 'success' }, { name: 'test', conclusion: 'skipped' }, { name: 'docs', conclusion: 'neutral' }],
 });
-assert.equal(summarize(view(run('lint', 'SUCCESS'), run('test', null, 'IN_PROGRESS'))).state, 'pending');
-assert.equal(summarize(view(run('lint', null, 'QUEUED'))).checks[0].conclusion, 'pending');
+assert.equal((await summarize(view(run('lint', 'SUCCESS'), run('test', null, 'IN_PROGRESS')))).state, 'pending');
+assert.equal((await summarize(view(run('lint', null, 'QUEUED')))).checks[0].conclusion, 'pending');
 for (const bad of ['FAILURE', 'CANCELLED', 'TIMED_OUT', 'ACTION_REQUIRED', 'STARTUP_FAILURE', 'SOMETHING_NEW']) {
-  assert.equal(summarize(view(run('a', 'SUCCESS'), run('b', bad), run('c', null, 'IN_PROGRESS'))).state, 'failure', bad);
+  assert.equal((await summarize(view(run('a', 'SUCCESS'), run('b', bad), run('c', null, 'IN_PROGRESS')))).state, 'failure', bad);
 }
-assert.equal(summarize(view(context('ci/x', 'SUCCESS'))).state, 'success');
-assert.equal(summarize(view(context('ci/x', 'PENDING'))).state, 'pending');
-assert.equal(summarize(view(context('ci/x', 'ERROR'))).state, 'failure');
-assert.deepEqual(summarize(view(context('ci/x', 'FAILURE'))).checks, [{ name: 'ci/x', conclusion: 'failure' }]);
+assert.equal((await summarize(view(context('ci/x', 'SUCCESS')))).state, 'success');
+assert.equal((await summarize(view(context('ci/x', 'PENDING')))).state, 'pending');
+assert.equal((await summarize(view(context('ci/x', 'ERROR')))).state, 'failure');
+assert.deepEqual((await summarize(view(context('ci/x', 'FAILURE')))).checks, [{ name: 'ci/x', conclusion: 'failure' }]);
 // No registered check yet is not a pass.
-assert.equal(summarize(view()).state, 'pending');
+assert.equal((await summarize(view())).state, 'pending');
 // A reply the tool cannot read is refused, never read as pending or success.
 for (const bad of [null, [], {}, { headRefOid: HEAD }, { headRefOid: 'abc', statusCheckRollup: [] }, { headRefOid: HEAD, statusCheckRollup: [{ name: 5 }] }]) {
-  assert.throws(() => summarize(bad), /unreadable/u, JSON.stringify(bad));
+  await assert.rejects(summarize(bad), /unreadable/u, JSON.stringify(bad));
 }
 
 // Argument parsing.

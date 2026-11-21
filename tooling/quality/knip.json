@@ -14,6 +14,7 @@
     "tools/isswf-handoff.mjs",
     "tools/isswf-handoff-core.mjs",
     "tools/isswf-parallel-workers.mjs",
+    "tools/isswf-ci-state.mjs",
     "tools/isswf-verify.mjs",
     "tools/isswf-snapshot.mjs",
     "tools/isswf-snapshot-core.mjs",

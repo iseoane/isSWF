@@ -82,6 +82,12 @@
       "scope": ".agents/**",
       "reason": "a check reported as run names the commit it ran at; the attempt template field Checks run and observed results defines it",
       "since": "I0058/J001"
+    },
+    {
+      "phrase": "For long CI, use a verified native completion event",
+      "scope": ".agents/**",
+      "reason": "a background watch is optional; the CI state tool in the delivery contract is the preferred bounded check, and a host can stop a background watcher with no result",
+      "since": "I0064/J003"
     }
   ]
 }
