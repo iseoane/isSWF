@@ -282,13 +282,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J013
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Objective: isSWF's own Git calls and tests never hold the index lock opportunistically or leave fsmonitor daemons running, and a check keeps it that way.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1.
+- Next step: None. Merged in #381 (46ce6434).
 
 ### Acceptance
 
