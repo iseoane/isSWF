@@ -56,6 +56,7 @@ assert.deepEqual(await findUndispatched({ io: memoryIo({ project: 'C:\\work\\pro
 const none = async (options, assignments = []) => assert.deepEqual(await findUndispatched({ io: memoryIo(options), assignments }), []);
 await none({ files: base({ '.factory/initiatives/I0001/jobs/J001/A001.md': 'attempt' }) });
 await none({ files: base() }, [dispatched('I0001', 'J001')]);
+await none({ files: base() }, [{ ...dispatched('I0001', 'J001'), path: String.raw`C:\work\project\.factory\initiatives\I0001\jobs\J001\brief-r1.md` }]);
 await none({ files: base(), committed: [] });
 await none({ files: { ...base(), [PLAN]: plan('I0001', job('J001', 'pending')) } });
 await none({ files: { ...base(), [PLAN]: plan('I0001', job('J001', 'completed')) } });
