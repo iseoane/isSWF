@@ -67,7 +67,7 @@ Type: enhancement
 - Status: pending
 - Size: S
 - Objective: A push to main that changes only initiative records does not start the Quality workflow.
-- Depends on: None (pilot pair with J005)
+- Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
 - Next step: Worker in its own worktree, parallel to J005.
@@ -85,7 +85,7 @@ Type: enhancement
 - Status: pending
 - Size: S
 - Objective: A development script reports CI wall-clock minutes per job from GitHub run data, so the pilot can compare batched and single-PR delivery.
-- Depends on: None (pilot pair with J004)
+- Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
 - Next step: Worker in its own worktree, parallel to J004.
