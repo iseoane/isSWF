@@ -25,20 +25,23 @@ Type: enhancement
 
 - Status: pending
 - Size: M (pilot and rule update)
-- Objective: Two independent jobs run in parallel, each in its own worktree and branch through test, review, PR and merge, and the worktrees are removed after integration.
+- Objective: Two independent jobs run in parallel, each in its own worktree and branch through test and review, are integrated together in one batched PR with one CI run, and the worktrees are removed after integration.
 - Depends on: J001
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Pick two small independent jobs after J001.
+- Next step: Run J004 and J005 concurrently in worktrees, then the batched PR.
 
 ### Acceptance
 
 - A pilot runs two independent jobs concurrently in coordinator-created worktrees (or the host's automatic worktree isolation if it fits), each integrated only when its checks and review are green, dependent jobs never in parallel, and each worktree removed after merge.
+- The two reviewed job branches reach main through one batched PR whose full CI runs once on the batch head; a CI failure is fixed forward on a new branch added to the batch, and reviewed branches are not rewritten. `isswf-handoff coverage` passes on the batch.
+- CI minutes per job are measured for the pilot with J005's script and compared with the last single-PR jobs (I0063 J001, J003).
 - The host guide worktree rule and docs/en|es are updated to the observed, guarded behavior, including checks on the pinned candidate while the next worker continues (former I0061 J011).
 
 ### Evidence
 
 - 2026-11-20: moved from I0061 J011 (pinned worktree checks), operator decision.
+- 2026-11-21: operator added batched PRs (per-branch light checks and review, one heavier CI per batch, fix forward) and skipping CI for records-only pushes to the scope, after a public post on batching branches. Reason: about 4-5 min of CI per run and several runs per job, against jobs of about 30 min of worker and review. #278 was checked and is already implemented (I0050 J001, J002; V record verdict field), so the pilot uses J004 and J005.
 
 ## J003
 
@@ -58,3 +61,39 @@ Type: enhancement
 
 - 2026-11-20: I0061 close: a local --record on Windows passed 6 checks and left check-docs, check-quality, lint and dead-code not run (Linux-only); the gate accepted such a record by design (J010: at least one passed). Closed with a source ci record instead (Quality run 44796797130 at 66f83049). Operator asked to fix it first in I0063.
 - 2026-11-20: PR #372 merged (close record needs every check passed; --record exits 1 on not-run); review V001 pass; coordinator observed focused tests; CI green on 09d272a8.
+
+## J004
+
+- Status: pending
+- Size: S
+- Objective: A push to main that changes only initiative records does not start the Quality workflow.
+- Depends on: None (pilot pair with J005)
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: None.
+- Next step: Worker in its own worktree, parallel to J005.
+
+### Acceptance
+
+- The Quality workflow's push trigger ignores commits whose changed paths are all under `.factory/initiatives/` or `.isswf/initiatives/`; pull requests, `ci/**` pushes and mixed commits still run it, and required PR checks are unaffected.
+
+### Evidence
+
+- 2026-11-21: operator approved, see J002.
+
+## J005
+
+- Status: pending
+- Size: S
+- Objective: A development script reports CI wall-clock minutes per job from GitHub run data, so the pilot can compare batched and single-PR delivery.
+- Depends on: None (pilot pair with J004)
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: None.
+- Next step: Worker in its own worktree, parallel to J004.
+
+### Acceptance
+
+- Given runs as `gh run list --json` output, the script groups them by pull request branch and by push to main, and prints run count, cancelled count and total minutes per group; it is tested with fixture data, without network.
+
+### Evidence
+
+- 2026-11-21: operator approved, see J002.
