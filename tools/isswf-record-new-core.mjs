@@ -1,6 +1,6 @@
 // No Node imports and no `process` access, like tools/isswf-plan-edit-core.mjs: a runtime without Node built-ins
 // can call these on text. tools/isswf-record-new.mjs is the Node wrapper that reads the files and runs Git.
-import { RECORD_NAME } from './isswf-snapshot-core.mjs';
+import { isInitiativePath, RECORD_NAME } from './isswf-snapshot-core.mjs';
 
 const KIND_PREFIX = { attempt: 'A', review: 'V' };
 const LAST_NUMBER = 999;
@@ -75,7 +75,6 @@ const COMPLETION_LABELS = {
   review: { candidate: 'Candidate commit SHA, or reproducible snapshot identity:', paths: 'Candidate paths reviewed:', base: 'Base commit SHA:' },
 };
 const TEMPLATE_RUN = '- Run: claude agent=<id>';
-export const isRecordPath = path => /^\.(?:isswf|factory)\/initiatives\//u.test(path);
 
 /** The base commit the record names, which `complete` diffs from. */
 export function recordBase(kind, text) {
@@ -92,8 +91,8 @@ function codePath(path) {
 }
 
 function pathLines(paths) {
-  const records = paths.filter(isRecordPath);
-  const lines = paths.filter(path => !isRecordPath(path)).map(path => `  - ${codePath(path)}`);
+  const records = paths.filter(isInitiativePath);
+  const lines = paths.filter(path => !isInitiativePath(path)).map(path => `  - ${codePath(path)}`);
   if (records.length) lines.push('  - Record paths:', ...records.map(path => `    - ${codePath(path)}`));
   return lines.length ? lines : ['  - None.'];
 }

@@ -73,6 +73,25 @@ function overrideOf(prompt) {
   return { model: parsed[1], effort: parsed[2] };
 }
 
+// The agent names a selection file may key the reviewer by, in the order tried: the plugin's and the bare spelling.
+export const REVIEWER_AGENTS = { claude: ['isswf:isswf-reviewer', 'isswf-reviewer'], pi: ['isswf-reviewer'] };
+
+/**
+ * The model and effort a parsed dispatch-selection.json holds for the first of `agents` it lists for `host`, or a refusal naming `label`.
+ * The guard, the handoff and the review launcher read the approved selection through this one function.
+ * @public
+ */
+export function selectionEntry(selection, host, agents, label) {
+  if (!isObject(selection) || selection.schemaVersion !== 1 || !isObject(selection.agents)) refuse(2, `${label} needs schemaVersion 1 and an agents object`);
+  const forHost = selection.agents[host];
+  const agent = isObject(forHost) ? agents.find(name => Object.hasOwn(forHost, name)) : undefined;
+  if (agent === undefined) refuse(2, `${label} has no entry for ${agents[0]} for host ${host}`);
+  const entry = forHost[agent];
+  const missing = ['model', 'effort'].find(field => !text(entry?.[field]));
+  if (!isObject(entry) || missing) refuse(2, `the entry for ${agent} for host ${host} needs a model and an effort${missing ? ` (${missing} is missing)` : ''}`);
+  return { agent, model: entry.model, effort: entry.effort };
+}
+
 async function checkSelection(host, call, state, file, io) {
   let selection;
   try {
@@ -80,12 +99,7 @@ async function checkSelection(host, call, state, file, io) {
   } catch {
     refuse(2, `${state}/dispatch-selection.json is missing or is not valid JSON`);
   }
-  if (!isObject(selection) || selection.schemaVersion !== 1 || !isObject(selection.agents)) refuse(2, `${state}/dispatch-selection.json needs schemaVersion 1 and an agents object`);
-  const forHost = selection.agents[host];
-  const entry = isObject(forHost) && Object.hasOwn(forHost, call.agent) ? forHost[call.agent] : undefined;
-  if (entry === undefined) refuse(2, `${state}/dispatch-selection.json has no entry for ${call.agent} for host ${host}`);
-  const missing = ['model', 'effort'].find(field => !text(entry?.[field]));
-  if (!isObject(entry) || missing) refuse(2, `the entry for ${call.agent} for host ${host} needs a model and an effort${missing ? ` (${missing} is missing)` : ''}`);
+  const entry = selectionEntry(selection, host, [call.agent], `${state}/dispatch-selection.json`);
   const override = overrideOf(call.prompt);
   const expected = override ?? entry;
   const source = override ? 'the Override line' : `${state}/dispatch-selection.json`;
