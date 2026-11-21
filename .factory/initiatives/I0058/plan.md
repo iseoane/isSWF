@@ -245,7 +245,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Size: S (one flow)
 - Objective: Batch-2 follow-ups: a job's records cannot be written outside its assigned worktree, and missing tests are added.
 - Depends on: None
-- Brief: None
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md) (pending until prepared)
 - Blocker: None.
 - Next step: Write brief r1.
 
@@ -264,7 +264,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Size: S (one flow)
 - Objective: The number of workers running at once is bounded by a per-machine limit that setup asks for.
 - Depends on: None
-- Brief: None
+- Brief: [brief-r1.md](jobs/J012/brief-r1.md) (pending until prepared)
 - Blocker: None.
 - Next step: Write brief r1.
 
