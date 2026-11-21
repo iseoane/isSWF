@@ -260,13 +260,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J012
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: The number of workers running at once is bounded by a per-machine limit that setup asks for.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J012/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J012/brief-r1.md)
 - Blocker: None.
-- Next step: Write brief r1.
+- Next step: Researcher grounds the design (brief r1).
 
 ### Acceptance
 
