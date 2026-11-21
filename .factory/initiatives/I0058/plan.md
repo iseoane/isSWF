@@ -23,14 +23,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J001
 
-- Status: in-progress
+- Status: done
 - Size: M (two related flows: recording a child's reads and commands, and comparing them with its brief)
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
 - Depends on: None
 - Brief: [brief-r5.md](jobs/J001/brief-r5.md)
 - Blocker: None.
-- Next step: Worker adds the commit-SHA record rule and the read-and-edited fix (brief r5).
+- Next step: None. Merged in #380 (ed0f2873); third acceptance item delivered.
 
 ### Acceptance
 
@@ -241,13 +241,13 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J011
 
-- Status: in-progress
+- Status: done
 - Size: S (one flow)
 - Objective: Batch-2 follow-ups: a job's records cannot be written outside its assigned worktree, and missing tests are added.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J011/brief-r2.md)
 - Blocker: None.
-- Next step: Worker adds the record-location guard and missing tests (brief r1).
+- Next step: None. Merged in #380 (ed0f2873).
 
 ### Acceptance
 
