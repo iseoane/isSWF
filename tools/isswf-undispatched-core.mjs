@@ -17,28 +17,30 @@ const orElse = async (task, otherwise) => {
   }
 };
 
-async function undispatchedInitiative({ project, state, initiative, assignments, io, join }) {
+async function undispatchedInitiative({ project, state, initiative, assignments, warned, io, join }) {
   const markdown = await io.read(join(project, state, 'initiatives', initiative, 'plan.md'));
   if (typeof markdown !== 'string' || markdown.length > MAX_CHARS) return [];
   const found = [];
   for (const job of parsePlan(markdown).filter(candidate => candidate.reportedStatus === 'in-progress')) {
     const path = `${state}/initiatives/${initiative}/jobs/${job.id}/${job.briefName}`;
-    if ((await io.git(['cat-file', '-e', `HEAD:./${path}`], project)) !== 0) continue;
     const attempts = await orElse(async () => (await io.list(join(project, state, 'initiatives', initiative, 'jobs', job.id))).filter(entry => entry.kind === 'file' && ATTEMPT.test(entry.name)), []);
     if (attempts.length) continue;
     const launched = assignments.some(entry => entry?.initiative === initiative && entry.job === job.id && typeof entry.path === 'string' && entry.path.split(/[\\/]/u).at(-1) === job.briefName);
-    if (!launched) found.push({ initiative, job: job.id, briefName: job.briefName, path });
+    if (launched) continue;
+    // An already-warned gap was committed when it was shown, so it costs no Git call while it stays open.
+    if (!warned.has(`${initiative}/${job.id}/${job.briefName}`) && (await io.git(['cat-file', '-e', `HEAD:./${path}`], project)) !== 0) continue;
+    found.push({ initiative, job: job.id, briefName: job.briefName, path });
   }
   return found;
 }
 
 /**
  * The jobs of the project's plans that are `in-progress`, whose brief is committed at HEAD, with no `A###.md` attempt record and no
- * accepted dispatch (`assignments`, as the compaction memory keeps them) naming that brief. Read-only; a fault in one plan skips that
+ * accepted dispatch (`assignments`, as the compaction memory keeps them) naming that brief. The cheap record checks run before Git, and a job in `warned` (keys as `freshUndispatched` writes them) skips the Git call. Read-only; a fault in one plan skips that
  * plan, and a fault in Git or the state directory reports nothing, so the warning never blocks a turn.
  * @returns {Promise<{ initiative: string, job: string, briefName: string, path: string }[]>}
  */
-export async function findUndispatched({ io, assignments } = {}) {
+export async function findUndispatched({ io, assignments, warned } = {}) {
   try {
     const project = await io.project();
     const join = joiner(project);
@@ -48,7 +50,7 @@ export async function findUndispatched({ io, assignments } = {}) {
     const [state] = states;
     const initiatives = (await io.list(join(project, state, 'initiatives'))).filter(entry => entry.kind === 'dir' && INITIATIVE.test(entry.name)).map(entry => entry.name);
     const found = [];
-    for (const initiative of initiatives) found.push(...await orElse(() => undispatchedInitiative({ project, state, initiative, assignments: assignments ?? [], io, join }), []));
+    for (const initiative of initiatives) found.push(...await orElse(() => undispatchedInitiative({ project, state, initiative, assignments: assignments ?? [], warned: warned ?? new Set(), io, join }), []));
     return found;
   } catch {
     return [];

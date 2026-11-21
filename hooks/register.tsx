@@ -711,10 +711,11 @@ export const register: Register = (on, options) => {
   on('turn.complete', async ($, e, next) => {
     try {
       const turn = e as { agentId?: unknown; aborted?: unknown; error?: unknown; isError?: unknown }
-      if (turn.agentId === undefined && turn.aborted !== true && turn.error === undefined && turn.isError !== true && (await $.state.get(IS_ACTIVATED)).value) {
+      if (turn.agentId === undefined && turn.aborted !== true && turn.error == null && turn.isError !== true && (await $.state.get(IS_ACTIVATED)).value) {
         const cwd = await $.session.cwd()
         const found = await findUndispatched({
           assignments: (await $.state.get(ASSIGNMENTS)).value ?? [],
+          warned: new Set<string>((await $.state.get(WARNED)).value ?? []),
           io: {
             project: () => cwd,
             list: (dir: string) => $.fs.list(dir),
@@ -727,7 +728,7 @@ export const register: Register = (on, options) => {
         if (text) {
           await $.state.set(WARNED, [...warned])
           $.ui.status(text)
-        }
+        } else if (!found.length && warned.size) $.ui.status(undefined)
       }
     } catch {}
 

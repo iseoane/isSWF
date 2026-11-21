@@ -56,10 +56,11 @@ export default function (pi) {
   // brief has no attempt record and no accepted dispatch (isswf-undispatched-core). A fault never reaches Pi.
   pi.on('agent_settled', async (event, ctx) => {
     try {
-      if (!active || event?.aborted === true || event?.error !== undefined) return;
-      const found = await findUndispatched({ assignments, io: { project: () => ctx.cwd, list, read: file => readFile(file, 'utf8'), git } });
+      if (!active || event?.aborted === true || event?.error != null) return;
+      const found = await findUndispatched({ assignments, warned, io: { project: () => ctx.cwd, list, read: file => readFile(file, 'utf8'), git } });
       const text = undispatchedWarning(freshUndispatched(found, warned));
       if (text) ctx.ui.setStatus('isswf-undispatched', text);
+      else if (!found.length && warned.size) ctx.ui.setStatus('isswf-undispatched', undefined);
     } catch {}
   });
 

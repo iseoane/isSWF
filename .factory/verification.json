@@ -133,7 +133,8 @@
       ],
       "cost": "job",
       "covers": [
-        "tools/isswf-undispatched-core.mjs"
+        "tools/isswf-undispatched-core.mjs",
+        "hooks/register.tsx"
       ],
       "timeoutSeconds": 300
     },
@@ -152,8 +153,7 @@
       "covers": [
         "tools/isswf-compaction-core.mjs",
         "tools/isswf-compaction-pi-extension.mjs",
-        "tools/isswf-undispatched-core.mjs",
-        "hooks/register.tsx"
+        "tools/isswf-undispatched-core.mjs"
       ],
       "timeoutSeconds": 300
     },
