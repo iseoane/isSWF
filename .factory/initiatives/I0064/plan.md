@@ -14,7 +14,7 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements brief r1.
+- Next step: Worker applies correction 1 under brief r2 (V003).
 
 ### Acceptance
 
