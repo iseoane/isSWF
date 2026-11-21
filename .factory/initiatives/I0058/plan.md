@@ -82,7 +82,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Researcher grounds the turn-end check (brief r1); implementation after the J001 pane merges (shared hooks/register.tsx).
+- Next step: Implementation brief r2 after the J001 pane merges (turn.complete in hooks/register.tsx; agent_settled in the Pi compaction extension).
 
 ### Acceptance
 
@@ -91,6 +91,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 ### Evidence
 
 - 2026-11-14: a brief was committed and its job set in-progress, and the turn ended without a dispatch (I0057 candidates).
+- 2026-11-21: research (brief r1): Claude `turn.complete` (main loop, `$.ui.status`), Pi `agent_settled` (`ctx.ui.setStatus`); candidate jobs from `parsePlan`, brief committed at HEAD as the dispatch guard checks, attempts by `A###.md`, dispatches from the session assignments (cap 5). Coordinator decisions for r2: only after coordinator activation; per brief revision; once per job-revision per session; skip aborted and error turns. Gaps: live display unobserved on both hosts; dispatches forgotten past the cap or a restart give a false warning.
 
 ## J004
 
