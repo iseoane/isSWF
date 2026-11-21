@@ -23,7 +23,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J001
 
-- Status: done
+- Status: completed
 - Size: M (two related flows: recording a child's reads and commands, and comparing them with its brief)
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
@@ -75,14 +75,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Scope: factory.
 - Objective: An in-progress job with a committed brief and no recorded launch is caught before the turn ends.
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J003/brief-r2.md)
 - Blocker: None.
-- Next step: Worker implements the turn-end warning (brief r2, batch 2).
+- Next step: None. Merged in #378 (aae21877).
 
 ### Acceptance
 
@@ -158,14 +158,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J007
 
-- Status: in-progress
+- Status: completed
 - Size: S (consolidation)
 - Scope: factory.
 - Objective: Each shared fact has one source in code.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Worker consolidates the three shared facts (brief r1, batch 2).
+- Next step: None. Merged in #378 (aae21877).
 
 ### Acceptance
 
@@ -179,14 +179,14 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Size: M (two related flows: one canonical definition per contract field, and a search for old statements)
 - Scope: factory.
 - Objective: A changed contract leaves no stale statement in any packaged text.
 - Depends on: None
 - Brief: [brief-r3.md](jobs/J008/brief-r3.md)
 - Blocker: None.
-- Next step: Worker writes canonical definitions (brief r3, batch 2); unit 2 merged in #377.
+- Next step: None. Merged in #378 (aae21877).
 
 ### Acceptance
 
@@ -241,7 +241,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 
 ## J011
 
-- Status: done
+- Status: completed
 - Size: S (one flow)
 - Objective: Batch-2 follow-ups: a job's records cannot be written outside its assigned worktree, and missing tests are added.
 - Depends on: None
