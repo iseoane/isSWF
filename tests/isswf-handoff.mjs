@@ -164,9 +164,13 @@ try {
   refuses(tool(['review', '--project', root]), 'usage');
   refuses(tool(['frobnicate']), 'usage');
   await assert.rejects(stat(join(root, 'handoffs')), 'a refused --out is not created inside the project');
+  // A checkout without the brief, or with a plan that does not mark the job in progress, is served from the checkpoint, as `isswf-record-new create` does.
   await write('.factory/initiatives/I0001/plan.md', plan('pending'));
-  refuses(review(), 'job-not-in-progress');
+  assert.deepEqual(review().handoff, made.handoff, 'the plan is read at the checkpoint');
   await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
+  await rm(join(root, BRIEF));
+  assert.deepEqual(review().handoff, made.handoff, 'the brief is read at the checkpoint');
+  await write(BRIEF, '# brief\n');
 
   // The default directory is the OS temporary directory, and a diff the Claude hook cannot read (4 MiB) is refused at generation.
   {
