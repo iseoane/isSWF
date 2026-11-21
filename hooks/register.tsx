@@ -11,7 +11,7 @@ import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
-import { countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
+import { compareBrief, countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
 const TOUCHED = { plugin: 'isswf', key: 'touched' } as const
@@ -50,6 +50,8 @@ const LABELS = {
     blocked: 'bloqueados',
     open: 'sin cerrar',
     usage: 'consumo',
+    briefUnread: 'el brief nombra y la ejecución no leyó',
+    briefRead: 'el brief nombra: todo leído',
     partial: 'parcial',
     duration: 'duración',
     cost: 'coste',
@@ -95,6 +97,8 @@ const LABELS = {
     blocked: 'blocked',
     open: 'open',
     usage: 'usage',
+    briefUnread: 'brief names, run did not read',
+    briefRead: 'brief names: all read',
     partial: 'partial',
     duration: 'duration',
     cost: 'cost',
@@ -160,6 +164,9 @@ let homes: Promise<{ claudeDir?: string; piDir?: string }> | undefined
 // The coordinator's own counts, refreshed after each Agents draw so drawing never waits on the transcript.
 let ownCounts: { usedSkills: any; usedReferences: any } | undefined
 let countingOwn = false
+// Brief texts by path, read once after a draw; the job view compares each with its attempt's runs.
+const briefs = new Map<string, string>()
+const briefsLoading = new Set<string>()
 // One resume per usage window: the timer lives only in this session, and `resumeFor` is the window's reset time.
 let resumeTimer: Timer | undefined
 let resumeFor: string | undefined
@@ -205,6 +212,16 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
     })
     scheduleRefresh($)
   })().catch(() => {})
+}
+
+function loadBriefs($: EngineInterface, paths: string[]) {
+  const pending = paths.filter(path => !briefs.has(path) && !briefsLoading.has(path))
+  for (const path of pending) briefsLoading.add(path)
+  void (async () => {
+    for (const path of pending) briefs.set(path, await $.fs.read(path).catch(() => ''))
+    for (const path of pending) briefsLoading.delete(path)
+    if (pending.length) scheduleRefresh($)
+  })()
 }
 
 function scheduleRefresh($: EngineInterface) {
@@ -385,18 +402,23 @@ function roundLabel(job: any, round: any) {
 }
 
 // Only what the record or its transcript says is listed; a record with nothing beyond its name has no detail.
-function pillView(initiativeId: string, jobId: string, entry: any, t: Labels) {
+function pillView(initiativeId: string, jobId: string, entry: any, t: Labels, brief?: string) {
   const resolved = entry.runs.length ? usageLines(entry, t) : { model: undefined, lines: [] as string[] }
   const model = resolved.model
     ? `${t.model}: ${resolved.model} (transcript)`
     : entry.model !== 'unknown' && entry.model ? `${t.model}: ${entry.model}${entry.modelSource === 'unknown' ? '' : ` (${entry.modelSource})`}` : undefined
   const effort = entry.effort !== 'unknown' && entry.effort ? `${t.effort}: ${entry.effort}` : undefined
+  const compared = brief && entry.kind === 'attempt' ? compareBrief(brief, entry.runs.map((run: any) => usage.get(runKey(run)))) : undefined
+  const briefLine = compared?.named.length
+    ? compared.unread.length ? `${t.briefUnread}: ${compared.unread.join(', ')}${compared.partial ? ` (${t.partial})` : ''}` : t.briefRead
+    : undefined
   // The record's own word, such as blocked or cancelled, is more precise than the colour's group.
   const verdict = entry.outcome !== 'unknown' && entry.verdict !== 'running' ? entry.outcome : t.verdicts[entry.verdict]
   const facts = [
     [model, effort].filter(Boolean).join(' · '),
     verdict && `${t.verdict}: ${verdict}`,
     ...resolved.lines,
+    briefLine,
   ].filter(Boolean) as string[]
   return {
     key: `${initiativeId}-${jobId}-${entry.id}`,
@@ -763,6 +785,8 @@ export const register: Register = (on, options) => {
     const isExpanded = (initiative: any, job: any) => expanded.includes(`${initiative.id}-${job.id}`)
     resolveUsage($, cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status !== 'completed' || isExpanded(i, j)))
       .flatMap((j: any) => j.rounds.flatMap((r: any) => r.entries.flatMap((x: any) => x.runs))), snapshot.project)
+    const briefPath = (initiative: any, job: any, round: any) => joiner(snapshot.stateDir)(snapshot.stateDir, initiative.id, 'jobs', job.id, `brief-r${round.round}.md`)
+    loadBriefs($, cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status !== 'completed' || isExpanded(i, j)).flatMap((j: any) => j.rounds.filter((r: any) => r.round !== 'unknown').map((r: any) => briefPath(i, j, r)))))
 
     // One completed job is unfolded at a time: unfolding one folds the other and closes any open record detail.
     const toggle = (key: string) => () => update($, EXPANDED, (list: string[] | undefined) => (list ?? []).includes(key) ? (list ?? []).filter(k => k !== key) : [key])
@@ -785,7 +809,7 @@ export const register: Register = (on, options) => {
       </Box>
     )
     const rounds = (initiative: any, job: any) => job.rounds.map((round: any) => {
-      const pills = round.entries.map((entry: any) => pillView(initiative.id, job.id, entry, t))
+      const pills = round.entries.map((entry: any) => pillView(initiative.id, job.id, entry, t, round.round === 'unknown' ? undefined : briefs.get(briefPath(initiative, job, round))))
       return (
         <Box flexDirection="column">
           <Box flexDirection="row" gap={1} alignItems="center">
