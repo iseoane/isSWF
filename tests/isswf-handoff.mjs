@@ -442,6 +442,52 @@ try {
   const viaMerge = tool(['coverage', '--project', merged, '--base', origin, '--head', git(merged, 'rev-parse', 'HEAD')]);
   assert.equal(viaMerge.ok, false, 'the docs commit made on main after the base is not reviewed');
   assert.deepEqual(viaMerge.jobs[0].uncovered.map(entry => entry.paths), [['docs/en/other.md']], 'only the docs commit, not the merge commit that brings in the reviewed one');
+
+  // A job branch that merges main keeps its review chain: the I0058 J013 shape, V002 on a candidate, a records commit, a merge of main, a fix, then V003 based on the merge.
+  const mergeShape = async (name, between) => {
+    const dir = join(coverTemp, name);
+    await mkdir(dir);
+    initRepository(dir, ['-b', 'main']);
+    const save = async (files, message) => {
+      for (const [path, content] of Object.entries(files)) {
+        await mkdir(join(dir, path, '..'), { recursive: true });
+        await writeFile(join(dir, path), content);
+      }
+      git(dir, 'add', '-A');
+      git(dir, 'commit', '-qm', message);
+      return git(dir, 'rev-parse', 'HEAD');
+    };
+    const root = await save({ 'README.md': 'start\n', '.factory/initiatives/I0001/plan.md': plan('in-progress') }, 'main');
+    git(dir, 'checkout', '-q', '-b', 'job');
+    const code = await save({ 'src/a.mjs': 'a\n' }, 'job code');
+    await save({ [`${jobDir('J001')}/V002.md`]: reviewText(code, '', root) }, 'records: V002');
+    const extra = await between({ dir, save });
+    git(dir, 'checkout', '-q', 'main');
+    await save({ 'src/main-only.mjs': 'm\n' }, 'code on main');
+    git(dir, 'update-ref', 'refs/remotes/origin/main', 'main');
+    git(dir, 'checkout', '-q', 'job');
+    git(dir, 'merge', '--no-ff', '-q', '-m', 'merge main', 'main');
+    const merge = git(dir, 'rev-parse', 'HEAD');
+    const fix = await save({ 'src/a.mjs': 'b\n' }, 'job fix');
+    await save({ [`${jobDir('J001')}/V003.md`]: reviewText(fix, '', merge) }, 'records: V003 based on the merge');
+    return { dir, code, extra, result: tool(['coverage', '--project', dir]) };
+  };
+  const throughMain = await mergeShape('merge-main', async () => undefined);
+  assert.equal(throughMain.result.ok, true, JSON.stringify(throughMain.result));
+  assert.equal(throughMain.result.jobs[0].record, 'V003');
+  // A merge of a branch that is not on main breaks the chain, even when that branch changes only records.
+  const sideMerge = await mergeShape('merge-side', async ({ dir, save }) => {
+    git(dir, 'checkout', '-q', '-b', 'side');
+    await save({ '.factory/initiatives/I0001/notes.md': 'side\n' }, 'records on a side branch');
+    git(dir, 'checkout', '-q', 'job');
+    git(dir, 'merge', '--no-ff', '-q', '-m', 'merge side', 'side');
+  });
+  assert.equal(sideMerge.result.ok, false, JSON.stringify(sideMerge.result));
+  assert.deepEqual(sideMerge.result.jobs[0].uncovered.map(entry => entry.commit), [sideMerge.code]);
+  // A code commit between the earlier candidate and the merge was reviewed by neither round.
+  const codeBetween = await mergeShape('merge-code-between', ({ save }) => save({ 'src/b.mjs': 'b\n' }, 'code between the rounds'));
+  assert.equal(codeBetween.result.ok, false, JSON.stringify(codeBetween.result));
+  assert.deepEqual(codeBetween.result.jobs[0].uncovered.map(entry => entry.commit), [codeBetween.code, codeBetween.extra]);
 } finally {
   await rm(coverTemp, { recursive: true, force: true });
 }
