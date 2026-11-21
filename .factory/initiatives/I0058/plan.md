@@ -28,9 +28,9 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Scope: factory.
 - Objective: Resource consumption and checks run become observed rather than self-reported, and the initiatives pane shows them without `unknown`.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Researcher grounds the design (brief r1); then implementation brief r2.
+- Next step: Worker adds the stamp and integration gate (brief r2); pane, observed reads and brief comparison follow.
 
 ### Acceptance
 
@@ -48,6 +48,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - 2026-11-17: verification practice of the Claude Code team ("stamp and gate commits", observe/enforce modes) adopted as the target for this job by the operator.
 - 2026-11-15: the operator saw `unknown` roles, `skills: unknown` and host guides under references in the pane (`tools/isswf-run-usage-core.mjs:152-158`; `hooks/register.tsx` groups by record role).
 - 2026-11-21: operator: after closing I0063, do all of I0058 starting with J001; the stamp and commit gate make the per-branch `isswf-verify --tier job` run deterministic (the coordinator skipped it in the I0063 pilot).
+- 2026-11-21: research (brief r1, researcher run, read-only) proposed seven units: pane fixes, role source, transcript-based observation, brief comparison, stamp, gate, SHA record rule. Operator chose the stamp at branch integration (batching model). Gate mode default observe.
 
 ## J002
 
