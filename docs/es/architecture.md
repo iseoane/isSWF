@@ -28,6 +28,7 @@ Estas herramientas empaquetan la fábrica, gestionan la instalación de un proye
 | Rechazar un despacho fallido a un agente de rol de isSWF | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Rechazar un comando de shell que espera al CI o adquiere paquetes | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Conservar la asignación del coordinador durante una compactación | `tools/isswf-compaction-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
+| Avisar al terminar un turno de un trabajo en curso con brief confirmado y sin lanzamiento | `tools/isswf-undispatched-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
 | Rechazar un `git commit` en una rama que la sesión no seleccionó | `tools/isswf-branch-guard-core.mjs`, `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 
 Estas herramientas tienen contratos distintos. No des por hecho que los comandos, modelos compatibles, recuperación o permisos de un rol se aplican a otro.

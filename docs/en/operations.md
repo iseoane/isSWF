@@ -154,6 +154,10 @@ Known limits:
 - A dispatch made before the coordinator skill was loaded, or by a means other than Claude's `Agent` tool or Pi's `subagent` tool, is not remembered. The list does not survive a new Pi session.
 - The reminder tells the model to reload the skill; it does not reload it. A fresh session started from a handoff has no reminder, because nothing compacted.
 
+## Undispatched brief warning
+
+When a turn of a session that activated the coordinator skill ends, the host shows one status line if a job is `in-progress`, its brief is committed at `HEAD`, the job directory has no `A###.md` attempt record, and no dispatch accepted in this session names that brief. The line names the job and its brief. It appears once per job and brief revision per session, never after a turn the host marks aborted or failed, and never blocks anything. The line is cleared once no gap remains. Claude Code does this on `turn.complete` in `hooks/register.tsx` through `$.ui.status`; Pi does it on `agent_settled` in `tools/isswf-compaction-pi-extension.mjs` through `ctx.ui.setStatus`. The logic is in `tools/isswf-undispatched-core.mjs`, which has no Node imports, only reads, and fails open: a fault in Git or in a plan reports nothing. Known limits: neither host's live display was observed, and the fields that mark a turn aborted or failed are read defensively because their shape is unverified, and `turn.complete` under the built-in `cc-plugin-sec-default` guard is unverified; the session keeps only its last five dispatches (see Compaction) and forgets all of them on a restart, so an older or earlier dispatch can produce a false warning.
+
 ## Plan edit
 
 ```bash
