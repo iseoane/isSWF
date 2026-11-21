@@ -1,0 +1,30 @@
+{
+  "statements": [
+    {
+      "phrase": "exits 0 even for an invalid plan",
+      "reason": "isswf-status exits 1 for invalid-or-changing-plan; exit 0 is not a pass either way",
+      "since": "I0057/J001"
+    },
+    {
+      "phrase": "node \\.audit\\/verify-",
+      "regex": true,
+      "scope": "docs/*.md",
+      "reason": "retired audit verification procedure; retired documentation lives in Git history",
+      "since": "I0057"
+    },
+    {
+      "phrase": "bounded live validation",
+      "regex": true,
+      "scope": "docs/*.md",
+      "reason": "historical procedure, not a current guide statement",
+      "since": "I0057"
+    },
+    {
+      "phrase": "remain pending in J[0-9]",
+      "regex": true,
+      "scope": "docs/*.md",
+      "reason": "job-status wording belongs in plans, not current guides",
+      "since": "I0057"
+    }
+  ]
+}

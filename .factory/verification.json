@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "d46153e862e08077656eefd879abbce1eba27f8fe16a4d8052f2da0be951a42c"
+      "sha256": "dd6842d7bd8d6b8c60146752ce02628c351daea6f0e5047ce155389606036d35"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -140,6 +140,29 @@
       "timeoutSeconds": 120
     },
     {
+      "id": "stale-statements",
+      "argv": [
+        "node",
+        "tests/stale-statements.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/factory-package.mjs",
+        "tooling/quality/stale-statements.json",
+        "tooling/quality/stale-statements.mjs",
+        ".agents/",
+        "agents/",
+        "skills/",
+        "docs/"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
       "id": "check-quality",
       "argv": [
         "node",
@@ -169,6 +192,7 @@
         "tooling/quality/check-docs.mjs",
         "tooling/quality/eslint.config.mjs",
         "tooling/quality/host-checks.mjs",
+        "tooling/quality/stale-statements.mjs",
         "tooling/quality/unrun-tests.mjs"
       ],
       "platforms": [
