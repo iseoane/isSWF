@@ -62,13 +62,14 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   checkSha(checkpoint, 'checkpoint');
   checkSha(base, 'base');
   checkSha(candidate, 'candidate');
-  await requireInProgress(target, initiative, job);
-  await requireBrief(target, brief);
+  const git = await gitIn(target.root);
+  assertCommit(git, checkpoint, 'checkpoint');
+  await requireInProgress(target, initiative, job, git, checkpoint);
+  await requireBrief(target, brief, git, checkpoint);
   const directory = resolve(out ?? tmpdir());
   if (isInside(await realpath(target.root), await realLocation(directory))) throw recordError('out-inside-project');
 
-  const git = await gitIn(target.root);
-  for (const [sha, flag] of [[checkpoint, 'checkpoint'], [base, 'base'], [candidate, 'candidate']]) assertCommit(git, sha, flag);
+  for (const [sha, flag] of [[base, 'base'], [candidate, 'candidate']]) assertCommit(git, sha, flag);
   try { git(['merge-base', '--is-ancestor', base, candidate]); } catch { throw recordError('candidate-not-descendant'); }
   const reviewer = await reviewerSelection(target, host);
   const resources = [...REVIEW_RESOURCES, HOST_GUIDES[host]];
