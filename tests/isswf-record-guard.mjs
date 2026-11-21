@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
-const { guardRecord } = await load('tools/isswf-record-guard-core.mjs');
+const { guardRecord, checkRecordLocation } = await load('tools/isswf-record-guard-core.mjs');
 const { default: registerGuard } = await load('tools/isswf-record-guard-pi-extension.mjs');
 
 const job = (id, status) => `## ${id}\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Observable outcome\n\n### Evidence\n\n- None.\n`;
@@ -100,13 +100,36 @@ for (const [name, call] of [
 ]) assert.equal(await call(), undefined, name);
 assert.equal(await guardRecord({ path: planPath, read: async () => `${invented}${'x'.repeat(1024 * 1024)}`, list: async () => [] }), undefined, 'a file over 1 MiB is skipped, like the CLI');
 
+// Record location: a child bound to a checkout may write an attempt or review record only inside it. The refusal names the bound checkout;
+// no binding (the coordinator, or an unknown child), a path that is not an attempt or review record and an unusable input are allowed.
+for (const [checkout, inside, outside] of [
+  ['/work/wt/job', '/work/wt/job/.factory/initiatives/I0001/jobs/J001/A001.md', '/work/primary/.factory/initiatives/I0001/jobs/J001/A001.md'],
+  ['C:\\work\\wt\\job', 'C:\\work\\wt\\job\\.isswf\\initiatives\\I0001\\jobs\\J001\\V002.md', 'C:\\work\\primary\\.isswf\\initiatives\\I0001\\jobs\\J001\\V002.md'],
+]) {
+  const assignment = { checkout, branch: 'feat/x' };
+  const verdict = await checkRecordLocation({ path: outside, assignment });
+  assert.equal(typeof verdict.deny, 'string', outside);
+  assert.ok(verdict.deny.includes(checkout.replaceAll('\\', '/')), `names the bound checkout\n${verdict.deny}`);
+  assert.deepEqual(await checkRecordLocation({ path: inside, assignment }), {}, inside);
+  // A sibling that shares the checkout's prefix is outside it, and a drive letter's case does not matter.
+  assert.equal(typeof (await checkRecordLocation({ path: `${checkout}-other${inside.slice(checkout.length)}`, assignment })).deny, 'string', 'prefix sibling');
+  assert.deepEqual(await checkRecordLocation({ path: inside.replace(/^C:/u, 'c:'), assignment: { checkout: checkout.replace(/^C:/u, 'c:'), branch: 'b' } }), {});
+  assert.deepEqual(await checkRecordLocation({ path: outside }), {}, 'no binding is a coordinator or unknown child');
+  assert.deepEqual(await checkRecordLocation({ path: outside, assignment: undefined }), {});
+  assert.deepEqual(await checkRecordLocation({ path: outside.replace(/A001\.md$|V002\.md$/u, 'plan.md'), assignment }), {}, 'a plan is not a child record');
+  assert.deepEqual(await checkRecordLocation({ path: outside.replace(/A001\.md$|V002\.md$/u, 'brief-r1.md'), assignment }), {}, 'a brief is not a child record');
+}
+for (const input of [undefined, {}, { path: 7, assignment: { checkout: '/w', branch: 'b' } }, { path: '.factory/initiatives/I1/jobs/J1/A001.md', assignment: { checkout: '/w', branch: 'b' } }, { path: '/p/.factory/initiatives/I1/jobs/J1/A001.md', assignment: { checkout: 7 } }]) {
+  assert.deepEqual(await checkRecordLocation(input), {}, 'a fault or an unknown path fails open');
+}
+
 // Pi: the extension patches the result of the edit and write tools only.
 const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-guard-')));
 try {
-  const handlers = [];
-  registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
-  assert.deepEqual(handlers.map(([name]) => name), ['tool_result'], 'only the result event is used');
-  const [[, handler]] = handlers;
+  const handlers = new Map();
+  registerGuard({ on: (name, handler) => handlers.set(name, handler) });
+  assert.deepEqual([...handlers.keys()].sort(), ['input', 'session_start', 'tool_call', 'tool_result'], 'the result patch plus the location check');
+  const handler = handlers.get('tool_result');
   const state = join(temp, '.factory/initiatives/I0001');
   await mkdir(join(state, 'jobs/J001'), { recursive: true });
   const bad = join(state, 'plan.md');
@@ -146,6 +169,39 @@ try {
     ['no context', event('write', '.factory/initiatives/I0001/plan.md'), undefined],
     ['no event', undefined, ctx],
   ]) assert.equal(await handler(input, context), undefined, name);
+
+  // Pi location check: a child whose task carries checkout: and branch: lines is blocked from writing a record outside that checkout.
+  const sha = 'a'.repeat(40);
+  const task = checkout => `Brief: .factory/initiatives/I0001/jobs/J001/brief-r1.md\ncheckpoint: ${sha}\nbase: ${sha}\ncheckout: ${checkout}\nbranch: feat/x\n`;
+  const callOf = (toolName, path) => ({ type: 'tool_call', toolName, toolCallId: 'c1', input: { path, content: 'x' } });
+  const session = () => {
+    const found = new Map();
+    registerGuard({ on: (name, fn) => found.set(name, fn) });
+    return found;
+  };
+  const bound = session();
+  assert.equal(await bound.get('tool_call')(callOf('write', good), ctx), undefined, 'no task yet: unknown binding is allowed');
+  await bound.get('input')({ text: task(temp) });
+  assert.equal(await bound.get('tool_call')(callOf('write', good), ctx), undefined, 'inside the bound checkout');
+  const otherRoot = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-other-')));
+  const elsewhere = join(otherRoot, '.factory/initiatives/I0001/jobs/J001/A002.md');
+  try {
+    for (const toolName of ['write', 'edit']) {
+      const refused = await bound.get('tool_call')(callOf(toolName, elsewhere), ctx);
+      assert.equal(refused?.block, true, toolName);
+      assert.ok(refused.reason.includes(temp.replaceAll('\\', '/')), refused?.reason);
+    }
+    assert.equal(await bound.get('tool_call')(callOf('read', elsewhere), ctx), undefined, 'only writes are checked');
+    assert.equal(await bound.get('tool_call')(callOf('write', join(temp, 'notes.md')), ctx), undefined, 'not a record');
+    const other = session();
+    assert.equal(await other.get('tool_call')(callOf('write', elsewhere), ctx), undefined, 'a session without a binding (the coordinator) is not checked');
+    await other.get('input')({ text: 'checkout: /somewhere\nbranch: b\n' });
+    assert.equal(await other.get('tool_call')(callOf('write', elsewhere), ctx), undefined, 'a message that is not a dispatch assigns nothing');
+    await bound.get('session_start')();
+    assert.equal(await bound.get('tool_call')(callOf('write', elsewhere), ctx), undefined, 'a new session forgets the binding');
+  } finally {
+    await rm(otherRoot, { recursive: true, force: true });
+  }
 } finally {
   await rm(temp, { recursive: true, force: true });
 }
@@ -167,6 +223,10 @@ const body = hooks.slice(hooks.indexOf('export const register'));
 const beforePane = body.slice(0, body.indexOf('options?.initiativesPane !== true'));
 assert.ok(hooks.includes('guardRecord(') && beforePane.includes("on('tool.call'"), 'the guard is registered whatever the pane option is');
 for (const tool of ['Edit', 'Write', 'MultiEdit']) assert.ok(hooks.includes(`'${tool}'`), tool);
+// The location check refuses before the write runs, by the child's agent id, so it sits ahead of the call to `next(e)`.
+const locationCheck = body.indexOf('checkRecordLocation(');
+assert.ok(locationCheck !== -1 && locationCheck < body.indexOf('ran = await next(e)'), 'the location check runs before the tool call');
+assert.ok(body.slice(locationCheck - 400, locationCheck + 400).includes('e.agentId'), 'the check is keyed by the child agent id');
 
 // One classifier answers three questions about a path. The table holds what the earlier copies (the guard's strict test,
 // the Git-relative `isRecordPath` of record-new-core and the pane's `RECORD_PATH`) accepted and rejected.
