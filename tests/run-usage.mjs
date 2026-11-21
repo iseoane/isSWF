@@ -59,6 +59,10 @@ const fixture = {
   'project/.factory/initiatives/I0001/jobs/J001/V001.md': record(['claude agent=missing99', 'pi child=run-pi-open', 'claude agent=broken1', 'claude agent=../escape']),
   'claude/projects/-p/9d9d/subagents/agent-a1b2c3.jsonl': agentTranscript,
   'claude/projects/-p/9d9d/subagents/agent-broken1.jsonl': `${jsonl([user('2026-01-01T00:00:00.000Z')])}not json\n${jsonl([assistant('req_b1', '2026-01-01T00:00:01.000Z', claudeUsage(1, 2, 3, 4), [], 'end_turn')])}`,
+  'claude/projects/-p/9d9d/subagents/agent-guide1.jsonl': jsonl([
+    user('2026-01-01T00:00:00.000Z', 'Apply .agents/roles/worker.md, .agents/hosts/claude-code.md and .agents/roles/references/review.md.'),
+    assistant('req_g1', '2026-01-01T00:00:01.000Z', claudeUsage(1, 1, 0, 0), [{ type: 'tool_use', name: 'Read', input: { file_path: '/repo/.agents/hosts/claude-code.md' } }, { type: 'tool_use', name: 'Read', input: { file_path: '/repo/.agents/roles/references/review.md' } }], 'end_turn'),
+  ]),
   [`claude/projects/-other/${SESSION}.jsonl`]: sessionTranscript,
   [`claude/projects/-other/${OPEN_SESSION}.jsonl`]: openSession,
   // A resumed `claude -p` session appends after the cost-state of its first exit.
@@ -91,26 +95,30 @@ try {
     tokens: { input: 11, output: 22, cacheRead: 33, cacheWrite: 44 }, durationMs: 5000,
     skills: { 'isswf-review': 1, 'isswf-tdd': 1, 'isswf-coordinator': 1 },
     agentsReads: { '.agents/roles/references/review.md': 1, '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1, '.agents/skills/isswf-coordinator/SKILL.md': 1, '.agents/skills/isswf-tdd/SKILL.md': 1 },
-    usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, costUsd: 'unknown',
+    usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, usedHostGuides: {}, costUsd: 'unknown',
   });
   // The advisor iteration is billed on top of the request's top-level usage.
-  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, costUsd: 'unknown' });
+  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown' });
   assert.deepEqual(pi, {
     found: true, finished: true, model: 'pi-test-1',
     tokens: { input: 101, output: 12, cacheRead: 53, cacheWrite: 9 }, durationMs: 3000,
-    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, costUsd: 'unknown',
+    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', agent: 'isswf-worker',
   });
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
-  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', costUsd: 'unknown' };
+  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', usedHostGuides: 'unknown', costUsd: 'unknown' };
   assert.deepEqual(missing, { found: false, reason: 'transcript-not-found', ...unknown });
   // Valid entries of a found transcript are still summed and the result is marked partial.
   assert.deepEqual(broken, {
     found: true, finished: true, model: 'claude-test-1', tokens: { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 },
-    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, costUsd: 'unknown', tokensPartial: true, reason: 'malformed-line',
+    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', tokensPartial: true, reason: 'malformed-line',
   });
   assert.deepEqual(escape, { found: false, reason: 'invalid-id', ...unknown });
   assert.equal(openPi.finished, false, 'a Pi child without its meta file is unfinished');
   assert.deepEqual(openPi.tokens, { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 });
+
+  // A host guide is listed apart from the references a run used.
+  const guide = await resolveRunUsage({ host: 'claude', kind: 'agent', id: 'guide1' }, { fs: nodeFs, claudeDir: env.CLAUDE_CONFIG_DIR, piDir: env.PI_CODING_AGENT_DIR, project });
+  assert.deepEqual([guide.usedReferences, guide.usedHostGuides], [{ '.agents/roles/references/review.md': 1 }, { '.agents/hosts/claude-code.md': 1 }]);
 
   // Cache: a finished run is read once while its size is unchanged; unfinished runs are re-read.
   const reads = [];
@@ -179,4 +187,23 @@ try {
     // Without an assignment every `.agents/` read counts, except a file the session changed.
     usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/reviewer.md': 1 },
   });
+}
+
+// The pane's per-role summary: an empty run is told apart from an unresolved one, and an unresolved run
+// no longer blanks the runs that did resolve.
+{
+  const { summarizeRuns, fallbackRole } = await import(pathToFileURL(join(source, 'tools/isswf-run-usage-core.mjs')).href);
+  const found = (usedSkills, usedReferences, usedHostGuides = {}) => ({ found: true, usedSkills, usedReferences, usedHostGuides });
+  const lost = { found: false, usedSkills: 'unknown', usedReferences: 'unknown', usedHostGuides: 'unknown' };
+  assert.deepEqual(summarizeRuns([found({}, {}), found({}, {})]), { skills: {}, references: {}, hostGuides: {}, resolved: 2, unresolved: 0, noReads: true });
+  assert.deepEqual(summarizeRuns([found({ 'isswf-tdd': 1 }, { '.agents/roles/worker.md': 1 }, { '.agents/hosts/pi.md': 1 }), found({ 'isswf-tdd': 2 }, {}), lost, undefined]), {
+    skills: { 'isswf-tdd': 3 }, references: { '.agents/roles/worker.md': 1 }, hostGuides: { '.agents/hosts/pi.md': 1 }, resolved: 2, unresolved: 2, noReads: false,
+  });
+  assert.deepEqual(summarizeRuns([lost, undefined]), { skills: undefined, references: undefined, hostGuides: undefined, resolved: 0, unresolved: 2, noReads: false });
+  // Role: the record's role wins; otherwise the host's agent name, from the hook store (Claude) or the transcript name (Pi).
+  assert.equal(fallbackRole('worker', { id: 'a1' }, { agent: 'isswf-reviewer' }, { a1: 'isswf:isswf-planner' }), 'worker');
+  assert.equal(fallbackRole('unknown', { id: 'a1' }, undefined, { a1: 'isswf:isswf-planner' }), 'planner');
+  assert.equal(fallbackRole('unknown', { id: 'p1' }, { agent: 'isswf-reviewer' }, {}), 'reviewer');
+  assert.equal(fallbackRole('unknown', { id: 'x' }, { agent: 'general-purpose' }, {}), 'unknown');
+  console.log('run usage pane summary tests passed');
 }
