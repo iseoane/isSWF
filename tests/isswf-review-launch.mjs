@@ -119,6 +119,16 @@ process.stdout.write(lines.map(l => JSON.stringify(l)).join('\\n') + '\\n');
   assert.match(await reason(launch(launchOptions('trace-noentry.jsonl'))), /has no entry for isswf:isswf-reviewer for host claude/u);
   await writeFile(selectionFile, reviewerSelection({ 'isswf:isswf-reviewer': { model: 'opus' } }));
   assert.match(await reason(launch(launchOptions('trace-noeffort.jsonl'))), /needs a model and an effort \(effort is missing\)/u);
+  // J007 V002 F6: --project moves where the selection is read from; the bound repository's file no longer decides.
+  await writeFile(selectionFile, reviewerSelection({ 'isswf-reviewer': { model: 'sonnet', effort: 'high' } }));
+  const elsewhere = join(root, 'other-project');
+  await mkdir(join(elsewhere, '.factory'), { recursive: true });
+  await writeFile(join(elsewhere, '.factory', 'dispatch-selection.json'), reviewerSelection({ 'isswf-reviewer': { model: 'haiku', effort: 'low' } }));
+  const fromProject = await launch({ ...launchOptions('trace-project.jsonl'), project: elsewhere });
+  assert.deepEqual([fromProject.model, fromProject.effort, fromProject.source], ['haiku', 'low', 'selection']);
+  const fromBindings = await launch(launchOptions('trace-bound.jsonl'));
+  assert.deepEqual([fromBindings.model, fromBindings.effort], ['sonnet', 'high']);
+  assert.equal(await reason(launch({ ...launchOptions('trace-empty.jsonl'), project: join(root, 'no-selection-here') })), 'no-error', 'a project without a selection file falls back to the preset');
   await rm(join(repo, '.factory'), { recursive: true });
 
   // Without a Git on the path, each caller keeps its own error code.

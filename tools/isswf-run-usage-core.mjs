@@ -404,13 +404,13 @@ const BRIEF_NAMES = /\.agents\/[\w./-]+\.md|(?<![\w./-])skills\/[\w./-]+\.md/gu;
 export function compareBrief(briefText, usages) {
   const resolved = usages.filter(u => u?.found && Array.isArray(u.readPaths));
   if (!resolved.length) return undefined;
-  // A file the run wrote is its work, not methodology it read.
-  const same = (a, b) => a === b || a.endsWith(`/${b}`) || b.endsWith(`/${a}`);
-  const edited = resolved.flatMap(u => u.editedPaths ?? []);
-  const read = resolved.flatMap(u => [...u.readPaths, ...Object.keys(u.agentsReads ?? {})]).filter(p => !edited.some(e => same(p, e)));
+  const read = resolved.flatMap(u => [...u.readPaths, ...Object.keys(u.agentsReads ?? {})]);
   const invoked = new Set(resolved.flatMap(u => Object.keys(u.skills ?? {})));
   const seen = path => read.some(p => p === path || p.endsWith(`/${path}`)) || invoked.has(path.match(/^(?:\.agents\/)?skills\/([^/]+)\/SKILL\.md$/u)?.[1]);
-  const named = [...new Set(briefText.replace(/\\/g, '/').match(BRIEF_NAMES) ?? [])];
+  // A file the run wrote is its work, not methodology it skipped; one it also read still counts as read.
+  const same = (a, b) => a === b || a.endsWith(`/${b}`) || b.endsWith(`/${a}`);
+  const edited = resolved.flatMap(u => u.editedPaths ?? []);
+  const named = [...new Set(briefText.replace(/\\/g, '/').match(BRIEF_NAMES) ?? [])].filter(path => !edited.some(e => same(path, e)));
   return { named, unread: named.filter(path => !seen(path)), partial: resolved.length < usages.length || resolved.some(u => u.readsTruncated || u.editsTruncated || u.tokensPartial) };
 }
 
@@ -420,11 +420,29 @@ export function briefNote(comparison) {
   return `brief names methodology the run never read: ${comparison.unread.join(', ')}${comparison.partial ? ' (run data incomplete)' : ''}`;
 }
 
-/** The note for an attempt record's text and the text of the brief it cites; `options` are those of resolveRunUsage. */
-export async function attemptBriefNote(recordText, briefText, options) {
+/** The usage of every run an attempt record's `Run:` lines name; `options` are those of resolveRunUsage. */
+export async function attemptUsages(recordText, options) {
   const usages = [];
   for (const run of recordText.split('\n').map(parseRunLine).filter(Boolean)) usages.push(await resolveRunUsage(run, options));
-  return briefNote(compareBrief(briefText, usages));
+  return usages;
+}
+
+// A check's script path (`tests/x.mjs`), else its first code span, whichever the record gives; a check with neither is not compared.
+const checkKey = entry => (/[\w.-]+(?:[\\/][\w.-]+)*\.mjs/u.exec(entry)?.[0] ?? /`([^`]+)`/u.exec(entry)?.[1])?.replaceAll('\\', '/');
+
+/**
+ * Non-blocking notes for the checks an attempt reports as run (`entries`, as reportedChecks of the record check returns them)
+ * that no observed command of its runs matches. Without a resolvable transcript there is nothing to compare, and the note says so.
+ */
+export function commandNotes(entries, usages) {
+  if (!entries.length) return [];
+  const resolved = usages.filter(u => u?.found && Array.isArray(u.commands));
+  if (!resolved.length) return ['reported checks cannot be compared with observed commands: no run transcript is available'];
+  const commands = resolved.flatMap(u => u.commands).map(command => command.replaceAll('\\', '/'));
+  const incomplete = resolved.length < usages.length || resolved.some(u => u.commandsTruncated) ? ' (run data incomplete)' : '';
+  return entries
+    .filter(({ entry }) => { const key = checkKey(entry); return key && !commands.some(command => command.includes(key)); })
+    .map(({ entry }) => `reported check not among the run's observed commands: ${entry.slice(0, 160)}${incomplete}`);
 }
 
 /** A run's role: the record's role, else the agent name the host gave the run (`names` holds Claude's, by run id), else unknown. */

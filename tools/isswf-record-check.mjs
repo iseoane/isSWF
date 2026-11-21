@@ -3,8 +3,8 @@ import { lstat, readdir, readFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { checkRecord } from './isswf-record-check-core.mjs';
-import { attemptBriefNote } from './isswf-run-usage-core.mjs';
+import { checkRecord, reportedChecks } from './isswf-record-check-core.mjs';
+import { attemptUsages, briefNote, commandNotes, compareBrief } from './isswf-run-usage-core.mjs';
 import { nodeFs } from './isswf-snapshot.mjs';
 
 const MAX_BYTES = 1024 * 1024;
@@ -26,16 +26,20 @@ function newAt(project, base) {
   return path => git('cat-file', '-e', `${base}:./${relative(project, path).split(sep).join('/')}`).status !== 0;
 }
 
-// A non-blocking note for an attempt record: the methodology its brief names that its runs never read. Any failure to compare leaves no note.
-async function briefNoteFor(project, path, text) {
+// Non-blocking notes for an attempt record: the methodology its brief names that its runs never read (only when it cites a brief; a failure
+// to compare leaves no such note), and the checks it reports as run that its runs never ran (also when no transcript resolves).
+async function notesFor(project, path, text) {
+  if (!/^A\d{3}\.md$/u.test(basename(path))) return [];
+  const checks = reportedChecks(text);
   const round = /^\W*brief\b.*brief-r(\d+)\.md/imu.exec(text)?.[1];
-  if (!/^A\d{3}\.md$/u.test(basename(path)) || !round) return undefined;
+  if (!checks.length && !round) return [];
   try {
-    const briefText = await readFile(join(dirname(path), `brief-r${round}.md`), 'utf8');
     const claudeDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
     const piDir = process.env.PI_CODING_AGENT_DIR || join(homedir(), '.pi', 'agent');
-    return await attemptBriefNote(text, briefText, { fs: nodeFs, claudeDir, piDir, project });
-  } catch { return undefined; }
+    const usages = await attemptUsages(text, { fs: nodeFs, claudeDir, piDir, project });
+    const briefText = round ? await readFile(join(dirname(path), `brief-r${round}.md`), 'utf8').catch(() => undefined) : undefined;
+    return [briefText === undefined ? undefined : briefNote(compareBrief(briefText, usages)), ...commandNotes(checks, usages)].filter(Boolean);
+  } catch { return []; }
 }
 
 async function checkFile(project, file, isNew) {
@@ -46,8 +50,8 @@ async function checkFile(project, file, isNew) {
   if (!stat.isFile() || stat.size > MAX_BYTES) throw Error(`file must be a regular file of at most ${MAX_BYTES} bytes: ${file}`);
   const jobFiles = basename(path) === 'plan.md' ? await jobFilesFor(path) : undefined;
   const text = await readFile(path, 'utf8');
-  const note = await briefNoteFor(project, path, text);
-  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path) }), ...(note && { notes: [note] }) };
+  const notes = await notesFor(project, path, text);
+  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path) }), ...(notes.length && { notes }) };
 }
 
 /** Parses `--project ABS [--base REV] --file ABS [--file ABS ...]`. */

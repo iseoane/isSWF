@@ -157,6 +157,10 @@ try {
   refuses(review([], { '--out': join(root, 'src', '..', 'src') }), 'out-inside-project');
   refuses(review([], { '--out': 'relative' }), 'invalid-out');
   refuses(review(['--host', 'pi']), 'reviewer-selection-missing');
+  // J007 V002 F8: an incomplete entry under the first reviewer spelling is refused; the complete second spelling is not tried instead.
+  await write('.factory/dispatch-selection.json', JSON.stringify({ schemaVersion: 1, agents: { claude: { 'isswf:isswf-reviewer': { model: 'opus' }, 'isswf-reviewer': { model: 'opus', effort: 'medium' } } } }));
+  refuses(review(), 'reviewer-selection-missing');
+  await write('.factory/dispatch-selection.json', JSON.stringify(selection));
   refuses(tool(['review', '--project', root]), 'usage');
   refuses(tool(['frobnicate']), 'usage');
   await assert.rejects(stat(join(root, 'handoffs')), 'a refused --out is not created inside the project');
