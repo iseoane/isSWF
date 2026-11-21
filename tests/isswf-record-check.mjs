@@ -149,7 +149,7 @@ for (const path of recordPaths('A001.md')) {
   assert.deepEqual(checkCodes(': `node tests/x.mjs .` exit 0', true, path), ['check-without-commit'], 'a run check without a commit');
 }
 assert.deepEqual(checkCodes(': `node tests/x.mjs .` exit 0', false), [], 'a record that existed at the base keeps its wording');
-assert.deepEqual(checkCodes(': `node tests/x.mjs .` exit 0', undefined), [], 'without a base nothing is new');
+assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: withChecks(': `node tests/x.mjs .` exit 0') }).violations, [], 'without a base nothing is new');
 for (const short of ['abc1234', 'a'.repeat(39), 'a'.repeat(41)]) assert.deepEqual(checkCodes(`: node tests/x.mjs . exit 0 at ${short}`), ['check-without-commit'], `not a full commit: ${short.length} hex`);
 for (const skipped of ['Not run: node tests/x.mjs . (needs a live host)', 'node tests/x.mjs . skipped: outside the tier', 'tests/x.mjs not run, check-quality is a close check', 'None.']) assert.deepEqual(checkCodes(`: ${skipped}`), [], skipped);
 const lineChecks = withChecks(`: node tests/a.mjs . exit 0 at ${sha}; node tests/b.mjs . exit 0; not run: tests/c.mjs`);

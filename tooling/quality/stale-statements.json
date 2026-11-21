@@ -66,6 +66,12 @@
       "regex": true,
       "reason": "TDD evidence is defined once, by the attempt template Method application report",
       "since": "I0058/J008"
+    },
+    {
+      "phrase": "Report what ran and its observed result",
+      "scope": ".agents/**",
+      "reason": "a check reported as run names the commit it ran at; the attempt template field Checks run and observed results defines it",
+      "since": "I0058/J001"
     }
   ]
 }

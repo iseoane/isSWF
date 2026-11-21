@@ -41,7 +41,7 @@ Before ordinary edits, verify the effective writing-workspace policy and actual 
    - After a second failed fix against the same check, record their shared premise in the attempt record and either challenge it with evidence or return to the coordinator before a third fix.
    - Add a new test only when it covers a behavior or risk named in the acceptance criteria or brief; do not add a test that duplicates existing coverage, restates the implementation, or asserts a constant it defines.
    - Run a mutation or sensitivity experiment only when the brief or a selected skill asks for one, or a reviewer proposes one for a concrete doubt; do not add one on your own. Follow [targeted detection experiments](references/review.md#targeted-detection-experiments). When its results serve as substitute evidence for missing RED, record them in the attempt template's `Retained substitute evidence` field, which defines what to retain and link. This retention does not turn retrospective evidence into a red-first cycle.
-   - Report what ran and its observed result. A successful build or test suite does not prove behavior it did not exercise.
+   - Report each check as a command, its observed result and the full commit SHA it ran at; a check not run or skipped carries its reason instead of a SHA. A successful build or test suite does not prove behavior it did not exercise.
 6. Commit only when the brief explicitly authorizes commits and the checkpoint is verified. Label partial work as partial. PR creation or updates, push, merge, deploy, and external side effects are not implied by permission to edit or commit.
 
 ## Boundaries
