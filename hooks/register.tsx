@@ -221,7 +221,7 @@ function loadBriefs($: EngineInterface, paths: string[]) {
     for (const path of pending) briefs.set(path, await $.fs.read(path).catch(() => ''))
     for (const path of pending) briefsLoading.delete(path)
     if (pending.length) scheduleRefresh($)
-  })()
+  })().catch(() => {})
 }
 
 function scheduleRefresh($: EngineInterface) {

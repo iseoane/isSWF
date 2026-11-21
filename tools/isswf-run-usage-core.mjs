@@ -12,7 +12,7 @@ const ID = {
 };
 const COUNTERS = ['input', 'output', 'cacheRead', 'cacheWrite'];
 
-const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, usedHostGuides: UNKNOWN, costUsd: UNKNOWN, readPaths: UNKNOWN, commands: UNKNOWN });
+const unknownUsage = reason => ({ found: false, reason, finished: UNKNOWN, model: UNKNOWN, tokens: UNKNOWN, durationMs: UNKNOWN, skills: UNKNOWN, agentsReads: UNKNOWN, usedSkills: UNKNOWN, usedReferences: UNKNOWN, usedHostGuides: UNKNOWN, costUsd: UNKNOWN, readPaths: UNKNOWN, commands: UNKNOWN, editedPaths: UNKNOWN });
 
 async function listDirs(fs, dir) {
   try {
@@ -63,7 +63,7 @@ async function locatePi(fs, piDir, project, id) {
   return found[0] ?? null;
 }
 
-// Bounds of the observed lists; a cut is disclosed as `observedTruncated`.
+// Bounds of the observed lists; a cut is disclosed as `readsTruncated`, `commandsTruncated` or `editsTruncated`.
 const OBSERVED = { reads: 200, commands: 100, commandChars: 300 };
 
 // Forward slashes always; project-relative when inside it. A Windows drive path matches its project without regard to case.
@@ -81,13 +81,21 @@ const blockText = content => (typeof content === 'string' ? content
   : Array.isArray(content) ? content.map(b => (typeof b === 'string' ? b : typeof b?.text === 'string' ? b.text : '')).join('\n') : '');
 
 function collector(project) {
-  const state = { observed: { reads: [], commands: [], truncated: false }, first: null, last: null, models: new Set(), skills: {}, agentsReads: {}, invoked: {}, reads: [], edited: new Set(), assigned: [], briefCalls: new Set(), readCalls: new Map(), contents: new Map() };
+  const state = { observed: { reads: [], commands: [], edits: [], cut: new Set() }, first: null, last: null, models: new Set(), skills: {}, agentsReads: {}, invoked: {}, reads: [], edited: new Set(), assigned: [], briefCalls: new Set(), readCalls: new Map(), contents: new Map() };
   const count = (map, key) => { map[key] = (map[key] ?? 0) + 1; };
   const relative = path => {
     if (typeof path !== 'string') return null;
     const normalized = path.replace(/\\/g, '/');
     const at = normalized.lastIndexOf('.agents/');
     return at < 0 ? null : normalized.slice(at);
+  };
+  // Distinct paths in first-seen order, up to the bound; a path past it flags that list as cut.
+  const listPath = (list, path) => {
+    if (typeof path !== 'string') return;
+    const shown = projectRelative(path, project);
+    if (state.observed[list].includes(shown)) return;
+    if (state.observed[list].length < OBSERVED.reads) state.observed[list].push(shown);
+    else state.observed.cut.add(list);
   };
   return {
     state,
@@ -103,19 +111,12 @@ function collector(project) {
     command(text) {
       const { commands } = state.observed;
       if (typeof text !== 'string') return;
-      if (commands.length >= OBSERVED.commands) { state.observed.truncated = true; return; }
-      if (text.length > OBSERVED.commandChars) state.observed.truncated = true;
+      if (commands.length >= OBSERVED.commands) { state.observed.cut.add('commands'); return; }
+      if (text.length > OBSERVED.commandChars) state.observed.cut.add('commands');
       commands.push(text.slice(0, OBSERVED.commandChars));
     },
     read(path, callId) {
-      if (typeof path === 'string') {
-        const shown = projectRelative(path, project);
-        const { reads } = state.observed;
-        if (!reads.includes(shown)) {
-          if (reads.length < OBSERVED.reads) reads.push(shown);
-          else state.observed.truncated = true;
-        }
-      }
+      listPath('reads', path);
       if (typeof path === 'string' && BRIEF.test(path.replace(/\\/g, '/')) && callId) state.briefCalls.add(callId);
       const rel = relative(path);
       if (!rel) return;
@@ -126,7 +127,7 @@ function collector(project) {
       const skill = rel.match(/\/([^/]+)\/SKILL\.md$/u);
       if (skill) this.skill(skill[1]);
     },
-    edit(path) { const rel = relative(path); if (rel) state.edited.add(rel); },
+    edit(path) { listPath('edits', path); const rel = relative(path); if (rel) state.edited.add(rel); },
     // The assignment: the run's prompts, its system profile (Pi) and the text of the briefs it read.
     assign(content) { const text = blockText(content); if (text) state.assigned.push(text); },
     result(callId, content) {
@@ -212,7 +213,7 @@ function costUsd(tokens, model) {
 // `invalid` names the first failing check of a found transcript whose valid entries were still summed.
 function finish(collected, counters, model, finished, invalid) {
   const { first, last, skills, agentsReads, observed } = collected.state;
-  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, ...methodology(collected.state, true), costUsd: costUsd(counters, model), readPaths: observed.reads, commands: observed.commands, ...(observed.truncated && { observedTruncated: true }) };
+  const usage = { found: true, finished, model, tokens: counters, durationMs: first === null ? UNKNOWN : last - first, skills, agentsReads, ...methodology(collected.state, true), costUsd: costUsd(counters, model), readPaths: observed.reads, commands: observed.commands, editedPaths: observed.edits, ...Object.fromEntries([...observed.cut].map(list => [`${list}Truncated`, true])) };
   return invalid ? { ...usage, tokensPartial: true, ...(usage.costUsd !== UNKNOWN && { costPartial: true }), reason: invalid } : usage;
 }
 
@@ -397,17 +398,20 @@ const BRIEF_NAMES = /\.agents\/[\w./-]+\.md|(?<![\w./-])skills\/[\w./-]+\.md/gu;
 
 /**
  * The methodology files a brief names that none of an attempt's runs read. A skill invoked through the Skill tool
- * counts as read. `partial` is set when a run is unresolved or its read list was cut; with no resolved run the
- * result is undefined, as nothing can be compared.
+ * counts as read. `partial` is set when a run is unresolved, its read or edit list was cut or its tokens are partial; with no
+ * resolved run the result is undefined, as nothing can be compared.
  */
 export function compareBrief(briefText, usages) {
   const resolved = usages.filter(u => u?.found && Array.isArray(u.readPaths));
   if (!resolved.length) return undefined;
-  const read = new Set(resolved.flatMap(u => [...u.readPaths, ...Object.keys(u.agentsReads ?? {})]));
+  // A file the run wrote is its work, not methodology it read.
+  const same = (a, b) => a === b || a.endsWith(`/${b}`) || b.endsWith(`/${a}`);
+  const edited = resolved.flatMap(u => u.editedPaths ?? []);
+  const read = resolved.flatMap(u => [...u.readPaths, ...Object.keys(u.agentsReads ?? {})]).filter(p => !edited.some(e => same(p, e)));
   const invoked = new Set(resolved.flatMap(u => Object.keys(u.skills ?? {})));
-  const seen = path => [...read].some(p => p === path || p.endsWith(`/${path}`)) || invoked.has(path.match(/^(?:\.agents\/)?skills\/([^/]+)\/SKILL\.md$/u)?.[1]);
+  const seen = path => read.some(p => p === path || p.endsWith(`/${path}`)) || invoked.has(path.match(/^(?:\.agents\/)?skills\/([^/]+)\/SKILL\.md$/u)?.[1]);
   const named = [...new Set(briefText.replace(/\\/g, '/').match(BRIEF_NAMES) ?? [])];
-  return { named, unread: named.filter(path => !seen(path)), partial: resolved.length < usages.length || resolved.some(u => u.observedTruncated) };
+  return { named, unread: named.filter(path => !seen(path)), partial: resolved.length < usages.length || resolved.some(u => u.readsTruncated || u.editsTruncated || u.tokensPartial) };
 }
 
 /** The non-blocking note for a comparison with something unread, else undefined. */
