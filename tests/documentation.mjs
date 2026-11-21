@@ -21,6 +21,8 @@ try {
   for (const path of ['docs', '.agents', 'README.md', 'README.es.md', 'GLOSSARY.md', 'GLOSSARY.es.md', 'AGENTS.md']) {
     await cp(join(source, path), join(root, path), { recursive: true });
   }
+  await mkdir(join(root, 'tooling/quality'), { recursive: true });
+  await cp(join(source, 'tooling/quality/stale-statements.json'), join(root, 'tooling/quality/stale-statements.json'));
   await mkdir(join(root, '.factory'));
   for (const path of ['models.json', 'templates']) await cp(join(source, '.factory', path), join(root, '.factory', path), { recursive: true });
   check();
@@ -32,7 +34,7 @@ try {
   const technical = join(root, 'docs/host-portability.md');
   const guide = await readFile(technical);
   await writeFile(technical, Buffer.concat([guide, Buffer.from('\nRun `node .audit/verify-obsolete.mjs`.\n')]));
-  check(/Historical procedure in current guide/u);
+  check(/Stale statement in current guide/u);
   await writeFile(technical, guide);
   check();
   console.log('PASS documentation: current links and mirrors, historical-procedure refusal; disposable mutations only, no examples executed');

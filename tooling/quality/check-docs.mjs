@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { findStale, loadStatements } from './stale-statements.mjs';
 
 const root = resolve(process.argv[2] || fileURLToPath(new URL('../../', import.meta.url)));
 const english = (await readdir(resolve(root, 'docs/en'))).filter(name => name.endsWith('.md')).sort();
@@ -52,10 +53,11 @@ for (const pair of pairs) {
   const commands = text => [...text.matchAll(/```(?:bash|sh)\n([\s\S]*?)\n```/gu)].map(match => match[1]);
   assert.deepEqual(commands(texts[0]), commands(texts[1]), `${pair[0]}: mirror shell examples differ`);
 }
+const statements = await loadStatements(root);
 const technical = (await readdir(resolve(root, 'docs'))).filter(name => name.endsWith('.md') && !name.startsWith('README'));
 for (const name of technical) {
   const text = await readFile(resolve(root, 'docs', name), 'utf8');
-  assert.doesNotMatch(text, /node \.audit\/verify-|bounded live validation|remain pending in J[0-9]/iu, `Historical procedure in current guide: ${name}`);
+  assert.deepEqual(findStale(statements, new Map([[`docs/${name}`, text]])), [], `Stale statement in current guide: ${name}`);
   for (const [, target] of text.matchAll(/\[[^\]]*\]\(([^)]+)\)/gu)) {
     if (/^[a-z]+:/iu.test(target)) continue;
     const [local, anchor] = target.split('#');
