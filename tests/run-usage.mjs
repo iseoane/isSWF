@@ -98,21 +98,22 @@ try {
     usedSkills: { 'isswf-review': 1, 'isswf-tdd': 1 }, usedReferences: { '.agents/roles/references/design-principles.md': 1, '.agents/roles/worker.md': 3, '.agents/roles/references/execution-principles.md': 1 }, usedHostGuides: {}, costUsd: 'unknown',
     readPaths: ['/repo/.factory/initiatives/I0001/jobs/J001/brief-r1.md', '/repo/.agents/roles/references/review.md', '/repo/.agents/roles/references/design-principles.md', '/repo/.agents/roles/worker.md', '/repo/.agents/roles/references/execution-principles.md', '/repo/.agents/skills/isswf-coordinator/SKILL.md', 'C:/repo/.agents/skills/isswf-tdd/SKILL.md', '/repo/README.md', 'src/a.mjs'],
     commands: ['node tests/run-usage.mjs .', 'Get-Content README.md'],
+    editedPaths: ['/repo/.agents/roles/references/review.md'],
   });
   // The advisor iteration is billed on top of the request's top-level usage.
-  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', readPaths: [], commands: [] });
+  assert.deepEqual(session, { found: true, finished: true, model: 'mixed', tokens: { input: 105, output: 56, cacheRead: 7, cacheWrite: 8 }, durationMs: 10000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', readPaths: [], commands: [], editedPaths: [] });
   assert.deepEqual(pi, {
     found: true, finished: true, model: 'pi-test-1',
     tokens: { input: 101, output: 12, cacheRead: 53, cacheWrite: 9 }, durationMs: 3000,
-    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', agent: 'isswf-worker', readPaths: ['/repo/.agents/skills/isswf-debug/SKILL.md'], commands: ['git status'],
+    skills: { 'isswf-debug': 1 }, agentsReads: { '.agents/skills/isswf-debug/SKILL.md': 1 }, usedSkills: { 'isswf-debug': 1 }, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', agent: 'isswf-worker', readPaths: ['/repo/.agents/skills/isswf-debug/SKILL.md'], commands: ['git status'], editedPaths: [],
   });
   const [missing, openPi, broken, escape] = review.runs.map(r => r.usage);
-  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', usedHostGuides: 'unknown', costUsd: 'unknown', readPaths: 'unknown', commands: 'unknown' };
+  const unknown = { finished: 'unknown', model: 'unknown', tokens: 'unknown', durationMs: 'unknown', skills: 'unknown', agentsReads: 'unknown', usedSkills: 'unknown', usedReferences: 'unknown', usedHostGuides: 'unknown', costUsd: 'unknown', readPaths: 'unknown', commands: 'unknown', editedPaths: 'unknown' };
   assert.deepEqual(missing, { found: false, reason: 'transcript-not-found', ...unknown });
   // Valid entries of a found transcript are still summed and the result is marked partial.
   assert.deepEqual(broken, {
     found: true, finished: true, model: 'claude-test-1', tokens: { input: 1, output: 2, cacheRead: 3, cacheWrite: 4 },
-    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', readPaths: [], commands: [], tokensPartial: true, reason: 'malformed-line',
+    durationMs: 1000, skills: {}, agentsReads: {}, usedSkills: {}, usedReferences: {}, usedHostGuides: {}, costUsd: 'unknown', readPaths: [], commands: [], editedPaths: [], tokensPartial: true, reason: 'malformed-line',
   });
   assert.deepEqual(escape, { found: false, reason: 'invalid-id', ...unknown });
   assert.equal(openPi.finished, false, 'a Pi child without its meta file is unfinished');
@@ -236,14 +237,19 @@ try {
   const windows = await resolve1([call('Read', { file_path: 'C:\\work\\proj\\src\\a.mjs' }), call('Read', { file_path: 'c:\\work\\PROJ\\docs\\b.md' }), call('Read', { file_path: 'C:\\work\\project2\\x.md' }), call('Read', { file_path: 'C:\\work\\proj\\src\\a.mjs' }), call('Bash', { command: 'dir' })]);
   assert.deepEqual(windows.readPaths, ['src/a.mjs', 'docs/b.md', 'C:/work/project2/x.md']);
   assert.deepEqual(windows.commands, ['dir']);
-  assert.equal('observedTruncated' in windows, false);
+  assert.deepEqual([windows.readsTruncated, windows.commandsTruncated, windows.editsTruncated], [undefined, undefined, undefined]);
 
   const many = await resolve1([...Array.from({ length: 205 }, (_, i) => call('Read', { file_path: `/repo/f${i}.md` })), ...Array.from({ length: 105 }, (_, i) => call('Bash', { command: i === 0 ? 'x'.repeat(400) : `echo ${i}` }))]);
   assert.equal(many.readPaths.length, 200);
   assert.equal(many.readPaths[199], '/repo/f199.md');
   assert.equal(many.commands.length, 100);
   assert.equal(many.commands[0], 'x'.repeat(300));
-  assert.equal(many.observedTruncated, true);
+  assert.deepEqual([many.readsTruncated, many.commandsTruncated], [true, true]);
+  // Each cut is flagged on its own: a command-only cut leaves the read list complete.
+  const shell = await resolve1(Array.from({ length: 105 }, (_, i) => call('Bash', { command: `echo ${i}` })));
+  assert.deepEqual([shell.readsTruncated, shell.commandsTruncated], [undefined, true]);
+  const wrote = await resolve1([call('Write', { file_path: 'C:\\work\\proj\\notes.md' }), call('Edit', { file_path: '/repo/.agents/roles/worker.md' })]);
+  assert.deepEqual(wrote.editedPaths, ['notes.md', '/repo/.agents/roles/worker.md']);
 }
 
 // The brief comparison names each `.agents/` or `skills/` file the brief mentions that the run never read.
@@ -260,7 +266,11 @@ try {
   assert.equal(compareBrief(brief, [{ found: false, readPaths: 'unknown' }]), undefined, 'an unresolved run compares nothing');
   assert.equal(compareBrief(brief, []), undefined);
   assert.equal(compareBrief('nothing to read', [run([])]).unread.length, 0);
-  assert.equal(compareBrief(brief, [run([], { observedTruncated: true })]).partial, true);
+  assert.equal(compareBrief(brief, [run([], { readsTruncated: true })]).partial, true);
+  assert.equal(compareBrief(brief, [run([], { commandsTruncated: true })]).partial, false, 'a cut command list does not make the reads partial');
+  assert.equal(compareBrief(brief, [run([], { tokensPartial: true })]).partial, true, 'a partly read transcript is partial');
+  // A file the run wrote is its work, not methodology it read.
+  assert.deepEqual(compareBrief(brief, [run(['/r/.agents/roles/worker.md', '/r/.agents/roles/references/comments.md'], { editedPaths: ['/r/.agents/roles/references/comments.md'] })]).unread, ['.agents/skills/isswf-tdd/SKILL.md', '.agents/roles/references/comments.md', 'skills/isswf-coordinator/SKILL.md']);
 }
 
 // A non-blocking note on an attempt record that cites a brief: the record check names the unread methodology and still exits on its own verdict.
