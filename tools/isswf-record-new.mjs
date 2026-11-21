@@ -94,9 +94,15 @@ export async function requireBrief({ root }, brief, git, checkpoint) {
   if (!info?.isFile() && showAt(git, checkpoint, brief.path) === undefined) throw recordError('brief-not-found');
 }
 
+/** Whether `checkpoint` is in the history of the tree's HEAD; an unborn HEAD has no history. */
+function isAncestor(git, checkpoint) {
+  try { git(['merge-base', '--is-ancestor', checkpoint, 'HEAD']); return true; } catch { return false; }
+}
+
 const planJob = (text, job) => parsePlan(text).find(candidate => candidate.id === job);
 
-// The job must be in progress in the working tree's plan or, when that plan lacks it or is older, in the plan at the checkpoint.
+// The job must be in progress in the working tree's plan or in the plan at the checkpoint. When the tree's plan lists the job, the checkpoint counts only if it is outside
+// the tree's history: a checkpoint already in that history is older than the tree's plan, while one on main that the branch has not merged yet is newer.
 export async function requireInProgress({ root, state }, initiative, job, git, checkpoint) {
   const planPath = `${state}/initiatives/${initiative}/plan.md`;
   const text = await readFile(join(root, planPath), 'utf8').catch(error => { if (error.code !== 'ENOENT') throw recordError('unreadable-plan'); });
@@ -104,6 +110,7 @@ export async function requireInProgress({ root, state }, initiative, job, git, c
   if (text !== undefined) {
     try { found = planJob(text, job); } catch (error) { throw recordError('current-plan-invalid', { planError: planErrorDetail(error) }); }
     if (found?.reportedStatus === 'in-progress') return;
+    if (found && isAncestor(git, checkpoint)) throw recordError('job-not-in-progress', { job });
   }
   const atCheckpoint = showAt(git, checkpoint, planPath);
   try { if (atCheckpoint !== undefined && planJob(atCheckpoint, job)?.reportedStatus === 'in-progress') return; } catch { /* an unparsable checkpoint plan grants nothing */ }
@@ -133,13 +140,14 @@ export async function createRecord(input) {
   if (checkout !== undefined && !isAbsolute(checkout)) throw recordError('invalid-checkout');
   if (branch !== undefined && !/^[^\s\p{Cc}~^:?*[\\]{1,200}$/u.test(branch)) throw recordError('invalid-branch');
   const git = await gitIn(target.root);
+  assertCommit(git, checkpoint, 'checkpoint');
   await requireInProgress(target, initiative, job, git, checkpoint);
   await requireBrief(target, brief, git, checkpoint);
 
   const names = await recordNames(target, git);
   const expectedId = nextRecordId(kind, names);
   if (id !== expectedId) throw recordError('id-not-next', { expected: expectedId });
-  for (const [sha, flag] of [[checkpoint, 'checkpoint'], [base, 'base'], [candidate, 'candidate']]) if (sha !== undefined) assertCommit(git, sha, flag);
+  for (const [sha, flag] of [[base, 'base'], [candidate, 'candidate']]) if (sha !== undefined) assertCommit(git, sha, flag);
 
   const profilePath = `.agents/roles/${role}.md`;
   const selectionPath = `${target.state}/dispatch-selection.json`;
