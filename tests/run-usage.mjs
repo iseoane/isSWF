@@ -133,6 +133,9 @@ try {
   assert.equal(reads.filter(p => p === agentPath).length, 1, 'finished run is cached');
   assert.equal(reads.filter(p => p === openPath).length, 2, 'unfinished run is not cached');
   assert.deepEqual([...options.cache.keys()], ['claude agent a1b2c3']);
+  // A cached finished Pi run keeps the agent name its transcript file carries.
+  const piOptions = { ...options, cache: new Map() };
+  for (let i = 0; i < 2; i++) assert.equal((await resolveRunUsage({ host: 'pi', kind: 'child', id: 'run-pi-1' }, piOptions)).agent, 'isswf-worker', `call ${i + 1}`);
   // A same-ID continuation appends to a finished transcript; the size change invalidates the entry.
   await writeFile(agentPath, agentTranscript + jsonl([user('2026-01-01T00:01:00.000Z')]));
   assert.equal((await resolveRunUsage({ host: 'claude', kind: 'agent', id: 'a1b2c3' }, options)).finished, false);
