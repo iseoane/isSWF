@@ -1,8 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import { lstat, readdir, readFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { checkRecord } from './isswf-record-check-core.mjs';
+import { attemptBriefNote } from './isswf-run-usage-core.mjs';
+import { nodeFs } from './isswf-snapshot.mjs';
 
 const MAX_BYTES = 1024 * 1024;
 
@@ -23,6 +26,18 @@ function newAt(project, base) {
   return path => git('cat-file', '-e', `${base}:./${relative(project, path).split(sep).join('/')}`).status !== 0;
 }
 
+// A non-blocking note for an attempt record: the methodology its brief names that its runs never read. Any failure to compare leaves no note.
+async function briefNoteFor(project, path, text) {
+  const round = /^\W*brief\b.*brief-r(\d+)\.md/imu.exec(text)?.[1];
+  if (!/^A\d{3}\.md$/u.test(basename(path)) || !round) return undefined;
+  try {
+    const briefText = await readFile(join(dirname(path), `brief-r${round}.md`), 'utf8');
+    const claudeDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+    const piDir = process.env.PI_CODING_AGENT_DIR || join(homedir(), '.pi', 'agent');
+    return await attemptBriefNote(text, briefText, { fs: nodeFs, claudeDir, piDir, project });
+  } catch { return undefined; }
+}
+
 async function checkFile(project, file, isNew) {
   const path = resolve(file);
   const inside = relative(project, path);
@@ -30,7 +45,9 @@ async function checkFile(project, file, isNew) {
   const stat = await lstat(path);
   if (!stat.isFile() || stat.size > MAX_BYTES) throw Error(`file must be a regular file of at most ${MAX_BYTES} bytes: ${file}`);
   const jobFiles = basename(path) === 'plan.md' ? await jobFilesFor(path) : undefined;
-  return { file: path, ...checkRecord({ path, text: await readFile(path, 'utf8'), jobFiles, newRecord: isNew?.(path) }) };
+  const text = await readFile(path, 'utf8');
+  const note = await briefNoteFor(project, path, text);
+  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path) }), ...(note && { notes: [note] }) };
 }
 
 /** Parses `--project ABS [--base REV] --file ABS [--file ABS ...]`. */
