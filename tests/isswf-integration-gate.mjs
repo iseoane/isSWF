@@ -129,18 +129,65 @@ try {
     assert.deepEqual(await checker(base)(command), {}, command);
   }
 
-  // off disables the gate; the mode is read from the setup record at HEAD, not the working tree, and `.isswf/` wins once it exists.
+  // off disables the gate. The mode is read from the setup record on <remote>/<base>, so a line in the working tree or in a commit of the branch under review is no setting.
   const off = makeRepo('off', '- Integration gate: off');
   edit(off, 'tools/a.mjs', 'a\n', 'a');
   assert.deepEqual(await checker(off)('git push origin feat'), {});
-  write(off, '.factory/project-setup.md', `# Setup\n\n${ENFORCE}\n`);
-  assert.deepEqual(await checker(off)('git push origin feat'), {}, 'a working-tree line is no setting');
-  commit(off, 'enforce');
-  assert.ok((await checker(off)('git push origin feat')).deny);
-  edit(off, '.isswf/project-setup.md', '# Setup\n', 'new state');
-  const modern = await checker(off)('git push origin feat');
-  assert.equal(modern.deny, undefined, 'the new state without the line is observe');
-  assert.ok(modern.note);
+  edit(off, '.factory/project-setup.md', `# Setup\n\n${ENFORCE}\n`, 'branch sets enforce');
+  assert.deepEqual(await checker(off)('git push origin feat'), {}, 'a branch commit cannot enable the gate');
+  const own = makeRepo('own', ENFORCE);
+  edit(own, '.factory/project-setup.md', '# Setup\n\n- Integration gate: off\n', 'branch sets off');
+  assert.ok((await checker(own)('git push origin feat')).deny, 'a branch commit cannot disable its own gate');
+  const noBase = join(temp, 'no-base');
+  mkdirSync(noBase);
+  run(noBase, 'init', '-q', '-b', 'main', '.');
+  run(noBase, 'config', 'user.email', 't@example.invalid');
+  run(noBase, 'config', 'user.name', 'T');
+  write(noBase, '.factory/project-setup.md', `# Setup\n\n${ENFORCE}\n`);
+  commit(noBase, 'start');
+  run(noBase, 'switch', '-q', '-c', 'feat');
+  edit(noBase, 'tools/a.mjs', 'a\n', 'a');
+  run(noBase, 'switch', '-q', 'main');
+  assert.ok((await checker(noBase)('git merge feat')).deny, 'without the base ref the mode is read at HEAD');
+
+  // The selected state is .isswf/ once its setup record is on the base: its line sets the mode and only its initiatives/ are records.
+  const modern = makeRepo('modern', ENFORCE);
+  run(modern, 'switch', '-q', 'main');
+  write(modern, '.isswf/project-setup.md', '# Setup\n\n- Integration gate: observe\n');
+  commit(modern, 'new state');
+  run(modern, 'push', '-q', 'origin', 'main');
+  run(modern, 'switch', '-q', '-C', 'feat');
+  edit(modern, 'tools/a.mjs', 'a\n', 'a');
+  const observing = await checker(modern)('git push origin feat');
+  assert.equal(observing.deny, undefined, 'the .isswf/ setup wins over the legacy one');
+  assert.ok(observing.note);
+  const strict = makeRepo('strict', ENFORCE);
+  run(strict, 'switch', '-q', 'main');
+  write(strict, '.isswf/project-setup.md', `# Setup\n\n${ENFORCE}\n`);
+  commit(strict, 'new state');
+  run(strict, 'push', '-q', 'origin', 'main');
+  run(strict, 'switch', '-q', '-C', 'feat');
+  edit(strict, '.isswf/initiatives/I0001/plan.md', 'x\n', 'records');
+  assert.deepEqual(await checker(strict)('git push origin feat'), {}, 'records of the selected state need no stamp');
+  const legacyRecords = edit(strict, '.factory/initiatives/I0001/plan.md', 'y\n', 'legacy records');
+  assert.match((await checker(strict)('git push origin feat')).deny ?? '', new RegExp(legacyRecords.slice(0, 7), 'u'), 'the other state directory is not a record');
+
+  // gh pr create: --head and -H name the branch to check, and gh global flags may come before pr.
+  const gh = makeRepo('gh', ENFORCE);
+  const ghHead = edit(gh, 'tools/a.mjs', 'a\n', 'a');
+  run(gh, 'switch', '-q', 'main');
+  for (const command of ['gh pr create --head feat --title t', 'gh pr create -H feat', 'gh pr create --head=feat', 'gh --repo owner/name pr create --head feat', 'gh -R owner/name pr create -H feat']) {
+    assert.match((await checker(gh)(command)).deny ?? '', new RegExp(ghHead.slice(0, 7), 'u'), command);
+  }
+  assert.deepEqual(await checker(gh)('gh pr create --title t'), {}, 'without --head the current branch, here the base, is checked');
+  run(gh, 'switch', '-q', 'feat');
+  assert.match((await checker(gh)('gh --repo owner/name pr create --title t')).deny ?? '', /integration gate/u, 'a global flag before pr');
+  assert.deepEqual(await checker(gh)('gh --repo owner/name pr view'), {});
+  assert.deepEqual(await checker(gh)('gh pr create --head fork-owner:topic'), {}, 'a head that is not a local branch is left alone');
+  run(gh, 'switch', '-q', 'main');
+  for (const command of ['git merge --cleanup strip feat', 'git merge --cleanup=strip feat']) {
+    assert.match((await checker(gh)(command)).deny ?? '', new RegExp(ghHead.slice(0, 7), 'u'), command);
+  }
 
   // A stamp written from a linked worktree is found from the main checkout, and the reverse.
   const shared = makeRepo('shared', ENFORCE);
