@@ -188,6 +188,14 @@ node tooling/maintenance/workflow-citations.mjs <new-revision>
 node tooling/maintenance/workflow-citations.mjs --write <new-revision>
 ```
 
+
+Para medir los minutos de reloj de CI por rama de pull request y por push (solo desarrollo; el script no hace llamadas de red):
+
+```sh
+gh run list --limit 100 --json event,headBranch,conclusion,createdAt,updatedAt,databaseId | node tooling/maintenance/ci-minutes.mjs
+```
+
+Muestra el número de ejecuciones, las canceladas y los minutos totales de cada grupo `<evento> <rama>`, y un total general.
 Cada rango de líneas citado se busca por texto exacto en la nueva revisión. Un rango que aparece exactamente una vez se mueve con su texto. Un rango cuyo texto cambió, desapareció o aparece más de una vez se lista como `UNRESOLVED` con su ruta, el rango anterior y el encabezado que lo contiene, nunca se adivina y hace que el comando termine con código distinto de cero. `--write` actualiza las citas movidas y la revisión fijada, así que corrige a mano las no resueltas y después regenera los diagramas.
 
 ## Fuente de la verdad e historial

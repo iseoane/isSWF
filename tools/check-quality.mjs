@@ -52,6 +52,7 @@ const docsResult = run(process.execPath, [join(source, 'tooling/quality/check-do
 const documentationResult = run(process.execPath, [join(source, 'tests/documentation.mjs'), source]);
 const workflowDiagramsResult = run(process.execPath, [join(source, 'tests/workflow-diagrams.mjs'), source]);
 run(process.execPath, [join(source, 'tests/workflow-citations.mjs'), source]);
+run(process.execPath, [join(source, 'tests/ci-minutes.mjs'), source]);
 const packageMetadataResult = run(process.execPath, [join(source, 'tests/package-metadata.mjs'), source]);
 console.log(packageMetadataResult);
 const revision = run('git', ['rev-parse', 'HEAD']);
