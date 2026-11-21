@@ -85,13 +85,12 @@ function resolutionViolations(text) {
 
 const CHECKS_LABEL = /^\s*(?:[-*]\s+)?Checks run and observed results\b[^:]*:/u;
 const COMMIT = /(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])/u;
-const NOT_RUN = /\b(?:not run|skipped)\b/iu;
-// An entry reports a check as run when it states an outcome.
-const OUTCOME = /\bexit \d+\b|\b(?:pass(?:ed)?|fail(?:ed)?|clean|ok)\b/iu;
+// An entry reports a check as run when it states an outcome; "not run" or "skipped" beside an outcome does not exempt it.
+const OUTCOME = /\bexits? \d+\b|\b(?:pass(?:es|ed)?|fail(?:s|ed)?|clean|ok)\b/iu;
 
 /**
  * The checks an attempt record reports as run: the entries of its checks field (the label's own text and the bullets nested
- * under it, each split at "; ") that state an outcome and do not read as not run or skipped. `named` is set when the entry or the
+ * under it, each split at "; ") that state an outcome. `named` is set when the entry or the
  * label's own text carries a full commit SHA.
  * @returns {{ line: number, entry: string, named: boolean }[]}
  */
@@ -104,7 +103,7 @@ export function reportedChecks(text) {
   const add = (index, raw) => {
     for (const piece of raw.split(/;\s+/u)) {
       const entry = piece.trim();
-      if (entry !== '' && !/^`?</u.test(entry) && !NOT_RUN.test(entry) && OUTCOME.test(entry)) checks.push({ line: index + 1, entry, named: COMMIT.test(label) || COMMIT.test(entry) });
+      if (entry !== '' && !/^`?</u.test(entry) && OUTCOME.test(entry)) checks.push({ line: index + 1, entry, named: COMMIT.test(label) || COMMIT.test(entry) });
     }
   };
   add(start, lines[start].slice(label.length));

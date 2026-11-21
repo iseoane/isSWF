@@ -26,8 +26,8 @@ function newAt(project, base) {
   return path => git('cat-file', '-e', `${base}:./${relative(project, path).split(sep).join('/')}`).status !== 0;
 }
 
-// Non-blocking notes for an attempt record: the methodology its brief names that its runs never read, and the checks it reports as run
-// that its runs never ran. Any failure to compare leaves no note.
+// Non-blocking notes for an attempt record: the methodology its brief names that its runs never read (only when it cites a brief; a failure
+// to compare leaves no such note), and the checks it reports as run that its runs never ran (also when no transcript resolves).
 async function notesFor(project, path, text) {
   if (!/^A\d{3}\.md$/u.test(basename(path))) return [];
   const checks = reportedChecks(text);
