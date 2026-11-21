@@ -30,7 +30,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - Depends on: None
 - Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
-- Next step: Worker adds the stamp and integration gate (brief r2); pane, observed reads and brief comparison follow.
+- Next step: Pane units (roles, host guides, no-reads line) in batch 1; then observed reads and brief comparison.
 
 ### Acceptance
 
@@ -50,6 +50,7 @@ Deferred candidates (low value; add a job only after another occurrence):
 - 2026-11-21: operator: after closing I0063, do all of I0058 starting with J001; the stamp and commit gate make the per-branch `isswf-verify --tier job` run deterministic (the coordinator skipped it in the I0063 pilot).
 - 2026-11-21: research (brief r1, researcher run, read-only) proposed seven units: pane fixes, role source, transcript-based observation, brief comparison, stamp, gate, SHA record rule. Operator chose the stamp at branch integration (batching model). Gate mode default observe.
 - 2026-11-21: acceptance reworded from per-commit stamp and commit gate to branch-head stamp and integration gate, per the operator decision (V001 F7).
+- 2026-11-21: stamp and integration gate PR #376 merged as dc9b8156a303f1a4593f1f1c566bf33c67c798cf after green CI on 9b88988e047f0f33daee3b7bb8d0642a3c82f96c. Attempt A001 (correction 1). Reviews: V001 inconclusive (F1 mode at HEAD, F2 gh/merge forms, F3 state dir; fixed), V002 inconclusive, resolved by coordinator run of the gate test at 06154b88 (exit 0). Coordinator-observed TDD RED 7c310855 exit 1, GREEN 22d18ef6 exit 0. Known limits: live Pi and Claude hook paths unobserved; V002 N1 HEAD fallback wording, N2 wording. Operator: J001 alone, later work in batches.
 
 ## J002
 
