@@ -37,4 +37,28 @@ assert.match(coordinatorSkill, /For coordinator-owned PR\/delivery, apply the ex
 const claudeHost = await readFile(join(source, '.agents/hosts/claude-code.md'), 'utf8');
 assert.match(claudeHost, /An Agent-tool reviewer is unbound[\s\S]*reviewer\.md#required-input[\s\S]*exact base\.\.head committed diff/u);
 assert.match(actualWorker, /For each selected method[\s\S]*required observed evidence[\s\S]*retrospective red-first proof/u);
+// Record fields keep one canonical definition, in the template. Dropping part of it fails here; the files that
+// name the field must not restate it (their old wording is listed in tooling/quality/stale-statements.json).
+const fieldDefinitions = [
+  [attemptTemplate, 'Required-resource consumption', /Required-resource consumption:[^\n]*observed \(host trace\) or self-reported; a trace proves a read, not understanding or application\. Name unreadable required resources explicitly/u],
+  [attemptTemplate, 'Retained substitute evidence', /Retained substitute evidence[^\n]*committed tests\/ evidence or ignored tooling\/\.local\/<job>\/[^\n]*link both paths[^\n]*archived commit[^\n]*unmutated baseline run, injected change and result\. Retrospective evidence is not red-first proof/u],
+  [attemptTemplate, 'Method application report (TDD)', /Method application report:[^\n]*full commit IDs of the test-only RED commit and the subsequent GREEN commit, the exact command and the failing assertion \(path:line\/message\)[^\n]*reruns the named command at both commits[^\n]*syntax\/setup failure is not RED[^\n]*Do not claim a retrospective red-first cycle[^\n]*State explicitly when no method was selected/u],
+  [attemptTemplate, 'Required-reference application map', /Required-reference application map:[^\n]*concrete application in candidate[^\n]*Do not list optional references/u],
+  [reviewTemplate, 'Retained substitute evidence assessment', /Retained substitute evidence assessment[^\n]*what the attempt template's `Retained substitute evidence` field requires[^\n]*disposable scratch space does not satisfy it[^\n]*attribute supplied observations/u],
+  [reviewTemplate, 'Reference-application outcomes', /Reference-application outcomes:[^\n]*“observed in candidate” \(the claimed application is visible[^\n]*“claimed, not visible” \(no application is visible[^\n]*only a concrete violation[^\n]*“not applicable accepted” \(the stated reason is sound/u],
+  [coordinatorSkill, 'Base worktree', /detached worktree at the brief's base \(`git worktree add --detach[^\n]*read-only by instruction, not enforced/u],
+];
+for (const [text, field, pattern] of fieldDefinitions) assert.match(text, pattern, `canonical definition of ${field}`);
+for (const [path, names] of [
+  ['.agents/roles/worker.md', ['Retained substitute evidence', 'Required-resource consumption', 'Method application report']],
+  ['.agents/roles/references/tdd.md', ['Method application report']],
+  ['.agents/roles/references/review.md', ['Retained substitute evidence assessment', 'Reference-application outcomes', 'Required-resource consumption']],
+  ['.agents/hosts/claude-code.md', ['Required-resource consumption', 'read-only by instruction, not enforced']],
+  ['.agents/hosts/pi.md', ['Required-resource consumption', 'read-only by instruction, not enforced']],
+  ['docs/en/installation.md', ['read-only by instruction, not enforced']],
+  ['docs/es/installation.md', ['worktree desacoplado (`--detach`)', 'de solo lectura por instrucción, no impuesto']],
+]) {
+  const body = await readFile(join(source, path), 'utf8');
+  for (const name of names) assert.ok(body.includes(name), `${path} names ${name} instead of redefining it`);
+}
 console.log('PASS worker instructions and brief/attempt/review contracts distinguish selected-method evidence from consumption, deviations and unselected methods; assertions are static contract checks, not live reviewer behavior');
