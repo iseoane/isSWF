@@ -39,16 +39,21 @@ export function validateBinding(value) {
   return binding;
 }
 
-export function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
-  const remaining = deadline - Date.now();
-  if (remaining <= 0) throw Error('identity-timeout');
-  const env = {
-    PATH: dirname(binding.gitExecutable), HOME: process.platform === 'win32' ? 'C:\\\\' : '/nonexistent',
+/** The isolated environment every bound Git call runs in: no system or global configuration, replace objects, grafts, lazy fetch or prompt, and no inherited `GIT_*` variable. */
+export function gitEnvironment(gitExecutable, extraEnv = {}) {
+  return {
+    PATH: dirname(gitExecutable), HOME: process.platform === 'win32' ? 'C:\\\\' : '/nonexistent',
     GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null',
     GIT_NO_REPLACE_OBJECTS: '1', GIT_NO_LAZY_FETCH: '1', GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0',
     GIT_ATTR_NOSYSTEM: '1', GIT_GRAFT_FILE: process.platform === 'win32' ? 'NUL' : '/dev/null',
     GIT_PAGER: 'cat', PAGER: 'cat', LC_ALL: 'C', ...extraEnv,
   };
+}
+
+export function runGit(binding, args, deadline, maxBuffer = 8192, extraEnv = {}) {
+  const remaining = deadline - Date.now();
+  if (remaining <= 0) throw Error('identity-timeout');
+  const env = gitEnvironment(binding.gitExecutable, extraEnv);
   const result = spawnSync(binding.gitExecutable, ['-C', binding.repository, ...args], {
     shell: false, windowsHide: true, env, encoding: 'buffer', timeout: Math.min(binding.timeoutMs, remaining), maxBuffer,
     stdio: ['ignore', 'pipe', 'pipe'],

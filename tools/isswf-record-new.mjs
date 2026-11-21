@@ -83,19 +83,40 @@ export function briefOf(brief, { root, relative: jobRelative }) {
   return { path, revision };
 }
 
-// A brief the coordinator has not written is refused here, whatever Git holds at the checkpoint.
-export async function requireBrief({ root }, brief) {
-  const info = await lstat(join(root, ...brief.path.split('/'))).catch(() => undefined);
-  if (!info?.isFile()) throw recordError('brief-not-found');
+/** The text of `path` in the checkpoint commit, or undefined when that commit does not track it. */
+function showAt(git, checkpoint, path) {
+  try { return git(['show', `${checkpoint}:${path}`]); } catch { return undefined; }
 }
 
-export async function requireInProgress({ root, state }, initiative, job) {
-  const text = await readFile(join(root, state, 'initiatives', initiative, 'plan.md'), 'utf8').catch(error => { throw recordError(error.code === 'ENOENT' ? 'plan-not-found' : 'unreadable-plan'); });
-  let jobs;
-  try { jobs = parsePlan(text); } catch (error) { throw recordError('current-plan-invalid', { planError: planErrorDetail(error) }); }
-  const found = jobs.find(candidate => candidate.id === job);
+// A worker's checkout may lack the brief the coordinator committed at the checkpoint; only a brief in neither place is refused.
+export async function requireBrief({ root }, brief, git, checkpoint) {
+  const info = await lstat(join(root, ...brief.path.split('/'))).catch(() => undefined);
+  if (!info?.isFile() && showAt(git, checkpoint, brief.path) === undefined) throw recordError('brief-not-found');
+}
+
+/** Whether `checkpoint` is in the history of the tree's HEAD; an unborn HEAD has no history. */
+function isAncestor(git, checkpoint) {
+  try { git(['merge-base', '--is-ancestor', checkpoint, 'HEAD']); return true; } catch { return false; }
+}
+
+const planJob = (text, job) => parsePlan(text).find(candidate => candidate.id === job);
+
+// The job must be in progress in the working tree's plan or in the plan at the checkpoint. When the tree's plan lists the job, the checkpoint counts only if it is outside
+// the tree's history: a checkpoint already in that history is older than the tree's plan, while one on main that the branch has not merged yet is newer.
+export async function requireInProgress({ root, state }, initiative, job, git, checkpoint) {
+  const planPath = `${state}/initiatives/${initiative}/plan.md`;
+  const text = await readFile(join(root, planPath), 'utf8').catch(error => { if (error.code !== 'ENOENT') throw recordError('unreadable-plan'); });
+  let found;
+  if (text !== undefined) {
+    try { found = planJob(text, job); } catch (error) { throw recordError('current-plan-invalid', { planError: planErrorDetail(error) }); }
+    if (found?.reportedStatus === 'in-progress') return;
+    if (found && isAncestor(git, checkpoint)) throw recordError('job-not-in-progress', { job });
+  }
+  const atCheckpoint = showAt(git, checkpoint, planPath);
+  try { if (atCheckpoint !== undefined && planJob(atCheckpoint, job)?.reportedStatus === 'in-progress') return; } catch { /* an unparsable checkpoint plan grants nothing */ }
+  if (text === undefined) throw recordError('plan-not-found');
   if (!found) throw recordError('job-not-found', { job });
-  if (found.reportedStatus !== 'in-progress') throw recordError('job-not-in-progress', { job });
+  throw recordError('job-not-in-progress', { job });
 }
 
 /**
@@ -118,14 +139,15 @@ export async function createRecord(input) {
   if (round !== undefined && !/^[1-9]\d{0,2}$/u.test(round)) throw recordError('invalid-round');
   if (checkout !== undefined && !isAbsolute(checkout)) throw recordError('invalid-checkout');
   if (branch !== undefined && !/^[^\s\p{Cc}~^:?*[\\]{1,200}$/u.test(branch)) throw recordError('invalid-branch');
-  await requireInProgress(target, initiative, job);
-  await requireBrief(target, brief);
-
   const git = await gitIn(target.root);
+  assertCommit(git, checkpoint, 'checkpoint');
+  await requireInProgress(target, initiative, job, git, checkpoint);
+  await requireBrief(target, brief, git, checkpoint);
+
   const names = await recordNames(target, git);
   const expectedId = nextRecordId(kind, names);
   if (id !== expectedId) throw recordError('id-not-next', { expected: expectedId });
-  for (const [sha, flag] of [[checkpoint, 'checkpoint'], [base, 'base'], [candidate, 'candidate']]) if (sha !== undefined) assertCommit(git, sha, flag);
+  for (const [sha, flag] of [[base, 'base'], [candidate, 'candidate']]) if (sha !== undefined) assertCommit(git, sha, flag);
 
   const profilePath = `.agents/roles/${role}.md`;
   const selectionPath = `${target.state}/dispatch-selection.json`;
