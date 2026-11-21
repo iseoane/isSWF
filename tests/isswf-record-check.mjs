@@ -152,6 +152,8 @@ assert.deepEqual(checkCodes(': `node tests/x.mjs .` exit 0', false), [], 'a reco
 assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: withChecks(': `node tests/x.mjs .` exit 0') }).violations, [], 'without a base nothing is new');
 for (const short of ['abc1234', 'a'.repeat(39), 'a'.repeat(41)]) assert.deepEqual(checkCodes(`: node tests/x.mjs . exit 0 at ${short}`), ['check-without-commit'], `not a full commit: ${short.length} hex`);
 for (const skipped of ['Not run: node tests/x.mjs . (needs a live host)', 'node tests/x.mjs . skipped: outside the tier', 'tests/x.mjs not run, check-quality is a close check', 'None.']) assert.deepEqual(checkCodes(`: ${skipped}`), [], skipped);
+// Other wordings of an outcome count as a run, and "skipped" beside an outcome does not exempt the entry.
+for (const reported of ['node tests/x.mjs . exits 0', 'node tests/x.mjs . passes', 'node tests/x.mjs . fails', 'node tests/x.mjs . exit 0, 2 skipped']) assert.deepEqual(checkCodes(`: ${reported}`), ['check-without-commit'], reported);
 const lineChecks = withChecks(`: node tests/a.mjs . exit 0 at ${sha}; node tests/b.mjs . exit 0; not run: tests/c.mjs`);
 assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: lineChecks, newRecord: true }).violations, [{ code: 'check-without-commit', field: checksLabel, line: lineOf(lineChecks, checksLabel), message: 'check reported as run names no full commit SHA: "node tests/b.mjs . exit 0"' }], 'entries split at semicolons');
 const listed = withChecks(` (code head ${sha}):\n  - node tests/a.mjs . exit 0\n  - git diff --check clean`);
