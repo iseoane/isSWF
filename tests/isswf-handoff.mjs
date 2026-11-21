@@ -444,7 +444,8 @@ try {
   assert.deepEqual(viaMerge.jobs[0].uncovered.map(entry => entry.paths), [['docs/en/other.md']], 'only the docs commit, not the merge commit that brings in the reviewed one');
 
   // A job branch that merges main keeps its review chain: the I0058 J013 shape, V002 on a candidate, a records commit, a merge of main, a fix, then V003 based on the merge.
-  const mergeShape = async (name, between) => {
+  // `resolve` adds files inside the merge itself, as a conflict resolution does; `reviewed: false` stops after the merge with only an attempt record following.
+  const mergeShape = async (name, between, { resolve: resolution, reviewed = true } = {}) => {
     const dir = join(coverTemp, name);
     await mkdir(dir);
     initRepository(dir, ['-b', 'main']);
@@ -466,11 +467,20 @@ try {
     await save({ 'src/main-only.mjs': 'm\n' }, 'code on main');
     git(dir, 'update-ref', 'refs/remotes/origin/main', 'main');
     git(dir, 'checkout', '-q', 'job');
-    git(dir, 'merge', '--no-ff', '-q', '-m', 'merge main', 'main');
+    git(dir, 'merge', '--no-ff', '-q', ...(resolution ? ['--no-commit'] : []), '-m', 'merge main', 'main');
+    if (resolution) {
+      for (const [path, content] of Object.entries(resolution)) await writeFile(join(dir, path), content);
+      git(dir, 'add', '-A');
+      git(dir, 'commit', '-qm', 'merge main');
+    }
     const merge = git(dir, 'rev-parse', 'HEAD');
+    if (!reviewed) {
+      await save({ [`${jobDir('J001')}/A001.md`]: '# attempt\n' }, 'records: attempt');
+      return { dir, code, extra, merge, root, result: tool(['coverage', '--project', dir]) };
+    }
     const fix = await save({ 'src/a.mjs': 'b\n' }, 'job fix');
     await save({ [`${jobDir('J001')}/V003.md`]: reviewText(fix, '', merge) }, 'records: V003 based on the merge');
-    return { dir, code, extra, result: tool(['coverage', '--project', dir]) };
+    return { dir, code, extra, merge, root, result: tool(['coverage', '--project', dir]) };
   };
   const throughMain = await mergeShape('merge-main', async () => undefined);
   assert.equal(throughMain.result.ok, true, JSON.stringify(throughMain.result));
@@ -488,6 +498,18 @@ try {
   const codeBetween = await mergeShape('merge-code-between', ({ save }) => save({ 'src/b.mjs': 'b\n' }, 'code between the rounds'));
   assert.equal(codeBetween.result.ok, false, JSON.stringify(codeBetween.result));
   assert.deepEqual(codeBetween.result.jobs[0].uncovered.map(entry => entry.commit), [codeBetween.code, codeBetween.extra]);
+  // A merge of main that adds code of its own, as a conflict resolution can, was reviewed by nobody: it breaks the chain, and with no later review it is listed with its combined-diff paths.
+  const evil = { 'src/evil.mjs': 'e\n' };
+  const evilChain = await mergeShape('merge-evil', async () => undefined, { resolve: evil });
+  assert.equal(evilChain.result.ok, false, JSON.stringify(evilChain.result));
+  assert.deepEqual(evilChain.result.jobs[0].uncovered, [{ commit: evilChain.code, paths: ['src/a.mjs'] }, { commit: evilChain.merge, paths: ['src/evil.mjs'] }]);
+  const evilOpen = await mergeShape('merge-evil-open', async () => undefined, { resolve: evil, reviewed: false });
+  assert.deepEqual(evilOpen.result.jobs[0].uncovered, [{ commit: evilOpen.merge, paths: ['src/evil.mjs'] }]);
+  // Without an origin/main ref no merge can be shown to bring in only main's commits, so the chain breaks.
+  git(throughMain.dir, 'update-ref', '-d', 'refs/remotes/origin/main');
+  const noMain = tool(['coverage', '--project', throughMain.dir, '--base', throughMain.root]);
+  assert.equal(noMain.ok, false, JSON.stringify(noMain));
+  assert.ok(noMain.jobs[0].uncovered.some(entry => entry.commit === throughMain.code), 'the first candidate is no longer covered');
 } finally {
   await rm(coverTemp, { recursive: true, force: true });
 }
