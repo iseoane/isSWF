@@ -48,13 +48,13 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: A CI wait or full check stopped by the host under memory pressure does not leave the coordinator without a result.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J003/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Write brief r1 after research on how the hosts report a stopped background command.
+- Next step: Worker implements brief r1.
 
 ### Acceptance
 
