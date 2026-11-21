@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
@@ -66,7 +67,7 @@ try{
  const gitPath=spawnSync(process.platform==='win32'?'where.exe':'which',['git'],{encoding:'utf8'}).stdout.trim().split(/\r?\n/u)[0];assert.ok(gitPath);
  const git=await realpath(gitPath);
  const gitRun=(...args)=>{const result=spawnSync(git,args,{cwd:work,encoding:'utf8',timeout:10000});assert.ifError(result.error);assert.equal(result.status,0,result.stderr);return result.stdout.trim();};
- gitRun('init','-q');gitRun('add','cwd-canary.txt');gitRun('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','-qm','bound identity candidate');
+ initRepository(work,[],{git});gitRun('add','cwd-canary.txt');gitRun('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','-qm','bound identity candidate');
  const identitySha=gitRun('rev-parse','HEAD'),identityBinding={version:1,repository:await realpath(work),baseSha:identitySha,candidateSha:identitySha,gitExecutable:git,timeoutMs:5000,outputBytes:4096},diffBinding={...identityBinding,outputBytes:22000},contentBinding={...identityBinding,outputBytes:8192,paths:['cwd-canary.txt']};
  const models={providers:{[provider]:{baseUrl:base+'/v1',api:'openai-completions',apiKey:'synthetic-not-a-secret',models:[{id:modelId,name:'Offline synthetic model',reasoning:true,input:['text'],cost:{input:0,output:0,cacheRead:0,cacheWrite:0},contextWindow:32000,maxTokens:1024,compat:{supportsReasoningEffort:true}}]}}};
  await writeFile(join(profile,'models.json'),JSON.stringify(models));

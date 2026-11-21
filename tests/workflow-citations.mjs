@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -13,7 +14,7 @@ try {
     return result.stdout.trim();
   };
   const run = (...args) => spawnSync(process.execPath, [join(source, 'tooling/maintenance/workflow-citations.mjs'), '--root', repo, ...args], { encoding: 'utf8' });
-  git('init', '-q');
+  initRepository(repo);
   await mkdir(join(repo, 'docs/diagrams'), { recursive: true });
   const body = ['# Title', 'intro', '## Moves', 'move one', 'move two', '## Edited', 'old text', '## Repeats', 'same', 'single'];
   await writeFile(join(repo, 'a.md'), body.join('\n') + '\n');

@@ -1,3 +1,4 @@
+import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -74,7 +75,7 @@ async function fixture() {
   ]);
   for (const [path, bytes] of payloads) await writeFile(join(project, '.factory', path), bytes);
   if (process.platform !== 'win32') await chmod(join(project, '.factory/initiatives/I0007/jobs/J002/brief-r1.md'), 0o640);
-  run('git', ['init', '-q', project]);
+  initRepository(project);
   git(project, 'add', '-f', '.factory');
   git(project, 'commit', '-qm', 'legacy state fixture');
   const args = ['--project', project, '--store', store];
@@ -190,7 +191,7 @@ let keep = false;
 try {
   // Build from a clone in temp, as release-package does: source and output then share a drive on Windows CI.
   const clone = join(temp, 'source');
-  run('git', ['clone', '-q', '--shared', source, clone]);
+  cloneRepository(source, clone, ['--shared']);
   const revision = run('git', ['-C', clone, 'rev-parse', 'HEAD']).stdout.trim(), release = join(temp, 'release spaces ñ');
   run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', release, '--runtime', 'node']);
   const built = verifyRelease(release);

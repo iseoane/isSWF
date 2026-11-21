@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises';
@@ -12,9 +13,7 @@ const proposal = join(root, 'proposal.json');
 let passed = false;
 try {
   await mkdir(project); await mkdir(sibling);
-  const initialized = spawnSync('git', ['init', '-q', project], { encoding: 'utf8', timeout: 15000 });
-  assert.ifError(initialized.error);
-  assert.equal(initialized.status, 0, initialized.stderr);
+  initRepository(project);
   // Stop after authority validation; durable publication and directory sync are separate behavior.
   await writeFile(proposal, '{"version":2}\n');
   const grant = { version: 1, project: await realpath(project), initiative: 'I0042', reference: 'Synthetic boundary regression', permissions: ['plan'] };

@@ -10,10 +10,10 @@ const kindOf = info => (info.isDirectory() ? 'dir' : info.isFile() ? 'file' : 'o
 const list = async dir => (await readdir(dir, { withFileTypes: true })).map(entry => ({ name: entry.name, kind: kindOf(entry) }));
 // A Git exit code answers the question; a failure to run Git at all (missing executable, timeout) rejects.
 const git = (argv, cwd) => new Promise((resolve, reject) => {
-  execFile('git', argv, { cwd, timeout: GIT_TIMEOUT_MS, windowsHide: true }, error => (!error ? resolve(0) : typeof error.code === 'number' ? resolve(error.code) : reject(error)));
+  execFile('git', argv, { cwd, timeout: GIT_TIMEOUT_MS, windowsHide: true, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } }, error => (!error ? resolve(0) : typeof error.code === 'number' ? resolve(error.code) : reject(error)));
 });
 const gitOut = (argv, cwd) => new Promise((resolve, reject) => {
-  execFile('git', argv, { cwd, timeout: GIT_TIMEOUT_MS, windowsHide: true }, (error, stdout) => (!error ? resolve({ exitCode: 0, stdout }) : typeof error.code === 'number' ? resolve({ exitCode: error.code, stdout: '' }) : reject(error)));
+  execFile('git', argv, { cwd, timeout: GIT_TIMEOUT_MS, windowsHide: true, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } }, (error, stdout) => (!error ? resolve({ exitCode: 0, stdout }) : typeof error.code === 'number' ? resolve({ exitCode: error.code, stdout: '' }) : reject(error)));
 });
 const ledgerIo = {
   gitOut,

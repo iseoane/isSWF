@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { cp, mkdir, readFile, writeFile, realpath, access } from 'node:fs/promises';
@@ -35,7 +36,7 @@ if (process.argv[3] === '--probe') {
   }
   const json = async path => JSON.parse(await readFile(path, 'utf8'));
   const writeJSON = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
-  for (const target of [project, neighbour]) run('git', ['init', '-q', target]);
+  for (const target of [project, neighbour]) initRepository(target);
   for (const path of ['package.json', '.agents/skills', '.claude-plugin', 'skills', '.claude/settings.json']) {
     await cp(join(source, path), join(project, path), { recursive: true });
   }

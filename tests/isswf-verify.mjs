@@ -4,7 +4,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] || '.');
 const runner = join(source, 'tools/isswf-verify.mjs');
@@ -23,7 +23,7 @@ const check = (id, argv, extra = {}) => ({ id, argv, platforms: [process.platfor
 function makeRepo(name, checks, derivedFrom = [], files = {}) {
   const repo = join(temp, name);
   mkdirSync(repo, { recursive: true });
-  git(repo, 'init', '-q', '-b', 'main', '.');
+  initRepository(repo, ['-b', 'main']);
   git(repo, 'config', 'user.email', 't@example.invalid');
   git(repo, 'config', 'user.name', 'T');
   for (const [path, text] of Object.entries(files)) write(repo, path, text);
@@ -170,7 +170,7 @@ try {
   // A missing or malformed file is refused with a code, never read as an empty check list.
   const bare = join(temp, 'bare');
   mkdirSync(bare);
-  git(bare, 'init', '-q', '-b', 'main', '.');
+  initRepository(bare, ['-b', 'main']);
   git(bare, 'config', 'user.email', 't@example.invalid');
   git(bare, 'config', 'user.name', 'T');
   write(bare, '.factory/keep', 'x');

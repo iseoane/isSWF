@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, writeFile, rm, chmod, stat, realpath } from 'node:fs/promises';
@@ -17,7 +18,7 @@ function git(path, ...args) {
 }
 try {
   await mkdir(project);
-  git(project, 'init', '-q');
+  initRepository(project);
   await writeFile(join(project, 'source.txt'), 'baseline\n');
   git(project, 'add', '.');
   git(project, 'commit', '-qm', 'baseline');

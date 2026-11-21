@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
@@ -182,7 +183,7 @@ try {
   const oldReview = join(state, 'jobs/J001/V001.md');
   const newReview = join(state, 'jobs/J001/V002.md');
   await writeFile(oldReview, reviewWith('F1 intentional: kept'));
-  assert.equal(git('init', '-q').status, 0);
+  initRepository(root);
   assert.equal(git('add', '-A').status, 0);
   assert.equal(git('commit', '-q', '-m', 'base').status, 0);
   await writeFile(newReview, reviewWith('F1 intentional: kept'));

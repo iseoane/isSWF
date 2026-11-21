@@ -62,6 +62,12 @@ A change to a documented contract adds its old statement to `tooling/quality/sta
 
 When a brief selects TDD, each behavioral RED commit is test-only and intentionally fails; the following GREEN commit contains the passing change. If `git bisect` lands on a RED commit, use `git bisect skip` because that commit is expected to fail. A syntax or setup failure is not a valid RED result.
 
+Git commands that hooks, guards, the pane and their runners start set `GIT_OPTIONAL_LOCKS=0` (the Claude hook, whose process call takes no environment here, passes `--no-optional-locks`), so a read never takes `index.lock` while someone commits; `node tests/git-optional-locks.mjs .` fails on a Git spawn in those sources that sets neither. A test creates its fixture repository with `initRepository` or `cloneRepository` from `tests/support/git-fixture.mjs`, which turns `core.fsmonitor` off for the new repository, and `node tests/fixture-repositories.mjs .` fails on a test that runs `git init` or `git clone` directly. Both run in `tools/check-quality.mjs`. A global `core.fsmonitor=true` otherwise leaves one `git fsmonitor--daemon` per fixture running. On Windows, this command runs the job-tier verification and reports by process ID any daemon that was not running before it and still is afterwards; it only lists processes and never stops one, and on another platform it prints `not-applicable`:
+
+```bash
+node tooling/quality/fsmonitor-daemons.mjs --project /absolute/checkout
+```
+
 When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` scripts and pinned binary handoff. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it. CI installs the pinned Bun compiler and requires the artifact check. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk. These fixtures do not execute Claude or real providers.
 
 CI also runs two host checks outside the portable check: `tests/host-prerequisites.mjs` and `tests/source-host-isolation.mjs`. Run both locally with one command:

@@ -1,3 +1,4 @@
+import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -23,7 +24,7 @@ function git(...args) {
 let passed = false;
 try {
   await mkdir(repository);
-  git('init', '-q', repository);
+  initRepository(repository);
   await writeFile(join(repository, '.gitattributes'), attributes);
   for (const [path, bytes] of samples) await writeFile(join(repository, path), bytes);
   git('-C', repository, '-c', 'core.autocrlf=false', 'add', '.');
@@ -32,7 +33,7 @@ try {
   assert.match(git('-C', repository, 'ls-tree', 'HEAD', 'runtime.mjs').toString(), /^100755 /u, 'runtime fixture must exercise executable checkout bytes');
   for (const autocrlf of ['true', 'false']) {
     const checkout = join(root, 'checkout-' + autocrlf);
-    git('-c', 'core.autocrlf=' + autocrlf, 'clone', '-q', '--no-hardlinks', repository, checkout);
+    cloneRepository(repository, checkout, ['-c', 'core.autocrlf=' + autocrlf, '--no-hardlinks']);
     for (const [path, original] of samples) {
       assert.deepEqual(await readFile(join(checkout, path)), original, `${path}: checkout changed under core.autocrlf=${autocrlf}`);
       assert.deepEqual(git('-C', checkout, 'show', 'HEAD:' + path), original);

@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
@@ -20,7 +21,7 @@ const untitled = good.replace('# I0001: Synthetic', '# I0001:');
 try {
   const repo = join(temp, 'repo');
   mkdirSync(join(repo, '.factory/initiatives/I0001'), { recursive: true });
-  run(repo, 'init', '-q', '-b', 'main', '.');
+  initRepository(repo, ['-b', 'main']);
   run(repo, 'config', 'user.email', 't@example.invalid');
   run(repo, 'config', 'user.name', 'T');
   const planPath = join(repo, '.factory/initiatives/I0001/plan.md');
@@ -72,7 +73,7 @@ try {
   // Close gate: the commit that makes every job completed needs a passing close record at the newest non-records commit.
   const closeRepo = join(temp, 'close');
   mkdirSync(join(closeRepo, '.factory/initiatives/I0001'), { recursive: true });
-  run(closeRepo, 'init', '-q', '-b', 'main', '.');
+  initRepository(closeRepo, ['-b', 'main']);
   run(closeRepo, 'config', 'user.email', 't@example.invalid');
   run(closeRepo, 'config', 'user.name', 'T');
   const closePlan = join(closeRepo, '.factory/initiatives/I0001/plan.md');

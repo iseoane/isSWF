@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
@@ -408,7 +409,7 @@ try {
   await write(BRIEF, '# brief\n');
   await write('.gitignore', 'brief-r3.md\n');
   await write('.factory/retrospectives/session.md', '# retrospective\n');
-  git(temp, 'init', '-q', 'project');
+  initRepository(root);
   git(root, 'add', '-A');
   git(root, 'commit', '-qm', 'fixture');
   const head = git(root, 'rev-parse', 'HEAD');
@@ -555,7 +556,7 @@ try {
     await mkdir(join(nested, path, '..'), { recursive: true });
     await writeFile(join(nested, path), await readFile(join(root, path)));
   }
-  git(outer, 'init', '-q', '.');
+  initRepository(outer);
   git(outer, 'add', '-A');
   git(outer, 'commit', '-qm', 'fixture');
   const outerHead = git(outer, 'rev-parse', 'HEAD');
@@ -582,7 +583,8 @@ assert.ok(hookAt < hooks.indexOf('options?.initiativesPane !== true'), 'register
 const guardAt = hook.indexOf('guardDispatch(');
 assert.ok(guardAt > 0 && guardAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
 assert.ok(hook.slice(0, guardAt).includes("e.tool === 'Agent'"), 'only the Agent tool is guarded');
-for (const part of ["host: 'claude'", '$.process.run(', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', "as: 'bytes'", 'readBytes', 'return { deny:']) assert.ok(hook.includes(part), part);
+assert.ok(hooks.includes('$.process.run('), 'Git runs through the host');
+for (const part of ["host: 'claude'", 'gitRun($, ', '$.session.cwd()', '$.fs.read(', '$.fs.list(', '$.fs.stat(', "as: 'bytes'", 'readBytes', 'return { deny:']) assert.ok(hook.includes(part), part);
 for (const part of ['openWorkers(', 'closeWorker(', 'markWorkerRun(', 'closeWorkerRun(', "status === 'async_launched'", 'gitOut']) assert.ok(hooks.includes(part), part);
 assert.ok(hooks.slice(hooks.indexOf("on('turn.complete'")).includes('closeWorkerRun('), 'a child turn closes its ledger entry');
 assert.ok(hooks.includes('if (exitCode !== 0) throw'), 'a failed removal leaves the entry'); // source check: register.tsx has no runner

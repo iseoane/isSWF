@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "cc32a4a9a08fdcbd5291bbe4d89ddd60944393ce39b35e96cb8b365c206e8465"
+      "sha256": "588b6baa16bc57fdd2bc16d8277c2ca01148ae07bc1311e8ed79c65ccd135a33"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -194,6 +194,41 @@
         "tools/isswf-undispatched-core.mjs"
       ],
       "timeoutSeconds": 300
+    },
+    {
+      "id": "git-optional-locks",
+      "argv": [
+        "node",
+        "tests/git-optional-locks.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "hooks/",
+        "tools/"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "fixture-repositories",
+      "argv": [
+        "node",
+        "tests/fixture-repositories.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tests/"
+      ],
+      "timeoutSeconds": 120
     },
     {
       "id": "host-portability",

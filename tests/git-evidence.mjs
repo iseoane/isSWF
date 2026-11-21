@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
@@ -13,7 +14,7 @@ const git = await realpath(gitPath);
 const cli = join(source, 'tools/git-evidence.mjs');
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-git-identity-')));
 function command(bin, args, cwd = root, expected = 0) {
-  const result = spawnSync(bin, args, { cwd, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+  const result = spawnSync(bin, args, { cwd, env: { ...process.env, GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.fsmonitor', GIT_CONFIG_VALUE_0: 'false' }, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, expected, `${bin} ${args.join(' ')}\n${result.stderr}\n${result.stdout}`);
   return result.stdout.trim();
@@ -68,7 +69,7 @@ async function fingerprint(paths) {
 try {
   await assertStalledInputRefused('diff', '{"version":1}');
   await assertStalledInputRefused('identity', '');
-  command(git, ['init', '-q']);
+  initRepository(root, [], { git, localConfig: false });
   await writeFile(join(root, 'tracked.txt'), 'initial\n');
   command(git, ['add', 'tracked.txt']);
   const baseSha = commit('base');

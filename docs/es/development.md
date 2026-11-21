@@ -62,6 +62,12 @@ Un cambio en un contrato documentado añade su enunciado antiguo a `tooling/qual
 
 Cuando un brief selecciona TDD, cada commit RED de comportamiento contiene solo la prueba y falla intencionadamente; el siguiente commit GREEN contiene el cambio que la supera. Si `git bisect` llega a un commit RED, usa `git bisect skip`, ya que se espera que ese commit falle. Un fallo de sintaxis o de configuración de la prueba no es un resultado RED válido.
 
+Los comandos Git que lanzan los hooks, las guardas, el panel y sus ejecutores establecen `GIT_OPTIONAL_LOCKS=0` (el hook de Claude, cuya llamada de proceso no admite aquí un entorno, pasa `--no-optional-locks`), de modo que una lectura nunca toma `index.lock` mientras alguien hace commit; `node tests/git-optional-locks.mjs .` falla ante un proceso Git de esas fuentes que no establece ninguno de los dos. Una prueba crea su repositorio de fixture con `initRepository` o `cloneRepository` de `tests/support/git-fixture.mjs`, que desactiva `core.fsmonitor` en el repositorio nuevo, y `node tests/fixture-repositories.mjs .` falla ante una prueba que ejecuta `git init` o `git clone` directamente. Ambas se ejecutan en `tools/check-quality.mjs`. Un `core.fsmonitor=true` global dejaría, si no, un `git fsmonitor--daemon` por fixture en ejecución. En Windows, este comando ejecuta la verificación del nivel de trabajo e informa, por ID de proceso, de cualquier daemon que no estuviera en ejecución antes y lo siga estando después; solo lista procesos y nunca detiene ninguno, y en otra plataforma imprime `not-applicable`:
+
+```bash
+node tooling/quality/fsmonitor-daemons.mjs --project /absolute/checkout
+```
+
 Cuando Bun está disponible, la comprobación portable también construye e instala un paquete Bun real en directorios temporales. Prueba las exportaciones de paquetes externos similares a un SDK y sus dependencias transitivas, los scripts `.mjs` con rutas absolutas y relativas y el traspaso al binario fijado. Sin Bun, la prueba de artefacto indica SKIP. Asigna a `ISSWF_TEST_BUN` la ruta de un compilador para exigirla. CI instala el compilador Bun fijado y exige la prueba de artefacto. En local, `ISSWF_TEST_BUN_TMPDIR` permite ubicar los datos de prueba binarios grandes en otro disco. Estos datos de prueba no ejecutan Claude ni proveedores reales.
 
 CI también ejecuta dos comprobaciones de host fuera de la comprobación portable: `tests/host-prerequisites.mjs` y `tests/source-host-isolation.mjs`. Ejecuta ambas en local con un solo comando:

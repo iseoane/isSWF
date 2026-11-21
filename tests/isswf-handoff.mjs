@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
@@ -50,7 +51,7 @@ try {
     await writeFile(join(root, path), content);
   };
   await mkdir(root);
-  git(root, 'init', '-q', '-b', 'main', '.');
+  initRepository(root, ['-b', 'main']);
   await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
   await write(BRIEF, '# brief\n');
   await write('.factory/initiatives/I0001/jobs/J001/V001.md', '# earlier review\n');
@@ -186,7 +187,7 @@ const coverTemp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-coverage-')
 try {
   const repo = join(coverTemp, 'repo');
   await mkdir(repo);
-  git(repo, 'init', '-q', '-b', 'main', '.');
+  initRepository(repo, ['-b', 'main']);
   const jobDir = job => `.factory/initiatives/I0001/jobs/${job}`;
   const commit = async (files, message) => {
     for (const [path, content] of Object.entries(files)) {
@@ -280,7 +281,7 @@ try {
   // Two jobs in one range: a commit that a later job's review covers is not unreviewed for the earlier job.
   const pair = join(coverTemp, 'pair');
   await mkdir(pair);
-  git(pair, 'init', '-q', '-b', 'main', '.');
+  initRepository(pair, ['-b', 'main']);
   const keep = async (files, message) => {
     for (const [path, content] of Object.entries(files)) {
       await mkdir(join(pair, path, '..'), { recursive: true });
@@ -306,7 +307,7 @@ try {
   // A delta review chains to the review whose candidate is its base, so their ranges together cover the job; an unchained earlier review covers nothing.
   const chain = join(coverTemp, 'chain');
   await mkdir(chain);
-  git(chain, 'init', '-q', '-b', 'main', '.');
+  initRepository(chain, ['-b', 'main']);
   const chainCommit = async (files, message) => {
     for (const [path, content] of Object.entries(files)) {
       await mkdir(join(chain, path, '..'), { recursive: true });
@@ -327,7 +328,7 @@ try {
   // A delta review whose base is the earlier review's record commit still chains: the commits between that candidate and the base change only records.
   const recordsGap = join(coverTemp, 'records-gap');
   await mkdir(recordsGap);
-  git(recordsGap, 'init', '-q', '-b', 'main', '.');
+  initRepository(recordsGap, ['-b', 'main']);
   const gapCommit = async (files, message) => {
     for (const [path, content] of Object.entries(files)) {
       await mkdir(join(recordsGap, path, '..'), { recursive: true });
@@ -367,7 +368,7 @@ try {
   // The PR322 shape across jobs: an unreviewed correction of one job lies before another job's candidate but outside that job's reviewed range.
   const shape = join(coverTemp, 'shape');
   await mkdir(shape);
-  git(shape, 'init', '-q', '-b', 'main', '.');
+  initRepository(shape, ['-b', 'main']);
   const stage = async (files, message) => {
     for (const [path, content] of Object.entries(files)) {
       await mkdir(join(shape, path, '..'), { recursive: true });
@@ -389,7 +390,7 @@ try {
   // The override lines of every reviewed job apply to the one commit list: a documentation commit named by one job's record is excused for both.
   const overrideRepo = join(coverTemp, 'override');
   await mkdir(overrideRepo);
-  git(overrideRepo, 'init', '-q', '-b', 'main', '.');
+  initRepository(overrideRepo, ['-b', 'main']);
   const lay = async (files, message) => {
     for (const [path, content] of Object.entries(files)) {
       await mkdir(join(overrideRepo, path, '..'), { recursive: true });
@@ -411,7 +412,7 @@ try {
   // A pull request's merge commit has no changes of its own: the commits it brings in are what counts, and a reviewed one passes.
   const merged = join(coverTemp, 'merged');
   await mkdir(merged);
-  git(merged, 'init', '-q', '-b', 'main', '.');
+  initRepository(merged, ['-b', 'main']);
   const put = async (path, content) => {
     await mkdir(join(merged, path, '..'), { recursive: true });
     await writeFile(join(merged, path), content);

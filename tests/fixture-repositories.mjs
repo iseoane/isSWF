@@ -6,8 +6,8 @@ const source = resolve(process.argv[2] || '.');
 
 // A fixture repository started by a bare `git init` or `git clone` inherits the operator's global `core.fsmonitor=true`, which leaves one
 // `git fsmonitor--daemon` per fixture running after the test. Fixtures go through tests/support/git-fixture.mjs instead, which turns it off.
-// A call is a raw one when a Git runner named like git, sh, run or command carries a quoted `init` or `clone` argument on its line; `-m init` is a message.
-const RAW = /\b(?:git\w*|sh|run|runAsync|command|execFileSync|spawnSync)\b[^\n]*(?<!'-m',\s*)['"](?:init|clone)['"]/u;
+// A call is a raw one when a Git runner named like git, sh, run or command carries a quoted `init` or `clone` argument on its line; `-m init` is a message and an isSWF `init` runs through `process.execPath`.
+const RAW = /\b(?:git\w*|sh|run|runAsync|command|execFileSync|spawnSync)\b(?:(?!execPath)[^\n])*(?<!'-m',\s*)['"](?:init|clone)['"]/u;
 
 // Returns "file:line" for each line of `text` that starts a repository without the helper.
 function rawRepositories(file, text) {

@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { cloneRepository, gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const locator = process.platform === 'win32' ? 'where.exe' : 'which';
 const gitPath = spawnSync(locator, ['git'], { encoding: 'utf8' }).stdout.trim().split(/\r?\n/u)[0];
@@ -24,9 +24,10 @@ const run = (args, encoding = 'utf8') => {
 };
 try {
   const callerArgs = ['status', '--porcelain'];
-  assert.deepEqual(gitFixtureArgs(callerArgs).slice(6), callerArgs);
+  assert.deepEqual(gitFixtureArgs(callerArgs).slice(8), callerArgs);
   assert.deepEqual(callerArgs, ['status', '--porcelain'], 'the helper does not mutate caller argv');
-  run(['init', '-q']);
+  initRepository(root, [], { git });
+  assert.equal(run(['config', '--local', '--get', 'core.fsmonitor']), 'false', 'a fixture repository keeps fsmonitor off');
   const blobs = new Map([
     ['crlf.txt', Buffer.from('one\r\ntwo\r\n')],
     ['bom.txt', Buffer.from([0xef, 0xbb, 0xbf, 0x41, 0x0d, 0x0a])],
@@ -45,6 +46,9 @@ try {
     assert.equal(result.status, 0, `committed blob ${path}: ${result.stderr}`);
     assert.deepEqual(result.stdout, bytes, `committed blob ${path} remains byte-exact`);
   }
+  const clone = join(root, 'clone');
+  cloneRepository(root, clone, ['--no-hardlinks'], { git });
+  assert.equal(spawnSync(git, ['-C', clone, 'config', '--local', '--get', 'core.fsmonitor'], { encoding: 'utf8' }).stdout.trim(), 'false', 'a fixture clone keeps fsmonitor off');
   console.log(JSON.stringify({ status: 'PASS', platform: process.platform, blobs: [...blobs].map(([path, bytes]) => ({ path, bytes: bytes.length })) }));
 } finally {
   await rm(root, { recursive: true, force: true });

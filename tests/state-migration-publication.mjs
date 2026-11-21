@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -19,8 +20,7 @@ async function fixture(label) {
   const project = join(root, label), store = join(root, label + '-store');
   await mkdir(join(project, '.factory/initiatives/I0001/jobs/J001'), { recursive: true });
   await writeFile(join(project, '.factory/initiatives/I0001/jobs/J001/brief-r1.md'), 'Historical .factory path and payload stay byte-identical.\n');
-  const init = spawnSync('git', ['init', '-q', project], { encoding: 'utf8', timeout: 10000 });
-  assert.ifError(init.error); assert.equal(init.status, 0, init.stderr);
+  initRepository(project);
   for (const args of [['-C', project, 'add', '-f', '.factory'], ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'fixture']]) {
     const result = spawnSync('git', args, { encoding: 'utf8', timeout: 10000 });
     assert.ifError(result.error); assert.equal(result.status, 0, result.stderr);

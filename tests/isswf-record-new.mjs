@@ -4,7 +4,7 @@ import { access, mkdir, mkdtemp, readdir, readFile, realpath, rm, stat, writeFil
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gitFixtureArgs } from './support/git-fixture.mjs';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, 'tools', name)));
@@ -33,7 +33,7 @@ try {
     const project = join(root, 'names');
     const jobDir = join(project, '.factory/initiatives/I0001/jobs/J001');
     await mkdir(jobDir, { recursive: true });
-    git(project, 'init', '-q');
+    initRepository(project);
     await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planText());
     await writeFile(join(jobDir, 'brief-r1.md'), '# Brief\n');
     for (const name of [...accepted, ...ignored]) await writeFile(join(jobDir, name), '- Run: claude agent=a1\n');
@@ -107,7 +107,7 @@ try {
     const jobRel = '.factory/initiatives/I0001/jobs/J001';
     const jobDir = join(project, jobRel);
     await mkdir(jobDir, { recursive: true });
-    git(project, 'init', '-q', '-b', 'main');
+    initRepository(project, ['-b', 'main']);
     await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), planText());
     await writeFile(join(jobDir, 'brief-r1.md'), '# Brief\n');
     git(project, 'add', '-A');
@@ -174,7 +174,7 @@ try {
     const jobRel = '.factory/initiatives/I0001/jobs/J001';
     const jobDir = join(project, jobRel);
     await mkdir(jobDir, { recursive: true });
-    git(project, 'init', '-q', '-b', 'main');
+    initRepository(project, ['-b', 'main']);
     await writeFile(join(project, 'base.txt'), 'base\n');
     git(project, 'add', '-A');
     git(project, 'commit', '-q', '-m', 'base');
@@ -340,7 +340,7 @@ try {
     const jobRel = '.factory/initiatives/I0001/jobs/J001';
     const jobDir = join(project, jobRel);
     await mkdir(join(project, 'src'), { recursive: true });
-    git(project, 'init', '-q', '-b', 'main');
+    initRepository(project, ['-b', 'main']);
     await writeFile(join(project, 'src/old-ü.txt'), 'old\n');
     await writeFile(join(project, 'README.md'), 'readme\n');
     git(project, 'add', '-A');

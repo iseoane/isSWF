@@ -12,7 +12,7 @@ const SHELL_TOOLS = new Set(['bash', 'powershell']);
 
 // `git` without a shell, so a path is passed as one argument on Linux and Windows; a missing `git` resolves as a failure and the guard allows the call.
 const git = (argv, cwd) => new Promise(done => {
-  execFile('git', argv, { cwd, encoding: 'utf8', maxBuffer: 8 << 20, windowsHide: true }, (error, stdout) => done({ exitCode: error ? (typeof error.code === 'number' ? error.code : 1) : 0, stdout: stdout ?? '' }));
+  execFile('git', argv, { cwd, encoding: 'utf8', maxBuffer: 8 << 20, windowsHide: true, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' } }, (error, stdout) => done({ exitCode: error ? (typeof error.code === 'number' ? error.code : 1) : 0, stdout: stdout ?? '' }));
 });
 
 // Refuses a CI-waiting or package-acquisition shell command, a `git commit` on a branch the session did not select, and one that records a plan

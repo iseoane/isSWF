@@ -1,3 +1,4 @@
+import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFile, execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
@@ -107,7 +108,7 @@ for (const [mode, observe] of Object.entries(observers)) {
   try {
     const repo = join(base, 'repo').replaceAll('\\', '/');
     mkdirSync(repo);
-    sh(repo, 'init', '-q');
+    initRepository(repo, ['-b', 'main']);
     writeFileSync(join(repo, 'a.txt'), 'a\n');
     sh(repo, 'add', '.');
     sh(repo, 'commit', '-q', '-m', 'first');
@@ -145,7 +146,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     {
       const other = join(base, 'other-repo').replaceAll('\\', '/');
       mkdirSync(other);
-      sh(other, 'init', '-q');
+      initRepository(other, ['-b', 'main']);
       writeFileSync(join(other, 'b.txt'), 'b\n');
       sh(other, 'add', '.');
       sh(other, 'commit', '-q', '-m', 'first');
@@ -313,7 +314,7 @@ for (const [mode, observe] of Object.entries(observers)) {
   try {
     const repo = join(base, 'repo');
     mkdirSync(repo);
-    sh(repo, 'init', '-q');
+    initRepository(repo, ['-b', 'main']);
     writeFileSync(join(repo, 'a.txt'), 'a\n');
     sh(repo, 'add', '.');
     sh(repo, 'commit', '-q', '-m', 'first');
@@ -416,7 +417,7 @@ for (const [mode, observe] of Object.entries(observers)) {
     const repo = join(base, 'repo');
     const tree = join(base, 'wt');
     mkdirSync(repo);
-    sh(repo, 'init', '-q');
+    initRepository(repo, ['-b', 'main']);
     writeFileSync(join(repo, 'a.txt'), 'a\n');
     sh(repo, 'add', '.');
     sh(repo, 'commit', '-q', '-m', 'first');
@@ -467,7 +468,7 @@ for (const [mode, observe] of Object.entries(observers)) {
   assert.ok(before.includes("e.tool === 'Bash' || e.tool === 'PowerShell'"), 'both shell tools are checked');
   assert.ok(hooks.includes("loop: e.agentId ?? 'main'"), 'the main loop and each child have their own expected branches');
   assert.ok(/return \{ deny: branch\.deny \}/u.test(before), 'a refusal is a deny');
-  assert.ok(/await \$\.process\.run\(\['git', \.\.\.argv\], \{ cwd \}\)/u.test(hook) && hook.includes('$.fs.read(file)'), 'Git runs through the host and the files are the fallback');
+  assert.ok(/await gitRun\(\$, argv, cwd\)/u.test(hook) && hook.includes('$.fs.read(file)'), 'Git runs through the host and the files are the fallback');
   assert.ok(/assignmentOf/u.test(imported), 'the hook imports assignmentOf from the core');
   assert.ok(/key: 'assigned'/u.test(hooks) && /assigned: IsswfAssigned/u.test(await readFile(join(source, 'types/index.d.ts'), 'utf8')), 'the assignments are one declared plugin state key');
   const checked = before.slice(checkAt, before.indexOf('\n', checkAt));

@@ -46,6 +46,7 @@
     "tooling/quality/eslint.config.mjs",
     "tooling/quality/check-docs.mjs",
     "tooling/quality/host-checks.mjs",
+    "tooling/quality/fsmonitor-daemons.mjs",
     "tooling/maintenance/*.mjs"
   ],
   "project": ["tools/**/*.mjs", "tests/**/*.mjs", "tooling/quality/*.mjs", "tooling/maintenance/**/*.mjs"],

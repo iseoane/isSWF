@@ -536,6 +536,10 @@ async function filesView($: EngineInterface, ui: any, t: Labels) {
   )
 }
 
+// Git without the opportunistic index refresh, so a read never takes `index.lock` while the operator or an agent commits. `$.process.run` takes no
+// environment here, so the global option stands in for GIT_OPTIONAL_LOCKS=0.
+const gitRun = ($: EngineInterface, argv: string[], cwd: string) => $.process.run(['git', '--no-optional-locks', ...argv], { cwd })
+
 const WRITE_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
 
 // What the branch guard needs from the host, for the loop that made the call: the main loop, or a child by its agent id.
@@ -545,7 +549,7 @@ function branchHost($: EngineInterface, e: { agentId?: string }) {
     // The engine refuses `$.fs` and `$.process` passed as values, so each call is spelled out.
     observe: (dir: string) => observeBranch(dir, {
       git: async (argv: string[], cwd: string) => {
-        const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+        const { exitCode, stdout } = await gitRun($, argv, cwd)
         return { exitCode, stdout }
       },
       read: (file: string) => $.fs.read(file),
@@ -561,7 +565,7 @@ function branchHost($: EngineInterface, e: { agentId?: string }) {
 function ledgerIo($: EngineInterface) {
   return {
     gitOut: async (argv: string[], cwd: string) => {
-      const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+      const { exitCode, stdout } = await gitRun($, argv, cwd)
       return { exitCode, stdout }
     },
     list: (dir: string) => $.fs.list(dir),
@@ -615,7 +619,7 @@ export const register: Register = (on, options) => {
           command,
           cwd: await $.session.cwd(),
           git: async (argv: string[], cwd: string) => {
-            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            const { exitCode, stdout } = await gitRun($, argv, cwd)
             return { exitCode, stdout }
           },
           read: (file: string) => $.fs.read(file),
@@ -625,7 +629,7 @@ export const register: Register = (on, options) => {
           command,
           cwd: await $.session.cwd(),
           git: async (argv: string[], cwd: string) => {
-            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            const { exitCode, stdout } = await gitRun($, argv, cwd)
             return { exitCode, stdout }
           },
         })
@@ -634,7 +638,7 @@ export const register: Register = (on, options) => {
           command,
           cwd: await $.session.cwd(),
           git: async (argv: string[], cwd: string) => {
-            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            const { exitCode, stdout } = await gitRun($, argv, cwd)
             return { exitCode, stdout }
           },
         })
@@ -643,7 +647,7 @@ export const register: Register = (on, options) => {
           command,
           cwd: await $.session.cwd(),
           git: async (argv: string[], cwd: string) => {
-            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            const { exitCode, stdout } = await gitRun($, argv, cwd)
             return { exitCode, stdout }
           },
           read: (file: string) => $.fs.read(file),
@@ -663,9 +667,9 @@ export const register: Register = (on, options) => {
           readBytes: async (file: string) => Uint8Array.from(atob((await $.fs.read(file, { as: 'bytes' })).base64), char => char.charCodeAt(0)),
           list: (dir: string) => $.fs.list(dir),
           stat: (file: string) => $.fs.stat(file),
-          git: async (argv: string[], cwd: string) => (await $.process.run(['git', ...argv], { cwd })).exitCode,
+          git: async (argv: string[], cwd: string) => (await gitRun($, argv, cwd)).exitCode,
           gitOut: async (argv: string[], cwd: string) => {
-            const { exitCode, stdout } = await $.process.run(['git', ...argv], { cwd })
+            const { exitCode, stdout } = await gitRun($, argv, cwd)
             return { exitCode, stdout }
           },
         },
@@ -798,7 +802,7 @@ export const register: Register = (on, options) => {
             project: () => cwd,
             list: (dir: string) => $.fs.list(dir),
             read: (file: string) => $.fs.read(file),
-            git: async (argv: string[], at: string) => (await $.process.run(['git', ...argv], { cwd: at })).exitCode,
+            git: async (argv: string[], at: string) => (await gitRun($, argv, at)).exitCode,
           },
         })
         const warned = new Set<string>((await $.state.get(WARNED)).value ?? [])
