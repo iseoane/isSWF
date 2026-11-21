@@ -10,7 +10,7 @@ import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
 import { guardRecord } from '../tools/isswf-record-guard-core.mjs'
-import { initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
+import { initiativeIdsIn, initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
 
 const PANE = 'isswf-initiatives'
@@ -34,7 +34,6 @@ const RESUME_THRESHOLD = 90
 const RESUME_DELAY_MS = 5 * 60_000
 // Delegated roles with a shared profile under `.agents/roles/`.
 const PROFILES = new Set(['worker', 'reviewer', 'researcher', 'planner', 'diagnostician'])
-const RECORD_PATH = /(?:\.isswf|\.factory)\/initiatives\/(I\d+)\b/g
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
 const RECENT_COMPLETED = 2
@@ -309,7 +308,7 @@ function touchedIds(e: { tool: string; file_path?: unknown; command?: unknown })
   const raw = e.tool === 'Bash' ? e.command : ['Read', 'Edit', 'Write'].includes(e.tool) ? e.file_path : undefined
   if (typeof raw !== 'string') return []
   const text = e.tool === 'Bash' ? raw.replace(HEREDOC, '$3\n').replace(QUOTED, q => (/\s/.test(q) ? '""' : q)) : raw
-  const ids = [...text.replace(/\\/g, '/').matchAll(RECORD_PATH)].map(m => m[1])
+  const ids = initiativeIdsIn(text.replace(/\\/g, '/'))
   if (e.tool === 'Bash') ids.push(...[...text.matchAll(INITIATIVE_FLAG)].map(m => m[1]))
   return ids
 }

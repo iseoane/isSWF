@@ -12,6 +12,20 @@ export function joiner(path) {
 const MAX_BYTES = 1024 * 1024;
 // Attempt and review record names (A or V and three digits): the checker, the guard, the status command and the pane share this.
 export const RECORD_NAME = /^[AV]\d{3}\.md$/;
+// Where records live: the guard, the pane and the record tools classify paths with these three functions.
+const INITIATIVES = /\.(?:isswf|factory)\/initiatives\//u.source;
+const INITIATIVES_PREFIX = new RegExp(`^${INITIATIVES}`, 'u');
+const RECORD_PATH = new RegExp(`^(?:.*/)?${INITIATIVES}I\\d+/(?:plan\\.md|jobs/J\\d+/([^/]+))$`, 'u');
+const INITIATIVE_ID = new RegExp(`${INITIATIVES}(I\\d+)\\b`, 'gu');
+/** True for a Git-relative path under a state directory's initiatives folder. */
+export const isInitiativePath = path => INITIATIVES_PREFIX.test(path);
+/** True for a plan or an attempt or review record, under any prefix; `path` uses forward slashes. */
+export const isRecordPath = path => {
+  const match = RECORD_PATH.exec(path);
+  return match !== null && (match[1] === undefined || RECORD_NAME.test(match[1]));
+};
+/** The initiative IDs of every initiative folder named in forward-slash `text`. */
+export const initiativeIdsIn = text => [...text.matchAll(INITIATIVE_ID)].map(match => match[1]);
 const UNKNOWN = 'unknown';
 const EFFORTS = /\b(minimal|low|medium|high|xhigh|max)\b/i;
 const MODEL_NAME = /(gpt|claude|opus|sonnet|haiku|gemini|glm|kimi|qwen|deepseek)/i;

@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // Prepares, launches and reads a Claude bound review (`claude -p` with the isswf_git_evidence server)
 // so the model, effort and base come from the approved preset and the candidate's real parent.
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { createReadStream, createWriteStream, statSync } from 'node:fs';
 import { readFile, realpath, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runGit } from './git-evidence.mjs';
+import { locateGit } from './trusted-git.mjs';
 
 const KIND = 'isswf.review-launch';
 const GIT_TIMEOUT_MS = 10000;
@@ -20,14 +21,6 @@ function git(repository, gitExecutable, args) {
   return runGit(binding, args, Date.now() + GIT_TIMEOUT_MS, 1 << 20).toString('utf8').trim();
 }
 
-async function trustedGit(given) {
-  if (given) return realpath(given);
-  const locator = process.platform === 'win32' ? 'where.exe' : 'which';
-  const found = spawnSync(locator, ['git'], { encoding: 'utf8', windowsHide: true }).stdout?.trim().split(/\r?\n/u)[0];
-  if (!found) throw Error('git-executable-not-found');
-  return realpath(found);
-}
-
 const commit = (repository, gitExecutable, ref) => {
   try { return git(repository, gitExecutable, ['rev-parse', '--verify', `${ref}^{commit}`]); } catch { throw Error(`commit-not-found:${ref}`); }
 };
@@ -37,7 +30,7 @@ export async function prepare({ repository, candidate, base, main = 'origin/main
   if (!repository || !isAbsolute(repository)) throw Error('absolute-repository-required');
   const repo = await realpath(repository);
   if (!statSync(join(repo, '.git')).isDirectory()) throw Error('linked-worktree-bind-the-primary-clone');
-  const gitExecutable = await trustedGit(gitPath);
+  const gitExecutable = await locateGit(gitPath, 'git-executable-not-found');
   if (!candidate) throw Error('candidate-required');
   const candidateSha = commit(repo, gitExecutable, candidate);
   const baseSha = base ? commit(repo, gitExecutable, base) : git(repo, gitExecutable, ['merge-base', commit(repo, gitExecutable, main), candidateSha]);
