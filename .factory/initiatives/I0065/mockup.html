@@ -1,0 +1,154 @@
+<title>isSWF diagram mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap">
+<style>
+/* Layout: 2D flowchart (generated SVG arrows + HTML nodes) left; wide doubts panel right; selected node/doubt makes its destination arrows pulse */
+:root{--bg:#f5f6f8;--panel:#ffffff;--fg:#1b2230;--muted:#5d6878;--line:#b9c2cf;--accent:#2b6cb0;--op:#b7791f;--role:#2f855a;--ctl:#9b2c2c;--hot:#d97706;
+--display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161d;--panel:#1b212b;--fg:#e4e8ef;--muted:#9aa5b5;--line:#45526a;--accent:#63a4e8;--op:#e0a84a;--role:#5fc08a;--ctl:#e07a7a;--hot:#fbbf24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161d;--panel:#1b212b;--fg:#e4e8ef;--muted:#9aa5b5;--line:#45526a;--accent:#63a4e8;--op:#e0a84a;--role:#5fc08a;--ctl:#e07a7a;--hot:#fbbf24;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+h1{font-family:var(--display);font-size:1.6rem;margin:0 0 6px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 16px;max-width:80ch;line-height:1.5}
+.wrap{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:1200px){.wrap{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.board{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow-x:auto;min-width:0}
+.chart{position:relative;width:760px;height:1260px;margin:0 auto}
+svg{position:absolute;left:0;top:0;width:760px;height:1260px;overflow:visible}
+.side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+svg .e{fill:none;stroke:var(--line);stroke-width:2;transition:stroke .2s}
+svg .e.loop{stroke-dasharray:5 4;stroke:var(--ctl)}
+svg .e.hot{stroke:var(--hot);stroke-width:3.5;animation:pulse 1s ease-in-out infinite}
+svg text{fill:var(--muted);font:500 11px var(--body)}
+svg text.hot{fill:var(--hot);font-weight:700}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){svg .e.hot{animation:none}}
+.n{position:absolute;transform:translate(-50%,-50%);width:172px;padding:10px 12px;border:2px solid var(--c);border-radius:8px;background:var(--panel);color:var(--fg);font:600 .9rem var(--body);cursor:pointer;text-align:center;line-height:1.25}
+.n small{display:block;font:400 .72rem var(--body);color:var(--muted);margin-top:3px}
+.n .cnt{display:block;font:600 .68rem var(--body);color:var(--c);margin-top:5px;letter-spacing:.04em}
+.n .shield{position:absolute;top:-10px;right:-10px;width:20px;height:20px;border-radius:50%;background:var(--panel);border:1.5px solid var(--muted);color:var(--muted);font:700 .7rem var(--mono);display:grid;place-items:center}
+.n.op{--c:var(--op)}.n.co{--c:var(--accent);border-radius:999px;width:192px}.n.ro{--c:var(--role)}
+.n.opt{border-style:dashed}
+.n:hover,.n:focus-visible,.n.on{background:color-mix(in srgb,var(--c) 15%,var(--panel));outline:none}
+.n.dest{box-shadow:0 0 0 4px color-mix(in srgb,var(--hot) 45%,transparent)}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;align-self:start;min-width:0}
+.side h2{font-family:var(--display);font-size:1.3rem;margin:0 0 6px}
+.side .who{color:var(--muted);font-size:.95rem;margin:0 0 16px;line-height:1.5;max-width:70ch}
+.side h3{font:600 .72rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+details{border:1px solid var(--line);border-radius:6px;margin-bottom:8px}
+summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:.95rem;line-height:1.35}
+summary:focus-visible{outline:2px solid var(--accent)}
+details[open]{border-color:var(--hot)}
+details[open] summary{border-bottom:1px dashed var(--line)}
+.ans{padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;font-size:.9rem;line-height:1.5}
+.ans .opt{border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.ans .opt b{display:block;font:700 .75rem var(--body);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.ans .y b{color:var(--role)}.ans .x b{color:var(--ctl)}
+.foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.go{font-size:.8rem;border:1px solid var(--hot);background:transparent;color:var(--fg);border-radius:4px;padding:3px 9px;cursor:pointer}
+.tech{font:.74rem var(--mono);color:var(--muted)}
+.tech a{color:var(--accent)}
+.guards{border-top:1px solid var(--line);margin-top:18px;padding-top:4px}
+.guards ul{margin:0;padding-left:18px;font-size:.88rem;line-height:1.5;color:var(--fg)}
+.guards li{margin-bottom:6px}
+.guards p{font-size:.8rem;color:var(--muted);margin:0 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin:0 0 12px;font-size:.8rem;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border:2px solid var(--c);border-radius:3px;margin-right:5px;vertical-align:-2px}
+.legend .s{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);font:700 .6rem var(--mono);margin-right:5px}
+</style>
+
+<h1>Maqueta de diagramas isSWF</h1>
+<p class="sub">Cómo avanza un encargo, de tu petición a tu visto bueno. <strong>Pulsa una caja</strong> para ver sus dudas y <strong>abre una duda</strong>: la flecha hacia donde lleva se ilumina. Los nombres técnicos en gris enlazan al archivo en GitHub.</p>
+<div class="legend"><span style="--c:var(--op)"><i></i>Tú</span><span style="--c:var(--accent)"><i style="border-radius:50%"></i>Coordinador</span><span style="--c:var(--role)"><i></i>Ayudante</span><span style="--c:var(--role)"><i style="border-style:dashed"></i>Solo si hace falta</span><span style="color:var(--ctl)">- - → vuelve atrás</span><span><span class="s">✓</span>tiene controles automáticos</span></div>
+
+<div class="wrap">
+<div class="board"><div class="chart" id="chart"><svg id="svg" viewBox="0 0 760 1260" aria-hidden="true"><defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="var(--line)"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="var(--hot)"/></marker>
+</defs></svg></div></div>
+<aside class="side" id="side" aria-live="polite"></aside>
+</div>
+
+<script>
+const GH="https://github.com/iseoane/isSWF/blob/main/";
+const L=(label,path)=>path?`<a href="${GH}${path}" target="_blank" rel="noopener">${label}</a>`:label;
+const S=n=>`.agents/skills/${n}/SKILL.md`, R=n=>`.agents/roles/${n}.md`, F=n=>`.agents/roles/references/${n}.md`, C=S("isswf-coordinator");
+/* q: [duda, siSí, siNo, techHTML, destino?] */
+const N={
+ you:{x:380,y:40,c:"op",l:"Tú pides algo",s:"una mejora, un fallo, docs…",who:"Tú decides qué se quiere y si el resultado vale. Nadie publica ni fusiona nada sin tu permiso.",q:[
+  ["¿Qué cosas solo puedo decidir yo?","Qué debe hacer el producto, si el resultado te sirve, y publicar, fusionar o gastar más de lo acordado.","El resto lo deciden ellos dentro de lo que ya autorizaste.",L("delivery.md",F("delivery")),"coord"]]},
+ coord:{x:380,y:150,c:"co",l:"Coordinador",s:"organiza y reparte",who:"No programa: entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es el único que llama a los ayudantes; ellos no se llaman entre sí.",q:[
+  ["¿Esto ya existe?","Busca pruebas en el código antes de proponer hacerlo otra vez.","Sigue adelante.",L("isswf-coordinator §2",C)],
+  ["¿Entiendo bien lo que se pide, o tendría que suponer cosas?","Prepara el encargo directamente.","Te propone una entrevista corta en una línea. Puedes aceptarla o saltarla.",L("isswf-interview",S("isswf-interview")),"interview"],
+  ["¿Me falta un dato técnico que no se ve leyendo el código?","Llama al investigador.","Si basta con leer el código, lo mira él mismo.",L("researcher.md",R("researcher")),"research"],
+  ["¿Es un fallo con causa clara y fácil de reproducir?","El programador lo diagnostica y lo arregla a la vez.","Si es raro, intermitente o grave, primero llama al diagnosticador.",L("diagnostician.md",R("diagnostician")),"diag"],
+  ["¿Está todo claro y no falta nada?","Pasa directamente a preparar el encargo.","Ver las dudas de arriba.",L("isswf-coordinator §2",C),"plan"],
+  ["¿Hay algo que solo puedes decidir tú?","Te hace esa pregunta concreta, deja esa parte en espera y sigue con lo demás.","No te molesta con confirmaciones de rutina.",L("awaiting-human",C)]],
+  g:[["Si el chat se resume para ahorrar memoria, le recuerda que recargue sus instrucciones y relea los registros.","docs/en/operations.md"]]},
+ interview:{x:110,y:280,c:"ro",opt:1,l:"Entrevista contigo",s:"solo si hay huecos",who:"Unas preguntas para cerrar lo que no está claro antes de planificar.",q:[
+  ["¿Cuándo hace falta?","Cuando es algo nuevo, cambia lo que ve el usuario, aparece un concepto sin definir o no está escrito cuándo se da por bueno.","Si nadie tendría que suponer nada, no hace falta.",L("isswf-interview",S("isswf-interview")),"plan"]]},
+ research:{x:300,y:280,c:"ro",opt:1,l:"Investigador",s:"solo mira, no toca",who:"Busca datos y pruebas. No cambia código ni llama a otros ayudantes.",q:[
+  ["¿Puedo ver la fuente real?","La relee: un resumen o una memoria no valen como prueba.","Se para y avisa de qué le falta.",L("researcher.md",R("researcher"))+" · "+L("research.md",F("research"))],
+  ["¿Lo que encuentro cuadra con lo que me dijeron?","Lo entrega al coordinador.","Se para y lo devuelve al coordinador; no adivina.",L("researcher.md",R("researcher")),"plan"]]},
+ diag:{x:650,y:280,c:"ro",opt:1,l:"Diagnosticador",s:"para fallos difíciles",who:"Reproduce el fallo y demuestra la causa. Recomienda qué hacer, pero no lo arregla.",q:[
+  ["¿Puedo reproducir el fallo?","Reúne pruebas de la causa y las entrega.","Anota qué intentó y qué acceso falta. No inventa una causa.",L("bug-diagnosis.md",F("bug-diagnosis"))+" · "+L("isswf-debug",S("isswf-debug")),"plan"]]},
+ plan:{x:380,y:410,c:"co",l:"Coordinador prepara el encargo",s:"qué, cómo se comprueba, con qué guías",who:"Tras investigar, vuelve a pensar si el problema es como creía y decide qué guías acompañan al encargo.",q:[
+  ["¿Lo investigado cambia lo que pensaba?","Replantea el plan. Si toca muchas piezas, piezas compartidas o pruebas inestables, puede pedir un planificador.","Sigue con el plan inicial.",L("Reclassify after research",C)+" · "+L("planner.md",R("planner")),"coord"],
+  ["¿Cambia la forma de los datos o cómo se hablan las piezas?","Añade la guía de diseño.","No la añade.",L("design-principles.md",F("design-principles"))],
+  ["¿Hay cosas en paralelo, reintentos o migraciones?","Añade la guía de ejecución.","No la añade.",L("execution-principles.md",F("execution-principles"))],
+  ["¿Es un fallo, o hace falta demostrar más de lo que prueban los tests?","Añade la guía de verificación.","No la añade.",L("verification-principles.md",F("verification-principles"))],
+  ["¿Merece la pena escribir primero la prueba que falla?","Pide hacerlo así (TDD).","No lo pide: nunca es obligatorio.",L("isswf-tdd",S("isswf-tdd"))],
+  ["¿Toca seguridad, rendimiento o documentación?","Añade la guía de ese tema.","No la añade.",L("isswf-security",S("isswf-security"))+" · "+L("isswf-performance",S("isswf-performance"))+" · "+L("isswf-writing",S("isswf-writing"))],
+  ["¿Por qué no aparece la guía de comentarios?","No hace falta elegirla: el programador la aplica siempre que toca código.","—",L("worker.md",R("worker"))+" → "+L("comments.md",F("comments"))],
+  ["¿Está listo para lanzarlo?","Lanza al programador.","Sigue preparándolo.",L("isswf-coordinator §5",C),"worker"]],
+  g:[["Antes de lanzar a un ayudante comprueba que el encargo es válido y que no hay más de 2 trabajando a la vez. Si falla, lo bloquea y dice por qué.","docs/en/operations.md"],["Si el encargo está guardado pero nadie lo ha lanzado, avisa al final del turno.","docs/en/architecture.md"]]},
+ worker:{x:380,y:520,c:"ro",l:"Programador",s:"hace el cambio",who:"Trabaja en su propia copia, hace el cambio más pequeño que cumpla y aporta pruebas de que funciona.",q:[
+  ["¿El código real coincide con lo que dice el encargo?","Sigue.","Lo habla con el coordinador antes de cambiar nada.",L("worker.md",R("worker"))],
+  ["¿Tengo todo lo que necesito (permisos, guías)?","Sigue.","Se para y dice qué falta; no lo sustituye por otra cosa.",L("worker.md",R("worker"))],
+  ["He fallado dos veces arreglando lo mismo: ¿mi idea de partida está mal?","La revisa con pruebas.","Antes de un tercer intento, vuelve al coordinador.",L("worker.md",R("worker"))],
+  ["¿He terminado y lo he comprobado?","Lo pasa a revisión.","Sigue trabajando.",L("code-quality.md",F("code-quality")),"review"]],
+  g:[["No puede hacer commit en una rama que no es la suya.","docs/en/operations.md"],["No puede quedarse esperando a CI en bucle ni instalar paquetes.","docs/en/operations.md"],["Sus registros solo pueden ir a la carpeta de su encargo.","docs/en/operations.md"]]},
+ review:{x:380,y:630,c:"ro",l:"Revisor",s:"otra mirada, independiente",who:"Comprueba el cambio exacto. Solo mira: no arregla ni aprueba la fusión.",q:[
+  ["¿Cumple las normas del proyecto?","Lo da por bueno en ese aspecto.","Lo anota con pruebas.",L("review.md",F("review"))],
+  ["¿Hace lo que se pidió?","Pasa a la entrega.","Lo anota y vuelve al programador.",L("isswf-review",S("isswf-review")),"worker"],
+  ["¿Todo bien en las dos cosas?","Pasa a la entrega.","Vuelve al programador.",L("isswf-review",S("isswf-review")),"pr"],
+  ["¿Llevamos demasiadas vueltas de corrección?","El coordinador te pregunta cómo seguir.","Otra ronda normal.",L("review-convergence.md",F("review-convergence"))]],
+  g:[["Recibe el diff exacto preparado automáticamente, y se comprueba que ningún commit se ha quedado sin revisar.",S("isswf-handoff")]]},
+ pr:{x:380,y:735,c:"ro",l:"Entrega",s:"prepara la propuesta",who:"Prepara la propuesta de cambio (PR) con sus riesgos y pruebas.",q:[
+  ["¿La revisión es de este cambio exacto, o de una versión anterior?","Te lo presenta para el visto bueno.","Lo dice claramente; no lo da por hecho.",L("isswf-pr",S("isswf-pr"))+" · "+L("delivery.md",F("delivery")),"ok"]],
+  g:[["Consulta el estado de CI una sola vez para ese commit exacto, en lugar de esperar en bucle.","docs/en/architecture.md"]]},
+ ok:{x:380,y:810,c:"op",l:"Tú das el visto bueno",s:"y luego, repaso de lo aprendido",who:"Aceptas y se fusiona. Al cerrar, se puede hacer un repaso para mejorar el proceso.",q:[
+  ["¿Hacemos repaso?","Al terminar una mejora o un fallo, o cuando cierras la sesión explícitamente.","Cerrar el chat sin más no cuenta como cierre.",L("isswf-retrospective",S("isswf-retrospective"))]]}
+};
+/* edges: [from,to,label,kind] kind: l=loop-left, r=loop-right */
+const E=[["you","coord"],["coord","interview","¿falta claridad?"],["coord","research","¿falta un dato?"],["coord","diag","¿fallo raro?"],["coord","plan","todo claro"],
+ ["interview","plan"],["research","plan"],["diag","plan"],["plan","worker"],["worker","review"],["review","worker","corregir","r"],["review","pr","todo bien"],["pr","ok"],["plan","coord","cambia el plan","l"]];
+const ch=document.getElementById('chart'),svg=document.getElementById('svg'),side=document.getElementById('side'),NS="http://www.w3.org/2000/svg";
+/* vertical rhythm with room for arrows between rows */
+Object.entries({you:55,coord:200,interview:370,research:370,diag:370,plan:550,worker:720,review:880,pr:1040,ok:1190}).forEach(([k,y])=>N[k].y=y);
+function draw(){svg.querySelectorAll('[data-f]').forEach(el=>el.remove());
+ const box=k=>{const el=ch.querySelector(`.n[data-k="${k}"]`);return{x:N[k].x,y:N[k].y,h:el.offsetHeight/2,w:el.offsetWidth/2};};
+ E.forEach(([f,t,lab,k])=>{const a=box(f),b=box(t);let d,lx,ly;const G=6;
+  if(k==="r"){d=`M${a.x+a.w},${a.y} C${a.x+a.w+120},${a.y} ${b.x+b.w+120},${b.y} ${b.x+b.w+G},${b.y}`;lx=a.x+a.w+70;ly=(a.y+b.y)/2+4;}
+  else if(k==="l"){d=`M${a.x-a.w},${a.y} C${a.x-a.w-250},${a.y} ${b.x-b.w-250},${b.y} ${b.x-b.w-G},${b.y}`;lx=20;ly=(a.y+b.y)/2+8;}
+  else if(f==="coord"&&t==="plan"){d=`M${a.x+a.w*.55},${a.y+a.h} C${a.x+150},${a.y+170} ${b.x+150},${b.y-170} ${b.x+b.w*.55},${b.y-b.h-G}`;lx=a.x+118;ly=(a.y+b.y)/2+4;}
+  else{const y1=a.y+a.h,y2=b.y-b.h-G,m=(y1+y2)/2;d=`M${a.x},${y1} C${a.x},${m} ${b.x},${m} ${b.x},${y2}`;lx=(a.x+b.x)/2+(a.x===b.x?8:(b.x<a.x?-60:10));ly=m+(a.x===b.x?4:-6);}
+  const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class','e'+(k?' loop':''));p.setAttribute('marker-end','url(#a)');p.dataset.f=f;p.dataset.t=t;svg.appendChild(p);
+  if(lab){const tx=document.createElementNS(NS,'text');tx.setAttribute('x',lx);tx.setAttribute('y',ly);tx.textContent=lab;tx.dataset.f=f;tx.dataset.t=t;svg.appendChild(tx);}});
+ if(cur)sync();}
+for(const [k,v] of Object.entries(N)){const b=document.createElement('button');b.className=`n ${v.c}${v.opt?' opt':''}`;b.dataset.k=k;b.style.left=v.x+'px';b.style.top=v.y+'px';
+ b.innerHTML=`${v.l}<small>${v.s}</small><span class="cnt">${v.q.length} ${v.q.length===1?'duda':'dudas'}</span>${v.g?'<span class="shield" title="tiene controles automáticos">✓</span>':''}`;b.onclick=()=>show(k);ch.appendChild(b);}
+function light(from,tos){svg.querySelectorAll('[data-f]').forEach(el=>{const on=el.dataset.f===from&&tos.includes(el.dataset.t);el.classList.toggle('hot',on);if(el.tagName==='path')el.setAttribute('marker-end',on?'url(#ah)':'url(#a)');});
+ document.querySelectorAll('.n').forEach(b=>b.classList.toggle('dest',tos.includes(b.dataset.k)));}
+let cur;
+function show(k){cur=k;const v=N[k];document.querySelectorAll('.n').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+ side.innerHTML=`<h2>${v.l}</h2><p class="who">${v.who}</p><h3>Sus dudas</h3>`+v.q.map(([d,y,n,t,g],i)=>`<details data-g="${g||''}"><summary>${d}</summary><div class="ans"><div class="opt y"><b>Sí</b>${y}</div>${n!=="—"?`<div class="opt x"><b>No</b>${n}</div>`:''}<div class="foot">${g?`<button class="go" data-g="${g}">Ir a ${N[g].l} →</button>`:''}<span class="tech">${t}</span></div></div></details>`).join('')
+ +(v.g?`<div class="guards"><h3>✓ Controles automáticos</h3><p>No dependen de que el agente se acuerde: el propio programa lo comprueba y, si falla, lo bloquea.</p><ul>${v.g.map(([txt,p])=>`<li>${txt} <span class="tech">${L("ver",p)}</span></li>`).join('')}</ul></div>`:'');
+ side.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)side.querySelectorAll('details[open]').forEach(o=>{if(o!==d)o.open=false;});sync();}));
+ side.querySelectorAll('.go').forEach(b=>b.onclick=()=>show(b.dataset.g));
+ sync();}
+function sync(){const open=[...side.querySelectorAll('details[open]')].map(d=>d.dataset.g).filter(Boolean);
+ const all=E.filter(e=>e[0]===cur).map(e=>e[1]);light(cur,open.length?open:all);}
+draw();show('coord');
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+</script>
