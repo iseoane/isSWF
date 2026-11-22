@@ -9,6 +9,7 @@
 
 - Ground every sentence in its canonical source; keep observed-only qualifiers (for example compaction observed on manual `/compact`, Pi guards wired but unobserved, usage capture opt-in and estimated).
 - Flowchart: change `docs/diagrams/flow.json` only, regenerate pages and SVGs with `tooling/maintenance/workflow-flow.mjs`.
+- Carried from J003 V003: F14, `docs/es/reference.md` verification paragraph: "un sello que la puerta de integración comprueba (y exige en el modo `enforce`)"; F15, `docs/en/reference.md` mechanical row: "Tools and guards also run this way of verifying."
 - Out: J004's animations; other guides' content.
 
 ## Checks
