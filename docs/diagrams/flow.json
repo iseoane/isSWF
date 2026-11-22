@@ -626,7 +626,7 @@
           "id": "g-integration",
           "text": {
             "en": "Before a merge, a branch push or a new PR, the integration gate looks for the stamp that a clean verification run leaves for each commit. By default it only adds a note; in enforce mode it refuses.",
-            "es": "Antes de una fusión, del push de una rama o de una PR nueva, la puerta de integración busca el sello que deja una verificación limpia para cada commit. Por defecto solo añade una nota; en modo enforce lo rechaza."
+            "es": "Antes de una fusión, del push de una rama o de una PR nueva, la puerta de integración busca el sello que deja una verificación limpia para cada commit. Por defecto solo añade una nota; en modo enforce rechaza el comando."
           },
           "path": "docs/en/operations.md"
         },
