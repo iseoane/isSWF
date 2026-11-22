@@ -129,6 +129,19 @@ try {
   assert.equal((await core.readSnapshot('C:\\absent', windowsMemory)).initiatives[0].title, 'Windows');
   await assert.rejects(core.readSnapshot('/absent', memoryFs({ '/absent/.isswf/x': '', '/absent/.factory/x': '' })), /Both \.isswf and \.factory/);
 
+  // A closed initiative is decided from its plan alone: its job folders are never listed, statted or read.
+  const touched = [];
+  const record = fs => Object.fromEntries(Object.entries(fs).map(([name, call]) => [name, path => (touched.push(path), call(path))]));
+  const closed = await core.readSnapshot('/closed', record(memoryFs({
+    '/closed/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Done', job('J001', 'completed', { evidence: ['- Done.'] })),
+    '/closed/.isswf/initiatives/I0001/jobs/J001/A001.md': '- Reported status: complete\n',
+    '/closed/.isswf/initiatives/I0002/plan.md': plan('I0002', 'Open', job('J001', 'completed', { evidence: ['- Done.'] }), job('J002', 'in-progress')),
+    '/closed/.isswf/initiatives/I0002/jobs/J002/A001.md': '- Reported status: running\n',
+  })));
+  assert.deepEqual(closed.initiatives.map(i => i.id), ['I0002']);
+  assert.deepEqual(touched.filter(path => path.includes('/I0001/jobs')), []);
+  assert.ok(touched.some(path => path.includes('/I0002/jobs/J002')), 'an open initiative still reads its jobs');
+
   // Spanish verdict labels, with markdown emphasis between label and value.
   const verdictOf = async text => (await core.readSnapshot('/es', memoryFs({
     '/es/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Es', job('J001', 'in-progress')),

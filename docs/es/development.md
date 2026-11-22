@@ -209,6 +209,14 @@ gh run list --limit 100 --json event,headBranch,conclusion,createdAt,updatedAt,d
 
 Muestra el número de ejecuciones, las canceladas y los minutos totales de cada grupo `<evento> <rama>`, y un total general.
 
+Para medir cuánto cuesta a un proyecto una lectura de la instantánea del panel de iniciativas (solo desarrollo; lecturas directas de Node, así que el panel de Claude, que enruta cada llamada por el host, es más lento):
+
+```sh
+node tooling/maintenance/snapshot-cost.mjs --project /absolute/project --runs 5
+```
+
+Muestra las llamadas al sistema de archivos por tipo y el tiempo mediano y mínimo de lectura en milisegundos.
+
 ## Fuente de la verdad e historial
 
 Comprueba las herramientas, los manifiestos y las pruebas reales antes de documentar el comportamiento actual. El [mapa del código](architecture.md) ayuda a localizar al responsable. Distingue los objetivos aceptados de las pruebas de implementación y de las [propuestas futuras](future-actions.md).

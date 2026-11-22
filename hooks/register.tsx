@@ -41,6 +41,10 @@ const PROFILES = new Set(['worker', 'reviewer', 'researcher', 'planner', 'diagno
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
 const RECENT_COMPLETED = 2
+// A drawing reads the records again once the snapshot is this old, even when no tool call and no timer said they changed.
+const SNAPSHOT_MAX_AGE_MS = 60_000
+// Tools that cannot change a record: the snapshot stays valid after them.
+const READ_ONLY_TOOLS = new Set(['Read', 'Grep', 'Glob'])
 const LABELS = {
   es: {
     notActive: 'El coordinador isSWF no está activo en esta sesión.',
@@ -159,6 +163,10 @@ const PILL_COLORS: Record<string, string> = {
 // Timers do not survive a hot reload, so the fallback restarts lazily from the activated state.
 let debounce: Timer | undefined
 let fallback: Timer | undefined
+// The last snapshot read and the records generation it belongs to. A press that changes only the view draws from it; anything that may have
+// changed a record bumps `recordsGeneration`, so a read that began before the bump is never kept as current.
+let recordsGeneration = 0
+let snapshotCache: { cwd: string; snapshot: any; readAt: number; generation: number } | undefined
 // Usage lives in module memory: drawing reads only `usage`, while resolution runs after the draw.
 const usage = new Map<string, any>()
 const finishedRuns = new Map()
@@ -233,7 +241,10 @@ function scheduleRefresh($: EngineInterface) {
 }
 
 function ensureFallback($: EngineInterface) {
-  fallback ??= $.clock.every(60_000, () => $.ui.invalidate('ui.render'))
+  fallback ??= $.clock.every(SNAPSHOT_MAX_AGE_MS, () => {
+    recordsGeneration++
+    $.ui.invalidate('ui.render')
+  })
 }
 
 const adding = (ids: string[]) => (list: string[] | undefined) => [...new Set([...(list ?? []), ...ids])].sort()
@@ -594,6 +605,7 @@ async function settleWorkers($: EngineInterface, tokens: string[], ran: { deny?:
 }
 
 export const register: Register = (on, options) => {
+  snapshotCache = undefined
   // The engine accepts one unmatched `tool.call` hook, so this one serves the shell and dispatch guards and the record check,
   // which run whatever the pane option is, and the pane's observation, which runs only with the option on.
   on('tool.call', async ($, e, next) => {
@@ -695,8 +707,10 @@ export const register: Register = (on, options) => {
       ran = await next(e)
     } catch (error) {
       await settleWorkers($, workerTokens, undefined)
+      if (!READ_ONLY_TOOLS.has(e.tool)) recordsGeneration++
       throw error
     }
+    if (!READ_ONLY_TOOLS.has(e.tool)) recordsGeneration++
     await settleWorkers($, workerTokens, ran)
     // The coordinator's accepted dispatches outlive a compaction in `$.state`; a failure here never changes the tool's result.
     if (e.tool === 'Agent' && ran.deny === undefined && !ran.isError) {
@@ -850,6 +864,7 @@ export const register: Register = (on, options) => {
       return { text: `${id} ${verb === 'pin' ? t.pinned : t.unpinned}.` }
     }
     if (verb) return { text: t.usageHelp }
+    recordsGeneration++
     await $.ui.open(await paneSpec($))
     $.ui.invalidate('ui.render')
 
@@ -869,11 +884,21 @@ export const register: Register = (on, options) => {
       stat: (path: string) => $.fs.stat(path),
       read: (path: string) => $.fs.read(path),
     }
+    // A press that only changes the view draws from the last snapshot; the records are read again after a tool call that may have changed one
+    // and at the latest once the snapshot is a minute old.
+    const cwd = await $.session.cwd()
+    const now = await $.clock.now()
     let snapshot
-    try {
-      snapshot = await readSnapshot(await $.session.cwd(), fs)
-    } catch (error) {
-      return <Text color="error">{String((error as Error).message)}</Text>
+    if (snapshotCache?.cwd === cwd && snapshotCache.generation === recordsGeneration && now - snapshotCache.readAt < SNAPSHOT_MAX_AGE_MS) snapshot = snapshotCache.snapshot
+    else {
+      const generation = recordsGeneration
+      try {
+        snapshot = await readSnapshot(cwd, fs)
+      } catch (error) {
+        snapshotCache = undefined
+        return <Text color="error">{String((error as Error).message)}</Text>
+      }
+      snapshotCache = { cwd, snapshot, readAt: now, generation }
     }
 
     // An unopened initiative becomes a card only when pinned: touching its plan starts no work.

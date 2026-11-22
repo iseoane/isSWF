@@ -223,6 +223,8 @@ async function readInitiative(fs, id, dir, skipped) {
   } catch (error) {
     return { id, title: title ?? UNKNOWN, type: UNKNOWN, status: 'unparsed', planError: planErrorDetail(error), jobs: [] };
   }
+  // A closed initiative is not drawn, so its job folders are never opened.
+  if (jobs.every(job => job.reportedStatus === 'completed')) return { id, status: 'closed' };
   const parsed = [];
   for (const job of jobs) parsed.push(await readJob(fs, job, join(dir, 'jobs', job.id), id, skipped));
   return { id, title: title ?? UNKNOWN, type: plan.match(/^Type:\s*(.+)$/m)[1].trim(), status: 'parsed', jobs: parsed };
@@ -258,8 +260,8 @@ export async function readSnapshot(project, fs) {
   const ids = (await listDir(fs, stateDir)).filter(e => e.kind === 'dir' && /^I\d+$/.test(e.name)).map(e => e.name).sort();
   for (const id of ids) {
     const initiative = await readInitiative(fs, id, join(stateDir, id), skipped);
+    if (initiative.status === 'closed') continue;
     const { jobs } = initiative;
-    if (initiative.status === 'parsed' && jobs.every(j => j.status === 'completed')) continue;
     if (initiative.status === 'parsed' && jobs.every(j => j.status === 'pending' && j.recordCount === 0)) {
       unopened.push({ id, title: initiative.title });
       continue;
