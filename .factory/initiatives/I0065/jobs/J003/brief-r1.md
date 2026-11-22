@@ -26,6 +26,7 @@ Reference page sections to add or reshape, keeping its existing current content:
 - Parallel work in worktrees, with a configurable limit. Sources: the coordinator's "Parallel jobs" section and `docs/en/installation.md`.
 - Skills, roles, references and principles: what each is, with links.
 - Update `.agents/skills/isswf-howto/SKILL.md` only if it is stale against the new README, reference page or J001 flowchart (for example, a link or flow it should point to). If no change is needed, record why in A001.
+- How an initiative is recorded: the plan (`plan.md`, one section per job with status, objective, acceptance, evidence), the curated brief per job and its revisions (`brief-rN.md`), jobs as small verifiable slices, attempt records (`ANNN.md`), review records (`VNNN.md`), and any other record kinds the templates define (`.factory/templates/`), with a short example tree. Sources: `docs/durable-work.md` "Project records", the templates, and `.agents/roles/references/planning.md`. Ground each file name in the templates; do not invent record kinds. The README's first-session story mentions in one line that the coordinator writes these records and links this section.
 - Opening issues from other repositories. Source: `.agents/skills/isswf-issue/SKILL.md`.
 - The initiatives panel in detail. Source: `docs/en/installation.md`.
 
