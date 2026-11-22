@@ -109,3 +109,20 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 ### Evidence
 
 - Researcher return, 2026-11-22, base d293487e, judged also against the J003 candidate snapshot. Top ten: (1) Pi needs the separately installed pi-subagents extension, dropped by the J003 candidate (regression); (2) compaction reminder; (3) integration gate stamps; (4) review coverage check in CI; (5) isswf-status --next and snapshot; (6) package-acquisition refusal; (7) token and cost reports (estimates); (8) record check after writes; (9) initiative close gate; (10) isswf-handoff missing from the skills table. Also: guards framed as Claude-only though Pi has equivalents; flowchart node pr implies a PR for every change, while records-only push and local mode have none.
+
+
+## J006
+
+- Status: pending
+- Objective: The reference page, the README and the flowchart cover the J005 gaps 2-10 and show the delivery paths without a pull request.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: None.
+- Next step: Wait for J003.
+
+### Acceptance
+
+- `docs/en/reference.md` and its Spanish mirror explain, each grounded in `docs/en/operations.md` or the named tool and linking to it: the compaction reminder, the integration gate and its stamp (observe and enforce), the review coverage check in CI, `isswf-status --next` and the snapshot, the package-acquisition refusal, token and cost reports as estimates, the record check after writes, and the initiative close gate. Host and version qualifiers from the sources are kept.
+- The reference skills table lists `isswf-handoff`.
+- The README gains at most four plain-language sentences for the most useful of these, linking the reference.
+- The flowchart data shows that records-only direct push and local mode reach the base branch without a pull request; `--check` passes and both languages match.
