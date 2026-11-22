@@ -6,7 +6,7 @@ The operator found the Archify workflow diagrams confusing: they mix every role,
 
 J003 restructures the README and its reference page, as the operator decided on 2026-11-22.
 
-Integration: the operator authorized integrating every I0065 job on 2026-11-22 ("tienes mi autorizacion para integrarla"), after required review and exact-head CI. No release is planned: the changed files are outside the package `files` list, except `.agents/skills/isswf-howto/` if J003 changes it, which would then need a patch release decided by the operator.
+Integration: the operator authorized integrating every I0065 job on 2026-11-22 ("tienes mi autorizacion para integrarla"), after required review and exact-head CI. No release is planned: the changed files are outside the package `files` list, except `.agents/skills/isswf-howto/` if J003 changes it, which would then need a patch release. The operator authorized that patch release on 2026-11-22 ("ok pues entonces release patch"): at initiative close, if any packaged file changed, release the next patch through `.claude/skills/project-release/SKILL.md`; otherwise no release.
 
 ## J001
 
