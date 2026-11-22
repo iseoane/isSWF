@@ -4,7 +4,7 @@ Type: enhancement
 
 On 2026-11-22 the operator saw that the Claude Code initiatives panel showed no worker runs for I0065. The panel counts a run only from a `- Run: claude agent=<id>` line in an attempt or review record. The coordinator did not pass the launch identity the host returned, so every I0065 worker record and the J001-J003 review records have no such line. `isswf-record-check` reports a malformed `Run:` line but not a missing one. The operator decided that this must be a deterministic control, not a retrospective note, and asked for a new initiative. It also holds a retrospective of the work done on 2026-11-21 and 2026-11-22; the operator decides which of its findings become further jobs here.
 
-Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`) need a patch release at close; that release needs its own operator authorization.
+Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`) need a patch release at close; the operator authorized that patch release on 2026-11-22 ("lo tienes autorizado!").
 
 ## J001
 
