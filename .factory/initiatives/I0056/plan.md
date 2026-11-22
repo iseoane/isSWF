@@ -25,10 +25,10 @@ Limits the operator accepted when closing I0009/J029 on 2026-11-14, plus one rel
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Objective: tools/build-release.mjs accepts a release output on a different Windows drive from the source.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
 - Next step: Fix isWithin for cross-drive paths with a focused regression test.
 
