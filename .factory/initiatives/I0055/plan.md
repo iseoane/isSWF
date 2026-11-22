@@ -6,12 +6,12 @@ Operator feedback 2026-11-14 on Windows: every press in the Claude Code initiati
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: A press that only changes pane view state (fold, unfold, record detail, tab) redraws without re-reading the project's state records; the snapshot is re-read only when records may have changed.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Start after I0009, on operator request.
+- Next step: Worker dispatched in its own worktree.
 
 ### Acceptance
 
@@ -26,13 +26,13 @@ Operator feedback 2026-11-14 on Windows: every press in the Claude Code initiati
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Size: S (one flow)
 - Objective: Removing a job worktree leaves no fsmonitor daemon running for it, and a check reports any daemon left behind for a worktree that no longer exists.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J002/brief-r1.md) (pending until prepared)
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Write brief r1 when I0055 starts.
+- Next step: Worker dispatched in its own worktree.
 
 ### Acceptance
 
