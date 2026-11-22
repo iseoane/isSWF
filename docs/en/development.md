@@ -202,6 +202,17 @@ The README shows `docs/en/workflow.svg` or `docs/es/workflow.svg`, which the sam
 
 `--check` fails when an image differs from what the data produces. `tests/workflow-flow.mjs` covers a stale image, escaped markup and the absence of script, but nothing renders an image: a box grows with its wrapped text, so a long label can collide with an arrow label. Open both SVGs in a browser after a change. `.github/workflows/pages.yml` publishes only the two interactive pages and the landing page, never the images.
 
+### Maintain the first-session animations
+
+[`docs/diagrams/first-session.json`](../diagrams/first-session.json) is the single source of four README images: `docs/en/first-session.svg` and `docs/es/first-session.svg` (a simulated terminal session) and `docs/en/initiatives-panel.svg` and `docs/es/initiatives-panel.svg` (a simulated Claude Code initiatives panel). Each step has English and Spanish text, a delay and the repository file that supports what it says; the panel data lists its jobs, frames and the labels it copies from `hooks/register.tsx`. Edit the data, never an image, and keep each step true to its cited file. Both images carry a visible "simulated" label, use demo data and are not recordings.
+
+```sh
+node tooling/maintenance/first-session.mjs
+node tooling/maintenance/first-session.mjs --check
+```
+
+The first command rewrites the four images; the second needs only Node.js and git, writes nothing and fails when a field lacks its English or Spanish text, a step ID repeats, a cited path does not exist at `HEAD`, the two languages differ in steps, or an image differs from what the data produces. `node tools/check-quality.mjs` runs it and `tests/first-session.mjs` tests each failure with disposable fixtures. The images animate with CSS only (no script), follow the viewer's light or dark setting and, with reduced motion requested, show every step or the last panel frame at once. Nothing renders them in a test: open both languages in a browser, in light and dark, after a change.
+
 To measure CI wall-clock minutes per pull request branch and per push (development only; the script makes no network calls):
 
 ```sh

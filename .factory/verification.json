@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "fc5a8ccb123bdaeeb84bdd71d9f73fb4162a516a9a3c4a1c8cf0d48f0e786873"
+      "sha256": "ee06632c275ee9e89f99c902ec086aeda09a406eae89346d0b78341705221537"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -317,6 +317,28 @@
         "tools/",
         "hooks/",
         ".agents/hosts/"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "first-session",
+      "argv": [
+        "node",
+        "tests/first-session.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "docs/diagrams/first-session.json",
+        "docs/en/first-session.svg",
+        "docs/es/first-session.svg",
+        "docs/en/initiatives-panel.svg",
+        "docs/es/initiatives-panel.svg",
+        "tooling/maintenance/first-session.mjs"
       ],
       "timeoutSeconds": 120
     },

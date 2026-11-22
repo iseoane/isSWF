@@ -1,0 +1,91 @@
+{
+  "ui": {
+    "sessionTitle": {
+      "en": "A first isSWF session in Claude Code",
+      "es": "Una primera sesión de isSWF en Claude Code"
+    },
+    "sessionDescription": {
+      "en": "A simulated terminal session, shortened: install the plugin, set up the project, ask isswf-howto what to use, send the coordinator a first request, see its review and pull request, approve the merge and close with a retrospective.",
+      "es": "Una sesión de terminal simulada y abreviada: instalar el plugin, configurar el proyecto, preguntar a isswf-howto qué usar, enviar al coordinador una primera petición, ver su revisión y su pull request, aprobar la fusión y cerrar con una retrospectiva."
+    },
+    "simulatedLabel": {
+      "en": "SIMULATED SESSION · shortened, not a recording",
+      "es": "SESIÓN SIMULADA · abreviada, no es una grabación"
+    },
+    "panelTitle": {
+      "en": "The initiatives panel following one job",
+      "es": "El panel de iniciativas siguiendo un trabajo"
+    },
+    "panelDescription": {
+      "en": "A simulated view of the Claude Code initiatives panel with demo data. One job goes from pending to in progress, to in review, to completed.",
+      "es": "Una vista simulada del panel de iniciativas de Claude Code con datos de demostración. Un trabajo pasa de pendiente a en curso, a en revisión y a completado."
+    },
+    "panelSimulatedLabel": {
+      "en": "SIMULATED PANEL · demo data, not a recording",
+      "es": "PANEL SIMULADO · datos de demostración, no es una grabación"
+    }
+  },
+  "session": {
+    "steps": [
+      { "id": "c-install", "kind": "caption", "delay": 0.6, "text": { "en": "1 · Install", "es": "1 · Instala" }, "source": "docs/en/installation.md" },
+      { "id": "s-marketplace", "kind": "shell", "delay": 0.8, "text": { "en": "claude plugin marketplace add /path/to/isswf-release", "es": "claude plugin marketplace add /path/to/isswf-release" }, "source": "docs/en/installation.md" },
+      { "id": "s-install", "kind": "shell", "delay": 1.2, "text": { "en": "claude plugin install isswf@isswf --scope user", "es": "claude plugin install isswf@isswf --scope user" }, "source": "docs/en/installation.md" },
+      { "id": "c-setup", "kind": "caption", "delay": 1.4, "text": { "en": "2 · Set up your project", "es": "2 · Configura tu proyecto" }, "source": ".agents/skills/isswf-setup/SKILL.md" },
+      { "id": "s-setup", "kind": "you", "delay": 0.8, "text": { "en": "/isswf:isswf-setup", "es": "/isswf:isswf-setup" }, "source": ".agents/skills/isswf-setup/SKILL.md" },
+      { "id": "r-setup", "kind": "reply", "delay": 1.4, "text": { "en": "Setup inspects this repository and asks only what is missing: the models and effort for each role, where the work is tracked, the checks, and where worktrees go. It saves the choices in the setup record and adds a small isSWF entry to AGENTS.md.", "es": "La configuración inspecciona este repositorio y solo pregunta lo que falta: los modelos y el esfuerzo de cada rol, dónde se registra el trabajo, las comprobaciones y dónde van los worktrees. Guarda las decisiones en el registro de configuración y añade una pequeña entrada de isSWF en AGENTS.md." }, "source": "docs/en/installation.md" },
+      { "id": "c-howto", "kind": "caption", "delay": 1.6, "text": { "en": "3 · Not sure what to ask?", "es": "3 · ¿No sabes qué pedir?" }, "source": ".agents/skills/isswf-howto/SKILL.md" },
+      { "id": "s-howto", "kind": "you", "delay": 0.8, "text": { "en": "/isswf:isswf-howto I want a clear-filter button on my list page. What should I use?", "es": "/isswf:isswf-howto Quiero un botón para limpiar el filtro en mi página de listado. ¿Qué debo usar?" }, "source": ".agents/skills/isswf-howto/SKILL.md" },
+      { "id": "r-howto", "kind": "reply", "delay": 1.6, "text": { "en": "Building a feature through to a pull request is the coordinator's default flow (.agents/roles/references/feature-delivery.md). I do not start work here. Send the coordinator: Add a clear-filter button that restores the full list.", "es": "Construir una funcionalidad hasta una pull request es el flujo por defecto del coordinador (.agents/roles/references/feature-delivery.md). Aquí no inicio trabajo. Envía al coordinador: Añade un botón para limpiar el filtro que restaure la lista completa." }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "c-request", "kind": "caption", "delay": 1.6, "text": { "en": "4 · Make a first request", "es": "4 · Haz una primera petición" }, "source": ".agents/skills/isswf-coordinator/SKILL.md" },
+      { "id": "s-request", "kind": "you", "delay": 0.8, "text": { "en": "/isswf:isswf-coordinator Add a clear-filter button that restores the full list.", "es": "/isswf:isswf-coordinator Añade un botón para limpiar el filtro que restaure la lista completa." }, "source": "docs/en/getting-started.md" },
+      { "id": "r-request", "kind": "reply", "delay": 1.6, "text": { "en": "I wrote the plan and a short brief for each job as Markdown files under .isswf/initiatives/I0001/. J001 goes to a worker, the agent that changes the code and checks it, and it runs in the background.", "es": "He escrito el plan y un brief corto de cada trabajo como archivos Markdown en .isswf/initiatives/I0001/. J001 pasa a un implementador, el agente que cambia el código y lo comprueba, y se ejecuta en segundo plano." }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "c-review", "kind": "caption", "delay": 2.0, "text": { "en": "5 · Review and pull request", "es": "5 · Revisión y pull request" }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "r-review", "kind": "reply", "delay": 0.8, "text": { "en": "J001 is done. A reviewer, a separate agent, checked the exact change. I pushed the feature branch and opened PR #12. CI, the automatic checks, passed on its head. Nothing is merged yet.", "es": "J001 está hecho. Un revisor, un agente distinto, comprobó el cambio exacto. He subido la rama de la funcionalidad y abierto la PR #12. La CI, las comprobaciones automáticas, pasó en su último commit. Aún no se ha fusionado nada." }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "c-approval", "kind": "caption", "delay": 1.8, "text": { "en": "6 · Your approval", "es": "6 · Tu aprobación" }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "r-approval", "kind": "reply", "delay": 0.8, "text": { "en": "PR #12 is ready. Merging it into main is your decision. Do you approve?", "es": "La PR #12 está lista. Fusionarla en main es decisión tuya. ¿La apruebas?" }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "s-approval", "kind": "you", "delay": 1.6, "text": { "en": "Approved. Merge it.", "es": "Aprobada. Fusiónala." }, "source": ".agents/roles/references/feature-delivery.md" },
+      { "id": "c-retro", "kind": "caption", "delay": 1.8, "text": { "en": "7 · Close with a retrospective", "es": "7 · Cierra con una retrospectiva" }, "source": ".agents/skills/isswf-retrospective/SKILL.md" },
+      { "id": "r-retro", "kind": "reply", "delay": 0.8, "text": { "en": "Merged PR #12 as you decided. Now I look back at what happened with isswf-retrospective and propose improvements as drafts. You decide which to keep.", "es": "He fusionado la PR #12 como decidiste. Ahora repaso lo ocurrido con isswf-retrospective y propongo mejoras como borradores. Tú decides cuáles conservar." }, "source": ".agents/skills/isswf-retrospective/SKILL.md" }
+    ],
+    "holdSeconds": 6
+  },
+  "panel": {
+    "source": "hooks/register.tsx",
+    "secondsPerFrame": 4.5,
+    "title": "isSWF v1.9.8 · demo-app",
+    "labels": {
+      "autoWakeUp": { "en": "⏰ AutoWakeUp: no", "es": "⏰ AutoWakeUp: no" },
+      "tabInitiatives": { "en": "Initiatives", "es": "Iniciativas" },
+      "tabAgents": { "en": "Agents", "es": "Agentes" },
+      "tabFiles": { "en": "Files", "es": "Archivos" },
+      "jobsLine": { "en": "jobs %d/%d ✓ · %d open", "es": "jobs %d/%d ✓ · %d sin cerrar" },
+      "completed": { "en": "✓ %d completed", "es": "✓ %d completados" },
+      "inactive": { "en": "Inactive %d", "es": "No activas %d" }
+    },
+    "initiative": { "id": "I0001", "title": { "en": "Clear-filter button", "es": "Botón para limpiar el filtro" } },
+    "inactive": { "id": "I0002", "title": { "en": "Docs refresh", "es": "Revisión de la documentación" } },
+    "jobs": [
+      { "id": "J001", "objective": { "en": "Add the clear-filter button", "es": "Añadir el botón para limpiar el filtro" } },
+      { "id": "J002", "objective": { "en": "Cover it with a test", "es": "Cubrirlo con una prueba" } },
+      { "id": "J003", "objective": { "en": "Update the user guide", "es": "Actualizar la guía de uso" } }
+    ],
+    "frames": [
+      {
+        "caption": { "en": "The plan is recorded: every job is pending.", "es": "El plan está registrado: todos los trabajos están pendientes." },
+        "first": { "status": "pending" }
+      },
+      {
+        "caption": { "en": "A worker starts J001: it is in progress.", "es": "Un implementador empieza J001: está en curso." },
+        "first": { "status": "in-progress", "pills": [{ "role": "worker", "state": "running" }] }
+      },
+      {
+        "caption": { "en": "The worker's attempt is complete and a reviewer is checking it.", "es": "El intento del implementador está completo y un revisor lo está comprobando." },
+        "first": { "status": "in-review", "pills": [{ "role": "worker", "state": "passed" }, { "role": "reviewer", "state": "running" }] }
+      },
+      {
+        "caption": { "en": "The review passed and J001 is completed.", "es": "La revisión se aprobó y J001 está completado." },
+        "first": { "status": "completed" }
+      }
+    ]
+  }
+}

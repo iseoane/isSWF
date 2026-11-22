@@ -4,6 +4,10 @@ English | [Español](README.es.md)
 
 isSWF is an AI-assisted software factory: AI agents do the work and you make the decisions. It splits a request into small jobs that are easy to check, picks the checks that match the risk, and keeps evidence for what was done, so nothing is merged or published unless you say so.
 
+![A simulated terminal session, shortened: install, set up, ask isswf-howto, send the coordinator a first request, then review, pull request, your approval and a retrospective.](docs/en/first-session.svg)
+
+The animation above is a simulated, shortened session in Claude Code, not a recording. It follows the steps in the next section.
+
 ![isSWF workflow overview: a request goes from you to the coordinator, then through a prepared brief, a worker, an optional review and delivery, until you approve it.](docs/en/workflow.svg)
 
 The picture is a summary: boxes are steps and arrows show where the work goes next. For the version where each step lists the questions it asks itself, open the [interactive flowchart](https://iseoane.github.io/isSWF/docs/en/workflow.html) ([Español](https://iseoane.github.io/isSWF/docs/es/workflow.html)). [How work is decided](docs/en/reference.md#how-work-is-decided-and-who-decides-it) explains it in words.
@@ -25,6 +29,10 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
 
 5. **The coordinator plans and records.** It writes a plan and a short brief (the instructions for one job) as Markdown files in your project, and a worker, an agent that changes code and checks it, does each job. The records of one initiative, a tracked piece of work, are described in [how an initiative is recorded](docs/en/reference.md#how-an-initiative-is-recorded).
 6. **Follow the progress.** In Claude Code, turn on the [initiatives panel](docs/en/reference.md#the-initiatives-panel) to see plans, jobs and reviews as cards. A similar panel for Pi is coming soon (see [possible future actions](docs/en/future-actions.md)).
+
+   ![A simulated view of the Claude Code initiatives panel with demo data: one job goes from pending to in progress, to in review and to completed.](docs/en/initiatives-panel.svg)
+
+   The panel animation is simulated, with demo data. It shows only fields and states that the panel renders.
 7. **Review, PR and your approval.** When the risk calls for it, a reviewer, a separate agent, checks the change. In a project that uses GitHub, the coordinator then opens a pull request (PR) and waits for continuous integration (CI), the automatic checks, to pass; a project with no remote keeps the work local. You decide whether to merge. Nothing is merged or published without you. See [how changes reach main](docs/en/reference.md#how-changes-reach-main).
 8. **Close with a retrospective.** When the work is finished, the coordinator runs the `isswf-retrospective` skill, which looks back at what happened and proposes improvements as drafts. You decide which to keep.
 
