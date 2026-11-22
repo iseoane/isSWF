@@ -48,13 +48,13 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Size: S (one flow)
 - Objective: A CI wait or full check stopped by the host under memory pressure does not leave the coordinator without a result.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Worker implements brief r1.
+- Next step: None; merged in #383.
 
 ### Acceptance
 
@@ -65,3 +65,13 @@ Sizing follows `.agents/roles/references/planning.md`. Advance the jobs under th
 ### Evidence
 
 - 2026-11-21: Claude Code stopped two `gh pr checks --watch` background commands under memory pressure during I0058, and an earlier one in I0057 (2026-11-15).
+
+## Close
+
+- Closed 2026-11-22. J001 and J002 merged in #382, J003 in #383 (main 84a171f991ecb4730cbd76aafc9733d9d0e5aa79).
+- Full check: `node tools/check-quality.mjs` exit 0 in 1063 s at d37f637a9bb948e1c97cde7cca9f9952c44676a8 (the J003 head after merging main). CI success on that head, read with `tools/isswf-ci-state.mjs --pr 383`.
+- Known limits carried forward:
+  - J002 N1: `isAncestor` fails open toward the checkpoint fallback.
+  - J003 V002 N1: a queued re-run with a zero-time `startedAt` can sort behind an older success.
+  - Pi's reporting of a stopped background command is unverified.
+- Deferred candidate: workers repeatedly reported checks without a full SHA on each entry (J001, J002, J003). The coordinator fixed every record by hand, so the template or worker profile should prevent it.
