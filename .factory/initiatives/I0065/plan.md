@@ -71,3 +71,19 @@ J003 restructures the README and its reference page, as the operator decided on 
 ### Evidence
 
 - None.
+
+
+## J004
+
+- Status: pending
+- Objective: The README front page opens with two hooks: an animated SVG that simulates a first complete session, and the operator's real recording of the Claude Code initiatives panel.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: The panel recording is supplied by the operator (screen capture, 10-15 s); the coordinator cannot record the screen in this session.
+- Next step: Wait for J003. The operator records the panel GIF before or during J004.
+
+### Acceptance
+
+- A Node script with no dependencies writes `docs/en/first-session.svg` and `docs/es/first-session.svg` from one bilingual script file. The SVG animates without JavaScript, is labeled as a simulation, and every command and response in it matches the real skill and coordinator behavior at the base revision.
+- `--check` fails when a generated SVG differs from the script file or the two languages differ in steps. It runs in `tools/check-quality.mjs`.
+- `README.md` and `README.es.md` show the animation near the top of the front page and the panel recording in the first-session section, with alt text. The recording is the operator's real capture, not a simulation.
