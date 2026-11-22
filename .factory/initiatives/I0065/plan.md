@@ -8,12 +8,12 @@ J003 restructures the README and its reference page, as the operator decided on 
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: A bilingual interactive flowchart page, generated from one in-repo data source and checked by the quality suite, replaces the Archify `workflow.html` pages.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Dispatch an isswf-worker.
+- Next step: Worker dispatched in background (operator, 2026-11-22, "adelante comienza con la iniciativa"); worktree `isSWF-worktrees/i0065-j001`, branch `i0065-j001`. Wait for its report.
 
 ### Acceptance
 
