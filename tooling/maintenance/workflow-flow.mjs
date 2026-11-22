@@ -4,8 +4,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Writes docs/<locale>/workflow.html from docs/diagrams/flow.json. With --check it writes nothing and fails
-// when the data is invalid or a page differs from what the data produces. --root selects another checkout.
+// Writes docs/<locale>/workflow.html and workflow.svg from docs/diagrams/flow.json. With --check it writes nothing and
+// fails when the data is invalid or a generated file differs from what the data produces. --root selects another checkout.
 const GITHUB_BLOB = 'https://github.com/iseoane/isSWF/blob/main/';
 const LOCALES = ['en', 'es'];
 const KINDS = ['operator', 'coordinator', 'helper'];
@@ -311,18 +311,96 @@ function page(data, locale) {
 `;
 }
 
+// The README overview: nodes and arrows only, with no script. It paints its own light panel, so it reads the same
+// on GitHub's light and dark backgrounds, where an image cannot follow the page theme.
+const SVG_COLORS = { operator: '#8a5a0b', coordinator: '#2b6cb0', helper: '#2f855a', loop: '#9b2c2c', line: '#6b7a93', text: '#1b2230', muted: '#4b5563' };
+const fmt = value => Math.round(value * 10) / 10;
+
+// Breaks text at spaces into lines of at most max characters; a single longer word keeps its own line.
+function wrap(text, max) {
+  const lines = [];
+  for (const word of text.split(/\s+/u)) {
+    if (lines.length && lines[lines.length - 1].length + 1 + word.length <= max) lines[lines.length - 1] += ` ${word}`;
+    else lines.push(word);
+  }
+  return lines;
+}
+
+function layout(node) {
+  const w = node.kind === 'coordinator' ? 192 : 172;
+  const label = wrap(node.label, Math.floor((w - 20) / 7.4));
+  const sub = wrap(node.sub, Math.floor((w - 20) / 5.9));
+  return { ...node, w, hw: w / 2, label, sub, hh: (12 + label.length * 16 + 4 + sub.length * 13 + 10) / 2 };
+}
+
+// The arrow geometry of the interactive page, with the node sizes this image computes.
+function route(edge, a, b) {
+  const G = 6, shape = edge.shape || 'straight';
+  if (shape === 'loop-right') {
+    return { d: `M${a.x + a.hw},${a.y} C${a.x + a.hw + 120},${a.y} ${b.x + b.hw + 120},${b.y} ${b.x + b.hw + G},${b.y}`, lx: a.x + a.hw + 100, ly: (a.y + b.y) / 2 + 4 };
+  }
+  if (shape === 'loop-left' || shape === 'skip') {
+    const swing = shape === 'loop-left' ? 250 : 120;
+    return { d: `M${a.x - a.hw},${a.y} C${a.x - a.hw - swing},${a.y} ${b.x - b.hw - swing},${b.y} ${b.x - b.hw - G},${b.y}`, lx: shape === 'skip' ? 62 : 20, ly: shape === 'skip' ? (a.y + b.y) / 2 + 8 : a.y - 30 };
+  }
+  if (shape === 'bypass') {
+    return { d: `M${a.x + a.hw * 0.55},${a.y + a.hh} C${a.x + 150},${a.y + 170} ${b.x + 150},${b.y - 170} ${b.x + b.hw * 0.55},${b.y - b.hh - G}`, lx: a.x + 118, ly: (a.y + b.y) / 2 + 4, anchor: 'end' };
+  }
+  const y1 = a.y + a.hh, y2 = b.y - b.hh - G, m = (y1 + y2) / 2;
+  return { d: `M${a.x},${y1} C${a.x},${m} ${b.x},${m} ${b.x},${y2}`, lx: b.x + (a.x === b.x ? 8 : 26), ly: a.x === b.x ? m + 4 : y2 - 8 };
+}
+
+function svg(data, locale) {
+  const local = localize(data, locale);
+  const nodes = new Map(local.nodes.map(node => [node.id, layout(node)]));
+  const c = SVG_COLORS;
+  const paths = [], labels = [];
+  for (const edge of local.edges) {
+    const r = route(edge, nodes.get(edge.from), nodes.get(edge.to));
+    const loop = edge.shape === 'loop-left' || edge.shape === 'loop-right';
+    paths.push(`<path d="${r.d.replace(/-?\d+(?:\.\d+)?/gu, number => fmt(Number(number)))}" fill="none" stroke="${loop ? c.loop : c.line}" stroke-width="2"${loop ? ' stroke-dasharray="5 4"' : ''} marker-end="url(#${loop ? 'al' : 'a'})"/>`);
+    if (edge.label) labels.push(`<text x="${fmt(r.lx)}" y="${fmt(r.ly)}"${r.anchor ? ` text-anchor="${r.anchor}"` : ''} fill="${loop ? c.loop : c.muted}" font-size="11" font-weight="600">${escapeHtml(edge.label)}</text>`);
+  }
+  const boxes = [...nodes.values()].map(node => {
+    const x = node.x - node.hw, y = node.y - node.hh;
+    const labelY = index => fmt(y + 12 + 12 + index * 16);
+    const subY = index => fmt(y + 12 + node.label.length * 16 + 4 + 10 + index * 13);
+    const text = [
+      ...node.label.map((line, i) => `<text x="${node.x}" y="${labelY(i)}" font-size="14" font-weight="700" fill="${c.text}">${escapeHtml(line)}</text>`),
+      ...node.sub.map((line, i) => `<text x="${node.x}" y="${subY(i)}" font-size="11" fill="${c.muted}">${escapeHtml(line)}</text>`),
+    ];
+    return `<rect x="${fmt(x)}" y="${fmt(y)}" width="${node.w}" height="${fmt(node.hh * 2)}" rx="${node.kind === 'coordinator' ? 18 : 8}" fill="#ffffff" stroke="${c[node.kind]}" stroke-width="2"${node.optional ? ' stroke-dasharray="6 4"' : ''}/>${text.join('')}`;
+  });
+  const marker = (id, color) => `<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="${color}"/></marker>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1260" viewBox="0 0 760 1260" role="img" aria-labelledby="t d" xml:lang="${locale}">
+<title id="t">${escapeHtml(local.ui.pageTitle)}</title>
+<desc id="d">${escapeHtml(local.ui.svgDescription)}</desc>
+<defs>${marker('a', c.line)}${marker('al', c.loop)}</defs>
+<rect x="1" y="1" width="758" height="1258" rx="12" fill="#f5f6f8" stroke="#8e99aa" stroke-width="2"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<g text-anchor="start">${paths.join('')}${labels.join('')}</g>
+<g text-anchor="middle">
+${boxes.join('\n')}
+</g>
+</g>
+</svg>
+`;
+}
+
 const dataPath = resolve(root, 'docs/diagrams/flow.json');
 assert.ok(existsSync(dataPath), `Missing ${dataPath}`);
 const data = JSON.parse(readFileSync(dataPath, 'utf8'));
 validate(data);
 for (const locale of LOCALES) {
-  const path = resolve(root, `docs/${locale}/workflow.html`);
-  const expected = page(data, locale);
-  if (check) {
-    assert.ok(existsSync(path) && readFileSync(path, 'utf8') === expected, `Regenerate ${path} with node tooling/maintenance/workflow-flow.mjs`);
-  } else {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, expected);
+  for (const [name, build] of [['html', page], ['svg', svg]]) {
+    const path = resolve(root, `docs/${locale}/workflow.${name}`);
+    const expected = build(data, locale);
+    if (check) {
+      assert.ok(existsSync(path) && readFileSync(path, 'utf8') === expected, `Regenerate ${path} with node tooling/maintenance/workflow-flow.mjs`);
+    } else {
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, expected);
+    }
   }
 }
-console.log(check ? 'The workflow flow data is valid and both pages match it.' : 'Wrote docs/en/workflow.html and docs/es/workflow.html.');
+console.log(check ? 'The workflow flow data is valid and all four generated files match it.' : 'Wrote workflow.html and workflow.svg under docs/en and docs/es.');
