@@ -35,12 +35,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Objective: The README shows a static SVG overview generated from the same data file, and all Archify tooling, sources and docs are removed.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j002`, branch `i0065-j002`, base e552183b. Wait for its report.
+- Next step: None.
 
 ### Acceptance
 
@@ -51,16 +51,16 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ### Evidence
 
-- None.
+- Merged as 7821cf9790b920c9ad384013f847c7434425c4e6 (PR #393), exact-head CI success on 04eacf3d. Attempts A001, A002; reviews V001 (fail, corrected) and V002 (pass). Ignored Archify receipts moved from the primary checkout to tooling/.local/archify-receipts. Known limit: the HTML page's loop label offset (+70) may touch its arrow (V002 N1), follow-up outside I0065.
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Objective: The README becomes a short, plain-language front page that tells the story of a first complete session. Reference detail moves into the existing "How the factory works" guide, in both languages.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Wait for J002.
+- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j003`, branch `i0065-j003`. Wait for its report.
 
 ### Acceptance
 
