@@ -187,36 +187,20 @@ El README debe ser accesible. Deja las reglas exactas de ejecución, modelos y r
 
 ### Mantener el diagrama interactivo del flujo
 
-[`docs/diagrams/flow.json`](../diagrams/flow.json) es la única fuente de las dos páginas interactivas `docs/en/workflow.html` y `docs/es/workflow.html`. Cada nodo, pregunta, control automático y flecha tiene un `id` estable y su texto en inglés y en español, y cada pregunta cita los archivos del repositorio que respaldan su respuesta. Edita los datos, nunca las páginas generadas, y mantén cada respuesta fiel al archivo citado. Los nombres exactos de roles, skills y archivos no cambian entre idiomas.
+[`docs/diagrams/flow.json`](../diagrams/flow.json) es la única fuente de las dos páginas interactivas `docs/en/workflow.html` y `docs/es/workflow.html` y de las dos imágenes del README `docs/en/workflow.svg` y `docs/es/workflow.svg`. Cada nodo, pregunta, control automático y flecha tiene un `id` estable y su texto en inglés y en español, y cada pregunta cita los archivos del repositorio que respaldan su respuesta. Edita los datos, nunca las páginas generadas, y mantén cada respuesta fiel al archivo citado. Los nombres exactos de roles, skills y archivos no cambian entre idiomas.
 
 ```sh
 node tooling/maintenance/workflow-flow.mjs
 node tooling/maintenance/workflow-flow.mjs --check
 ```
 
-El primer comando reescribe ambas páginas, que son archivos únicos con CSS y JavaScript en línea y funcionan sin conexión. El segundo solo necesita Node.js y git. No escribe nada y falla cuando a un campo le falta el texto en inglés o en español, se repite un ID, una flecha o el destino de una pregunta nombra un nodo desconocido, una ruta citada no existe en `HEAD`, o una página difiere de lo que producen los datos. `node tools/check-quality.mjs` lo ejecuta y `tests/workflow-flow.mjs` prueba cada fallo con fixtures desechables. Estas comprobaciones no abren un navegador ni verifican que una traducción o una respuesta sea exacta: lee ambas páginas después de un cambio. La sección de Archify de más abajo describe el flujo anterior, que las páginas de arriba sustituyen.
+El primer comando reescribe ambas páginas y ambas imágenes. Las páginas son archivos únicos con CSS y JavaScript en línea y funcionan sin conexión; las imágenes se describen más abajo. El segundo solo necesita Node.js y git. No escribe nada y falla cuando a un campo le falta el texto en inglés o en español, se repite un ID, una flecha o el destino de una pregunta nombra un nodo desconocido, una ruta citada no existe en `HEAD`, o una página o una imagen difiere de lo que producen los datos. `node tools/check-quality.mjs` lo ejecuta y `tests/workflow-flow.mjs` prueba cada fallo con fixtures desechables. Estas comprobaciones no abren un navegador ni verifican que una traducción o una respuesta sea exacta: lee ambas páginas después de un cambio.
 
 ### Mantener los diagramas del flujo
 
-Las imágenes de los README y los diagramas interactivos completos comparten [una fuente bilingüe](../diagrams/workflow.json). Mantén juntos los identificadores de los nodos, las ramas, las citas de fuentes y las traducciones. Cuando cambie el flujo, fija la revisión del repositorio y las citas al commit que respalda el nuevo comportamiento. Los nombres exactos de roles, skills y archivos no cambian entre idiomas. El resumen omite las ramas detalladas y las referencias; el HTML las conserva.
+El README muestra `docs/en/workflow.svg` o `docs/es/workflow.svg`, que el mismo comando escribe desde el mismo archivo de datos que las páginas interactivas. La imagen tiene una caja por nodo y una flecha por arista, y no incluye script, enlaces ni texto de las preguntas. Pinta su propio panel claro, así que se lee igual sobre los fondos claro y oscuro de GitHub. Edita `docs/diagrams/flow.json`, nunca un SVG a mano, y vuelve a ejecutar el generador tras cambiar el flujo.
 
-Para regenerar ambos idiomas, utiliza una CLI de Archify 3.2 ya instalada. Sustituye `/path/to/archify/bin/archify.mjs` por su ruta de instalación. El comando utiliza un navegador local para validar, escribe los HTML y SVG en `docs/en/` y `docs/es/`, y conserva los candidatos y comprobaciones locales en `.archify/`. No instala herramientas, activa GitHub Pages ni publica archivos.
-
-```sh
-node tooling/maintenance/workflow-diagrams.mjs /path/to/archify/bin/archify.mjs
-node tooling/maintenance/workflow-diagrams.mjs --check
-```
-
-El segundo comando solo necesita Node.js. Comprueba los campos de traducción, las referencias del resumen, los bytes de los SVG generados y los hashes de los HTML contra el manifiesto generado portable. La suite de calidad portable también prueba esas comprobaciones con fixtures desechables que omiten traducciones, dejan la fuente desactualizada, incluyen referencias inválidas o identificadores duplicados y modifican los artefactos. No repite la validación en navegador ni verifica el significado de las traducciones. Inspecciona ambas imágenes y revisa las traducciones después de regenerar. Los recibos locales de entrega de Archify contienen rutas de la máquina y se ignoran; el manifiesto portable se conserva con los diagramas.
-
-Para fijar las citas de fuentes a un commit más reciente, previsualiza el resultado y luego escríbelo:
-
-```sh
-node tooling/maintenance/workflow-citations.mjs <new-revision>
-node tooling/maintenance/workflow-citations.mjs --write <new-revision>
-```
-
-Cada rango de líneas citado se busca por texto exacto en la nueva revisión. Un rango que aparece exactamente una vez se mueve con su texto. Un rango cuyo texto cambió, desapareció o aparece más de una vez se lista como `UNRESOLVED` con su ruta, el rango anterior y el encabezado que lo contiene, nunca se adivina y hace que el comando termine con código distinto de cero. `--write` actualiza las citas movidas y la revisión fijada, así que corrige a mano las no resueltas y después regenera los diagramas.
+`--check` falla cuando una imagen difiere de lo que producen los datos. `tests/workflow-flow.mjs` cubre una imagen desactualizada, el escapado del marcado y la ausencia de script, pero nada renderiza una imagen: una caja crece con su texto ajustado, así que una etiqueta larga puede chocar con el texto de una flecha. Abre ambos SVG en un navegador tras un cambio. `.github/workflows/pages.yml` publica solo las dos páginas interactivas y la página de inicio, nunca las imágenes.
 
 Para medir los minutos de reloj de CI por rama de pull request y por push (solo desarrollo; el script no hace llamadas de red):
 

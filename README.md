@@ -23,11 +23,11 @@ A selected feature-to-PR request follows the project's prepared delivery policy,
 
 ## Workflow diagrams
 
-![isSWF workflow overview: coordinator, selected supporting roles, implementation, checks and delivery.](docs/en/workflow.svg)
+![isSWF workflow overview: a request goes from you to the coordinator, then through a prepared brief, a worker, an optional review and delivery, until you approve it.](docs/en/workflow.svg)
 
-The [overview](docs/en/workflow.svg) is a quick summary. Open the complete workflow as a web page: [English](https://iseoane.github.io/isSWF/docs/en/workflow.html) · [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html). The diagrams retain legacy execution details and are navigation aids, not the authority for current native-host behavior; use the linked guides for the current contract. For offline viewing, download the [English HTML source](docs/en/workflow.html) or [Spanish HTML source](docs/es/workflow.html); GitHub displays these source files as code.
+The [overview](docs/en/workflow.svg) is a quick summary: boxes are steps and arrows show where the work goes next. Open the interactive flowchart, where each step lists the questions it asks itself: [English](https://iseoane.github.io/isSWF/docs/en/workflow.html) · [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html). The flowchart is a navigation aid, not the authority for current native-host behavior; use the linked guides for the current contract. For offline viewing, download the [English page](docs/en/workflow.html) or [Spanish page](docs/es/workflow.html); each is a single file that works without a network connection, and GitHub displays it as code.
 
-The site is published at [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/). Updates remain manual: open **Actions → Publish workflow diagrams → Run workflow**, select `main`, and run it when publication is authorized. There is no automatic deployment on push. The staging step allowlists only the bilingual landing page and the two complete workflow diagrams.
+The site is published at [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/). Updates remain manual: open **Actions → Publish workflow diagrams → Run workflow**, select `main`, and run it when publication is authorized. There is no automatic deployment on push. The staging step allowlists only the bilingual landing page and the two interactive flowcharts.
 
 ## Retained compiled release (legacy path)
 

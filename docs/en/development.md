@@ -187,36 +187,20 @@ Keep the README approachable. Put exact execution, model, and recovery rules in 
 
 ### Maintain the interactive workflow flowchart
 
-[`docs/diagrams/flow.json`](../diagrams/flow.json) is the single source of the two interactive pages `docs/en/workflow.html` and `docs/es/workflow.html`. Each node, question, automatic check and edge has a stable `id` and English and Spanish text, and each question cites the repository files that support its answer. Edit the data, never the generated pages, and keep each answer true to the cited file. Exact role, skill and file names stay the same in both languages.
+[`docs/diagrams/flow.json`](../diagrams/flow.json) is the single source of the two interactive pages `docs/en/workflow.html` and `docs/es/workflow.html` and of the two README images `docs/en/workflow.svg` and `docs/es/workflow.svg`. Each node, question, automatic check and edge has a stable `id` and English and Spanish text, and each question cites the repository files that support its answer. Edit the data, never the generated pages, and keep each answer true to the cited file. Exact role, skill and file names stay the same in both languages.
 
 ```sh
 node tooling/maintenance/workflow-flow.mjs
 node tooling/maintenance/workflow-flow.mjs --check
 ```
 
-The first command rewrites both pages, which are single files with inline CSS and JavaScript that work offline. The second needs only Node.js and git. It writes nothing and fails when a field lacks its English or Spanish text, an ID repeats, an edge or question destination names an unknown node, a cited path does not exist at `HEAD`, or a page differs from what the data produces. `node tools/check-quality.mjs` runs it, and `tests/workflow-flow.mjs` tests each failure with disposable fixtures. These checks do not open a browser or verify that a translation or an answer is accurate: read both pages after a change. The Archify section below describes the older pipeline, which the pages above replace.
+The first command rewrites both pages and both images. The pages are single files with inline CSS and JavaScript that work offline; the images are described below. The second needs only Node.js and git. It writes nothing and fails when a field lacks its English or Spanish text, an ID repeats, an edge or question destination names an unknown node, a cited path does not exist at `HEAD`, or a page or image differs from what the data produces. `node tools/check-quality.mjs` runs it, and `tests/workflow-flow.mjs` tests each failure with disposable fixtures. These checks do not open a browser or verify that a translation or an answer is accurate: read both pages after a change.
 
 ### Maintain the workflow diagrams
 
-The README previews and complete interactive diagrams share [one bilingual source](../diagrams/workflow.json). Keep node IDs, branches, source citations, and translations together. When the workflow changes, pin its repository revision and citations to the commit that supports the new behavior. Exact role, skill, and file names remain unchanged between languages. The overview omits detailed branches and references; the HTML retains them.
+The README shows `docs/en/workflow.svg` or `docs/es/workflow.svg`, which the same command writes from the same data file as the interactive pages. The image has one box per node and one arrow per edge, and no script, link or question text. It paints its own light panel, so it stays readable on GitHub's light and dark backgrounds. Edit `docs/diagrams/flow.json`, never an SVG by hand, and rerun the generator after a change to the flow.
 
-To regenerate both languages, use an existing Archify 3.2 CLI. Replace `/path/to/archify/bin/archify.mjs` with its installed path. This command uses a local browser for validation, writes the HTML and SVG files under `docs/en/` and `docs/es/`, and keeps local candidates and check receipts under `.archify/`. It does not install tools, enable GitHub Pages, or publish files.
-
-```sh
-node tooling/maintenance/workflow-diagrams.mjs /path/to/archify/bin/archify.mjs
-node tooling/maintenance/workflow-diagrams.mjs --check
-```
-
-The second command needs only Node.js. It checks translation fields, preview references, generated SVG bytes, and HTML hashes against the portable generated manifest. The portable quality suite also tests these checks against disposable missing-translation, stale-source, invalid-reference, duplicate-ID, and modified-artifact fixtures. It does not rerun browser validation or verify translation meaning. Inspect both preview images and review the translations after regeneration. Local Archify delivery receipts contain machine paths and are ignored; the portable manifest is retained with the diagrams.
-
-To re-pin the source citations to a newer commit, preview the result and then write it:
-
-```sh
-node tooling/maintenance/workflow-citations.mjs <new-revision>
-node tooling/maintenance/workflow-citations.mjs --write <new-revision>
-```
-
-Each cited line range is looked up by exact text in the new revision. A range that occurs exactly once moves with its text. A range whose text changed, disappeared or occurs more than once is listed as `UNRESOLVED` with its path, old range and enclosing heading, is never guessed, and makes the command exit nonzero. `--write` updates the moved citations and the pinned revision, so fix the unresolved ones by hand and then regenerate the diagrams.
+`--check` fails when an image differs from what the data produces. `tests/workflow-flow.mjs` covers a stale image, escaped markup and the absence of script, but nothing renders an image: a box grows with its wrapped text, so a long label can collide with an arrow label. Open both SVGs in a browser after a change. `.github/workflows/pages.yml` publishes only the two interactive pages and the landing page, never the images.
 
 To measure CI wall-clock minutes per pull request branch and per push (development only; the script makes no network calls):
 
