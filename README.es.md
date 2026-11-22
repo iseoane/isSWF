@@ -23,16 +23,16 @@ La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va e
    > Investiga por qué la prueba checkout.spec falla de forma intermitente. Solo diagnostica: encuentra la causa con evidencias y no cambies código. Informa de la causa y del siguiente paso.
    > ```
 
-5. **El coordinador planifica y registra.** Escribe un plan y un brief corto (las instrucciones de un trabajo) como archivos Markdown en tu proyecto, y un worker, un agente que cambia el código y lo comprueba, hace cada trabajo. Los registros se describen en [cómo se registra una iniciativa](docs/es/reference.md#cómo-se-registra-una-iniciativa).
-6. **Sigue el avance.** En Claude Code, activa el [panel de iniciativas](docs/es/reference.md#el-panel-de-iniciativas) para ver planes, trabajos y revisiones como tarjetas. Pronto habrá un panel similar para Pi.
-7. **Revisión, PR y tu aprobación.** Cuando el riesgo lo pide, un revisor, un agente distinto, comprueba el cambio. Después el coordinador abre una pull request (PR) y espera a que pasen las comprobaciones. Tú decides si se fusiona. Nada se fusiona ni se publica sin ti.
+5. **El coordinador planifica y registra.** Escribe un plan y un brief corto (las instrucciones de un trabajo) como archivos Markdown en tu proyecto, y un worker, un agente que cambia el código y lo comprueba, hace cada trabajo. Los registros de una iniciativa, una pieza de trabajo con seguimiento, se describen en [cómo se registra una iniciativa](docs/es/reference.md#cómo-se-registra-una-iniciativa).
+6. **Sigue el avance.** En Claude Code, activa el [panel de iniciativas](docs/es/reference.md#el-panel-de-iniciativas) para ver planes, trabajos y revisiones como tarjetas. Pronto habrá un panel similar para Pi (consulta las [posibles acciones futuras](docs/es/future-actions.md)).
+7. **Revisión, PR y tu aprobación.** Cuando el riesgo lo pide, un revisor, un agente distinto, comprueba el cambio. En un proyecto que usa GitHub, el coordinador abre después una pull request (PR) y espera a que pase la integración continua (CI), las comprobaciones automáticas; un proyecto sin remoto mantiene el trabajo en local. Tú decides si se fusiona. Nada se fusiona ni se publica sin ti. Consulta [cómo llegan los cambios a main](docs/es/reference.md#cómo-llegan-los-cambios-a-main).
 8. **Cierra con una retrospectiva.** Cuando el trabajo termina, el coordinador ejecuta la skill `isswf-retrospective`, que repasa lo ocurrido y propone mejoras como borradores. Tú decides cuáles conservar.
 
 ## Cómo funciona, en cuatro líneas
 
 - **Trabajos pequeños y verificables.** Cada trabajo recibe un tamaño según lo difícil que sea comprobarlo, y uno grande se divide. [Dividir el trabajo](docs/es/reference.md#dividir-el-trabajo-en-trabajos-por-tamaño).
-- **Pruebas elegidas según el riesgo.** Cada trabajo ejecuta las pruebas que corresponden a su cambio; la comprobación completa se ejecuta al final y en la CI de cada PR. [Qué pruebas se ejecutan y cuándo](docs/es/reference.md#qué-pruebas-se-ejecutan-y-cuándo).
-- **Tres tipos de revisión.** Mecánica (también llamada determinista), con comprobaciones de herramientas; empírica, ejecutando pruebas; y semántica, con un revisor que lee el cambio. [Tres tipos de revisión](docs/es/reference.md#tres-tipos-de-revisión).
+- **Pruebas elegidas según el riesgo.** Cada trabajo ejecuta las pruebas que corresponden a su cambio; la comprobación completa se ejecuta al final y, con GitHub, en la CI de cada PR. [Qué pruebas se ejecutan y cuándo](docs/es/reference.md#qué-pruebas-se-ejecutan-y-cuándo).
+- **Tres formas de verificar.** Mecánica (también llamada determinista), con comprobaciones de herramientas; empírica, ejecutando pruebas; y semántica, con un revisor que lee el cambio. [Tres formas de verificar](docs/es/reference.md#tres-formas-de-verificar).
 - **Nada se publica sin ti.** La factoría propone y entrega una PR; tú apruebas la fusión. [Quién decide qué](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide).
 
 ## En qué se apoya

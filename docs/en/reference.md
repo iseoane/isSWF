@@ -6,7 +6,7 @@ isSWF combines instructions for agents with tools that record, run, and inspect 
 
 ## How work is decided and who decides it
 
-You decide the goal, what the factory may do and whether to accept the result. The coordinator decides the path: it reads your request, checks the code and the project records, and picks the smallest route that fits. It can start the work, investigate first, interview you, or diagnose a bug whose cause is unknown. Only a decision that belongs to you stops the work, and then it is recorded as `awaiting-human` with the exact question.
+You decide the goal, what the factory may do and whether to accept the result. The coordinator decides the path: it reads your request, checks the code and the project records, and picks the smallest route that fits. It can start the work, investigate first, interview you, or diagnose a bug whose cause is unknown. A decision that only you can make stops the step that needs it, not the safe work around it, and is recorded as `awaiting-human` with the exact question.
 
 | Decision | Who takes it |
 | --- | --- |
@@ -43,15 +43,17 @@ Checks are chosen by the risk of the change, not run in bulk. In this repository
 | --- | --- |
 | For each job | The focused tests of the changed behavior and the documentation check, plus the job-tier verification. |
 | At the close of an initiative | The full quality check, once, at the closing commit. Earlier only when the change touches packaging. |
-| On every PR | The full check in continuous integration (CI), which must pass on the exact head before an authorized merge. |
+| On every PR | When the project delivers through GitHub, the full check in continuous integration (CI), which must pass on the exact head before an authorized merge. |
 
-A local run that skips the full check says so in its report. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
+A local run that skips the full check says so in its report.
 
-## Three kinds of review
+Setup chooses the checks for a project. It inspects five quality areas (lint, tests, build, dead code and duplicated logic) without running untrusted scripts. From what it finds it proposes a file, `verification.json`, that lists the checks, and writes it only when you approve. `tools/isswf-verify.mjs` runs those checks by tier (`job` or `initiative`) and, after a clean run in which every check passes, writes a stamp that the integration guards require. Setup also proposes a check table for the project's `AGENTS.md`, by kind of change; you keep your own rules, take the proposal or merge the two. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
 
-The coordinator picks the least costly kind of verification that covers the acceptance criteria and the risk. [Review selection](../../.agents/roles/references/review.md#choose-sufficient-verification) defines each kind, and the [glossary](../../GLOSSARY.md) names them.
+## Three ways to verify
 
-| Kind | What it checks | Typical use |
+The coordinator picks the least costly way of verifying a change that covers the acceptance criteria and the risk. [Review selection](../../.agents/roles/references/review.md#choose-sufficient-verification) defines each kind, and the [glossary](../../GLOSSARY.md) names them.
+
+| Way | What it checks | Typical use |
 | --- | --- | --- |
 | Mechanical (also called deterministic) | A fixed procedure gives the same result every time: bytes, hashes, links, references and tool output. | Moved files, generated indexes, link replacements. Tools and guards also run this kind. |
 | Empirical | Tests or user journeys, run on the exact candidate, observe each acceptance criterion. Each relevant test must also have failed once under a deliberate fault. | Behavior that can be executed. |
@@ -68,6 +70,18 @@ Independent jobs can run at the same time, each in its own Git worktree (a secon
 How many workers run at once is a limit local to your clone: `git config --local isswf.maxParallelWorkers`, which is 2 when absent or invalid. Setup asks for it. In the default `observe` mode a dispatch over the limit is allowed with a note; `isswf.parallelWorkersMode` set to `enforce` makes the dispatch guard refuse it. Each background worker is told its checkout and branch, and the branch guard refuses its commits anywhere else. Each branch is checked and reviewed on its own, then integrated as one PR per job or one batched PR.
 
 This was observed with Claude Code background workers on Windows. Foreground workers, live Linux and Pi were not observed. See [parallel work](operations.md#parallel-work), [the worker limit](operations.md#parallel-worker-limit), the [installation guide](installation.md#initialise-a-project) and the coordinator's "Parallel jobs" section in its [skill](../../.agents/skills/isswf-coordinator/SKILL.md#parallel-jobs).
+
+## How changes reach main
+
+What happens to a finished change depends on the delivery choice recorded at setup. A feature start never includes integration into the base branch (`main` by default), except for the optional grant below.
+
+| Mode | What happens |
+| --- | --- |
+| Default, with GitHub | The coordinator pushes the feature branch and opens a pull request (PR). Continuous integration (CI) must pass on the exact head, and you decide whether to merge. |
+| Records-only direct push (optional) | Setup offers this as a separate grant and records `- Records-only direct push: granted` in `project-setup.md` only if you say yes. Job and initiative close records, and other changes only under `initiatives/`, then go straight to the base branch. Code, docs, instructions, templates and tests always keep the PR and CI path. |
+| Local mode, no remote | Setup records local tracking: no GitHub account, repository, labels or remote calls are needed. Plans and jobs still live under `initiatives/`, and nothing leaves your machine until you publish it. |
+
+The records push guard enforces the second row: it refuses a push to the base branch that carries any other path or lacks the grant. Like the other guards it is a process rule, not an authority. See [delivery](../../.agents/roles/references/delivery.md), [setup](../../.agents/skills/isswf-setup/SKILL.md) and the [records push guard](operations.md#records-push-guard).
 
 ## Skills, roles, references and principles
 
@@ -193,18 +207,18 @@ An initiative is one tracked piece of work, with a stable ID such as `I0042`. Th
 | `jobs/J001/` | A job, a small slice that delivers something you can verify. Its folder holds that job's records. |
 | `brief-r1.md` | The curated brief of the job: what to do, the scope, the acceptance and the checks. When the criteria change, the new revision is `brief-r2.md` and the earlier one stays. |
 | `A001.md` | An attempt record: what a worker did, checked and could not do. Written by the worker. |
-| `V001.md` | A review record: the verdict and findings of one review round. Written by the reviewer. |
+| `V001.md` | A review record: the verdict and findings of one review round. Written by the reviewer, or by the coordinator when the reviewer has no file-writing tool. |
 | `delivery.md` | A local summary of the delivered work, for the panel and for you. It does not publish anything. |
 
-The templates in `.factory/templates/` (in a project, `<state>/templates/`) define two more kinds of record, written only when needed: a correction inbox `C001.md` in the job folder, for a correction you send to a running coordinator, and a retrospective under `<state>/retrospectives/`. A job prepared from an issue also has an `intake.json`. Statuses are `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human` and `completed`. The coordinator owns the plan and the briefs, a worker owns its attempt, a reviewer owns its review, and you record acceptance in the plan through the coordinator. See [plans, records and evidence retention](../durable-work.md#project-records) and the [planning guidance](../../.agents/roles/references/planning.md).
+The templates in `.factory/templates/` (in a project, `<state>/templates/`) define two more kinds of record, written only when needed: a correction inbox `C001.md` in the job folder, for a correction you send to a running coordinator, and a retrospective under `<state>/retrospectives/`. A job prepared from an issue also has an `intake.json`. Statuses are `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human` and `completed`. The coordinator owns the plan and the briefs, a worker owns its attempt, a reviewer owns its review (the coordinator writes it down when the reviewer cannot), and you record acceptance in the plan through the coordinator. See [plans, records and evidence retention](../durable-work.md#project-records) and the [planning guidance](../../.agents/roles/references/planning.md).
 
 ## Opening issues from other repositories
 
-While working in one repository you may find a bug, or an idea, that belongs elsewhere. The `isswf-issue` skill reports it without expanding the current assignment and without starting a fix. It first decides whether the finding belongs to your product or to the factory, using evidence and not the folder you ran it from, and checks the exact repository and your access. It looks for duplicates, removes private material, and asks for the `needs-triage` label on every new issue. Without permission to publish, it hands you a draft. An issue asks for assessment; it does not approve implementation. A possible vulnerability is never published openly. See the [skill](../../.agents/skills/isswf-issue/SKILL.md) and [routing and publication](../../.agents/skills/isswf-issue/references/routing-and-publication.md).
+While working in one repository you may find a bug, or an idea, that belongs elsewhere. The `isswf-issue` skill reports it without expanding the current assignment and without starting a fix. It first decides whether the finding belongs to your product or to the factory, using evidence and not the folder you ran it from, and checks the exact repository and your access. It looks for duplicates, removes private material, and requires the `needs-triage` label on every new issue. Without permission to publish, it hands you a draft. An issue asks for assessment; it does not approve implementation. A possible vulnerability is never published openly. See the [skill](../../.agents/skills/isswf-issue/SKILL.md) and [routing and publication](../../.agents/skills/isswf-issue/references/routing-and-publication.md).
 
 ## The initiatives panel
 
-Claude Code has an optional initiatives panel, off by default, that shows the recorded work as cards. It reads your project's files and never starts agents. A similar panel for Pi is coming soon. Turn it on with **Initiatives pane** for the `isswf` plugin in `/config`. It opens when the coordinator skill loads, and `/isswf-initiatives` reopens it. It has three tabs:
+Claude Code has an optional initiatives panel, off by default, that shows the recorded work as cards. It reads your project's files and does not start agents; its optional AutoWakeUp switch, off by default, can schedule one prompt asking the coordinator to reconcile state. A similar panel for Pi is coming soon. Turn it on with **Initiatives pane** for the `isswf` plugin in `/config`. It opens when the coordinator skill loads, and `/isswf-initiatives` reopens it. It has three tabs:
 
 - **Initiatives.** A card per initiative with its jobs and review rounds. A record's border shows its result: green for a passed review or complete attempt, yellow for requested changes or partial work, red for failed, blocked or cancelled, and grey when it states none.
 - **Files.** The initiative's plan, briefs and records as a tree, each readable as Markdown.

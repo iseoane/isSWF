@@ -6,7 +6,7 @@ isSWF combina instrucciones para agentes con herramientas que registran, ejecuta
 
 ## Cómo se decide el trabajo y quién decide
 
-Tú decides el objetivo, lo que la factoría puede hacer y si aceptas el resultado. El coordinador decide el camino: lee tu petición, comprueba el código y los registros del proyecto, y elige la ruta más corta que encaje. Puede empezar el trabajo, investigar antes, entrevistarte o diagnosticar un error de causa desconocida. Solo se detiene el trabajo cuando falta una decisión que te corresponde, y entonces queda registrado como `awaiting-human` con la pregunta exacta.
+Tú decides el objetivo, lo que la factoría puede hacer y si aceptas el resultado. El coordinador decide el camino: lee tu petición, comprueba el código y los registros del proyecto, y elige la ruta más corta que encaje. Puede empezar el trabajo, investigar antes, entrevistarte o diagnosticar un error de causa desconocida. Una decisión que solo puedes tomar tú detiene el paso que la necesita, no el trabajo seguro de alrededor, y queda registrada como `awaiting-human` con la pregunta exacta.
 
 | Decisión | Quién la toma |
 | --- | --- |
@@ -43,15 +43,17 @@ Las comprobaciones se eligen según el riesgo del cambio; no se ejecuta todo en 
 | --- | --- |
 | En cada trabajo | Las pruebas específicas del comportamiento modificado y la comprobación de documentación, más la verificación de nivel de trabajo. |
 | Al cerrar una iniciativa | La comprobación de calidad completa, una vez, en el commit de cierre. Antes, solo si el cambio afecta al empaquetado. |
-| En cada PR | La comprobación completa en integración continua (CI), que debe superarse en la cabeza exacta antes de una fusión autorizada. |
+| En cada PR | Cuando el proyecto entrega con GitHub, la comprobación completa en integración continua (CI), que debe superarse en la cabeza exacta antes de una fusión autorizada. |
 
-Una ejecución local que omite la comprobación completa lo indica en su informe. Consulta los [controles de calidad](development.md#controles-de-calidad) y el [verificador](operations.md#ejecutor-de-verificación).
+Una ejecución local que omite la comprobación completa lo indica en su informe.
 
-## Tres tipos de revisión
+La configuración elige las comprobaciones de cada proyecto. Inspecciona cinco áreas de calidad (lint, pruebas, compilación, código muerto y lógica duplicada) sin ejecutar scripts no confiables. Con lo que encuentra propone un archivo, `verification.json`, que enumera las comprobaciones, y lo escribe solo si lo apruebas. `tools/isswf-verify.mjs` ejecuta esas comprobaciones por nivel (`job` o `initiative`) y, tras una ejecución limpia en la que todas se superan, escribe un sello que exigen las guardas de integración. La configuración también propone una tabla de comprobaciones para el `AGENTS.md` del proyecto, según el tipo de cambio; conservas tus reglas, tomas la propuesta o combinas ambas. Consulta los [controles de calidad](development.md#controles-de-calidad) y el [verificador](operations.md#ejecutor-de-verificación).
 
-El coordinador elige el tipo de verificación menos costoso que cubra los criterios de aceptación y el riesgo. La [selección de revisión](../../.agents/roles/references/review.md#choose-sufficient-verification), en inglés, define cada tipo, y el [glosario](../../GLOSSARY.es.md) los nombra.
+## Tres formas de verificar
 
-| Tipo | Qué comprueba | Uso habitual |
+El coordinador elige la forma menos costosa de verificar un cambio que cubra los criterios de aceptación y el riesgo. La [selección de revisión](../../.agents/roles/references/review.md#choose-sufficient-verification), en inglés, define cada tipo, y el [glosario](../../GLOSSARY.es.md) los nombra.
+
+| Forma | Qué comprueba | Uso habitual |
 | --- | --- | --- |
 | Mecánica (también llamada determinista) | Un procedimiento fijo da el mismo resultado siempre: bytes, hashes, enlaces, referencias y salida de herramientas. | Archivos movidos, índices generados, sustitución de enlaces. También la ejecutan herramientas y guardas. |
 | Empírica | Pruebas o recorridos de usuario, ejecutados sobre el candidato exacto, observan cada criterio de aceptación. Cada prueba relevante también debe haber fallado una vez ante un fallo deliberado. | Comportamiento que se puede ejecutar. |
@@ -68,6 +70,18 @@ Los trabajos independientes pueden ejecutarse a la vez, cada uno en su propio wo
 Cuántos workers se ejecutan a la vez es un límite local de tu clon: `git config --local isswf.maxParallelWorkers`, que vale 2 cuando falta o no es válido. La configuración te lo pregunta. En el modo `observe`, que es el predeterminado, un despacho por encima del límite se permite con un aviso; con `isswf.parallelWorkersMode` en `enforce`, la guarda de despacho lo rechaza. A cada worker en segundo plano se le indica su checkout y su rama, y la guarda de rama rechaza sus commits en cualquier otro sitio. Cada rama se comprueba y se revisa por separado, y después se integra como una PR por trabajo o una PR agrupada.
 
 Esto se observó con workers en segundo plano de Claude Code en Windows. No se observaron workers en primer plano, Linux en directo ni Pi. Consulta el [trabajo en paralelo](operations.md#trabajo-en-paralelo), [el límite de workers](operations.md#límite-de-workers-en-paralelo), la [guía de instalación](installation.md#inicializar-un-proyecto) y la sección «Parallel jobs» de la [skill del coordinador](../../.agents/skills/isswf-coordinator/SKILL.md#parallel-jobs), en inglés.
+
+## Cómo llegan los cambios a main
+
+Lo que ocurre con un cambio terminado depende de la opción de entrega registrada en la configuración. Iniciar una funcionalidad nunca incluye integrarla en la rama base (`main` por defecto), salvo por la autorización opcional de abajo.
+
+| Modo | Qué ocurre |
+| --- | --- |
+| Predeterminado, con GitHub | El coordinador sube la rama de la funcionalidad y abre una pull request (PR). La integración continua (CI) debe superarse en la cabeza exacta, y tú decides si se fusiona. |
+| Push directo de solo registros (opcional) | La configuración lo ofrece como una autorización aparte y registra `- Records-only direct push: granted` en `project-setup.md` solo si respondes que sí. Los registros de cierre de trabajos e iniciativas, y otros cambios solo bajo `initiatives/`, van entonces directamente a la rama base. El código, la documentación, las instrucciones, las plantillas y las pruebas siguen siempre el camino de PR y CI. |
+| Modo local, sin remoto | La configuración registra el seguimiento local: no hace falta cuenta de GitHub, repositorio, etiquetas ni llamadas remotas. Los planes y los trabajos siguen en `initiatives/`, y nada sale de tu equipo hasta que lo publiques. |
+
+La guarda de pushes de registros hace cumplir la segunda fila: rechaza un push a la rama base que lleve cualquier otra ruta o carezca de la autorización. Como las demás guardas, es una regla de proceso, no una autoridad. Consulta [entrega](../../.agents/roles/references/delivery.md), [configuración](../../.agents/skills/isswf-setup/SKILL.md) y la [guarda de pushes de registros](operations.md#guarda-de-pushes-de-registros), en inglés salvo la última.
 
 ## Skills, roles, referencias y principios
 
@@ -191,12 +205,12 @@ Una iniciativa es una pieza de trabajo con seguimiento y un ID estable, como `I0
 | --- | --- |
 | `plan.md` | Un plan vigente por iniciativa, con una sección por trabajo: estado, objetivo, dependencias, aceptación, bloqueo, siguiente paso y evidencias. |
 | `jobs/J001/` | Un trabajo, una porción pequeña que entrega algo verificable. Su carpeta contiene los registros de ese trabajo. |
-| `brief-r1.md` | El brief seleccionado del trabajo: qué hacer, el alcance, la aceptación y las comprobaciones. Cuando cambian los criterios, la nueva revisión es `brief-r2.md` y la anterior se conserva. |
+| `brief-r1.md` | El brief elaborado del trabajo: qué hacer, el alcance, la aceptación y las comprobaciones. Cuando cambian los criterios, la nueva revisión es `brief-r2.md` y la anterior se conserva. |
 | `A001.md` | Un registro de intento: qué hizo, comprobó y no pudo hacer un worker. Lo escribe el worker. |
-| `V001.md` | Un registro de revisión: el veredicto y los hallazgos de una ronda de revisión. Lo escribe el revisor. |
+| `V001.md` | Un registro de revisión: el veredicto y los hallazgos de una ronda de revisión. Lo escribe el revisor, o el coordinador cuando el revisor no tiene herramienta para escribir archivos. |
 | `delivery.md` | Un resumen local del trabajo entregado, para el panel y para ti. No publica nada. |
 
-Las plantillas de `.factory/templates/` (en un proyecto, `<state>/templates/`) definen dos tipos más de registro, que se escriben solo cuando hacen falta: una bandeja de correcciones `C001.md` en la carpeta del trabajo, para una corrección que envías a un coordinador en ejecución, y una retrospectiva en `<state>/retrospectives/`. Un trabajo preparado desde una issue tiene además un `intake.json`. Los estados son `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human` y `completed`. El coordinador es responsable del plan y de los briefs, el worker de su intento, el revisor de su revisión, y tú registras la aceptación en el plan a través del coordinador. Consulta [planes, registros y conservación de evidencias](../durable-work.md#project-records) y la [guía de planificación](../../.agents/roles/references/planning.md), en inglés.
+Las plantillas de `.factory/templates/` (en un proyecto, `<state>/templates/`) definen dos tipos más de registro, que se escriben solo cuando hacen falta: una bandeja de correcciones `C001.md` en la carpeta del trabajo, para una corrección que envías a un coordinador en ejecución, y una retrospectiva en `<state>/retrospectives/`. Un trabajo preparado desde una issue tiene además un `intake.json`. Los estados son `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human` y `completed`. El coordinador es responsable del plan y de los briefs, el worker de su intento, el revisor de su revisión (el coordinador la deja por escrito cuando el revisor no puede), y tú registras la aceptación en el plan a través del coordinador. Consulta [planes, registros y conservación de evidencias](../durable-work.md#project-records) y la [guía de planificación](../../.agents/roles/references/planning.md), en inglés.
 
 ## Abrir issues en otros repositorios
 
@@ -204,7 +218,7 @@ Mientras trabajas en un repositorio puedes encontrar un error, o una idea, que p
 
 ## El panel de iniciativas
 
-Claude Code tiene un panel de iniciativas opcional, desactivado por defecto, que muestra el trabajo registrado en tarjetas. Lee los archivos de tu proyecto y nunca inicia agentes. Pronto habrá un panel similar para Pi. Actívalo con **Initiatives pane** del plugin `isswf` en `/config`. Se abre cuando se carga la skill del coordinador, y `/isswf-initiatives` lo vuelve a abrir. Tiene tres pestañas:
+Claude Code tiene un panel de iniciativas opcional, desactivado por defecto, que muestra el trabajo registrado en tarjetas. Lee los archivos de tu proyecto y no inicia agentes; su interruptor opcional AutoWakeUp, desactivado por defecto, puede programar un prompt que pide al coordinador conciliar el estado. Pronto habrá un panel similar para Pi. Actívalo con **Initiatives pane** del plugin `isswf` en `/config`. Se abre cuando se carga la skill del coordinador, y `/isswf-initiatives` lo vuelve a abrir. Tiene tres pestañas:
 
 - **Initiatives.** Una tarjeta por iniciativa con sus trabajos y rondas de revisión. El borde de un registro muestra su resultado: verde para una revisión superada o un intento completo, amarillo para cambios solicitados o trabajo parcial, rojo para fallido, bloqueado o cancelado, y gris cuando no indica ninguno.
 - **Files.** El plan, los briefs y los registros de la iniciativa como árbol, cada uno legible como Markdown.

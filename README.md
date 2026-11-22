@@ -23,16 +23,16 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
    > Investigate why the test checkout.spec fails intermittently. Diagnose only: find the cause with evidence and do not change any code. Report the cause and the next step.
    > ```
 
-5. **The coordinator plans and records.** It writes a plan and a short brief (the instructions for one job) as Markdown files in your project, and a worker, an agent that changes code and checks it, does each job. The records are described in [how an initiative is recorded](docs/en/reference.md#how-an-initiative-is-recorded).
-6. **Follow the progress.** In Claude Code, turn on the [initiatives panel](docs/en/reference.md#the-initiatives-panel) to see plans, jobs and reviews as cards. A similar panel for Pi is coming soon.
-7. **Review, PR and your approval.** When the risk calls for it, a reviewer, a separate agent, checks the change. The coordinator then opens a pull request (PR) and waits for the checks to pass. You decide whether to merge it. Nothing is merged or published without you.
+5. **The coordinator plans and records.** It writes a plan and a short brief (the instructions for one job) as Markdown files in your project, and a worker, an agent that changes code and checks it, does each job. The records of one initiative, a tracked piece of work, are described in [how an initiative is recorded](docs/en/reference.md#how-an-initiative-is-recorded).
+6. **Follow the progress.** In Claude Code, turn on the [initiatives panel](docs/en/reference.md#the-initiatives-panel) to see plans, jobs and reviews as cards. A similar panel for Pi is coming soon (see [possible future actions](docs/en/future-actions.md)).
+7. **Review, PR and your approval.** When the risk calls for it, a reviewer, a separate agent, checks the change. In a project that uses GitHub, the coordinator then opens a pull request (PR) and waits for continuous integration (CI), the automatic checks, to pass; a project with no remote keeps the work local. You decide whether to merge. Nothing is merged or published without you. See [how changes reach main](docs/en/reference.md#how-changes-reach-main).
 8. **Close with a retrospective.** When the work is finished, the coordinator runs the `isswf-retrospective` skill, which looks back at what happened and proposes improvements as drafts. You decide which to keep.
 
 ## How it works, in four lines
 
 - **Small, verifiable jobs.** Each job is sized by how hard it is to check, and a large one is split. [Splitting work into jobs](docs/en/reference.md#splitting-work-into-jobs-by-size).
-- **Tests chosen by risk.** Each job runs the tests that match its change; the full check runs at the end and in CI for every PR. [Which tests run and when](docs/en/reference.md#which-tests-run-and-when).
-- **Three kinds of review.** Mechanical (also called deterministic) checks by tools, empirical checks by running tests, and semantic review by a reviewer who reads the change. [Three kinds of review](docs/en/reference.md#three-kinds-of-review).
+- **Tests chosen by risk.** Each job runs the tests that match its change; the full check runs at the end and, with GitHub, in CI for every PR. [Which tests run and when](docs/en/reference.md#which-tests-run-and-when).
+- **Three ways to verify.** Mechanical (also called deterministic) checks by tools, empirical checks by running tests, and semantic review by a reviewer who reads the change. [Three ways to verify](docs/en/reference.md#three-ways-to-verify).
 - **Nothing is published without you.** The factory proposes and delivers a PR; you approve the merge. [Who decides what](docs/en/reference.md#how-work-is-decided-and-who-decides-it).
 
 ## What it builds on

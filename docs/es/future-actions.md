@@ -21,3 +21,7 @@ Ofrecer una asignación opcional de refactorización cuando los tests pasen, que
 ## Envíos de solo registros
 
 Comprobar los registros de plan antes de que un commit de solo registros llegue a `main` sin pull request. Una guarda analizaría cada `plan.md` cambiado con `parsePlan` y cada registro cambiado con la comprobación de registros, y rechazaría el envío si alguno falla. Hoy estos commits no pasan revisión, así que un registro mal formado llega a `main` y rompe el CI de todos los pull requests abiertos, como ocurrió el 18-11-2026 con `None.` en un campo de dependencias de I0061.
+
+## Panel de iniciativas para Pi
+
+Un panel como el panel de iniciativas de Claude Code (tarjetas de planes, trabajos y rondas de revisión, un árbol de archivos y una vista de agentes) para Pi, que hoy no tiene uno equivalente. Costes: una interfaz específica de Pi que construir y mantener alineada con los formatos de los registros. Solo leería los registros y no concedería ningún permiso. Fuente: el plan del operador de llevar un panel similar a Pi.
