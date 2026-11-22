@@ -10,7 +10,7 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
 
 ## A first complete session
 
-1. **Install it.** isSWF works with **Pi** and with **Claude Code**, the coding assistants the agents run in, on Windows and Linux. Follow the [installation guide](docs/en/installation.md) for your host; [host support](docs/host-portability.md) lists what each one can do. Installing does not start any agent.
+1. **Install it.** isSWF works with **Pi** and with **Claude Code**, the coding assistants the agents run in, on Windows and Linux. Follow the [installation guide](docs/en/installation.md) for your host. Pi also needs the separately installed `pi-subagents` extension, and [host support](docs/host-portability.md) lists what each one can do. Installing does not start any agent.
 2. **Set up your project.** In the repository where you want to work, run `/skill:isswf-setup` in Pi or `/isswf:isswf-setup` in Claude Code. Setup asks which models to use, where to keep the work and what the checks are, and it prepares a small entry in the project's `AGENTS.md`.
 3. **Make a first request.** Address the coordinator, the agent that plans the work and calls the others, for example: `/isswf:isswf-coordinator Add a clear-filter button that restores the full list.` Use `/skill:isswf-coordinator` in Pi. An ordinary request does not start the factory; only an explicit one does. See [your first request](docs/en/getting-started.md).
 4. **Not sure what to ask?** Run `/skill:isswf-howto` in Pi or `/isswf:isswf-howto` in Claude Code. It tells you which skill (a ready-made task you can ask for by name) or flow fits, links its source, and ends with a prompt you can send to the coordinator. It never starts work. For instance (illustrative):
@@ -33,7 +33,7 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
 - **Small, verifiable jobs.** Each job is sized by how hard it is to check, and a large one is split. [Splitting work into jobs](docs/en/reference.md#splitting-work-into-jobs-by-size).
 - **Tests chosen by risk.** Each job runs the tests that match its change; the full check runs at the end and, with GitHub, in CI for every PR. [Which tests run and when](docs/en/reference.md#which-tests-run-and-when).
 - **Three ways to verify.** Mechanical (also called deterministic) checks by tools, empirical checks by running tests, and semantic review by a reviewer who reads the change. [Three ways to verify](docs/en/reference.md#three-ways-to-verify).
-- **Nothing is published without you.** The factory proposes and delivers a PR; you approve the merge. [Who decides what](docs/en/reference.md#how-work-is-decided-and-who-decides-it).
+- **Nothing is published without you.** With GitHub delivery, the factory opens a PR and you approve the merge; without a remote, nothing leaves your machine until you publish it. [Who decides what](docs/en/reference.md#how-work-is-decided-and-who-decides-it).
 
 ## What it builds on
 

@@ -10,7 +10,7 @@ La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va e
 
 ## Una primera sesión completa
 
-1. **Instálalo.** isSWF funciona con **Pi** y con **Claude Code**, los asistentes de programación en los que se ejecutan los agentes, en Windows y Linux. Sigue la [guía de instalación](docs/es/installation.md) de tu entorno; la [compatibilidad de los hosts](docs/host-portability.md) indica qué puede hacer cada uno. Instalar no inicia ningún agente.
+1. **Instálalo.** isSWF funciona con **Pi** y con **Claude Code**, los asistentes de programación en los que se ejecutan los agentes, en Windows y Linux. Sigue la [guía de instalación](docs/es/installation.md) de tu entorno. Pi necesita además la extensión `pi-subagents`, que se instala por separado, y la [compatibilidad de los hosts](docs/host-portability.md) indica qué puede hacer cada uno. Instalar no inicia ningún agente.
 2. **Configura tu proyecto.** En el repositorio donde quieras trabajar, ejecuta `/skill:isswf-setup` en Pi o `/isswf:isswf-setup` en Claude Code. La configuración pregunta qué modelos usar, dónde guardar el trabajo y cuáles son las comprobaciones, y prepara una pequeña entrada en el `AGENTS.md` del proyecto.
 3. **Haz una primera petición.** Dirígete al coordinador, el agente que planifica el trabajo y llama a los demás, por ejemplo: `/isswf:isswf-coordinator Añade un botón para limpiar el filtro que restaure la lista completa.` En Pi, usa `/skill:isswf-coordinator`. Una petición normal no pone en marcha la factoría; solo lo hace una petición explícita. Consulta [tu primera petición](docs/es/getting-started.md).
 4. **¿No sabes qué pedir?** Ejecuta `/skill:isswf-howto` en Pi o `/isswf:isswf-howto` en Claude Code. Te dice qué skill (una tarea ya preparada que puedes pedir por su nombre) o flujo encaja, enlaza su origen y termina con un prompt que puedes enviar al coordinador. Nunca inicia trabajo. Por ejemplo (ilustrativo):
@@ -33,7 +33,7 @@ La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va e
 - **Trabajos pequeños y verificables.** Cada trabajo recibe un tamaño según lo difícil que sea comprobarlo, y uno grande se divide. [Dividir el trabajo](docs/es/reference.md#dividir-el-trabajo-en-trabajos-por-tamaño).
 - **Pruebas elegidas según el riesgo.** Cada trabajo ejecuta las pruebas que corresponden a su cambio; la comprobación completa se ejecuta al final y, con GitHub, en la CI de cada PR. [Qué pruebas se ejecutan y cuándo](docs/es/reference.md#qué-pruebas-se-ejecutan-y-cuándo).
 - **Tres formas de verificar.** Mecánica (también llamada determinista), con comprobaciones de herramientas; empírica, ejecutando pruebas; y semántica, con un revisor que lee el cambio. [Tres formas de verificar](docs/es/reference.md#tres-formas-de-verificar).
-- **Nada se publica sin ti.** La factoría propone y entrega una PR; tú apruebas la fusión. [Quién decide qué](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide).
+- **Nada se publica sin ti.** Con entrega mediante GitHub, la factoría abre una PR y tú apruebas la fusión; sin remoto, nada sale de tu equipo hasta que lo publiques. [Quién decide qué](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide).
 
 ## En qué se apoya
 

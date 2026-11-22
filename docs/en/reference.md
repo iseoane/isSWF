@@ -47,21 +47,21 @@ Checks are chosen by the risk of the change, not run in bulk. In this repository
 
 A local run that skips the full check says so in its report.
 
-Setup chooses the checks for a project. It inspects five quality areas (lint, tests, build, dead code and duplicated logic) without running untrusted scripts. From what it finds it proposes a file, `verification.json`, that lists the checks, and writes it only when you approve. `tools/isswf-verify.mjs` runs those checks by tier (`job` or `initiative`) and, after a clean run in which every check passes, writes a stamp that the integration guards require. Setup also proposes a check table for the project's `AGENTS.md`, by kind of change; you keep your own rules, take the proposal or merge the two. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
+Setup proposes the checks for a project and you approve them. It inspects five quality areas (lint, tests, build, dead code and duplicated logic) without running untrusted scripts. From what it finds it proposes a file, `verification.json`, that lists the checks, and writes it only when you approve. `tools/isswf-verify.mjs` runs those checks by tier (`job` or `initiative`) and, after a clean run in which every check passes, writes a stamp that the integration gate checks (and, in `enforce` mode, requires). Setup also proposes a check table for the project's `AGENTS.md`, by kind of change; you keep your own rules, take the proposal or merge the two. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
 
 ## Three ways to verify
 
-The coordinator picks the least costly way of verifying a change that covers the acceptance criteria and the risk. [Review selection](../../.agents/roles/references/review.md#choose-sufficient-verification) defines each kind, and the [glossary](../../GLOSSARY.md) names them.
+The coordinator picks the least costly way to verify that covers the acceptance criteria and the risk. [Review selection](../../.agents/roles/references/review.md#choose-sufficient-verification) defines each way, and the [glossary](../../GLOSSARY.md) names them.
 
 | Way | What it checks | Typical use |
 | --- | --- | --- |
-| Mechanical (also called deterministic) | A fixed procedure gives the same result every time: bytes, hashes, links, references and tool output. | Moved files, generated indexes, link replacements. Tools and guards also run this kind. |
+| Mechanical (also called deterministic) | A fixed procedure gives the same result every time: bytes, hashes, links, references and tool output. | Moved files, generated indexes, link replacements. Tools and guards also run this way. |
 | Empirical | Tests or user journeys, run on the exact candidate, observe each acceptance criterion. Each relevant test must also have failed once under a deliberate fault. | Behavior that can be executed. |
 | Semantic | A reviewer reads the change and its consumers and judges it. | Product decisions, permissions, shared contracts, methodology text, claims that running cannot establish. |
 
 A change can combine them. A mechanical or empirical result can close a covered change without a model call, unless the risk or an explicit rule requires an independent reviewer. The author's own checks never count as independent.
 
-Hooks and guards make some rules deterministic as well. The plugin's checks refuse, before it runs, a commit on the wrong branch, a record written outside the worker's checkout, a delegation that fails its conditions, or a shell command that waits on CI in a loop. See the [dispatch guard](operations.md#dispatch-guard), [shell command guard](operations.md#shell-command-guard), [branch guard](operations.md#branch-guard), [record location guard](operations.md#record-location-guard), [plan commit guard](operations.md#plan-commit-guard) and [records push guard](operations.md#records-push-guard). They are process rules, not permissions.
+Hooks and guards make some rules deterministic as well. The Claude Code plugin and the Pi extensions refuse, before it runs, a commit on the wrong branch, a record written outside the worker's checkout, a delegation that fails its conditions, or a shell command that waits on CI in a loop. See the [dispatch guard](operations.md#dispatch-guard), [shell command guard](operations.md#shell-command-guard), [branch guard](operations.md#branch-guard), [record location guard](operations.md#record-location-guard), [plan commit guard](operations.md#plan-commit-guard) and [records push guard](operations.md#records-push-guard). They are process rules, not permissions.
 
 ## Parallel work in worktrees
 
