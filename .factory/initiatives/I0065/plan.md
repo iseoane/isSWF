@@ -55,12 +55,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Objective: The README becomes a short, plain-language front page that tells the story of a first complete session. Reference detail moves into the existing "How the factory works" guide, in both languages.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j003`, branch `i0065-j003`. Wait for its report.
+- Next step: None.
 
 ### Acceptance
 
@@ -72,14 +72,14 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ### Evidence
 
-- None.
+- Merged as 9d50fc7cd8ceaed34b1d600d914770926535fe6d (PR #394), exact-head CI success on 02673537; operator product acceptance 2026-11-22 ("por lo demas OK"). Attempts A001-A003; reviews V001 (fail, corrected), V002 and V003 (pass). isswf-howto unchanged, so no packaged file changed. F14 and F15 wording carried to J006.
 
 
 ## J004
 
 - Status: pending
 - Objective: The README front page opens with two hooks: an animated SVG that simulates a first complete session, and an animated SVG that simulates the Claude Code initiatives panel.
-- Depends on: J003
+- Depends on: J003, J006
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
 - Next step: Wait for J003.
@@ -113,12 +113,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Objective: The reference page, the README and the flowchart cover the J005 gaps 2-10 and show the delivery paths without a pull request.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Wait for J003.
+- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j006`, branch `i0065-j006`. J004 follows J006 because both edit the README.
 
 ### Acceptance
 
