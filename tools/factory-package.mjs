@@ -189,7 +189,8 @@ function digest(bytes) {
 
 export function isWithin(parent, child, pathApi = nodePath) {
   const part = pathApi.relative(parent, child);
-  return part === "" || (!part.startsWith(`..${pathApi.sep}`) && part !== "..");
+  // Across Windows drives relative() returns an absolute path instead of a ".." walk.
+  return part === "" || (!pathApi.isAbsolute(part) && !part.startsWith(`..${pathApi.sep}`) && part !== "..");
 }
 
 export async function canonicalPath(path) {
