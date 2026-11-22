@@ -93,12 +93,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Objective: A gap inventory lists current isSWF capabilities that a new user would value but that the README, the reference page or the workflow flowchart do not mention, so the operator can choose what to add.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Researcher dispatched in background. The operator chooses which gaps to add; chosen items go to J003 or J004.
+- Next step: None. The operator chooses which gaps to add.
 
 ### Acceptance
 
@@ -108,4 +108,4 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ### Evidence
 
-- None.
+- Researcher return, 2026-11-22, base d293487e, judged also against the J003 candidate snapshot. Top ten: (1) Pi needs the separately installed pi-subagents extension, dropped by the J003 candidate (regression); (2) compaction reminder; (3) integration gate stamps; (4) review coverage check in CI; (5) isswf-status --next and snapshot; (6) package-acquisition refusal; (7) token and cost reports (estimates); (8) record check after writes; (9) initiative close gate; (10) isswf-handoff missing from the skills table. Also: guards framed as Claude-only though Pi has equivalents; flowchart node pr implies a PR for every change, while records-only push and local mode have none.
