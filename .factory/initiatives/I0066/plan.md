@@ -35,3 +35,19 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 
 - Each finding cites its evidence (record, commit, transcript or guard output) and says whether it can be checked mechanically.
 - The operator chooses which findings become jobs in this initiative. Each chosen finding becomes a job with its own acceptance criteria.
+
+## J003
+
+- Status: pending
+- Objective: The coordinator integrates a reviewed job and prepares a review dispatch through host-neutral tools in `tools/`, called from the coordinator skill, instead of hand-run command sequences.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the current hand-run sequences in the I0065 transcript and the existing tools.
+
+### Acceptance
+
+- An integration command checks review coverage and exact-head CI success, merges with the head pinned, records the job close in the plan, pushes that records-only commit, and removes the job worktree and branch. It refuses with a named reason when a check fails, and changes nothing in that case.
+- A review-preparation command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
+- Risk and operator-acceptance judgment stay with the coordinator; the commands never decide them.
+- Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
