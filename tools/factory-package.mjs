@@ -11,7 +11,7 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import nodePath, { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { releaseReceiptName, verifyRelease } from "./release-source.mjs";
 import { stateDirectory } from "./project-state.mjs";
@@ -187,9 +187,10 @@ function digest(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
-function isWithin(parent, child) {
-  const path = relative(parent, child);
-  return path === "" || (!path.startsWith(`..${sep}`) && path !== "..");
+export function isWithin(parent, child, pathApi = nodePath) {
+  const part = pathApi.relative(parent, child);
+  // Across Windows drives relative() returns an absolute path instead of a ".." walk.
+  return part === "" || (!pathApi.isAbsolute(part) && !part.startsWith(`..${pathApi.sep}`) && part !== "..");
 }
 
 export async function canonicalPath(path) {

@@ -2,10 +2,10 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { lstat, mkdir, realpath, rename, rm, writeFile } from 'node:fs/promises';
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { releaseReceiptName, verifyRelease } from './release-source.mjs';
-import { canonicalPath, nativePiResources } from './factory-package.mjs';
+import { canonicalPath, isWithin, nativePiResources } from './factory-package.mjs';
 import { compileBunRelease, bunTargets } from './bun-release.mjs';
 
 const legacyMethodologySha = '37a56ebc902e94f21fc10666f33fceac44946af7';
@@ -13,7 +13,6 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const blobOid = bytes => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
 const shaPattern = /^[a-f0-9]{40}$/u;
 const plainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
-const isWithin = (parent, child) => { const part = relative(parent, child); return part === '' || (!part.startsWith(`..${sep}`) && part !== '..'); };
 function fail(message) { throw new Error(message); }
 function runGit(source, args) {
   const result = spawnSync('git', ['-C', source, ...args], { encoding: 'buffer', maxBuffer: 16 * 1024 * 1024, timeout: 30_000 });
