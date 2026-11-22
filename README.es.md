@@ -4,7 +4,7 @@
 
 isSWF es una factoría de software asistida por IA: los agentes de IA hacen el trabajo y tú tomas las decisiones. Divide una petición en trabajos pequeños y fáciles de comprobar, elige las comprobaciones según el riesgo y conserva evidencias de lo que se hizo, de modo que nada se fusiona ni se publica si tú no lo decides.
 
-![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un programador, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
+![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un implementador, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
 
 La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va el trabajo después. Para ver la versión en la que cada paso enumera las preguntas que se hace, abre el [diagrama interactivo](https://iseoane.github.io/isSWF/docs/es/workflow.html) ([English](https://iseoane.github.io/isSWF/docs/en/workflow.html)). [Cómo se decide el trabajo](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide) lo explica con palabras.
 
@@ -34,6 +34,8 @@ La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va e
 - **Pruebas elegidas según el riesgo.** Cada trabajo ejecuta las pruebas que corresponden a su cambio; la comprobación completa se ejecuta al final y, con GitHub, en la CI de cada PR. [Qué pruebas se ejecutan y cuándo](docs/es/reference.md#qué-pruebas-se-ejecutan-y-cuándo).
 - **Tres formas de verificar.** Mecánica (también llamada determinista), con comprobaciones de herramientas; empírica, ejecutando pruebas; y semántica, con un revisor que lee el cambio. [Tres formas de verificar](docs/es/reference.md#tres-formas-de-verificar).
 - **Nada se publica sin ti.** Con entrega mediante GitHub, la factoría abre una PR y tú apruebas la fusión; sin remoto, nada sale de tu equipo hasta que lo publiques. [Quién decide qué](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide).
+
+Las comprobaciones automáticas no dependen de que un agente se acuerde: rechazan un commit en la rama equivocada o un comando de shell que obtiene paquetes, y recuerdan al coordinador que recargue sus instrucciones y relea los registros tras compactar una conversación larga. Antes de fusionar una rama, subirla o abrirla como PR, un sello de verificación muestra que las comprobaciones del proyecto pasaron en ese commit; por defecto, un sello ausente solo añade una nota, y el modo `enforce` lo rechaza. `isswf-status --next` imprime el trabajo que toca iniciar sin llamar a ningún modelo, y los informes de tokens y coste son estimaciones a partir de contadores registrados, no facturación. [Más guardas e informes](docs/es/reference.md#más-guardas-e-informes) enumera cada una.
 
 ## En qué se apoya
 

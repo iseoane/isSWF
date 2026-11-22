@@ -35,6 +35,8 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
 - **Three ways to verify.** Mechanical (also called deterministic) checks by tools, empirical checks by running tests, and semantic review by a reviewer who reads the change. [Three ways to verify](docs/en/reference.md#three-ways-to-verify).
 - **Nothing is published without you.** With GitHub delivery, the factory opens a PR and you approve the merge; without a remote, nothing leaves your machine until you publish it. [Who decides what](docs/en/reference.md#how-work-is-decided-and-who-decides-it).
 
+Automatic checks do not depend on an agent remembering: they refuse a commit on the wrong branch or a shell command that fetches packages, and they remind the coordinator to reload its instructions and re-read the records after a long chat is compacted. Before a branch is merged, pushed or opened as a PR, a verification stamp shows that the project's checks passed on that commit; by default a missing stamp only adds a note, and `enforce` mode refuses. `isswf-status --next` prints the job to start next without calling a model, and token and cost reports are estimates from recorded counters, not billing. [More safeguards and reports](docs/en/reference.md#more-safeguards-and-reports) lists each one.
+
 ## What it builds on
 
 Two optional tools make the agents better informed. isSWF works without them and does not install them.
