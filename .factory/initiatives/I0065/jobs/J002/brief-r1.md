@@ -18,7 +18,8 @@
 
    Before each removal, search the whole repository for other references, including `tooling/quality/stale-statements.json`, the packaging allowlists and the Knip config.
 4. Rewrite "Maintain the workflow diagrams" in `docs/en/development.md` and `docs/es/development.md` for the new generator.
-5. Add the removed Archify regeneration statement to `tooling/quality/stale-statements.json`.
+5. Carried from J001 V002 N1: in `flow.json` `coord.who`, say helpers do not start helpers of their own, and that only a worker or diagnostician may when its brief explicitly allows it (`.agents/roles/researcher.md:29`, `worker.md:50`, `diagnostician.md:15`). Regenerate the pages.
+6. Add the removed Archify regeneration statement to `tooling/quality/stale-statements.json`.
 
 ## Scope
 

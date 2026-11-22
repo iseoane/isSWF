@@ -10,12 +10,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: A bilingual interactive flowchart page, generated from one in-repo data source and checked by the quality suite, replaces the Archify `workflow.html` pages.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatched in background (operator, 2026-11-22, "adelante comienza con la iniciativa"); worktree `isSWF-worktrees/i0065-j001`, branch `i0065-j001`. Wait for its report.
+- Next step: None.
 
 ### Acceptance
 
@@ -31,16 +31,16 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ### Evidence
 
-- None.
+- Merged as e552183b05bcee3a7f94283d638e81312128485a (PR #392), exact-head CI success on da857fab. Attempts A001, A002; reviews V001 (fail, corrected) and V002 (pass). Known limits: 390 px not observed (500 px observed); N1 (researcher exception in coord.who) fixed in J002.
 
 ## J002
 
-- Status: pending
+- Status: in-progress
 - Objective: The README shows a static SVG overview generated from the same data file, and all Archify tooling, sources and docs are removed.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Wait for J001.
+- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j002`, branch `i0065-j002`, base e552183b. Wait for its report.
 
 ### Acceptance
 
