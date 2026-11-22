@@ -16,10 +16,14 @@ const VALUE_LOOPS = new Set(['for', 'foreach']);
 const PASSTHROUGH_KEYWORDS = new Set(['if', 'then', 'else', 'elif', '!', 'time']);
 const BRACE_LOOP_COMMANDS = new Set(['foreach-object', '%']);
 
+// A quoted script path with spaces stays one word that ends in the tool name, so the CI-wait rule still sees it.
+const CI_STATE_QUOTED = /^(["'])[^"']*[\\/]isswf-ci-state\.mjs\1$/u;
+const maskQuoted = quoted => (CI_STATE_QUOTED.test(quoted) ? 'isswf-ci-state.mjs' : SAFE_QUOTED.test(quoted) ? quoted.slice(1, -1) : OPAQUE);
+
 const wordsOnly = command => command
   .replace(/\\\r?\n/gu, ' ')
   .replace(HEREDOC, '$3\n')
-  .replace(QUOTED, quoted => (SAFE_QUOTED.test(quoted) ? quoted.slice(1, -1) : OPAQUE));
+  .replace(QUOTED, maskQuoted);
 
 // Splits masked text into words and the operators that end a segment.
 function lex(text) {
@@ -273,21 +277,26 @@ function sleepSeconds({ command, args }) {
 }
 
 const SHARED_NOTE = 'This is a process rule, not a retry signal: do not rephrase the command to get past it. Use the alternative, or report the blocker.';
-const CI_REASON = `Continuous CI waiting is refused. Use a native completion event (\`gh pr checks --watch\` or \`gh run watch\`, in the background where the host supports it), one bounded deferred check (one sleep of at most ${MAX_SLEEP_SECONDS} seconds, then one \`gh pr checks\`), or report CI as pending; see .agents/roles/references/feature-delivery.md. ${SHARED_NOTE}`;
+const CI_REASON = `Continuous CI waiting is refused. Use a native completion event (\`gh pr checks --watch\` or \`gh run watch\`, in the background where the host supports it), one bounded deferred check (one sleep of at most ${MAX_SLEEP_SECONDS} seconds, then one \`gh pr checks\` or \`node tools/isswf-ci-state.mjs --pr <n>\`), or report CI as pending; see .agents/roles/references/feature-delivery.md. ${SHARED_NOTE}`;
 const PACKAGE_REASON = `Package acquisition is refused. Use the installed local tools: \`node tooling/quality/node_modules/eslint/bin/eslint.js --config tooling/quality/eslint.config.mjs tools tests tooling/quality/*.mjs\` and \`node tooling/quality/node_modules/knip/bin/knip.js --config tooling/quality/knip.json --no-progress\` (docs/en/development.md, Quality checks). The only installs allowed are \`npm ci --prefix tooling/quality --ignore-scripts\` and \`npm ci --prefix tooling/host-tests --ignore-scripts\`, with no package arguments. ${SHARED_NOTE}`;
+
+// `node <path>/isswf-ci-state.mjs` reads a PR's CI state once, so it is a bounded check like `gh`.
+const CI_STATE_TOOL = /(?:^|[\\/])isswf-ci-state\.mjs$/u;
+const isCiCall = ({ command, args }) => command === 'gh' || (command === 'node' && args.some(arg => CI_STATE_TOOL.test(arg)));
 
 function ciWaiting(segments) {
   const refusal = { rule: 'ci-waiting', reason: CI_REASON };
   let slept = 0;
   const sleepLoops = new Set();
   const ghLoops = new Set();
-  for (const { command, args, loops } of segments) {
-    if (command === 'gh') {
+  for (const segment of segments) {
+    const { command, args, loops } = segment;
+    if (isCiCall(segment)) {
       // `gh pr checks --watch` and `gh run watch` end when the checks finish, so they count as a native completion event.
       if (slept > MAX_SLEEP_SECONDS) return refusal;
       for (const id of loops) ghLoops.add(id);
     }
-    if (command === 'watch' && args.some(arg => basename(arg) === 'gh')) return refusal;
+    if (command === 'watch' && args.some(arg => basename(arg) === 'gh' || CI_STATE_TOOL.test(arg))) return refusal;
     const seconds = sleepSeconds({ command, args });
     if (seconds !== undefined) {
       slept += seconds;
