@@ -209,6 +209,14 @@ gh run list --limit 100 --json event,headBranch,conclusion,createdAt,updatedAt,d
 
 It prints the run count, cancelled count and total minutes for each `<event> <branch>` group, and a grand total.
 
+To measure what one initiatives-pane snapshot read costs a project (development only; direct Node reads, so the Claude pane, which routes each call through the host, is slower):
+
+```sh
+node tooling/maintenance/snapshot-cost.mjs --project /absolute/project --runs 5
+```
+
+It prints the file-system calls by kind and the median and minimum read time in milliseconds.
+
 ## Source of truth and history
 
 Check actual tools, manifests, and tests before documenting current behaviour. Use [the source map](architecture.md) to find the owner. Keep accepted objectives distinct from implementation evidence and [future proposals](future-actions.md).

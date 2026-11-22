@@ -679,6 +679,33 @@ for (const cwd of ['/p', 'C:\\p']) {
   })
 }
 
+// Measurement: a project of this repository's size (50 initiatives, about 630 records), the press timed through the test engine, which routes
+// each file-system call as the host does. The timing is printed, not asserted; the call count is.
+test('a view-only press on a project of fifty initiatives makes no file-system call for records', ON, async ($, on) => {
+  const records: Record<string, string> = { ...RECORDS }
+  for (let n = 1; n <= 49; n++) {
+    const id = `I${String(100 + n).padStart(4, '0')}`
+    const jobs: [string, string, string][] = Array.from({ length: 6 }, (_, j) => [`J${String(j + 1).padStart(3, '0')}`, 'completed', `job ${j + 1}`])
+    records[`${id}/plan.md`] = plan(id, `Closed ${n}`, jobs)
+    for (const [job] of jobs) {
+      records[`${id}/jobs/${job}/brief-r1.md`] = 'brief'
+      records[`${id}/jobs/${job}/A001.md`] = `- Brief: ${id}/jobs/${job}/brief-r1.md\n- Outcome: complete\n`
+      records[`${id}/jobs/${job}/V001.md`] = `- Brief: ${id}/jobs/${job}/brief-r1.md\n- Verdict: pass\n`
+    }
+  }
+  const { seen } = engine(on, 'C:\\p', records)
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  const first = seen.length
+  const started = performance.now()
+  await ui.press({ key: 'I0046-J002' })
+  const pressMs = Math.round(performance.now() - started)
+  console.log(`press-to-redraw ${pressMs} ms, ${seen.length - first} fs calls for the press, ${first} for the first draw`)
+  expect(seen.slice(first).filter(path => /initiatives/.test(path) && !/brief-r\d+\.md$/.test(path))).toEqual([])
+  await ui.unmount()
+})
+
 const STATUS: [string, string[], boolean, string, string, boolean][] = [
   ['nothing available', [], false, 'error', 'error', true],
   ['an index without its tools', ['mcp__engram__mem_save'], true, 'success', 'warning', false],
