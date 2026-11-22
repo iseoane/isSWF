@@ -77,18 +77,22 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Objective: The README front page opens with two hooks: an animated SVG that simulates a first complete session, and an animated SVG that simulates the Claude Code initiatives panel.
 - Depends on: J003, J006
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j004`, branch `i0065-j004`.
+- Next step: None.
 
 ### Acceptance
 
 - A Node script with no dependencies writes `docs/en/first-session.svg` and `docs/es/first-session.svg` from one bilingual script file. The SVG animates without JavaScript, is labeled as a simulation, and every command and response in it matches the real skill and coordinator behavior at the base revision.
 - `--check` fails when a generated SVG differs from the script file or the two languages differ in steps. It runs in `tools/check-quality.mjs`.
 - `README.md` and `README.es.md` show the animation near the top of the front page and the panel animation in the first-session section, with alt text. The panel animation is labeled as a simulation and shows only fields, states and layout that the panel code renders at the base revision (operator decision, 2026-11-22: simulated rather than recorded).
+
+### Evidence
+
+- Merged as 344855934ca758b0c9e475a9f2b458113937f568 (PR #396), exact-head CI success on 95c5ec90; operator viewed the rendered README and accepted it 2026-11-22. Attempts A001-A003; reviews V001 (fail, corrected), V002 and V003 (pass). Operator additions: AutoWakeUp sentence, side-by-side layout. Known limits: V002 N3 (a single pending frame would be hidden; unreachable with current data); flowchart keeps a light background in dark mode (operator: leave for now).
 
 
 ## J005
