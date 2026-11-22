@@ -68,6 +68,12 @@ Los comandos Git que lanzan los hooks, las guardas, el panel y sus ejecutores es
 node tooling/quality/fsmonitor-daemons.mjs --project /absolute/checkout
 ```
 
+En Windows y Linux, este comando lista, por ID de proceso, cualquier `git fsmonitor--daemon` cuyo worktree ya no existe y sale con 1 si encuentra alguno. Los coordinadores detienen un daemon con `git -C <worktree> fsmonitor--daemon stop` antes de `git worktree remove`; la guarda de comandos de shell no puede exigir ese orden porque ve un solo comando cada vez, así que este listado es la comprobación mecánica. Solo lee y nunca detiene un proceso. En Windows lee la tubería con nombre de cada daemon, porque el directorio de trabajo del daemon no es su worktree:
+
+```bash
+node tooling/quality/fsmonitor-orphans.mjs
+```
+
 Ambos análisis son heurísticos y tienen límites conocidos. `tests/git-optional-locks.mjs` reconoce una llamada a Git solo como un comando `git` literal pasado a `execFile`, `execFileSync`, `spawn`, `spawnSync`, `run`, `runAsync` o `$.process.run`, y solo en las fuentes indicadas de hooks, guardas, panel, plan, intake, verify y record-check; no ve una llamada a Git mediante otro ejecutor ni con un ejecutable calculado. `tests/fixture-repositories.mjs` detecta un argumento `init` o `clone` entre comillas en la misma línea que un ejecutor con nombre tipo git, sh, run o command, así que no ve un repositorio creado con otra forma de línea.
 
 Cuando Bun está disponible, la comprobación portable también construye e instala un paquete Bun real en directorios temporales. Prueba las exportaciones de paquetes externos similares a un SDK y sus dependencias transitivas, los scripts `.mjs` con rutas absolutas y relativas y el traspaso al binario fijado. Sin Bun, la prueba de artefacto indica SKIP. Asigna a `ISSWF_TEST_BUN` la ruta de un compilador para exigirla. CI instala el compilador Bun fijado y exige la prueba de artefacto. En local, `ISSWF_TEST_BUN_TMPDIR` permite ubicar los datos de prueba binarios grandes en otro disco. Estos datos de prueba no ejecutan Claude ni proveedores reales.
