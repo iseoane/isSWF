@@ -1,7 +1,7 @@
 import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { chmod, mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,8 +10,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyRelease } from '../tools/release-source.mjs';
 
 // Journey: a real `migrate-state` process is terminated at three moveState boundaries, then the installed
-// public `recover-state` resolves it. Launcher: the npm-installed genuine Node release (tools/isswf.mjs).
-// The compiled Bun executable cannot take `node --import`, so this seam cannot run there (Bun gap).
+// public `recover-state` resolves it. The pause seam needs `node --import`, so the process that is killed is always
+// the npm-installed Node release (tools/isswf.mjs). When a Bun compiler is available (ISSWF_TEST_BUN, or `bun` on PATH
+// as in tests/bun-release.mjs), the compiled Bun executable then resolves the same dead-owner states from disk, which
+// is all recoverState reads, so it needs no pause. Without Bun that half is reported as SKIP.
+const bunCompiler = process.env.ISSWF_TEST_BUN || 'bun';
+const bunProbe = spawnSync(bunCompiler, ['--version'], { encoding: 'utf8' });
+const bunAvailable = !bunProbe.error && bunProbe.status === 0;
+if (!bunAvailable && process.env.ISSWF_TEST_BUN) throw Error('Requested Bun compiler is unavailable');
+const quiescent = 'Disposable fixture; no external writers';
 const source = resolve(process.argv[2] || dirname(dirname(fileURLToPath(import.meta.url))));
 // Canonical temp path: runners may report an 8.3 short name, while the launcher resolves the long one.
 const temp = await realpath(await mkdtemp(join(tmpdir(), 'isswf-interrupt-')));
@@ -59,8 +66,9 @@ const boundaries = {
   renamed: { label: 'after rename, before complete.json', legacy: false, journalDir: true, record: true, activeDirectory: '.isswf', recovered: 'moved', journalFiles: ['complete.json', 'record.json', 'recovered.json'] },
 };
 const children = new Set(), receipts = [];
-let installed, launcher, counter = 0;
-const isswf = (args, expectedStatus = 0) => run(process.execPath, [launcher, ...args], expectedStatus);
+let installed, nodeLauncher, counter = 0, invoke;
+// Runs the public CLI through the launcher under test: the Node release launcher or the compiled Bun executable.
+const isswf = (args, expectedStatus = 0) => run(invoke[0], [...invoke.slice(1), ...args], expectedStatus);
 
 async function fixture() {
   const name = 'interrupted ' + ++counter + ' ñ';
@@ -95,6 +103,7 @@ async function walk(root, label, out) {
 async function evidence(ctx) {
   const out = new Map();
   await walk(ctx.claim, 'claim', out); await walk(ctx.journal, 'journal', out);
+  if (ctx.retired) await walk(ctx.retired, 'retired', out);
   await walk(join(ctx.project, '.factory'), 'factory', out); await walk(join(ctx.project, '.isswf'), 'isswf', out);
   out.set('project-entries', (await readdir(ctx.project)).sort().join('|'));
   return out;
@@ -122,7 +131,7 @@ async function assertInventory(ctx, rootName) {
 
 async function interrupt(boundary) {
   const ctx = await fixture(), expectation = boundaries[boundary], ready = join(temp, ctx.name + '.ready');
-  const child = spawn(process.execPath, ['--import', pathToFileURL(preload).href, launcher, 'migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', 'Disposable fixture; no external writers'], { env: { ...env, ISSWF_TEST_PAUSE_AT: boundary, ISSWF_TEST_READY: ready }, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, ['--import', pathToFileURL(preload).href, nodeLauncher, 'migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', quiescent], { env: { ...env, ISSWF_TEST_PAUSE_AT: boundary, ISSWF_TEST_READY: ready }, stdio: ['ignore', 'pipe', 'pipe'] });
   children.add(child);
   let output = '', settled = null;
   for (const stream of [child.stdout, child.stderr]) stream.on('data', bytes => { output += bytes; });
@@ -177,14 +186,35 @@ async function recoverAndVerify(ctx, termination) {
   assert.deepEqual(await evidence(ctx), settled, 'A repeat leaves every byte unchanged');
   let afterwards;
   if (ctx.boundary === 'renamed') {
-    afterwards = JSON.parse(isswf(['migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', 'Disposable fixture; no external writers']).stdout).status;
+    afterwards = JSON.parse(isswf(['migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', quiescent]).stdout).status;
     assert.equal(afterwards, 'unchanged', 'The recovered completed move is an identical repeat');
   } else {
-    afterwards = JSON.parse(isswf(['migrate-state', ...ctx.args, '--id', 'S0002', '--expected', ctx.expected, '--quiescent-ref', 'Disposable fixture; no external writers']).stdout).status;
+    afterwards = JSON.parse(isswf(['migrate-state', ...ctx.args, '--id', 'S0002', '--expected', ctx.expected, '--quiescent-ref', quiescent]).stdout).status;
     assert.equal(afterwards, 'state-migrated', 'The unchanged original can be moved by a new migration');
     await assertInventory({ ...ctx, journal: join(ctx.store, 'state-migrations', hash(ctx.project), 'S0002') }, '.isswf');
   }
   return { boundary: ctx.boundary, label: ctx.expectation.label, ownerPid: ctx.child.pid, ownerIdentity: ctx.owner, termination, recovered, repeat: { status: repeat.status, stderr: repeat.stderr.trim().split('\n')[0] }, afterwards, expectedDigest: ctx.expected, journalFiles: expectation.journalFiles };
+}
+
+// clearClaim renames the claim to .isswf-transition-retired-<uuid> and then removes it; a kill in between leaves that
+// directory behind. After a completed migration it is inert: recover-state finds no claim, and no byte changes.
+async function retainedRetiredClaim() {
+  const ctx = await fixture(), migrate = id => ['migrate-state', ...ctx.args, '--id', id, '--expected', ctx.expected, '--quiescent-ref', quiescent];
+  assert.equal(JSON.parse(isswf(migrate(ctx.id)).stdout).status, 'state-migrated');
+  ctx.retired = join(ctx.project, '.isswf-transition-retired-' + randomUUID());
+  await mkdir(ctx.retired); await writeFile(join(ctx.retired, 'owner.json'), JSON.stringify({ format: 1, id: ctx.id }) + '\n');
+  const before = await evidence(ctx);
+  const recover = isswf(recoverArgs(ctx), 1);
+  assert.match(recover.stderr, /ENOENT/u, 'recover-state finds no .isswf-transition and refuses');
+  assert.equal(recover.stdout, '', 'recover-state prints no success result');
+  assert.deepEqual(await evidence(ctx), before, 'recover-state changed no byte');
+  assert.equal(JSON.parse(isswf(migrate(ctx.id)).stdout).status, 'unchanged', 'The same id and digest is an identical repeat');
+  assert.deepEqual(await evidence(ctx), before, 'The identical repeat changed no byte');
+  const another = isswf(migrate('S0002'), 1);
+  assert.match(another.stderr, /--expected must match the legacy state inventory/u, 'A new id has no .factory left to move');
+  assert.equal(existsSync(join(ctx.store, 'state-migrations', hash(ctx.project), 'S0002')), false, 'The refused id gets no journal');
+  assert.deepEqual(await evidence(ctx), before, 'The refused new id changed no byte');
+  return { control: 'retained retired claim after complete.json', recover: recover.stderr.trim().split('\n')[0], sameId: 'unchanged', newId: another.stderr.trim().split('\n')[0] };
 }
 
 let keep = false;
@@ -200,20 +230,35 @@ try {
   run(process.execPath, [npm, 'install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', join(temp, (Array.isArray(packed) ? packed[0] : Object.values(packed)[0]).filename)]);
   installed = join(consumer, 'node_modules/isswf-pi-resources');
   assert.equal(verifyRelease(installed).artifactId, built.artifactId, 'Installed package retains the exact built release');
-  launcher = join(installed, 'tools/isswf.mjs');
-
-  // 1. Every boundary: the real owner is killed, then recover-state resolves it.
-  for (const boundary of Object.keys(boundaries)) {
-    const ctx = await interrupt(boundary), controls = [];
-    if (boundary === 'record') {
-      // Live-owner control: the same paused process, not yet terminated, must block recovery.
-      controls.push(await assertRefused(ctx, /live or uncertain/u, 'owner still alive (real paused process)'));
-      assert.equal(ctx.child.exitCode, null, 'The live owner was still running after the refusal');
-    }
-    const termination = await ctx.kill();
-    const receipt = await recoverAndVerify(ctx, termination);
-    receipts.push({ ...receipt, controls });
+  nodeLauncher = join(installed, 'tools/isswf.mjs');
+  const launchers = [{ kind: 'Node release launcher, npm-installed', invoke: [process.execPath, nodeLauncher] }];
+  if (bunAvailable) {
+    const bunRelease = join(temp, 'release bun');
+    run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', bunRelease, '--runtime', 'bun', '--bun', bunCompiler]);
+    const bunManifest = JSON.parse(await readFile(join(bunRelease, 'package.json'), 'utf8'));
+    assert.equal(bunManifest.isswfRuntime.engine, 'bun');
+    verifyRelease(bunRelease);
+    launchers.push({ kind: 'compiled Bun executable', invoke: [join(bunRelease, bunManifest.bin.isswf)] });
   }
+
+  // 1. Every boundary: the real Node owner is killed, then recover-state resolves it through each launcher.
+  for (const { kind, invoke: selected } of launchers) {
+    invoke = selected;
+    for (const boundary of Object.keys(boundaries)) {
+      const ctx = await interrupt(boundary), controls = [];
+      if (boundary === 'record') {
+        // Live-owner control: the same paused process, not yet terminated, must block recovery.
+        controls.push(await assertRefused(ctx, /live or uncertain/u, 'owner still alive (real paused process)'));
+        assert.equal(ctx.child.exitCode, null, 'The live owner was still running after the refusal');
+      }
+      const termination = await ctx.kill();
+      const receipt = await recoverAndVerify(ctx, termination);
+      receipts.push({ ...receipt, launcher: kind, controls });
+    }
+  }
+  const retiredControls = [];
+  for (const { kind, invoke: selected } of launchers) { invoke = selected; retiredControls.push({ launcher: kind, ...await retainedRetiredClaim() }); }
+  invoke = launchers[0].invoke;
 
   // 2. Controls on a genuinely interrupted, dead-owner migration: each refuses and keeps every byte.
   const controls = [];
@@ -243,7 +288,7 @@ try {
   await mkdir(join(dual.project, '.isswf')); await writeFile(join(dual.project, '.isswf/unrelated.txt'), 'competing root\n');
   controls.push(await assertRefused(dual, /Both \.isswf and \.factory exist/u, 'both .factory and .isswf present'));
 
-  const report = { status: 'PASS', platform: process.platform, arch: process.arch, node: process.version, revision, artifactId: built.artifactId, launcher: { kind: 'Node release launcher, npm-installed', executable: process.execPath, entry: launcher }, bunGap: 'The compiled Bun executable cannot load the node --import pause seam, so interruption is exercised only through the genuine Node release launcher.', interruptions: receipts, controls };
+  const report = { status: 'PASS', platform: process.platform, arch: process.arch, node: process.version, revision, artifactId: built.artifactId, launcher: { kind: launchers[0].kind, executable: process.execPath, entry: nodeLauncher }, bun: bunAvailable ? { status: 'PASS', compiler: bunProbe.stdout.trim(), scope: 'recover-state and migrate-state of the same dead-owner states, through the compiled executable; the kill itself is a Node process' } : { status: 'SKIP', reason: 'compiler unavailable' }, interruptions: receipts, controls, retiredClaim: retiredControls };
   if (process.env.ISSWF_INTERRUPT_RECEIPTS) await writeFile(process.env.ISSWF_INTERRUPT_RECEIPTS, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
 } catch (error) { keep = true; console.error('Retained failing fixture: ' + temp); throw error; }
