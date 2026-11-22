@@ -33,6 +33,8 @@ La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va e
    ![Una vista simulada del panel de iniciativas de Claude Code con datos de demostración: una iniciativa empieza como no activa y luego un trabajo pasa de en curso a en revisión y a completado.](docs/es/initiatives-panel.svg)
 
    La animación del panel es simulada, con datos de demostración. Solo muestra campos y estados que el panel dibuja.
+
+   El panel tiene además un interruptor AutoWakeUp, desactivado por defecto: si está activado y la ventana de uso de cinco horas llega al 90 % o más mientras hay un trabajo en curso, el panel abierto programa un único mensaje para la hora de renovación más cinco minutos, que pide al coordinador revisar el estado y continuar solo el trabajo ya autorizado. La programación dura solo mientras la sesión de Claude sigue abierta. Consulta el [panel de iniciativas](docs/es/installation.md#panel-de-iniciativas).
 7. **Revisión, PR y tu aprobación.** Cuando el riesgo lo pide, un revisor, un agente distinto, comprueba el cambio. En un proyecto que usa GitHub, el coordinador abre después una pull request (PR) y espera a que pase la integración continua (CI), las comprobaciones automáticas; un proyecto sin remoto mantiene el trabajo en local. Tú decides si se fusiona. Nada se fusiona ni se publica sin ti. Consulta [cómo llegan los cambios a main](docs/es/reference.md#cómo-llegan-los-cambios-a-main).
 8. **Cierra con una retrospectiva.** Cuando el trabajo termina, el coordinador ejecuta la skill `isswf-retrospective`, que repasa lo ocurrido y propone mejoras como borradores. Tú decides cuáles conservar.
 

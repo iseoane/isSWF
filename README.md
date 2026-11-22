@@ -33,6 +33,8 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
    ![A simulated view of the Claude Code initiatives panel with demo data: an initiative starts inactive, then one job goes from in progress to in review and to completed.](docs/en/initiatives-panel.svg)
 
    The panel animation is simulated, with demo data. It shows only fields and states that the panel renders.
+
+   The panel also has an AutoWakeUp switch, off by default: when it is on and the five-hour usage window reaches 90% or more while a job is in progress, the open pane schedules one prompt for the window reset plus five minutes, asking the coordinator to reconcile state and continue only work already authorised. The schedule lasts only while the Claude session stays open. See the [initiatives pane](docs/en/installation.md#initiatives-pane).
 7. **Review, PR and your approval.** When the risk calls for it, a reviewer, a separate agent, checks the change. In a project that uses GitHub, the coordinator then opens a pull request (PR) and waits for continuous integration (CI), the automatic checks, to pass; a project with no remote keeps the work local. You decide whether to merge. Nothing is merged or published without you. See [how changes reach main](docs/en/reference.md#how-changes-reach-main).
 8. **Close with a retrospective.** When the work is finished, the coordinator runs the `isswf-retrospective` skill, which looks back at what happened and proposes improvements as drafts. You decide which to keep.
 
