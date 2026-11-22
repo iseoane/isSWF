@@ -71,7 +71,7 @@
     ],
     "frames": [
       {
-        "caption": { "en": "The plan is recorded: every job is pending.", "es": "El plan está registrado: todos los trabajos están pendientes." },
+        "caption": { "en": "Plan recorded, no job started: the initiative is listed as inactive.", "es": "Plan registrado, sin trabajo iniciado: iniciativa en No activas." },
         "first": { "status": "pending" }
       },
       {
@@ -79,7 +79,7 @@
         "first": { "status": "in-progress", "pills": [{ "role": "worker", "state": "running" }] }
       },
       {
-        "caption": { "en": "The worker's attempt is complete and a reviewer is checking it.", "es": "El intento del implementador está completo y un revisor lo está comprobando." },
+        "caption": { "en": "The worker's attempt is complete; a reviewer is checking it.", "es": "Intento del implementador completo; un revisor lo comprueba." },
         "first": { "status": "in-review", "pills": [{ "role": "worker", "state": "passed" }, { "role": "reviewer", "state": "running" }] }
       },
       {

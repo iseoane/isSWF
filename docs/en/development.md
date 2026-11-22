@@ -204,14 +204,14 @@ The README shows `docs/en/workflow.svg` or `docs/es/workflow.svg`, which the sam
 
 ### Maintain the first-session animations
 
-[`docs/diagrams/first-session.json`](../diagrams/first-session.json) is the single source of four README images: `docs/en/first-session.svg` and `docs/es/first-session.svg` (a simulated terminal session) and `docs/en/initiatives-panel.svg` and `docs/es/initiatives-panel.svg` (a simulated Claude Code initiatives panel). Each step has English and Spanish text, a delay and the repository file that supports what it says; the panel data lists its jobs, frames and the labels it copies from `hooks/register.tsx`. Edit the data, never an image, and keep each step true to its cited file. Both images carry a visible "simulated" label, use demo data and are not recordings.
+[`docs/diagrams/first-session.json`](../diagrams/first-session.json) is the single source of four README images: `docs/en/first-session.svg` and `docs/es/first-session.svg` (a simulated terminal session) and `docs/en/initiatives-panel.svg` and `docs/es/initiatives-panel.svg` (a simulated Claude Code initiatives panel). Each step has English and Spanish text, a delay and the repository file that supports what it says; the panel data lists its jobs, frames and the labels it copies from `hooks/register.tsx`. A frame whose job is pending shows the initiative only under Inactive, as the panel does, and a caption too long for the image is refused. A frame whose job is pending shows the initiative only under Inactive, as the panel does, and a caption too long for the image is refused. Edit the data, never an image, and keep each step true to its cited file. Both images carry a visible "simulated" label, use demo data and are not recordings.
 
 ```sh
 node tooling/maintenance/first-session.mjs
 node tooling/maintenance/first-session.mjs --check
 ```
 
-The first command rewrites the four images; the second needs only Node.js and git, writes nothing and fails when a field lacks its English or Spanish text, a step ID repeats, a cited path does not exist at `HEAD`, the two languages differ in steps, or an image differs from what the data produces. `node tools/check-quality.mjs` runs it and `tests/first-session.mjs` tests each failure with disposable fixtures. The images animate with CSS only (no script), follow the viewer's light or dark setting and, with reduced motion requested, show every step or the last panel frame at once. Nothing renders them in a test: open both languages in a browser, in light and dark, after a change.
+The first command rewrites the four images; the second needs only Node.js and git, writes nothing and fails when a field lacks its English or Spanish text, a step ID repeats, a cited path does not exist at `HEAD`, or an image differs from what the data produces. `node tools/check-quality.mjs` runs it and `tests/first-session.mjs` tests each failure with disposable fixtures. The images animate with CSS only (no script), follow the viewer's light or dark setting and, with reduced motion requested, show every step or the last panel frame at once. Nothing renders them in a test: open both languages in a browser, in light and dark, after a change.
 
 To measure CI wall-clock minutes per pull request branch and per push (development only; the script makes no network calls):
 

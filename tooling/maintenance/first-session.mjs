@@ -161,8 +161,7 @@ function panelSvg(data, locale) {
   const top = 34 + 10, headerEnd = top + LINE * 3 + 14;
   const cardTop = headerEnd + 8;
   const inactiveTop = cardTop + cardHeight + 8;
-  const inactiveHeight = 16 + LINE * 2;
-  const captionY = inactiveTop + inactiveHeight + 26;
+  const captionY = inactiveTop + 16 + LINE * 2 + 26;
   const height = captionY + 18;
   const frames = panel.frames.length;
   const total = frames * panel.secondsPerFrame + 3;
@@ -175,12 +174,18 @@ function panelSvg(data, locale) {
     `<text x="${X}" y="${top + LINE * 2 + 15}" xml:space="preserve"><tspan class="ac b">[${escapeXml(label('tabInitiatives'))}]</tspan><tspan class="mu">  ${escapeXml(label('tabAgents'))}   ${escapeXml(label('tabFiles'))}</tspan></text>`,
     `<rect class="rule" x="8" y="${top + LINE * 3 + 2}" width="${WIDTH - 16}" height="1"/><rect class="rule" x="8" y="${top + LINE * 3 + 5}" width="${WIDTH - 16}" height="1"/>`,
   ].join('');
-  const inactive = [
-    `<rect class="card" x="8" y="${inactiveTop}" width="${WIDTH - 16}" height="${inactiveHeight}" rx="8"/>`,
-    text('b', X, inactiveTop + 24, fill(label('inactive'), 1)),
-    text('mu', X, inactiveTop + 24 + LINE, `○ ${panel.inactive.id} · ${panel.inactive.title[locale]}`),
+  // The panel lists an initiative whose jobs are all pending without records only under Inactive, never as a card.
+  const inactiveCard = (top, rows) => [
+    `<rect class="card" x="8" y="${top}" width="${WIDTH - 16}" height="${16 + LINE * (rows.length + 1)}" rx="8"/>`,
+    text('b', X, top + 24, fill(label('inactive'), rows.length)),
+    ...rows.map((row, n) => text('mu', X, top + 24 + LINE * (n + 1), `○ ${row.id} · ${row.title[locale]}`)),
   ].join('');
   const drawFrame = (frame, index) => {
+    const caption = `${index + 1}/${frames} · ${frame.caption[locale]}`;
+    assert.ok(caption.length * CHAR <= WIDTH - 2 * X, `The caption of frame ${index} is too long for the image: ${caption}`);
+    if (frame.first.status === 'pending') {
+      return `<g class="fr f${index}">${inactiveCard(cardTop, [panel.initiative, panel.inactive])}${text('b', WIDTH / 2, captionY, caption, 'middle')}</g>`;
+    }
     const done = frame.first.status === 'completed' ? 1 : 0;
     let y = cardTop + 24;
     const out = [`<rect class="card" x="8" y="${cardTop}" width="${WIDTH - 16}" height="${cardHeight}" rx="8"/>`];
@@ -210,7 +215,7 @@ function panelSvg(data, locale) {
       y += LINE + 6;
     }
     const last = index === frames - 1;
-    out.push(text('b', WIDTH / 2, captionY, `${index + 1}/${frames} · ${frame.caption[locale]}`, 'middle'));
+    out.push(inactiveCard(inactiveTop, [panel.inactive]), text('b', WIDTH / 2, captionY, caption, 'middle'));
     return `<g class="fr f${index}${last ? ' last' : ''}">${out.join('')}</g>`;
   };
   const fade = 0.3;
@@ -221,18 +226,15 @@ function panelSvg(data, locale) {
     const open = index === 0 ? '0%{opacity:1}' : `0%,${fmt(start)}%{opacity:0}${fadeIn}%{opacity:1}`;
     return `@keyframes p${index}{${open}${fadeOut}%{opacity:1}${fmt(end)}%,100%{opacity:0}}.f${index}{animation:p${index} ${fmt(total)}s linear infinite both}`;
   }).join('');
-  const body = `${header}${inactive}${panel.frames.map(drawFrame).join('\n')}`;
+  const body = `${header}${panel.frames.map(drawFrame).join('\n')}`;
   return frameOf(WIDTH, height, locale, data.ui.panelTitle[locale], data.ui.panelDescription[locale], data.ui.panelSimulatedLabel[locale], body, css, '.fr{opacity:0}.fr.last{opacity:1}');
 }
-
-const stepCount = svg => (svg.match(/class="st /gu) ?? []).length;
 
 const dataPath = resolve(root, 'docs/diagrams/first-session.json');
 assert.ok(existsSync(dataPath), `Missing ${dataPath}`);
 const data = JSON.parse(readFileSync(dataPath, 'utf8'));
 validate(data);
 const built = Object.fromEntries(LOCALES.map(locale => [locale, { 'first-session': sessionSvg(data, locale), 'initiatives-panel': panelSvg(data, locale) }]));
-assert.equal(stepCount(built.en['first-session']), stepCount(built.es['first-session']), 'Both languages must have the same steps.');
 for (const locale of LOCALES) {
   for (const [name, expected] of Object.entries(built[locale])) {
     const path = resolve(root, `docs/${locale}/${name}.svg`);

@@ -86,10 +86,11 @@ try {
   await mutate(data => { data.session.steps[1].id = 'a'; }, /unique/u);
   await mutate(data => { data.session.steps[1].kind = 'other'; }, /Unknown kind/u);
   await mutate(data => { data.panel.frames[0].first.status = 'done'; }, /unknown status/u);
+  await mutate(data => { data.panel.frames[1].caption = tr('x'.repeat(90)); }, /too long for the image/u);
 
   const real = spawnSync(process.execPath, [generator, '--check'], { encoding: 'utf8', timeout: 30000, cwd: source });
   assert.equal(real.status, 0, real.stderr);
-  console.log('PASS first session: current images, generation, missing translation, missing cited path, duplicate step, unknown kind and status, stale session image, stale panel image, escaped markup and no script. No browser or network required.');
+  console.log('PASS first session: current images, generation, missing translation, missing cited path, duplicate step, unknown kind and status, over-long panel caption, stale session image, stale panel image, escaped markup and no script. No browser or network required.');
 } finally {
   await rm(fixture, { recursive: true, force: true });
 }

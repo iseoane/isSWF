@@ -30,7 +30,7 @@ The picture is a summary: boxes are steps and arrows show where the work goes ne
 5. **The coordinator plans and records.** It writes a plan and a short brief (the instructions for one job) as Markdown files in your project, and a worker, an agent that changes code and checks it, does each job. The records of one initiative, a tracked piece of work, are described in [how an initiative is recorded](docs/en/reference.md#how-an-initiative-is-recorded).
 6. **Follow the progress.** In Claude Code, turn on the [initiatives panel](docs/en/reference.md#the-initiatives-panel) to see plans, jobs and reviews as cards. A similar panel for Pi is coming soon (see [possible future actions](docs/en/future-actions.md)).
 
-   ![A simulated view of the Claude Code initiatives panel with demo data: one job goes from pending to in progress, to in review and to completed.](docs/en/initiatives-panel.svg)
+   ![A simulated view of the Claude Code initiatives panel with demo data: an initiative starts inactive, then one job goes from in progress to in review and to completed.](docs/en/initiatives-panel.svg)
 
    The panel animation is simulated, with demo data. It shows only fields and states that the panel renders.
 7. **Review, PR and your approval.** When the risk calls for it, a reviewer, a separate agent, checks the change. In a project that uses GitHub, the coordinator then opens a pull request (PR) and waits for continuous integration (CI), the automatic checks, to pass; a project with no remote keeps the work local. You decide whether to merge. Nothing is merged or published without you. See [how changes reach main](docs/en/reference.md#how-changes-reach-main).
