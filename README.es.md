@@ -4,9 +4,16 @@
 
 isSWF es una factoría de software asistida por IA: los agentes de IA hacen el trabajo y tú tomas las decisiones. Divide una petición en trabajos pequeños y fáciles de comprobar, elige las comprobaciones según el riesgo y conserva evidencias de lo que se hizo, de modo que nada se fusiona ni se publica si tú no lo decides.
 
-![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un implementador, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
+<table>
+<tr>
+<td width="50%" valign="top"><img src="docs/es/first-session.svg" alt="Una sesión de terminal simulada y abreviada: instalar, configurar, preguntar a isswf-howto, enviar al coordinador una primera petición y después revisión, pull request, tu aprobación y una retrospectiva." width="100%"></td>
+<td width="50%" valign="top"><img src="docs/es/workflow.svg" alt="Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un implementador, una revisión opcional y la entrega, hasta que lo apruebas." width="100%"></td>
+</tr>
+</table>
 
-La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va el trabajo después. Para ver la versión en la que cada paso enumera las preguntas que se hace, abre el [diagrama interactivo](https://iseoane.github.io/isSWF/docs/es/workflow.html) ([English](https://iseoane.github.io/isSWF/docs/en/workflow.html)). [Cómo se decide el trabajo](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide) lo explica con palabras.
+La animación de la izquierda es una sesión simulada y abreviada en Claude Code, no una grabación. Sigue los pasos de la sección siguiente.
+
+La imagen de la derecha es un resumen: las cajas son pasos y las flechas muestran adónde va el trabajo después. Para ver la versión en la que cada paso enumera las preguntas que se hace, abre el [diagrama interactivo](https://iseoane.github.io/isSWF/docs/es/workflow.html) ([English](https://iseoane.github.io/isSWF/docs/en/workflow.html)). [Cómo se decide el trabajo](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide) lo explica con palabras.
 
 ## Una primera sesión completa
 
@@ -25,6 +32,12 @@ La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va e
 
 5. **El coordinador planifica y registra.** Escribe un plan y un brief corto (las instrucciones de un trabajo) como archivos Markdown en tu proyecto, y un worker, un agente que cambia el código y lo comprueba, hace cada trabajo. Los registros de una iniciativa, una pieza de trabajo con seguimiento, se describen en [cómo se registra una iniciativa](docs/es/reference.md#cómo-se-registra-una-iniciativa).
 6. **Sigue el avance.** En Claude Code, activa el [panel de iniciativas](docs/es/reference.md#el-panel-de-iniciativas) para ver planes, trabajos y revisiones como tarjetas. Pronto habrá un panel similar para Pi (consulta las [posibles acciones futuras](docs/es/future-actions.md)).
+
+   ![Una vista simulada del panel de iniciativas de Claude Code con datos de demostración: una iniciativa empieza como no activa y luego un trabajo pasa de en curso a en revisión y a completado.](docs/es/initiatives-panel.svg)
+
+   La animación del panel es simulada, con datos de demostración. Solo muestra campos y estados que el panel dibuja.
+
+   El panel tiene además un interruptor AutoWakeUp, desactivado por defecto: si está activado y la ventana de uso de cinco horas llega al 90 % o más mientras hay un trabajo en curso, el panel abierto programa un único mensaje para la hora de renovación más cinco minutos, que pide al coordinador revisar el estado y continuar solo el trabajo ya autorizado. La programación dura solo mientras la sesión de Claude sigue abierta. Consulta el [panel de iniciativas](docs/es/installation.md#panel-de-iniciativas).
 7. **Revisión, PR y tu aprobación.** Cuando el riesgo lo pide, un revisor, un agente distinto, comprueba el cambio. En un proyecto que usa GitHub, el coordinador abre después una pull request (PR) y espera a que pase la integración continua (CI), las comprobaciones automáticas; un proyecto sin remoto mantiene el trabajo en local. Tú decides si se fusiona. Nada se fusiona ni se publica sin ti. Consulta [cómo llegan los cambios a main](docs/es/reference.md#cómo-llegan-los-cambios-a-main).
 8. **Cierra con una retrospectiva.** Cuando el trabajo termina, el coordinador ejecuta la skill `isswf-retrospective`, que repasa lo ocurrido y propone mejoras como borradores. Tú decides cuáles conservar.
 

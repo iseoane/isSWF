@@ -52,6 +52,8 @@ const docsResult = run(process.execPath, [join(source, 'tooling/quality/check-do
 const documentationResult = run(process.execPath, [join(source, 'tests/documentation.mjs'), source]);
 run(process.execPath, [join(source, 'tests/workflow-flow.mjs'), source]);
 run(process.execPath, [join(source, 'tooling/maintenance/workflow-flow.mjs'), '--check', '--root', source]);
+run(process.execPath, [join(source, 'tests/first-session.mjs'), source]);
+run(process.execPath, [join(source, 'tooling/maintenance/first-session.mjs'), '--check', '--root', source]);
 run(process.execPath, [join(source, 'tests/ci-minutes.mjs'), source]);
 const packageMetadataResult = run(process.execPath, [join(source, 'tests/package-metadata.mjs'), source]);
 console.log(packageMetadataResult);
