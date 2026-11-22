@@ -24,17 +24,21 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 
 ## J002
 
-- Status: pending
+- Status: completed
 - Objective: A retrospective of the work done on 2026-11-21 and 2026-11-22 (I0055, I0056, I0064, I0065 and their releases) gives evidence-backed improvement drafts for the operator to choose from.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Run `isswf-retrospective` with the operator after I0065 closes.
+- Next step: None.
 
 ### Acceptance
 
 - Each finding cites its evidence (record, commit, transcript or guard output) and says whether it can be checked mechanically.
 - The operator chooses which findings become jobs in this initiative. Each chosen finding becomes a job with its own acceptance criteria.
+
+### Evidence
+
+- Retrospective `.factory/retrospectives/2026-11-22-session-close.md` (2026-11-22). Operator chose all proposals: J005-J008 added, P5 folded into J003.
 
 ## J003
 
@@ -65,3 +69,61 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 
 - A recorded breakdown names the slowest steps and tests on Windows, compared with Linux.
 - Changes cut the Windows wall-clock time without dropping any check or platform coverage; before and after times are recorded.
+
+## J005
+
+- Status: pending
+- Objective: A ci-only failure on a reviewed head cannot be integrated without a recorded miss block, and review coverage runs before a candidate is pushed.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the change in the current source.
+
+### Acceptance
+
+- When CI fails on a head that a passing review covered, the integration command refuses until the job records hold a `- Kind: ci-only` miss block for it.
+- Review coverage (`isswf-handoff coverage`) runs before push in the coordinator flow, and its failure stops the push.
+- Tests cover the refusal and the recorded case.
+
+## J006
+
+- Status: pending
+- Objective: On Windows, the initiative close points straight to a passing CI record instead of a local run that cannot pass.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J006/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the change in the current source.
+
+### Acceptance
+
+- `isswf-verify --tier initiative` on win32 reports before running that `check-quality` and `dead-code` will be "not run" and that the close gate needs a `source: "ci"` record, and how to write it.
+- The plan commit guard refusal names the CI record route first on win32.
+- Tests cover both messages.
+
+## J007
+
+- Status: pending
+- Objective: The plan commit guard checks a newly added plan the same way as a changed one.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J007/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the change in the current source.
+
+### Acceptance
+
+- Committing a new plan that `isswf-status` cannot parse is refused.
+- Regression test with a new plan file holding an unsafe Brief field.
+
+## J008
+
+- Status: pending
+- Objective: Planning guidance sizes a semantic rewrite of user-facing pages by its review cost.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J008/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the change in the current source.
+
+### Acceptance
+
+- `.agents/roles/references/planning.md` states, with an example, that a rewrite whose review is semantic across two languages is sized L and split.
+- Spanish mirrors and glossary unchanged unless a term requires it.
