@@ -46,3 +46,12 @@ Operator feedback 2026-11-14 on Windows: every press in the Claude Code initiati
 - 2026-11-22: merged in PR #386 (ee8c0e951a5b0d67053c5e5ffea6a94cac47e218) after reviews V001 (changes required: Linux cwd), V002 pass and V003 pass (coordinator digest line, a third round beyond the brief budget, disclosed), with CI success on head af6587c2cd90313b241ec25d9399e1f78e476970. Known limits: Linux path not observed live; relative gitdir or socket paths.
 - 2026-11-22: four orphaned `git fsmonitor--daemon run --detach` processes were found and killed. They were created at 21:22, 21:23, 23:31 and 01:37, which matches the I0064 J001, J002 and J003 worktrees. The cause is a global `core.fsmonitor=true` in the operator's `~/.gitconfig`. I0058 J013 covered test fixtures only, not coordinator worktrees.
 - 2026-11-22: the operator chose to fix this in the factory, not by changing the global config, and asked for it in the next initiative.
+
+## Close
+
+- Closed 2026-11-22. J001 merged in #385, J002 in #386, the J001 docs clause (V001 F1) in #387 (main 10863944b48a6b267d1632e035689e6ee2b83b8f).
+- Full check: `node tools/check-quality.mjs` exit 0 in 1113 s at 10863944b48a6b267d1632e035689e6ee2b83b8f. `node tooling/quality/host-checks.mjs`: host-prerequisites PASS; source-host-isolation SKIPPED locally (host-tests dependencies not installed), covered by CI.
+- Known limits carried forward:
+  - J001: Linux latency not measured; a change made outside a session tool call can appear up to 60 s late.
+  - J002: the Linux orphan lookup is tested with fake `/proc` data only; relative `gitdir` or socket paths can mislead it (V002 N1, N2).
+- Process notes: J002 took a third, coordinator-applied review round for a missed `verification.json` digest in `project-setup.md`, beyond the brief's two-round budget. Neither reviewer caught the digest; a check that compares that digest with the file would prevent it.
