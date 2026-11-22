@@ -10,7 +10,7 @@
 1. A bilingual script file, for example `docs/diagrams/first-session.json`: ordered steps (who speaks, text in `en`/`es`, delay). Steps follow J003's story: install, setup, an `isswf-howto` question and its answer, a first coordinator request, review and PR, the operator's approval, retrospective.
 2. A generator, for example `tooling/maintenance/first-session.mjs`, Node built-ins only, writing an SVG terminal animation with CSS keyframes (no JavaScript, no external fonts), light and dark aware, readable at GitHub README width. A visible "simulated session" label.
 3. A test `tests/first-session.mjs` with fixtures for a stale SVG and a missing translation, wired into `tools/check-quality.mjs`.
-4. The operator's panel recording, placed at `docs/assets/initiatives-panel.gif` (or the format supplied). Keep it under 5 MB. If it has not arrived, leave the README slot out and record that in A001; do not fabricate one.
+4. A second animation from the same generator: `docs/en/initiatives-panel.svg` and `docs/es/initiatives-panel.svg`, simulating the Claude Code initiatives panel following a job from pending to in-progress to done. Operator decision, 2026-11-22: simulated, not recorded. Ground it in the panel's rendering code and `docs/en/installation.md`: show only fields, states and layout it actually renders, with neutral demo data (no real paths, names or emails) and a visible "simulated" label. Its script data and test fixtures are covered by the same `--check`.
 5. README placement in both languages, keeping J003's structure.
 
 ## Grounding
