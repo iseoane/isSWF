@@ -11,7 +11,7 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 - Status: pending
 - Objective: An attempt or review record for a host launch that returned a run identity cannot be created or pass the record check without the matching `Run:` line, and the coordinator gets a refusal that names the missing line.
 - Depends on: None
-- Brief: None yet; written before dispatch.
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
 - Next step: Ground the design: where the launch guard records accepted dispatches and their run identity, how `isswf-record-new create` and `isswf-record-check` read records, and whether the panel reads records in linked worktrees.
 
@@ -27,7 +27,7 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 - Status: pending
 - Objective: A retrospective of the work done on 2026-11-21 and 2026-11-22 (I0055, I0056, I0064, I0065 and their releases) gives evidence-backed improvement drafts for the operator to choose from.
 - Depends on: None
-- Brief: None yet; written before dispatch.
+- Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
 - Next step: Run `isswf-retrospective` with the operator after I0065 closes.
 
