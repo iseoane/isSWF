@@ -24,11 +24,38 @@ export function parseWindowsDaemons(text) {
   });
 }
 
-/** The daemon for a Linux process, from its NUL-separated `/proc/<pid>/cmdline` and its `/proc/<pid>/cwd` link, or null for any other process. */
-export function parseLinuxDaemon(pid, cmdline, cwdLink) {
+const SOCKET_SUFFIX = '/fsmonitor--daemon.ipc';
+
+/** The inode to Git directory map of the daemon sockets in `/proc/net/unix` (`Num RefCount Protocol Flags Type St Inode Path`). */
+export function parseUnixSockets(text) {
+  const sockets = new Map();
+  for (const line of text.split('\n')) {
+    const [, , , , , , inode, ...rest] = line.trim().split(/\s+/u);
+    const path = rest.join(' ');
+    if (/^\d+$/u.test(inode ?? '') && path.endsWith(SOCKET_SUFFIX)) sockets.set(inode, path.slice(0, -SOCKET_SUFFIX.length));
+  }
+  return sockets;
+}
+
+/**
+ * The daemon for a Linux process, from its NUL-separated `/proc/<pid>/cmdline`, the targets of its `/proc/<pid>/fd` links and the socket map, or null for any other process.
+ * The daemon changes to its home directory, so its Git directory comes from the IPC socket it listens on; `path` is null when it holds none (for example with `fsmonitor.socketDir`).
+ */
+export function parseLinuxDaemon(pid, cmdline, fdTargets, sockets) {
   const [program, ...args] = cmdline.split('\0');
   if (!/^git(?:\.exe)?$/u.test(program.split('/').pop()) || args[0] !== 'fsmonitor--daemon' || args[1] !== 'run') return null;
-  return { pid, path: cwdLink === undefined ? null : cwdLink.replace(/ \(deleted\)$/u, '') };
+  const inode = fdTargets.map(target => /^socket:\[(\d+)\]$/u.exec(target)?.[1]).find(candidate => sockets.has(candidate));
+  return { pid, path: inode === undefined ? null : sockets.get(inode) };
+}
+
+/** Whether a Git directory still serves a worktree: it exists and, for a linked worktree, its `gitdir` file names a `.git` that exists. */
+export function gitDirLive(directory) {
+  if (!existsSync(directory)) return false;
+  try {
+    return existsSync(readFileSync(join(directory, 'gitdir'), 'utf8').trim());
+  } catch {
+    return true;
+  }
 }
 
 /** Splits daemons into orphans (their path is gone) and unknown ones (their path could not be read). */
@@ -69,16 +96,19 @@ function windowsDaemons() {
 
 function linuxDaemons() {
   const found = [];
+  const sockets = parseUnixSockets(readFileSync('/proc/net/unix', 'utf8'));
   for (const name of readdirSync('/proc')) {
     if (!/^\d+$/u.test(name)) continue;
     try {
-      let cwdLink;
+      const cmdline = readFileSync(`/proc/${name}/cmdline`, 'utf8');
+      if (!cmdline.includes('fsmonitor--daemon')) continue;
+      let fdTargets = [];
       try {
-        cwdLink = readlinkSync(`/proc/${name}/cwd`);
+        fdTargets = readdirSync(`/proc/${name}/fd`).map(fd => readlinkSync(`/proc/${name}/fd/${fd}`));
       } catch {
-        // A daemon whose directory cannot be read is reported as unknown.
+        // A daemon whose descriptors cannot be read is reported as unknown.
       }
-      const daemon = parseLinuxDaemon(Number(name), readFileSync(`/proc/${name}/cmdline`, 'utf8'), cwdLink);
+      const daemon = parseLinuxDaemon(Number(name), cmdline, fdTargets, sockets);
       if (daemon) found.push(daemon);
     } catch {
       // The process ended while it was read.
@@ -95,8 +125,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
   try {
     const windows = process.platform === 'win32';
     const daemons = windows ? windowsDaemons() : linuxDaemons();
-    // A Windows path is a Git directory, which Git removes with its worktree; a Linux path is the daemon's working directory, a worktree while it holds `.git`.
-    const { orphans, unknown } = orphanReport(daemons, path => existsSync(windows ? path : join(path, '.git')));
+    const { orphans, unknown } = orphanReport(daemons, gitDirLive);
     console.log(JSON.stringify({ status: orphans.length === 0 ? 'clean' : 'orphans', daemons: daemons.length, orphans, unknown }));
     process.exit(orphans.length > 0 ? 1 : 0);
   } catch (error) {
