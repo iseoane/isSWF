@@ -3,12 +3,12 @@
   "artifacts": {
     "en": {
       "specificationSha256": "0b90366bce0252d36c018c5308a87901576c4e365057aed3702509cc6e33a5fa",
-      "htmlSha256": "dc46622efd000d0ecc80e41b685bd658053c878e77c170bc3d634497617b04fd",
+      "htmlSha256": "aff8fbaf6c5f1cbf654d31a987416840ceacf1ac9bd98bacc6589b2c30fb6c1a",
       "svgSha256": "7f1453f9283a9c488be322d60d6a9adc86886ce4fbd9553f5d8514f431f84c24"
     },
     "es": {
       "specificationSha256": "a81dfa020e072d32d8ee1e07e7d86fcd7dd7832309cb48ab5dab43beb474db26",
-      "htmlSha256": "8986a5080a4ce9652faf3b506b518cfe161eab1fa8bf5f84dc049817d4ce783e",
+      "htmlSha256": "4c59a5ac83a1d0c0f33d09a97830dc70f39f9c27ccb9db56c0d7e7afbcc410b9",
       "svgSha256": "db476f67a1949b521f5218893ae4516e2cf139c73f5c82bf4e9246ffc926addb"
     }
   }

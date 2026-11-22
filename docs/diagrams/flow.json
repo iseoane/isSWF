@@ -21,8 +21,8 @@
     "goTo": { "en": "Go to %s →", "es": "Ir a %s →" },
     "guardsHeading": { "en": "✓ Automatic checks", "es": "✓ Controles automáticos" },
     "guardsNote": {
-      "en": "They do not depend on the agent remembering: the program itself checks and, when the check fails, refuses.",
-      "es": "No dependen de que el agente se acuerde: el propio programa lo comprueba y, si falla, lo rechaza."
+      "en": "They do not depend on the agent remembering: the program itself acts. Most of these checks refuse the action; some only remind or report.",
+      "es": "No dependen de que el agente se acuerde: lo hace el propio programa. La mayoría de estos controles rechaza la acción; algunos solo recuerdan o informan."
     },
     "see": { "en": "see", "es": "ver" },
     "otherLanguage": { "en": "Español", "es": "English" }
@@ -41,12 +41,8 @@
           "id": "you-decide", "to": "coord",
           "ask": { "en": "What can only I decide?", "es": "¿Qué cosas solo puedo decidir yo?" },
           "yes": {
-            "en": "What the product should do, whether the result is acceptable, and any publishing, merging or extra spending that was not already granted.",
-            "es": "Qué debe hacer el producto, si el resultado es aceptable y cualquier publicación, fusión o gasto adicional que no estuviera ya concedido."
-          },
-          "no": {
-            "en": "Everything else is decided inside what you already authorized.",
-            "es": "Todo lo demás se decide dentro de lo que ya autorizaste."
+            "en": "What the product should do, whether the result is acceptable, and any publishing, merging or extra spending that was not already granted. Everything else is decided inside what you already authorized.",
+            "es": "Qué debe hacer el producto, si el resultado es aceptable y cualquier publicación, fusión o gasto adicional que no estuviera ya concedido. Todo lo demás se decide dentro de lo que ya autorizaste."
           },
           "cites": [
             { "label": "feature-delivery.md", "path": ".agents/roles/references/feature-delivery.md" },
@@ -61,8 +57,8 @@
       "label": { "en": "Coordinator", "es": "Coordinador" },
       "sub": { "en": "organizes and hands out work", "es": "organiza y reparte" },
       "who": {
-        "en": "Understands the request, decides whom to call and checks what comes back. It owns the plan, the permissions and the other agents: helpers never start helpers of their own.",
-        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes nunca lanzan ayudantes propios."
+        "en": "Understands the request, decides whom to call and checks what comes back. It owns the plan, the permissions and the other agents: helpers do not start helpers of their own unless the brief explicitly allows it.",
+        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes no lanzan ayudantes propios salvo que el brief lo permita expresamente."
       },
       "questions": [
         {
@@ -79,9 +75,9 @@
           "id": "coord-interview", "to": "interview",
           "ask": {
             "en": "Can I prepare the brief without having to guess anything?",
-            "es": "¿Puedo preparar el encargo sin tener que suponer nada?"
+            "es": "¿Puedo preparar el brief sin tener que suponer nada?"
           },
-          "yes": { "en": "It prepares the brief directly, with no interview.", "es": "Prepara el encargo directamente, sin entrevista." },
+          "yes": { "en": "It prepares the brief directly, with no interview.", "es": "Prepara el brief directamente, sin entrevista." },
           "no": {
             "en": "It offers a short interview in one line. You can accept it or skip it.",
             "es": "Te propone una entrevista corta en una línea. Puedes aceptarla o saltarla."
@@ -107,8 +103,8 @@
         {
           "id": "coord-bug", "to": "diag",
           "ask": {
-            "en": "Is it a bug whose cause is clear and easy to reproduce?",
-            "es": "¿Es un fallo con causa clara y fácil de reproducir?"
+            "en": "Is it a bug whose cause is clear and reproducible locally?",
+            "es": "¿Es un fallo con causa clara y reproducible en local?"
           },
           "yes": {
             "en": "The worker finds the cause and fixes it in one go.",
@@ -129,7 +125,7 @@
             "en": "Are the objective and the acceptance already clear, with nothing to look up?",
             "es": "¿Están ya claros el objetivo y cuándo se da por bueno, sin nada que investigar?"
           },
-          "yes": { "en": "It goes straight to preparing the brief.", "es": "Pasa directamente a preparar el encargo." },
+          "yes": { "en": "It goes straight to preparing the brief.", "es": "Pasa directamente a preparar el brief." },
           "no": { "en": "It takes the matching detour above first.", "es": "Antes hace el desvío que corresponda de los de arriba." },
           "cites": [{ "label": "isswf-coordinator §2", "path": ".agents/skills/isswf-coordinator/SKILL.md" }]
         },
@@ -173,8 +169,8 @@
         {
           "id": "interview-needed", "to": "plan",
           "ask": {
-            "en": "Is it something new, visible to users, with an undefined concept or no written acceptance?",
-            "es": "¿Es algo nuevo, visible para el usuario, con un concepto sin definir o sin criterio de aceptación escrito?"
+            "en": "Is it a new feature, a change users can see, a concept missing from the glossary or acceptance that is not written down?",
+            "es": "¿Es una funcionalidad nueva, un cambio que el usuario ve, un concepto que falta en el glosario o un criterio de aceptación sin escribir?"
           },
           "yes": { "en": "An interview closes those gaps.", "es": "Una entrevista cierra esos huecos." },
           "no": {
@@ -236,7 +232,7 @@
       "sub": { "en": "for hard bugs", "es": "para fallos difíciles" },
       "who": {
         "en": "Reproduces the failure and gathers evidence of its cause. It recommends what to do and does not fix it unless the brief says so.",
-        "es": "Reproduce el fallo y reúne pruebas de su causa. Recomienda qué hacer y no lo arregla salvo que el encargo lo diga."
+        "es": "Reproduce el fallo y reúne pruebas de su causa. Recomienda qué hacer y no lo arregla salvo que el brief lo diga."
       },
       "questions": [
         {
@@ -261,11 +257,11 @@
     },
     {
       "id": "plan", "kind": "coordinator", "x": 380, "y": 550,
-      "label": { "en": "Coordinator prepares the brief", "es": "Coordinador prepara el encargo" },
+      "label": { "en": "Coordinator prepares the brief", "es": "Coordinador prepara el brief" },
       "sub": { "en": "what, how to check it, which guides", "es": "qué, cómo se comprueba, con qué guías" },
       "who": {
         "en": "After research it asks again whether the problem is what it thought, and chooses which optional guides go with the brief.",
-        "es": "Tras investigar vuelve a preguntarse si el problema es el que creía y elige qué guías opcionales acompañan al encargo."
+        "es": "Tras investigar vuelve a preguntarse si el problema es el que creía y elige qué guías opcionales acompañan al brief."
       },
       "questions": [
         {
@@ -317,8 +313,8 @@
         {
           "id": "plan-tdd",
           "ask": {
-            "en": "Is writing the failing test first worth it?",
-            "es": "¿Merece la pena escribir primero la prueba que falla?"
+            "en": "Is TDD requested, or is there a cheap, useful regression test to write first?",
+            "es": "¿Se ha pedido TDD, o hay una prueba de regresión barata y útil que escribir primero?"
           },
           "yes": { "en": "It asks for it (TDD).", "es": "Pide hacerlo así (TDD)." },
           "no": { "en": "It does not ask. TDD is never mandatory.", "es": "No lo pide: nunca es obligatorio." },
@@ -358,7 +354,7 @@
         },
         {
           "id": "plan-ready", "to": "worker",
-          "ask": { "en": "Is the brief ready to launch?", "es": "¿Está el encargo listo para lanzarlo?" },
+          "ask": { "en": "Is the brief ready to launch?", "es": "¿Está el brief listo para lanzarlo?" },
           "yes": {
             "en": "It launches the worker, once your explicit start instruction is on record.",
             "es": "Lanza al programador, una vez registrada tu instrucción explícita de empezar."
@@ -375,7 +371,7 @@
           "id": "g-dispatch",
           "text": {
             "en": "Before a helper starts, the dispatch guard checks that the plan is readable, the job is in progress, the brief is committed and the request names the exact commits, and that model and effort match your selection. If a check fails it refuses and names the reason. It also counts open workers against a local limit (2 by default): it only warns by default and refuses in enforce mode.",
-            "es": "Antes de lanzar un ayudante, el guardián de lanzamientos comprueba que el plan se puede leer, que el trabajo está en curso, que el encargo está confirmado y que la petición nombra los commits exactos, y que el modelo y el esfuerzo coinciden con tu selección. Si falla algo, lo rechaza y dice por qué. También cuenta los programadores abiertos frente a un límite local (2 por defecto): por defecto solo avisa y en modo enforce rechaza."
+            "es": "Antes de lanzar un ayudante, el guardián de lanzamientos comprueba que el plan se puede leer, que el trabajo está en curso, que el brief ya está en un commit y que la petición nombra los commits exactos, y que el modelo y el esfuerzo coinciden con tu selección. Si falla algo, lo rechaza y dice por qué. También cuenta los programadores abiertos frente a un límite local (2 por defecto): por defecto solo avisa y en modo enforce rechaza."
           },
           "path": "docs/en/operations.md"
         },
@@ -383,7 +379,7 @@
           "id": "g-undispatched",
           "text": {
             "en": "If a job is in progress and its brief is committed but nothing was launched, a status line says so at the end of the turn.",
-            "es": "Si un trabajo está en curso y su encargo está confirmado pero no se ha lanzado nada, una línea de estado lo indica al final del turno."
+            "es": "Si un trabajo está en curso y su brief ya está en un commit pero no se ha lanzado nada, una línea de estado lo indica al final del turno."
           },
           "path": "docs/en/operations.md"
         }
@@ -395,19 +391,19 @@
       "sub": { "en": "makes the change", "es": "hace el cambio" },
       "who": {
         "en": "Works in its own copy of the repository, makes the smallest change that meets the brief and brings evidence that it works.",
-        "es": "Trabaja en su propia copia del repositorio, hace el cambio más pequeño que cumpla el encargo y aporta pruebas de que funciona."
+        "es": "Trabaja en su propia copia del repositorio, hace el cambio más pequeño que cumpla el brief y aporta pruebas de que funciona."
       },
       "questions": [
         {
           "id": "worker-code",
           "ask": {
             "en": "Does the real code match what the brief says?",
-            "es": "¿El código real coincide con lo que dice el encargo?"
+            "es": "¿El código real coincide con lo que dice el brief?"
           },
           "yes": { "en": "It carries on.", "es": "Sigue." },
           "no": {
-            "en": "It takes it up with the coordinator before changing anything.",
-            "es": "Lo habla con el coordinador antes de cambiar nada."
+            "en": "It reconciles the difference with the coordinator before changing the objective.",
+            "es": "Concilia la diferencia con el coordinador antes de cambiar el objetivo."
           },
           "cites": [{ "label": "worker.md", "path": ".agents/roles/worker.md" }]
         },
@@ -432,7 +428,7 @@
           },
           "yes": {
             "en": "It records the premise behind both fixes and either challenges it with evidence or returns to the coordinator before a third fix.",
-            "es": "Anota la idea de partida de ambos arreglos y o la cuestiona con pruebas o vuelve al coordinador antes de un tercer arreglo."
+            "es": "Anota la idea de partida de ambos arreglos y la cuestiona con pruebas, o vuelve al coordinador antes de un tercer arreglo."
           },
           "no": { "en": "It carries on.", "es": "Sigue." },
           "cites": [{ "label": "worker.md", "path": ".agents/roles/worker.md" }]
@@ -455,8 +451,8 @@
         {
           "id": "g-branch",
           "text": {
-            "en": "A background worker cannot commit outside its assigned checkout and branch.",
-            "es": "Un programador en segundo plano no puede hacer commit fuera de su copia y su rama asignadas."
+            "en": "A background worker's git commit is refused outside its assigned checkout and branch. This is a process rule, not a sandbox.",
+            "es": "Se rechaza el git commit de un programador en segundo plano fuera de su copia y su rama asignadas. Es una regla de proceso, no un aislamiento."
           },
           "path": "docs/en/operations.md"
         },
@@ -532,12 +528,12 @@
         {
           "id": "review-rounds",
           "ask": {
-            "en": "Is the correction budget spent with a blocking finding still open?",
-            "es": "¿Se ha agotado el presupuesto de correcciones con un hallazgo bloqueante abierto?"
+            "en": "Is the brief's review-round or correction budget spent with a blocking finding still open?",
+            "es": "¿Se ha agotado el presupuesto de rondas de revisión o de correcciones del brief con un hallazgo bloqueante abierto?"
           },
           "yes": {
-            "en": "The reviewer recommends reconsidering the approach. The coordinator asks you before any further correction.",
-            "es": "El revisor recomienda replantear el enfoque. El coordinador te pregunta antes de cualquier otra corrección."
+            "en": "The reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks you before any further correction.",
+            "es": "El revisor recomienda replantear el enfoque en lugar de otra corrección. Después el coordinador te pregunta antes de cualquier otra."
           },
           "no": {
             "en": "Another ordinary round, limited to what changed.",
@@ -569,16 +565,16 @@
         {
           "id": "pr-review-exact", "to": "ok",
           "ask": {
-            "en": "Does the review cover this exact change, or only an earlier version?",
-            "es": "¿La revisión cubre este cambio exacto o solo una versión anterior?"
+            "en": "Does the review cover this exact change?",
+            "es": "¿La revisión cubre este cambio exacto?"
           },
           "yes": {
             "en": "It presents the change for your approval with the review attached.",
             "es": "Te presenta el cambio para tu visto bueno con la revisión adjunta."
           },
           "no": {
-            "en": "It says so plainly. A missing or outdated review is never assumed to be fine.",
-            "es": "Lo dice claramente. Una revisión que falta o que está desfasada nunca se da por buena."
+            "en": "It says so plainly: the review is missing, or covers only an earlier version. It is never assumed to be fine.",
+            "es": "Lo dice claramente: falta la revisión o solo cubre una versión anterior. Nunca se da por buena."
           },
           "cites": [
             { "label": "isswf-pr", "path": ".agents/skills/isswf-pr/SKILL.md" },
@@ -590,8 +586,8 @@
         {
           "id": "g-ci",
           "text": {
-            "en": "CI status is read once, for the exact commit of the PR, instead of waiting in a loop.",
-            "es": "El estado de CI se consulta una sola vez, para el commit exacto de la PR, en lugar de esperar en bucle."
+            "en": "A tool reads CI status once, for the exact commit of the PR. The command guard refuses waiting in a loop.",
+            "es": "Una herramienta consulta el estado de CI una sola vez, para el commit exacto de la PR. El guardián de comandos rechaza esperar en bucle."
           },
           "path": "docs/en/operations.md"
         }

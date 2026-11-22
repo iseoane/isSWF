@@ -273,6 +273,8 @@ const SCRIPT = String.raw`
   });
   draw();
   show('coord', false);
+  var board = document.getElementById('board');
+  board.scrollLeft = (board.scrollWidth - board.clientWidth) / 2;
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 })();
 `;
@@ -296,7 +298,7 @@ function page(data, locale) {
 <p class="sub">${escapeHtml(ui.intro)}</p>
 <div class="legend"><span style="--c:var(--op)"><i></i>${escapeHtml(ui.legendOperator)}</span><span style="--c:var(--accent)"><i style="border-radius:50%"></i>${escapeHtml(ui.legendCoordinator)}</span><span style="--c:var(--role)"><i></i>${escapeHtml(ui.legendHelper)}</span><span style="--c:var(--role)"><i style="border-style:dashed"></i>${escapeHtml(ui.legendOptional)}</span><span style="color:var(--ctl)">${escapeHtml(ui.legendLoop)}</span><span><span class="s">✓</span>${escapeHtml(ui.legendGuard)}</span></div>
 <div class="wrap">
-<div class="board"><div class="chart" id="chart"><svg id="svg" viewBox="0 0 760 1260" aria-hidden="true"><defs>
+<div class="board" id="board"><div class="chart" id="chart"><svg id="svg" viewBox="0 0 760 1260" aria-hidden="true"><defs>
 <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0,0 L10,5 L0,10z"/></marker>
 <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mk hot" d="M0,0 L10,5 L0,10z"/></marker>
 </defs></svg></div></div>
