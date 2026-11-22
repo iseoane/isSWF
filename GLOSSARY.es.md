@@ -50,6 +50,10 @@ La versión concreta de una entrega sometida a verificación, revisión o acepta
 Un resultado observado y atribuible a un candidato o contexto concreto que respalda una afirmación.
 _Avoid_: PASS sin indicar qué se comprobó.
 
+**Modo de verificación**:
+La forma de comprobar un candidato: mecánica, empírica, semántica o combinada. La mecánica (en lenguaje llano, determinista) comprueba el resultado de un procedimiento fijo, como bytes, hashes y enlaces. La empírica observa cada criterio de aceptación ejecutando pruebas o recorridos sobre el candidato exacto, cada uno con capacidad demostrada de fallar. La semántica es el juicio de un revisor sobre lo que la ejecución no puede demostrar. La combinada juzga semánticamente un procedimiento modificado y verifica su resultado de forma mecánica o empírica.
+_Avoid_: revisión como sinónimo de todos los modos, porque solo el modo semántico necesita que un revisor lea el cambio.
+
 **Commit RED**:
 Un commit que contiene solo una prueba de comportamiento cuyo fallo se debe a que falta el comportamiento solicitado; cuando el brief selecciona TDD, precede a un commit GREEN independiente con la corrección de producción.
 

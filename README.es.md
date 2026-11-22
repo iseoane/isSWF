@@ -2,46 +2,52 @@
 
 [English](README.md) | Español
 
-isSWF es una factoría de software asistida por IA donde los agentes ejecutan y las personas deciden. Es un marco de gobierno para el desarrollo de software con agentes: divide el trabajo en encargos pequeños y revisables, elige la verificación según el riesgo y exige evidencias verificables. Tú mantienes el control: instalar la integración no inicia agentes, y un flujo de funcionalidad no autoriza su merge ni su despliegue.
-
-## Empieza con un host nativo
-
-El flujo compartido actual admite Windows y Linux nativos con **Pi** o **Claude Code**. Pi delega mediante la extensión `pi-subagents`, que se instala por separado; Claude Code utiliza sus agentes nativos. Estos encargos mediante hosts nativos no necesitan el ejecutor compilado heredado ni una versión de runtime fijada para el proyecto. Consulta [compatibilidad de los hosts](docs/host-portability.md) para conocer su configuración, límites de capacidad y evidencias de verificación.
-
-1. Prepara los recursos de isSWF de confianza y la delegación nativa siguiendo la [guía de Pi](.agents/hosts/pi.md) o la [guía de Claude Code](.agents/hosts/claude-code.md); consulta [compatibilidad de los hosts](docs/host-portability.md) para cargar la integración. Si utilizas este checkout de desarrollo, sigue también la [separación del checkout de código fuente](docs/es/development.md#separar-este-checkout-del-código-fuente-de-una-release-instalada). La instalación compilada descrita más abajo es una vía heredada independiente.
-2. En el repositorio de destino, ejecuta `/skill:isswf-setup` en Pi o `/isswf:isswf-setup` en Claude Code.
-3. Para iniciar un encargo, dirígelo explícitamente al coordinador de isSWF. Las peticiones normales no activan un flujo automático.
-4. ¿No sabes qué skill, rol o flujo encaja? Ejecuta `/skill:isswf-howto` en Pi o `/isswf:isswf-howto` en Claude Code. Responde sin iniciar trabajo y termina con un prompt que puedes enviar al coordinador.
-
-La configuración prepara las decisiones específicas del proyecto y la entrada acotada del coordinador en el `AGENTS.md` raíz. Esa entrada se activa con una petición explícita al coordinador/a isSWF, no con cualquier petición de programación. La instalación o la configuración por sí solas no autorizan acciones futuras ni demuestran que un modelo esté disponible. Consulta la [guía de primeros pasos](docs/es/getting-started.md).
-
-## Registro y entrega del trabajo
-
-Antes de delegar trabajo nativo, el coordinador registra un plan duradero de iniciativa y un brief de encargo con la información pertinente en el directorio de estado existente (`.isswf` o el histórico `.factory`). Las tareas pequeñas no necesitan invocar un planificador ni generar un paquete fijo de documentos. Workers y revisores devuelven evidencias asociadas al candidato concreto; las comprobaciones y revisiones se eligen de forma proporcional, no son roles obligatorios para cada tarea. Cuando pruebas o recorridos ejecutados cubren todos los criterios de aceptación y han demostrado que pueden fallar, el cambio puede cerrarse sin llamar a un revisor; la revisión semántica se mantiene para lo que la ejecución no puede demostrar, como permisos, contratos compartidos, decisiones de diseño o texto de metodología. Herramientas de contexto opcionales como Engram o Codegraph no sustituyen los registros del proyecto.
-
-Una petición seleccionada de funcionalidad a PR sigue la política de entrega preparada para el proyecto, con comprobaciones y revisión acotadas cuando correspondan. Entregar una PR es una decisión distinta de integrarla en la rama base. La petición puede establecer límites más estrechos y locales; elegir seguimiento mediante GitHub no concede permiso para publicar. Consulta [trabajo duradero](docs/durable-work.md), [cómo funciona la factoría](docs/es/reference.md) y [comprobaciones de desarrollo](docs/es/development.md).
-
-## Diagramas del flujo
+isSWF es una factoría de software asistida por IA: los agentes de IA hacen el trabajo y tú tomas las decisiones. Divide una petición en trabajos pequeños y fáciles de comprobar, elige las comprobaciones según el riesgo y conserva evidencias de lo que se hizo, de modo que nada se fusiona ni se publica si tú no lo decides.
 
 ![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un programador, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
 
-El [resumen](docs/es/workflow.svg) ofrece una vista rápida: las cajas son pasos y las flechas muestran adónde va el trabajo después. Abre el diagrama interactivo, donde cada paso enumera las preguntas que se hace: [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html) · [English](https://iseoane.github.io/isSWF/docs/en/workflow.html). El diagrama sirve de orientación, no como contrato del comportamiento nativo actual; consulta las guías enlazadas para conocerlo. Para verlo sin conexión, descarga la [página en español](docs/es/workflow.html) o la [página en inglés](docs/en/workflow.html); cada una es un archivo único que funciona sin conexión, y GitHub lo muestra como código.
+La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va el trabajo después. Para ver la versión en la que cada paso enumera las preguntas que se hace, abre el [diagrama interactivo](https://iseoane.github.io/isSWF/docs/es/workflow.html) ([English](https://iseoane.github.io/isSWF/docs/en/workflow.html)). [Cómo se decide el trabajo](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide) lo explica con palabras.
 
-El sitio está publicado en [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/). Las actualizaciones siguen siendo manuales: abre **Actions → Publish workflow diagrams → Run workflow**, selecciona `main` y ejecútalo cuando la publicación esté autorizada. No hay despliegue automático al hacer push. La fase de preparación solo incluye la página de inicio bilingüe y los dos diagramas interactivos.
+## Una primera sesión completa
 
-## Release compilada conservada (vía heredada)
+1. **Instálalo.** isSWF funciona con **Pi** y con **Claude Code**, los asistentes de programación en los que se ejecutan los agentes, en Windows y Linux. Sigue la [guía de instalación](docs/es/installation.md) de tu entorno. Pi necesita además la extensión `pi-subagents`, que se instala por separado, y la [compatibilidad de los hosts](docs/host-portability.md) indica qué puede hacer cada uno. Instalar no inicia ningún agente.
+2. **Configura tu proyecto.** En el repositorio donde quieras trabajar, ejecuta `/skill:isswf-setup` en Pi o `/isswf:isswf-setup` en Claude Code. La configuración pregunta qué modelos usar, dónde guardar el trabajo y cuáles son las comprobaciones, y prepara una pequeña entrada en el `AGENTS.md` del proyecto.
+3. **Haz una primera petición.** Dirígete al coordinador, el agente que planifica el trabajo y llama a los demás, por ejemplo: `/isswf:isswf-coordinator Añade un botón para limpiar el filtro que restaure la lista completa.` En Pi, usa `/skill:isswf-coordinator`. Una petición normal no pone en marcha la factoría; solo lo hace una petición explícita. Consulta [tu primera petición](docs/es/getting-started.md).
+4. **¿No sabes qué pedir?** Ejecuta `/skill:isswf-howto` en Pi o `/isswf:isswf-howto` en Claude Code. Te dice qué skill (una tarea ya preparada que puedes pedir por su nombre) o flujo encaja, enlaza su origen y termina con un prompt que puedes enviar al coordinador. Nunca inicia trabajo. Por ejemplo (ilustrativo):
 
-La instalación de la release compilada es una vía independiente, no un requisito para las nuevas tareas con hosts nativos. Ya no incluye las herramientas del ejecutor heredado. La evidencia de releases documentada se limita a Linux x64; tiene restricciones distintas de runtime y migración, y no certifica la ejecución nativa en Windows/macOS. Adoptar el flujo nativo no migra instalaciones existentes. Antes de elegir esa vía, consulta la [instalación y los límites del runtime heredado](docs/es/installation.md) y las evidencias de la release concreta. La versión del manifiesto no demuestra que exista una release publicada; no deduzcas una última release ni publicación en un registro a partir de ella.
+   > Tú: `/isswf:isswf-howto` Una prueba de mi proyecto falla de vez en cuando y no sé por qué. ¿Qué debo usar?
+   >
+   > Respuesta: Una causa desconocida e intermitente es una tarea de depuración, que cubre la skill [isswf-debug](.agents/skills/isswf-debug/SKILL.md). Reproduce el fallo y reúne evidencias de la causa; no cambia código salvo que lo pidas. Puedes enviar el prompt siguiente al coordinador, o ejecutar `/isswf:isswf-debug` directamente.
+   >
+   > ```text
+   > Investiga por qué la prueba checkout.spec falla de forma intermitente. Solo diagnostica: encuentra la causa con evidencias y no cambies código. Informa de la causa y del siguiente paso.
+   > ```
+
+5. **El coordinador planifica y registra.** Escribe un plan y un brief corto (las instrucciones de un trabajo) como archivos Markdown en tu proyecto, y un worker, un agente que cambia el código y lo comprueba, hace cada trabajo. Los registros de una iniciativa, una pieza de trabajo con seguimiento, se describen en [cómo se registra una iniciativa](docs/es/reference.md#cómo-se-registra-una-iniciativa).
+6. **Sigue el avance.** En Claude Code, activa el [panel de iniciativas](docs/es/reference.md#el-panel-de-iniciativas) para ver planes, trabajos y revisiones como tarjetas. Pronto habrá un panel similar para Pi (consulta las [posibles acciones futuras](docs/es/future-actions.md)).
+7. **Revisión, PR y tu aprobación.** Cuando el riesgo lo pide, un revisor, un agente distinto, comprueba el cambio. En un proyecto que usa GitHub, el coordinador abre después una pull request (PR) y espera a que pase la integración continua (CI), las comprobaciones automáticas; un proyecto sin remoto mantiene el trabajo en local. Tú decides si se fusiona. Nada se fusiona ni se publica sin ti. Consulta [cómo llegan los cambios a main](docs/es/reference.md#cómo-llegan-los-cambios-a-main).
+8. **Cierra con una retrospectiva.** Cuando el trabajo termina, el coordinador ejecuta la skill `isswf-retrospective`, que repasa lo ocurrido y propone mejoras como borradores. Tú decides cuáles conservar.
+
+## Cómo funciona, en cuatro líneas
+
+- **Trabajos pequeños y verificables.** Cada trabajo recibe un tamaño según lo difícil que sea comprobarlo, y uno grande se divide. [Dividir el trabajo](docs/es/reference.md#dividir-el-trabajo-en-trabajos-por-tamaño).
+- **Pruebas elegidas según el riesgo.** Cada trabajo ejecuta las pruebas que corresponden a su cambio; la comprobación completa se ejecuta al final y, con GitHub, en la CI de cada PR. [Qué pruebas se ejecutan y cuándo](docs/es/reference.md#qué-pruebas-se-ejecutan-y-cuándo).
+- **Tres formas de verificar.** Mecánica (también llamada determinista), con comprobaciones de herramientas; empírica, ejecutando pruebas; y semántica, con un revisor que lee el cambio. [Tres formas de verificar](docs/es/reference.md#tres-formas-de-verificar).
+- **Nada se publica sin ti.** Con entrega mediante GitHub, la factoría abre una PR y tú apruebas la fusión; sin remoto, nada sale de tu equipo hasta que lo publiques. [Quién decide qué](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide).
+
+## En qué se apoya
+
+Dos herramientas opcionales hacen que los agentes estén mejor informados. isSWF funciona sin ellas y no las instala.
+
+- [Engram](https://github.com/Gentleman-Programming/engram) da a los agentes memoria persistente entre sesiones, para que no se pierdan las decisiones ni los descubrimientos. Se ejecuta en tu equipo y tiene su propio instalador.
+- [Codegraph](https://github.com/colbymchenry/codegraph) indexa tu código como un grafo en tu equipo, de modo que los agentes encuentran dónde están las cosas y qué depende de ellas con menos lecturas de archivos.
+
+Gracias a la organización Gentleman-Programming, que desarrolla Engram, a colbymchenry, que desarrolla Codegraph, y a sus colaboradores. La configuración indica si cada una está disponible, y la [guía de instalación](docs/es/installation.md#inicializar-un-proyecto) explica cómo conectarlas.
 
 ## Más información
 
+- [Cómo funciona la factoría](docs/es/reference.md)
 - [Índice de documentación](docs/es/index.md)
-- [Instalación y actualizaciones](docs/es/installation.md)
-- [Primeros pasos](docs/es/getting-started.md)
-- [Compatibilidad de los hosts](docs/host-portability.md)
 - [Glosario](GLOSSARY.es.md)
 - [Colaborar](docs/es/development.md)
-
-## Licencia
-
-MIT.
+- Licencia: MIT.

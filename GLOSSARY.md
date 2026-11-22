@@ -50,6 +50,10 @@ The exact version of a delivery being checked, reviewed, or accepted.
 An observed result attributable to a specific candidate or context that supports a claim.
 _Avoid_: PASS without stating what was checked.
 
+**Verification mode**:
+How a candidate is checked: mechanical, empirical, semantic or combined. Mechanical (plain word: deterministic) checks the output of a fixed procedure, such as bytes, hashes and links. Empirical observes each acceptance criterion by running tests or journeys on the exact candidate, each shown able to fail. Semantic is a reviewer's judgment of what execution cannot establish. Combined judges a changed procedure semantically and verifies its output mechanically or empirically.
+_Avoid_: review as a synonym for every mode, because only the semantic mode needs a reviewer to read the change.
+
 **RED commit**:
 A test-only commit whose focused behavioral test fails because the requested behavior is missing; it precedes the separate GREEN production-fix commit when a brief selects TDD.
 

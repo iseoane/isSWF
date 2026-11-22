@@ -21,3 +21,7 @@ Offer an optional refactor assignment after the tests pass, selected by the coor
 ## Records-only pushes
 
 Check plan records before a records-only commit goes to `main` without a pull request. A guard would parse each changed `plan.md` with `parsePlan` and each changed record with the record check, and refuse the push when one fails. Today these commits skip review, so a malformed record reaches `main` and breaks CI for every open pull request, as `None.` in an I0061 dependency field did on 2026-11-18.
+
+## Initiatives panel for Pi
+
+A panel like the Claude Code initiatives pane (cards for plans, jobs and review rounds, a file tree and an agents view) for Pi, which has no equivalent today. Costs: a Pi-specific interface to build and keep in step with the record formats. It would only read the records and would grant no permission. Source: the operator's plan to bring a similar panel to Pi.
