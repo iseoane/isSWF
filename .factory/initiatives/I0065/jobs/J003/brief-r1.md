@@ -12,7 +12,7 @@ The README is a front page that a new reader understands in a couple of minutes.
 README, in this order:
 
 1. **What it is.** Two plain sentences, then the J002 diagram.
-2. **A first complete session.** Told as one story: install, with the supported hosts (Pi and Claude Code, Windows and Linux); run setup; make a first request to the coordinator; follow progress in the Claude Code initiatives panel, noting that a similar panel for Pi is coming soon; review, PR and the operator's approval; retrospective at close.
+2. **A first complete session.** Told as one story: install, with the supported hosts (Pi and Claude Code, Windows and Linux); run setup; make a first request to the coordinator; when unsure what to ask, run `isswf-howto` (`/skill:isswf-howto` in Pi, `/isswf:isswf-howto` in Claude Code), which suggests the skill or flow and a prompt for the coordinator without starting work; follow progress in the Claude Code initiatives panel, noting that a similar panel for Pi is coming soon; review, PR and the operator's approval; retrospective at close.
 3. **How it works, in four lines.** Small verifiable jobs; tests chosen by risk; three kinds of review; nothing is published without the operator. Each line links to its section of the reference page.
 4. **What it builds on.** Engram and Codegraph: what each one adds, that both are optional, their project URLs, and acknowledgements. Verify the URLs and what each tool does from `docs/en/installation.md` and the tools' own public pages. Do not guess them.
 5. **More.** How it works, the glossary, contributing (`docs/en/development.md`) and the license.
@@ -25,12 +25,13 @@ Reference page sections to add or reshape, keeping its existing current content:
 - Three kinds of review: deterministic, empirical and semantic. The source term is "mechanical"; use the glossary's canonical term. If the glossary has none, add one in both glossaries after checking `.agents/roles/references/review.md`. Mention that the hooks and guards make some rules deterministic. Source: `docs/en/operations.md`.
 - Parallel work in worktrees, with a configurable limit. Sources: the coordinator's "Parallel jobs" section and `docs/en/installation.md`.
 - Skills, roles, references and principles: what each is, with links.
+- Update `.agents/skills/isswf-howto/SKILL.md` only if it is stale against the new README, reference page or J001 flowchart (for example, a link or flow it should point to). If no change is needed, record why in A001.
 - Opening issues from other repositories. Source: `.agents/skills/isswf-issue/SKILL.md`.
 - The initiatives panel in detail. Source: `docs/en/installation.md`.
 
 ## Scope
 
-- In: `README.md`, `README.es.md`, `docs/en/reference.md`, `docs/es/reference.md`, and the documentation index and glossaries only where a link or term requires it.
+- In: `README.md`, `README.es.md`, `docs/en/reference.md`, `docs/es/reference.md`, `.agents/skills/isswf-howto/` when the check above requires it, and the documentation index and glossaries only where a link or term requires it.
 - Out: the diagram itself (J001 and J002), other guides' content, and the legacy installation guide's content.
 
 ## Checks

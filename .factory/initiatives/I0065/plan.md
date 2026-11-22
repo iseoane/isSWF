@@ -64,6 +64,7 @@ J003 restructures the README and its reference page, as the operator decided on 
 
 - `README.md` and `README.es.md` follow the operator's outline in the brief, in plain language, and define any technical term they keep.
 - `docs/en/reference.md` and `docs/es/reference.md` hold the reference topics the brief lists, each grounded in its canonical guide and linking to it rather than copying it.
+- The README's first-session story tells new users to run `isswf-howto` when unsure what to ask. `isswf-howto` is updated if it is stale against the new pages, or A001 records why no change was needed.
 - The legacy compiled-release path and the Pages publication notes leave the README. They stay findable from the documentation index.
 - `check-docs` passes, and no content that is still current is lost: each removed README paragraph is either moved or already covered, and A001 records where each went.
 
