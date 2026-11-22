@@ -6,7 +6,7 @@ The operator found the Archify workflow diagrams confusing: they mix every role,
 
 J003 restructures the README and its reference page, as the operator decided on 2026-11-22.
 
-Integration: the operator authorized integrating every I0065 job on 2026-11-22 ("tienes mi autorizacion para integrarla"), after required review and exact-head CI. No release is planned: the changed files are outside the package `files` list, except `.agents/skills/isswf-howto/` if J003 changes it, which would then need a patch release. The operator authorized that patch release on 2026-11-22 ("ok pues entonces release patch"): at initiative close, if any packaged file changed, release the next patch through `.claude/skills/project-release/SKILL.md`; otherwise no release.
+Integration: the operator authorized integrating every I0065 job on 2026-11-22 ("tienes mi autorizacion para integrarla"), after required review and exact-head CI. Operator 2026-11-22 ("saca release Patch cuando este todo"): finish I0065 without asking per job and release the patch at close. Earlier note: no release was planned: the changed files are outside the package `files` list, except `.agents/skills/isswf-howto/` if J003 changes it, which would then need a patch release. The operator authorized that patch release on 2026-11-22 ("ok pues entonces release patch"): at initiative close, if any packaged file changed, release the next patch through `.claude/skills/project-release/SKILL.md`; otherwise no release.
 
 ## J001
 
@@ -77,12 +77,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Objective: The README front page opens with two hooks: an animated SVG that simulates a first complete session, and an animated SVG that simulates the Claude Code initiatives panel.
 - Depends on: J003, J006
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Ready; awaiting operator go.
+- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j004`, branch `i0065-j004`.
 
 ### Acceptance
 
