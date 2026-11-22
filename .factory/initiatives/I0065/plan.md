@@ -82,7 +82,7 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 - Depends on: J003, J006
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Wait for J003.
+- Next step: Ready; awaiting operator go.
 
 ### Acceptance
 
@@ -113,12 +113,12 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 
 ## J006
 
-- Status: in-progress
+- Status: completed
 - Objective: The reference page, the README and the flowchart cover the J005 gaps 2-10 and show the delivery paths without a pull request.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatched in background; worktree `isSWF-worktrees/i0065-j006`, branch `i0065-j006`. J004 follows J006 because both edit the README.
+- Next step: None.
 
 ### Acceptance
 
@@ -126,3 +126,7 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 - The reference skills table lists `isswf-handoff`.
 - The README gains at most four plain-language sentences for the most useful of these, linking the reference.
 - The flowchart data shows that records-only direct push and local mode reach the base branch without a pull request; `--check` passes and both languages match.
+
+### Evidence
+
+- Merged as cee39ae76cbd46c2440da9975b571946cb642374 (PR #395), exact-head CI success on 9417ef1e; operator acceptance 2026-11-22 ("adelante"). Attempts A001, A002; reviews V001 (fail, corrected) and V002 (pass). Known limit V002 F7: compaction row names managed settings only; operations.md gives the full condition. Local mode is worded as staying on the machine, matching its source (V001 F6).
