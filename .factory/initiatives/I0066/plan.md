@@ -4,7 +4,7 @@ Type: enhancement
 
 On 2026-11-22 the operator saw that the Claude Code initiatives panel showed no worker runs for I0065. The panel counts a run only from a `- Run: claude agent=<id>` line in an attempt or review record. The coordinator did not pass the launch identity the host returned, so every I0065 worker record and the J001-J003 review records have no such line. `isswf-record-check` reports a malformed `Run:` line but not a missing one. The operator decided that this must be a deterministic control, not a retrospective note, and asked for a new initiative. It also holds a retrospective of the work done on 2026-11-21 and 2026-11-22; the operator decides which of its findings become further jobs here.
 
-Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`) need a patch release at close; the operator authorized that patch release on 2026-11-22 ("lo tienes autorizado!").
+Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit): the delivery lifecycle in J003, then J006 (close route), J009 (job status), J010 (review rounds), J011 (AutoWakeUp), J012 (migration). Changes in packaged files (`tools/`, `hooks/`) need a patch release at close; the operator authorized that patch release on 2026-11-22 ("lo tienes autorizado!").
 
 ## J001
 
@@ -54,6 +54,7 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 - An integration command checks review coverage and exact-head CI success, merges with the head pinned, records the job close in the plan, pushes that records-only commit, and removes the job worktree and branch. It refuses with a named reason when a check fails, and changes nothing in that case.
 - A review-preparation command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
 - Risk and operator-acceptance judgment stay with the coordinator; the commands never decide them.
+- The delivery lifecycle (brief, attempt, review, covered, ci-green, merged, closed) is an explicit state machine in one module. Each command checks the job's current state and refuses an illegal transition with a named reason. The state is derived from the records and Git, not stored separately.
 - Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
 
 ## J004
@@ -127,3 +128,63 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 
 - `.agents/roles/references/planning.md` states, with an example, that a rewrite whose review is semantic across two languages is sized L and split.
 - Spanish mirrors and glossary unchanged unless a term requires it.
+
+## J009
+
+- Status: pending
+- Objective: The job status shown by the panel and `isswf-status` is derived from one shared state machine, and the plan stores only the states no record can reveal.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J009/brief-r1.md)
+- Blocker: None.
+- Next step: Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`.
+
+### Acceptance
+
+- One shared module defines the job states and their transitions; `tools/isswf-plan-core.mjs`, `tools/isswf-status.mjs`, `tools/isswf-panel.mjs` and `hooks/register.tsx` use it instead of their own string lists.
+- `in-progress` and `in-review` are derived from attempt and review records; existing plans with any current value still parse.
+- Tests cover each derived state and a plan using every legacy value.
+
+## J010
+
+- Status: pending
+- Objective: Each review record declares its round and candidate, and a new round requires a correction attempt after a fail verdict.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J010/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the round inference in `tools/isswf-snapshot-core.mjs` (statedRound and reviewRound by position).
+
+### Acceptance
+
+- `isswf-record-check` refuses a review record whose round does not follow a fail verdict and a correction attempt, or whose candidate does not match that attempt.
+- Existing records keep parsing; the panel shows the same rounds for completed initiatives.
+- Tests cover the legal sequence and each refusal.
+
+## J011
+
+- Status: pending
+- Objective: The panel AutoWakeUp is one explicit state (off, armed, waiting for reset, fired) instead of separate variables.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J011/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the variables in `hooks/register.tsx` (resumeOn, resumeTimer, resumeFor, resumeAtMs, noReset).
+
+### Acceptance
+
+- A single state value drives the timer and the label; an invalid combination cannot be represented.
+- Behavior is unchanged: 90% threshold, reset +5 min, toggle cancels.
+- Tests cover each transition, including cancel and no reset.
+
+## J012
+
+- Status: pending
+- Objective: A state migration records its phase in the journal, and recovery reads that phase instead of inferring it from directory names.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J012/brief-r1.md)
+- Blocker: None.
+- Next step: Ground the stage, retired and pending directories in `tools/state-migration.mjs` and the journal in `tools/isswf.mjs`. Lowest priority: do only if an observed failure or J009 needs it.
+
+### Acceptance
+
+- The journal records the phases staged, swapped, retired and done; recovery from each phase is tested.
+- Existing interrupted-migration fixtures still recover.
+- Works on Windows and Linux.
