@@ -6,12 +6,12 @@ Operator feedback 2026-11-14 on Windows: every press in the Claude Code initiati
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: A press that only changes pane view state (fold, unfold, record detail, tab) redraws without re-reading the project's state records; the snapshot is re-read only when records may have changed.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Worker dispatched in its own worktree.
+- Next step: None.
 
 ### Acceptance
 
@@ -21,6 +21,7 @@ Operator feedback 2026-11-14 on Windows: every press in the Claude Code initiati
 
 ### Evidence
 
+- 2026-11-22: merged in PR #385 (0298ab157a9746781b8c81f00321c553956d632c) after review V001 pass and CI success on head 290e78352d0436cd08fae3ec883ae5352ffd1d48. Windows direct read 1156 ms / 1481 fs calls before, 226 ms / 138 after; press 814-1308 ms before, 12-17 ms after. Linux latency not measured. Open docs clause (V001 F1) for the initiative close.
 - 2026-11-14: every ui.render calls readSnapshot over the whole state (hooks/register.tsx:546). On this Windows checkout (50 initiatives, 632 Markdown records) one direct Node read takes about 700 ms and 987 fs calls; the pane routes each call through the host engine, adding per-call overhead not yet measured. Linux not measured.
 - 2026-11-14 operator idea: avoid reading closed initiatives at all, for example through a prior index of live versus closed initiatives. Coordinator note: readSnapshot already discards fully completed initiatives, but only after reading every job directory and record (tools/isswf-snapshot-core.mjs:233-236). Compare two options: decide from plan.md alone before opening job directories (no new persisted state), or a persisted index (a second status store that can drift from the plans, which AGENTS.md discourages). Measure both against the cache.
 
