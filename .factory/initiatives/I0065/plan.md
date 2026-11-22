@@ -4,7 +4,7 @@ Type: enhancement
 
 The operator found the Archify workflow diagrams confusing: they mix every role, skill and reference in one picture. On 2026-11-22 they approved an interactive flowchart mockup ([mockup.html](mockup.html)) and decided to drop Archify entirely. In the mockup, clicking a node lists the questions that role asks itself. Each question opens to a yes and a no outcome, highlights the arrow it leads to, and links the cited `.md` file on GitHub. Nodes that have automatic guards carry a small mark. All text uses plain language, with the technical name shown only as a grey link.
 
-The README tone and structure are a separate operator discussion. This initiative changes only the README's diagram section.
+J003 restructures the README and its reference page, as the operator decided on 2026-11-22.
 
 ## J001
 
@@ -46,6 +46,26 @@ The README tone and structure are a separate operator discussion. This initiativ
 - `README.md` and `README.es.md` show the SVG and link the interactive page. Only the diagram section changes.
 - The following are removed: `docs/diagrams/workflow.json`, `workflow.generated.json`, both `workflow.delivery.json` files, `tooling/maintenance/workflow-diagrams.mjs`, `tooling/maintenance/workflow-citations.mjs`, their tests and their `check-quality` calls, and `/.archify/` in `.gitignore`. Each removal is checked for other callers first.
 - `docs/en/development.md` and `docs/es/development.md` describe how to maintain the new source. `.github/workflows/pages.yml` still publishes the two pages.
+
+### Evidence
+
+- None.
+
+## J003
+
+- Status: pending
+- Objective: The README becomes a short, plain-language front page that tells the story of a first complete session. Reference detail moves into the existing "How the factory works" guide, in both languages.
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Wait for J002.
+
+### Acceptance
+
+- `README.md` and `README.es.md` follow the operator's outline in the brief, in plain language, and define any technical term they keep.
+- `docs/en/reference.md` and `docs/es/reference.md` hold the reference topics the brief lists, each grounded in its canonical guide and linking to it rather than copying it.
+- The legacy compiled-release path and the Pages publication notes leave the README. They stay findable from the documentation index.
+- `check-docs` passes, and no content that is still current is lost: each removed README paragraph is either moved or already covered, and A001 records where each went.
 
 ### Evidence
 
