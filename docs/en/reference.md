@@ -47,7 +47,7 @@ Checks are chosen by the risk of the change, not run in bulk. In this repository
 
 A local run that skips the full check says so in its report.
 
-Setup proposes the checks for a project and you approve them. It inspects five quality areas (lint, tests, build, dead code and duplicated logic) without running untrusted scripts. From what it finds it proposes a file, `verification.json`, that lists the checks, and writes it only when you approve. `tools/isswf-verify.mjs` runs those checks by tier (`job` or `initiative`) and, after a clean run in which every check passes, writes a stamp that the integration gate checks (and, in `enforce` mode, requires). Setup also proposes a check table for the project's `AGENTS.md`, by kind of change; you keep your own rules, take the proposal or merge the two. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
+Setup proposes the checks for a project and you approve them. It inspects five quality areas (lint, tests, build, dead code and duplicated logic) without running untrusted scripts. From what it finds it proposes a file, `verification.json`, that lists the checks, and writes it only when you approve. `tools/isswf-verify.mjs` runs those checks by tier (`job` or `initiative`) and, after a clean run in which every check passes, writes a stamp that the [integration gate](operations.md#integration-gate) checks (and, in `enforce` mode, requires). Setup also proposes a check table for the project's `AGENTS.md`, by kind of change; you keep your own rules, take the proposal or merge the two. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
 
 ## Three ways to verify
 
@@ -55,13 +55,28 @@ The coordinator picks the least costly way to verify that covers the acceptance 
 
 | Way | What it checks | Typical use |
 | --- | --- | --- |
-| Mechanical (also called deterministic) | A fixed procedure gives the same result every time: bytes, hashes, links, references and tool output. | Moved files, generated indexes, link replacements. Tools and guards also run this way. |
+| Mechanical (also called deterministic) | A fixed procedure gives the same result every time: bytes, hashes, links, references and tool output. | Moved files, generated indexes, link replacements. Tools and guards also run this way of verifying. |
 | Empirical | Tests or user journeys, run on the exact candidate, observe each acceptance criterion. Each relevant test must also have failed once under a deliberate fault. | Behavior that can be executed. |
 | Semantic | A reviewer reads the change and its consumers and judges it. | Product decisions, permissions, shared contracts, methodology text, claims that running cannot establish. |
 
 A change can combine them. A mechanical or empirical result can close a covered change without a model call, unless the risk or an explicit rule requires an independent reviewer. The author's own checks never count as independent.
 
 Hooks and guards make some rules deterministic as well. The Claude Code plugin and the Pi extensions refuse, before it runs, a commit on the wrong branch, a record written outside the worker's checkout, a delegation that fails its conditions, or a shell command that waits on CI in a loop. See the [dispatch guard](operations.md#dispatch-guard), [shell command guard](operations.md#shell-command-guard), [branch guard](operations.md#branch-guard), [record location guard](operations.md#record-location-guard), [plan commit guard](operations.md#plan-commit-guard) and [records push guard](operations.md#records-push-guard). They are process rules, not permissions.
+
+## More safeguards and reports
+
+These run beside the work, and the [operations guide](operations.md) describes each in full. None is a permission: they remind, report or refuse, and most fail open when they cannot read what they need. Where a source records the host, version or platform on which something was observed, it is repeated here.
+
+| What | What it does | Details |
+| --- | --- | --- |
+| Compaction reminder | When a session that loaded the coordinator skill compacts its conversation, the first turn afterwards reminds the model to reload the skill and to check the records against the summary; the records win. In Claude Code the summary is also asked to keep the active job, brief, candidate, budgets and open decisions. Pi cannot steer its summary, so its reminder lists only the remembered dispatches. In Claude Code, observed on a manual `/compact` only; the automatic trigger was not observed. With Team or Enterprise managed settings the summary is not steered. | [Compaction](operations.md#compaction) |
+| Integration gate | Before `git merge <branch>`, a push of a branch other than the base, or `gh pr create`, the host looks for the stamp that a clean `isswf-verify --tier job` run leaves for each commit. The setup record's `- Integration gate:` line is `off`, `observe` or `enforce`; a missing line means `observe`, which adds a note naming the unstamped commit, and `enforce` refuses the command. In Pi the note is not verified live. | [Integration gate](operations.md#integration-gate), [verification runner](operations.md#verification-runner) |
+| Review coverage check | `isswf-handoff coverage` lists every commit that no recorded review covers and fails with `unreviewed-commits`. `tools/check-quality.mjs` runs it, so CI fails a PR with an unreviewed commit, and the coordinator runs it before `gh pr create` and before a merge. A pass shows that reviews cover the commits; it is not a review verdict. | [Review handoff and coverage check](operations.md#review-handoff-and-coverage-check) |
+| Next job and snapshot | `isswf-status --next` prints only the job to start next, the first pending job whose dependencies are all `completed`, or why there is none (`awaiting-human`, `in-flight`, `blocked`, `waiting-on-dependencies` or `none`). `isswf-snapshot` prints a JSON snapshot of every open initiative. Both read recorded plan state, call no model and grant no execution. | [From a source checkout](operations.md#from-a-source-checkout), [initiative snapshot](operations.md#initiative-snapshot) |
+| Package-acquisition refusal | The shell command guard refuses commands that fetch packages, such as `npx`, `npm install` and `pip install`. It allows the two documented locked installs, `npm ci --prefix tooling/quality --ignore-scripts` and `npm ci --prefix tooling/host-tests --ignore-scripts`. The refusal names the rule and the alternative and is not a retry signal. It reduces mistakes and is not a sandbox. | [Shell command guard](operations.md#shell-command-guard) |
+| Token and cost reports | `tools/token-report.mjs` summarizes token counts you supply, offline and without a model call. `isswf-snapshot --usage` reads the transcripts the hosts already write and adds token counts per run, and a cost only for a model with a known price. Capturing usage during a session is opt-in. Costs are estimates from recorded counters, not billing, and a missing counter is never read as zero. | [Offline token summary](operations.md#create-an-offline-token-summary), [run usage](operations.md#run-usage) |
+| Record check after writes | When an edit or write leaves a plan, attempt or review record with a violation, the check of `tools/isswf-record-check.mjs` runs and the model sees each violation in the same turn. It only reports: it never edits a file, blocks a write or starts work. | [Record check](operations.md#record-check), [after a write](operations.md#automatic-check-after-a-write) |
+| Initiative close gate | A commit that makes every job of an initiative `completed` is refused unless the initiative's `close-verification.json` is a valid record in which every check passed. `isswf-verify --tier initiative --record I0001` writes it, or the coordinator does after a passing manually dispatched CI run. The record shows that a coordinator recorded the checks, not that they ran on that head. | [Plan commit guard](operations.md#plan-commit-guard), [verification runner](operations.md#verification-runner) |
 
 ## Parallel work in worktrees
 
@@ -112,6 +127,7 @@ The host guides in [`.agents/hosts/`](../../.agents/hosts/) describe how Pi and 
 | `isswf-e2e` | Create, run or maintain executable tests of critical user journeys, with Playwright or another driver suitable for the real interface. |
 | `isswf-debug` | Reproduce defects, investigate causes and return a causal diagnosis or explicit uncertainty. |
 | `isswf-review` | Review an exact candidate against Standards and Spec with proportionate evidence. |
+| `isswf-handoff` | Generate the exact diff file, digest and review envelope that an unbound reviewer needs, and check that no commit after the last reviewed candidate escaped review. |
 | `isswf-retrospective` | Learn from completed features or bugs, or an explicit session close, through local improvement drafts. |
 | `isswf-tdd` | Use an observed red-green-refactor loop for explicitly requested TDD or a selected useful regression seam. |
 | `isswf-security` | Model threats, assess a bounded security surface or implement explicitly authorized hardening. |

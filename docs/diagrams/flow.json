@@ -28,7 +28,7 @@
     "otherLanguage": { "en": "Español", "es": "English" },
     "svgDescription": {
       "en": "A request goes from you to the coordinator, optionally through an interview, a researcher or a diagnostician, then to a prepared brief, a worker, an optional independent reviewer and delivery, until you approve it. Dashed boxes are optional steps.",
-      "es": "Un encargo pasa de ti al coordinador, opcionalmente por una entrevista, un investigador o un diagnosticador, y luego por un brief preparado, un programador, un revisor independiente opcional y la entrega, hasta que lo apruebas. Las cajas discontinuas son pasos opcionales."
+      "es": "Un encargo pasa de ti al coordinador, opcionalmente por una entrevista, un investigador o un diagnosticador, y luego por un brief preparado, un implementador, un revisor independiente opcional y la entrega, hasta que lo apruebas. Las cajas discontinuas son pasos opcionales."
     }
   },
   "nodes": [
@@ -62,7 +62,7 @@
       "sub": { "en": "organizes and hands out work", "es": "organiza y reparte" },
       "who": {
         "en": "Understands the request, decides whom to call and checks what comes back. It owns the plan, the permissions and the other agents: helpers do not start helpers of their own; only a worker or diagnostician may, when its brief explicitly allows it.",
-        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes no lanzan ayudantes propios; solo un programador o un diagnosticador puede hacerlo, y solo si su brief lo permite expresamente."
+        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes no lanzan ayudantes propios; solo un implementador o un diagnosticador puede hacerlo, y solo si su brief lo permite expresamente."
       },
       "questions": [
         {
@@ -112,7 +112,7 @@
           },
           "yes": {
             "en": "The worker finds the cause and fixes it in one go.",
-            "es": "El programador encuentra la causa y lo arregla de una vez."
+            "es": "El implementador encuentra la causa y lo arregla de una vez."
           },
           "no": {
             "en": "If the cause is unknown, intermittent, crosses several parts or has high impact, it calls the diagnostician first.",
@@ -277,7 +277,7 @@
           },
           "no": {
             "en": "A small, clear change goes straight to the worker.",
-            "es": "Un cambio pequeño y claro va directo al programador."
+            "es": "Un cambio pequeño y claro va directo al implementador."
           },
           "cites": [
             { "label": "Reclassify after research", "path": ".agents/skills/isswf-coordinator/SKILL.md" },
@@ -349,7 +349,7 @@
           },
           "yes": {
             "en": "It does not need to be: the worker applies it whenever the work touches code.",
-            "es": "No hace falta elegirla: el programador la aplica siempre que toca código."
+            "es": "No hace falta elegirla: el implementador la aplica siempre que toca código."
           },
           "cites": [
             { "label": "worker.md", "path": ".agents/roles/worker.md" },
@@ -361,7 +361,7 @@
           "ask": { "en": "Is the brief ready to launch?", "es": "¿Está el brief listo para lanzarlo?" },
           "yes": {
             "en": "It launches the worker, once your explicit start instruction is on record.",
-            "es": "Lanza al programador, una vez registrada tu instrucción explícita de empezar."
+            "es": "Lanza al implementador, una vez registrada tu instrucción explícita de empezar."
           },
           "no": {
             "en": "It keeps preparing and records what is missing.",
@@ -375,7 +375,7 @@
           "id": "g-dispatch",
           "text": {
             "en": "Before a helper starts, the dispatch guard checks that the plan is readable, the job is in progress, the brief is committed and the request names the exact commits, and that model and effort match your selection. If a check fails it refuses and names the reason. It also counts open workers against a local limit (2 by default): it only warns by default and refuses in enforce mode.",
-            "es": "Antes de lanzar un ayudante, el guardián de lanzamientos comprueba que el plan se puede leer, que el trabajo está en curso, que el brief ya está en un commit y que la petición nombra los commits exactos, y que el modelo y el esfuerzo coinciden con tu selección. Si falla algo, lo rechaza y dice por qué. También cuenta los programadores abiertos frente a un límite local (2 por defecto): por defecto solo avisa y en modo enforce rechaza."
+            "es": "Antes de lanzar un ayudante, el guardián de lanzamientos comprueba que el plan se puede leer, que el trabajo está en curso, que el brief ya está en un commit y que la petición nombra los commits exactos, y que el modelo y el esfuerzo coinciden con tu selección. Si falla algo, lo rechaza y dice por qué. También cuenta los implementadores abiertos frente a un límite local (2 por defecto): por defecto solo avisa y en modo enforce rechaza."
           },
           "path": "docs/en/operations.md"
         },
@@ -391,7 +391,7 @@
     },
     {
       "id": "worker", "kind": "helper", "x": 380, "y": 720,
-      "label": { "en": "Worker", "es": "Programador" },
+      "label": { "en": "Worker", "es": "Implementador" },
       "sub": { "en": "makes the change", "es": "hace el cambio" },
       "who": {
         "en": "Works in its own copy of the repository, makes the smallest change that meets the brief and brings evidence that it works.",
@@ -456,7 +456,7 @@
           "id": "g-branch",
           "text": {
             "en": "A background worker's git commit is refused outside its assigned checkout and branch. This is a process rule, not a sandbox.",
-            "es": "Se rechaza el git commit de un programador en segundo plano fuera de su copia y su rama asignadas. Es una regla de proceso, no un aislamiento."
+            "es": "Se rechaza el git commit de un implementador en segundo plano fuera de su copia y su rama asignadas. Es una regla de proceso, no un aislamiento."
           },
           "path": "docs/en/operations.md"
         },
@@ -472,7 +472,15 @@
           "id": "g-record",
           "text": {
             "en": "A background worker's attempt record must be written inside its own checkout.",
-            "es": "El registro de intento de un programador en segundo plano debe escribirse dentro de su propia copia."
+            "es": "El registro de intento de un implementador en segundo plano debe escribirse dentro de su propia copia."
+          },
+          "path": "docs/en/operations.md"
+        },
+        {
+          "id": "g-record-check",
+          "text": {
+            "en": "After a plan, attempt or review record is written, a check shows any violation in the same turn. It only reports and never blocks the write.",
+            "es": "Tras escribir un plan, un registro de intento o uno de revisión, una comprobación muestra cualquier infracción en el mismo turno. Solo informa y nunca bloquea la escritura."
           },
           "path": "docs/en/operations.md"
         }
@@ -562,10 +570,29 @@
       "label": { "en": "Delivery", "es": "Entrega" },
       "sub": { "en": "prepares the proposal", "es": "prepara la propuesta" },
       "who": {
-        "en": "Prepares the pull request (PR) with its risk assessment and evidence.",
-        "es": "Prepara la propuesta de cambio (PR) con su evaluación de riesgo y sus pruebas."
+        "en": "Prepares the pull request (PR) with its risk assessment and evidence. Not every change goes through a PR: see its first question.",
+        "es": "Prepara la propuesta de cambio (PR) con su evaluación de riesgo y sus pruebas. No todo cambio pasa por una PR: mira su primera pregunta."
       },
       "questions": [
+        {
+          "id": "pr-route",
+          "ask": {
+            "en": "Does this change reach the base branch through a PR?",
+            "es": "¿Este cambio llega a la rama base mediante una PR?"
+          },
+          "yes": {
+            "en": "With GitHub delivery, yes. The feature branch is pushed and a PR is opened, and continuous integration must pass on the exact head before you decide to merge. Code, docs, instructions, templates and tests always take this path.",
+            "es": "Con entrega mediante GitHub, sí. Se sube la rama de la funcionalidad y se abre una PR, y la integración continua debe superarse en la cabeza exacta antes de que decidas fusionar. El código, la documentación, las instrucciones, las plantillas y las pruebas siempre siguen este camino."
+          },
+          "no": {
+            "en": "Two cases have no PR. With records-only direct push, which you grant at setup, a change under initiatives/ only goes straight to the base branch. In local mode, with no remote, nothing leaves your machine until you publish it.",
+            "es": "Hay dos casos sin PR. Con el push directo de solo registros, que concedes en la configuración, un cambio solo bajo initiatives/ va directamente a la rama base. En el modo local, sin remoto, nada sale de tu equipo hasta que lo publiques."
+          },
+          "cites": [
+            { "label": "How changes reach main", "path": "docs/en/reference.md" },
+            { "label": "delivery.md", "path": ".agents/roles/references/delivery.md" }
+          ]
+        },
         {
           "id": "pr-review-exact", "to": "ok",
           "ask": {
@@ -594,6 +621,22 @@
             "es": "Una herramienta consulta el estado de CI una sola vez, para el commit exacto de la PR. El guardián de comandos rechaza esperar en bucle."
           },
           "path": "docs/en/operations.md"
+        },
+        {
+          "id": "g-integration",
+          "text": {
+            "en": "Before a merge, a branch push or a new PR, the integration gate looks for the stamp that a clean verification run leaves for each commit. By default it only adds a note; in enforce mode it refuses.",
+            "es": "Antes de una fusión, del push de una rama o de una PR nueva, la puerta de integración busca el sello que deja una verificación limpia para cada commit. Por defecto solo añade una nota; en modo enforce rechaza el comando."
+          },
+          "path": "docs/en/operations.md"
+        },
+        {
+          "id": "g-records-push",
+          "text": {
+            "en": "A push to the base branch is refused unless every path is under initiatives/ and you granted records-only direct push.",
+            "es": "Se rechaza un push a la rama base salvo que todas las rutas estén bajo initiatives/ y hayas concedido el push directo de solo registros."
+          },
+          "path": "docs/en/operations.md"
         }
       ]
     },
@@ -620,7 +663,16 @@
           "cites": [{ "label": "isswf-retrospective", "path": ".agents/skills/isswf-retrospective/SKILL.md" }]
         }
       ],
-      "guards": []
+      "guards": [
+        {
+          "id": "g-close",
+          "text": {
+            "en": "A commit that marks every job of an initiative completed is refused unless a close-verification record shows that every check passed.",
+            "es": "Se rechaza el commit que marca como completados todos los trabajos de una iniciativa salvo que un registro de verificación de cierre muestre que todas las comprobaciones pasaron."
+          },
+          "path": "docs/en/operations.md"
+        }
+      ]
     }
   ],
   "edges": [
