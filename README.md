@@ -2,46 +2,52 @@
 
 English | [Español](README.es.md)
 
-isSWF is an AI-assisted software factory where agents execute and people decide. It is a governance framework for agentic software development: it splits work into small, reviewable assignments, selects verification by risk and requires verifiable evidence. You stay in control: installing the integration does not start agents, and a feature workflow does not authorize merging or deployment.
-
-## Start with a native host
-
-The current shared workflow supports native Windows and Linux with **Pi** or **Claude Code**. Pi delegates through the separately installed `pi-subagents` extension; Claude Code uses its native agents. These host-native tasks do not require the compiled legacy executor or a project runtime pin. Host configuration, capability limits and verification evidence are described in [host support](docs/host-portability.md).
-
-1. Prepare the trusted isSWF resources and native delegation through the [Pi host guide](.agents/hosts/pi.md) or [Claude Code host guide](.agents/hosts/claude-code.md), with [host support](docs/host-portability.md) for loading the integration. When using this development checkout, also follow [source-checkout separation](docs/en/development.md#keep-this-source-checkout-separate-from-an-installed-release). The compiled-release installation below is a separate legacy path.
-2. In the target repository, run `/skill:isswf-setup` in Pi or `/isswf:isswf-setup` in Claude Code.
-3. To start a task, explicitly address the isSWF coordinator. Ordinary requests do not activate an automatic pipeline.
-4. Not sure which skill, role or flow fits? Run `/skill:isswf-howto` in Pi or `/isswf:isswf-howto` in Claude Code. It answers without starting work and ends with a prompt you can send to the coordinator.
-
-Setup prepares project-specific choices and the bounded coordinator entry in the root `AGENTS.md`. The entry is triggered by an explicit coordinator/isSWF request, not every coding request. Setup or installation alone does not grant future actions or prove a model is available. See [getting started](docs/en/getting-started.md).
-
-## How work is recorded and delivered
-
-Before native dispatch, the coordinator records a durable initiative plan and a curated job brief in the project's existing state directory (`.isswf` or historical `.factory`). Small tasks need no planner call or artifact bundle. Workers and reviewers return candidate-specific evidence; checks and review are selected proportionately rather than being mandatory roles for every task. When executed tests or journeys cover every acceptance criterion and have been shown able to fail, the change can close without a reviewer call; semantic review remains for what execution cannot establish, such as permissions, shared contracts, design decisions or methodology text. Optional context tools such as Engram or Codegraph do not replace the project records.
-
-A selected feature-to-PR request follows the project's prepared delivery policy, with bounded checks and review as applicable. Delivery of a PR is separate from the human decision to integrate it into the base branch. A request may set narrower local-only boundaries; GitHub tracking alone is not publication permission. See [durable work](docs/durable-work.md), [how the factory works](docs/en/reference.md), and [development checks](docs/en/development.md).
-
-## Workflow diagrams
+isSWF is an AI-assisted software factory: AI agents do the work and you make the decisions. It splits a request into small jobs that are easy to check, picks the checks that match the risk, and keeps evidence for what was done, so nothing is merged or published unless you say so.
 
 ![isSWF workflow overview: a request goes from you to the coordinator, then through a prepared brief, a worker, an optional review and delivery, until you approve it.](docs/en/workflow.svg)
 
-The [overview](docs/en/workflow.svg) is a quick summary: boxes are steps and arrows show where the work goes next. Open the interactive flowchart, where each step lists the questions it asks itself: [English](https://iseoane.github.io/isSWF/docs/en/workflow.html) · [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html). The flowchart is a navigation aid, not the authority for current native-host behavior; use the linked guides for the current contract. For offline viewing, download the [English page](docs/en/workflow.html) or [Spanish page](docs/es/workflow.html); each is a single file that works without a network connection, and GitHub displays it as code.
+The picture is a summary: boxes are steps and arrows show where the work goes next. For the version where each step lists the questions it asks itself, open the [interactive flowchart](https://iseoane.github.io/isSWF/docs/en/workflow.html) ([Español](https://iseoane.github.io/isSWF/docs/es/workflow.html)). [How work is decided](docs/en/reference.md#how-work-is-decided-and-who-decides-it) explains it in words.
 
-The site is published at [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/). Updates remain manual: open **Actions → Publish workflow diagrams → Run workflow**, select `main`, and run it when publication is authorized. There is no automatic deployment on push. The staging step allowlists only the bilingual landing page and the two interactive flowcharts.
+## A first complete session
 
-## Retained compiled release (legacy path)
+1. **Install it.** isSWF works with **Pi** and with **Claude Code**, the coding assistants the agents run in, on Windows and Linux. Follow the [installation guide](docs/en/installation.md) for your host; [host support](docs/host-portability.md) lists what each one can do. Installing does not start any agent.
+2. **Set up your project.** In the repository where you want to work, run `/skill:isswf-setup` in Pi or `/isswf:isswf-setup` in Claude Code. Setup asks which models to use, where to keep the work and what the checks are, and it prepares a small entry in the project's `AGENTS.md`.
+3. **Make a first request.** Address the coordinator, the agent that plans the work and calls the others, for example: `/isswf:isswf-coordinator Add a clear-filter button that restores the full list.` Use `/skill:isswf-coordinator` in Pi. An ordinary request does not start the factory; only an explicit one does. See [your first request](docs/en/getting-started.md).
+4. **Not sure what to ask?** Run `/skill:isswf-howto` in Pi or `/isswf:isswf-howto` in Claude Code. It tells you which skill (a ready-made task you can ask for by name) or flow fits, links its source, and ends with a prompt you can send to the coordinator. It never starts work. For instance (illustrative):
 
-The compiled release installation is a separate path, not a prerequisite for new native-host tasks. It no longer ships the legacy executor tools. Its documented release evidence targets Linux x64; it has different runtime and migration constraints and does not certify native Windows/macOS execution. Existing installations are not migrated by adopting the native workflow. Consult [installation and legacy-runtime limits](docs/en/installation.md) and the exact release evidence before selecting that path. The package manifest version is not evidence of a published release; do not infer a latest release or package-registry publication from it.
+   > You: `/isswf:isswf-howto` A test in my project fails now and then and I do not know why. What should I use?
+   >
+   > Answer: An unknown, intermittent cause is a debugging task, which the [isswf-debug](.agents/skills/isswf-debug/SKILL.md) skill covers. It reproduces the failure and gathers evidence of the cause; it changes no code unless you ask. You can send the prompt below to the coordinator, or run `/isswf:isswf-debug` directly.
+   >
+   > ```text
+   > Investigate why the test checkout.spec fails intermittently. Diagnose only: find the cause with evidence and do not change any code. Report the cause and the next step.
+   > ```
+
+5. **The coordinator plans and records.** It writes a plan and a short brief (the instructions for one job) as Markdown files in your project, and a worker, an agent that changes code and checks it, does each job. The records are described in [how an initiative is recorded](docs/en/reference.md#how-an-initiative-is-recorded).
+6. **Follow the progress.** In Claude Code, turn on the [initiatives panel](docs/en/reference.md#the-initiatives-panel) to see plans, jobs and reviews as cards. A similar panel for Pi is coming soon.
+7. **Review, PR and your approval.** When the risk calls for it, a reviewer, a separate agent, checks the change. The coordinator then opens a pull request (PR) and waits for the checks to pass. You decide whether to merge it. Nothing is merged or published without you.
+8. **Close with a retrospective.** When the work is finished, the coordinator runs the `isswf-retrospective` skill, which looks back at what happened and proposes improvements as drafts. You decide which to keep.
+
+## How it works, in four lines
+
+- **Small, verifiable jobs.** Each job is sized by how hard it is to check, and a large one is split. [Splitting work into jobs](docs/en/reference.md#splitting-work-into-jobs-by-size).
+- **Tests chosen by risk.** Each job runs the tests that match its change; the full check runs at the end and in CI for every PR. [Which tests run and when](docs/en/reference.md#which-tests-run-and-when).
+- **Three kinds of review.** Mechanical (also called deterministic) checks by tools, empirical checks by running tests, and semantic review by a reviewer who reads the change. [Three kinds of review](docs/en/reference.md#three-kinds-of-review).
+- **Nothing is published without you.** The factory proposes and delivers a PR; you approve the merge. [Who decides what](docs/en/reference.md#how-work-is-decided-and-who-decides-it).
+
+## What it builds on
+
+Two optional tools make the agents better informed. isSWF works without them and does not install them.
+
+- [Engram](https://github.com/Gentleman-Programming/engram) gives agents persistent memory across sessions, so decisions and discoveries are not lost. It runs on your machine and has its own installer.
+- [Codegraph](https://github.com/colbymchenry/codegraph) indexes your code as a graph on your machine, so agents find where things are and what depends on them with fewer file reads.
+
+Thanks to the Gentleman-Programming organization, which builds Engram, and to colbymchenry, who builds Codegraph, and to their contributors. Setup reports whether each one is available, and the [installation guide](docs/en/installation.md#initialise-a-project) explains how to connect them.
 
 ## More
 
+- [How the factory works](docs/en/reference.md)
 - [Documentation index](docs/en/index.md)
-- [Installation and updates](docs/en/installation.md)
-- [First request](docs/en/getting-started.md)
-- [Host support](docs/host-portability.md)
 - [Glossary](GLOSSARY.md)
 - [Contributing](docs/en/development.md)
-
-## License
-
-MIT.
+- License: MIT.

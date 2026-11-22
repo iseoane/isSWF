@@ -4,6 +4,84 @@
 
 isSWF combines instructions for agents with tools that record, run, and inspect authorised work. A Markdown profile alone does not create a running agent.
 
+## How work is decided and who decides it
+
+You decide the goal, what the factory may do and whether to accept the result. The coordinator decides the path: it reads your request, checks the code and the project records, and picks the smallest route that fits. It can start the work, investigate first, interview you, or diagnose a bug whose cause is unknown. Only a decision that belongs to you stops the work, and then it is recorded as `awaiting-human` with the exact question.
+
+| Decision | Who takes it |
+| --- | --- |
+| The goal, what is allowed, and accepting the result | You |
+| The path, the plan and each job's brief | The coordinator |
+| Doing the work and checking it | A worker |
+| An independent judgment, when the risk calls for one | A reviewer, in a separate context |
+| Integrating the finished pull request (PR) into the base branch | You |
+
+The interactive flowchart shows the same decisions step by step, with the questions each step asks itself: [English](https://iseoane.github.io/isSWF/docs/en/workflow.html) or [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html). To read it offline, open [the English page](workflow.html) or [the Spanish page](../es/workflow.html); the [overview image](workflow.svg) shows the same flow in one picture. The flowchart is a navigation aid, not the authority for current behavior: the guides it cites are. The site is published manually, and the [documentation index](index.md#published-site) says how.
+
+## Splitting work into jobs by size
+
+The coordinator splits an assignment into jobs, small slices that each deliver something you can verify. Each job gets a size, S, M or L, chosen by how costly it is to verify. Four questions decide it:
+
+1. How many distinct user-visible flows or screens must the reviewer check?
+2. Does the change carry concurrency, timing or security risk?
+3. Can an independent reviewer read the whole change in one pass?
+4. Would the worker have to improvise design decisions?
+
+| Size | Meaning | What happens |
+| --- | --- | --- |
+| S | One flow, no special risk, one review pass. | Dispatched as it is. |
+| M | Two or three related flows, or one well-bounded special risk. | Dispatched as it is. |
+| L | Anything else. | Split into independently useful parts, or the plan records why it cannot be split. |
+
+No line count or other number decides the size, and when in doubt the smaller size is chosen. Sizing is part of the plan text and adds no approval step. See [planning guidance](../../.agents/roles/references/planning.md#size-units-by-verification-cost).
+
+## Which tests run and when
+
+Checks are chosen by the risk of the change, not run in bulk. In this repository the rule has three levels, and the project's own setup records its checks:
+
+| When | What runs |
+| --- | --- |
+| For each job | The focused tests of the changed behavior and the documentation check, plus the job-tier verification. |
+| At the close of an initiative | The full quality check, once, at the closing commit. Earlier only when the change touches packaging. |
+| On every PR | The full check in continuous integration (CI), which must pass on the exact head before an authorized merge. |
+
+A local run that skips the full check says so in its report. See [quality checks](development.md#quality-checks) and the [verification runner](operations.md#verification-runner).
+
+## Three kinds of review
+
+The coordinator picks the least costly kind of verification that covers the acceptance criteria and the risk. [Review selection](../../.agents/roles/references/review.md#choose-sufficient-verification) defines each kind, and the [glossary](../../GLOSSARY.md) names them.
+
+| Kind | What it checks | Typical use |
+| --- | --- | --- |
+| Mechanical (also called deterministic) | A fixed procedure gives the same result every time: bytes, hashes, links, references and tool output. | Moved files, generated indexes, link replacements. Tools and guards also run this kind. |
+| Empirical | Tests or user journeys, run on the exact candidate, observe each acceptance criterion. Each relevant test must also have failed once under a deliberate fault. | Behavior that can be executed. |
+| Semantic | A reviewer reads the change and its consumers and judges it. | Product decisions, permissions, shared contracts, methodology text, claims that running cannot establish. |
+
+A change can combine them. A mechanical or empirical result can close a covered change without a model call, unless the risk or an explicit rule requires an independent reviewer. The author's own checks never count as independent.
+
+Hooks and guards make some rules deterministic as well. The plugin's checks refuse, before it runs, a commit on the wrong branch, a record written outside the worker's checkout, a delegation that fails its conditions, or a shell command that waits on CI in a loop. See the [dispatch guard](operations.md#dispatch-guard), [shell command guard](operations.md#shell-command-guard), [branch guard](operations.md#branch-guard), [record location guard](operations.md#record-location-guard), [plan commit guard](operations.md#plan-commit-guard) and [records push guard](operations.md#records-push-guard). They are process rules, not permissions.
+
+## Parallel work in worktrees
+
+Independent jobs can run at the same time, each in its own Git worktree (a second checkout of the same repository) and on its own branch. A job that depends on another waits for it. Setup offers a folder for the worktrees, by default next to the repository as `../<repo>-worktrees/<feature>`, kept in your local Git configuration as `isswf.worktreeRoot`.
+
+How many workers run at once is a limit local to your clone: `git config --local isswf.maxParallelWorkers`, which is 2 when absent or invalid. Setup asks for it. In the default `observe` mode a dispatch over the limit is allowed with a note; `isswf.parallelWorkersMode` set to `enforce` makes the dispatch guard refuse it. Each background worker is told its checkout and branch, and the branch guard refuses its commits anywhere else. Each branch is checked and reviewed on its own, then integrated as one PR per job or one batched PR.
+
+This was observed with Claude Code background workers on Windows. Foreground workers, live Linux and Pi were not observed. See [parallel work](operations.md#parallel-work), [the worker limit](operations.md#parallel-worker-limit), the [installation guide](installation.md#initialise-a-project) and the coordinator's "Parallel jobs" section in its [skill](../../.agents/skills/isswf-coordinator/SKILL.md#parallel-jobs).
+
+## Skills, roles, references and principles
+
+The instructions in `.agents/` come in four kinds, each with its own folder:
+
+| Kind | What it is | Where |
+| --- | --- | --- |
+| Skill | A task you can ask for by name, or the coordinator can select. It has an observable outcome. | [`.agents/skills/`](../../.agents/skills/) |
+| Role | The responsibility a delegated agent takes: worker, researcher, planner, diagnostician, reviewer, delivery or retrospective. | [`.agents/roles/`](../../.agents/roles/) |
+| Reference | Detailed rules that a skill or role reads only when they apply, such as [review](../../.agents/roles/references/review.md) or [planning](../../.agents/roles/references/planning.md). | [`.agents/roles/references/`](../../.agents/roles/references/) |
+| Principle | A reference that holds general judgment rather than a procedure: [design](../../.agents/roles/references/design-principles.md), [execution](../../.agents/roles/references/execution-principles.md) and [verification](../../.agents/roles/references/verification-principles.md). The coordinator supplies one only when it applies; none is a checklist. | `.agents/roles/references/` |
+
+The host guides in [`.agents/hosts/`](../../.agents/hosts/) describe how Pi and Claude Code launch each role. The next section lists the skills.
+
 ## Skills you use
 
 | Skill | Purpose |
@@ -87,6 +165,52 @@ New installations keep shared project records under `.isswf/`. They describe pla
 Older projects may still use `.factory/`. Migration is explicit and preserves existing records; do not keep both as active state directories.
 
 When installed and available, Engram is used to recover and save project context and Codegraph is used first to locate and understand code. Neither is required, and neither is the job database or a source of permissions.
+
+## How an initiative is recorded
+
+An initiative is one tracked piece of work, with a stable ID such as `I0042`. The coordinator writes its records as plain Markdown files in the project's state directory, so you can read them and Git keeps their history. Small tasks need no planner and no fixed bundle of files.
+
+```text
+<state>/
+  templates/
+  initiatives/
+    I0042/
+      plan.md
+      jobs/
+        J001/
+          brief-r1.md
+          brief-r2.md
+          A001.md
+          V001.md
+          delivery.md
+        J002/
+          brief-r1.md
+```
+
+| Record | What it holds |
+| --- | --- |
+| `plan.md` | One current plan per initiative, with one section per job: status, objective, dependencies, acceptance, blocker, next step and evidence. |
+| `jobs/J001/` | A job, a small slice that delivers something you can verify. Its folder holds that job's records. |
+| `brief-r1.md` | The curated brief of the job: what to do, the scope, the acceptance and the checks. When the criteria change, the new revision is `brief-r2.md` and the earlier one stays. |
+| `A001.md` | An attempt record: what a worker did, checked and could not do. Written by the worker. |
+| `V001.md` | A review record: the verdict and findings of one review round. Written by the reviewer. |
+| `delivery.md` | A local summary of the delivered work, for the panel and for you. It does not publish anything. |
+
+The templates in `.factory/templates/` (in a project, `<state>/templates/`) define two more kinds of record, written only when needed: a correction inbox `C001.md` in the job folder, for a correction you send to a running coordinator, and a retrospective under `<state>/retrospectives/`. A job prepared from an issue also has an `intake.json`. Statuses are `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human` and `completed`. The coordinator owns the plan and the briefs, a worker owns its attempt, a reviewer owns its review, and you record acceptance in the plan through the coordinator. See [plans, records and evidence retention](../durable-work.md#project-records) and the [planning guidance](../../.agents/roles/references/planning.md).
+
+## Opening issues from other repositories
+
+While working in one repository you may find a bug, or an idea, that belongs elsewhere. The `isswf-issue` skill reports it without expanding the current assignment and without starting a fix. It first decides whether the finding belongs to your product or to the factory, using evidence and not the folder you ran it from, and checks the exact repository and your access. It looks for duplicates, removes private material, and asks for the `needs-triage` label on every new issue. Without permission to publish, it hands you a draft. An issue asks for assessment; it does not approve implementation. A possible vulnerability is never published openly. See the [skill](../../.agents/skills/isswf-issue/SKILL.md) and [routing and publication](../../.agents/skills/isswf-issue/references/routing-and-publication.md).
+
+## The initiatives panel
+
+Claude Code has an optional initiatives panel, off by default, that shows the recorded work as cards. It reads your project's files and never starts agents. A similar panel for Pi is coming soon. Turn it on with **Initiatives pane** for the `isswf` plugin in `/config`. It opens when the coordinator skill loads, and `/isswf-initiatives` reopens it. It has three tabs:
+
+- **Initiatives.** A card per initiative with its jobs and review rounds. A record's border shows its result: green for a passed review or complete attempt, yellow for requested changes or partial work, red for failed, blocked or cancelled, and grey when it states none.
+- **Files.** The initiative's plan, briefs and records as a tree, each readable as Markdown.
+- **Agents.** The coordinator and one row per delegated role, with the number of runs and which skills and references they used.
+
+A row under the title shows whether Engram and Codegraph are available in the session. The panel shows recorded work, not live proof of every process. Everything it does is described in [initiatives pane](installation.md#initiatives-pane). A separate local browser panel (`tools/isswf-panel.mjs`) shows the same plans as a Kanban board; see [inspect work](operations.md).
 
 ## Versions and updates
 

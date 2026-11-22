@@ -4,6 +4,84 @@
 
 isSWF combina instrucciones para agentes con herramientas que registran, ejecutan y consultan trabajo autorizado. Un perfil Markdown por sí solo no crea un agente en ejecución.
 
+## Cómo se decide el trabajo y quién decide
+
+Tú decides el objetivo, lo que la factoría puede hacer y si aceptas el resultado. El coordinador decide el camino: lee tu petición, comprueba el código y los registros del proyecto, y elige la ruta más corta que encaje. Puede empezar el trabajo, investigar antes, entrevistarte o diagnosticar un error de causa desconocida. Solo se detiene el trabajo cuando falta una decisión que te corresponde, y entonces queda registrado como `awaiting-human` con la pregunta exacta.
+
+| Decisión | Quién la toma |
+| --- | --- |
+| El objetivo, lo que está permitido y aceptar el resultado | Tú |
+| El camino, el plan y el brief de cada trabajo | El coordinador |
+| Hacer el trabajo y comprobarlo | Un worker |
+| Un juicio independiente, cuando el riesgo lo pide | Un revisor, en un contexto separado |
+| Integrar la pull request (PR) terminada en la rama base | Tú |
+
+El diagrama interactivo muestra esas mismas decisiones paso a paso, con las preguntas que se hace cada paso: [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html) o [English](https://iseoane.github.io/isSWF/docs/en/workflow.html). Para leerlo sin conexión, abre [la página en español](workflow.html) o [la página en inglés](../en/workflow.html); la [imagen de resumen](workflow.svg) muestra el mismo flujo en una sola figura. El diagrama sirve de orientación, no es la autoridad sobre el comportamiento actual: lo son las guías que cita. El sitio se publica de forma manual, y el [índice de documentación](index.md#sitio-publicado) explica cómo.
+
+## Dividir el trabajo en trabajos por tamaño
+
+El coordinador divide un encargo en trabajos: porciones pequeñas que entregan algo que puedes verificar. Cada trabajo recibe un tamaño, S, M o L, según lo costoso que sea verificarlo. Lo deciden cuatro preguntas:
+
+1. ¿Cuántos flujos o pantallas visibles para el usuario debe comprobar el revisor?
+2. ¿El cambio tiene riesgo de concurrencia, de tiempos o de seguridad?
+3. ¿Puede un revisor independiente leer todo el cambio de una vez?
+4. ¿Tendría el worker que improvisar decisiones de diseño?
+
+| Tamaño | Qué significa | Qué ocurre |
+| --- | --- | --- |
+| S | Un flujo, sin riesgo especial, una pasada de revisión. | Se despacha tal cual. |
+| M | Dos o tres flujos relacionados, o un riesgo especial bien acotado. | Se despacha tal cual. |
+| L | Cualquier otro caso. | Se divide en partes útiles por sí mismas, o el plan registra por qué no puede dividirse. |
+
+Ningún número de líneas ni otra cifra decide el tamaño, y en caso de duda se elige el más pequeño. El tamaño forma parte del texto del plan y no añade ningún paso de aprobación. Consulta la [guía de planificación](../../.agents/roles/references/planning.md#size-units-by-verification-cost), en inglés.
+
+## Qué pruebas se ejecutan y cuándo
+
+Las comprobaciones se eligen según el riesgo del cambio; no se ejecuta todo en bloque. En este repositorio la regla tiene tres niveles, y la configuración de cada proyecto registra sus propias comprobaciones:
+
+| Cuándo | Qué se ejecuta |
+| --- | --- |
+| En cada trabajo | Las pruebas específicas del comportamiento modificado y la comprobación de documentación, más la verificación de nivel de trabajo. |
+| Al cerrar una iniciativa | La comprobación de calidad completa, una vez, en el commit de cierre. Antes, solo si el cambio afecta al empaquetado. |
+| En cada PR | La comprobación completa en integración continua (CI), que debe superarse en la cabeza exacta antes de una fusión autorizada. |
+
+Una ejecución local que omite la comprobación completa lo indica en su informe. Consulta los [controles de calidad](development.md#controles-de-calidad) y el [verificador](operations.md#ejecutor-de-verificación).
+
+## Tres tipos de revisión
+
+El coordinador elige el tipo de verificación menos costoso que cubra los criterios de aceptación y el riesgo. La [selección de revisión](../../.agents/roles/references/review.md#choose-sufficient-verification), en inglés, define cada tipo, y el [glosario](../../GLOSSARY.es.md) los nombra.
+
+| Tipo | Qué comprueba | Uso habitual |
+| --- | --- | --- |
+| Mecánica (también llamada determinista) | Un procedimiento fijo da el mismo resultado siempre: bytes, hashes, enlaces, referencias y salida de herramientas. | Archivos movidos, índices generados, sustitución de enlaces. También la ejecutan herramientas y guardas. |
+| Empírica | Pruebas o recorridos de usuario, ejecutados sobre el candidato exacto, observan cada criterio de aceptación. Cada prueba relevante también debe haber fallado una vez ante un fallo deliberado. | Comportamiento que se puede ejecutar. |
+| Semántica | Un revisor lee el cambio y sus consumidores y lo juzga. | Decisiones de producto, permisos, contratos compartidos, texto de metodología, afirmaciones que ejecutar no puede demostrar. |
+
+Un cambio puede combinarlas. Un resultado mecánico o empírico puede cerrar un cambio cubierto sin llamar a un modelo, salvo que el riesgo o una regla explícita exijan un revisor independiente. Las comprobaciones de quien hizo el cambio nunca cuentan como independientes.
+
+Los hooks y las guardas también vuelven deterministas algunas reglas. Las comprobaciones del plugin rechazan, antes de que ocurra, un commit en la rama equivocada, un registro escrito fuera del checkout del worker, una delegación que incumple sus condiciones o un comando de shell que espera a la CI en un bucle. Consulta la [guarda de despacho](operations.md#guarda-de-despacho), la [guarda de comandos de shell](operations.md#guarda-de-comandos-de-shell), la [guarda de rama](operations.md#guarda-de-ramas), la [guarda de ubicación de registros](operations.md#guarda-de-ubicación-de-registros), la [guarda de commit del plan](operations.md#guarda-de-commits-de-planes) y la [guarda de push de registros](operations.md#guarda-de-pushes-de-registros). Son reglas de proceso, no permisos.
+
+## Trabajo en paralelo con worktrees
+
+Los trabajos independientes pueden ejecutarse a la vez, cada uno en su propio worktree de Git (un segundo checkout del mismo repositorio) y en su propia rama. Un trabajo que depende de otro espera. La configuración ofrece una carpeta para los worktrees, por defecto junto al repositorio como `../<repo>-worktrees/<feature>`, guardada en tu configuración local de Git como `isswf.worktreeRoot`.
+
+Cuántos workers se ejecutan a la vez es un límite local de tu clon: `git config --local isswf.maxParallelWorkers`, que vale 2 cuando falta o no es válido. La configuración te lo pregunta. En el modo `observe`, que es el predeterminado, un despacho por encima del límite se permite con un aviso; con `isswf.parallelWorkersMode` en `enforce`, la guarda de despacho lo rechaza. A cada worker en segundo plano se le indica su checkout y su rama, y la guarda de rama rechaza sus commits en cualquier otro sitio. Cada rama se comprueba y se revisa por separado, y después se integra como una PR por trabajo o una PR agrupada.
+
+Esto se observó con workers en segundo plano de Claude Code en Windows. No se observaron workers en primer plano, Linux en directo ni Pi. Consulta el [trabajo en paralelo](operations.md#trabajo-en-paralelo), [el límite de workers](operations.md#límite-de-workers-en-paralelo), la [guía de instalación](installation.md#inicializar-un-proyecto) y la sección «Parallel jobs» de la [skill del coordinador](../../.agents/skills/isswf-coordinator/SKILL.md#parallel-jobs), en inglés.
+
+## Skills, roles, referencias y principios
+
+Las instrucciones de `.agents/` son de cuatro tipos, cada uno en su carpeta:
+
+| Tipo | Qué es | Dónde |
+| --- | --- | --- |
+| Skill | Una tarea que puedes pedir por su nombre o que el coordinador puede seleccionar. Tiene un resultado observable. | [`.agents/skills/`](../../.agents/skills/) |
+| Rol | La responsabilidad que asume un agente delegado: worker, researcher, planner, diagnostician, reviewer, delivery o retrospective. | [`.agents/roles/`](../../.agents/roles/) |
+| Referencia | Reglas detalladas que una skill o un rol leen solo cuando se aplican, como [revisión](../../.agents/roles/references/review.md) o [planificación](../../.agents/roles/references/planning.md). | [`.agents/roles/references/`](../../.agents/roles/references/) |
+| Principio | Una referencia con criterio general en vez de un procedimiento: [diseño](../../.agents/roles/references/design-principles.md), [ejecución](../../.agents/roles/references/execution-principles.md) y [verificación](../../.agents/roles/references/verification-principles.md). El coordinador aporta uno solo cuando se aplica; ninguno es una lista de comprobación. | `.agents/roles/references/` |
+
+Las guías de host de [`.agents/hosts/`](../../.agents/hosts/) describen cómo Pi y Claude Code lanzan cada rol. La sección siguiente enumera las skills.
+
 ## Skills que utilizas
 
 | Skill | Para qué sirve |
@@ -87,6 +165,52 @@ Las instalaciones nuevas conservan los registros compartidos del proyecto en `.i
 Los proyectos antiguos pueden seguir utilizando `.factory/`. La migración es explícita y conserva los registros existentes; no mantengas ambas carpetas como estados activos.
 
 Cuando están instalados y disponibles, Engram se usa para recuperar y guardar el contexto del proyecto y Codegraph se usa primero para localizar y entender el código. Ninguno es obligatorio, y ninguno es la base de datos de los encargos ni una fuente de permisos.
+
+## Cómo se registra una iniciativa
+
+Una iniciativa es una pieza de trabajo con seguimiento y un ID estable, como `I0042`. El coordinador escribe sus registros como archivos Markdown normales en el directorio de estado del proyecto, de modo que puedes leerlos y Git conserva su historial. Las tareas pequeñas no necesitan planificador ni un paquete fijo de archivos.
+
+```text
+<state>/
+  templates/
+  initiatives/
+    I0042/
+      plan.md
+      jobs/
+        J001/
+          brief-r1.md
+          brief-r2.md
+          A001.md
+          V001.md
+          delivery.md
+        J002/
+          brief-r1.md
+```
+
+| Registro | Qué contiene |
+| --- | --- |
+| `plan.md` | Un plan vigente por iniciativa, con una sección por trabajo: estado, objetivo, dependencias, aceptación, bloqueo, siguiente paso y evidencias. |
+| `jobs/J001/` | Un trabajo, una porción pequeña que entrega algo verificable. Su carpeta contiene los registros de ese trabajo. |
+| `brief-r1.md` | El brief seleccionado del trabajo: qué hacer, el alcance, la aceptación y las comprobaciones. Cuando cambian los criterios, la nueva revisión es `brief-r2.md` y la anterior se conserva. |
+| `A001.md` | Un registro de intento: qué hizo, comprobó y no pudo hacer un worker. Lo escribe el worker. |
+| `V001.md` | Un registro de revisión: el veredicto y los hallazgos de una ronda de revisión. Lo escribe el revisor. |
+| `delivery.md` | Un resumen local del trabajo entregado, para el panel y para ti. No publica nada. |
+
+Las plantillas de `.factory/templates/` (en un proyecto, `<state>/templates/`) definen dos tipos más de registro, que se escriben solo cuando hacen falta: una bandeja de correcciones `C001.md` en la carpeta del trabajo, para una corrección que envías a un coordinador en ejecución, y una retrospectiva en `<state>/retrospectives/`. Un trabajo preparado desde una issue tiene además un `intake.json`. Los estados son `pending`, `in-progress`, `blocked`, `in-review`, `awaiting-human` y `completed`. El coordinador es responsable del plan y de los briefs, el worker de su intento, el revisor de su revisión, y tú registras la aceptación en el plan a través del coordinador. Consulta [planes, registros y conservación de evidencias](../durable-work.md#project-records) y la [guía de planificación](../../.agents/roles/references/planning.md), en inglés.
+
+## Abrir issues en otros repositorios
+
+Mientras trabajas en un repositorio puedes encontrar un error, o una idea, que pertenece a otro sitio. La skill `isswf-issue` lo reporta sin ampliar el encargo actual y sin empezar a corregirlo. Primero decide si el hallazgo pertenece a tu producto o a la factoría, con evidencias y no según la carpeta desde la que la ejecutaste, y comprueba el repositorio exacto y tu acceso. Busca duplicados, elimina el material privado y exige la etiqueta `needs-triage` en cada issue nueva. Sin permiso para publicar, te entrega un borrador. Una issue pide una evaluación; no aprueba la implementación. Una posible vulnerabilidad nunca se publica abiertamente. Consulta la [skill](../../.agents/skills/isswf-issue/SKILL.md) y [enrutamiento y publicación](../../.agents/skills/isswf-issue/references/routing-and-publication.md), en inglés.
+
+## El panel de iniciativas
+
+Claude Code tiene un panel de iniciativas opcional, desactivado por defecto, que muestra el trabajo registrado en tarjetas. Lee los archivos de tu proyecto y nunca inicia agentes. Pronto habrá un panel similar para Pi. Actívalo con **Initiatives pane** del plugin `isswf` en `/config`. Se abre cuando se carga la skill del coordinador, y `/isswf-initiatives` lo vuelve a abrir. Tiene tres pestañas:
+
+- **Initiatives.** Una tarjeta por iniciativa con sus trabajos y rondas de revisión. El borde de un registro muestra su resultado: verde para una revisión superada o un intento completo, amarillo para cambios solicitados o trabajo parcial, rojo para fallido, bloqueado o cancelado, y gris cuando no indica ninguno.
+- **Files.** El plan, los briefs y los registros de la iniciativa como árbol, cada uno legible como Markdown.
+- **Agents.** El coordinador y una fila por rol delegado, con el número de ejecuciones y qué skills y referencias usaron.
+
+Una fila bajo el título indica si Engram y Codegraph están disponibles en la sesión. El panel muestra trabajo registrado, no una prueba en directo de cada proceso. Todo lo que hace se describe en el [panel de iniciativas](installation.md#panel-de-iniciativas). Un panel local distinto en el navegador (`tools/isswf-panel.mjs`) muestra los mismos planes como un tablero Kanban; consulta [consultar el trabajo](operations.md).
 
 ## Versiones y actualizaciones
 

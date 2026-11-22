@@ -18,8 +18,14 @@ Empieza por las guías vigentes de esta página. La implementación y sus prueba
 - [Glosario](../../GLOSSARY.es.md): vocabulario compartido del producto.
 - [Posibles acciones futuras](future-actions.md): propuestas separadas del comportamiento implementado.
 
+## Sitio publicado
+
+El diagrama interactivo del flujo está publicado en [https://iseoane.github.io/isSWF/](https://iseoane.github.io/isSWF/). Las actualizaciones son manuales: abre **Actions → Publish workflow diagrams → Run workflow**, selecciona `main` y ejecútalo cuando la publicación esté autorizada. No hay despliegue automático al hacer push. La fase de preparación solo incluye la página de inicio bilingüe y los dos diagramas interactivos, nunca las imágenes de resumen.
+
 ## Recursos detallados e historial
 
 Los recursos técnicos del coordinador siguen en inglés y en sus rutas estables porque hay instrucciones y paquetes actuales que los referencian. Se enumeran en [consulta del trabajo](operations.md). No constituyen un flujo obligatorio para el usuario.
+
+La instalación de la release compilada es una vía heredada independiente, no un requisito para el trabajo con hosts nativos: consulta [actualizar la ruta heredada y después migrar un proyecto](installation.md#actualizar-la-ruta-heredada-y-después-migrar-un-proyecto) y la [compatibilidad de los hosts](../host-portability.md).
 
 La documentación retirada está disponible en el historial de Git.
