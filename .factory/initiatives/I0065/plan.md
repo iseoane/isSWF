@@ -89,3 +89,23 @@ Integration: the operator authorized integrating every I0065 job on 2026-11-22 (
 - A Node script with no dependencies writes `docs/en/first-session.svg` and `docs/es/first-session.svg` from one bilingual script file. The SVG animates without JavaScript, is labeled as a simulation, and every command and response in it matches the real skill and coordinator behavior at the base revision.
 - `--check` fails when a generated SVG differs from the script file or the two languages differ in steps. It runs in `tools/check-quality.mjs`.
 - `README.md` and `README.es.md` show the animation near the top of the front page and the panel animation in the first-session section, with alt text. The panel animation is labeled as a simulation and shows only fields, states and layout that the panel code renders at the base revision (operator decision, 2026-11-22: simulated rather than recorded).
+
+
+## J005
+
+- Status: in-progress
+- Objective: A gap inventory lists current isSWF capabilities that a new user would value but that the README, the reference page or the workflow flowchart do not mention, so the operator can choose what to add.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: None.
+- Next step: Researcher dispatched in background. The operator chooses which gaps to add; chosen items go to J003 or J004.
+
+### Acceptance
+
+- Each gap names the capability, its canonical source path, where it is missing (README, reference, flowchart) and why a new user would care.
+- Every listed capability is current behavior grounded in code, a skill, a role or a current guide; proposals and historical records are excluded.
+- The inventory is ranked, with a short recommendation of at most the top ten.
+
+### Evidence
+
+- None.
