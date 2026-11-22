@@ -23,7 +23,7 @@ Una petición seleccionada de funcionalidad a PR sigue la política de entrega p
 
 ## Diagramas del flujo
 
-![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un worker, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
+![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un programador, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
 
 El [resumen](docs/es/workflow.svg) ofrece una vista rápida: las cajas son pasos y las flechas muestran adónde va el trabajo después. Abre el diagrama interactivo, donde cada paso enumera las preguntas que se hace: [Español](https://iseoane.github.io/isSWF/docs/es/workflow.html) · [English](https://iseoane.github.io/isSWF/docs/en/workflow.html). El diagrama sirve de orientación, no como contrato del comportamiento nativo actual; consulta las guías enlazadas para conocerlo. Para verlo sin conexión, descarga la [página en español](docs/es/workflow.html) o la [página en inglés](docs/en/workflow.html); cada una es un archivo único que funciona sin conexión, y GitHub lo muestra como código.
 

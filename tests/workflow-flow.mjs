@@ -66,11 +66,11 @@ try {
 
   const image = await readFile(join(fixture, 'docs/en/workflow.svg'), 'utf8');
   assert.ok(image.includes('B &lt;b&gt;') && !image.includes('<b>'), 'Data containing markup must be escaped in the image.');
-  assert.ok(!/<script|son[a-z]+=|<a[s>]/u.test(image), 'The image carries nodes and arrows only: no script, handler or link.');
+  assert.ok(!/<script|\son[a-z]+=|<a[\s>]/u.test(image), 'The image carries nodes and arrows only: no script, handler or link.');
   assert.equal((image.match(/<path d="[^"]*" fill="none"/gu) ?? []).length, 1, 'One arrow per edge.');
-  assert.match(await readFile(join(fixture, 'docs/es/workflow.svg'), 'utf8'), /(es)/u, 'The Spanish image must carry the Spanish text.');
+  assert.match(await readFile(join(fixture, 'docs/es/workflow.svg'), 'utf8'), /\(es\)/u, 'The Spanish image must carry the Spanish text.');
   await writeFile(join(fixture, 'docs/es/workflow.svg'), `${await readFile(join(fixture, 'docs/es/workflow.svg'), 'utf8')}<!-- stale -->`);
-  expectFailure(/workflow.svg/u, '--check');
+  expectFailure(/workflow\.svg/u, '--check');
   assert.equal(run().status, 0);
 
   await mutate(data => { delete data.nodes[0].label.es; }, /Every translated field needs exactly en and es/u);

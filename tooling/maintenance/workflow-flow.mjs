@@ -337,7 +337,7 @@ function layout(node) {
 function route(edge, a, b) {
   const G = 6, shape = edge.shape || 'straight';
   if (shape === 'loop-right') {
-    return { d: `M${a.x + a.hw},${a.y} C${a.x + a.hw + 120},${a.y} ${b.x + b.hw + 120},${b.y} ${b.x + b.hw + G},${b.y}`, lx: a.x + a.hw + 90, ly: (a.y + b.y) / 2 + 4 };
+    return { d: `M${a.x + a.hw},${a.y} C${a.x + a.hw + 120},${a.y} ${b.x + b.hw + 120},${b.y} ${b.x + b.hw + G},${b.y}`, lx: a.x + a.hw + 100, ly: (a.y + b.y) / 2 + 4 };
   }
   if (shape === 'loop-left' || shape === 'skip') {
     const swing = shape === 'loop-left' ? 250 : 120;

@@ -28,7 +28,7 @@
     "otherLanguage": { "en": "Español", "es": "English" },
     "svgDescription": {
       "en": "A request goes from you to the coordinator, optionally through an interview, a researcher or a diagnostician, then to a prepared brief, a worker, an optional independent reviewer and delivery, until you approve it. Dashed boxes are optional steps.",
-      "es": "Un encargo pasa de ti al coordinador, opcionalmente por una entrevista, un investigador o un diagnosticador, y luego por un brief preparado, un worker, un revisor independiente opcional y la entrega, hasta que lo apruebas. Las cajas discontinuas son pasos opcionales."
+      "es": "Un encargo pasa de ti al coordinador, opcionalmente por una entrevista, un investigador o un diagnosticador, y luego por un brief preparado, un programador, un revisor independiente opcional y la entrega, hasta que lo apruebas. Las cajas discontinuas son pasos opcionales."
     }
   },
   "nodes": [
@@ -62,7 +62,7 @@
       "sub": { "en": "organizes and hands out work", "es": "organiza y reparte" },
       "who": {
         "en": "Understands the request, decides whom to call and checks what comes back. It owns the plan, the permissions and the other agents: helpers do not start helpers of their own; only a worker or diagnostician may, when its brief explicitly allows it.",
-        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes no lanzan ayudantes propios; solo un worker o un diagnosticador puede hacerlo, y solo si su brief lo permite expresamente."
+        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes no lanzan ayudantes propios; solo un programador o un diagnosticador puede hacerlo, y solo si su brief lo permite expresamente."
       },
       "questions": [
         {
