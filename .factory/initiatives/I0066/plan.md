@@ -51,3 +51,17 @@ Order: starts after I0065 closes. Changes in packaged files (`tools/`, `hooks/`)
 - A review-preparation command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
 - Risk and operator-acceptance judgment stay with the coordinator; the commands never decide them.
 - Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
+
+## J004
+
+- Status: pending
+- Objective: The Windows CI job and the local initiative-tier verification on Windows take measurably less time, based on a per-step timing breakdown.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: None.
+- Next step: Measure per-step and per-test durations in the windows-latest job and in a local `isswf-verify --tier initiative` run on Windows.
+
+### Acceptance
+
+- A recorded breakdown names the slowest steps and tests on Windows, compared with Linux.
+- Changes cut the Windows wall-clock time without dropping any check or platform coverage; before and after times are recorded.
