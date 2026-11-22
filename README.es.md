@@ -4,13 +4,16 @@
 
 isSWF es una factoría de software asistida por IA: los agentes de IA hacen el trabajo y tú tomas las decisiones. Divide una petición en trabajos pequeños y fáciles de comprobar, elige las comprobaciones según el riesgo y conserva evidencias de lo que se hizo, de modo que nada se fusiona ni se publica si tú no lo decides.
 
-![Una sesión de terminal simulada y abreviada: instalar, configurar, preguntar a isswf-howto, enviar al coordinador una primera petición y después revisión, pull request, tu aprobación y una retrospectiva.](docs/es/first-session.svg)
+<table>
+<tr>
+<td width="50%" valign="top"><img src="docs/es/first-session.svg" alt="Una sesión de terminal simulada y abreviada: instalar, configurar, preguntar a isswf-howto, enviar al coordinador una primera petición y después revisión, pull request, tu aprobación y una retrospectiva." width="100%"></td>
+<td width="50%" valign="top"><img src="docs/es/workflow.svg" alt="Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un implementador, una revisión opcional y la entrega, hasta que lo apruebas." width="100%"></td>
+</tr>
+</table>
 
-La animación de arriba es una sesión simulada y abreviada en Claude Code, no una grabación. Sigue los pasos de la sección siguiente.
+La animación de la izquierda es una sesión simulada y abreviada en Claude Code, no una grabación. Sigue los pasos de la sección siguiente.
 
-![Resumen del flujo de isSWF: un encargo va de ti al coordinador y pasa por un brief preparado, un implementador, una revisión opcional y la entrega, hasta que lo apruebas.](docs/es/workflow.svg)
-
-La imagen es un resumen: las cajas son pasos y las flechas muestran adónde va el trabajo después. Para ver la versión en la que cada paso enumera las preguntas que se hace, abre el [diagrama interactivo](https://iseoane.github.io/isSWF/docs/es/workflow.html) ([English](https://iseoane.github.io/isSWF/docs/en/workflow.html)). [Cómo se decide el trabajo](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide) lo explica con palabras.
+La imagen de la derecha es un resumen: las cajas son pasos y las flechas muestran adónde va el trabajo después. Para ver la versión en la que cada paso enumera las preguntas que se hace, abre el [diagrama interactivo](https://iseoane.github.io/isSWF/docs/es/workflow.html) ([English](https://iseoane.github.io/isSWF/docs/en/workflow.html)). [Cómo se decide el trabajo](docs/es/reference.md#cómo-se-decide-el-trabajo-y-quién-decide) lo explica con palabras.
 
 ## Una primera sesión completa
 

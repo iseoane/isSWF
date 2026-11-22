@@ -4,13 +4,16 @@ English | [Español](README.es.md)
 
 isSWF is an AI-assisted software factory: AI agents do the work and you make the decisions. It splits a request into small jobs that are easy to check, picks the checks that match the risk, and keeps evidence for what was done, so nothing is merged or published unless you say so.
 
-![A simulated terminal session, shortened: install, set up, ask isswf-howto, send the coordinator a first request, then review, pull request, your approval and a retrospective.](docs/en/first-session.svg)
+<table>
+<tr>
+<td width="50%" valign="top"><img src="docs/en/first-session.svg" alt="A simulated terminal session, shortened: install, set up, ask isswf-howto, send the coordinator a first request, then review, pull request, your approval and a retrospective." width="100%"></td>
+<td width="50%" valign="top"><img src="docs/en/workflow.svg" alt="isSWF workflow overview: a request goes from you to the coordinator, then through a prepared brief, a worker, an optional review and delivery, until you approve it." width="100%"></td>
+</tr>
+</table>
 
-The animation above is a simulated, shortened session in Claude Code, not a recording. It follows the steps in the next section.
+The animation on the left is a simulated, shortened session in Claude Code, not a recording. It follows the steps in the next section.
 
-![isSWF workflow overview: a request goes from you to the coordinator, then through a prepared brief, a worker, an optional review and delivery, until you approve it.](docs/en/workflow.svg)
-
-The picture is a summary: boxes are steps and arrows show where the work goes next. For the version where each step lists the questions it asks itself, open the [interactive flowchart](https://iseoane.github.io/isSWF/docs/en/workflow.html) ([Español](https://iseoane.github.io/isSWF/docs/es/workflow.html)). [How work is decided](docs/en/reference.md#how-work-is-decided-and-who-decides-it) explains it in words.
+The picture on the right is a summary: boxes are steps and arrows show where the work goes next. For the version where each step lists the questions it asks itself, open the [interactive flowchart](https://iseoane.github.io/isSWF/docs/en/workflow.html) ([Español](https://iseoane.github.io/isSWF/docs/es/workflow.html)). [How work is decided](docs/en/reference.md#how-work-is-decided-and-who-decides-it) explains it in words.
 
 ## A first complete session
 

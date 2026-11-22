@@ -174,7 +174,7 @@ function panelSvg(data, locale) {
     `<text x="${X}" y="${top + LINE * 2 + 15}" xml:space="preserve"><tspan class="ac b">[${escapeXml(label('tabInitiatives'))}]</tspan><tspan class="mu">  ${escapeXml(label('tabAgents'))}   ${escapeXml(label('tabFiles'))}</tspan></text>`,
     `<rect class="rule" x="8" y="${top + LINE * 3 + 2}" width="${WIDTH - 16}" height="1"/><rect class="rule" x="8" y="${top + LINE * 3 + 5}" width="${WIDTH - 16}" height="1"/>`,
   ].join('');
-  // The panel lists an initiative whose jobs are all pending without records only under Inactive, never as a card.
+  // The panel lists an initiative whose jobs are all pending without records only under Inactive, or as a "no work started" card when pinned; this image never pins.
   const inactiveCard = (top, rows) => [
     `<rect class="card" x="8" y="${top}" width="${WIDTH - 16}" height="${16 + LINE * (rows.length + 1)}" rx="8"/>`,
     text('b', X, top + 24, fill(label('inactive'), rows.length)),
