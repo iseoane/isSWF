@@ -1,0 +1,639 @@
+{
+  "ui": {
+    "pageTitle": { "en": "How a request moves through isSWF", "es": "Cómo avanza un encargo en isSWF" },
+    "intro": {
+      "en": "From your request to your approval. Click a box to see the questions that step asks itself, then open a question: the arrow it leads to lights up. Grey names link to the file on GitHub.",
+      "es": "De tu petición a tu visto bueno. Pulsa una caja para ver las preguntas que se hace ese paso y abre una pregunta: la flecha hacia donde lleva se ilumina. Los nombres en gris enlazan al archivo en GitHub."
+    },
+    "legendOperator": { "en": "You", "es": "Tú" },
+    "legendCoordinator": { "en": "Coordinator", "es": "Coordinador" },
+    "legendHelper": { "en": "Helper", "es": "Ayudante" },
+    "legendOptional": { "en": "Only when needed", "es": "Solo si hace falta" },
+    "legendLoop": { "en": "- - → goes back", "es": "- - → vuelve atrás" },
+    "legendGuard": { "en": "has automatic checks", "es": "tiene controles automáticos" },
+    "guardMark": { "en": "has automatic checks", "es": "tiene controles automáticos" },
+    "questionOne": { "en": "question", "es": "pregunta" },
+    "questionMany": { "en": "questions", "es": "preguntas" },
+    "questionsHeading": { "en": "Its questions", "es": "Sus preguntas" },
+    "yes": { "en": "Yes", "es": "Sí" },
+    "no": { "en": "No", "es": "No" },
+    "answer": { "en": "Answer", "es": "Respuesta" },
+    "goTo": { "en": "Go to %s →", "es": "Ir a %s →" },
+    "guardsHeading": { "en": "✓ Automatic checks", "es": "✓ Controles automáticos" },
+    "guardsNote": {
+      "en": "They do not depend on the agent remembering: the program itself acts. Most of these checks refuse the action; some only remind or report.",
+      "es": "No dependen de que el agente se acuerde: lo hace el propio programa. La mayoría de estos controles rechaza la acción; algunos solo recuerdan o informan."
+    },
+    "see": { "en": "see", "es": "ver" },
+    "otherLanguage": { "en": "Español", "es": "English" }
+  },
+  "nodes": [
+    {
+      "id": "you", "kind": "operator", "x": 380, "y": 55,
+      "label": { "en": "You ask for something", "es": "Tú pides algo" },
+      "sub": { "en": "an improvement, a bug, docs…", "es": "una mejora, un fallo, docs…" },
+      "who": {
+        "en": "You decide what is wanted and whether the result is good enough. Nothing is published or merged unless you have authorized it.",
+        "es": "Tú decides qué se quiere y si el resultado es suficiente. Nada se publica ni se fusiona sin que lo hayas autorizado."
+      },
+      "questions": [
+        {
+          "id": "you-decide", "to": "coord",
+          "ask": { "en": "What can only I decide?", "es": "¿Qué cosas solo puedo decidir yo?" },
+          "yes": {
+            "en": "What the product should do, whether the result is acceptable, and any publishing, merging or extra spending that was not already granted. Everything else is decided inside what you already authorized.",
+            "es": "Qué debe hacer el producto, si el resultado es aceptable y cualquier publicación, fusión o gasto adicional que no estuviera ya concedido. Todo lo demás se decide dentro de lo que ya autorizaste."
+          },
+          "cites": [
+            { "label": "feature-delivery.md", "path": ".agents/roles/references/feature-delivery.md" },
+            { "label": "AGENTS.md", "path": "AGENTS.md" }
+          ]
+        }
+      ],
+      "guards": []
+    },
+    {
+      "id": "coord", "kind": "coordinator", "x": 380, "y": 200,
+      "label": { "en": "Coordinator", "es": "Coordinador" },
+      "sub": { "en": "organizes and hands out work", "es": "organiza y reparte" },
+      "who": {
+        "en": "Understands the request, decides whom to call and checks what comes back. It owns the plan, the permissions and the other agents: helpers do not start helpers of their own unless the brief explicitly allows it.",
+        "es": "Entiende el encargo, decide a quién llamar y comprueba lo que le devuelven. Es dueño del plan, de los permisos y de los demás agentes: los ayudantes no lanzan ayudantes propios salvo que el brief lo permita expresamente."
+      },
+      "questions": [
+        {
+          "id": "coord-exists",
+          "ask": { "en": "Might this already exist?", "es": "¿Puede que esto ya exista?" },
+          "yes": {
+            "en": "It looks for evidence in the code before proposing to build it again.",
+            "es": "Busca pruebas en el código antes de proponer hacerlo otra vez."
+          },
+          "no": { "en": "It moves on to the next question.", "es": "Pasa a la siguiente pregunta." },
+          "cites": [{ "label": "isswf-coordinator §2", "path": ".agents/skills/isswf-coordinator/SKILL.md" }]
+        },
+        {
+          "id": "coord-interview", "to": "interview",
+          "ask": {
+            "en": "Can I prepare the brief without having to guess anything?",
+            "es": "¿Puedo preparar el brief sin tener que suponer nada?"
+          },
+          "yes": { "en": "It prepares the brief directly, with no interview.", "es": "Prepara el brief directamente, sin entrevista." },
+          "no": {
+            "en": "It offers a short interview in one line. You can accept it or skip it.",
+            "es": "Te propone una entrevista corta en una línea. Puedes aceptarla o saltarla."
+          },
+          "cites": [
+            { "label": "isswf-interview", "path": ".agents/skills/isswf-interview/SKILL.md" },
+            { "label": "isswf-coordinator §2", "path": ".agents/skills/isswf-coordinator/SKILL.md" }
+          ]
+        },
+        {
+          "id": "coord-research", "to": "research",
+          "ask": {
+            "en": "Is a technical fact missing that reading the code will not reveal?",
+            "es": "¿Falta un dato técnico que leer el código no va a revelar?"
+          },
+          "yes": { "en": "It calls the researcher.", "es": "Llama al investigador." },
+          "no": { "en": "Reading the code is enough, so it does that itself.", "es": "Basta con leer el código, así que lo hace él mismo." },
+          "cites": [
+            { "label": "researcher.md", "path": ".agents/roles/researcher.md" },
+            { "label": "isswf-coordinator §2", "path": ".agents/skills/isswf-coordinator/SKILL.md" }
+          ]
+        },
+        {
+          "id": "coord-bug", "to": "diag",
+          "ask": {
+            "en": "Is it a bug whose cause is clear and reproducible locally?",
+            "es": "¿Es un fallo con causa clara y reproducible en local?"
+          },
+          "yes": {
+            "en": "The worker finds the cause and fixes it in one go.",
+            "es": "El programador encuentra la causa y lo arregla de una vez."
+          },
+          "no": {
+            "en": "If the cause is unknown, intermittent, crosses several parts or has high impact, it calls the diagnostician first.",
+            "es": "Si la causa es desconocida, intermitente, cruza varias piezas o tiene mucho impacto, llama primero al diagnosticador."
+          },
+          "cites": [
+            { "label": "diagnostician.md", "path": ".agents/roles/diagnostician.md" },
+            { "label": "isswf-coordinator §2", "path": ".agents/skills/isswf-coordinator/SKILL.md" }
+          ]
+        },
+        {
+          "id": "coord-clear", "to": "plan",
+          "ask": {
+            "en": "Are the objective and the acceptance already clear, with nothing to look up?",
+            "es": "¿Están ya claros el objetivo y cuándo se da por bueno, sin nada que investigar?"
+          },
+          "yes": { "en": "It goes straight to preparing the brief.", "es": "Pasa directamente a preparar el brief." },
+          "no": { "en": "It takes the matching detour above first.", "es": "Antes hace el desvío que corresponda de los de arriba." },
+          "cites": [{ "label": "isswf-coordinator §2", "path": ".agents/skills/isswf-coordinator/SKILL.md" }]
+        },
+        {
+          "id": "coord-human",
+          "ask": {
+            "en": "Does a step need something only you can decide?",
+            "es": "¿Hay un paso que necesita algo que solo puedes decidir tú?"
+          },
+          "yes": {
+            "en": "It asks you that one question, marks that part as awaiting-human and carries on with the independent work.",
+            "es": "Te hace esa pregunta concreta, marca esa parte como awaiting-human y sigue con el trabajo independiente."
+          },
+          "no": {
+            "en": "It does not bother you with routine confirmations for things already granted.",
+            "es": "No te molesta con confirmaciones de rutina para lo que ya está concedido."
+          },
+          "cites": [{ "label": "awaiting-human", "path": ".agents/skills/isswf-coordinator/SKILL.md" }]
+        }
+      ],
+      "guards": [
+        {
+          "id": "g-compaction",
+          "text": {
+            "en": "When the chat is compacted to save memory, the coordinator is reminded to reload its instructions and re-read the records before acting.",
+            "es": "Cuando el chat se compacta para ahorrar memoria, se recuerda al coordinador que recargue sus instrucciones y relea los registros antes de actuar."
+          },
+          "path": "docs/en/operations.md"
+        }
+      ]
+    },
+    {
+      "id": "interview", "kind": "helper", "optional": true, "x": 110, "y": 370,
+      "label": { "en": "Interview with you", "es": "Entrevista contigo" },
+      "sub": { "en": "only if there are gaps", "es": "solo si hay huecos" },
+      "who": {
+        "en": "A few questions to settle what is unclear before planning.",
+        "es": "Unas preguntas para cerrar lo que no está claro antes de planificar."
+      },
+      "questions": [
+        {
+          "id": "interview-needed", "to": "plan",
+          "ask": {
+            "en": "Is it a new feature, a change users can see, a concept missing from the glossary or acceptance that is not written down?",
+            "es": "¿Es una funcionalidad nueva, un cambio que el usuario ve, un concepto que falta en el glosario o un criterio de aceptación sin escribir?"
+          },
+          "yes": { "en": "An interview closes those gaps.", "es": "Una entrevista cierra esos huecos." },
+          "no": {
+            "en": "If nobody would have to presume anything, it is not needed.",
+            "es": "Si nadie tendría que suponer nada, no hace falta."
+          },
+          "cites": [
+            { "label": "isswf-interview", "path": ".agents/skills/isswf-interview/SKILL.md" },
+            { "label": "isswf-coordinator", "path": ".agents/skills/isswf-coordinator/SKILL.md" }
+          ]
+        }
+      ],
+      "guards": []
+    },
+    {
+      "id": "research", "kind": "helper", "optional": true, "x": 300, "y": 370,
+      "label": { "en": "Researcher", "es": "Investigador" },
+      "sub": { "en": "only looks, never edits", "es": "solo mira, no toca" },
+      "who": {
+        "en": "Looks up facts and evidence. It changes no code and calls no other helpers.",
+        "es": "Busca datos y pruebas. No cambia código ni llama a otros ayudantes."
+      },
+      "questions": [
+        {
+          "id": "research-source",
+          "ask": { "en": "Can I see the real source?", "es": "¿Puedo ver la fuente real?" },
+          "yes": {
+            "en": "It reopens it. A summary, an index or a memory is not proof.",
+            "es": "La vuelve a abrir. Un resumen, un índice o una memoria no valen como prueba."
+          },
+          "no": { "en": "It stops and says what is missing.", "es": "Se para y dice qué le falta." },
+          "cites": [
+            { "label": "researcher.md", "path": ".agents/roles/researcher.md" },
+            { "label": "research.md", "path": ".agents/roles/references/research.md" }
+          ]
+        },
+        {
+          "id": "research-match", "to": "plan",
+          "ask": {
+            "en": "Do the documents I was given match the code as it is now?",
+            "es": "¿Los documentos que me dieron coinciden con el código tal como está ahora?"
+          },
+          "yes": {
+            "en": "It hands the coordinator its conclusion and a reading map.",
+            "es": "Entrega al coordinador su conclusión y un mapa de lectura."
+          },
+          "no": {
+            "en": "It stops and reports the mismatch to the coordinator instead of guessing.",
+            "es": "Se para y avisa al coordinador de la diferencia en lugar de adivinar."
+          },
+          "cites": [{ "label": "researcher.md", "path": ".agents/roles/researcher.md" }]
+        }
+      ],
+      "guards": []
+    },
+    {
+      "id": "diag", "kind": "helper", "optional": true, "x": 650, "y": 370,
+      "label": { "en": "Diagnostician", "es": "Diagnosticador" },
+      "sub": { "en": "for hard bugs", "es": "para fallos difíciles" },
+      "who": {
+        "en": "Reproduces the failure and gathers evidence of its cause. It recommends what to do and does not fix it unless the brief says so.",
+        "es": "Reproduce el fallo y reúne pruebas de su causa. Recomienda qué hacer y no lo arregla salvo que el brief lo diga."
+      },
+      "questions": [
+        {
+          "id": "diag-reproduce", "to": "plan",
+          "ask": { "en": "Can I reproduce the failure?", "es": "¿Puedo reproducir el fallo?" },
+          "yes": {
+            "en": "It gathers evidence of the cause and returns a diagnosis with a recommended next step.",
+            "es": "Reúne pruebas de la causa y entrega un diagnóstico con el siguiente paso recomendado."
+          },
+          "no": {
+            "en": "It notes what it tried and which access is missing. It does not invent a cause.",
+            "es": "Anota qué intentó y qué acceso falta. No inventa una causa."
+          },
+          "cites": [
+            { "label": "bug-diagnosis.md", "path": ".agents/roles/references/bug-diagnosis.md" },
+            { "label": "isswf-debug", "path": ".agents/skills/isswf-debug/SKILL.md" },
+            { "label": "diagnostician.md", "path": ".agents/roles/diagnostician.md" }
+          ]
+        }
+      ],
+      "guards": []
+    },
+    {
+      "id": "plan", "kind": "coordinator", "x": 380, "y": 550,
+      "label": { "en": "Coordinator prepares the brief", "es": "Coordinador prepara el brief" },
+      "sub": { "en": "what, how to check it, which guides", "es": "qué, cómo se comprueba, con qué guías" },
+      "who": {
+        "en": "After research it asks again whether the problem is what it thought, and chooses which optional guides go with the brief.",
+        "es": "Tras investigar vuelve a preguntarse si el problema es el que creía y elige qué guías opcionales acompañan al brief."
+      },
+      "questions": [
+        {
+          "id": "plan-reclassify", "to": "coord",
+          "ask": { "en": "Does what was found change what I thought?", "es": "¿Lo investigado cambia lo que yo pensaba?" },
+          "yes": {
+            "en": "It re-plans. Several modules, shared contracts or unstable tests are signals, not thresholds, and may lead it to ask for a planner.",
+            "es": "Replantea el plan. Varios módulos, contratos compartidos o pruebas inestables son señales, no umbrales, y pueden llevarle a pedir un planificador."
+          },
+          "no": {
+            "en": "A small, clear change goes straight to the worker.",
+            "es": "Un cambio pequeño y claro va directo al programador."
+          },
+          "cites": [
+            { "label": "Reclassify after research", "path": ".agents/skills/isswf-coordinator/SKILL.md" },
+            { "label": "planner.md", "path": ".agents/roles/planner.md" }
+          ]
+        },
+        {
+          "id": "plan-design",
+          "ask": {
+            "en": "Does the work change data shapes, contracts or who is responsible for what?",
+            "es": "¿El trabajo cambia la forma de los datos, los contratos o quién es responsable de qué?"
+          },
+          "yes": { "en": "It adds the design guide.", "es": "Añade la guía de diseño." },
+          "no": { "en": "It leaves it out.", "es": "No la añade." },
+          "cites": [{ "label": "design-principles.md", "path": ".agents/roles/references/design-principles.md" }]
+        },
+        {
+          "id": "plan-execution",
+          "ask": {
+            "en": "Does it involve parallel owners, retries, migrations or repeated operations?",
+            "es": "¿Hay responsables en paralelo, reintentos, migraciones u operaciones repetidas?"
+          },
+          "yes": { "en": "It adds the execution guide.", "es": "Añade la guía de ejecución." },
+          "no": { "en": "It leaves it out.", "es": "No la añade." },
+          "cites": [{ "label": "execution-principles.md", "path": ".agents/roles/references/execution-principles.md" }]
+        },
+        {
+          "id": "plan-verification",
+          "ask": {
+            "en": "Is it a bug, a regression or a multi-phase change, or does it need more proof than the existing tests give?",
+            "es": "¿Es un fallo, una regresión o un cambio en varias fases, o hace falta más prueba de la que dan los tests existentes?"
+          },
+          "yes": { "en": "It adds the verification guide.", "es": "Añade la guía de verificación." },
+          "no": { "en": "It leaves it out.", "es": "No la añade." },
+          "cites": [{ "label": "verification-principles.md", "path": ".agents/roles/references/verification-principles.md" }]
+        },
+        {
+          "id": "plan-tdd",
+          "ask": {
+            "en": "Is TDD requested, or is there a cheap, useful regression test to write first?",
+            "es": "¿Se ha pedido TDD, o hay una prueba de regresión barata y útil que escribir primero?"
+          },
+          "yes": { "en": "It asks for it (TDD).", "es": "Pide hacerlo así (TDD)." },
+          "no": { "en": "It does not ask. TDD is never mandatory.", "es": "No lo pide: nunca es obligatorio." },
+          "cites": [{ "label": "isswf-tdd", "path": ".agents/skills/isswf-tdd/SKILL.md" }]
+        },
+        {
+          "id": "plan-topics",
+          "ask": {
+            "en": "Does it involve trust boundaries or sensitive data, observed slowness or a performance budget, or documentation?",
+            "es": "¿Hay fronteras de confianza o datos sensibles, lentitud observada o un presupuesto de rendimiento, o documentación?"
+          },
+          "yes": {
+            "en": "It adds the matching guide: security, performance or writing.",
+            "es": "Añade la guía que corresponda: seguridad, rendimiento o redacción."
+          },
+          "no": { "en": "It adds none of them.", "es": "No añade ninguna." },
+          "cites": [
+            { "label": "isswf-security", "path": ".agents/skills/isswf-security/SKILL.md" },
+            { "label": "isswf-performance", "path": ".agents/skills/isswf-performance/SKILL.md" },
+            { "label": "isswf-writing", "path": ".agents/skills/isswf-writing/SKILL.md" }
+          ]
+        },
+        {
+          "id": "plan-comments",
+          "ask": {
+            "en": "Why is the comments guide never picked here?",
+            "es": "¿Por qué aquí nunca se elige la guía de comentarios?"
+          },
+          "yes": {
+            "en": "It does not need to be: the worker applies it whenever the work touches code.",
+            "es": "No hace falta elegirla: el programador la aplica siempre que toca código."
+          },
+          "cites": [
+            { "label": "worker.md", "path": ".agents/roles/worker.md" },
+            { "label": "comments.md", "path": ".agents/roles/references/comments.md" }
+          ]
+        },
+        {
+          "id": "plan-ready", "to": "worker",
+          "ask": { "en": "Is the brief ready to launch?", "es": "¿Está el brief listo para lanzarlo?" },
+          "yes": {
+            "en": "It launches the worker, once your explicit start instruction is on record.",
+            "es": "Lanza al programador, una vez registrada tu instrucción explícita de empezar."
+          },
+          "no": {
+            "en": "It keeps preparing and records what is missing.",
+            "es": "Sigue preparándolo y anota lo que falta."
+          },
+          "cites": [{ "label": "isswf-coordinator §4-5", "path": ".agents/skills/isswf-coordinator/SKILL.md" }]
+        }
+      ],
+      "guards": [
+        {
+          "id": "g-dispatch",
+          "text": {
+            "en": "Before a helper starts, the dispatch guard checks that the plan is readable, the job is in progress, the brief is committed and the request names the exact commits, and that model and effort match your selection. If a check fails it refuses and names the reason. It also counts open workers against a local limit (2 by default): it only warns by default and refuses in enforce mode.",
+            "es": "Antes de lanzar un ayudante, el guardián de lanzamientos comprueba que el plan se puede leer, que el trabajo está en curso, que el brief ya está en un commit y que la petición nombra los commits exactos, y que el modelo y el esfuerzo coinciden con tu selección. Si falla algo, lo rechaza y dice por qué. También cuenta los programadores abiertos frente a un límite local (2 por defecto): por defecto solo avisa y en modo enforce rechaza."
+          },
+          "path": "docs/en/operations.md"
+        },
+        {
+          "id": "g-undispatched",
+          "text": {
+            "en": "If a job is in progress and its brief is committed but nothing was launched, a status line says so at the end of the turn.",
+            "es": "Si un trabajo está en curso y su brief ya está en un commit pero no se ha lanzado nada, una línea de estado lo indica al final del turno."
+          },
+          "path": "docs/en/operations.md"
+        }
+      ]
+    },
+    {
+      "id": "worker", "kind": "helper", "x": 380, "y": 720,
+      "label": { "en": "Worker", "es": "Programador" },
+      "sub": { "en": "makes the change", "es": "hace el cambio" },
+      "who": {
+        "en": "Works in its own copy of the repository, makes the smallest change that meets the brief and brings evidence that it works.",
+        "es": "Trabaja en su propia copia del repositorio, hace el cambio más pequeño que cumpla el brief y aporta pruebas de que funciona."
+      },
+      "questions": [
+        {
+          "id": "worker-code",
+          "ask": {
+            "en": "Does the real code match what the brief says?",
+            "es": "¿El código real coincide con lo que dice el brief?"
+          },
+          "yes": { "en": "It carries on.", "es": "Sigue." },
+          "no": {
+            "en": "It reconciles the difference with the coordinator before changing the objective.",
+            "es": "Concilia la diferencia con el coordinador antes de cambiar el objetivo."
+          },
+          "cites": [{ "label": "worker.md", "path": ".agents/roles/worker.md" }]
+        },
+        {
+          "id": "worker-inputs",
+          "ask": {
+            "en": "Does it have everything it needs, such as permissions and guides?",
+            "es": "¿Tiene todo lo que necesita, como permisos y guías?"
+          },
+          "yes": { "en": "It carries on.", "es": "Sigue." },
+          "no": {
+            "en": "It stops and says what is missing. It does not swap in something else.",
+            "es": "Se para y dice qué falta. No lo sustituye por otra cosa."
+          },
+          "cites": [{ "label": "worker.md", "path": ".agents/roles/worker.md" }]
+        },
+        {
+          "id": "worker-twice",
+          "ask": {
+            "en": "Has the same check failed twice after its fixes?",
+            "es": "¿Ha fallado dos veces la misma comprobación tras sus arreglos?"
+          },
+          "yes": {
+            "en": "It records the premise behind both fixes and either challenges it with evidence or returns to the coordinator before a third fix.",
+            "es": "Anota la idea de partida de ambos arreglos y la cuestiona con pruebas, o vuelve al coordinador antes de un tercer arreglo."
+          },
+          "no": { "en": "It carries on.", "es": "Sigue." },
+          "cites": [{ "label": "worker.md", "path": ".agents/roles/worker.md" }]
+        },
+        {
+          "id": "worker-done", "to": "review",
+          "ask": { "en": "Is it finished and checked?", "es": "¿Ha terminado y lo ha comprobado?" },
+          "yes": {
+            "en": "It writes its report in an attempt record, marked complete, partial or blocked. The coordinator then decides on review.",
+            "es": "Escribe su informe en un registro de intento, marcado como completo, parcial o bloqueado. Después el coordinador decide sobre la revisión."
+          },
+          "no": { "en": "It keeps working.", "es": "Sigue trabajando." },
+          "cites": [
+            { "label": "code-quality.md", "path": ".agents/roles/references/code-quality.md" },
+            { "label": "worker.md", "path": ".agents/roles/worker.md" }
+          ]
+        }
+      ],
+      "guards": [
+        {
+          "id": "g-branch",
+          "text": {
+            "en": "A background worker's git commit is refused outside its assigned checkout and branch. This is a process rule, not a sandbox.",
+            "es": "Se rechaza el git commit de un programador en segundo plano fuera de su copia y su rama asignadas. Es una regla de proceso, no un aislamiento."
+          },
+          "path": "docs/en/operations.md"
+        },
+        {
+          "id": "g-command",
+          "text": {
+            "en": "It cannot wait on CI in a loop or acquire packages with ad-hoc commands. The two documented locked installs are allowed.",
+            "es": "No puede esperar a CI en bucle ni obtener paquetes con comandos sueltos. Se permiten las dos instalaciones bloqueadas documentadas."
+          },
+          "path": "docs/en/operations.md"
+        },
+        {
+          "id": "g-record",
+          "text": {
+            "en": "A background worker's attempt record must be written inside its own checkout.",
+            "es": "El registro de intento de un programador en segundo plano debe escribirse dentro de su propia copia."
+          },
+          "path": "docs/en/operations.md"
+        }
+      ]
+    },
+    {
+      "id": "review", "kind": "helper", "optional": true, "x": 380, "y": 880,
+      "label": { "en": "Reviewer", "es": "Revisor" },
+      "sub": { "en": "independent, when the risk calls for it", "es": "independiente, si el riesgo lo pide" },
+      "who": {
+        "en": "Checks the exact change in a separate context and reports. It only reads: it does not fix the change or approve the merge.",
+        "es": "Comprueba el cambio exacto en un contexto aparte y lo cuenta. Solo mira: no arregla el cambio ni aprueba la fusión."
+      },
+      "questions": [
+        {
+          "id": "review-standards",
+          "ask": {
+            "en": "Does the change follow the project's standards?",
+            "es": "¿El cambio cumple las normas del proyecto?"
+          },
+          "yes": { "en": "The Standards axis passes.", "es": "El eje de normas (Standards) se da por bueno." },
+          "no": {
+            "en": "It records a finding with evidence: fail, or inconclusive if the evidence is missing.",
+            "es": "Anota un hallazgo con pruebas: fallo, o no concluyente si faltan pruebas."
+          },
+          "cites": [{ "label": "review.md", "path": ".agents/roles/references/review.md" }]
+        },
+        {
+          "id": "review-spec", "to": "worker",
+          "ask": { "en": "Does the change do what was asked?", "es": "¿El cambio hace lo que se pidió?" },
+          "yes": { "en": "The Spec axis passes.", "es": "El eje de lo pedido (Spec) se da por bueno." },
+          "no": {
+            "en": "It records the finding. The coordinator then decides: fix it, dismiss it with a reason, or ask you.",
+            "es": "Anota el hallazgo. Después el coordinador decide: corregirlo, descartarlo con una razón o preguntarte."
+          },
+          "cites": [
+            { "label": "isswf-review", "path": ".agents/skills/isswf-review/SKILL.md" },
+            { "label": "reviewer.md", "path": ".agents/roles/reviewer.md" }
+          ]
+        },
+        {
+          "id": "review-overall", "to": "pr",
+          "ask": {
+            "en": "Do both axes pass, with enough evidence and no open blockers?",
+            "es": "¿Pasan los dos ejes, con pruebas suficientes y sin bloqueos abiertos?"
+          },
+          "yes": {
+            "en": "The overall result is pass, and the coordinator moves on to delivery.",
+            "es": "El resultado global es correcto y el coordinador pasa a la entrega."
+          },
+          "no": {
+            "en": "The overall result is fail or inconclusive and goes back to the coordinator.",
+            "es": "El resultado global es fallo o no concluyente y vuelve al coordinador."
+          },
+          "cites": [{ "label": "reviewer.md", "path": ".agents/roles/reviewer.md" }]
+        },
+        {
+          "id": "review-rounds",
+          "ask": {
+            "en": "Is the brief's review-round or correction budget spent with a blocking finding still open?",
+            "es": "¿Se ha agotado el presupuesto de rondas de revisión o de correcciones del brief con un hallazgo bloqueante abierto?"
+          },
+          "yes": {
+            "en": "The reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks you before any further correction.",
+            "es": "El revisor recomienda replantear el enfoque en lugar de otra corrección. Después el coordinador te pregunta antes de cualquier otra."
+          },
+          "no": {
+            "en": "Another ordinary round, limited to what changed.",
+            "es": "Otra ronda normal, limitada a lo que ha cambiado."
+          },
+          "cites": [{ "label": "review-convergence.md", "path": ".agents/roles/references/review-convergence.md" }]
+        }
+      ],
+      "guards": [
+        {
+          "id": "g-handoff",
+          "text": {
+            "en": "The exact diff is generated by a tool and its digest is checked before the reviewer starts. A separate check fails when a commit was never covered by a review.",
+            "es": "El diff exacto lo genera una herramienta y se comprueba su huella antes de que el revisor empiece. Otra comprobación falla si algún commit no quedó cubierto por una revisión."
+          },
+          "path": "docs/en/operations.md"
+        }
+      ]
+    },
+    {
+      "id": "pr", "kind": "helper", "x": 380, "y": 1040,
+      "label": { "en": "Delivery", "es": "Entrega" },
+      "sub": { "en": "prepares the proposal", "es": "prepara la propuesta" },
+      "who": {
+        "en": "Prepares the pull request (PR) with its risk assessment and evidence.",
+        "es": "Prepara la propuesta de cambio (PR) con su evaluación de riesgo y sus pruebas."
+      },
+      "questions": [
+        {
+          "id": "pr-review-exact", "to": "ok",
+          "ask": {
+            "en": "Does the review cover this exact change?",
+            "es": "¿La revisión cubre este cambio exacto?"
+          },
+          "yes": {
+            "en": "It presents the change for your approval with the review attached.",
+            "es": "Te presenta el cambio para tu visto bueno con la revisión adjunta."
+          },
+          "no": {
+            "en": "It says so plainly: the review is missing, or covers only an earlier version. It is never assumed to be fine.",
+            "es": "Lo dice claramente: falta la revisión o solo cubre una versión anterior. Nunca se da por buena."
+          },
+          "cites": [
+            { "label": "isswf-pr", "path": ".agents/skills/isswf-pr/SKILL.md" },
+            { "label": "delivery.md", "path": ".agents/roles/references/delivery.md" }
+          ]
+        }
+      ],
+      "guards": [
+        {
+          "id": "g-ci",
+          "text": {
+            "en": "A tool reads CI status once, for the exact commit of the PR. The command guard refuses waiting in a loop.",
+            "es": "Una herramienta consulta el estado de CI una sola vez, para el commit exacto de la PR. El guardián de comandos rechaza esperar en bucle."
+          },
+          "path": "docs/en/operations.md"
+        }
+      ]
+    },
+    {
+      "id": "ok", "kind": "operator", "x": 380, "y": 1190,
+      "label": { "en": "You approve", "es": "Tú das el visto bueno" },
+      "sub": { "en": "then a look back at what was learned", "es": "y luego, repaso de lo aprendido" },
+      "who": {
+        "en": "Integrating the change is your decision. When the work closes, a retrospective can suggest improvements to the process.",
+        "es": "Integrar el cambio es decisión tuya. Al cerrar el trabajo, un repaso puede proponer mejoras del proceso."
+      },
+      "questions": [
+        {
+          "id": "ok-retro",
+          "ask": { "en": "Do we hold a retrospective?", "es": "¿Hacemos repaso?" },
+          "yes": {
+            "en": "After a completed feature or bug, or when you explicitly close the session.",
+            "es": "Al terminar una mejora o un fallo, o cuando cierras la sesión de forma explícita."
+          },
+          "no": {
+            "en": "Ending the chat alone does not count as closing the session.",
+            "es": "Cerrar el chat sin más no cuenta como cerrar la sesión."
+          },
+          "cites": [{ "label": "isswf-retrospective", "path": ".agents/skills/isswf-retrospective/SKILL.md" }]
+        }
+      ],
+      "guards": []
+    }
+  ],
+  "edges": [
+    { "id": "e-you-coord", "from": "you", "to": "coord" },
+    { "id": "e-coord-interview", "from": "coord", "to": "interview", "label": { "en": "unclear?", "es": "¿falta claridad?" } },
+    { "id": "e-coord-research", "from": "coord", "to": "research", "label": { "en": "fact missing?", "es": "¿falta un dato?" } },
+    { "id": "e-coord-diag", "from": "coord", "to": "diag", "label": { "en": "odd bug?", "es": "¿fallo raro?" } },
+    { "id": "e-coord-plan", "from": "coord", "to": "plan", "shape": "bypass", "label": { "en": "all clear", "es": "todo claro" } },
+    { "id": "e-interview-plan", "from": "interview", "to": "plan" },
+    { "id": "e-research-plan", "from": "research", "to": "plan" },
+    { "id": "e-diag-plan", "from": "diag", "to": "plan" },
+    { "id": "e-plan-worker", "from": "plan", "to": "worker" },
+    { "id": "e-worker-review", "from": "worker", "to": "review" },
+    { "id": "e-worker-pr", "from": "worker", "to": "pr", "shape": "skip", "label": { "en": "no review needed", "es": "sin revisión" } },
+    { "id": "e-review-worker", "from": "review", "to": "worker", "shape": "loop-right", "label": { "en": "fix", "es": "corregir" } },
+    { "id": "e-review-pr", "from": "review", "to": "pr", "label": { "en": "all good", "es": "todo bien" } },
+    { "id": "e-pr-ok", "from": "pr", "to": "ok" },
+    { "id": "e-plan-coord", "from": "plan", "to": "coord", "shape": "loop-left", "label": { "en": "plan changes", "es": "cambia el plan" } }
+  ]
+}

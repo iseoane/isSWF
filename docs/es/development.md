@@ -185,6 +185,17 @@ Mantén en inglés las instrucciones activas de la factoría y sus recursos oper
 
 El README debe ser accesible. Deja las reglas exactas de ejecución, modelos y recuperación en sus guías operativas existentes, en lugar de repetirlas en varias páginas.
 
+### Mantener el diagrama interactivo del flujo
+
+[`docs/diagrams/flow.json`](../diagrams/flow.json) es la única fuente de las dos páginas interactivas `docs/en/workflow.html` y `docs/es/workflow.html`. Cada nodo, pregunta, control automático y flecha tiene un `id` estable y su texto en inglés y en español, y cada pregunta cita los archivos del repositorio que respaldan su respuesta. Edita los datos, nunca las páginas generadas, y mantén cada respuesta fiel al archivo citado. Los nombres exactos de roles, skills y archivos no cambian entre idiomas.
+
+```sh
+node tooling/maintenance/workflow-flow.mjs
+node tooling/maintenance/workflow-flow.mjs --check
+```
+
+El primer comando reescribe ambas páginas, que son archivos únicos con CSS y JavaScript en línea y funcionan sin conexión. El segundo solo necesita Node.js y git. No escribe nada y falla cuando a un campo le falta el texto en inglés o en español, se repite un ID, una flecha o el destino de una pregunta nombra un nodo desconocido, una ruta citada no existe en `HEAD`, o una página difiere de lo que producen los datos. `node tools/check-quality.mjs` lo ejecuta y `tests/workflow-flow.mjs` prueba cada fallo con fixtures desechables. Estas comprobaciones no abren un navegador ni verifican que una traducción o una respuesta sea exacta: lee ambas páginas después de un cambio. La sección de Archify de más abajo describe el flujo anterior, que las páginas de arriba sustituyen.
+
 ### Mantener los diagramas del flujo
 
 Las imágenes de los README y los diagramas interactivos completos comparten [una fuente bilingüe](../diagrams/workflow.json). Mantén juntos los identificadores de los nodos, las ramas, las citas de fuentes y las traducciones. Cuando cambie el flujo, fija la revisión del repositorio y las citas al commit que respalda el nuevo comportamiento. Los nombres exactos de roles, skills y archivos no cambian entre idiomas. El resumen omite las ramas detalladas y las referencias; el HTML las conserva.

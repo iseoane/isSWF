@@ -185,6 +185,17 @@ Keep active factory instructions and operational resources in English. User-faci
 
 Keep the README approachable. Put exact execution, model, and recovery rules in their existing operational guides instead of repeating them across pages.
 
+### Maintain the interactive workflow flowchart
+
+[`docs/diagrams/flow.json`](../diagrams/flow.json) is the single source of the two interactive pages `docs/en/workflow.html` and `docs/es/workflow.html`. Each node, question, automatic check and edge has a stable `id` and English and Spanish text, and each question cites the repository files that support its answer. Edit the data, never the generated pages, and keep each answer true to the cited file. Exact role, skill and file names stay the same in both languages.
+
+```sh
+node tooling/maintenance/workflow-flow.mjs
+node tooling/maintenance/workflow-flow.mjs --check
+```
+
+The first command rewrites both pages, which are single files with inline CSS and JavaScript that work offline. The second needs only Node.js and git. It writes nothing and fails when a field lacks its English or Spanish text, an ID repeats, an edge or question destination names an unknown node, a cited path does not exist at `HEAD`, or a page differs from what the data produces. `node tools/check-quality.mjs` runs it, and `tests/workflow-flow.mjs` tests each failure with disposable fixtures. These checks do not open a browser or verify that a translation or an answer is accurate: read both pages after a change. The Archify section below describes the older pipeline, which the pages above replace.
+
 ### Maintain the workflow diagrams
 
 The README previews and complete interactive diagrams share [one bilingual source](../diagrams/workflow.json). Keep node IDs, branches, source citations, and translations together. When the workflow changes, pin its repository revision and citations to the commit that supports the new behavior. Exact role, skill, and file names remain unchanged between languages. The overview omits detailed branches and references; the HTML retains them.
