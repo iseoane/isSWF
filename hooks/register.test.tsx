@@ -84,7 +84,8 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   const tools: string[] = []
   on('tool.list', () => ({ value: tools.map(name => ({ name })) }))
   const index = () => { files[[cwd, '.codegraph', 'codegraph.db'].join(sep)] = '' }
-  return { clock: mock.clock(on), seen, settings, opened, tools, index }
+  const write = (path: string, text: string) => { files[[cwd, '.factory', 'initiatives', ...path.split('/')].join(sep)] = text }
+  return { clock: mock.clock(on), seen, settings, opened, tools, index, write }
 }
 
 const activate = ($: any) => $.skill.prompt({ skill: 'isswf:isswf-coordinator', text: '' })
@@ -615,6 +616,68 @@ test('unfolding a completed job folds the other one', ON, async ($, on) => {
   expect(await ui.find({ type: 'Box', key: 'I0046-J003-V001' })).toBe(undefined)
   await ui.unmount()
 })
+
+// Reads of plans, records and folders under the initiatives directory; a brief is read once per path and cached on its own.
+const recordReads = (seen: string[]) => seen.filter(path => /initiatives/.test(path) && !/brief-r\d+\.md$/.test(path)).length
+
+for (const cwd of ['/p', 'C:\\p']) {
+  test(`a press that only changes the view redraws without reading state records (${cwd})`, ON, async ($, on) => {
+    const { seen } = engine(on, cwd)
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    const first = recordReads(seen)
+    expect(first).toBeGreaterThan(0)
+    await ui.press({ key: 'I0046-J002' })
+    expect(await ui.find({ type: 'Box', key: 'I0046-J002-A001' })).toBe(undefined)
+    await ui.press({ key: 'I0046-J004-A001' })
+    expect(await ui.find({ type: 'Box', key: 'I0046-J004-A001-detail' })).toBeDefined()
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /I0047/)).toBe('○ I0047 · Sidebar')
+    expect(recordReads(seen)).toBe(first)
+    await ui.unmount()
+  })
+
+  test(`a tool call that may have changed records makes the next draw read them again (${cwd})`, ON, async ($, on) => {
+    const { seen, write } = engine(on, cwd)
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /J005/)).toBe('○ J005 docs')
+    write('I0046/plan.md', plan('I0046', 'Pane mod', [['J001', 'completed', 'triage'], ['J002', 'completed', 'reader'], ['J003', 'completed', 'cores'], ['J004', 'in-progress', 'pane'], ['J005', 'in-progress', 'docs']]))
+    // A read-only tool cannot have changed a record, and an external edit is bounded by the refresh limit below.
+    await $.tool.call({ tool: 'Read', file_path: `${cwd}/README.md` })
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /J005/)).toBe('○ J005 docs')
+    const before = recordReads(seen)
+    await $.tool.call({ tool: 'Bash', command: 'git merge feature' })
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /J005/)).toBe('▸ J005 (in-progress) docs')
+    expect(recordReads(seen)).toBeGreaterThan(before)
+    await ui.unmount()
+  })
+
+  test(`records changed outside the session appear within one minute (${cwd})`, ON, async ($, on) => {
+    const { clock, write } = engine(on, cwd)
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    expect(await text(ui, /J005/)).toBe('○ J005 docs')
+    write('I0046/plan.md', plan('I0046', 'Pane mod', [['J001', 'completed', 'triage'], ['J002', 'completed', 'reader'], ['J003', 'completed', 'cores'], ['J004', 'in-progress', 'pane'], ['J005', 'in-progress', 'docs']]))
+    await clock.advance(59_000)
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /J005/)).toBe('○ J005 docs')
+    await clock.advance(1000)
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /J005/)).toBe('▸ J005 (in-progress) docs')
+    await ui.unmount()
+  })
+}
 
 const STATUS: [string, string[], boolean, string, string, boolean][] = [
   ['nothing available', [], false, 'error', 'error', true],
