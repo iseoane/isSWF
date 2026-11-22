@@ -9,7 +9,7 @@ Limits the operator accepted when closing I0009/J029 on 2026-11-14, plus one rel
 - Status: in-progress
 - Objective: Exercise actual interrupted-owner recovery through the compiled Bun artifact, and an interruption inside claim retirement (clearClaim), on Linux and Windows.
 - Depends on: None
-- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Brief: [brief-r2.md](jobs/J001/brief-r2.md)
 - Blocker: None.
 - Next step: Research a pause seam usable with the compiled Bun executable without adding a production test hook; reuse tests/state-interruption.mjs for the clearClaim boundary.
 
