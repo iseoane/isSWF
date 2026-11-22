@@ -98,6 +98,16 @@
       "phrase": "el coordinador los copia antes a la rama",
       "reason": "create and review read the brief and the in-progress plan at the checkpoint when the worker's tree lacks them",
       "since": "I0064/J002"
+    },
+    {
+      "phrase": "remove each worktree with `git worktree remove`",
+      "reason": "removing a worktree without first stopping its fsmonitor daemon leaves the daemon running",
+      "since": "I0055/J002"
+    },
+    {
+      "phrase": "elimina cada worktree con `git worktree remove`",
+      "reason": "removing a worktree without first stopping its fsmonitor daemon leaves the daemon running",
+      "since": "I0055/J002"
     }
   ]
 }

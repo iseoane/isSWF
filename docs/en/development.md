@@ -70,6 +70,12 @@ node tooling/quality/fsmonitor-daemons.mjs --project /absolute/checkout
 
 Both scans are heuristics with known limits. `tests/git-optional-locks.mjs` recognizes a Git call only as a literal `git` command passed to `execFile`, `execFileSync`, `spawn`, `spawnSync`, `run`, `runAsync` or `$.process.run`, and only in the listed hook, guard, pane, plan, intake, verify and record-check sources; a Git call through another runner or a computed executable is not seen. `tests/fixture-repositories.mjs` matches a quoted `init` or `clone` argument on the same line as a runner named like git, sh, run or command, so a repository created through another line shape is not seen.
 
+`tooling/quality/fsmonitor-orphans.mjs` is a separate check. On Windows and Linux, it lists any `git fsmonitor--daemon` whose worktree no longer exists, by process ID, and exits 1 when it finds one. Coordinators stop a daemon with `git -C <worktree> fsmonitor--daemon stop` before `git worktree remove`; the shell command guard cannot enforce that order because it sees one command at a time, so this listing is the mechanical check. It only reads and never stops a process. The daemon's own working directory is not its worktree on either platform, so the check identifies its Git directory by its IPC endpoint: on Windows the named pipe, on Linux the `fsmonitor--daemon.ipc` socket listed in `/proc/net/unix` and held in the process's `/proc/<pid>/fd`. A Linux daemon with `fsmonitor.socketDir` set has no such socket and is reported as `unknown`, never as an orphan. A daemon is an orphan when its Git directory is gone or a linked worktree's `gitdir` file names a checkout that no longer exists:
+
+```bash
+node tooling/quality/fsmonitor-orphans.mjs
+```
+
 When Bun is available, the portable check also builds and installs a real Bun package in temporary directories. It tests external SDK-style package exports and transitive dependencies, absolute and relative `.mjs` scripts and pinned binary handoff. Without Bun, the artifact check reports SKIP. Set `ISSWF_TEST_BUN` to a compiler path to require it. CI installs the pinned Bun compiler and requires the artifact check. Locally, `ISSWF_TEST_BUN_TMPDIR` can place large binary fixtures on a separate disk. These fixtures do not execute Claude or real providers.
 
 CI also runs two host checks outside the portable check: `tests/host-prerequisites.mjs` and `tests/source-host-isolation.mjs`. Run both locally with one command:

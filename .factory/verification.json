@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "3d578b811fcb10ee13cc4e8a717a5a7bf20ac93257c463c5f44502b996d90c8b"
+      "sha256": "48a2306bd4f412eac1368bd39c5931fabd766f0bab1e306131290aa78d1b8a6a"
     },
     {
       "path": ".github/workflows/quality.yml",
@@ -155,6 +155,23 @@
         "tools/isswf-parallel-workers.mjs"
       ],
       "timeoutSeconds": 300
+    },
+    {
+      "id": "fsmonitor-orphans",
+      "argv": [
+        "node",
+        "tests/fsmonitor-orphans.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tooling/quality/fsmonitor-orphans.mjs"
+      ],
+      "timeoutSeconds": 60
     },
     {
       "id": "isswf-ci-state",
