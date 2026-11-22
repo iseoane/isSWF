@@ -1,0 +1,95 @@
+{
+  "schema": "isswf.close-verification",
+  "schemaVersion": 1,
+  "source": "ci",
+  "initiative": "I0056",
+  "head": "65579bf5f140db701f13f0345b9f6d24c6882d58",
+  "runUrl": "https://github.com/iseoane/isSWF/actions/runs/45009986276",
+  "verificationSha256": "710c34f5d8a27ae8aa41255d34a46f8e0c36dc34cdc384bb0cdcaa40ab730fac",
+  "checks": [
+    {
+      "id": "check-docs",
+      "status": "passed"
+    },
+    {
+      "id": "checkout-line-endings",
+      "status": "passed"
+    },
+    {
+      "id": "factory-tools-install",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-verify",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-verification-guard",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-integration-gate",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-undispatched",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-parallel-workers",
+      "status": "passed"
+    },
+    {
+      "id": "fsmonitor-orphans",
+      "status": "passed"
+    },
+    {
+      "id": "path-within",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-ci-state",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-command-guard",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-dispatch-guard",
+      "status": "passed"
+    },
+    {
+      "id": "isswf-compaction",
+      "status": "passed"
+    },
+    {
+      "id": "git-optional-locks",
+      "status": "passed"
+    },
+    {
+      "id": "fixture-repositories",
+      "status": "passed"
+    },
+    {
+      "id": "host-portability",
+      "status": "passed"
+    },
+    {
+      "id": "stale-statements",
+      "status": "passed"
+    },
+    {
+      "id": "check-quality",
+      "status": "passed"
+    },
+    {
+      "id": "lint",
+      "status": "passed"
+    },
+    {
+      "id": "dead-code",
+      "status": "passed"
+    }
+  ]
+}
