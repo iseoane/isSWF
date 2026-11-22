@@ -4,7 +4,7 @@ Type: enhancement
 
 On 2026-11-22 the operator saw that the Claude Code initiatives panel showed no worker runs for I0065. The panel counts a run only from a `- Run: claude agent=<id>` line in an attempt or review record. The coordinator did not pass the launch identity the host returned, so every I0065 worker record and the J001-J003 review records have no such line. `isswf-record-check` reports a malformed `Run:` line but not a missing one. The operator decided that this must be a deterministic control, not a retrospective note, and asked for a new initiative. It also holds a retrospective of the work done on 2026-11-21 and 2026-11-22; the operator decides which of its findings become further jobs here.
 
-Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit): the delivery lifecycle in J003, then J006 (close route), J009 (job status), J010 (review rounds), J011 (AutoWakeUp), J012 (migration). Changes in packaged files (`tools/`, `hooks/`) need a patch release at close; the operator authorized that patch release on 2026-11-22 ("lo tienes autorizado!").
+Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most two in parallel): J001 + J007; J003 + J006; J005 + J009; J013 + J010; J004 + J014; J008 + J011; J012 only if needed.
 
 ## J001
 
@@ -13,7 +13,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the design: where the launch guard records accepted dispatches and their run identity, how `isswf-record-new create` and `isswf-record-check` read records, and whether the panel reads records in linked worktrees.
+- Next step: Size M (launch guard, record-new, record-check and the Pi check). Ground the design: where the launch guard records accepted dispatches and their run identity, how `isswf-record-new create` and `isswf-record-check` read records, and whether the panel reads records in linked worktrees.
 
 ### Acceptance
 
@@ -43,16 +43,15 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 ## J003
 
 - Status: pending
-- Objective: The coordinator integrates a reviewed job and prepares a review dispatch through host-neutral tools in `tools/`, called from the coordinator skill, instead of hand-run command sequences.
+- Objective: The coordinator integrates a reviewed job through one host-neutral command in `tools/`, called from the coordinator skill, driven by an explicit delivery-lifecycle state machine.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the current hand-run sequences in the I0065 transcript and the existing tools.
+- Next step: Size M (lifecycle module and one integration command; merge and push are one bounded special risk). Ground the current hand-run sequences in the I0065 transcript and the existing tools.
 
 ### Acceptance
 
 - An integration command checks review coverage and exact-head CI success, merges with the head pinned, records the job close in the plan, pushes that records-only commit, and removes the job worktree and branch. It refuses with a named reason when a check fails, and changes nothing in that case.
-- A review-preparation command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
 - Risk and operator-acceptance judgment stay with the coordinator; the commands never decide them.
 - The delivery lifecycle (brief, attempt, review, covered, ci-green, merged, closed) is an explicit state machine in one module. Each command checks the job's current state and refuses an illegal transition with a named reason. The state is derived from the records and Git, not stored separately.
 - Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
@@ -64,7 +63,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Measure per-step and per-test durations in the windows-latest job and in a local `isswf-verify --tier initiative` run on Windows.
+- Next step: Size M (measure, then optimize without dropping coverage). Measure per-step and per-test durations in the windows-latest job and in a local `isswf-verify --tier initiative` run on Windows.
 
 ### Acceptance
 
@@ -78,7 +77,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the change in the current source.
+- Next step: Size S (one refusal in the integration command). Ground the change in the current source.
 
 ### Acceptance
 
@@ -93,7 +92,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the change in the current source.
+- Next step: Size S (two messages). Ground the change in the current source.
 
 ### Acceptance
 
@@ -108,7 +107,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the change in the current source.
+- Next step: Size S (one more guard case). Ground the change in the current source.
 
 ### Acceptance
 
@@ -122,7 +121,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the change in the current source.
+- Next step: Size S (one guidance paragraph). Ground the change in the current source.
 
 ### Acceptance
 
@@ -132,15 +131,15 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 ## J009
 
 - Status: pending
-- Objective: The job status shown by the panel and `isswf-status` is derived from one shared state machine, and the plan stores only the states no record can reveal.
+- Objective: The job status reported by `isswf-status` is derived from one shared state machine, and the plan stores only the states no record can reveal.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`.
+- Next step: Size M (shared module and two tool consumers, legacy plans). Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`.
 
 ### Acceptance
 
-- One shared module defines the job states and their transitions; `tools/isswf-plan-core.mjs`, `tools/isswf-status.mjs`, `tools/isswf-panel.mjs` and `hooks/register.tsx` use it instead of their own string lists.
+- One shared module defines the job states and their transitions; `tools/isswf-plan-core.mjs` and `tools/isswf-status.mjs` use it instead of their own string lists.
 - `in-progress` and `in-review` are derived from attempt and review records; existing plans with any current value still parse.
 - Tests cover each derived state and a plan using every legacy value.
 
@@ -151,7 +150,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the round inference in `tools/isswf-snapshot-core.mjs` (statedRound and reviewRound by position).
+- Next step: Size S (one record-check rule). Ground the round inference in `tools/isswf-snapshot-core.mjs` (statedRound and reviewRound by position).
 
 ### Acceptance
 
@@ -166,7 +165,7 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the variables in `hooks/register.tsx` (resumeOn, resumeTimer, resumeFor, resumeAtMs, noReset).
+- Next step: Size S (local hook refactor). Ground the variables in `hooks/register.tsx` (resumeOn, resumeTimer, resumeFor, resumeAtMs, noReset).
 
 ### Acceptance
 
@@ -181,10 +180,40 @@ Order: starts after I0065 closes. State machine jobs by impact (2026-11-22 audit
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md)
 - Blocker: None.
-- Next step: Ground the stage, retired and pending directories in `tools/state-migration.mjs` and the journal in `tools/isswf.mjs`. Lowest priority: do only if an observed failure or J009 needs it.
+- Next step: Size M (phase recovery on two platforms). Ground the stage, retired and pending directories in `tools/state-migration.mjs` and the journal in `tools/isswf.mjs`. Lowest priority: do only if an observed failure or J009 needs it.
 
 ### Acceptance
 
 - The journal records the phases staged, swapped, retired and done; recovery from each phase is tested.
 - Existing interrupted-migration fixtures still recover.
 - Works on Windows and Linux.
+
+## J013
+
+- Status: pending
+- Objective: A review dispatch is prepared through one host-neutral command in `tools/`, called from the coordinator skill.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J013/brief-r1.md)
+- Blocker: None.
+- Next step: Size S (one command and a template fix). Reuse the J003 lifecycle module; ground the I0065 review-preparation failures.
+
+### Acceptance
+
+- The command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
+- The review template no longer turns a filled "None." into "None.." (retrospective P5), or the parser tolerates it.
+- Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
+
+## J014
+
+- Status: pending
+- Objective: The Claude Code panel (`tools/isswf-panel.mjs`, `hooks/register.tsx`) shows job status from the J009 shared state machine.
+- Depends on: J009
+- Brief: [brief-r1.md](jobs/J014/brief-r1.md)
+- Blocker: None.
+- Next step: Size S (two consumers switch to the shared module). Ground the status string filters in `hooks/register.tsx` and `tools/isswf-panel.mjs`.
+
+### Acceptance
+
+- The panel and hook use the shared module instead of their own status lists.
+- Completed initiatives render as before.
+- Tests cover the derived states in the panel snapshot.

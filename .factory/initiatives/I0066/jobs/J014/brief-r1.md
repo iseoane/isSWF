@@ -1,0 +1,8 @@
+# I0066 J014 brief r1
+
+- Authorization: operator, 2026-11-22 ("ok", splitting J003 and J009 by size).
+- Objective and acceptance: [plan.md](../../plan.md) J014.
+
+## Method
+
+- `isswf-tdd`: selected. Review: one reviewer, standards and spec.
