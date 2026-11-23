@@ -66,6 +66,17 @@ const ENFORCE = '- Integration gate: enforce';
 const FROM_FEAT = ['git push origin feat', 'git push -u origin feat', 'git push', 'gh pr create --title t --body b'];
 
 try {
+  // A repository without any isSWF state directory is not an isSWF project: the gate is off and adds no note.
+  const plain = makeRepo('plain');
+  run(plain, 'rm', '-rq', '.factory');
+  run(plain, 'commit', '-qm', 'drop state');
+  run(plain, 'switch', '-q', 'main');
+  run(plain, 'merge', '-q', 'feat');
+  run(plain, 'push', '-q', 'origin', 'main');
+  run(plain, 'switch', '-q', 'feat');
+  edit(plain, 'tools/x.mjs', 'x\n', 'code');
+  for (const command of FROM_FEAT) assert.deepEqual(await checker(plain)(command), {}, `${command} in a repository without isSWF state`);
+
   // observe is the default: an unstamped code head is allowed with a note naming the head and the command to run.
   const observed = makeRepo('observe');
   const head = edit(observed, 'tools/x.mjs', 'x\n', 'code');

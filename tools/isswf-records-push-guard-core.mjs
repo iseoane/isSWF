@@ -38,6 +38,7 @@ function sourcesFor(refspecs, base, current) {
  * Refuses a `git push` to the base branch that carries anything but work records, before it runs: every path of `<remote>/<base>..<source>` must be
  * under the selected state's `initiatives/` directory, and the selected state's `project-setup.md` on `<remote>/<base>` must record the records-only grant.
  * The state is `.isswf/` when its `project-setup.md` exists on that ref, else the legacy `.factory/`; a missing setup record is no grant.
+ * A repository whose `<remote>/<base>` has neither `.isswf/` nor `.factory/` does not use isSWF, so the guard does not apply to it.
  * It fails open on a git fault: this guard enforces a process rule, not an authority.
  * `git(argv, cwd)` resolves to `{ exitCode, stdout }`.
  */
@@ -59,6 +60,7 @@ export async function checkRecordsPush({ command, cwd, git }) {
         const listed = await git(['diff', '--name-only', '-z', '--no-renames', `${push.remote}/${base}..${from}`], root);
         if (listed.exitCode !== 0) continue;
         const setup = await readSetup(root, `${push.remote}/${base}`, git);
+        if (setup === undefined) continue;
         const offending = listed.stdout.split('\0').find(path => path && !path.startsWith(`${setup.state}/initiatives/`));
         if (offending !== undefined) return { deny: `isSWF records push guard: git push to ${base} refused. ${offending} is not a work record under ${setup.state}/initiatives/, so the change keeps the pull request path: ${PR_PATH}. This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
         if (!setup.granted) return { deny: `isSWF records push guard: git push to ${base} refused. ${setup.state}/project-setup.md does not record the grant "- Records-only direct push: granted", so even a records-only change keeps the pull request path: ${PR_PATH}. This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
@@ -76,7 +78,10 @@ const readGrant = async (root, ref, state, git) => {
   return shown.exitCode === 0 ? GRANT_LINE.test(shown.stdout) : undefined;
 };
 
+// The selected state and its grant, or undefined when `ref` has no isSWF state directory at all.
 async function readSetup(root, ref, git) {
+  const hasState = async state => (await git(['cat-file', '-e', `${ref}:${state}`], root)).exitCode === 0;
+  if (!(await hasState('.isswf')) && !(await hasState('.factory'))) return undefined;
   const modern = await readGrant(root, ref, '.isswf', git);
   if (modern !== undefined) return { state: '.isswf', granted: modern };
   return { state: '.factory', granted: (await readGrant(root, ref, '.factory', git)) === true };

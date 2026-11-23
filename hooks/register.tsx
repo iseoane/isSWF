@@ -565,6 +565,11 @@ function branchHost($: EngineInterface, e: { agentId?: string }) {
       },
       read: (file: string) => $.fs.read(file),
     }),
+    // A checkout uses isSWF when it has a file under a state directory, tracked or not yet committed.
+    usesIsswf: async (top: string) => {
+      const { exitCode, stdout } = await gitRun($, ['ls-files', '--cached', '--others', '--', '.isswf', '.factory'], top)
+      return exitCode !== 0 || stdout.trim() !== ''
+    },
     store: {
       read: async () => (await $.state.get(BRANCHES)).value ?? {},
       set: (key: string, state: { branch: string } | { detached: string }) => update($, BRANCHES, (all: Record<string, unknown> | undefined) => ({ ...all, [key]: state })),

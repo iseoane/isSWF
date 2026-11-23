@@ -104,6 +104,20 @@ try {
   write(noSetup, record, 'b\n');
   commit(noSetup, 'records');
   assert.ok((await checker(noSetup)('git push origin main')).deny, 'a missing setup record is no grant');
+  // A repository without any isSWF state directory on its base branch is not an isSWF project: the guard does not apply.
+  const plain = join(temp, 'plain');
+  mkdirSync(plain, { recursive: true });
+  initRepository(join(temp, 'plain-remote.git'), ['--bare', '-b', 'main']);
+  initRepository(plain, ['-b', 'main']);
+  run(plain, 'config', 'user.email', 't@example.invalid');
+  run(plain, 'config', 'user.name', 'T');
+  run(plain, 'remote', 'add', 'origin', join(temp, 'plain-remote.git'));
+  write(plain, 'README.md', 'x\n');
+  commit(plain, 'start');
+  run(plain, 'push', '-q', '-u', 'origin', 'main');
+  write(plain, 'docs/spec.md', 'y\n');
+  commit(plain, 'docs');
+  assert.equal((await checker(plain)('git push origin main')).deny, undefined, 'a repository without isSWF state is not guarded');
   // The grant is read from the base branch on the remote, so a grant only in the working tree is none.
   write(ungranted, '.factory/project-setup.md', `# Setup\n\n${GRANT}`);
   assert.match((await checker(ungranted)('git push origin main')).deny ?? '', /Records-only direct push: granted/u, 'a working-tree grant is no grant');

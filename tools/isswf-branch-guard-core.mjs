@@ -122,9 +122,11 @@ function assignmentRefusal(top, current, assigned) {
  * `git switch` or `git checkout`, which `refreshBranches` looks at again after the call.
  * A loop with an `assignment` (`{ checkout, branch }`, from `assignmentOf`) may commit only in that checkout, and there only on that branch
  * unless the same command switches first; a loop without one is checked against the branch it selected.
+ * `usesIsswf(top)`, when the host supplies it, says whether a checkout has an isSWF state directory; without an assignment, a commit in a checkout
+ * that has none is not checked, because the guard serves isSWF projects only.
  * It fails open: this guard enforces a process rule, not an authority, so a fault allows the command and updates nothing.
  */
-export async function checkBranch({ command, cwd, loop, store, observe, assignment }) {
+export async function checkBranch({ command, cwd, loop, store, observe, assignment, usesIsswf }) {
   try {
     const assigned = assignment && { top: resolveDir(assignment.checkout, '.'), branch: assignment.branch };
     const calls = tokenize(command)
@@ -160,6 +162,7 @@ export async function checkBranch({ command, cwd, loop, store, observe, assignme
       if (found && assigned && (!samePath(found.top, assigned.top) || (!switched.has(found.top) && found.state.branch !== assigned.branch))) return { deny: assignmentRefusal(found.top, found.state, assigned), reobserve: [] };
       // A switch earlier in the same command re-selects the branch of that repository, so a commit after it is not checked.
       if (found && switched.has(found.top)) continue;
+      if (found && !assigned && usesIsswf && !(await usesIsswf(found.top))) continue;
       if (found && !sameState(entries[keyOf(loop, found.top)], found.state)) return { deny: refusal(found.top, found.state, entries[keyOf(loop, found.top)]), reobserve: [] };
     }
     return { reobserve: [...new Set(reobserve)] };

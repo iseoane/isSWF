@@ -98,8 +98,16 @@ async function readSetupAt(root, ref, git) {
 }
 
 // The base ref decides, so a commit of the branch under review cannot change the rule it is judged by; HEAD answers only when the base ref is missing.
+// A repository with no state directory at the base ref nor at HEAD does not use isSWF, so the gate is off for it.
 async function readSetup(root, baseRef, git) {
-  return (await readSetupAt(root, baseRef, git)) ?? (await readSetupAt(root, 'HEAD', git)) ?? { state: '.factory', mode: 'observe' };
+  const found = (await readSetupAt(root, baseRef, git)) ?? (await readSetupAt(root, 'HEAD', git));
+  if (found) return found;
+  for (const ref of [baseRef, 'HEAD']) {
+    for (const state of STATE_DIRECTORIES) {
+      if ((await git(['cat-file', '-e', `${ref}:${state}`], root)).exitCode === 0) return { state: '.factory', mode: 'observe' };
+    }
+  }
+  return { state: '.factory', mode: 'off' };
 }
 
 async function hasStamp(root, sha, git, read) {
