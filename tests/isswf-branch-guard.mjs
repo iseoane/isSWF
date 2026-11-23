@@ -124,6 +124,10 @@ for (const [mode, observe] of Object.entries(observers)) {
     refusal(await s.check('git add . && git commit -am two', repo), 'other', 'main');
     refusal(await s.check('git -c core.editor=true commit --amend', repo), 'other', 'main');
     assert.equal((await s.check('git status', repo)).deny, undefined, label('only commits are refused'));
+    // A host that says the checkout has no isSWF state directory turns the unassigned check off; one that says it has keeps it.
+    const plainCheck = usesIsswf => checkBranch({ command: 'git commit -m two', cwd: repo, loop: 'main', store: s.store, observe, usesIsswf });
+    assert.equal((await plainCheck(async () => false)).deny, undefined, label('a checkout without isSWF state is not checked'));
+    refusal(await plainCheck(async () => true), 'other', 'main');
     assert.equal((await s.check('git merge main', repo)).deny, undefined, label('merge is a known limit'));
     assert.equal((await s.check('git log --oneline -3', repo)).deny, undefined);
 
@@ -313,9 +317,10 @@ for (const [mode, observe] of Object.entries(observers)) {
   const base = realpathSync.native(mkdtempSync(join(tmpdir(), 'isswf-branch-pi-')));
   try {
     const repo = join(base, 'repo');
-    mkdirSync(repo);
+    mkdirSync(join(repo, '.factory'), { recursive: true });
     initRepository(repo, ['-b', 'main']);
     writeFileSync(join(repo, 'a.txt'), 'a\n');
+    writeFileSync(join(repo, '.factory', 'project-setup.md'), '# Setup\n');
     sh(repo, 'add', '.');
     sh(repo, 'commit', '-q', '-m', 'first');
     const handlers = {};
@@ -361,6 +366,9 @@ for (const [mode, observe] of Object.entries(observers)) {
     sh(repo, 'switch', '-q', 'main');
     const moved = await call('bash', 'c14', 'git commit -m eight');
     assert.ok(moved.reason.includes('The checkout is on "main", but this session selected "other"'), moved.reason);
+    // Without a state directory the checkout is not an isSWF project, so the same commit runs.
+    rmSync(join(repo, '.factory'), { recursive: true, force: true });
+    assert.equal(await call('bash', 'c15', 'git commit -m nine'), undefined, 'a checkout without isSWF state is not checked');
   } finally {
     rmSync(base, { recursive: true, force: true });
   }

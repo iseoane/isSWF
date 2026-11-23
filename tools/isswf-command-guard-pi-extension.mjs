@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { assignmentOf, checkBranch, observeFromFiles, refreshBranches } from './isswf-branch-guard-core.mjs';
 import { guardCommand } from './isswf-command-core.mjs';
 import { checkReferences } from './isswf-dispatch-guard-core.mjs';
@@ -27,6 +27,9 @@ export default function (pi) {
   let assignment;
   const store = { read: async () => ({ ...expected }), set: async (key, state) => { expected[key] = state; } };
   const observe = dir => observeFromFiles(dir, path => readFile(path, 'utf8'));
+  // A checkout uses isSWF when it has a state directory.
+  const isDir = path => stat(path).then(found => found.isDirectory(), () => false);
+  const usesIsswf = async top => (await isDir(`${top}/.isswf`)) || isDir(`${top}/.factory`);
   // The directories a call must look at again once it has run, by tool call id.
   const switching = new Map();
   // The gate's observe-mode note for a call, by tool call id, appended to the call's result.
@@ -56,7 +59,7 @@ export default function (pi) {
     const { deny } = guardCommand(command);
     if (deny !== undefined) return { block: true, reason: deny };
     if (typeof ctx?.cwd !== 'string') return undefined;
-    const branch = await checkBranch({ command, cwd: ctx.cwd, loop: 'main', store, observe, assignment });
+    const branch = await checkBranch({ command, cwd: ctx.cwd, loop: 'main', store, observe, assignment, usesIsswf });
     if (branch.deny !== undefined) return { block: true, reason: branch.deny };
     const plans = await checkPlanCommit({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
     if (plans.deny !== undefined) return { block: true, reason: plans.deny };
