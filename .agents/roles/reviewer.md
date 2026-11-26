@@ -11,6 +11,7 @@ Do not begin until the brief provides:
 - The candidate, in one of these shapes:
   - **Commit candidate:** the exact base commit SHA and candidate commit SHA.
   - **Snapshot candidate (before commit):** the exact base commit SHA, the reproducible snapshot digest, the retained snapshot package path, its exact diff, untracked file paths and contents, and paths in scope. A candidate commit is not required for review.
+  - **Code-only review:** the exact base and candidate commit SHAs and the operator's request, carried by a `code-only` handoff, when a small change has no initiative or brief. The request is the Spec criterion; report Spec against it and Standards as usual.
   - **Document audit:** a commit SHA and the paths to audit. Use this shape only when the brief assigns an audit of committed content, not a review of a change. No diff or snapshot applies.
 - For a commit or snapshot candidate, the exact diff itself, supplied as review evidence, unless a bound review mechanism provides the candidate diff. A working-tree view, branch name, file list, or statement that a diff was supplied is not the diff.
 - The authorization boundary and any required independent review criteria.

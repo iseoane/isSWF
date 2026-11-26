@@ -66,6 +66,40 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   assertCommit(git, checkpoint, 'checkpoint');
   await requireInProgress(target, initiative, job, git, checkpoint);
   await requireBrief(target, brief, git, checkpoint);
+  const names = await recordNames(target, git);
+  const priorReviews = prior ?? reviewIds(names);
+  return writeHandoff({
+    target, git, base, candidate, out, host, stem: `${job}-${candidate.slice(0, 12)}`, resourceRevision: checkpoint,
+    fields: { initiative, job, brief: { path: brief.path, revision: brief.revision, checkpoint, blob: blobAt(git, checkpoint, brief.path) }, round: priorReviews.length + 1, priorReviews },
+  });
+}
+
+const MAX_REQUEST_CHARS = 8192;
+
+/**
+ * Writes a code-only review handoff: the exact `base..candidate` diff and an envelope with mode `code-only`, no initiative, job or brief,
+ * and the operator's request as the review criterion. It serves a small change the coordinator made itself, so an independent reviewer
+ * can still judge it; the result is reported in the conversation or the pull request, not in a job record.
+ */
+export async function codeReviewHandoff({ project, base, candidate, request, out, host = 'claude' }) {
+  if (out !== undefined && !isAbsolute(out)) throw recordError('invalid-out');
+  if (!Object.hasOwn(HOST_GUIDES, host)) throw recordError('invalid-host');
+  if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
+  if (typeof request !== 'string' || !request.trim() || request.length > MAX_REQUEST_CHARS) throw recordError('invalid-request');
+  checkSha(base, 'base');
+  checkSha(candidate, 'candidate');
+  const root = resolve(project);
+  const states = [];
+  for (const name of ['.isswf', '.factory']) if ((await lstat(join(root, name)).catch(() => undefined))?.isDirectory()) states.push(name);
+  if (states.length !== 1) throw recordError('state-not-found');
+  const git = await gitIn(root);
+  return writeHandoff({
+    target: { root, state: states[0] }, git, base, candidate, out, host, stem: `code-${candidate.slice(0, 12)}`, resourceRevision: base,
+    fields: { mode: 'code-only', initiative: null, job: null, brief: null, request: request.trim(), round: 1, priorReviews: [] },
+  });
+}
+
+async function writeHandoff({ target, git, base, candidate, out, host, stem, resourceRevision, fields }) {
   const directory = resolve(out ?? tmpdir());
   if (isInside(await realpath(target.root), await realLocation(directory))) throw recordError('out-inside-project');
 
@@ -86,21 +120,17 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   if (patch.length === 0) throw recordError('diff-empty');
   if (patch.length > MAX_DIFF_BYTES) throw recordError('diff-too-large');
 
-  const names = await recordNames(target, git);
-  const priorReviews = prior ?? reviewIds(names);
-  const stem = `${job}-${candidate.slice(0, 12)}`;
   const diffPath = join(directory, `${stem}.diff`);
   // REVIEW.md is read at the base, so a candidate cannot change the rules that judge it.
   const guideBlob = blobAt(git, base, 'REVIEW.md');
   const guideCopy = guideBlob ? join(directory, `${stem}.REVIEW.md`) : null;
   const guideChanged = guideBlob !== blobAt(git, candidate, 'REVIEW.md');
   const envelope = buildEnvelope({
-    initiative, job, base, candidate,
+    ...fields, base, candidate,
     diff: { path: diffPath, argv, bytes: patch.length, sha256: createHash('sha256').update(patch).digest('hex') },
-    brief: { path: brief.path, revision: brief.revision, checkpoint, blob: blobAt(git, checkpoint, brief.path) },
     reviewGuide: { revision: base, blob: guideBlob, copy: guideCopy, changed: guideChanged },
-    round: priorReviews.length + 1, priorReviews, reviewer,
-    resources: resources.map(path => ({ path, absolutePath: join(FACTORY_ROOT, ...path.split('/')), blob: blobAt(git, checkpoint, path) })),
+    reviewer,
+    resources: resources.map(path => ({ path, absolutePath: join(FACTORY_ROOT, ...path.split('/')), blob: blobAt(git, resourceRevision, path) })),
   });
   const text = Buffer.from(`${JSON.stringify(envelope, null, 2)}\n`, 'utf8');
   await mkdir(directory, { recursive: true });
@@ -110,6 +140,7 @@ export async function reviewHandoff({ project, initiative, job, brief: briefInpu
   await writeOnce(handoffPath, text);
   const handoff = { path: handoffPath, sha256: createHash('sha256').update(text).digest('hex'), bytes: text.length };
   return { ok: true, handoff, envelope, promptLines: [`handoff: ${handoff.path}`, `handoff-sha256: ${handoff.sha256}`, `candidate ${candidate}`,
+    ...(fields.mode === 'code-only' ? [`base ${base}`, 'review-mode: code-only'] : []),
     guideCopy ? `review-guide: ${guideCopy} (REVIEW.md at base ${base})` : `review-guide: absent at base ${base}`,
     ...(guideChanged ? ["review-guide-changed: the candidate changes REVIEW.md; it needs a person's approval"] : [])] };
 }
@@ -204,6 +235,7 @@ const LOCATION = ['--project', '--initiative', '--job'];
 const commands = {
   review: { required: [...LOCATION, '--brief', '--checkpoint', '--base', '--candidate'], optional: ['--out', '--host'], variadic: '--prior' },
   coverage: { required: ['--project'], optional: ['--initiative', '--job', '--base', '--head'] },
+  'code-review': { required: ['--project', '--base', '--candidate', '--request'], optional: ['--out', '--host'] },
 };
 
 /** Parses `<command> --flag VALUE ...`: every required flag once, each optional flag at most once, and `--prior` with the review IDs that follow it. */
@@ -231,6 +263,7 @@ function parseArgs([command, ...parts]) {
 
 async function run(argv) {
   const { command, args } = parseArgs(argv);
+  if (command === 'code-review') return codeReviewHandoff({ project: args['--project'], base: args['--base'], candidate: args['--candidate'], request: args['--request'], out: args['--out'], host: args['--host'] });
   if (command === 'coverage') return coverage({ project: args['--project'], initiative: args['--initiative'], job: args['--job'], base: args['--base'], head: args['--head'] });
   return reviewHandoff({
     project: args['--project'], initiative: args['--initiative'], job: args['--job'], brief: args['--brief'], checkpoint: args['--checkpoint'],

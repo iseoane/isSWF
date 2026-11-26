@@ -82,10 +82,14 @@ export async function verifyHandoff({ prompt, host, agent, references, io }) {
   }
   if (!isObject(envelope) || envelope.schema !== HANDOFF_SCHEMA) return `the handoff schema is not ${HANDOFF_SCHEMA}`;
   if (envelope.kind !== 'review') return 'the handoff is not a review handoff (kind review)';
+  // A code-only review names no brief: the prompt's base and the envelope's mode, request and empty job identity stand in for it.
+  const codeOnly = references.mode === 'code-only';
+  if (codeOnly !== (envelope.mode === 'code-only')) return codeOnly ? 'the handoff is not a code-only review handoff (mode code-only)' : 'a code-only review handoff needs a code-only prompt (review-mode: code-only)';
+  if (codeOnly && (envelope.initiative !== null || envelope.job !== null || envelope.brief !== null || typeof envelope.request !== 'string' || !envelope.request.trim())) return 'a code-only review handoff has no initiative, job or brief and carries the operator request';
   const brief = isObject(envelope.brief) ? envelope.brief : {};
   for (const [field, actual, expected] of [
-    ['candidate', envelope.candidate, named.candidate], ['base', envelope.base, references.base], ['checkpoint', brief.checkpoint, references.checkpoint],
-    ['initiative', envelope.initiative, references.initiative], ['job', envelope.job, references.job], ['brief revision', String(brief.revision), references.revision],
+    ['candidate', envelope.candidate, named.candidate], ['base', envelope.base, references.base],
+    ...(codeOnly ? [] : [['checkpoint', brief.checkpoint, references.checkpoint], ['initiative', envelope.initiative, references.initiative], ['job', envelope.job, references.job], ['brief revision', String(brief.revision), references.revision]]),
   ]) if (actual !== expected) return `the handoff ${field} ${actual} is not the prompt's ${expected}`;
   const reviewer = isObject(envelope.reviewer) ? envelope.reviewer : {};
   if (reviewer.host !== host) return `the handoff reviewer host ${reviewer.host} is not ${host}`;
@@ -171,11 +175,12 @@ export function sha256Hex(bytes) {
 }
 
 /** The `isswf.handoff/1` envelope for a review: the one place that fixes its keys and their order. `reviewGuide` is REVIEW.md at the base, its copy, and whether the candidate changes it. */
-export function buildEnvelope({ initiative, job, base, candidate, diff, brief, reviewGuide, round, priorReviews, reviewer, resources }) {
+export function buildEnvelope({ mode, initiative, job, base, candidate, diff, brief, request, reviewGuide, round, priorReviews, reviewer, resources }) {
   return {
-    schema: HANDOFF_SCHEMA, kind: 'review', initiative, job, base, candidate,
+    schema: HANDOFF_SCHEMA, kind: 'review', ...(mode === 'code-only' && { mode }), initiative, job, base, candidate,
     diff: { path: diff.path, argv: diff.argv, bytes: diff.bytes, sha256: diff.sha256 },
-    brief: { path: brief.path, revision: brief.revision, checkpoint: brief.checkpoint, blob: brief.blob ?? null },
+    brief: brief ? { path: brief.path, revision: brief.revision, checkpoint: brief.checkpoint, blob: brief.blob ?? null } : null,
+    ...(mode === 'code-only' && { request }),
     reviewGuide: { path: 'REVIEW.md', revision: reviewGuide?.revision ?? null, blob: reviewGuide?.blob ?? null, copy: reviewGuide?.copy ?? null, changed: reviewGuide?.changed ?? false },
     round, priorReviews: [...priorReviews],
     reviewer: { host: reviewer.host, agent: reviewer.agent, model: reviewer.model, effort: reviewer.effort },

@@ -296,6 +296,37 @@ const reviewed = async options => {
   return claude(reviewerCall(prompt), io);
 };
 assert.deepEqual(await reviewed(), { allow: true }, 'a verifying handoff');
+
+// A code-only review: no brief, a `review-mode: code-only` line and the base; the handoff carries the request and no job identity.
+{
+  const codeEnvelope = () => buildEnvelope({
+    mode: 'code-only', initiative: null, job: null, brief: null, request: 'Scope the command guard to isSWF projects.', base: BASE, candidate: CANDIDATE,
+    diff: { path: DIFF_PATH, argv: diffArguments(BASE, CANDIDATE), bytes: DIFF.length, sha256: sha256Hex(DIFF) }, reviewGuide: null, round: 1, priorReviews: [],
+    reviewer: { host: 'claude', agent: 'isswf:isswf-reviewer', model: 'opus', effort: 'medium' }, resources: [],
+  });
+  const codeReview = async ({ mutate, lines = digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}\nbase ${BASE}\nreview-mode: code-only`, agent = 'isswf:isswf-reviewer' } = {}) => {
+    const envelope = codeEnvelope();
+    mutate?.(envelope);
+    const genuine = bytesOf(JSON.stringify(envelope, null, 2));
+    const io = memoryIo({ ...project(), files: { ...project().files, [HANDOFF_PATH]: genuine, [DIFF_PATH]: DIFF } });
+    return claude(claudeCall({ subagent_type: agent, model: agent.endsWith('reviewer') ? 'opus' : undefined, effort: agent.endsWith('reviewer') ? 'medium' : undefined, prompt: `Review the change.\n${lines(sha256Hex(genuine))}` }), io);
+  };
+  assert.deepEqual(await codeReview(), { allow: true }, 'a code-only review without an initiative');
+  refused(await codeReview({ lines: digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}\nreview-mode: code-only` }), 'references', 'base');
+  refused(await codeReview({ lines: digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}\nbase ${BASE}` }), 'references', 'brief');
+  refused(await codeReview({ lines: digest => `handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${digest}\ncandidate ${CANDIDATE}\nbase ${'d4'.repeat(20)}\nreview-mode: code-only` }), 'handoff', 'base');
+  refused(await codeReview({ mutate: envelope => { delete envelope.mode; } }), 'handoff', 'code-only');
+  refused(await codeReview({ mutate: envelope => { envelope.job = 'J001'; } }), 'handoff', 'no initiative, job or brief');
+  refused(await codeReview({ mutate: envelope => { envelope.request = ' '; } }), 'handoff', 'request');
+  // A job handoff cannot be passed off as code-only, nor the reverse.
+  {
+    const genuine = bytesOf(JSON.stringify(envelopeOf(DIFF), null, 2));
+    const io = memoryIo({ ...project(), files: { ...project().files, [HANDOFF_PATH]: genuine, [DIFF_PATH]: DIFF } });
+    refused(await claude(reviewerCall(`handoff: ${HANDOFF_PATH}\nhandoff-sha256: ${sha256Hex(genuine)}\ncandidate ${CANDIDATE}\nbase ${BASE}\nreview-mode: code-only`), io), 'handoff', 'code-only');
+  }
+  // Only the reviewer has a code-only mode.
+  refused(await claude(claudeCall({ prompt: `review-mode: code-only\nbase ${BASE}` }), memoryIo(project())), 'references', 'brief');
+}
 assert.deepEqual(await reviewed({ handoffPath: 'C:\\tmp\\handoffs\\J001.handoff.json' }), { allow: true }, 'a Windows handoff path');
 assert.deepEqual(await reviewed({ line: digest => `handoff ${HANDOFF_PATH}\nhandoff-sha256 ${digest}\ncandidate: ${CANDIDATE}` }), { allow: true }, 'the labels with or without a colon');
 // Only a reviewer needs a handoff; the worker dispatch above carries none.
