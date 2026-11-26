@@ -48,5 +48,5 @@
 - Required corrections or unresolved questions:
 - Return this artifact to the coordinator. Do not edit the candidate or disposition your own findings.
 - Coordinator override, recorded afterwards by the coordinator and never written into the verdicts above: `<decision, reason, evidence and authority, or None.>`
-- Finding resolutions, recorded afterwards by the coordinator: `<one entry per finding, as "<ID> <resolution>: <reason>", separated by "; " or as nested bullets; resolution is fixed, wrong, known-limit, not-material or dismissed; a deferral to a tracked job is known-limit naming the job>`.
+- Finding resolutions, recorded afterwards by the coordinator: `<one entry per finding, as "<ID> <resolution>: <reason>", separated by "; " or as nested bullets; resolution is fixed, wrong, known-limit, not-material or dismissed; a deferral to a tracked job is known-limit naming the job>`
 - A changed candidate requires a new review identifying its exact base and candidate.
