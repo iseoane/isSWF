@@ -352,7 +352,8 @@ function subcommand(args, from = 0) {
 
 const INSTALLERS = {
   npm: ['install', 'i', 'add', 'exec', 'x'],
-  pnpm: ['dlx', 'add', 'install', 'i', 'exec'],
+  // `pnpm exec` runs a binary the project already installed; it never fetches one, unlike `npm exec` and `pnpm dlx`.
+  pnpm: ['dlx', 'add', 'install', 'i'],
   yarn: ['dlx', 'add', 'install'],
   bun: ['add', 'install', 'i', 'x'],
 };

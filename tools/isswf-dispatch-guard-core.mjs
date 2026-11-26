@@ -171,6 +171,18 @@ function retrospectiveOf(prompt) {
   return { name: record[1], checkpoint };
 }
 
+/**
+ * A reviewer prompt that names no job brief but a `review-mode: code-only` line and a full base SHA, or undefined when it names a job
+ * brief or no such line; condition 3 then decides as for any other review. Its handoff is then the only evidence checked (condition 6).
+ */
+function codeOnlyOf(prompt) {
+  const body = typeof prompt === 'string' ? prompt : '';
+  if (BRIEF_PATH.test(body) || !/^[ \t]*(?:[-*][ \t]+)?review-mode:?[ \t]+code-only[ \t\r]*$/mu.test(body)) return undefined;
+  const base = fullShaAfter(body, 'base');
+  if (!base) refuse(3, 'the prompt does not give the full 40-hex target base SHA after the word "base"');
+  return { mode: 'code-only', base };
+}
+
 async function checkPlan(planPath, job, io) {
   let markdown;
   try {
@@ -224,6 +236,12 @@ async function checkCall(host, call, io) {
   const retrospective = READ_ONLY_AGENT.test(call.agent) ? retrospectiveOf(call.prompt) : undefined;
   if (retrospective) {
     await checkBrief(project, `${state}/retrospectives/${retrospective.name}.md`, retrospective.checkpoint, join, io, 'retrospective record');
+    return;
+  }
+  const codeOnly = REVIEWER_AGENT.test(call.agent) ? codeOnlyOf(call.prompt) : undefined;
+  if (codeOnly) {
+    const reason = await verifyHandoff({ prompt: call.prompt, host, agent: call.agent, references: codeOnly, io });
+    if (reason) refuse(6, reason);
     return;
   }
   const references = checkReferences(call.prompt);

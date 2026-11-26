@@ -176,6 +176,30 @@ try {
   assert.equal(sideOut.ok, true, JSON.stringify(sideOut));
   await write('.factory/initiatives/I0001/plan.md', plan('in-progress'));
 
+  // A code-only review needs no initiative, job or brief: it binds the exact diff to the operator's request.
+  {
+    const codeOut = join(temp, 'out-code');
+    const code = (overrides = {}) => {
+      const flags = { '--project': root, '--base': base, '--candidate': candidate, '--request': 'Scope the guard.', '--out': codeOut, ...overrides };
+      return tool(['code-only', ...Object.entries(flags).flatMap(([flag, value]) => (value === undefined ? [] : [flag, value]))]);
+    };
+    const made = code();
+    assert.equal(made.ok, true, JSON.stringify(made));
+    const envelope = JSON.parse(await readFile(made.handoff.path, 'utf8'));
+    assert.deepEqual([envelope.mode, envelope.initiative, envelope.job, envelope.brief, envelope.request, envelope.round], ['code-only', null, null, null, 'Scope the guard.', 1]);
+    assert.equal(envelope.diff.sha256, sha256(await readFile(envelope.diff.path)));
+    assert.deepEqual(made.promptLines.slice(0, 5), [`handoff: ${made.handoff.path}`, `handoff-sha256: ${made.handoff.sha256}`, `candidate ${candidate}`, `base ${base}`, 'review-mode: code-only']);
+    refuses(code({ '--request': ' ' }), 'invalid-request');
+    refuses(code({ '--out': join(root, 'inside') }), 'out-inside-project');
+    assert.equal(tool(['code-only', '--project', root, '--base', base, '--candidate', candidate]).code, 'usage');
+    // A range that changes job records is a job's change and is refused.
+    await write('.factory/initiatives/I0001/jobs/J001/A001.md', '# attempt\n');
+    git(root, 'add', '-A');
+    git(root, 'commit', '-qm', 'job record');
+    refuses(code({ '--candidate': git(root, 'rev-parse', 'HEAD') }), 'job-records-in-range');
+    git(root, 'reset', '-q', '--hard', candidate);
+  }
+
   // The default directory is the OS temporary directory, and a diff the Claude hook cannot read (4 MiB) is refused at generation.
   {
     const scratch = join(temp, 'tmp');
