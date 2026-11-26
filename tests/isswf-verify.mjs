@@ -96,6 +96,20 @@ try {
   assert.deepEqual(statusOf(verify(tiers.repo, '--base', tiers.head, '--only', 'init-one').out), { 'init-one': 'passed' });
   assert.equal(verify(tiers.repo, '--base', tiers.head, '--only', 'nope').out.code, 'check-not-found');
 
+  // Checks overlap by default and keep their listed order: each of two checks waits for the other to start, so a one-at-a-time run times both out.
+  const rendezvous = (mine, theirs) => node('-e', `const fs = require('fs'); fs.writeFileSync(${JSON.stringify(mine)}, ''); const end = Date.now() + 6000; while (!fs.existsSync(${JSON.stringify(theirs)})) { if (Date.now() > end) process.exit(9); Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20); }`);
+  const flagA = join(temp, 'overlap-a.flag'), flagB = join(temp, 'overlap-b.flag');
+  const overlap = makeRepo('overlap', [
+    check('first', rendezvous(flagA, flagB), { timeoutSeconds: 30 }),
+    check('second', rendezvous(flagB, flagA), { timeoutSeconds: 30 }),
+  ]);
+  const together = verify(overlap.repo, '--base', overlap.head, '--tier', 'job', '--jobs', '2');
+  assert.deepEqual(together.out.results.map(result => [result.checkId, result.status]), [['first', 'passed'], ['second', 'passed']]);
+  rmSync(flagA); rmSync(flagB);
+  const serial = verify(overlap.repo, '--base', overlap.head, '--tier', 'job', '--jobs', '1');
+  assert.deepEqual(serial.out.results.map(result => [result.checkId, result.exitCode]), [['first', 9], ['second', 0]], '--jobs 1 runs one check at a time');
+  for (const bad of ['0', '-1', 'x', '1000']) assert.equal(verify(overlap.repo, '--base', overlap.head, '--tier', 'job', '--jobs', bad).out.code, 'invalid-jobs', `--jobs ${bad}`);
+
   // The approved file comes from the base, not from the candidate that may rewrite it.
   const approved = makeRepo('approved', [check('real', node('-e', 'process.exit(0)'))]);
   write(approved.repo, '.factory/verification.json', file([check('real', node('-e', 'process.exit(5)'))]));

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process';
+import { execFile, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { availableParallelism } from 'node:os';
 import { isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
@@ -29,7 +30,7 @@ const gitText = (cwd, args) => {
 
 function parseArguments(argv) {
   const options = {};
-  const flags = new Set(['--project', '--base', '--tier', '--only', '--record']);
+  const flags = new Set(['--project', '--base', '--tier', '--only', '--record', '--jobs']);
   const switches = new Set(['--stale', '--allow-stale', '--table']);
   for (let index = 0; index < argv.length; index += 1) {
     if (switches.has(argv[index])) { options[argv[index].slice(2)] = true; continue; }
@@ -40,6 +41,7 @@ function parseArguments(argv) {
   if (typeof options.project !== 'string' || !isAbsolute(options.project)) throw fail('invalid-project', '--project needs an absolute path');
   if (options.tier !== undefined && !Object.hasOwn(TIER_COSTS, options.tier)) throw fail('invalid-tier', '--tier is job or initiative');
   if (options.base !== undefined && !REF.test(options.base)) throw fail('invalid-base');
+  if (options.jobs !== undefined && !/^[1-9]d{0,2}$/u.test(options.jobs)) throw fail('invalid-jobs', '--jobs needs a whole number from 1 to 999');
   if (options.tier === undefined && options.only === undefined && !options.stale && !options.table) throw fail('tier-required', 'pass --tier job|initiative, --only <id>, --stale or --table');
   if (options.record !== undefined) {
     if (options.tier !== 'initiative' || options.only !== undefined || options.stale || options.table || options['allow-stale']) throw fail('record-needs-initiative-tier', '--record needs --tier initiative, without --only, --stale, --allow-stale or --table');
@@ -88,18 +90,41 @@ function staleEntries(derivedFrom, project) {
 
 const tail = bytes => (bytes ?? Buffer.alloc(0)).subarray(-TAIL_BYTES).toString('utf8');
 
+// Checks overlap because each one is dominated by process start-up (Git, Node), which is far slower on Windows than on Linux and
+// leaves the CPU idle; `--jobs 1` restores strictly one-at-a-time runs.
+const defaultJobs = () => Math.min(4, availableParallelism());
+
 function execute(check, project) {
   const [command, ...args] = check.argv;
-  if (isLauncher(command)) return { status: 'refused', exitCode: null, message: `${command} needs a shell on Windows; call \`node <cli.js>\` instead` };
+  if (isLauncher(command)) return Promise.resolve({ status: 'refused', exitCode: null, message: `${command} needs a shell on Windows; call \`node <cli.js>\` instead` });
   const started = Date.now();
-  const result = spawnSync(command === 'node' ? process.execPath : command, args, {
-    cwd: project, shell: false, windowsHide: true, encoding: 'buffer', maxBuffer: OUTPUT_LIMIT, timeout: check.timeoutSeconds * 1000, stdio: ['ignore', 'pipe', 'pipe'],
+  return new Promise(done => {
+    const child = execFile(command === 'node' ? process.execPath : command, args, {
+      cwd: project, shell: false, windowsHide: true, encoding: 'buffer', maxBuffer: OUTPUT_LIMIT, timeout: check.timeoutSeconds * 1000,
+    }, (error, stdout, stderr) => {
+      const outcome = { exitCode: error === null ? 0 : typeof error.code === 'number' ? error.code : null, durationMs: Date.now() - started, stdoutTail: tail(stdout), stderrTail: tail(stderr) };
+      if (error === null) return done({ ...outcome, status: 'passed' });
+      if (error.code === 'ENOENT') return done({ ...outcome, status: 'unavailable', message: `${command} was not found` });
+      if (error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') return done({ ...outcome, status: 'failed', message: error.message });
+      if (error.killed) return done({ ...outcome, status: 'timeout', message: `stopped after ${check.timeoutSeconds} s` });
+      return done({ ...outcome, status: 'failed' });
+    });
+    // spawnSync ran with stdin ignored; closing it gives a reader the same immediate end of input.
+    child.stdin?.end();
   });
-  const outcome = { exitCode: result.status, durationMs: Date.now() - started, stdoutTail: tail(result.stdout), stderrTail: tail(result.stderr) };
-  if (result.error?.code === 'ENOENT') return { ...outcome, status: 'unavailable', message: `${command} was not found` };
-  if (result.error?.code === 'ETIMEDOUT') return { ...outcome, status: 'timeout', message: `stopped after ${check.timeoutSeconds} s` };
-  if (result.error) return { ...outcome, status: 'failed', message: result.error.message };
-  return { ...outcome, status: result.status === 0 ? 'passed' : 'failed' };
+}
+
+/** Runs `task` over `items` with at most `limit` in flight and returns the results in input order. */
+async function mapLimit(items, limit, task) {
+  const results = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await task(items[index]);
+    }
+  }));
+  return results;
 }
 
 /** Resolves the candidate and base commits and reads the approved verification file at the base. */
@@ -185,7 +210,7 @@ export function platformNotice({ selected, costs, platform }) {
 }
 
 /** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. With `record`, runs every cost and writes the initiative's close record. */
-function verify(options) {
+async function verify(options) {
   const { project, candidate, base, path, blob, state } = readApproved(options);
   const { checks } = parseVerification(blob.stdout);
   // Staleness compares the candidate's own derivedFrom, so a branch that refreshes the file is fresh; the base file falls back when the candidate has none.
@@ -206,10 +231,11 @@ function verify(options) {
   const selected = options.only === undefined ? checks : checks.filter(entry => entry.id === options.only);
   const notice = options.tier === 'initiative' ? platformNotice({ selected, costs, platform: process.platform }) : undefined;
   if (notice) console.error(notice);
-  const results = selected.map(check => {
+  const jobs = options.jobs === undefined ? defaultJobs() : Number(options.jobs);
+  const results = await mapLimit(selected, jobs, async check => {
     const stamp = { checkId: check.id, platform: process.platform, argvSha256: sha256(JSON.stringify(check.argv)), candidate, dirty, verificationSha256 };
     const applies = check.platforms.includes(process.platform) && (options.only !== undefined || costs.includes(check.cost));
-    return { ...stamp, ...(applies ? execute(check, project) : { status: 'not run', exitCode: null }) };
+    return { ...stamp, ...(applies ? await execute(check, project) : { status: 'not run', exitCode: null }) };
   });
   const refused = stale.length > 0 && !options['allow-stale'];
   if (recordPath !== undefined && !refused) {
@@ -228,7 +254,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     if (options.table) {
       console.log(renderTable(parseVerification(readApproved(options).blob.stdout).checks));
     } else {
-      const report = verify(options);
+      const report = await verify(options);
       console.log(JSON.stringify(report, null, 2));
       // 1 for a failed check, or for a recorded check that did not run (the close gate refuses that record), 2 for staleness alone.
       const unrun = report.record === undefined ? [] : report.results.filter(result => result.status === 'not run');
