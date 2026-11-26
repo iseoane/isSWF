@@ -88,7 +88,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J006
 
-- Status: pending
+- Status: in-progress
 - Objective: On Windows, the initiative close points straight to a passing CI record instead of a local run that cannot pass.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
