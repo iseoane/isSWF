@@ -59,7 +59,7 @@ export function launchViolations({ path, text, name, launches, siblings }) {
     && (roleOfAgent(agent) === 'reviewer') === (name[0] === 'V')
     && path.replaceAll('\\', '/').includes(`/${initiative}/jobs/${job}/`)
     && text.includes(baseName(brief)) && text.includes(checkpoint));
-  return open.map(({ run }) => ({ code: 'run-line-missing', field: 'Run:', message: `the host returned run ${run} for an accepted launch of this brief but the record has no Run: line: add "- Run: claude agent=${run}"` }));
+  return open.map(({ run }) => ({ code: 'run-line-missing', field: 'Run:', message: `the host returned run ${run} for an accepted launch of this brief and the record has no Run: line. That launch may belong to an earlier record of this job (a foreground child's ID reaches the session only after it finishes): add "- Run: claude agent=${run}" to the record that launch produced, or pass --run when it is this one` }));
 }
 
 // Labels of the current templates (.factory/templates/attempt.md and review.md), matched at the start of a line.
