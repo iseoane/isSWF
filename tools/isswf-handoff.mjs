@@ -93,6 +93,9 @@ export async function codeReviewHandoff({ project, base, candidate, request, out
   for (const name of ['.isswf', '.factory']) if ((await lstat(join(root, name)).catch(() => undefined))?.isDirectory()) states.push(name);
   if (states.length !== 1) throw recordError('state-not-found');
   const git = await gitIn(root);
+  // A change that touches job records belongs to a job, whose review goes through `review` and its brief.
+  for (const [sha, flag] of [[base, 'base'], [candidate, 'candidate']]) assertCommit(git, sha, flag);
+  if (git(['diff', '--name-only', '-z', base, candidate]).split('\0').some(path => /^\.(?:isswf|factory)\/initiatives\/[^/]+\/jobs\//u.test(path))) throw recordError('job-records-in-range');
   return writeHandoff({
     target: { root, state: states[0] }, git, base, candidate, out, host, stem: `code-${candidate.slice(0, 12)}`, resourceRevision: base,
     fields: { mode: 'code-only', initiative: null, job: null, brief: null, request: request.trim(), round: 1, priorReviews: [] },

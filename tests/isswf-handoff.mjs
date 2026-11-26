@@ -192,6 +192,12 @@ try {
     refuses(code({ '--request': ' ' }), 'invalid-request');
     refuses(code({ '--out': join(root, 'inside') }), 'out-inside-project');
     assert.equal(tool(['code-review', '--project', root, '--base', base, '--candidate', candidate]).code, 'usage');
+    // A range that changes job records is a job's change and is refused.
+    await write('.factory/initiatives/I0001/jobs/J001/A001.md', '# attempt\n');
+    git(root, 'add', '-A');
+    git(root, 'commit', '-qm', 'job record');
+    refuses(code({ '--candidate': git(root, 'rev-parse', 'HEAD') }), 'job-records-in-range');
+    git(root, 'reset', '-q', '--hard', candidate);
   }
 
   // The default directory is the OS temporary directory, and a diff the Claude hook cannot read (4 MiB) is refused at generation.
