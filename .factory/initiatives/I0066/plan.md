@@ -92,18 +92,22 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J006
 
-- Status: in-progress
+- Status: completed
 - Objective: On Windows, the initiative close points straight to a passing CI record instead of a local run that cannot pass.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J006/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (two messages). Ground the change in the current source.
+- Next step: None.
 
 ### Acceptance
 
 - `isswf-verify --tier initiative` on win32 reports before running that `check-quality` and `dead-code` will be "not run" and that the close gate needs a `source: "ci"` record, and how to write it.
 - The plan commit guard refusal names the CI record route first on win32.
 - Tests cover both messages.
+
+### Evidence
+
+- PR #406 merged as 57b498a60ff436a8c461a442c7c4afa5e28c8a43, CI green on head 84629b19. Reviews V001 fail (Node global in a hook core, false win32 wording), V002 pass; coordinator ran the verify and guard tests and the hook suite (unchanged versus main). Known limits: job-cost checks limited to other platforms are not in the notice; the OS lookup shares the guards try; no hook test for the win32 wording.
 
 ## J007
 
