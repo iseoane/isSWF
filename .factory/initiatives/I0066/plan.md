@@ -287,7 +287,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J017
 
-- Status: pending
+- Status: in-progress
 - Objective: The integration gate checks review coverage at `git push` time on both Pi and Claude Code, through a pure coverage core that packaged hooks can import.
 - Depends on: J005
 - Brief: [brief-r1.md](jobs/J017/brief-r1.md)
