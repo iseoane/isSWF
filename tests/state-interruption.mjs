@@ -1,6 +1,6 @@
 import { cloneRepository, initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
+import { execFile, spawn, spawnSync } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { chmod, mkdir, mkdtemp, readFile, readdir, realpath, rm, stat, writeFile } from 'node:fs/promises';
@@ -29,11 +29,27 @@ const plain = value => JSON.parse(JSON.stringify(value));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 const readJSON = async path => JSON.parse(await readFile(path, 'utf8'));
-function run(binary, args, expectedStatus = 0) {
-  const result = spawnSync(binary, args, { cwd: temp, env, encoding: 'utf8', timeout: 180000, maxBuffer: 4 * 1024 * 1024 });
-  assert.ifError(result.error);
+// Asynchronous so independent scenarios overlap: each one is dominated by process start-up, which is several times slower on Windows.
+async function run(binary, args, expectedStatus = 0) {
+  const result = await new Promise(done => {
+    const child = execFile(binary, args, { cwd: temp, env, encoding: 'utf8', timeout: 180000, maxBuffer: 4 * 1024 * 1024 }, (error, stdout, stderr) => done({ error, status: error === null ? 0 : error.code, stdout, stderr }));
+    child.stdin.end();
+  });
+  if (typeof result.status !== 'number') assert.ifError(result.error);
   assert.equal(result.status, expectedStatus, `${binary} ${args.join(' ')}\n${result.stderr}\n${result.stdout}`);
   return result;
+}
+// Runs at most `max` of the scheduled thunks at once.
+function limiter(max) {
+  let active = 0;
+  const waiting = [];
+  const next = () => {
+    if (active >= max || waiting.length === 0) return;
+    const { thunk, resolve, reject } = waiting.shift();
+    active++;
+    thunk().then(resolve, reject).finally(() => { active--; next(); });
+  };
+  return thunk => new Promise((resolve, reject) => { waiting.push({ thunk, resolve, reject }); next(); });
 }
 const git = (project, ...args) => run('git', ['-C', project, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', ...args]);
 
@@ -66,11 +82,11 @@ const boundaries = {
   renamed: { label: 'after rename, before complete.json', legacy: false, journalDir: true, record: true, activeDirectory: '.isswf', recovered: 'moved', journalFiles: ['complete.json', 'record.json', 'recovered.json'] },
 };
 const children = new Set(), receipts = [];
-let installed, nodeLauncher, counter = 0, invoke;
-// Runs the public CLI through the launcher under test: the Node release launcher or the compiled Bun executable.
-const isswf = (args, expectedStatus = 0) => run(invoke[0], [...invoke.slice(1), ...args], expectedStatus);
+let installed, nodeLauncher, counter = 0;
+// Runs the public CLI through a launcher under test: the Node release launcher or the compiled Bun executable.
+const isswf = (launcher, args, expectedStatus = 0) => run(launcher[0], [...launcher.slice(1), ...args], expectedStatus);
 
-async function fixture() {
+async function fixture(launcher) {
   const name = 'interrupted ' + ++counter + ' ñ';
   const root = join(temp, name);
   await mkdir(join(root, '.factory/initiatives/I0007/jobs/J002'), { recursive: true });
@@ -84,11 +100,11 @@ async function fixture() {
   for (const [path, bytes] of payloads) await writeFile(join(project, '.factory', path), bytes);
   if (process.platform !== 'win32') await chmod(join(project, '.factory/initiatives/I0007/jobs/J002/brief-r1.md'), 0o640);
   initRepository(project);
-  git(project, 'add', '-f', '.factory');
-  git(project, 'commit', '-qm', 'legacy state fixture');
+  await git(project, 'add', '-f', '.factory');
+  await git(project, 'commit', '-qm', 'legacy state fixture');
   const args = ['--project', project, '--store', store];
-  const expected = JSON.parse(isswf(['inspect', ...args]).stdout).stateMigration.expected;
-  return { name, project, store, payloads, expected, id: 'S0001', args, journal: join(store, 'state-migrations', hash(project), 'S0001'), claim: join(project, '.isswf-transition') };
+  const expected = JSON.parse((await isswf(launcher, ['inspect', ...args])).stdout).stateMigration.expected;
+  return { name, launcher, project, store, payloads, expected, id: 'S0001', args, journal: join(store, 'state-migrations', hash(project), 'S0001'), claim: join(project, '.isswf-transition') };
 }
 
 async function walk(root, label, out) {
@@ -129,8 +145,8 @@ async function assertInventory(ctx, rootName) {
   for (const [path, bytes] of ctx.payloads) assert.deepEqual(await readFile(join(ctx.project, rootName, path)), bytes, `payload bytes changed: ${path}`);
 }
 
-async function interrupt(boundary) {
-  const ctx = await fixture(), expectation = boundaries[boundary], ready = join(temp, ctx.name + '.ready');
+async function interrupt(boundary, launcher) {
+  const ctx = await fixture(launcher), expectation = boundaries[boundary], ready = join(temp, ctx.name + '.ready');
   const child = spawn(process.execPath, ['--import', pathToFileURL(preload).href, nodeLauncher, 'migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', quiescent], { env: { ...env, ISSWF_TEST_PAUSE_AT: boundary, ISSWF_TEST_READY: ready }, stdio: ['ignore', 'pipe', 'pipe'] });
   children.add(child);
   let output = '', settled = null;
@@ -163,7 +179,7 @@ async function interrupt(boundary) {
 
 const recoverArgs = ctx => ['recover-state', ...ctx.args, '--id', ctx.id];
 async function assertRefused(ctx, pattern, label) {
-  const before = await evidence(ctx), result = isswf(recoverArgs(ctx), 1);
+  const before = await evidence(ctx), result = await isswf(ctx.launcher, recoverArgs(ctx), 1);
   assert.match(result.stderr, pattern, label);
   assert.equal(result.stdout, '', `${label}: refusal prints no success result`);
   assert.deepEqual(await evidence(ctx), before, `${label}: claim, journal and state bytes retained`);
@@ -171,7 +187,7 @@ async function assertRefused(ctx, pattern, label) {
 }
 
 async function recoverAndVerify(ctx, termination) {
-  const recovered = JSON.parse(isswf(recoverArgs(ctx)).stdout), expectation = ctx.expectation, other = expectation.activeDirectory === '.factory' ? '.isswf' : '.factory';
+  const recovered = JSON.parse((await isswf(ctx.launcher, recoverArgs(ctx))).stdout), expectation = ctx.expectation, other = expectation.activeDirectory === '.factory' ? '.isswf' : '.factory';
   assert.deepEqual(recovered, { status: 'state-recovered', id: ctx.id, activeDirectory: expectation.activeDirectory });
   assert.equal(existsSync(ctx.claim), false, 'Claim retired');
   assert.equal(existsSync(join(ctx.project, other)), false, 'Exactly one active root');
@@ -181,15 +197,15 @@ async function recoverAndVerify(ctx, termination) {
   assert.deepEqual(await readJSON(join(ctx.journal, 'recovered.json')), { format: 1, id: ctx.id, state: expectation.recovered });
   if (ctx.boundary === 'renamed') assert.deepEqual(await readJSON(join(ctx.journal, 'complete.json')), { format: 1, id: ctx.id, state: 'moved' });
   else assert.equal(existsSync(join(ctx.journal, 'complete.json')), false, 'An unmoved directory gets no complete receipt');
-  const settled = await evidence(ctx), repeat = isswf(recoverArgs(ctx), 1);
+  const settled = await evidence(ctx), repeat = await isswf(ctx.launcher, recoverArgs(ctx), 1);
   assert.match(repeat.stderr, /ENOENT/u, 'A repeat finds no claim and refuses');
   assert.deepEqual(await evidence(ctx), settled, 'A repeat leaves every byte unchanged');
   let afterwards;
   if (ctx.boundary === 'renamed') {
-    afterwards = JSON.parse(isswf(['migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', quiescent]).stdout).status;
+    afterwards = JSON.parse((await isswf(ctx.launcher, ['migrate-state', ...ctx.args, '--id', ctx.id, '--expected', ctx.expected, '--quiescent-ref', quiescent])).stdout).status;
     assert.equal(afterwards, 'unchanged', 'The recovered completed move is an identical repeat');
   } else {
-    afterwards = JSON.parse(isswf(['migrate-state', ...ctx.args, '--id', 'S0002', '--expected', ctx.expected, '--quiescent-ref', quiescent]).stdout).status;
+    afterwards = JSON.parse((await isswf(ctx.launcher, ['migrate-state', ...ctx.args, '--id', 'S0002', '--expected', ctx.expected, '--quiescent-ref', quiescent])).stdout).status;
     assert.equal(afterwards, 'state-migrated', 'The unchanged original can be moved by a new migration');
     await assertInventory({ ...ctx, journal: join(ctx.store, 'state-migrations', hash(ctx.project), 'S0002') }, '.isswf');
   }
@@ -198,19 +214,19 @@ async function recoverAndVerify(ctx, termination) {
 
 // clearClaim renames the claim to .isswf-transition-retired-<uuid> and then removes it; a kill in between leaves that
 // directory behind. After a completed migration it is inert: recover-state finds no claim, and no byte changes.
-async function retainedRetiredClaim() {
-  const ctx = await fixture(), migrate = id => ['migrate-state', ...ctx.args, '--id', id, '--expected', ctx.expected, '--quiescent-ref', quiescent];
-  assert.equal(JSON.parse(isswf(migrate(ctx.id)).stdout).status, 'state-migrated');
+async function retainedRetiredClaim(launcher) {
+  const ctx = await fixture(launcher), migrate = id => ['migrate-state', ...ctx.args, '--id', id, '--expected', ctx.expected, '--quiescent-ref', quiescent];
+  assert.equal(JSON.parse((await isswf(launcher, migrate(ctx.id))).stdout).status, 'state-migrated');
   ctx.retired = join(ctx.project, '.isswf-transition-retired-' + randomUUID());
   await mkdir(ctx.retired); await writeFile(join(ctx.retired, 'owner.json'), JSON.stringify({ format: 1, id: ctx.id }) + '\n');
   const before = await evidence(ctx);
-  const recover = isswf(recoverArgs(ctx), 1);
+  const recover = await isswf(launcher, recoverArgs(ctx), 1);
   assert.match(recover.stderr, /ENOENT/u, 'recover-state finds no .isswf-transition and refuses');
   assert.equal(recover.stdout, '', 'recover-state prints no success result');
   assert.deepEqual(await evidence(ctx), before, 'recover-state changed no byte');
-  assert.equal(JSON.parse(isswf(migrate(ctx.id)).stdout).status, 'unchanged', 'The same id and digest is an identical repeat');
+  assert.equal(JSON.parse((await isswf(launcher, migrate(ctx.id))).stdout).status, 'unchanged', 'The same id and digest is an identical repeat');
   assert.deepEqual(await evidence(ctx), before, 'The identical repeat changed no byte');
-  const another = isswf(migrate('S0002'), 1);
+  const another = await isswf(launcher, migrate('S0002'), 1);
   assert.match(another.stderr, /--expected must match the legacy state inventory/u, 'A new id has no .factory left to move');
   assert.equal(existsSync(join(ctx.store, 'state-migrations', hash(ctx.project), 'S0002')), false, 'The refused id gets no journal');
   assert.deepEqual(await evidence(ctx), before, 'The refused new id changed no byte');
@@ -222,71 +238,85 @@ try {
   // Build from a clone in temp, as release-package does: source and output then share a drive on Windows CI.
   const clone = join(temp, 'source');
   cloneRepository(source, clone, ['--shared']);
-  const revision = run('git', ['-C', clone, 'rev-parse', 'HEAD']).stdout.trim(), release = join(temp, 'release spaces ñ');
-  run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', release, '--runtime', 'node']);
-  const built = verifyRelease(release);
-  const packed = JSON.parse(run(process.execPath, [npm, 'pack', release, '--ignore-scripts', '--json', '--pack-destination', temp]).stdout);
-  const consumer = join(temp, 'consumer spaces ñ');
-  run(process.execPath, [npm, 'install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', join(temp, (Array.isArray(packed) ? packed[0] : Object.values(packed)[0]).filename)]);
-  installed = join(consumer, 'node_modules/isswf-pi-resources');
-  assert.equal(verifyRelease(installed).artifactId, built.artifactId, 'Installed package retains the exact built release');
-  nodeLauncher = join(installed, 'tools/isswf.mjs');
-  const launchers = [{ kind: 'Node release launcher, npm-installed', invoke: [process.execPath, nodeLauncher] }];
-  if (bunAvailable) {
+  const revision = (await run('git', ['-C', clone, 'rev-parse', 'HEAD'])).stdout.trim(), release = join(temp, 'release spaces ñ');
+  // The Bun build needs only the clone, so it overlaps the Node release's build, pack and install.
+  async function installNodeRelease() {
+    await run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', release, '--runtime', 'node']);
+    const built = verifyRelease(release);
+    const packed = JSON.parse((await run(process.execPath, [npm, 'pack', release, '--ignore-scripts', '--json', '--pack-destination', temp])).stdout);
+    const consumer = join(temp, 'consumer spaces ñ');
+    await run(process.execPath, [npm, 'install', '--prefix', consumer, '--ignore-scripts', '--no-audit', '--no-fund', '--offline', join(temp, (Array.isArray(packed) ? packed[0] : Object.values(packed)[0]).filename)]);
+    installed = join(consumer, 'node_modules/isswf-pi-resources');
+    assert.equal(verifyRelease(installed).artifactId, built.artifactId, 'Installed package retains the exact built release');
+    nodeLauncher = join(installed, 'tools/isswf.mjs');
+    return built;
+  }
+  async function buildBunLauncher() {
     const bunRelease = join(temp, 'release bun');
-    run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', bunRelease, '--runtime', 'bun', '--bun', bunCompiler]);
+    await run(process.execPath, [join(source, 'tools/build-release.mjs'), '--source', clone, '--revision', revision, '--output', bunRelease, '--runtime', 'bun', '--bun', bunCompiler]);
     const bunManifest = JSON.parse(await readFile(join(bunRelease, 'package.json'), 'utf8'));
     assert.equal(bunManifest.isswfRuntime.engine, 'bun');
     verifyRelease(bunRelease);
-    launchers.push({ kind: 'compiled Bun executable', invoke: [join(bunRelease, bunManifest.bin.isswf)] });
+    return { kind: 'compiled Bun executable', invoke: [join(bunRelease, bunManifest.bin.isswf)] };
   }
+  const [built, bunLauncher] = await Promise.all([installNodeRelease(), bunAvailable ? buildBunLauncher() : undefined]);
+  const launchers = [{ kind: 'Node release launcher, npm-installed', invoke: [process.execPath, nodeLauncher] }];
+  if (bunLauncher) launchers.push(bunLauncher);
 
+  // Every scenario owns its project and store, so they run side by side, a few at a time; each result keeps its place in the report.
+  const gate = limiter(4);
   // 1. Every boundary: the real Node owner is killed, then recover-state resolves it through each launcher.
-  for (const { kind, invoke: selected } of launchers) {
-    invoke = selected;
-    for (const boundary of Object.keys(boundaries)) {
-      const ctx = await interrupt(boundary), controls = [];
-      if (boundary === 'record') {
-        // Live-owner control: the same paused process, not yet terminated, must block recovery.
-        controls.push(await assertRefused(ctx, /live or uncertain/u, 'owner still alive (real paused process)'));
-        assert.equal(ctx.child.exitCode, null, 'The live owner was still running after the refusal');
-      }
-      const termination = await ctx.kill();
-      const receipt = await recoverAndVerify(ctx, termination);
-      receipts.push({ ...receipt, launcher: kind, controls });
+  const interruptions = launchers.flatMap(({ kind, invoke: selected }) => Object.keys(boundaries).map(boundary => gate(async () => {
+    const ctx = await interrupt(boundary, selected), controls = [];
+    if (boundary === 'record') {
+      // Live-owner control: the same paused process, not yet terminated, must block recovery.
+      controls.push(await assertRefused(ctx, /live or uncertain/u, 'owner still alive (real paused process)'));
+      assert.equal(ctx.child.exitCode, null, 'The live owner was still running after the refusal');
     }
-  }
-  const retiredControls = [];
-  for (const { kind, invoke: selected } of launchers) { invoke = selected; retiredControls.push({ launcher: kind, ...await retainedRetiredClaim() }); }
-  invoke = launchers[0].invoke;
+    const termination = await ctx.kill();
+    const receipt = await recoverAndVerify(ctx, termination);
+    return { ...receipt, launcher: kind, controls };
+  })));
+  const retired = launchers.map(({ kind, invoke: selected }) => gate(async () => ({ launcher: kind, ...await retainedRetiredClaim(selected) })));
 
   // 2. Controls on a genuinely interrupted, dead-owner migration: each refuses and keeps every byte.
-  const controls = [];
-  const malformed = await interrupt('record'); await malformed.kill();
-  const ownerPath = join(malformed.claim, 'owner.json'), realOwner = await readJSON(ownerPath);
-  await writeFile(ownerPath, '{"format":1,"id":"S0001",');
-  controls.push(await assertRefused(malformed, /JSON|Unexpected|Expected/u, 'malformed owner.json'));
-  const partialIdentity = { ...realOwner.owner };
-  delete partialIdentity.bootId;
-  await writeFile(ownerPath, JSON.stringify({ ...realOwner, owner: partialIdentity }));
-  controls.push(await assertRefused(malformed, /live or uncertain/u, 'owner identity missing bootId'));
-
-  const disagree = await interrupt('record'); await disagree.kill();
-  const recordPath = join(disagree.journal, 'record.json'), record = await readJSON(recordPath);
-  await writeFile(recordPath, JSON.stringify({ ...record, reference: 'edited after interruption' }, null, 2) + '\n');
-  controls.push(await assertRefused(disagree, /Claim and state journal disagree/u, 'claim and journal record disagree'));
-
-  const driftBefore = await interrupt('record'); await driftBefore.kill();
-  await writeFile(join(driftBefore.project, '.factory/drift-after-interruption.txt'), 'new bytes\n');
-  controls.push(await assertRefused(driftBefore, /State drift blocks recovery/u, 'inventory drift in .factory before rename'));
-
-  const driftAfter = await interrupt('renamed'); await driftAfter.kill();
-  await writeFile(join(driftAfter.project, '.isswf/project-setup.md'), 'Edited after the move\n');
-  controls.push(await assertRefused(driftAfter, /State drift blocks recovery/u, 'inventory drift in .isswf after rename'));
-
-  const dual = await interrupt('record'); await dual.kill();
-  await mkdir(join(dual.project, '.isswf')); await writeFile(join(dual.project, '.isswf/unrelated.txt'), 'competing root\n');
-  controls.push(await assertRefused(dual, /Both \.isswf and \.factory exist/u, 'both .factory and .isswf present'));
+  const controlLauncher = launchers[0].invoke;
+  const controlRuns = [
+    gate(async () => {
+      const malformed = await interrupt('record', controlLauncher); await malformed.kill();
+      const ownerPath = join(malformed.claim, 'owner.json'), realOwner = await readJSON(ownerPath);
+      await writeFile(ownerPath, '{"format":1,"id":"S0001",');
+      const first = await assertRefused(malformed, /JSON|Unexpected|Expected/u, 'malformed owner.json');
+      const partialIdentity = { ...realOwner.owner };
+      delete partialIdentity.bootId;
+      await writeFile(ownerPath, JSON.stringify({ ...realOwner, owner: partialIdentity }));
+      return [first, await assertRefused(malformed, /live or uncertain/u, 'owner identity missing bootId')];
+    }),
+    gate(async () => {
+      const disagree = await interrupt('record', controlLauncher); await disagree.kill();
+      const recordPath = join(disagree.journal, 'record.json'), record = await readJSON(recordPath);
+      await writeFile(recordPath, JSON.stringify({ ...record, reference: 'edited after interruption' }, null, 2) + '\n');
+      return [await assertRefused(disagree, /Claim and state journal disagree/u, 'claim and journal record disagree')];
+    }),
+    gate(async () => {
+      const driftBefore = await interrupt('record', controlLauncher); await driftBefore.kill();
+      await writeFile(join(driftBefore.project, '.factory/drift-after-interruption.txt'), 'new bytes\n');
+      return [await assertRefused(driftBefore, /State drift blocks recovery/u, 'inventory drift in .factory before rename')];
+    }),
+    gate(async () => {
+      const driftAfter = await interrupt('renamed', controlLauncher); await driftAfter.kill();
+      await writeFile(join(driftAfter.project, '.isswf/project-setup.md'), 'Edited after the move\n');
+      return [await assertRefused(driftAfter, /State drift blocks recovery/u, 'inventory drift in .isswf after rename')];
+    }),
+    gate(async () => {
+      const dual = await interrupt('record', controlLauncher); await dual.kill();
+      await mkdir(join(dual.project, '.isswf')); await writeFile(join(dual.project, '.isswf/unrelated.txt'), 'competing root\n');
+      return [await assertRefused(dual, /Both \.isswf and \.factory exist/u, 'both .factory and .isswf present')];
+    }),
+  ];
+  const [receiptList, retiredControls, controlLists] = await Promise.all([Promise.all(interruptions), Promise.all(retired), Promise.all(controlRuns)]);
+  receipts.push(...receiptList);
+  const controls = controlLists.flat();
 
   const report = { status: 'PASS', platform: process.platform, arch: process.arch, node: process.version, revision, artifactId: built.artifactId, launcher: { kind: launchers[0].kind, executable: process.execPath, entry: nodeLauncher }, bun: bunAvailable ? { status: 'PASS', compiler: bunProbe.stdout.trim(), scope: 'recover-state and migrate-state of the same dead-owner states, through the compiled executable; the kill itself is a Node process' } : { status: 'SKIP', reason: 'compiler unavailable' }, interruptions: receipts, controls, retiredClaim: retiredControls };
   if (process.env.ISSWF_INTERRUPT_RECEIPTS) await writeFile(process.env.ISSWF_INTERRUPT_RECEIPTS, JSON.stringify(report, null, 2) + '\n');
