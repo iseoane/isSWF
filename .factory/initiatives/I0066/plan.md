@@ -249,3 +249,21 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 - A run recorded only in a linked worktree of the same repository appears in the panel; after integration it is not counted twice.
 - Tests cover a record in a linked worktree and the same record after integration.
 - It works on Windows and Linux.
+
+## J016
+
+- Status: in-progress
+- Objective: The small follow-ups left by the J001, J003 and J006 reviews are fixed, so their refusals and messages are accurate and their guards cannot be switched off by an unrelated lookup.
+- Depends on: J003
+- Brief: [brief-r1.md](jobs/J016/brief-r1.md)
+- Blocker: None.
+- Next step: Size S (messages, docs and one hook test). Operator asked for it on 2026-11-26.
+
+### Acceptance
+
+-  reads  so that a failing lookup cannot skip the plan-commit, verification, records-push or integration guards; a hook test with  sees the CI record route first in the refusal.
+- The  message names  only for , not for  (EN and ES docs match).
+-  confirms the pull request is merged (state or ancestry) after  exits 0, before editing the plan, and refuses with a named reason otherwise; tested.
+- The operations guide (EN and ES) describes rerun recovery and  as the code behaves.
+- Tests cover each changed behaviour; Windows and Linux.
+
