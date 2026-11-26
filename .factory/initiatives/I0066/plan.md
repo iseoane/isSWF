@@ -47,12 +47,12 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Objective: The coordinator integrates a reviewed job through one host-neutral command in `tools/`, called from the coordinator skill, driven by an explicit delivery-lifecycle state machine.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (lifecycle module and one integration command; merge and push are one bounded special risk). Ground the current hand-run sequences in the I0065 transcript and the existing tools.
+- Next step: None.
 
 ### Acceptance
 
@@ -60,6 +60,10 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 - Risk and operator-acceptance judgment stay with the coordinator; the commands never decide them.
 - The delivery lifecycle (brief, attempt, review, covered, ci-green, merged, closed) is an explicit state machine in one module. Each command checks the job's current state and refuses an illegal transition with a named reason. The state is derived from the records and Git, not stored separately.
 - Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
+
+### Evidence
+
+- PR #407 merged as c95b14bbe0740b6158cc9c2ef612a19bb8115708 with operator approval (2026-11-26, grant code under REVIEW.md), CI green on head 56faebe4. Reviews V001 fail (B1-B3), V002 pass, V003 pass (Knip delta). Coordinator ran tests/isswf-integrate.mjs on win32 (124 s). Known limits: closing the last job stays manual; a rerun after a failed push refuses primary-diverged; gh pr merge exit 0 is trusted (merge queues); last-job check not repeated after the merge; rerun docs and the primary-diverged gloss need narrowing; real gh untested.
 
 ## J004
 
