@@ -122,7 +122,11 @@ export async function checkPlanCommit({ command, cwd, git, read }) {
       // Paths the commit would record with content: staged, plus tracked working-tree changes with -a. Deletions are left out.
       const listed = await git(['diff', '--name-only', '-z', '--no-renames', '--diff-filter=d', ...(all ? ['HEAD'] : ['--cached'])], root);
       if (listed.exitCode !== 0) continue;
-      for (const path of listed.stdout.split('\0')) {
+      // An earlier command in the same call (`git add -A`) can add a new, still untracked plan that the commit then records.
+      const added = position > 0 ? await git(['ls-files', '--others', '--exclude-standard', '-z'], root) : { exitCode: 0, stdout: '' };
+      if (added.exitCode !== 0) continue;
+      const paths = [...listed.stdout.split('\0'), ...added.stdout.split('\0')];
+      for (const path of paths) {
         const match = PLAN_PATH.exec(path);
         if (!match) continue;
         const [, state, initiative] = match;
