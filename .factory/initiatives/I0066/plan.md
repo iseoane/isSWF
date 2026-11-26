@@ -103,12 +103,12 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J007
 
-- Status: in-progress
+- Status: done
 - Objective: The plan commit guard checks a newly added plan the same way as a changed one.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one more guard case). Ground the change in the current source.
+- Next step: None. Merged in PR #404 (6f7c60e1c75d1222cd1a5be9d95e194dd007eb9d); reviews V001 fail, V002 pass (coordinator ran the guard test). Known limit: any earlier git add lists all untracked plans.
 
 ### Acceptance
 
