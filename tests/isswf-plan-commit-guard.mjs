@@ -112,6 +112,11 @@ try {
   const unrecorded = await closeCheck('git commit -m close');
   assert.match(unrecorded.deny ?? '', /close-verification\.json/u);
   assert.match(unrecorded.deny, /isswf-verify/u);
+  // On win32 the refusal leads with the CI record route, since the local record cannot pass there; elsewhere it leads with the local command.
+  const onWindows = await checkPlanCommit({ command: 'git commit -m close', cwd: closeRepo, git, read: async path => readFileSync(path, 'utf8'), platform: 'win32' });
+  assert.match(onWindows.deny ?? '', /source: "ci"[\s\S]*isswf-verify/u, 'win32 names the CI record first');
+  const onLinux = await checkPlanCommit({ command: 'git commit -m close', cwd: closeRepo, git, read: async path => readFileSync(path, 'utf8'), platform: 'linux' });
+  assert.ok(onLinux.deny.indexOf('isswf-verify') < onLinux.deny.indexOf('source: "ci"'), 'other platforms keep the local command first');
   unstageClose();
   // A job that is still open is not a close.
   const open = `

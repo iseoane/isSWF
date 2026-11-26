@@ -4,6 +4,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] || '.');
@@ -327,6 +328,18 @@ try {
   const linkedHead = git(linkedDir, 'rev-parse', 'HEAD');
   assert.equal(verify(linkedDir, '--base', stamped.head, '--tier', 'job').status, 0);
   assert.ok(existsSync(stampPath(stamped.repo, linkedHead)), 'the main checkout sees the stamp of the linked worktree');
+
+  // On win32 the initiative tier says up front which checks cannot run there and how to record the CI route; other platforms and tiers say nothing.
+  const { platformNotice } = await import(pathToFileURL(runner));
+  const gated = [check('quality', node('-e', '0'), { platforms: ['linux'], cost: 'initiative' }), check('dead', node('-e', '0'), { platforms: ['linux'], cost: 'initiative' }), check('unit', node('-e', '0'), { platforms: ['linux', 'win32'] })];
+  const notice = platformNotice({ selected: gated, costs: ['job', 'initiative'], platform: 'win32' });
+  assert.match(notice ?? '', /quality, dead/u);
+  assert.match(notice, /not run/u);
+  assert.match(notice, /source.*ci/u);
+  assert.match(notice, /runUrl/u);
+  assert.match(notice, /close-verification.json/u);
+  assert.equal(platformNotice({ selected: gated, costs: ['job', 'initiative'], platform: 'linux' }), undefined);
+  assert.equal(platformNotice({ selected: gated, costs: ['job'], platform: 'win32' }), undefined);
 
   console.log('PASS isswf-verify statuses, tiers, base-read file, bounded output and refusals');
 } finally {
