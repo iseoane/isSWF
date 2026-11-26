@@ -1,7 +1,7 @@
 // No Node imports and no `process` access, like tools/isswf-snapshot-core.mjs: runtimes that only offer
 // an injected fs load this module. tools/isswf-record-check.mjs is the Node wrapper.
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
-import { parseRunLine, RECORD_NAME } from './isswf-snapshot-core.mjs';
+import { parseRole, parseRunLine, RECORD_NAME, roleOfAgent } from './isswf-snapshot-core.mjs';
 
 // Callers pass Windows or POSIX paths, so the file name is split on both separators.
 const baseName = path => path.split(/[\\/]/).pop();
@@ -45,6 +45,21 @@ function runViolations(text) {
     else if (run.id === 'unknown') violations.push({ code: 'run-id-unknown', field: 'Run:', line: index + 1, message: 'Run: line has no known ID: omit the line when the ID is unknown' });
   }
   return violations;
+}
+
+// A launch the host accepted and gave a run identity needs that identity on a `Run:` line of some record of its job. Only a record that has
+// no `Run:` line is refused, and only for a launch of its own kind (an attempt for a non-reviewer role, a review for the reviewer) of the brief,
+// checkpoint and job it names, whose identity no record of the job carries yet. A coordinator acting as writer launches nothing, and a launch
+// without a returned identity is not in `launches`.
+function launchViolations({ path, text, name, launches, siblings }) {
+  const runsIn = record => record.split('\n').map(parseRunLine).filter(Boolean);
+  if (!launches?.length || runsIn(text).length || parseRole(text) === 'coordinator') return [];
+  const claimed = new Set([text, ...(siblings ?? [])].flatMap(record => runsIn(record)).map(({ id }) => id));
+  const open = launches.filter(({ agent, initiative, job, path: brief, checkpoint, run }) => run && !claimed.has(run)
+    && (roleOfAgent(agent) === 'reviewer') === (name[0] === 'V')
+    && path.replaceAll('\\', '/').includes(`/${initiative}/jobs/${job}/`)
+    && text.includes(baseName(brief)) && text.includes(checkpoint));
+  return open.map(({ run }) => ({ code: 'run-line-missing', field: 'Run:', message: `the host returned run ${run} for an accepted launch of this brief but the record has no Run: line: add "- Run: claude agent=${run}"` }));
 }
 
 // Labels of the current templates (.factory/templates/attempt.md and review.md), matched at the start of a line.
@@ -122,12 +137,13 @@ function checkViolations(text) {
  * `path` may use `\` or `/`. `jobFiles` maps a job ID to the file names in its directory and is
  * only read when `path` is a plan. `newRecord` is true for a record absent at the base; only a new
  * review is held to the finding resolution vocabulary and only a new attempt to naming the commit of each check it reports as run.
+ * `launches` are the accepted dispatches with their run identity (see compaction notes) and `siblings` the texts of the job's other records.
  * @returns {{ ok: boolean, violations: { code: string, job?: string, field?: string, line?: number, message: string }[] }}
  */
-export function checkRecord({ path, text, jobFiles, newRecord }) {
+export function checkRecord({ path, text, jobFiles, newRecord, launches, siblings }) {
   const name = baseName(path);
   let violations = [];
   if (name === 'plan.md') violations = planViolations(text, jobFiles);
-  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? resolutionViolations(text) : []), ...(newRecord === true && name[0] === 'A' ? checkViolations(text) : [])];
+  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...launchViolations({ path, text, name, launches, siblings }), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? resolutionViolations(text) : []), ...(newRecord === true && name[0] === 'A' ? checkViolations(text) : [])];
   return { ok: violations.length === 0, violations };
 }
