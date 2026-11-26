@@ -672,8 +672,10 @@ export const register: Register = (on, options) => {
           },
         })
         if (pushes.deny !== undefined) return { deny: pushes.deny }
+        // A truncated answer would be judged as if complete, so it rejects and the gate fails open.
         const gateGit = async (argv: string[], cwd: string) => {
-          const { exitCode, stdout } = await gitRun($, argv, cwd)
+          const { exitCode, stdout, isStdoutTruncated } = await gitRun($, argv, cwd)
+          if (isStdoutTruncated) throw new Error('git-output-limit')
           return { exitCode, stdout }
         }
         const gate = await checkIntegrationGate({

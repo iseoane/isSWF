@@ -16,6 +16,7 @@ import { locateGit } from './trusted-git.mjs';
 const FACTORY_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const GIT_TIMEOUT_MS = 30000;
 const GIT_MAX_BUFFER = 16 * 1024 * 1024;
+const COVERAGE_GIT_TIMEOUT_MS = 20000;
 const REVIEW_RESOURCES = ['.agents/roles/reviewer.md', '.agents/skills/isswf-review/SKILL.md', '.agents/roles/references/review.md', '.agents/roles/references/review-convergence.md'];
 const HOST_GUIDES = { claude: '.agents/hosts/claude-code.md', pi: '.agents/hosts/pi.md' };
 
@@ -150,13 +151,16 @@ async function writeHandoff({ target, git, base, candidate, out, host, stem, res
 }
 
 // The injected git of the coverage core: one process per call, with the exit code returned so the core judges the merge-tree conflict status itself.
+// A call that cannot run rejects with the code the shared runner (`runGit`) gave it, the same limits and codes as before the core was split.
 const coverageGit = (root, gitExecutable) => async argv => {
-  const result = spawnSync(gitExecutable, ['-C', root, ...argv], { encoding: 'utf8', env: gitEnvironment(gitExecutable, { GIT_LITERAL_PATHSPECS: '1' }), timeout: GIT_TIMEOUT_MS, maxBuffer: GIT_MAX_BUFFER, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
-  if (result.error) throw result.error;
+  const result = spawnSync(gitExecutable, ['-C', root, ...argv], { encoding: 'utf8', env: gitEnvironment(gitExecutable, { GIT_LITERAL_PATHSPECS: '1' }), timeout: COVERAGE_GIT_TIMEOUT_MS, maxBuffer: GIT_MAX_BUFFER, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  if (result.error?.code === 'ETIMEDOUT') throw new Error('git-timeout');
+  if (result.error?.code === 'ENOBUFS') throw new Error('git-output-limit');
+  if (result.error) throw new Error('git-identity-command-failed');
   return { exitCode: result.status ?? 1, stdout: result.stdout };
 };
 
-/** Reads, for every job whose records the range changed, the commits outside its review chain's ranges that change more than records;  holds the rules. */
+/** Reads, for every job whose records the range changed, the commits outside its review chain's ranges that change more than records; `reviewCoverage` holds the rules. */
 export async function coverage({ project, initiative, job, base, head }) {
   if (typeof project !== 'string' || !isAbsolute(project)) throw recordError('invalid-project');
   checkSha(base, 'base', { optional: true });
@@ -170,7 +174,11 @@ export async function coverage({ project, initiative, job, base, head }) {
   }
   assertCommit(git, from, 'base');
   assertCommit(git, tip, 'head');
-  return reviewCoverage({ git: coverageGit(root, await locateGit()), base: from, head: tip, initiative, job });
+  try {
+    return await reviewCoverage({ git: coverageGit(root, await locateGit()), base: from, head: tip, initiative, job });
+  } catch (error) {
+    throw error.message === 'git-failed' ? new Error('git-identity-command-failed') : error;
+  }
 }
 
 const LOCATION = ['--project', '--initiative', '--job'];

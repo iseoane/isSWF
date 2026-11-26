@@ -11,7 +11,7 @@ export const reviewIds = names => [...names].filter(name => /^V\d{3}\.md$/u.test
 
 /**
  * Reads, for every job whose records the range `base`..`head` changed, the commits outside its review chain's ranges that change more than records. A merge counts by what it adds beyond the automatic merge of its parents, so a clean merge adds nothing and a conflict resolution that adds code is listed.
- * `base` and `head` are commit SHAs the caller resolved. A git command that fails rejects, except where the code judges the failure.
+ * `base` and `head` are commit SHAs the caller resolved. A git command that exits nonzero rejects with `git-failed` and one that cannot run rejects with the runner's error, except where the code judges the failure.
  */
 export async function reviewCoverage({ git, base, head, initiative, job }) {
   const out = async argv => {
@@ -19,7 +19,11 @@ export async function reviewCoverage({ git, base, head, initiative, job }) {
     if (result.exitCode !== 0) throw new Error('git-failed');
     return result.stdout;
   };
-  const isAncestor = async (ancestor, descendant) => (await git(['merge-base', '--is-ancestor', ancestor, descendant])).exitCode === 0;
+  // A probe that cannot run answers "no", as a nonzero exit does.
+  const probe = async argv => {
+    try { return (await git(argv)).exitCode === 0; } catch { return false; }
+  };
+  const isAncestor = (ancestor, descendant) => probe(['merge-base', '--is-ancestor', ancestor, descendant]);
 
   // Every job whose records the range changes counts as a reviewer of the commits it names, even when initiative or job leaves it out of the report.
   const touched = new Map();
@@ -43,7 +47,7 @@ export async function reviewCoverage({ git, base, head, initiative, job }) {
       return [...new Set([...conflicted, ...(await out(['diff', '--no-renames', '--name-only', '-z', tree, commit])).split('\0').filter(Boolean)])];
     } catch { return [UNJUDGED_MERGE]; }
   };
-  const hasMain = (await git(['rev-parse', '--verify', '--quiet', `${MAIN_REF}^{commit}`])).exitCode === 0;
+  const hasMain = await probe(['rev-parse', '--verify', '--quiet', `${MAIN_REF}^{commit}`]);
   const onlyRecordsOrMainMerges = async (candidate, laterBase) => {
     const lines = (await out(['rev-list', '--parents', `${candidate}..${laterBase}`, ...(hasMain ? ['--not', MAIN_REF] : [])])).split('\n').filter(Boolean);
     for (const line of lines) {
