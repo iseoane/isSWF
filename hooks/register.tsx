@@ -633,6 +633,10 @@ export const register: Register = (on, options) => {
           if ('deny' in verdict) return { deny: verdict.deny }
         }
       } catch {}
+      // The hook runtime has no process platform; Windows sets OS=Windows_NT, and an unknown platform, or a failed lookup, gets the default wording.
+      // The lookup has its own try so that a fault in it cannot skip the guards below.
+      let platform: string | undefined
+      try { platform = (await $.env.get('OS')) === 'Windows_NT' ? 'win32' : undefined } catch {}
       try {
         const assignment = e.agentId === undefined ? undefined : (await $.state.get(ASSIGNED)).value?.[e.agentId]
         const branch = await checkBranch({ command, cwd: await $.session.cwd(), assignment, ...branches })
@@ -646,8 +650,7 @@ export const register: Register = (on, options) => {
             return { exitCode, stdout }
           },
           read: (file: string) => $.fs.read(file),
-          // The hook runtime has no process platform; Windows sets OS=Windows_NT, and an unknown platform gets the default wording.
-          platform: (await $.env.get('OS')) === 'Windows_NT' ? 'win32' : undefined,
+          platform,
         })
         if (plans.deny !== undefined) return { deny: plans.deny }
         const verification = await checkVerificationCommit({

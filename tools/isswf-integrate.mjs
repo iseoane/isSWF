@@ -145,7 +145,8 @@ export async function integrate(request) {
       let merge;
       try { merge = await gh(['pr', 'merge', pr, '--squash', '--match-head-commit', head, ...(repo ? ['--repo', repo] : [])]); } catch { merge = { exitCode: 1 }; }
       // A merge that failed or timed out may still have happened: the pull request says.
-      if (merge.exitCode !== 0 && !mergedAt(await readPr({ pr, repo, gh }), head)) return refuse('merge-refused', { state: found.state });
+      // An exit 0 is not a merge either: a merge queue or auto-merge accepts the request and merges later.
+      if (!mergedAt(await readPr({ pr, repo, gh }), head)) return refuse(merge.exitCode === 0 ? 'merge-unconfirmed' : 'merge-refused', { state: found.state });
     }
     let step = 'fetch';
     try {

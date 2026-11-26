@@ -51,7 +51,7 @@ function runViolations(text) {
 // no `Run:` line is refused, and only for a launch of its own kind (an attempt for a non-reviewer role, a review for the reviewer) of the brief,
 // checkpoint and job it names, whose identity no record of the job carries yet. A coordinator acting as writer launches nothing, and a launch
 // without a returned identity is not in `launches`.
-export function launchViolations({ path, text, name, launches, siblings }) {
+export function launchViolations({ path, text, name, launches, siblings, offerRunFlag = false }) {
   const runsIn = record => record.split('\n').map(parseRunLine).filter(Boolean);
   if (!launches?.length || runsIn(text).length || parseRole(text) === 'coordinator') return [];
   const claimed = new Set([text, ...(siblings ?? [])].flatMap(record => runsIn(record)).map(({ id }) => id));
@@ -59,7 +59,7 @@ export function launchViolations({ path, text, name, launches, siblings }) {
     && (roleOfAgent(agent) === 'reviewer') === (name[0] === 'V')
     && path.replaceAll('\\', '/').includes(`/${initiative}/jobs/${job}/`)
     && text.includes(baseName(brief)) && text.includes(checkpoint));
-  return open.map(({ run }) => ({ code: 'run-line-missing', field: 'Run:', message: `the host returned run ${run} for an accepted launch of this brief and the record has no Run: line. That launch may belong to an earlier record of this job (a foreground child's ID reaches the session only after it finishes): add "- Run: claude agent=${run}" to the record that launch produced, or pass --run when it is this one` }));
+  return open.map(({ run }) => ({ code: 'run-line-missing', field: 'Run:', message: `the host returned run ${run} for an accepted launch of this brief and the record has no Run: line. That launch may belong to an earlier record of this job (a foreground child's ID reaches the session only after it finishes): add "- Run: claude agent=${run}" to the record that launch produced${offerRunFlag ? ', or pass --run when it is this one' : ''}` }));
 }
 
 // Labels of the current templates (.factory/templates/attempt.md and review.md), matched at the start of a line.
