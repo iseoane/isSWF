@@ -61,6 +61,12 @@ function makeRepo(name, line) {
   return repo;
 }
 const checker = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8') });
+// The review coverage the Node hosts inject: the commits no recorded review covers, from `isswf-handoff coverage`.
+const { coverage } = await import(pathToFileURL(join(source, 'tools/isswf-handoff.mjs')));
+const gateCoverage = async ({ root, head, base }) => (await coverage({ project: root, head, base })).jobs.flatMap(job => job.uncovered.map(item => item.commit));
+const covering = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8'), coverage: gateCoverage });
+// A review record of J001 for the range `base`..`candidate`, committed on top of the branch.
+const review = (repo, base, candidate) => edit(repo, '.factory/initiatives/I0001/jobs/J001/V001.md', `# review\n\n- Base commit SHA: ${base}\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n`, 'review record');
 const ENFORCE = '- Integration gate: enforce';
 // Integration commands issued on the feature branch; a merge is issued from main.
 const FROM_FEAT = ['git push origin feat', 'git push -u origin feat', 'git push', 'gh pr create --title t --body b'];
@@ -217,6 +223,28 @@ try {
   stamp(shared, topicTwo);
   assert.deepEqual(await checker(linked)('git push origin topic'), {});
 
+  // Review coverage on a push of a job branch: a reviewed push is allowed, a commit after the review is refused in enforce mode and noted in observe mode.
+  const covered = makeRepo('covered', ENFORCE);
+  const mainTip = run(covered, 'rev-parse', 'main');
+  const reviewedCode = edit(covered, 'tools/r.mjs', 'r\n', 'reviewed code');
+  stamp(covered, reviewedCode);
+  review(covered, mainTip, reviewedCode);
+  assert.deepEqual(await covering(covered)('git push origin feat'), {}, 'every commit is inside a review range');
+  const lateCode = edit(covered, 'tools/late.mjs', 'l\n', 'code after the review');
+  stamp(covered, lateCode);
+  assert.deepEqual(await checker(covered)('git push origin feat'), {}, 'without a coverage check only the stamp is judged');
+  assert.match((await covering(covered)('git push origin feat')).deny ?? '', new RegExp(`unreviewed.*${lateCode.slice(0, 7)}`, 'su'));
+  assert.equal((await covering(covered)('git push origin feat:main')).deny, undefined, 'a push to the base stays with the records push guard');
+  const watched = makeRepo('watched');
+  const watchedBase = run(watched, 'rev-parse', 'main');
+  stamp(watched, edit(watched, 'tools/w.mjs', 'w\n', 'code'));
+  review(watched, watchedBase, watchedBase);
+  const noted = await covering(watched)('git push origin feat');
+  assert.equal(noted.deny, undefined);
+  assert.match(noted.note ?? '', /unreviewed/u);
+  const faulty = command => checkIntegrationGate({ command, cwd: covered, git, read: async path => readFileSync(path, 'utf8'), coverage: async () => { throw new Error('boom'); } });
+  assert.deepEqual(await faulty('git push origin feat'), {}, 'a coverage fault allows');
+
   // A git fault allows; a stamp naming another commit or unreadable is no stamp.
   assert.deepEqual(await checker(temp)('git push origin feat'), {});
   const bad = makeRepo('bad', ENFORCE);
@@ -243,6 +271,7 @@ try {
   assert.equal(await piResult(observed, 'p3', true), undefined, 'a failed command gets no note');
   assert.equal(await piCall(tiers, 'p4', 'git push origin feat'), undefined, 'a stamped head passes');
   assert.equal(await piResult(tiers, 'p4'), undefined);
+  assert.match((await piCall(covered, 'p5', 'git push origin feat')).reason, /unreviewed/u, 'the extension passes the review coverage check');
 
   // register.tsx has no runner here, so the Claude hook is a source check: the gate runs after the records push guard, refuses before the call and adds its note after it.
   const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');

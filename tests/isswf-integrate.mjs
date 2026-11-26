@@ -56,7 +56,7 @@ async function addBranch(f, name, { brief = true, attempt = true, review = true,
   git(worktree, 'add', '-A'); git(worktree, 'commit', '-qm', 'feat: x');
   const candidate = git(worktree, 'rev-parse', 'HEAD');
   if (attempt) await put(worktree, `${JOB}/A001.md`, '# attempt\n');
-  const missBlock = miss ? `\n## Misses\n\n- Kind: ci-only\n- Observer and evidence: coordinator, Quality run failed\n- Candidate SHA that passed and passing review (verdict quoted): ${candidate}\n` : '';
+  const missBlock = miss ? `\n## Misses\n\n- Kind: ci-only\n- Observer and evidence: coordinator, Quality run failed\n- Candidate SHA that passed and passing review (verdict quoted): ${typeof miss === 'string' ? miss : candidate}\n` : '';
   if (review) await put(worktree, `${JOB}/V001.md`, `# review\n\n- Base commit SHA: ${f.base}\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n${missBlock}`);
   git(worktree, 'add', '-A'); git(worktree, 'commit', '--allow-empty', '-qm', 'docs: records');
   if (extra) { await put(worktree, 'src/y.mjs', 'export const y = 1;\n'); git(worktree, 'add', '-A'); git(worktree, 'commit', '-qm', 'feat: y after review'); }
@@ -179,6 +179,9 @@ try {
     await expectRefusal(f, fakeGh(f, { ci: 'FAILURE' }), 'ci-miss-unrecorded');
     const recorded = await addBranch(f, 'recorded', { miss: true });
     await expectRefusal(recorded, fakeGh(recorded, { ci: 'FAILURE' }), 'ci-not-green');
+    // A block that names an earlier commit than the head's code does not record this failure.
+    const earlier = await addBranch(f, 'earlier', { miss: f.base });
+    await expectRefusal(earlier, fakeGh(earlier, { ci: 'FAILURE' }), 'ci-miss-unrecorded');
     await expectRefusal(f, fakeGh(f), 'head-mismatch', { head: 'c'.repeat(40) });
     await expectRefusal(f, fakeGh(f), 'evidence-required', { evidence: '' });
     await expectRefusal(f, fakeGh(f), 'job-not-found', { job: 'J009' });
