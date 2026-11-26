@@ -181,7 +181,7 @@ try {
     const codeOut = join(temp, 'out-code');
     const code = (overrides = {}) => {
       const flags = { '--project': root, '--base': base, '--candidate': candidate, '--request': 'Scope the guard.', '--out': codeOut, ...overrides };
-      return tool(['code-review', ...Object.entries(flags).flatMap(([flag, value]) => (value === undefined ? [] : [flag, value]))]);
+      return tool(['code-only', ...Object.entries(flags).flatMap(([flag, value]) => (value === undefined ? [] : [flag, value]))]);
     };
     const made = code();
     assert.equal(made.ok, true, JSON.stringify(made));
@@ -191,7 +191,7 @@ try {
     assert.deepEqual(made.promptLines.slice(0, 5), [`handoff: ${made.handoff.path}`, `handoff-sha256: ${made.handoff.sha256}`, `candidate ${candidate}`, `base ${base}`, 'review-mode: code-only']);
     refuses(code({ '--request': ' ' }), 'invalid-request');
     refuses(code({ '--out': join(root, 'inside') }), 'out-inside-project');
-    assert.equal(tool(['code-review', '--project', root, '--base', base, '--candidate', candidate]).code, 'usage');
+    assert.equal(tool(['code-only', '--project', root, '--base', base, '--candidate', candidate]).code, 'usage');
     // A range that changes job records is a job's change and is refused.
     await write('.factory/initiatives/I0001/jobs/J001/A001.md', '# attempt\n');
     git(root, 'add', '-A');

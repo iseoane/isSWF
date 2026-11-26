@@ -238,7 +238,7 @@ const LOCATION = ['--project', '--initiative', '--job'];
 const commands = {
   review: { required: [...LOCATION, '--brief', '--checkpoint', '--base', '--candidate'], optional: ['--out', '--host'], variadic: '--prior' },
   coverage: { required: ['--project'], optional: ['--initiative', '--job', '--base', '--head'] },
-  'code-review': { required: ['--project', '--base', '--candidate', '--request'], optional: ['--out', '--host'] },
+  'code-only': { required: ['--project', '--base', '--candidate', '--request'], optional: ['--out', '--host'] },
 };
 
 /** Parses `<command> --flag VALUE ...`: every required flag once, each optional flag at most once, and `--prior` with the review IDs that follow it. */
@@ -266,7 +266,7 @@ function parseArgs([command, ...parts]) {
 
 async function run(argv) {
   const { command, args } = parseArgs(argv);
-  if (command === 'code-review') return codeReviewHandoff({ project: args['--project'], base: args['--base'], candidate: args['--candidate'], request: args['--request'], out: args['--out'], host: args['--host'] });
+  if (command === 'code-only') return codeReviewHandoff({ project: args['--project'], base: args['--base'], candidate: args['--candidate'], request: args['--request'], out: args['--out'], host: args['--host'] });
   if (command === 'coverage') return coverage({ project: args['--project'], initiative: args['--initiative'], job: args['--job'], base: args['--base'], head: args['--head'] });
   return reviewHandoff({
     project: args['--project'], initiative: args['--initiative'], job: args['--job'], brief: args['--brief'], checkpoint: args['--checkpoint'],
