@@ -559,12 +559,17 @@ try {
       assert.equal(refused.status, 1);
       assert.equal(refused.out.code, 'run-line-missing');
       assert.match(JSON.stringify(refused.out), /claude agent=w-run/u);
+      assert.match(JSON.stringify(refused.out), /earlier record of this job/u);
+      assert.match(JSON.stringify(refused.out), /--run/u);
       assert.equal(await readFile(file('A013.md'), 'utf8'), before, 'a refusal changes nothing');
       assert.equal(withNote('complete', completeArgs('A013', { '--run': 'claude agent=w-run' })).status, 0);
       assert.equal(withNote('complete', completeArgs('A013')).status, 0, 'the existing line satisfies it');
       // Exceptions: a coordinator acting as writer, and a launch with no returned identity.
+      // Its own unclaimed launch is open, so only the coordinator exception lets the record through; the whole Profile value names the coordinator skill.
+      await writeNote([launch('isswf:isswf-worker', 'c-run')]);
       attempt('A015');
-      await writeFile(file('A015.md'), (await readFile(file('A015.md'), 'utf8')).replace('- Profile path and revision, if available:', '- Profile path and revision, if available: coordinator acting as writer'));
+      const profile = '- Profile path and revision, if available:';
+      await writeFile(file('A015.md'), (await readFile(file('A015.md'), 'utf8')).split('\n').map(line => (line.startsWith(profile) ? `${profile} .agents/skills/isswf-coordinator/SKILL.md` : line)).join('\n'));
       assert.equal(withNote('complete', completeArgs('A015')).status, 0);
       await writeNote([launch('isswf:isswf-worker')]);
       attempt('A016');
