@@ -41,7 +41,7 @@ function parseArguments(argv) {
   if (typeof options.project !== 'string' || !isAbsolute(options.project)) throw fail('invalid-project', '--project needs an absolute path');
   if (options.tier !== undefined && !Object.hasOwn(TIER_COSTS, options.tier)) throw fail('invalid-tier', '--tier is job or initiative');
   if (options.base !== undefined && !REF.test(options.base)) throw fail('invalid-base');
-  if (options.jobs !== undefined && !/^[1-9]d{0,2}$/u.test(options.jobs)) throw fail('invalid-jobs', '--jobs needs a whole number from 1 to 999');
+  if (options.jobs !== undefined && !/^[1-9]\d{0,2}$/u.test(options.jobs)) throw fail('invalid-jobs', '--jobs needs a whole number from 1 to 999');
   if (options.tier === undefined && options.only === undefined && !options.stale && !options.table) throw fail('tier-required', 'pass --tier job|initiative, --only <id>, --stale or --table');
   if (options.record !== undefined) {
     if (options.tier !== 'initiative' || options.only !== undefined || options.stale || options.table || options['allow-stale']) throw fail('record-needs-initiative-tier', '--record needs --tier initiative, without --only, --stale, --allow-stale or --table');
