@@ -4,7 +4,7 @@ Type: enhancement
 
 On 2026-11-22 the operator saw that the Claude Code initiatives panel showed no worker runs for I0065. The panel counts a run only from a `- Run: claude agent=<id>` line in an attempt or review record. The coordinator did not pass the launch identity the host returned, so every I0065 worker record and the J001-J003 review records have no such line. `isswf-record-check` reports a malformed `Run:` line but not a missing one. The operator decided that this must be a deterministic control, not a retrospective note, and asked for a new initiative. It also holds a retrospective of the work done on 2026-11-21 and 2026-11-22; the operator decides which of its findings become further jobs here.
 
-Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most two in parallel): J001 + J007; J003 + J006; J005 + J009; J013 + J010; J004 + J014; J008 + J011; J015 after J001; J012 only if needed.
+Order: starts after I0065 closes. Execution order (2026-11-26, at most two in parallel, paired so they do not touch the same files): done J001 + J007, J003 + J006; now J016 + J005 (both touch isswf-integrate; J005 rebases after J016); then J009 + J008; J013 + J010 (handoff vs record check); J004 alone or with J008 if pending; the panel jobs J014, J011, J015 one at a time (all touch hooks/register.tsx and the panel), each paired with a non-panel job left; J012 only if needed.
 
 ## J001
 
