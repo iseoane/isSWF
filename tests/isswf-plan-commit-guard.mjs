@@ -74,6 +74,9 @@ try {
   assert.match((await check('git commit -m new')).deny ?? '', /I0002\/plan\.md.*unsafe-brief-reference/su, 'a staged new plan is checked');
   run(repo, 'reset', '-q');
   assert.match((await check('git add -A && git commit -m new')).deny ?? '', /I0002\/plan\.md.*unsafe-brief-reference/su, 'a new plan added by a chained add is checked');
+  // An untracked plan that no earlier command adds is not committed.
+  assert.equal((await check('git commit -m x')).deny, undefined, 'an untracked plan is not committed');
+  assert.equal((await check('cd . && git commit -m x')).deny, undefined, 'an earlier command that is not git add does not add the plan');
   writeFileSync(newPath, newGood);
   assert.equal((await check('git add -A && git commit -m new')).deny, undefined, 'a readable new plan passes');
   rmSync(newDir, { recursive: true });
