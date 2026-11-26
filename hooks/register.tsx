@@ -10,6 +10,7 @@ import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
+import { gateCoverage } from '../tools/isswf-handoff-coverage-core.mjs'
 import { findUndispatched, freshUndispatched, undispatchedWarning } from '../tools/isswf-undispatched-core.mjs'
 import { checkRecordLocation, guardRecord } from '../tools/isswf-record-guard-core.mjs'
 import { initiativeIdsIn, initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
@@ -671,14 +672,16 @@ export const register: Register = (on, options) => {
           },
         })
         if (pushes.deny !== undefined) return { deny: pushes.deny }
+        const gateGit = async (argv: string[], cwd: string) => {
+          const { exitCode, stdout } = await gitRun($, argv, cwd)
+          return { exitCode, stdout }
+        }
         const gate = await checkIntegrationGate({
           command,
           cwd: await $.session.cwd(),
-          git: async (argv: string[], cwd: string) => {
-            const { exitCode, stdout } = await gitRun($, argv, cwd)
-            return { exitCode, stdout }
-          },
+          git: gateGit,
           read: (file: string) => $.fs.read(file),
+          coverage: gateCoverage(gateGit),
         })
         if (gate.deny !== undefined) return { deny: gate.deny }
         gateNote = gate.note

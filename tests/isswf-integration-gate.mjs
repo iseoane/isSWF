@@ -61,7 +61,7 @@ function makeRepo(name, line) {
   return repo;
 }
 const checker = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8') });
-// The review coverage a host may inject (neither host does yet): the commits no recorded review covers, from `isswf-handoff coverage`.
+// The review coverage a caller may inject: the commits no recorded review covers, from `isswf-handoff coverage`.
 const { coverage } = await import(pathToFileURL(join(source, 'tools/isswf-handoff.mjs')));
 const gateCoverage = async ({ root, head, base }) => (await coverage({ project: root, head, base })).jobs.flatMap(job => job.uncovered.map(item => item.commit));
 const covering = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8'), coverage: gateCoverage });

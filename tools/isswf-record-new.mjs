@@ -6,6 +6,7 @@ import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 import { createExclusive, editFile } from './isswf-plan-edit.mjs';
 import { isIdentifier } from './isswf-plan-edit-core.mjs';
 import { checkRecord, launchViolations } from './isswf-record-check-core.mjs';
+import { reviewIds } from './isswf-handoff-coverage-core.mjs';
 import { launchesFor, siblingsOf } from './isswf-launch-notes.mjs';
 import { completeText, nextRecordId, recordBase, recordError, recordPrefix, renderRecord } from './isswf-record-new-core.mjs';
 import { parseRunLine } from './isswf-snapshot-core.mjs';
@@ -47,9 +48,6 @@ export async function recordNames({ root, relative: jobRelative }, git) {
   for (const tip of tips) for (const name of childNames(git(['ls-tree', '-z', '--name-only', tip, '--', directory]), directory)) names.add(name);
   return names;
 }
-
-/** The review IDs (`V001`, ...) among the file names of a job directory, in order: the job's prior reviews. */
-export const reviewIds = names => [...names].filter(name => /^V\d{3}\.md$/u.test(name)).map(name => name.slice(0, 4)).sort();
 
 /** The next unused record ID of `kind` for the job. */
 export async function nextId({ project, initiative, job, kind }) {
