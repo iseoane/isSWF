@@ -4,12 +4,12 @@ Type: enhancement
 
 On 2026-11-22 the operator saw that the Claude Code initiatives panel showed no worker runs for I0065. The panel counts a run only from a `- Run: claude agent=<id>` line in an attempt or review record. The coordinator did not pass the launch identity the host returned, so every I0065 worker record and the J001-J003 review records have no such line. `isswf-record-check` reports a malformed `Run:` line but not a missing one. The operator decided that this must be a deterministic control, not a retrospective note, and asked for a new initiative. It also holds a retrospective of the work done on 2026-11-21 and 2026-11-22; the operator decides which of its findings become further jobs here.
 
-Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most two in parallel): J001 + J007; J003 + J006; J005 + J009; J013 + J010; J004 + J014; J008 + J011; J012 only if needed.
+Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most two in parallel): J001 + J007; J003 + J006; J005 + J009; J013 + J010; J004 + J014; J008 + J011; J015 after J001; J012 only if needed.
 
 ## J001
 
 - Status: in-progress
-- Objective: An attempt or review record for a host launch that returned a run identity cannot be created or pass the record check without the matching `Run:` line, and the coordinator gets a refusal that names the missing line.
+- Objective: An attempt or review record for a host launch that returned a run identity cannot be completed or pass the record check without the matching `Run:` line, and the coordinator gets a refusal that names the missing line.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
@@ -17,10 +17,11 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ### Acceptance
 
-- Creating or checking an attempt or review record for a brief with a recorded accepted launch that has a run identity fails when the record has no matching `Run:` line. Records from a coordinator acting as writer, and launches whose identity the host did not return, are not refused.
+- Completing (`isswf-record-new complete`) or checking an attempt or review record for a brief with a recorded accepted launch that has a run identity fails when the record has no matching `Run:` line. Records from a coordinator acting as writer, and launches whose identity the host did not return, are not refused.
 - Tests cover both refusal cases and the two exceptions.
 - It works on Windows and Linux in Claude Code. Pi equivalence is checked, or its absence is recorded as an explicit limit.
-- If the panel does not show runs whose records are only in a linked worktree, that is either fixed here or recorded as a separate job.
+- If the panel does not show runs whose records are only in a linked worktree, that is either fixed here or recorded as a separate job (recorded as J015).
+- Operator decision 2026-11-26: the refusal applies at `complete`, not `create`, because a worker creates its record before the coordinator knows its run identity.
 
 ## J002
 
@@ -217,3 +218,18 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 - The panel and hook use the shared module instead of their own status lists.
 - Completed initiatives render as before.
 - Tests cover the derived states in the panel snapshot.
+
+## J015
+
+- Status: pending
+- Objective: The Claude Code initiatives panel shows worker and reviewer runs whose attempt or review records exist only in a linked worktree that has not been integrated yet.
+- Depends on: J001
+- Brief: [brief-r1.md](jobs/J015/brief-r1.md)
+- Blocker: None.
+- Next step: Size S. Ground how `tools/isswf-panel.mjs` reads records and how it can find linked worktrees (`git worktree list --porcelain`) without reading unrelated checkouts. Operator split it out of J001 on 2026-11-26.
+
+### Acceptance
+
+- A run recorded only in a linked worktree of the same repository appears in the panel; after integration it is not counted twice.
+- Tests cover a record in a linked worktree and the same record after integration.
+- It works on Windows and Linux.
