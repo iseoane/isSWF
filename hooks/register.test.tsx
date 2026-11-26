@@ -995,7 +995,7 @@ test('a failing OS lookup does not switch the plan commit guard off', async ($, 
 // A checkout on branch `feat` whose head carries one code commit and a J001 review of the range `reviewBase`..`reviewCandidate`; `git` answers just enough for the integration gate.
 const PUSH_BASE = '1'.repeat(40)
 const PUSH_HEAD = '2'.repeat(40)
-function pushHost(on: any, { mode, reviewBase, reviewCandidate, coverageFails = false }: { mode: string; reviewBase: string; reviewCandidate: string; coverageFails?: boolean }) {
+function pushHost(on: any, { mode, reviewBase, reviewCandidate, coverageFails = false, truncated = false }: { mode: string; reviewBase: string; reviewCandidate: string; coverageFails?: boolean; truncated?: boolean }) {
   const jobDir = '.factory/initiatives/I0001/jobs/J001/'
   const review = `# review\n\n- Base commit SHA: ${reviewBase}\n- Candidate commit SHA, or reproducible snapshot identity: ${reviewCandidate}\n`
   const stamp = JSON.stringify({ candidate: PUSH_HEAD, tier: 'job', checks: [{ id: 'x', status: 'passed' }] })
@@ -1032,7 +1032,8 @@ function pushHost(on: any, { mode, reviewBase, reviewCandidate, coverageFails = 
   })
   on('process.run', (_: unknown, e: { argv: string[] }) => {
     const { exitCode, stdout } = answer(e.argv)
-    return { value: { exitCode, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+    const cut = truncated && e.argv.slice(2).join(' ') === 'show ' + PUSH_HEAD + ':' + jobDir + 'V001.md'
+    return { value: { exitCode, stdout, stderr: '', isStdoutTruncated: cut, isStderrTruncated: false } }
   })
   on('tool.call', () => ({ result: {} }))
 }
@@ -1062,4 +1063,10 @@ test('a coverage fault allows the push', async ($, on) => {
   const ran = await $.tool.call({ tool: 'Bash', command: 'git push origin feat' })
   expect(ran.deny).toBeUndefined()
   expect(ran.context).toBeUndefined()
+})
+
+test('a truncated git answer makes the gate fail open instead of judging partial output', async ($, on) => {
+  pushHost(on, { mode: 'enforce', reviewBase: PUSH_BASE, reviewCandidate: PUSH_BASE, truncated: true })
+  const ran = await $.tool.call({ tool: 'Bash', command: 'git push origin feat' })
+  expect(ran.deny).toBeUndefined()
 })
