@@ -233,6 +233,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 - The panel and hook use the shared module instead of their own status lists.
 - Completed initiatives render as before.
+- Each job line shows its size after the ID, for example `J005(S) (in-progress) ...`, read from the plan (operator request 2026-11-26); a job without a size shows no suffix.
 - Tests cover the derived states in the panel snapshot.
 
 ## J015
