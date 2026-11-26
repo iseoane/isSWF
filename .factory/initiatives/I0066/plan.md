@@ -261,9 +261,9 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ### Acceptance
 
--  reads  so that a failing lookup cannot skip the plan-commit, verification, records-push or integration guards; a hook test with  sees the CI record route first in the refusal.
-- The  message names  only for , not for  (EN and ES docs match).
--  confirms the pull request is merged (state or ancestry) after  exits 0, before editing the plan, and refuses with a named reason otherwise; tested.
-- The operations guide (EN and ES) describes rerun recovery and  as the code behaves.
+- `hooks/register.tsx` reads `OS` so that a failing lookup cannot skip the plan-commit, verification, records-push or integration guards; a hook test with `OS=Windows_NT` sees the CI record route first in the refusal.
+- The `run-line-missing` message names `--run` only for `isswf-record-new complete`, not for `isswf-record-check` (EN and ES docs match).
+- `isswf-integrate` confirms the pull request is merged (state or ancestry) after `gh pr merge` exits 0, before editing the plan, and refuses with a named reason otherwise; tested.
+- The operations guide (EN and ES) describes rerun recovery and `primary-diverged` as the code behaves.
 - Tests cover each changed behaviour; Windows and Linux.
 
