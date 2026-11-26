@@ -253,12 +253,12 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J016
 
-- Status: in-progress
+- Status: completed
 - Objective: The small follow-ups left by the J001, J003 and J006 reviews are fixed, so their refusals and messages are accurate and their guards cannot be switched off by an unrelated lookup.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J016/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (messages, docs and one hook test). Operator asked for it on 2026-11-26.
+- Next step: None.
 
 ### Acceptance
 
@@ -267,4 +267,8 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 - `isswf-integrate` confirms the pull request is merged (state or ancestry) after `gh pr merge` exits 0, before editing the plan, and refuses with a named reason otherwise; tested.
 - The operations guide (EN and ES) describes rerun recovery and `primary-diverged` as the code behaves.
 - Tests cover each changed behaviour; Windows and Linux.
+
+### Evidence
+
+- PR #408 merged after CI green (portable, ubuntu, windows); review V001 pass at 96edc459 (F1 plan-step rerun wording known-limit deferred to J005, F2 not-material); operator approved grant-code change 2026-11-26
 
