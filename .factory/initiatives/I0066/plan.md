@@ -137,17 +137,21 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J008
 
-- Status: in-progress
+- Status: completed
 - Objective: Planning guidance sizes a semantic rewrite of user-facing pages by its review cost.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one guidance paragraph). Ground the change in the current source.
+- Next step: None.
 
 ### Acceptance
 
 - `.agents/roles/references/planning.md` states, with an example, that a rewrite whose review is semantic across two languages is sized L and split.
 - Spanish mirrors and glossary unchanged unless a term requires it.
+
+### Evidence
+
+- PR #411 merged after CI green (portable, ubuntu, windows); review V001 pass at d2576bfb (S1, S2 wording not-material)
 
 ## J009
 
