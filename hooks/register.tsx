@@ -646,6 +646,8 @@ export const register: Register = (on, options) => {
             return { exitCode, stdout }
           },
           read: (file: string) => $.fs.read(file),
+          // The hook runtime has no process platform; Windows sets OS=Windows_NT, and an unknown platform gets the default wording.
+          platform: (await $.env.get('OS')) === 'Windows_NT' ? 'win32' : undefined,
         })
         if (plans.deny !== undefined) return { deny: plans.deny }
         const verification = await checkVerificationCommit({

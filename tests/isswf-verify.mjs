@@ -4,6 +4,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] || '.');
@@ -327,6 +328,33 @@ try {
   const linkedHead = git(linkedDir, 'rev-parse', 'HEAD');
   assert.equal(verify(linkedDir, '--base', stamped.head, '--tier', 'job').status, 0);
   assert.ok(existsSync(stampPath(stamped.repo, linkedHead)), 'the main checkout sees the stamp of the linked worktree');
+
+  // On win32 the initiative tier says up front which checks cannot run there and how to record the CI route; other platforms and tiers say nothing.
+  const { platformNotice } = await import(pathToFileURL(runner));
+  const gated = [check('quality', node('-e', '0'), { platforms: ['linux'], cost: 'initiative' }), check('dead', node('-e', '0'), { platforms: ['linux'], cost: 'initiative' }), check('unit', node('-e', '0'), { platforms: ['linux', 'win32'] })];
+  const notice = platformNotice({ selected: gated, costs: ['job', 'initiative'], platform: 'win32' });
+  assert.match(notice ?? '', /quality, dead/u);
+  assert.match(notice, /not run/u);
+  assert.match(notice, /source.*ci/u);
+  assert.match(notice, /runUrl/u);
+  assert.match(notice, /close-verification.json/u);
+  assert.match(notice, /schemaVersion 1/u);
+  assert.match(notice, /source "ci"/u);
+  assert.doesNotMatch(notice, /docs\//u,'the notice names no repo-relative path');
+  assert.doesNotMatch(notice, /check-quality|dead-code/u, 'the notice names only the manifest checks');
+  assert.equal(platformNotice({ selected: gated, costs: ['job', 'initiative'], platform: 'linux' }), undefined);
+  assert.equal(platformNotice({ selected: gated, costs: ['job'], platform: 'win32' }), undefined);
+
+  // Through the CLI: a platform-limited initiative check puts the notice on stderr on win32 only, and stdout stays one JSON document.
+  const limited = makeRepo('platform-limited', [check('only-elsewhere', node('-e', '0'), { platforms: ['plan9'], cost: 'initiative' })]);
+  const cli = verify(limited.repo, '--base', limited.head, '--tier', 'initiative');
+  if (process.platform === 'win32') {
+    assert.match(cli.stderr, /not run.*only-elsewhere|only-elsewhere.*not run/su);
+    assert.match(cli.stderr, /schemaVersion 1/u);
+    assert.match(cli.stderr, /source "ci"/u);
+    assert.doesNotMatch(cli.stderr, /docs\//u);
+  } else assert.equal(cli.stderr, '');
+  assert.equal(cli.out.results[0].status, 'not run');
 
   console.log('PASS isswf-verify statuses, tiers, base-read file, bounded output and refusals');
 } finally {

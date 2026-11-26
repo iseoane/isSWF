@@ -173,6 +173,17 @@ function closeRecordTarget(options, project, state) {
   return `${directory}/close-verification.json`;
 }
 
+/**
+ * The up-front warning for an initiative-tier run on Windows: the checks of these costs that are not approved for this platform will be "not run", and the close gate refuses a record that lists them.
+ * Returns undefined when nothing is skipped, so other platforms and the job tier stay silent.
+ */
+export function platformNotice({ selected, costs, platform }) {
+  if (platform !== 'win32') return undefined;
+  const skipped = selected.filter(check => costs.includes(check.cost) && check.cost !== 'job' && !check.platforms.includes(platform));
+  if (!skipped.length) return undefined;
+  return `on win32 these checks will be "not run": ${skipped.map(check => check.id).join(', ')}; the close gate refuses a record that lists them. Record a passing CI run instead: write <state directory>/initiatives/<ID>/close-verification.json with the same fields as a local record (schema "isswf.close-verification", schemaVersion 1, initiative, head, verificationSha256, checks as {id, status} all passed) but source "ci", plus the run's runUrl and its head SHA, then commit it and the plan.`;
+}
+
 /** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. With `record`, runs every cost and writes the initiative's close record. */
 function verify(options) {
   const { project, candidate, base, path, blob, state } = readApproved(options);
@@ -193,6 +204,8 @@ function verify(options) {
   if (recordPath !== undefined && stale.length > 0) return { ok: false, code: 'stale', message: 'verification.json is stale; refresh it from its derivedFrom files before recording', base, tier: options.tier, stale, results: [] };
   const costs = options.record === undefined ? TIER_COSTS[options.tier] : COSTS;
   const selected = options.only === undefined ? checks : checks.filter(entry => entry.id === options.only);
+  const notice = options.tier === 'initiative' ? platformNotice({ selected, costs, platform: process.platform }) : undefined;
+  if (notice) console.error(notice);
   const results = selected.map(check => {
     const stamp = { checkId: check.id, platform: process.platform, argvSha256: sha256(JSON.stringify(check.argv)), candidate, dirty, verificationSha256 };
     const applies = check.platforms.includes(process.platform) && (options.only !== undefined || costs.includes(check.cost));

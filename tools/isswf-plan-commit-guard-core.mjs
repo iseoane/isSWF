@@ -106,7 +106,7 @@ const describe = (path, { code, job, field, line }) => `${path}: ${code}${[job, 
  * It fails open: this guard enforces a process rule, not an authority, so a fault allows the command.
  * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text.
  */
-export async function checkPlanCommit({ command, cwd, git, read }) {
+export async function checkPlanCommit({ command, cwd, git, read, platform = globalThis.process?.platform }) {
   try {
     const problems = [], closes = [];
     const segments = tokenize(command);
@@ -143,7 +143,11 @@ export async function checkPlanCommit({ command, cwd, git, read }) {
     }
     if (!problems.length && !closes.length) return {};
     const unreadable = problems.length ? `isSWF plan commit guard: git commit refused. isswf-status cannot read back ${problems.length === 1 ? 'this plan' : 'these plans'}:\n${problems.map(item => `- ${item}`).join('\n')}\nFix the plan with tools/isswf-plan-edit.mjs or by hand, stage it, and commit again.` : '';
-    const open = closes.map(({ initiative, found }) => `isSWF plan commit guard: git commit refused. This commit completes every job of ${initiative}, and its close verification is not recorded at the closing head:\n${found.map(item => `- ${item}`).join('\n')}\nRun the initiative tier with \`isswf-verify --tier initiative --record ${initiative}\` (or record a passing CI run with \`source: "ci"\` and its run URL), commit the record, and commit the plan again.`);
+    // A local record often cannot pass on Windows, where checks limited to other platforms do not run, so the CI record leads there.
+    const route = initiative => (platform === 'win32'
+      ? `Record a passing CI run with \`source: "ci"\` and its run URL (or run \`isswf-verify --tier initiative --record ${initiative}\` if every check runs on Windows)`
+      : `Run the initiative tier with \`isswf-verify --tier initiative --record ${initiative}\` (or record a passing CI run with \`source: "ci"\` and its run URL)`);
+    const open = closes.map(({ initiative, found }) => `isSWF plan commit guard: git commit refused. This commit completes every job of ${initiative}, and its close verification is not recorded at the closing head:\n${found.map(item => `- ${item}`).join('\n')}\n${route(initiative)}, commit the record, and commit the plan again.`);
     return { deny: `${[unreadable, ...open].join('\n\n').trim()}\nThis is a process rule, not a retry signal: do not rephrase the command to get past it.` };
   } catch {
     return {};
