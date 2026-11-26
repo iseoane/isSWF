@@ -272,3 +272,19 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 - PR #408 merged after CI green (portable, ubuntu, windows); review V001 pass at 96edc459 (F1 plan-step rerun wording known-limit deferred to J005, F2 not-material); operator approved grant-code change 2026-11-26
 
+
+## J017
+
+- Status: pending
+- Objective: The integration gate checks review coverage at `git push` time on both Pi and Claude Code, through a pure coverage core that packaged hooks can import.
+- Depends on: J005
+- Brief: [brief-r1.md](jobs/J017/brief-r1.md)
+- Blocker: None.
+- Next step: Size S/M. Split the coverage computation of `tools/isswf-handoff.mjs` into a `*-core.mjs` module with an injected git runner, list it in the package resources, and pass it as `coverage` to the gate from `hooks/register.tsx` and the Pi command-guard extension. Recorded from J005 review V002 (F5, F6) on 2026-11-26.
+
+### Acceptance
+
+- On Claude Code and Pi, a `git push` of a job branch with commits after the last reviewed candidate is noted in observe mode and refused in enforce mode; a covered push passes; a coverage fault allows the push.
+- Every module the hook and the Pi extension import is in the package resources (`tests/package-metadata.mjs` passes).
+- The operations guide (EN and ES) no longer describes the push-time check as pending.
+- Tests cover both hosts' wiring; Windows and Linux.
