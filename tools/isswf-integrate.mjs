@@ -18,6 +18,7 @@ const execFileAsync = promisify(execFile);
 const SHA = /^[0-9a-f]{40}$/u;
 const GRANT = /^- Records-only direct push: granted\s*$/mu;
 const REMOTE = /^[\w][\w.-]*$/u;
+const CI_ONLY_BLOCK = /^- Kind: ci-only\s*$/mu;
 const refuse = (code, detail = {}) => ({ ok: false, code, ...detail });
 
 /** The real `gh`: resolves `{ exitCode, stdout }`, as the CI state tool reads it. */
@@ -106,6 +107,8 @@ export async function jobState({ project, initiative, job, branch, head, pr, rep
       const ci = await readCiState({ pr, repo, gh });
       facts.ciGreen = ci.state === 'success' && ci.head === head;
       if (!facts.ciGreen) detail.ci = ci.head === head ? ci.state : `head ${ci.head}`;
+      // A failure on a reviewed head is a miss the retrospective needs; the job records must hold its block before this goes on.
+      if (ci.head === head && ci.state === 'failure') detail.missUnrecorded = !names.filter(name => /^[AV]\d{3}\.md$/u.test(name)).some(name => CI_ONLY_BLOCK.test(git(root, ['show', `${head}:${stateDir}/initiatives/${initiative}/jobs/${job}/${name}`]).stdout));
     } catch (error) { facts.ciGreen = false; detail.ci = error.message; }
   }
   return { ...found, facts, detail, state: deriveState(facts) };
@@ -130,7 +133,7 @@ export async function integrate(request) {
     // A pull request already merged at this head resumes after the merge; any other state needs the merge first.
     const resuming = found.state === 'merged';
     const reason = resuming ? refusalFor('merged', 'closed') : refusalFor(found.state, 'merged');
-    if (reason) return refuse(reason, { state: found.state, ...found.detail });
+    if (reason) return refuse(reason === 'ci-not-green' && found.detail.missUnrecorded ? 'ci-miss-unrecorded' : reason, { state: found.state, ...found.detail });
     if (found.closesInitiative) return refuse('initiative-close-required', { state: found.state });
     const { upstream } = found;
     if (git(root, ['merge-base', '--is-ancestor', 'HEAD', upstream], { check: false }).status !== 0) return refuse('primary-diverged');

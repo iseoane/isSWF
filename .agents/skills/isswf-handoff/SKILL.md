@@ -52,7 +52,7 @@ The diff bytes are the same `base..candidate` patch the bound review tools produ
 
 ## 3. Check review coverage
 
-Run this before `gh pr create` and before a merge, and whenever commits were added after a review:
+Run this before pushing a job branch, before `gh pr create` and before a merge (a failure stops the push), and whenever commits were added after a review:
 
 ```sh
 node <factory-root>/tools/isswf-handoff.mjs coverage --project <abs>
