@@ -81,18 +81,22 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Objective: A ci-only failure on a reviewed head cannot be integrated without a recorded miss block, and review coverage runs before a candidate is pushed.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one refusal in the integration command). Ground the change in the current source.
+- Next step: None.
 
 ### Acceptance
 
 - When CI fails on a head that a passing review covered, the integration command refuses until the job records hold a `- Kind: ci-only` miss block for it.
 - Review coverage (`isswf-handoff coverage`) runs before push in the coordinator flow, and its failure stops the push.
 - Tests cover the refusal and the recorded case.
+
+### Evidence
+
+- PR #410 merged after CI green (portable, ubuntu, windows); reviews V001 fail, V002 fail, V003 pass at dd18b510; push-time coverage on both hosts deferred to J017 (incl. V003 F11 wording)
 
 ## J006
 
