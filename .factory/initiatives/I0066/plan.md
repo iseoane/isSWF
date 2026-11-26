@@ -67,17 +67,21 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Objective: The Windows CI job and the local initiative-tier verification on Windows take measurably less time, based on a per-step timing breakdown.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (measure, then optimize without dropping coverage). Measure per-step and per-test durations in the windows-latest job and in a local `isswf-verify --tier initiative` run on Windows.
+- Next step: None.
 
 ### Acceptance
 
 - A recorded breakdown names the slowest steps and tests on Windows, compared with Linux.
 - Changes cut the Windows wall-clock time without dropping any check or platform coverage; before and after times are recorded.
+
+### Evidence
+
+- PR #412 merged after CI green (portable, ubuntu, windows). Reviews V001 fail, V002 pass at e3e73844. Windows CI (run 45896858512) job 387 s -> 323 s, state-interruption step 98 s -> 60 s, platform-package step 68 s -> 45 s. Local isswf-verify --tier initiative 339.7 s -> 140 s with --jobs (default min(4, CPUs)). Known limits: default-path test needs 2+ CPUs; PID reuse window in state-interruption; isswf-integration-gate git spawn cost left as is.
 
 ## J005
 
