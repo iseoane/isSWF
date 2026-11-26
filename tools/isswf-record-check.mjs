@@ -3,7 +3,7 @@ import { lstat, readdir, readFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { NOTE_DIR, parseNote } from './isswf-compaction-core.mjs';
+import { launchesFor, siblingsOf } from './isswf-launch-notes.mjs';
 import { checkRecord, reportedChecks } from './isswf-record-check-core.mjs';
 import { attemptUsages, briefNote, commandNotes, compareBrief } from './isswf-run-usage-core.mjs';
 import { RECORD_NAME } from './isswf-snapshot-core.mjs';
@@ -42,21 +42,6 @@ async function notesFor(project, path, text) {
     const briefText = round ? await readFile(join(dirname(path), `brief-r${round}.md`), 'utf8').catch(() => undefined) : undefined;
     return [briefText === undefined ? undefined : briefNote(compareBrief(briefText, usages)), ...commandNotes(checks, usages)].filter(Boolean);
   } catch { return []; }
-}
-
-// The accepted dispatches every Claude session note holds; a missing directory is no launch. Pi keeps its dispatches in the running extension, so it has none here.
-async function launchesFor() {
-  const dir = join(process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), ...NOTE_DIR);
-  const launches = [];
-  try { for (const name of await readdir(dir)) launches.push(...(parseNote(await readFile(join(dir, name), 'utf8').catch(() => '')) ?? [])); } catch { /* no notes */ }
-  return launches.filter(({ run }) => run);
-}
-
-// The other records of the job directory, read only when a launch could make this record's missing line matter.
-async function siblingsOf(path) {
-  const own = basename(path);
-  const dir = dirname(path);
-  try { return await Promise.all((await readdir(dir)).filter(name => RECORD_NAME.test(name) && name !== own).map(name => readFile(join(dir, name), 'utf8'))); } catch { return []; }
 }
 
 async function checkFile(project, file, isNew) {

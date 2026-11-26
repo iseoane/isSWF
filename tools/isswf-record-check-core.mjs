@@ -51,7 +51,7 @@ function runViolations(text) {
 // no `Run:` line is refused, and only for a launch of its own kind (an attempt for a non-reviewer role, a review for the reviewer) of the brief,
 // checkpoint and job it names, whose identity no record of the job carries yet. A coordinator acting as writer launches nothing, and a launch
 // without a returned identity is not in `launches`.
-function launchViolations({ path, text, name, launches, siblings }) {
+export function launchViolations({ path, text, name, launches, siblings }) {
   const runsIn = record => record.split('\n').map(parseRunLine).filter(Boolean);
   if (!launches?.length || runsIn(text).length || parseRole(text) === 'coordinator') return [];
   const claimed = new Set([text, ...(siblings ?? [])].flatMap(record => runsIn(record)).map(({ id }) => id));
