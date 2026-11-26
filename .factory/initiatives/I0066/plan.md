@@ -164,7 +164,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (shared module and two tool consumers, legacy plans). Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`.
+- Next step: Size M (shared module and two tool consumers, legacy plans). Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`. Coordinator decision 2026-11-26 (V001): `in-progress` stays stored because authorization to start is not revealed by any record; `in-review` is derived and no longer stored.
 
 ### Acceptance
 
