@@ -103,7 +103,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J007
 
-- Status: done
+- Status: completed
 - Objective: The plan commit guard checks a newly added plan the same way as a changed one.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
