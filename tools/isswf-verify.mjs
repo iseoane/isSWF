@@ -181,7 +181,7 @@ export function platformNotice({ selected, costs, platform }) {
   if (platform !== 'win32') return undefined;
   const skipped = selected.filter(check => costs.includes(check.cost) && check.cost !== 'job' && !check.platforms.includes(platform));
   if (!skipped.length) return undefined;
-  return `on win32 these checks will be "not run": ${skipped.map(check => check.id).join(', ')}; the close gate refuses a record that lists them. Record a passing CI run instead: write <state directory>/initiatives/<ID>/close-verification.json with source "ci", the run's runUrl, its head SHA and every check as passed (see "Verification runner" in docs/en/operations.md), commit it, then commit the plan.`;
+  return `on win32 these checks will be "not run": ${skipped.map(check => check.id).join(', ')}; the close gate refuses a record that lists them. Record a passing CI run instead: write <state directory>/initiatives/<ID>/close-verification.json with the same fields as a local record (schema "isswf.close-verification", schemaVersion 1, initiative, head, verificationSha256, checks as {id, status} all passed) but source "ci", plus the run's runUrl and its head SHA, then commit it and the plan.`;
 }
 
 /** Runs the checks the base ref approved for this platform and returns one stamp-ready result per check. With `record`, runs every cost and writes the initiative's close record. */
