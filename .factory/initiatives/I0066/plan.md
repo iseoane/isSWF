@@ -8,12 +8,12 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Objective: An attempt or review record for a host launch that returned a run identity cannot be completed or pass the record check without the matching `Run:` line, and the coordinator gets a refusal that names the missing line.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (launch guard, record-new, record-check and the Pi check). Ground the design: where the launch guard records accepted dispatches and their run identity, how `isswf-record-new create` and `isswf-record-check` read records, and whether the panel reads records in linked worktrees.
+- Next step: None.
 
 ### Acceptance
 
@@ -22,6 +22,10 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 - It works on Windows and Linux in Claude Code. Pi equivalence is checked, or its absence is recorded as an explicit limit.
 - If the panel does not show runs whose records are only in a linked worktree, that is either fixed here or recorded as a separate job (recorded as J015).
 - Operator decision 2026-11-26: the refusal applies at `complete`, not `create`, because a worker creates its record before the coordinator knows its run identity.
+
+### Evidence
+
+- PR #405 merged as cca6e752c8bfccb6df94649131fda974ce906262, CI green on head d99dd3b5. Reviews V001 inconclusive (no blockers), V002 pass. Known limits: Pi keeps no dispatch notes; notes keep the last 5 dispatches per session and are not project-scoped; the refusal may name an earlier record launch; the shared message names --run, which only isswf-record-new complete accepts. Panel in linked worktrees: J015.
 
 ## J002
 
