@@ -3,7 +3,7 @@
   "derivedFrom": [
     {
       "path": "tools/check-quality.mjs",
-      "sha256": "ee06632c275ee9e89f99c902ec086aeda09a406eae89346d0b78341705221537"
+      "sha256": "aa96c5c1741e39f972c11d4f8ab9fbd05a294f714df99babed0bfdff58f8528d"
     },
     {
       "path": ".github/workflows/quality.yml",

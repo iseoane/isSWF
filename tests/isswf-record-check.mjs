@@ -130,6 +130,9 @@ assert.deepEqual(resolutionCodes('None.'), []);
 const templateLine = (await readFile(join(source, '.factory/templates/review.md'), 'utf8')).split('\n').find(line => line.includes(resolutionLabel));
 assert.ok(templateLine, 'the real template carries the resolution line');
 assert.deepEqual(resolutionViolations(`${attempt([], reviewFields).replace('# Attempt report', '# Review report')}${templateLine}\n`), [], 'the unfilled line of the real template');
+// Filling the template line by replacing its placeholder with "None." must not leave a doubled period that names no resolution.
+assert.deepEqual(resolutionViolations(`${attempt([], reviewFields).replace('# Attempt report', '# Review report')}${templateLine.replace(/`[^`]*`/u, 'None.')}
+`), [], 'the template line with its placeholder replaced by None.');
 for (const bad of ['F1 intentional: reason', 'F1 fixed', 'F1 fixed:', 'F1 not material: reason', 'fixed: reason', 'F1 fixed: ok; S1 wrong']) assert.deepEqual(resolutionCodes(bad), ['finding-resolution-invalid'], bad);
 assert.deepEqual(resolutionCodes('F1 intentional: reason', false), [], 'a record that existed at the base keeps its wording');
 assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: reviewWith('F1 intentional: reason') }).violations, [], 'without a base nothing is new');

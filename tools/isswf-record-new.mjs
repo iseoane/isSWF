@@ -66,7 +66,7 @@ export function checkSha(value, flag, { optional = false } = {}) {
 }
 
 // The pane's own parser decides what a Run line is; an unknown ID is left out of the record instead.
-function knownRun(run) {
+export function knownRun(run) {
   const parsed = parseRunLine(`- Run: ${run}`);
   return parsed !== null && parsed.id !== 'unknown';
 }

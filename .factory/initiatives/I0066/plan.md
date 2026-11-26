@@ -159,12 +159,12 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J009
 
-- Status: pending
+- Status: in-progress
 - Objective: The job status reported by `isswf-status` is derived from one shared state machine, and the plan stores only the states no record can reveal.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (shared module and two tool consumers, legacy plans). Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`.
+- Next step: Size M (shared module and two tool consumers, legacy plans). Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`. Coordinator decision 2026-11-26 (V001): `in-progress` stays stored because authorization to start is not revealed by any record; `in-review` is derived and no longer stored.
 
 ### Acceptance
 
@@ -219,18 +219,22 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J013
 
-- Status: in-progress
+- Status: completed
 - Objective: A review dispatch is prepared through one host-neutral command in `tools/`, called from the coordinator skill.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one command and a template fix). Reuse the J003 lifecycle module; ground the I0065 review-preparation failures.
+- Next step: None.
 
 ### Acceptance
 
 - The command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
 - The review template no longer turns a filled "None." into "None.." (retrospective P5), or the parser tolerates it.
 - Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
+
+### Evidence
+
+- PR #413 merged after CI green (portable incl. Knip, ubuntu, windows). Reviews V001 fail, V002 pass at 2885f59e. The new command prepared its own V001 and V002. .agents/hosts/** change approved under the operator's standing merge authorization (not HIGH risk: doc reference to the new command). Known limits: RED 00a307d6 was a missing-file failure (disclosed); the attempt template placeholder still ends in a period.
 
 ## J014
 
