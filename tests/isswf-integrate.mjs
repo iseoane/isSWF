@@ -47,7 +47,7 @@ const BRANCH = 'feat/i0001-j001';
 let counter = 0;
 
 // A bare origin, the primary checkout on main and a linked job worktree. `options` leave records out or add commits after the review.
-async function fixture({ brief = true, attempt = true, review = true, extra = false, dirtyPrimary = false } = {}) {
+async function fixture({ brief = true, attempt = true, review = true, extra = false, grant = true } = {}) {
   counter += 1;
   const dir = join(temp, `case${counter}`);
   const origin = join(dir, 'origin.git'), project = join(dir, 'project'), worktree = join(dir, 'job-worktree'), forge = join(dir, 'forge');
@@ -56,7 +56,7 @@ async function fixture({ brief = true, attempt = true, review = true, extra = fa
   initRepository(project, ['-b', 'main']);
   const put = async (root, path, text) => { await mkdir(join(root, path, '..'), { recursive: true }); await writeFile(join(root, path), text); };
   await put(project, '.factory/initiatives/I0001/plan.md', PLAN('in-progress'));
-  await put(project, '.factory/project-setup.md', '# setup\n');
+  await put(project, '.factory/project-setup.md', grant ? '# setup\n\n- Records-only direct push: granted\n' : '# setup\n');
   await put(project, `${JOB}/brief-r1.md`, '# brief\n');
   git(project, 'add', '-A'); git(project, 'commit', '-qm', 'start');
   git(project, 'remote', 'add', 'origin', origin);
@@ -75,7 +75,6 @@ async function fixture({ brief = true, attempt = true, review = true, extra = fa
   const head = git(worktree, 'rev-parse', 'HEAD');
   initRepository(forge, []);
   git(forge, 'remote', 'add', 'origin', origin);
-  if (dirtyPrimary) { await put(project, 'dirty.txt', 'x\n'); git(project, 'add', 'dirty.txt'); }
   return { dir, origin, project, worktree, forge, head, base };
 }
 
@@ -133,58 +132,40 @@ try {
   }
 
   // Each refusal names its reason and changes nothing: origin/main is unchanged, no merge is called, the worktree and branch remain.
-  const refusals = [
-    ['no-brief', { brief: false }, {}, {}],
-    ['no-attempt', { attempt: false }, {}, {}],
-    ['no-review', { review: false }, {}, {}],
-    ['not-covered', { extra: true }, {}, {}],
-    ['ci-not-green', {}, { ci: 'PENDING' }, {}],
-    ['ci-not-green', {}, { ci: 'FAILURE' }, {}],
-    ['ci-not-green', {}, { ciHead: 'b'.repeat(40) }, {}],
-    ['ci-not-green', {}, { unreadable: true }, {}],
-    ['head-mismatch', {}, {}, { head: 'c'.repeat(40) }],
-    ['primary-dirty', { dirtyPrimary: true }, {}, {}],
-    ['evidence-required', {}, {}, { evidence: '' }],
-  ];
-  for (const [code, options, ghOptions, override] of refusals) {
-    const f = await fixture(options), fake = fakeGh(f, ghOptions);
+  const expectRefusal = async (f, fake, code, override = {}) => {
     const before = originMain(f);
     const result = await integrate(request(f, fake.gh, override));
-    assert.equal(result.ok, false, `${code}: ${JSON.stringify(result)}`);
+    assert.equal(result.ok, false, code + ': ' + JSON.stringify(result));
     assert.equal(result.code, code, JSON.stringify(result));
-    assert.equal(merged(fake), false, `${code} must not merge`);
-    assert.equal(originMain(f), before, `${code} must not push`);
-    assert.equal(existsSync(f.worktree), true, `${code} keeps the worktree`);
-    assert.equal(git(f.project, 'branch', '--list', BRANCH).includes(BRANCH), true, `${code} keeps the branch`);
+    assert.equal(merged(fake), false, code + ' must not merge');
+    assert.equal(originMain(f), before, code + ' must not push');
+    assert.equal(existsSync(f.worktree), true, code + ' keeps the worktree');
+    assert.equal(git(f.project, 'branch', '--list', BRANCH).includes(BRANCH), true, code + ' keeps the branch');
+  };
+  // A refusal changes nothing, so one fixture serves every refusal that does not depend on the records.
+  for (const [code, options] of [['no-brief', { brief: false }], ['no-attempt', { attempt: false }], ['no-review', { review: false }], ['not-covered', { extra: true }], ['records-push-not-granted', { grant: false }]]) {
+    const f = await fixture(options);
+    await expectRefusal(f, fakeGh(f), code);
   }
-
-  // The primary checkout must be on the base branch.
   {
-    const f = await fixture(), fake = fakeGh(f);
-    git(f.project, 'checkout', '-q', '-b', 'other');
-    const result = await integrate(request(f, fake.gh));
-    assert.equal(result.code, 'primary-not-on-base');
-    assert.equal(merged(fake), false);
-  }
-
-  // A dirty job worktree would lose work when removed, so it refuses before the merge.
-  {
-    const f = await fixture(), fake = fakeGh(f);
+    const f = await fixture();
+    for (const ghOptions of [{ ci: 'PENDING' }, { ci: 'FAILURE' }, { ciHead: 'b'.repeat(40) }, { unreadable: true }]) await expectRefusal(f, fakeGh(f, ghOptions), 'ci-not-green');
+    await expectRefusal(f, fakeGh(f), 'head-mismatch', { head: 'c'.repeat(40) });
+    await expectRefusal(f, fakeGh(f), 'evidence-required', { evidence: '' });
+    // The refusing forge: the head moved, so the pinned merge fails and nothing else happens.
+    const fake = fakeGh(f);
+    await expectRefusal(f, { ...fake, gh: async argv => (argv[1] === 'merge' ? { exitCode: 1, stdout: '' } : fake.gh(argv)) }, 'merge-refused');
+    // A dirty job worktree would lose work when removed, so it refuses before the merge.
     await writeFile(join(f.worktree, 'scratch.txt'), 'unsaved\n');
-    const result = await integrate(request(f, fake.gh));
-    assert.equal(result.code, 'worktree-dirty');
-    assert.equal(merged(fake), false);
-  }
-
-  // A merge the forge refuses (the head moved) leaves everything as it was.
-  {
-    const f = await fixture(), fake = fakeGh(f);
-    const refusing = async argv => (argv[1] === 'merge' ? { exitCode: 1, stdout: '' } : fake.gh(argv));
-    const before = originMain(f);
-    const result = await integrate(request(f, refusing));
-    assert.equal(result.code, 'merge-refused');
-    assert.equal(originMain(f), before);
-    assert.equal(existsSync(f.worktree), true);
+    await expectRefusal(f, fakeGh(f), 'worktree-dirty');
+    await rm(join(f.worktree, 'scratch.txt'));
+    // The primary checkout must be clean and on the base branch.
+    await writeFile(join(f.project, 'dirty.txt'), 'x\n');
+    git(f.project, 'add', 'dirty.txt');
+    await expectRefusal(f, fakeGh(f), 'primary-dirty');
+    git(f.project, 'reset', '-q');
+    git(f.project, 'checkout', '-q', '-b', 'other');
+    await expectRefusal(f, fakeGh(f), 'primary-not-on-base');
   }
 
   // The command line refuses an incomplete request in the same JSON shape.
