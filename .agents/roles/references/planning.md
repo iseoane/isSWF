@@ -31,6 +31,8 @@ Give each proposed job a size of S, M or L with a one-line reason. Size by the c
 - **M:** two or three related flows, or one well-bounded special risk.
 - **L:** anything else.
 
+A rewrite of user-facing pages whose review is [semantic](review.md) across two languages is L: the reviewer must judge the meaning of each page in English and again in its Spanish mirror, so the cost grows with pages times languages, and a single pass cannot cover it. Split it into parts that each have their own review, such as one page or one guide family with its mirror. Example: rewriting the `docs/en/` guides and their `docs/es/` mirrors as one job is L; propose one job per guide family, each with its mirrors. A mechanical change to the same pages, such as a link replacement checked by `node tooling/quality/check-docs.mjs`, keeps its own size.
+
 Dispatch S and M jobs as they are. Split an L job into independently useful functional parts, or record in the plan why it cannot be split. Do not use a line-count or other numeric threshold. When in doubt, choose the smaller size and proceed. Sizing is part of the plan text; it adds no planner dispatch or approval step.
 
 ## Stop conditions
