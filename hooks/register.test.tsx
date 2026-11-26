@@ -991,3 +991,75 @@ test('a failing OS lookup does not switch the plan commit guard off', async ($, 
   const refused = await $.tool.call({ tool: 'Bash', command: 'git commit -a -m close' })
   expect(refused.deny).toMatch(/isswf-verify --tier initiative --record I0099[\s\S]*source: "ci"/)
 })
+
+// A checkout on branch `feat` whose head carries one code commit and a J001 review of the range `reviewBase`..`reviewCandidate`; `git` answers just enough for the integration gate.
+const PUSH_BASE = '1'.repeat(40)
+const PUSH_HEAD = '2'.repeat(40)
+function pushHost(on: any, { mode, reviewBase, reviewCandidate, coverageFails = false }: { mode: string; reviewBase: string; reviewCandidate: string; coverageFails?: boolean }) {
+  const jobDir = '.factory/initiatives/I0001/jobs/J001/'
+  const review = `# review\n\n- Base commit SHA: ${reviewBase}\n- Candidate commit SHA, or reproducible snapshot identity: ${reviewCandidate}\n`
+  const stamp = JSON.stringify({ candidate: PUSH_HEAD, tier: 'job', checks: [{ id: 'x', status: 'passed' }] })
+  const reply = (stdout: string, exitCode = 0) => ({ exitCode, stdout })
+  const answer = (argv: string[]) => {
+    const cmd = argv.slice(2).join(' ')
+    if (cmd === 'rev-parse --show-toplevel') return reply('/p\n')
+    if (cmd === 'config --get isswf.baseBranch') return reply('', 1)
+    if (cmd === 'symbolic-ref --short -q HEAD') return reply('feat\n')
+    if (cmd === 'show origin/main:.isswf/project-setup.md') return reply('', 1)
+    if (cmd === 'show origin/main:.factory/project-setup.md') return reply(`- Integration gate: ${mode}\n`)
+    if (cmd === 'rev-parse --verify -q feat^{commit}') return reply(`${PUSH_HEAD}\n`)
+    if (cmd === `merge-base --is-ancestor ${PUSH_HEAD} origin/main`) return reply('', 1)
+    if (cmd === `rev-list --first-parent ${PUSH_HEAD} --not origin/main`) return reply(`${PUSH_HEAD}\n`)
+    if (cmd === 'rev-parse --git-common-dir') return reply('.git\n')
+    if (cmd === `merge-base ${PUSH_HEAD} origin/main`) return reply(`${PUSH_BASE}\n`)
+    if (coverageFails && cmd.startsWith('ls-tree')) return reply('', 128)
+    if (cmd === `diff --name-only -z ${PUSH_BASE} ${PUSH_HEAD}`) return reply(`${jobDir}V001.md\0`)
+    if (cmd.startsWith('ls-tree --name-only -z')) return reply(`${jobDir}V001.md\0`)
+    if (cmd === `show ${PUSH_HEAD}:${jobDir}V001.md`) return reply(review)
+    if (cmd === `rev-list ${reviewCandidate} --not ${reviewBase}`) return reply(reviewCandidate === reviewBase ? '' : `${reviewCandidate}\n`)
+    if (cmd === `rev-list --reverse --parents ${PUSH_BASE}..${PUSH_HEAD}`) return reply(`${PUSH_HEAD} ${PUSH_BASE}\n`)
+    if (cmd.startsWith('diff-tree')) return reply('tools/x.mjs\0')
+    return reply('')
+  }
+  on('session.cwd', () => ({ value: '/p' }))
+  on('state.get', () => ({ value: { value: undefined, version: 1 } }))
+  on('state.set', () => ({ value: { isSet: true, version: 1 } }))
+  on('env.get', () => ({ value: undefined }))
+  on('fs.read', (_: unknown, { path }: { path: string }) => {
+    const tail = path.split(String.fromCharCode(92)).join('/')
+    if (tail.endsWith(`/.git/isswf/verification-stamps/${PUSH_HEAD}.json`)) return { value: stamp }
+    throw new Error('ENOENT ' + path)
+  })
+  on('process.run', (_: unknown, e: { argv: string[] }) => {
+    const { exitCode, stdout } = answer(e.argv)
+    return { value: { exitCode, stdout, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+  })
+  on('tool.call', () => ({ result: {} }))
+}
+
+test('a push of commits no review covers is refused in enforce mode and noted in observe mode', async ($, on) => {
+  pushHost(on, { mode: 'enforce', reviewBase: PUSH_BASE, reviewCandidate: PUSH_BASE })
+  const refused = await $.tool.call({ tool: 'Bash', command: 'git push origin feat' })
+  expect(refused.deny).toMatch(/Unreviewed commits: 2222222/)
+})
+
+test('an observe-mode push of unreviewed commits runs and carries the gate note', async ($, on) => {
+  pushHost(on, { mode: 'observe', reviewBase: PUSH_BASE, reviewCandidate: PUSH_BASE })
+  const ran = await $.tool.call({ tool: 'Bash', command: 'git push origin feat' })
+  expect(ran.deny).toBeUndefined()
+  expect(ran.context?.join('\n')).toMatch(/integration gate \(observe\)[\s\S]*Unreviewed commits: 2222222/)
+})
+
+test('a push covered by a review is allowed', async ($, on) => {
+  pushHost(on, { mode: 'enforce', reviewBase: PUSH_BASE, reviewCandidate: PUSH_HEAD })
+  const covered = await $.tool.call({ tool: 'Bash', command: 'git push origin feat' })
+  expect(covered.deny).toBeUndefined()
+  expect(covered.context).toBeUndefined()
+})
+
+test('a coverage fault allows the push', async ($, on) => {
+  pushHost(on, { mode: 'enforce', reviewBase: PUSH_BASE, reviewCandidate: PUSH_BASE, coverageFails: true })
+  const ran = await $.tool.call({ tool: 'Bash', command: 'git push origin feat' })
+  expect(ran.deny).toBeUndefined()
+  expect(ran.context).toBeUndefined()
+})
