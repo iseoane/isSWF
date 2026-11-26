@@ -28,6 +28,7 @@ Estas herramientas empaquetan la fábrica, gestionan la instalación de un proye
 | Rechazar un despacho fallido a un agente de rol de isSWF | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Contar los workers abiertos contra el límite local del clon y listar o limpiar entradas obsoletas | `tools/isswf-parallel-workers-core.mjs`, `tools/isswf-parallel-workers.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Leer una vez el estado del CI de un pull request para su cabeza exacta | `tools/isswf-ci-state-core.mjs`, `tools/isswf-ci-state.mjs` |
+| Integrar un trabajo revisado y derivar el estado de su ciclo de entrega | `tools/isswf-delivery-core.mjs`, `tools/isswf-integrate.mjs` |
 | Rechazar un comando de shell que espera al CI o adquiere paquetes | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Conservar la asignación del coordinador durante una compactación | `tools/isswf-compaction-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
 | Avisar al terminar un turno de un trabajo en curso con brief confirmado y sin lanzamiento | `tools/isswf-undispatched-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |

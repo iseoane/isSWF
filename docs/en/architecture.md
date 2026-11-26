@@ -28,6 +28,7 @@ These tools package the factory, manage a project's installation and read or pre
 | Refuse a failing dispatch to an isSWF role agent | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Count open workers against the clone's local limit and list or clear stale entries | `tools/isswf-parallel-workers-core.mjs`, `tools/isswf-parallel-workers.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Read a pull request's CI state once for its exact head | `tools/isswf-ci-state-core.mjs`, `tools/isswf-ci-state.mjs` |
+| Integrate a reviewed job and derive its delivery lifecycle state | `tools/isswf-delivery-core.mjs`, `tools/isswf-integrate.mjs` |
 | Refuse a CI-waiting or package-acquiring shell command | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Keep the coordinator's assignment through a compaction | `tools/isswf-compaction-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
 | Warn at turn end about an in-progress job with a committed brief and no launch | `tools/isswf-undispatched-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
