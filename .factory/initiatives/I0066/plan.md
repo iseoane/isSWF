@@ -4,7 +4,7 @@ Type: enhancement
 
 On 2026-11-22 the operator saw that the Claude Code initiatives panel showed no worker runs for I0065. The panel counts a run only from a `- Run: claude agent=<id>` line in an attempt or review record. The coordinator did not pass the launch identity the host returned, so every I0065 worker record and the J001-J003 review records have no such line. `isswf-record-check` reports a malformed `Run:` line but not a missing one. The operator decided that this must be a deterministic control, not a retrospective note, and asked for a new initiative. It also holds a retrospective of the work done on 2026-11-21 and 2026-11-22; the operator decides which of its findings become further jobs here.
 
-Order: starts after I0065 closes. Execution order (2026-11-26, at most two in parallel, paired so they do not touch the same files): done J001 + J007, J003 + J006; now J016 + J005 (both touch isswf-integrate; J005 rebases after J016); then J004 first (Windows speed, operator 2026-11-26) with J008; J009 + J013; J010; the panel jobs J014, J011, J015 one at a time (all touch hooks/register.tsx and the panel), each paired with a non-panel job left; J012 only if needed.
+Order: starts after I0065 closes. Execution order (2026-11-26, at most two in parallel, paired so they do not touch the same files): done J001 + J007, J003 + J006; now J016 + J005 (both touch isswf-integrate; J005 rebases after J016); J005 now with J004 (Windows speed, operator 2026-11-26); J008 after J005; J017 after J005; J009 + J013; J010; the panel jobs J014, J011, J015 one at a time (all touch hooks/register.tsx and the panel), each paired with a non-panel job left; J012 only if needed.
 
 ## J001
 
@@ -67,7 +67,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J004
 
-- Status: pending
+- Status: in-progress
 - Objective: The Windows CI job and the local initiative-tier verification on Windows take measurably less time, based on a per-step timing breakdown.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J004/brief-r1.md)
