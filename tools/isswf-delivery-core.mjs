@@ -1,7 +1,7 @@
 // The delivery lifecycle of one job as an explicit state machine. No Node imports: the state is derived from facts the caller reads from records and Git, never stored.
 
 /** The steps in order; each holds only when every earlier one does. */
-export const STATES = ['brief', 'attempt', 'review', 'covered', 'ci-green', 'merged', 'closed'];
+const STATES = ['brief', 'attempt', 'review', 'covered', 'ci-green', 'merged', 'closed'];
 
 // The fact each state needs, and the refusal named when the walk stops just before it.
 const FACT = { brief: 'brief', attempt: 'attempt', review: 'review', covered: 'covered', 'ci-green': 'ciGreen', merged: 'merged', closed: 'closed' };

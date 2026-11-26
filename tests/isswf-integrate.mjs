@@ -9,11 +9,10 @@ import { initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, 'tools', name)).href);
-const { STATES, deriveState, refusalFor } = await load('isswf-delivery-core.mjs');
+const { deriveState, refusalFor } = await load('isswf-delivery-core.mjs');
 const { integrate } = await load('isswf-integrate.mjs');
 
 // The lifecycle: the state is the furthest step whose earlier steps all hold; a later step alone does not count.
-assert.deepEqual(STATES, ['brief', 'attempt', 'review', 'covered', 'ci-green', 'merged', 'closed']);
 const all = { brief: true, attempt: true, review: true, covered: true, ciGreen: true, merged: false, closed: false };
 assert.equal(deriveState({}), 'none');
 assert.equal(deriveState({ brief: true }), 'brief');
