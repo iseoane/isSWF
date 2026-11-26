@@ -108,7 +108,11 @@ try {
   rmSync(flagA); rmSync(flagB);
   const serial = verify(overlap.repo, '--base', overlap.head, '--tier', 'job', '--jobs', '1');
   assert.deepEqual(serial.out.results.map(result => [result.checkId, result.exitCode]), [['first', 9], ['second', 0]], '--jobs 1 runs one check at a time');
-  for (const bad of ['0', '-1', 'x', '1000']) assert.equal(verify(overlap.repo, '--base', overlap.head, '--tier', 'job', '--jobs', bad).out.code, 'invalid-jobs', `--jobs ${bad}`);
+  rmSync(flagA); rmSync(flagB);
+  const byDefault = verify(overlap.repo, '--base', overlap.head, '--tier', 'job');
+  assert.deepEqual(byDefault.out.results.map(result => [result.checkId, result.status]), [['first', 'passed'], ['second', 'passed']], 'checks overlap with no --jobs');
+  for (const good of ['1', '12', '999']) assert.deepEqual(statusOf(verify(tiers.repo, '--base', tiers.head, '--tier', 'job', '--jobs', good).out), { 'job-one': 'passed', 'init-one': 'not run', 'ci-one': 'not run' }, `--jobs ${good}`);
+  for (const bad of ['0', '-1', 'x', '1d', '1000']) assert.equal(verify(overlap.repo, '--base', overlap.head, '--tier', 'job', '--jobs', bad).out.code, 'invalid-jobs', `--jobs ${bad}`);
 
   // The approved file comes from the base, not from the candidate that may rewrite it.
   const approved = makeRepo('approved', [check('real', node('-e', 'process.exit(0)'))]);
