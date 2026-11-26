@@ -108,12 +108,16 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
 - Blocker: None.
-- Next step: None. Merged in PR #404 (6f7c60e1c75d1222cd1a5be9d95e194dd007eb9d); reviews V001 fail, V002 pass (coordinator ran the guard test). Known limit: any earlier git add lists all untracked plans.
+- Next step: None.
 
 ### Acceptance
 
 - Committing a new plan that `isswf-status` cannot parse is refused.
 - Regression test with a new plan file holding an unsafe Brief field.
+
+### Evidence
+
+- PR #404 merged as 6f7c60e1c75d1222cd1a5be9d95e194dd007eb9d, CI green on head f8bfea09. Reviews V001 fail (F1 over-refusal), V002 pass after the coordinator ran the guard test (RED cf292e2f fails, candidate 3ce6785d PASS 38 s). Known limit: any earlier git add lists all untracked plans.
 
 ## J008
 
