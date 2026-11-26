@@ -259,6 +259,7 @@ try {
   assert.deepEqual(verdict(record('V001.md', { role: 'roles/reviewer.md' }), [launch('isswf:isswf-reviewer', 'r1')]), ['run-line-missing']);
   const [named] = checkRecord({ ...record('A001.md'), launches: [launch('isswf-worker', 'w1')] }).violations;
   assert.match(named.message, /- Run: claude agent=w1/u);
+  assert.doesNotMatch(named.message, /--run/u, 'the record check has no --run flag to offer');
   // The line satisfies it, here or in a sibling record of the job (a second attempt continues the same launch).
   assert.deepEqual(verdict(record('A001.md', { run: 'w1' }), [launch('isswf-worker', 'w1')]), []);
   assert.deepEqual(verdict(record('A002.md'), [launch('isswf-worker', 'w1')], [record('A001.md', { run: 'w1' }).text]), []);
