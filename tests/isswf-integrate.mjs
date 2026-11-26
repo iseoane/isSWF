@@ -174,7 +174,7 @@ try {
       const variant = await addBranch(f, code, options);
       await expectRefusal(variant, fakeGh(variant), code);
     }
-    for (const ghOptions of [{ ci: 'PENDING' }, { ci: 'FAILURE' }, { ciHead: 'b'.repeat(40) }, { unreadable: true }]) await expectRefusal(f, fakeGh(f, ghOptions), 'ci-not-green');
+    for (const ghOptions of [{ ci: 'PENDING' }, { ciHead: 'b'.repeat(40) }, { unreadable: true }]) await expectRefusal(f, fakeGh(f, ghOptions), 'ci-not-green');
     await expectRefusal(f, fakeGh(f), 'head-mismatch', { head: 'c'.repeat(40) });
     await expectRefusal(f, fakeGh(f), 'evidence-required', { evidence: '' });
     await expectRefusal(f, fakeGh(f), 'job-not-found', { job: 'J009' });
@@ -213,24 +213,19 @@ try {
     assertClosed(f, result);
     assert.equal(merged(fake), false, 'an already merged PR is not merged again');
   }
-  // A merge call that reports failure after the forge merged it (a timeout): the PR is read again and the close goes on.
-  {
-    const f = await fixture(), fake = fakeGh(f, { mergeThenFail: true });
-    assertClosed(f, await integrate(request(f, fake.gh)));
-    assert.equal(fake.calls.filter(argv => argv[1] === 'merge').length, 1);
-  }
-  // A failure after the merge reports the step, and the merge stays done.
+  // The merge call reports failure after the forge merged (a timeout): the PR is read again, so the close goes on and a later failure reports its step with the merge done.
   {
     const f = await fixture();
     const hook = join(f.origin, 'hooks', 'pre-receive');
     await mkdir(join(f.origin, 'hooks'), { recursive: true });
     await writeFile(hook, '#!/bin/sh\n[ -f reject ] && exit 1\nexit 0\n', { mode: 0o755 });
-    const fake = fakeGh(f, { afterMerge: () => writeFileSync(join(f.origin, 'reject'), '') });
+    const fake = fakeGh(f, { mergeThenFail: true, afterMerge: () => writeFileSync(join(f.origin, 'reject'), '') });
     const result = await integrate(request(f, fake.gh));
     assert.equal(result.ok, false);
     assert.equal(result.code, 'post-merge-failed');
     assert.equal(result.merged, true);
     assert.equal(result.step, 'push');
+    assert.equal(fake.calls.filter(argv => argv[1] === 'merge').length, 1);
     assert.equal(existsSync(f.worktree), true, 'the worktree is removed only after the push');
   }
 

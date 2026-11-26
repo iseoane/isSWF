@@ -8,7 +8,6 @@ import { promisify } from 'node:util';
 import { deriveState, refusalFor } from './isswf-delivery-core.mjs';
 import { coverage } from './isswf-handoff.mjs';
 import { readCiState } from './isswf-ci-state-core.mjs';
-import { checkRecordsPush } from './isswf-records-push-guard-core.mjs';
 import { editPlanFile } from './isswf-plan-edit.mjs';
 import { appendEvidence, isIdentifier, setField } from './isswf-plan-edit-core.mjs';
 import { parsePlan } from './isswf-plan-core.mjs';
@@ -17,12 +16,14 @@ import { locateGit } from './trusted-git.mjs';
 
 const execFileAsync = promisify(execFile);
 const SHA = /^[0-9a-f]{40}$/u;
+const GRANT = /^- Records-only direct push: granted\s*$/mu;
+const REMOTE = /^[\w][\w.-]*$/u;
 const refuse = (code, detail = {}) => ({ ok: false, code, ...detail });
 
 /** The real `gh`: resolves `{ exitCode, stdout }`, as the CI state tool reads it. */
-export async function realGh(argv) {
+export async function realGh(argv, { cwd } = {}) {
   try {
-    return { exitCode: 0, stdout: (await execFileAsync('gh', argv, { timeout: 60_000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 })).stdout };
+    return { exitCode: 0, stdout: (await execFileAsync('gh', argv, { cwd, timeout: 60_000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 })).stdout };
   } catch (error) {
     if (typeof error.code === 'number') return { exitCode: error.code, stdout: '' };
     throw error;
@@ -48,11 +49,20 @@ function worktreeOf(git, root, branch) {
   return undefined;
 }
 
-function checkRequest({ project, initiative, job, branch, head, pr, repo }) {
+function checkRequest({ project, initiative, job, branch, head, pr, repo, remote }) {
   const good = typeof project === 'string' && isAbsolute(project) && /^I\d+$/u.test(initiative ?? '') && isIdentifier(job ?? '')
-    && /^[\w][\w./-]*$/u.test(branch ?? '') && SHA.test(head ?? '') && /^[1-9]\d*$/u.test(pr ?? '') && (repo === undefined || /^[\w.-]+\/[\w.-]+$/u.test(repo));
+    && /^[\w][\w./-]*$/u.test(branch ?? '') && SHA.test(head ?? '') && /^[1-9]\d*$/u.test(pr ?? '') && (remote === undefined || REMOTE.test(remote)) && (repo === undefined || /^[\w.-]+\/[\w.-]+$/u.test(repo));
   return good ? undefined : refuse('usage');
 }
+
+// The pull request's state and head, or undefined when gh cannot read it. A squash merge never puts the head in the base branch's history, so this is how a merge is seen.
+async function readPr({ pr, repo, gh }) {
+  try {
+    const result = await gh(['pr', 'view', pr, '--json', 'state,headRefOid', ...(repo ? ['--repo', repo] : [])]);
+    return result.exitCode === 0 ? JSON.parse(result.stdout) : undefined;
+  } catch { return undefined; }
+}
+const mergedAt = (view, head) => view?.state === 'MERGED' && view.headRefOid === head;
 
 /**
  * Reads the job's lifecycle facts from the records and Git and derives its state. Nothing is written; the remote's refs are fetched.
@@ -65,16 +75,19 @@ export async function jobState({ project, initiative, job, branch, head, pr, rep
   const upstream = `${remote}/${base}`;
   git(root, ['fetch', '-q', remote]);
   const planText = git(root, ['show', `${upstream}:${stateDir}/initiatives/${initiative}/plan.md`], { check: false });
-  const entry = planText.status === 0 ? parsePlan(planText.stdout).find(item => item.id === job) : undefined;
+  const jobs = planText.status === 0 ? parsePlan(planText.stdout) : [];
+  const entry = jobs.find(item => item.id === job);
   if (!entry) return { error: refuse('job-not-found') };
   const facts = { closed: entry.reportedStatus === 'completed' };
-  const found = { root, base, upstream, git, stateDir };
+  // Closing the last open job completes the initiative, which the plan commit guard gates and this command cannot.
+  const found = { root, base, upstream, git, stateDir, closesInitiative: jobs.every(item => item.id === job || item.reportedStatus === 'completed') };
   if (facts.closed) return { ...found, facts: { ...facts, brief: true, attempt: true, review: true, covered: true, ciGreen: true, merged: true }, state: 'closed' };
 
   const tip = git(root, ['rev-parse', '--verify', '-q', `refs/heads/${branch}^{commit}`], { check: false });
   if (tip.status !== 0) return { error: refuse('branch-not-found') };
   if (tip.stdout !== head) return { error: refuse('head-mismatch', { branch: tip.stdout }) };
-  facts.merged = git(root, ['merge-base', '--is-ancestor', head, upstream], { check: false }).status === 0;
+  facts.merged = git(root, ['merge-base', '--is-ancestor', head, upstream], { check: false }).status === 0 || (pr !== undefined && mergedAt(await readPr({ pr, repo, gh }), head));
+  if (facts.merged) return { ...found, facts: { ...facts, brief: true, attempt: true, review: true, covered: true, ciGreen: true }, detail: {}, state: 'merged' };
   const names = git(root, ['ls-tree', '--name-only', head, `${stateDir}/initiatives/${initiative}/jobs/${job}/`]).stdout.split(/\r?\n/u).map(path => path.split('/').pop());
   facts.brief = names.some(name => /^brief-r\d+\.md$/u.test(name));
   facts.attempt = names.some(name => /^A\d{3}\.md$/u.test(name));
@@ -82,7 +95,8 @@ export async function jobState({ project, initiative, job, branch, head, pr, rep
   const detail = {};
   if (facts.brief && facts.attempt && facts.review) {
     try {
-      const report = (await coverage({ project: root, initiative, job, head })).jobs.find(item => item.job === job);
+      const from = git(root, ['merge-base', head, upstream], { check: false });
+      const report = (await coverage({ project: root, initiative, job, head, base: from.status === 0 ? from.stdout : undefined })).jobs.find(item => item.job === job);
       facts.covered = report !== undefined && report.uncovered.length === 0;
       if (!facts.covered) detail.uncovered = report?.uncovered.map(item => item.commit);
     } catch (error) { facts.covered = false; detail.coverage = error.code ?? error.message; }
@@ -99,9 +113,9 @@ export async function jobState({ project, initiative, job, branch, head, pr, rep
 
 /** Merges a covered, CI-green job with its head pinned, closes it in the plan, pushes the records-only commit and removes its worktree and branch. */
 export async function integrate(request) {
-  const { project, initiative, job, branch, head, pr, repo, remote = 'origin', evidence, gh = realGh } = request;
   const bad = checkRequest(request);
   if (bad) return bad;
+  const { project, initiative, job, branch, head, pr, repo, remote = 'origin', evidence } = request;
   if (typeof evidence !== 'string' || !evidence.trim() || /[\p{Cc}\u2028\u2029]/u.test(evidence)) return refuse('evidence-required');
   let found;
   try {
@@ -110,22 +124,29 @@ export async function integrate(request) {
     const base = configured.status === 0 && configured.stdout ? configured.stdout : 'main';
     if (git(root, ['symbolic-ref', '--short', '-q', 'HEAD'], { check: false }).stdout !== base) return refuse('primary-not-on-base', { base });
     if (git(root, ['status', '--porcelain', '--untracked-files=no']).stdout) return refuse('primary-dirty');
+    const gh = argv => (request.gh ?? realGh)(argv, { cwd: root });
     found = await jobState({ project, initiative, job, branch, head, pr, repo, remote, gh });
     if (found.error) return found.error;
-    const reason = refusalFor(found.state, 'merged');
+    // A pull request already merged at this head resumes after the merge; any other state needs the merge first.
+    const resuming = found.state === 'merged';
+    const reason = resuming ? refusalFor('merged', 'closed') : refusalFor(found.state, 'merged');
     if (reason) return refuse(reason, { state: found.state, ...found.detail });
+    if (found.closesInitiative) return refuse('initiative-close-required', { state: found.state });
     const { upstream } = found;
     if (git(root, ['merge-base', '--is-ancestor', 'HEAD', upstream], { check: false }).status !== 0) return refuse('primary-diverged');
-    // The push below bypasses the shell guard, so the same records-only grant is checked here, before anything is merged.
-    const denied = await checkRecordsPush({ command: `git push ${remote} ${base}`, cwd: root, git: async (argv, cwd) => { const result = git(cwd, argv, { check: false }); return { exitCode: result.status, stdout: result.stdout }; } });
-    if (denied.deny) return refuse('records-push-not-granted');
+    // The push below bypasses the shell guard, so the records-only grant the guard reads is checked here on the remote's base, before anything is merged.
+    const setup = git(root, ['show', `${upstream}:${found.stateDir}/project-setup.md`], { check: false });
+    if (setup.status !== 0 || !GRANT.test(setup.stdout)) return refuse('records-push-not-granted');
     const worktree = worktreeOf(git, root, branch);
     if (worktree && resolve(worktree) !== root && git(worktree, ['status', '--porcelain']).stdout) return refuse('worktree-dirty');
 
     // From here the merge is out of this command's hands: a later failure leaves the merge done and names the step to finish by hand.
-    let merge;
-    try { merge = await gh(['pr', 'merge', pr, '--squash', '--match-head-commit', head, ...(repo ? ['--repo', repo] : [])]); } catch { merge = { exitCode: 1 }; }
-    if (merge.exitCode !== 0) return refuse('merge-refused', { state: found.state });
+    if (!resuming) {
+      let merge;
+      try { merge = await gh(['pr', 'merge', pr, '--squash', '--match-head-commit', head, ...(repo ? ['--repo', repo] : [])]); } catch { merge = { exitCode: 1 }; }
+      // A merge that failed or timed out may still have happened: the pull request says.
+      if (merge.exitCode !== 0 && !mergedAt(await readPr({ pr, repo, gh }), head)) return refuse('merge-refused', { state: found.state });
+    }
     let step = 'fetch';
     try {
       git(root, ['fetch', '-q', remote]);
@@ -137,7 +158,7 @@ export async function integrate(request) {
       git(root, ['commit', '-q', '-m', `docs(${initiative.toLowerCase()}): close ${job}`]);
       step = 'push'; git(root, ['push', '-q', remote, `HEAD:refs/heads/${base}`]);
       step = 'remove-worktree'; if (worktree && resolve(worktree) !== root) git(root, ['worktree', 'remove', worktree]);
-      step = 'delete-branch'; git(root, ['branch', '-D', branch]);
+      step = 'delete-branch'; git(root, ['update-ref', '-d', `refs/heads/${branch}`, head]);
     } catch (error) {
       return refuse('post-merge-failed', { merged: true, step, message: error.code ?? error.message });
     }
