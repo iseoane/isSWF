@@ -47,7 +47,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Objective: The coordinator integrates a reviewed job through one host-neutral command in `tools/`, called from the coordinator skill, driven by an explicit delivery-lifecycle state machine.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
