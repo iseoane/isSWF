@@ -219,18 +219,22 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J013
 
-- Status: in-progress
+- Status: completed
 - Objective: A review dispatch is prepared through one host-neutral command in `tools/`, called from the coordinator skill.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one command and a template fix). Reuse the J003 lifecycle module; ground the I0065 review-preparation failures.
+- Next step: None.
 
 ### Acceptance
 
 - The command generates the handoff, creates the review record with the run identity when known, and prints the prompt lines including the brief path, so the dispatch guard's reference condition is met.
 - The review template no longer turns a filled "None." into "None.." (retrospective P5), or the parser tolerates it.
 - Tests cover success and each refusal. Works on Windows and Linux; Pi and Claude Code both use it through the skill.
+
+### Evidence
+
+- PR #413 merged after CI green (portable incl. Knip, ubuntu, windows). Reviews V001 fail, V002 pass at 2885f59e. The new command prepared its own V001 and V002. .agents/hosts/** change approved under the operator's standing merge authorization (not HIGH risk: doc reference to the new command). Known limits: RED 00a307d6 was a missing-file failure (disclosed); the attempt template placeholder still ends in a period.
 
 ## J014
 
