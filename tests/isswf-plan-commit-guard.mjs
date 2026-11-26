@@ -65,6 +65,20 @@ try {
   writeFileSync(planPath, good);
   run(repo, 'add', '-A');
 
+  // A newly added plan is checked like a changed one, staged or added by an earlier command of the same call.
+  const newDir = join(repo, '.factory/initiatives/I0002'), newPath = join(newDir, 'plan.md');
+  mkdirSync(newDir, { recursive: true });
+  const newGood = good.replace('# I0001:', '# I0002:');
+  writeFileSync(newPath, newGood.replace('(jobs/J001/brief-r1.md)', '(jobs/J001/brief-r1.md) '));
+  run(repo, 'add', '-A');
+  assert.match((await check('git commit -m new')).deny ?? '', /I0002\/plan\.md.*unsafe-brief-reference/su, 'a staged new plan is checked');
+  run(repo, 'reset', '-q');
+  assert.match((await check('git add -A && git commit -m new')).deny ?? '', /I0002\/plan\.md.*unsafe-brief-reference/su, 'a new plan added by a chained add is checked');
+  writeFileSync(newPath, newGood);
+  assert.equal((await check('git add -A && git commit -m new')).deny, undefined, 'a readable new plan passes');
+  rmSync(newDir, { recursive: true });
+  run(repo, 'reset', '-q');
+
   // Not a commit, another directory spelled out, a deleted plan, or a git fault: allowed.
   assert.equal((await check('git status')).deny, undefined);
   run(repo, 'rm', '-q', '.factory/initiatives/I0001/plan.md');
