@@ -206,7 +206,7 @@ export async function completeRecord(input) {
       const commits = kind === 'attempt' ? git(['rev-list', '--reverse', `${base}..${candidate}`]).split('\n').filter(Boolean) : undefined;
       const completed = completeText({ text, kind, candidate, paths, commits, run });
       ({ filled } = completed);
-      const missing = launchViolations({ path, text: completed.text, name: `${record}.md`, launches, siblings });
+      const missing = launchViolations({ path, text: completed.text, name: `${record}.md`, launches, siblings, offerRunFlag: true });
       if (missing.length) throw recordError('run-line-missing', { violations: missing });
       return completed.text;
     },

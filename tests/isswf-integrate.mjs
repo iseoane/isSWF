@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -92,7 +92,7 @@ function forgeCommit(f, files, message) {
 }
 
 // A fake `gh`: `pr view` answers with the PR state and CI rollup; `pr merge` squash-merges the branch into origin/main in the forge clone, as GitHub would.
-function fakeGh(f, { ci = 'SUCCESS', ciHead, unreadable = false, mergeThenFail = false, afterMerge } = {}) {
+function fakeGh(f, { ci = 'SUCCESS', ciHead, unreadable = false, mergeThenFail = false, mergeNoop = false, afterMerge } = {}) {
   const calls = [];
   const state = { merged: false };
   const forgeMerge = () => {
@@ -113,7 +113,7 @@ function fakeGh(f, { ci = 'SUCCESS', ciHead, unreadable = false, mergeThenFail =
     if (argv[0] === 'pr' && argv[1] === 'merge') {
       const pinned = argv[argv.indexOf('--match-head-commit') + 1];
       if (pinned !== git(f.worktree, 'rev-parse', 'HEAD')) return { exitCode: 1, stdout: '' };
-      forgeMerge();
+      if (!mergeNoop) forgeMerge();
       afterMerge?.();
       return { exitCode: mergeThenFail ? 1 : 0, stdout: '' };
     }
@@ -226,6 +226,18 @@ try {
     assert.equal(result.step, 'push');
     assert.equal(fake.calls.filter(argv => argv[1] === 'merge').length, 1);
     assert.equal(existsSync(f.worktree), true, 'the worktree is removed only after the push');
+  }
+
+  // A merge call that exits 0 without merging (a merge queue, auto-merge) is not a merge: the close stops before the plan is edited.
+  {
+    const f = await fixture(), fake = fakeGh(f, { mergeNoop: true });
+    const before = originMain(f), plan = readFileSync(join(f.project, PLAN_PATH), 'utf8');
+    const result = await integrate(request(f, fake.gh));
+    assert.equal(result.ok, false);
+    assert.equal(result.code, 'merge-unconfirmed', JSON.stringify(result));
+    assert.equal(originMain(f), before);
+    assert.equal(readFileSync(join(f.project, PLAN_PATH), 'utf8'), plan, 'the plan is not edited');
+    assert.equal(existsSync(f.worktree), true);
   }
 
   // The command line refuses an incomplete request in the same JSON shape.

@@ -951,3 +951,43 @@ test('a typed coordinator command is recorded with the pane option off, and only
   expect(seen[0]).toContain('child agent IDs')
   expect(host.assignments()).toEqual([])
 })
+
+// A checkout whose plan commit closes I0099 with no close verification record; `git` answers just enough for the plan commit guard.
+function closingCommitHost(on: any, osLookup: () => unknown) {
+  const planPath = '.factory/initiatives/I0099/plan.md'
+  const closed = plan('I0099', 'Close', [['J001', 'completed', 'work']])
+  const open = plan('I0099', 'Close', [['J001', 'in-progress', 'work']])
+  const answer = (argv: string[]) => {
+    const [command, ...rest] = argv.slice(2)
+    if (command === 'rev-parse' && rest[0] === '--show-toplevel') return '/p'
+    if (command === 'ls-files') return planPath
+    if (command === 'diff') return `${planPath}\0`
+    if (command === 'show' && rest[0] === `HEAD:${planPath}`) return open
+    return ''
+  }
+  on('session.cwd', () => ({ value: '/p' }))
+  on('state.get', () => ({ value: { value: undefined, version: 1 } }))
+  on('state.set', () => ({ value: { isSet: true, version: 1 } }))
+  on('env.get', (_: unknown, e: { name: string }) => ({ value: e.name === 'OS' ? osLookup() : undefined }))
+  on('fs.read', (_: unknown, { path }: { path: string }) => {
+    // The host may resolve `/p` against its own drive, so the plan is matched by its tail.
+    const tail = path.split(String.fromCharCode(92)).join('/')
+    if (tail.endsWith('/p/.git/HEAD')) return { value: 'ref: refs/heads/main\n' }
+    if (!tail.endsWith(planPath)) throw new Error('ENOENT ' + path)
+    return { value: closed }
+  })
+  on('process.run', (_: unknown, e: { argv: string[] }) => ({ value: { exitCode: 0, stdout: answer(e.argv), stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('tool.call', () => ({ result: {} }))
+}
+
+test('on Windows the plan commit refusal leads with the CI record route', async ($, on) => {
+  closingCommitHost(on, () => 'Windows_NT')
+  const refused = await $.tool.call({ tool: 'Bash', command: 'git commit -a -m close' })
+  expect(refused.deny).toMatch(/source: "ci"[\s\S]*isswf-verify/)
+})
+
+test('a failing OS lookup does not switch the plan commit guard off', async ($, on) => {
+  closingCommitHost(on, () => { throw new Error('env unavailable') })
+  const refused = await $.tool.call({ tool: 'Bash', command: 'git commit -a -m close' })
+  expect(refused.deny).toMatch(/isswf-verify --tier initiative --record I0099[\s\S]*source: "ci"/)
+})
