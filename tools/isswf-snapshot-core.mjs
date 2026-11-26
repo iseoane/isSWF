@@ -120,7 +120,7 @@ const COORDINATOR = /isswf-coordinator[\\/]SKILL\.md|\bcoordinator acting as wri
 
 // In the record's identity lines the shared role file wins over the host agent name: a diagnostician runs as
 // the isswf-worker agent. Elsewhere the first mention wins, since reports also cite other roles' files.
-function parseRole(text) {
+export function parseRole(text) {
   const identity = text.split('\n').filter(line => IDENTITY_LINE.test(line)).join('\n');
   const match = identity.match(ROLE_FILE) ?? identity.match(ROLE_ANY);
   if (match) return match[1] ?? match[2];

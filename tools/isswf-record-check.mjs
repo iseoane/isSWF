@@ -3,8 +3,10 @@ import { lstat, readdir, readFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { launchesFor, siblingsOf } from './isswf-launch-notes.mjs';
 import { checkRecord, reportedChecks } from './isswf-record-check-core.mjs';
 import { attemptUsages, briefNote, commandNotes, compareBrief } from './isswf-run-usage-core.mjs';
+import { RECORD_NAME } from './isswf-snapshot-core.mjs';
 import { nodeFs } from './isswf-snapshot.mjs';
 
 const MAX_BYTES = 1024 * 1024;
@@ -51,7 +53,8 @@ async function checkFile(project, file, isNew) {
   const jobFiles = basename(path) === 'plan.md' ? await jobFilesFor(path) : undefined;
   const text = await readFile(path, 'utf8');
   const notes = await notesFor(project, path, text);
-  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path) }), ...(notes.length && { notes }) };
+  const launches = RECORD_NAME.test(basename(path)) ? await launchesFor() : [];
+  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path), ...(launches.length && { launches, siblings: await siblingsOf(path) }) }), ...(notes.length && { notes }) };
 }
 
 /** Parses `--project ABS [--base REV] --file ABS [--file ABS ...]`. */

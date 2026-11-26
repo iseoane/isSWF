@@ -5,7 +5,8 @@ import { runGit } from './git-evidence.mjs';
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 import { createExclusive, editFile } from './isswf-plan-edit.mjs';
 import { isIdentifier } from './isswf-plan-edit-core.mjs';
-import { checkRecord } from './isswf-record-check-core.mjs';
+import { checkRecord, launchViolations } from './isswf-record-check-core.mjs';
+import { launchesFor, siblingsOf } from './isswf-launch-notes.mjs';
 import { completeText, nextRecordId, recordBase, recordError, recordPrefix, renderRecord } from './isswf-record-new-core.mjs';
 import { parseRunLine } from './isswf-snapshot-core.mjs';
 import { stateDirectory } from './project-state.mjs';
@@ -192,6 +193,9 @@ export async function completeRecord(input) {
   assertCommit(git, candidate, 'candidate');
   const kind = record.startsWith('A') ? 'attempt' : 'review';
   const path = join(target.root, target.relative, `${record}.md`);
+  // An accepted launch with a returned run ID must reach the record, from `--run` or a line already there.
+  const launches = await launchesFor();
+  const siblings = launches.length ? await siblingsOf(path) : [];
   let filled;
   await editFile({
     path, what: 'record', beforeRename,
@@ -202,6 +206,8 @@ export async function completeRecord(input) {
       const commits = kind === 'attempt' ? git(['rev-list', '--reverse', `${base}..${candidate}`]).split('\n').filter(Boolean) : undefined;
       const completed = completeText({ text, kind, candidate, paths, commits, run });
       ({ filled } = completed);
+      const missing = launchViolations({ path, text: completed.text, name: `${record}.md`, launches, siblings });
+      if (missing.length) throw recordError('run-line-missing', { violations: missing });
       return completed.text;
     },
   });
