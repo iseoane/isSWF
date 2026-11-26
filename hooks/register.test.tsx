@@ -78,7 +78,6 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   on('command.register', () => ({ value: { command: 'isswf-initiatives' } }))
   const opened: string[] = []
   on('ui.open', (_: unknown, e: { id: string }) => (opened.push(e.id), { value: { isPlaced: true } }))
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
   on('session.messages', () => ({ value: messages }))
   const tools: string[] = []
@@ -88,13 +87,12 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   return { clock: mock.clock(on), seen, settings, opened, tools, index, write }
 }
 
-const activate = ($: any) => $.skill.prompt({ skill: 'isswf:isswf-coordinator', text: '' })
+const activate = ($: any) => $.tool.call({ tool: 'Skill', skill: 'isswf:isswf-coordinator' })
 const text = async (ui: any, re: RegExp) => (await ui.find({ type: 'Text', text: re }))?.text
 
 test('with the option off nothing registers, reads, schedules or opens', async ($, on) => {
   let calls = 0
   for (const event of ['command.register', 'ui.open', 'session.cwd', 'fs.exists', 'fs.read', 'fs.list', 'env.get', 'clock.after', 'clock.every']) on(event, () => { calls++; throw new Error(event) })
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
   await activate($)
   await $.tool.call({ tool: 'Read', file_path: '/p/.factory/initiatives/I0046/plan.md' })
@@ -106,13 +104,12 @@ test('nothing opens or reads before the coordinator skill loads', ON, async ($, 
   let reads = 0
   on('command.register', () => ({ value: { command: 'isswf-initiatives' } }))
   on('ui.open', () => (opened++, { value: { isPlaced: true } }))
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('tool.call', () => ({ result: {} }))
   on('session.cwd', () => (reads++, { value: '/p' }))
   on('settings.read', () => ({ value: {} }))
   on('fs.exists', () => (reads++, { value: false }))
   on('fs.read', () => (reads++, { value: '{}' }))
-  await $.skill.prompt({ skill: 'other-skill', text: '' })
+  await $.tool.call({ tool: 'Skill', skill: 'other-skill' })
   await $.tool.call({ tool: 'Read', file_path: '/p/.factory/initiatives/I0046/plan.md' })
   expect(await $.command.run({ command: 'isswf-initiatives', args: '' })).toEqual({ text: 'The isSWF coordinator is not active in this session.' })
   expect([opened, reads]).toEqual([0, 0])
@@ -785,7 +782,7 @@ function noteHost(on: any, sessionId = 'sess-1', { hasEnv = true } = {}) {
 
 test('a session that activated the coordinator adds the retention instructions to its compaction, with or without the pane option', async ($, on) => {
   const seen: (string | undefined)[] = []
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('tool.call', () => ({ result: {} }))
   on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
   await compact($)
   await activate($)
@@ -798,17 +795,17 @@ test('a session that activated the coordinator adds the retention instructions t
 
 test('a session that never activated the coordinator compacts and starts unchanged', async ($, on) => {
   const seen: (string | undefined)[] = []
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('tool.call', () => ({ result: {} }))
   on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
   on('classic.SessionStart', () => ({}))
-  await $.skill.prompt({ skill: 'other-skill', text: '' })
+  await $.tool.call({ tool: 'Skill', skill: 'other-skill' })
   await compact($, 'keep the plan')
   expect(seen).toEqual(['keep the plan'])
   expect(contextOf(await startAfterCompaction($))).toBe('')
 })
 
 test('the mod no longer adds the reminder on SessionStart: the plugin hook script prints it from the session note', async ($, on) => {
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('tool.call', () => ({ result: {} }))
   on('classic.SessionStart', () => ({}))
   const host = noteHost(on)
   await activate($)
@@ -818,7 +815,6 @@ test('the mod no longer adds the reminder on SessionStart: the plugin hook scrip
 
 test('the reminder source lists the accepted dispatches, and a refused one is not remembered', async ($, on) => {
   dispatchHost(on)
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   const host = noteHost(on)
   await activate($)
   const ran = await $.tool.call(worker())
@@ -853,7 +849,6 @@ test('a reviewer dispatch needs a handoff whose digests verify, and the worker n
 
 test('a session that never activated the coordinator remembers no dispatch', async ($, on) => {
   dispatchHost(on)
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   const host = noteHost(on)
   await $.tool.call(worker())
   expect(host.writes).toEqual([])
@@ -863,7 +858,7 @@ test('a session that never activated the coordinator remembers no dispatch', asy
 
 test('a fault in the compaction hooks leaves the host behaviour unchanged', async ($, on) => {
   const seen: (string | undefined)[] = []
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
+  on('tool.call', () => ({ result: {} }))
   on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
   on('classic.SessionStart', () => ({ additionalContext: ['other hook'] }))
   const stored = new Map<string, unknown>()
@@ -895,10 +890,9 @@ for (const skill of ['isswf:isswf-coordinator', 'isswf-coordinator']) {
   })
 }
 
-test('the Skill tool activation is recorded with the pane option off, and a later skill.prompt does no harm', async ($, on) => {
+test('the Skill tool activation is recorded with the pane option off, and a repeated activation does no harm', async ($, on) => {
   const seen: (string | undefined)[] = []
   on('tool.call', () => ({ result: {} }))
-  on('skill.prompt', (_: unknown, e: { text: string }) => ({ text: e.text }))
   on('session.compact', (_: unknown, e: { instructions?: string }) => (seen.push(e.instructions), { messages: SUMMARY }))
   const host = noteHost(on)
   await $.tool.call(loadCoordinator('isswf:isswf-coordinator'))

@@ -625,8 +625,14 @@ export const register: Register = (on, options) => {
     // A delegated child's shell calls reach this hook too. Both cores fail open, so a fault in them never blocks a call.
     if (e.tool === 'Bash' || e.tool === 'PowerShell') {
       const command = (e as { command?: unknown }).command
-      const verdict = guardCommand(command)
-      if ('deny' in verdict) return { deny: verdict.deny }
+      // Like the branch, push and integration guards, the command guard applies only in a Git checkout that uses isSWF.
+      try {
+        const top = await gitRun($, ['rev-parse', '--show-toplevel'], await $.session.cwd())
+        if (top.exitCode === 0 && await branches.usesIsswf(top.stdout.trim())) {
+          const verdict = guardCommand(command)
+          if ('deny' in verdict) return { deny: verdict.deny }
+        }
+      } catch {}
       try {
         const assignment = e.agentId === undefined ? undefined : (await $.state.get(ASSIGNED)).value?.[e.agentId]
         const branch = await checkBranch({ command, cwd: await $.session.cwd(), assignment, ...branches })
@@ -752,7 +758,8 @@ export const register: Register = (on, options) => {
         }
       } catch {}
     }
-    // Where the built-in guard is seated `skill.prompt` never runs for this mod, but the Skill tool call does.
+    // The coordinator's activation is recorded whatever the pane option is: compaction reads it. The Skill tool call and a typed command
+    // (`command.run` below) are the two entry points; both run where the built-in guard skips `skill.prompt`, so no `skill.prompt` hook is registered.
     if (e.tool === 'Skill' && isCoordinatorSkill((e as { skill?: unknown }).skill) && ran.deny === undefined && !ran.isError) {
       try {
         await activateCoordinator($)
@@ -775,18 +782,6 @@ export const register: Register = (on, options) => {
     }
   })
 
-  // The coordinator's activation is recorded whatever the pane option is: compaction reads it. With the option off nothing else
-  // happens here, so nothing schedules, registers or draws. Both entry points are idempotent: where the guard is absent both
-  // fire, and the second only sets the same state, rewrites the same note and opens the same pane.
-  on('skill.prompt', async ($, e, next) => {
-    if (isCoordinatorSkill(e.skill)) {
-      await activateCoordinator($)
-      if (options?.initiativesPane === true) void openPane($).catch(() => {})
-    }
-
-    return next(e)
-  })
-
   // A session that activated the coordinator asks its summary to keep the assignment. Only the main conversation is steered,
   // and any fault leaves the compaction as the host would have run it.
   on('session.compact', async ($, e, next) => {
@@ -797,7 +792,7 @@ export const register: Register = (on, options) => {
     return next(steered)
   })
 
-  // A typed `/isswf:isswf-coordinator` raises `command.run` and no Skill tool call, and the guard skips `skill.prompt`. It runs the
+  // A typed `/isswf:isswf-coordinator` raises `command.run` and no Skill tool call. It runs the
   // command first, then marks the session exactly as the Skill tool call does; a fault never changes the command's output.
   on('command.run', { command: /^(isswf:)?isswf-coordinator$/ }, async ($, e, next) => {
     const result = await next(e)

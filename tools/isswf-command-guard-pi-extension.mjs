@@ -56,9 +56,13 @@ export default function (pi) {
   pi.on('tool_call', async (event, ctx) => {
     if (!SHELL_TOOLS.has(event?.toolName)) return undefined;
     const { command } = event.input ?? {};
-    const { deny } = guardCommand(command);
-    if (deny !== undefined) return { block: true, reason: deny };
     if (typeof ctx?.cwd !== 'string') return undefined;
+    // Like the branch, push and integration guards, the command guard applies only in a Git checkout that uses isSWF.
+    const top = await git(['rev-parse', '--show-toplevel'], ctx.cwd);
+    if (top.exitCode === 0 && await usesIsswf(top.stdout.trim())) {
+      const { deny } = guardCommand(command);
+      if (deny !== undefined) return { block: true, reason: deny };
+    }
     const branch = await checkBranch({ command, cwd: ctx.cwd, loop: 'main', store, observe, assignment, usesIsswf });
     if (branch.deny !== undefined) return { block: true, reason: branch.deny };
     const plans = await checkPlanCommit({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });

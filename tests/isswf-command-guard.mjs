@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, name)));
 const { HEREDOC, QUOTED, tokenize, checkCommand, guardCommand } = await load('tools/isswf-command-core.mjs');
+const { initRepository } = await load('tests/support/git-fixture.mjs');
 const { default: registerGuard } = await load('tools/isswf-command-guard-pi-extension.mjs');
 
 const refused = (command, rule) => assert.equal(checkCommand(command)?.rule, rule, `should refuse (${rule}): ${command}`);
@@ -164,7 +166,6 @@ for (const command of [
   'pnpm add left-pad',
   'pnpm install',
   'pnpm i',
-  'pnpm exec vite',
   'yarn',
   'yarn --frozen-lockfile',
   'yarn dlx cowsay',
@@ -238,6 +239,8 @@ for (const command of [
   'yarn --version',
   'yarn run build',
   'pnpm run build',
+  'pnpm exec tsc --noEmit',
+  'pnpm exec vitest run',
   'pnpm --version',
   'pip --version',
   'pip list',
@@ -289,7 +292,17 @@ for (const command of [
   registerGuard({ on: (name, handler) => handlers.push([name, handler]) });
   assert.deepEqual(handlers.map(([name]) => name).sort(), ['input', 'session_start', 'tool_call', 'tool_result'], 'the input, call, result and start events are used');
   const handler = handlers.find(([name]) => name === 'tool_call')[1];
-  const call = (toolName, command) => handler({ toolName, input: { command } }, { cwd: '/work' });
+  // The guard applies only in a Git checkout with a state directory; a checkout without one, or no checkout, is left alone.
+  const repository = async prefix => { const dir = await mkdtemp(join(tmpdir(), prefix)); await initRepository(dir); return dir; };
+  const isswf = await repository('isswf-guard-');
+  await mkdir(join(isswf, '.isswf'));
+  const plain = await repository('plain-guard-');
+  const outside = await mkdtemp(join(tmpdir(), 'nogit-guard-'));
+  for (const cwd of [plain, outside]) {
+    assert.equal(await handler({ toolName: 'bash', input: { command: 'npx --version' } }, { cwd }), undefined, `no isSWF: ${cwd}`);
+    assert.equal(await handler({ toolName: 'bash', input: { command: 'watch -n 30 gh pr checks' } }, { cwd }), undefined, `no isSWF: ${cwd}`);
+  }
+  const call = (toolName, command) => handler({ toolName, input: { command } }, { cwd: isswf });
   for (const toolName of ['bash', 'powershell']) {
     const blocked = await call(toolName, 'watch -n 30 gh pr checks');
     assert.equal(blocked.block, true, toolName);
@@ -319,6 +332,7 @@ const hook = hooks.slice(hooks.indexOf("on('tool.call'"));
 const coreImport = /import \{([^}]*)\} from '\.\.\/tools\/isswf-command-core\.mjs'/u.exec(hooks)?.[1] ?? '';
 assert.ok(/\bguardCommand\b/u.test(coreImport), 'the hook imports the shared core');
 const shellAt = hook.indexOf('guardCommand(');
+assert.ok(hook.slice(0, shellAt).includes('branches.usesIsswf('), 'the command guard applies only where isSWF is used');
 assert.ok(shellAt > 0 && shellAt < hook.indexOf('await next(e)'), 'the guard runs before the tool is called');
 assert.ok(hook.slice(0, shellAt).includes("e.tool === 'Bash'") && hook.slice(0, shellAt).includes("e.tool === 'PowerShell'"), 'both shell tools are guarded');
 assert.ok(hook.slice(shellAt, hook.indexOf('await next(e)')).includes('return { deny:'), 'a refusal is a deny');
