@@ -493,6 +493,36 @@ try {
     assert.ok(!/(?<!\r)\n/u.test(afterCrlf), 'every line still ends with CRLF');
     assert.ok(afterCrlf.includes(`- Candidate commit SHA: ${candidate}\r\n`));
 
+    // An accepted launch that returned a run identity (as the coordinator session's note keeps it) must reach the record: `complete` refuses a record without the line and `--run` or an existing line satisfies it. `create` stays open.
+    {
+      const configDir = join(root, 'claude-config');
+      await mkdir(join(configDir, 'isswf/compaction'), { recursive: true });
+      const launch = (agent, run) => ({ agent, initiative: 'I0001', job: 'J001', path: `${jobRel}/brief-r1.md`, checkpoint: base, base, ...(run && { run }) });
+      const writeNote = launches => writeFile(join(configDir, 'isswf/compaction/s1.json'), JSON.stringify({ version: 1, assignments: launches }));
+      const withNote = (command, args) => {
+        const result = spawnSync(process.execPath, [join(source, 'tools/isswf-record-new.mjs'), command, ...Object.entries(args).flat()], { encoding: 'utf8', timeout: 30000, env: { ...process.env, CLAUDE_CONFIG_DIR: configDir } });
+        return { status: result.status, out: JSON.parse(result.stdout || 'null') };
+      };
+      await writeNote([launch('isswf:isswf-worker', 'w-run')]);
+      attempt('A005');
+      assert.equal(withNote('create', { ...target, '--kind': 'attempt', '--id': 'A006', '--role': 'worker', '--brief': `${jobRel}/brief-r1.md`, '--checkpoint': base, '--base': base, '--model': 'sonnet', '--effort': 'medium' }).status, 0, 'create needs no Run line');
+      const before = await readFile(file('A005.md'), 'utf8');
+      const refused = withNote('complete', completeArgs('A005'));
+      assert.equal(refused.status, 1);
+      assert.equal(refused.out.code, 'run-line-missing');
+      assert.match(JSON.stringify(refused.out), /claude agent=w-run/u);
+      assert.equal(await readFile(file('A005.md'), 'utf8'), before, 'a refusal changes nothing');
+      assert.equal(withNote('complete', completeArgs('A005', { '--run': 'claude agent=w-run' })).status, 0);
+      assert.equal(withNote('complete', completeArgs('A005')).status, 0, 'the existing line satisfies it');
+      // Exceptions: a coordinator acting as writer, and a launch with no returned identity.
+      attempt('A007');
+      await writeFile(file('A007.md'), (await readFile(file('A007.md'), 'utf8')).replace('- Profile path and revision, if available:', '- Profile path and revision, if available: coordinator acting as writer'));
+      assert.equal(withNote('complete', completeArgs('A007')).status, 0);
+      await writeNote([launch('isswf:isswf-worker')]);
+      attempt('A008');
+      assert.equal(withNote('complete', completeArgs('A008')).status, 0);
+    }
+
     // A field that is no longer the template's text is refused, the whole file stays as it was, and nothing is partly filled.
     const refuseComplete = async (name, change, code, field, extra = {}) => {
       const text = change(await readFile(file(name), 'utf8'));
