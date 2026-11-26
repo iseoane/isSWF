@@ -4,20 +4,28 @@
  * records (`deriveJobState`); `blocked` and `awaiting-human` are the states no record reveals.
  */
 export const jobStates = Object.freeze(['pending', 'in-progress', 'in-review', 'blocked', 'awaiting-human', 'completed']);
-export const planStates = jobStates;
 /** The states of work that was started and is not closed, blocked or waiting for the operator. */
 export const inFlightStates = Object.freeze(['in-progress', 'in-review']);
-/** A job moves to any other state until it completes; `completed` is final. */
-export const canTransition = (from, to) => jobStates.includes(from) && jobStates.includes(to) && from !== to && from !== 'completed';
+/** The moves a plan edit makes. `in-review` is derived from review records, so only a legacy plan moves out of it; `completed` is final. */
+const transitions = Object.freeze({
+  pending: ['in-progress', 'blocked', 'awaiting-human'],
+  'in-progress': ['blocked', 'awaiting-human', 'completed'],
+  'in-review': ['in-progress', 'completed'],
+  blocked: ['in-progress', 'pending'],
+  'awaiting-human': ['in-progress', 'pending'],
+  completed: [],
+});
+export const canTransition = (from, to) => transitions[from]?.includes(to) ?? false;
 const PROGRESS = ['pending', 'in-progress', 'in-review'];
 /**
- * The state a job is in: its plan value, raised to `in-review` by a review record or to `in-progress` by an attempt record. Records never lower a
- * state, and never change `blocked`, `awaiting-human` or `completed`, which they cannot reveal.
+ * The state a job is in. Its plan value is raised to `in-progress` by an attempt record. With review records, the work is `in-review` when
+ * every attempt has been reviewed and back `in-progress` while a correction attempt has none. Records never change `blocked`,
+ * `awaiting-human` or `completed`, which they cannot reveal.
  */
 export function deriveJobState(stored, { attempts = 0, reviews = 0 } = {}) {
   if (!PROGRESS.includes(stored)) return stored;
-  const derived = reviews ? 'in-review' : attempts ? 'in-progress' : 'pending';
-  return PROGRESS[Math.max(PROGRESS.indexOf(stored), PROGRESS.indexOf(derived))];
+  if (reviews) return reviews >= attempts ? 'in-review' : 'in-progress';
+  return attempts ? PROGRESS[Math.max(PROGRESS.indexOf(stored), 1)] : stored;
 }
 export const hasEvidence = values => values.some(item => item.trim() && item.trim() !== 'None.');
 // A plan error keeps its code as the message and says where it is: the job, the field and the 1-based line, when known.
