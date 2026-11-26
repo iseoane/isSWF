@@ -81,7 +81,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Objective: A ci-only failure on a reviewed head cannot be integrated without a recorded miss block, and review coverage runs before a candidate is pushed.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J005/brief-r1.md)
