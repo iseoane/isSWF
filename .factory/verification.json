@@ -7,7 +7,7 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "5f246bd66519d349ee075b42bfa1b8b8cd2cc24988c6394b1ade46b4b85cbc9b"
+      "sha256": "58cac65f7ec9baca397c17618661d4ae01cf2e6925151796a7f72575376d6217"
     }
   ],
   "checks": [
@@ -428,6 +428,25 @@
         "tests/"
       ],
       "timeoutSeconds": 300
+    },
+    {
+      "id": "job-state",
+      "argv": [
+        "node",
+        "tests/job-state.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-plan-core.mjs",
+        "tools/isswf-status.mjs",
+        "tests/job-state.mjs"
+      ],
+      "timeoutSeconds": 120
     }
   ]
 }
