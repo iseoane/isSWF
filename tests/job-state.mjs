@@ -24,6 +24,10 @@ try {
     ['J006', 'blocked', ['A001.md', 'V001.md'], 'blocked'],
     ['J007', 'awaiting-human', ['A001.md'], 'awaiting-human'],
     ['J008', 'completed', ['A001.md', 'V001.md'], 'completed'],
+    // A correction after a review: more attempts than reviews puts the work back with its author.
+    ['J009', 'pending', ['A001.md', 'V001.md', 'A002.md'], 'in-progress'],
+    ['J010', 'in-review', ['A001.md', 'V001.md', 'A002.md'], 'in-progress'],
+    ['J011', 'pending', ['A001.md', 'A002.md', 'V001.md', 'V002.md'], 'in-review'],
   ];
   const jobs = cases.map(([id, stored]) => ({ id, objective: `Job ${id}`, status: stored, dependsOn: [], acceptance: ['A result'], blocker: 'None', nextStep: 'None', evidence: stored === 'completed' ? ['Merged'] : [] }));
   await writeFile(join(root, 'proposal.json'), JSON.stringify({ version: 1, initiative: 'I0001', title: 'Job state fixture', type: 'enhancement', jobs }));
@@ -40,18 +44,29 @@ try {
   const observed = JSON.parse(result.stdout);
   assert.deepEqual(observed.jobs.map(job => [job.id, job.reportedStatus, job.status]), cases.map(([id, stored, , derived]) => [id, stored, derived]));
 
-  // Every value an existing plan can hold still parses.
-  const legacy = Object.keys(status).map((value, index) => `## J${String(index + 1).padStart(3, '0')}\n\n- Status: ${value}\n- Objective: Legacy ${value}\n- Depends on: None\n- Brief: [brief-r1.md](jobs/J${String(index + 1).padStart(3, '0')}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- A result\n\n### Evidence\n\n- ${value === 'completed' ? 'Merged' : 'None.'}\n`);
-  const parsed = core.parsePlan(`# I0002: Legacy\n\nType: maintenance\n\n${legacy.join('\n')}`);
-  assert.deepEqual(parsed.map(job => job.reportedStatus), Object.keys(status));
-
-  // The shared module defines the states and their moves; a plan outside it is refused.
+  // The fixture above holds every legacy value and still parses. A value outside the shared module is refused.
   assert.deepEqual([...core.jobStates], Object.keys(status));
-  assert.equal(core.canTransition('pending', 'in-progress'), true);
-  assert.equal(core.canTransition('in-progress', 'in-review'), true);
-  assert.equal(core.canTransition('completed', 'pending'), false);
-  assert.equal(core.canTransition('pending', 'completed'), true);
-  assert.equal(core.canTransition('blocked', 'blocked'), false);
-  assert.throws(() => core.parsePlan(`# I0002: Legacy\n\nType: maintenance\n\n${legacy[0].replace('pending', 'invented')}`), { code: 'invalid-job' });
+  const invented = `# I0002: Legacy
+
+Type: maintenance
+
+## J001
+
+- Status: invented
+- Objective: One
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J001/brief-r1.md)
+- Blocker: None.
+- Next step: None.
+
+### Acceptance
+
+- A result
+`;
+  assert.throws(() => core.parsePlan(invented), { code: 'invalid-job' });
+
+  // The moves: in-review is derived, so only a legacy plan moves out of it.
+  const allowed = { pending: ['in-progress', 'blocked', 'awaiting-human'], 'in-progress': ['blocked', 'awaiting-human', 'completed'], blocked: ['in-progress', 'pending'], 'awaiting-human': ['in-progress', 'pending'], 'in-review': ['in-progress', 'completed'], completed: [] };
+  for (const from of core.jobStates) assert.deepEqual(core.jobStates.filter(to => core.canTransition(from, to)), core.jobStates.filter(to => allowed[from].includes(to)), from);
 } finally { await rm(root, { recursive: true, force: true }); }
 console.log('job-state ok');
