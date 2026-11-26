@@ -146,10 +146,13 @@ async function unstampedCommit(root, sha, baseRef, state, git, read) {
  * The mode is the `- Integration gate: off|observe|enforce` line of the selected state's `project-setup.md` on `<remote>/<base>`, or at HEAD when that ref is missing (a missing line is `observe`): `observe` returns a
  * `note` for the caller to show after the run, `enforce` a `deny`. It fails open on a git fault: this guard enforces a process rule, not an authority.
  * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a file's text or rejects.
+ * A `git push` also reports commits no recorded review covers when the caller passes `coverage({ root, head, base })`, which resolves to those commit SHAs (no host passes it yet; J017 wires
+ * a packaged coverage core into both); a host without it checks stamps only.
  */
-export async function checkIntegrationGate({ command, cwd, git, read }) {
+export async function checkIntegrationGate({ command, cwd, git, read, coverage }) {
   try {
     const problems = [];
+    const unreviewed = [];
     for (const { kind, root, remote, base, refs } of await integrationsIn(command, cwd, git)) {
       if (!refs.length) continue;
       const baseRef = `${remote}/${base}`;
@@ -160,14 +163,31 @@ export async function checkIntegrationGate({ command, cwd, git, read }) {
         if (resolved.exitCode !== 0) continue;
         const missing = await unstampedCommit(root, resolved.stdout.trim(), baseRef, state, git, read);
         if (missing !== undefined && !problems.some(problem => problem.sha === missing)) problems.push({ kind, sha: missing, mode });
+        if (kind !== 'git push' || coverage === undefined) continue;
+        for (const sha of await unreviewedCommits({ coverage, git, root, head: resolved.stdout.trim(), baseRef })) {
+          if (!unreviewed.some(item => item.sha === sha)) unreviewed.push({ sha, mode });
+        }
       }
     }
-    if (!problems.length) return {};
-    const what = problems.map(({ kind, sha }) => `${kind}: ${sha.slice(0, 7)}`).join('; ');
-    const fix = 'Run `node tools/isswf-verify.mjs --project <project> --tier job` on a clean tree at that commit, which writes the stamp, then repeat the command.';
-    if (problems.some(problem => problem.mode === 'enforce')) return { deny: `isSWF integration gate: refused. No verification stamp for ${what}. ${fix} This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
-    return { note: `isSWF integration gate (observe): the command ran, and enforce mode would refuse it. No verification stamp for ${what}. ${fix}` };
+    if (!problems.length && !unreviewed.length) return {};
+    const reasons = [];
+    if (problems.length) reasons.push(`No verification stamp for ${problems.map(({ kind, sha }) => `${kind}: ${sha.slice(0, 7)}`).join('; ')}. Run \`node tools/isswf-verify.mjs --project <project> --tier job\` on a clean tree at that commit, which writes the stamp, then repeat the command.`);
+    if (unreviewed.length) reasons.push(`Unreviewed commits: ${unreviewed.map(({ sha }) => sha.slice(0, 7)).join(', ')}. Run \`node tools/isswf-handoff.mjs coverage --project <project>\`, obtain a delta review of them and record it, then repeat the command.`);
+    const all = [...problems, ...unreviewed];
+    if (all.some(problem => problem.mode === 'enforce')) return { deny: `isSWF integration gate: refused. ${reasons.join(' ')} This is a process rule, not a retry signal: do not rephrase the command to get past it.` };
+    return { note: `isSWF integration gate (observe): the command ran, and enforce mode would refuse it. ${reasons.join(' ')}` };
   } catch {
     return {};
+  }
+}
+
+/** The commits of `head` above the base that no recorded review covers, from the injected `coverage({ root, head, base })`; none when the base or the check cannot be read. */
+async function unreviewedCommits({ coverage, git, root, head, baseRef }) {
+  try {
+    const from = await git(['merge-base', head, baseRef], root);
+    if (from.exitCode !== 0) return [];
+    return await coverage({ root, head, base: from.stdout.trim() });
+  } catch {
+    return [];
   }
 }
