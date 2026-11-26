@@ -23,7 +23,7 @@ These tools package the factory, manage a project's installation and read or pre
 | Prepare plans and issue intake | `tools/isswf-plan.mjs`, `tools/isswf-plan-core.mjs`, `tools/isswf-plan-edit.mjs`, `tools/isswf-plan-edit-core.mjs`, `tools/isswf-intake.mjs` |
 | Create attempt and review records | `tools/isswf-record-new.mjs`, `tools/isswf-record-new-core.mjs` |
 | Run the approved verification checks and print the check table | `tools/isswf-verify.mjs` |
-| Hand a reviewer the exact diff and check that every commit is reviewed | `tools/isswf-handoff.mjs`, `tools/isswf-handoff-core.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/check-quality.mjs` |
+| Hand a reviewer the exact diff and check that every commit is reviewed | `tools/isswf-handoff.mjs`, `tools/isswf-review-prepare.mjs`, `tools/isswf-handoff-core.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/check-quality.mjs` |
 | Read records and show the local panel | `tools/isswf-status.mjs`, `tools/isswf-snapshot.mjs`, `tools/isswf-snapshot-core.mjs`, `tools/isswf-record-check.mjs`, `tools/isswf-record-check-core.mjs`, `tools/isswf-record-guard-core.mjs`, `tools/isswf-record-guard-pi-extension.mjs`, `tools/isswf-run-usage-core.mjs`, `tools/isswf-prices.mjs`, `tools/isswf-panel.mjs`, `tools/isswf-response.mjs` |
 | Refuse a failing dispatch to an isSWF role agent | `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Count open workers against the clone's local limit and list or clear stale entries | `tools/isswf-parallel-workers-core.mjs`, `tools/isswf-parallel-workers.mjs`, `tools/isswf-dispatch-guard-core.mjs`, `tools/isswf-dispatch-guard-pi-extension.mjs`, `hooks/register.tsx` |
