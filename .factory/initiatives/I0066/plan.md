@@ -8,7 +8,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Objective: An attempt or review record for a host launch that returned a run identity cannot be created or pass the record check without the matching `Run:` line, and the coordinator gets a refusal that names the missing line.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
@@ -102,7 +102,7 @@ Order: starts after I0065 closes. Execution order (2026-11-22, by value, at most
 
 ## J007
 
-- Status: pending
+- Status: in-progress
 - Objective: The plan commit guard checks a newly added plan the same way as a changed one.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J007/brief-r1.md)
