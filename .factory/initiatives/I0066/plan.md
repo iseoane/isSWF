@@ -215,7 +215,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J013
 
-- Status: pending
+- Status: in-progress
 - Objective: A review dispatch is prepared through one host-neutral command in `tools/`, called from the coordinator skill.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J013/brief-r1.md)
