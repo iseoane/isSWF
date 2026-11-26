@@ -123,7 +123,7 @@ export async function checkPlanCommit({ command, cwd, git, read }) {
       const listed = await git(['diff', '--name-only', '-z', '--no-renames', '--diff-filter=d', ...(all ? ['HEAD'] : ['--cached'])], root);
       if (listed.exitCode !== 0) continue;
       // An earlier command in the same call (`git add -A`) can add a new, still untracked plan that the commit then records.
-      const added = position > 0 ? await git(['ls-files', '--others', '--exclude-standard', '-z'], root) : { exitCode: 0, stdout: '' };
+      const added = segments.slice(0, position).some(earlier => earlier.git?.subcommand === 'add') ? await git(['ls-files', '--others', '--exclude-standard', '-z'], root) : { exitCode: 0, stdout: '' };
       if (added.exitCode !== 0) continue;
       const paths = [...listed.stdout.split('\0'), ...added.stdout.split('\0')];
       for (const path of paths) {
