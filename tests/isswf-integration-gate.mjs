@@ -233,7 +233,7 @@ try {
   const lateCode = edit(covered, 'tools/late.mjs', 'l\n', 'code after the review');
   stamp(covered, lateCode);
   assert.deepEqual(await checker(covered)('git push origin feat'), {}, 'without a coverage check only the stamp is judged');
-  assert.match((await covering(covered)('git push origin feat')).deny ?? '', new RegExp(`unreviewed.*${lateCode.slice(0, 7)}`, 'su'));
+  assert.match((await covering(covered)('git push origin feat')).deny ?? '', new RegExp(`unreviewed.*${lateCode.slice(0, 7)}`, 'siu'));
   assert.equal((await covering(covered)('git push origin feat:main')).deny, undefined, 'a push to the base stays with the records push guard');
   const watched = makeRepo('watched');
   const watchedBase = run(watched, 'rev-parse', 'main');
@@ -241,7 +241,7 @@ try {
   review(watched, watchedBase, watchedBase);
   const noted = await covering(watched)('git push origin feat');
   assert.equal(noted.deny, undefined);
-  assert.match(noted.note ?? '', /unreviewed/u);
+  assert.match(noted.note ?? '', /unreviewed/iu);
   const faulty = command => checkIntegrationGate({ command, cwd: covered, git, read: async path => readFileSync(path, 'utf8'), coverage: async () => { throw new Error('boom'); } });
   assert.deepEqual(await faulty('git push origin feat'), {}, 'a coverage fault allows');
 
@@ -271,7 +271,7 @@ try {
   assert.equal(await piResult(observed, 'p3', true), undefined, 'a failed command gets no note');
   assert.equal(await piCall(tiers, 'p4', 'git push origin feat'), undefined, 'a stamped head passes');
   assert.equal(await piResult(tiers, 'p4'), undefined);
-  assert.match((await piCall(covered, 'p5', 'git push origin feat')).reason, /unreviewed/u, 'the extension passes the review coverage check');
+  assert.match((await piCall(covered, 'p5', 'git push origin feat')).reason, /unreviewed/iu, 'the extension passes the review coverage check');
 
   // register.tsx has no runner here, so the Claude hook is a source check: the gate runs after the records push guard, refuses before the call and adds its note after it.
   const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');

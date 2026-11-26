@@ -65,6 +65,19 @@ async function readPr({ pr, repo, gh }) {
 }
 const mergedAt = (view, head) => view?.state === 'MERGED' && view.headRefOid === head;
 
+// The newest commit of the head's first-parent history above `upstream` that changes more than work records. A records-only commit leaves the code CI ran on unchanged,
+// so the miss for a failure at the head names this commit, not a record commit that would itself move the head.
+function codeTip({ git, root, head, upstream, stateDir }) {
+  const commits = git(root, ['rev-list', '--first-parent', head, '--not', upstream], { check: false }).stdout.split(/\r?\n/u).filter(Boolean);
+  const changesCode = commit => git(root, ['diff-tree', '-r', '--root', '--name-only', '--no-commit-id', '-m', commit]).stdout.split(/\r?\n/u).some(path => path && !path.startsWith(`${stateDir}/initiatives/`));
+  return commits.find(changesCode) ?? head;
+}
+
+/** Whether `text` holds a `- Kind: ci-only` miss block whose text names `sha` (a full SHA or an abbreviation of at least seven characters). */
+export function hasCiOnlyBlock(text, sha) {
+  return text.split(/^(?=- Kind:)/mu).some(block => CI_ONLY_BLOCK.test(block) && (block.match(/\b[0-9a-f]{7,40}\b/gu) ?? []).some(token => sha.startsWith(token)));
+}
+
 /**
  * Reads the job's lifecycle facts from the records and Git and derives its state. Nothing is written; the remote's refs are fetched.
  * Steps after a missing one are not read, so a refusal names the first thing missing.
@@ -108,7 +121,11 @@ export async function jobState({ project, initiative, job, branch, head, pr, rep
       facts.ciGreen = ci.state === 'success' && ci.head === head;
       if (!facts.ciGreen) detail.ci = ci.head === head ? ci.state : `head ${ci.head}`;
       // A failure on a reviewed head is a miss the retrospective needs; the job records must hold its block before this goes on.
-      if (ci.head === head && ci.state === 'failure') detail.missUnrecorded = !names.filter(name => /^[AV]\d{3}\.md$/u.test(name)).some(name => CI_ONLY_BLOCK.test(git(root, ['show', `${head}:${stateDir}/initiatives/${initiative}/jobs/${job}/${name}`]).stdout));
+      if (ci.head === head && ci.state === 'failure') {
+        const tipOfCode = codeTip({ git, root, head, upstream, stateDir });
+        const records = names.filter(name => /^[AV]\d{3}\.md$/u.test(name)).map(name => git(root, ['show', `${head}:${stateDir}/initiatives/${initiative}/jobs/${job}/${name}`]).stdout);
+        detail.missUnrecorded = !records.some(text => hasCiOnlyBlock(text, tipOfCode));
+      }
     } catch (error) { facts.ciGreen = false; detail.ci = error.message; }
   }
   return { ...found, facts, detail, state: deriveState(facts) };
