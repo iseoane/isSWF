@@ -48,7 +48,7 @@ const put = async (root, path, text) => { await mkdir(join(root, path, '..'), { 
 let counter = 0;
 
 // A job branch in its own worktree off `f.base`; `options` leave records out or add commits after the review.
-async function addBranch(f, name, { brief = true, attempt = true, review = true, extra = false, miss = false } = {}) {
+async function addBranch(f, name, { brief = true, attempt = true, review = true, extra = false, miss = false, trailer = false } = {}) {
   const worktree = join(f.dir, `wt-${name}`), branch = `feat/${name}`;
   git(f.project, 'worktree', 'add', '-q', '-b', branch, worktree, f.base);
   if (!brief) { git(worktree, 'rm', '-q', `${JOB}/brief-r1.md`); git(worktree, 'commit', '-qm', 'drop brief'); }
@@ -57,7 +57,8 @@ async function addBranch(f, name, { brief = true, attempt = true, review = true,
   const candidate = git(worktree, 'rev-parse', 'HEAD');
   if (attempt) await put(worktree, `${JOB}/A001.md`, '# attempt\n');
   const missBlock = miss ? `\n## Misses\n\n- Kind: ci-only\n- Observer and evidence: coordinator, Quality run failed\n- Candidate SHA that passed and passing review (verdict quoted): ${typeof miss === 'string' ? miss : candidate}\n` : '';
-  if (review) await put(worktree, `${JOB}/V001.md`, `# review\n\n- Base commit SHA: ${f.base}\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n${missBlock}`);
+  const note = trailer ? `\n## Notes\n\nThe reviewed candidate was ${candidate}.\n` : '';
+  if (review) await put(worktree, `${JOB}/V001.md`, `# review\n\n- Base commit SHA: ${f.base}\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n${missBlock}${note}`);
   git(worktree, 'add', '-A'); git(worktree, 'commit', '--allow-empty', '-qm', 'docs: records');
   if (extra) { await put(worktree, 'src/y.mjs', 'export const y = 1;\n'); git(worktree, 'add', '-A'); git(worktree, 'commit', '-qm', 'feat: y after review'); }
   git(worktree, 'push', '-q', 'origin', branch);
@@ -182,6 +183,9 @@ try {
     // A block that names an earlier commit than the head's code does not record this failure.
     const earlier = await addBranch(f, 'earlier', { miss: f.base });
     await expectRefusal(earlier, fakeGh(earlier, { ci: 'FAILURE' }), 'ci-miss-unrecorded');
+    // The block ends at the next heading: the head's SHA mentioned in a later section is not part of it.
+    const trailing = await addBranch(f, 'trailing', { miss: f.base, trailer: true });
+    await expectRefusal(trailing, fakeGh(trailing, { ci: 'FAILURE' }), 'ci-miss-unrecorded');
     await expectRefusal(f, fakeGh(f), 'head-mismatch', { head: 'c'.repeat(40) });
     await expectRefusal(f, fakeGh(f), 'evidence-required', { evidence: '' });
     await expectRefusal(f, fakeGh(f), 'job-not-found', { job: 'J009' });
