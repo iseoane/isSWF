@@ -159,7 +159,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J009
 
-- Status: pending
+- Status: in-progress
 - Objective: The job status reported by `isswf-status` is derived from one shared state machine, and the plan stores only the states no record can reveal.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
