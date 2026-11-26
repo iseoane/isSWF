@@ -137,7 +137,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J008
 
-- Status: pending
+- Status: in-progress
 - Objective: Planning guidance sizes a semantic rewrite of user-facing pages by its review cost.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J008/brief-r1.md)
