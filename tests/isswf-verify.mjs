@@ -338,8 +338,23 @@ try {
   assert.match(notice, /source.*ci/u);
   assert.match(notice, /runUrl/u);
   assert.match(notice, /close-verification.json/u);
+  assert.match(notice, /schemaVersion 1/u);
+  assert.match(notice, /source "ci"/u);
+  assert.doesNotMatch(notice, /docs//u, 'the notice names no repo-relative path');
+  assert.doesNotMatch(notice, /check-quality|dead-code/u, 'the notice names only the manifest checks');
   assert.equal(platformNotice({ selected: gated, costs: ['job', 'initiative'], platform: 'linux' }), undefined);
   assert.equal(platformNotice({ selected: gated, costs: ['job'], platform: 'win32' }), undefined);
+
+  // Through the CLI: a platform-limited initiative check puts the notice on stderr on win32 only, and stdout stays one JSON document.
+  const limited = makeRepo('platform-limited', [check('only-elsewhere', node('-e', '0'), { platforms: ['plan9'], cost: 'initiative' })]);
+  const cli = verify(limited.repo, '--base', limited.head, '--tier', 'initiative');
+  if (process.platform === 'win32') {
+    assert.match(cli.stderr, /not run.*only-elsewhere|only-elsewhere.*not run/su);
+    assert.match(cli.stderr, /schemaVersion 1/u);
+    assert.match(cli.stderr, /source "ci"/u);
+    assert.doesNotMatch(cli.stderr, /docs//u);
+  } else assert.equal(cli.stderr, '');
+  assert.equal(cli.out.results[0].status, 'not run');
 
   console.log('PASS isswf-verify statuses, tiers, base-read file, bounded output and refusals');
 } finally {
