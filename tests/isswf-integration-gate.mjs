@@ -61,7 +61,7 @@ function makeRepo(name, line) {
   return repo;
 }
 const checker = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8') });
-// The review coverage the Node hosts inject: the commits no recorded review covers, from `isswf-handoff coverage`.
+// The review coverage a host may inject (neither host does yet): the commits no recorded review covers, from `isswf-handoff coverage`.
 const { coverage } = await import(pathToFileURL(join(source, 'tools/isswf-handoff.mjs')));
 const gateCoverage = async ({ root, head, base }) => (await coverage({ project: root, head, base })).jobs.flatMap(job => job.uncovered.map(item => item.commit));
 const covering = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8'), coverage: gateCoverage });
@@ -271,7 +271,6 @@ try {
   assert.equal(await piResult(observed, 'p3', true), undefined, 'a failed command gets no note');
   assert.equal(await piCall(tiers, 'p4', 'git push origin feat'), undefined, 'a stamped head passes');
   assert.equal(await piResult(tiers, 'p4'), undefined);
-  assert.match((await piCall(covered, 'p5', 'git push origin feat')).reason, /unreviewed/iu, 'the extension passes the review coverage check');
 
   // register.tsx has no runner here, so the Claude hook is a source check: the gate runs after the records push guard, refuses before the call and adds its note after it.
   const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');

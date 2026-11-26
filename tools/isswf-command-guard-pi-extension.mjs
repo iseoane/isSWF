@@ -7,12 +7,8 @@ import { checkPlanCommit } from './isswf-plan-commit-guard-core.mjs';
 import { checkVerificationCommit } from './isswf-verification-guard-core.mjs';
 import { checkRecordsPush } from './isswf-records-push-guard-core.mjs';
 import { checkIntegrationGate } from './isswf-integration-gate-core.mjs';
-import { coverage } from './isswf-handoff.mjs';
 
 const SHELL_TOOLS = new Set(['bash', 'powershell']);
-
-// The commits of `head` above `base` that no recorded review covers, for the integration gate.
-const unreviewedIn = async ({ root, head, base }) => (await coverage({ project: root, head, base })).jobs.flatMap(job => job.uncovered.map(item => item.commit));
 
 // `git` without a shell, so a path is passed as one argument on Linux and Windows; a missing `git` resolves as a failure and the guard allows the call.
 const git = (argv, cwd) => new Promise(done => {
@@ -75,7 +71,7 @@ export default function (pi) {
     if (verification.deny !== undefined) return { block: true, reason: verification.deny };
     const pushes = await checkRecordsPush({ command, cwd: ctx.cwd, git });
     if (pushes.deny !== undefined) return { block: true, reason: pushes.deny };
-    const gate = await checkIntegrationGate({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8'), coverage: unreviewedIn });
+    const gate = await checkIntegrationGate({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
     if (gate.deny !== undefined) return { block: true, reason: gate.deny };
     if (gate.note !== undefined && event.toolCallId !== undefined) notes.set(event.toolCallId, gate.note);
     if (branch.reobserve.length && event.toolCallId !== undefined) switching.set(event.toolCallId, branch.reobserve);

@@ -73,9 +73,15 @@ function codeTip({ git, root, head, upstream, stateDir }) {
   return commits.find(changesCode) ?? head;
 }
 
-/** Whether `text` holds a `- Kind: ci-only` miss block whose text names `sha` (a full SHA or an abbreviation of at least seven characters). */
+/** Whether `text` holds a `- Kind: ci-only` miss block whose lines name `sha` (a full SHA or an abbreviation of at least seven characters). A block ends at the next blank line or heading. */
 export function hasCiOnlyBlock(text, sha) {
-  return text.split(/^(?=- Kind:)/mu).some(block => CI_ONLY_BLOCK.test(block) && (block.match(/\b[0-9a-f]{7,40}\b/gu) ?? []).some(token => sha.startsWith(token)));
+  const lines = text.split(/\r?\n/u);
+  return lines.some((line, start) => {
+    if (!CI_ONLY_BLOCK.test(line)) return false;
+    const end = lines.findIndex((next, index) => index > start && (next.trim() === '' || next.startsWith('#')));
+    const block = lines.slice(start, end < 0 ? lines.length : end).join('\n');
+    return (block.match(/\b[0-9a-f]{7,40}\b/gu) ?? []).some(token => sha.startsWith(token));
+  });
 }
 
 /**

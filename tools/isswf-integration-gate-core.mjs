@@ -146,8 +146,8 @@ async function unstampedCommit(root, sha, baseRef, state, git, read) {
  * The mode is the `- Integration gate: off|observe|enforce` line of the selected state's `project-setup.md` on `<remote>/<base>`, or at HEAD when that ref is missing (a missing line is `observe`): `observe` returns a
  * `note` for the caller to show after the run, `enforce` a `deny`. It fails open on a git fault: this guard enforces a process rule, not an authority.
  * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a file's text or rejects.
- * A `git push` also reports commits no recorded review covers when the caller passes `coverage({ root, head, base })`, which resolves to those commit SHAs (the Node hosts pass
- * `isswf-handoff coverage`); a host without it checks stamps only.
+ * A `git push` also reports commits no recorded review covers when the caller passes `coverage({ root, head, base })`, which resolves to those commit SHAs (no host passes it yet; J017 wires
+ * a packaged coverage core into both); a host without it checks stamps only.
  */
 export async function checkIntegrationGate({ command, cwd, git, read, coverage }) {
   try {
