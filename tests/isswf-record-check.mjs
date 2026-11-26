@@ -245,4 +245,49 @@ try {
   for (const base of ['no-such-rev', '--file']) assert.equal(cli('--project', root, '--base', base, '--file', newReview).status, 1, `refuses base ${base}`);
 } finally { await rm(root, { recursive: true, force: true }); }
 
+// A record for a brief with an accepted launch that returned a run identity needs the matching `Run:` line (the launch note is the coordinator session's, as tools/isswf-compaction-core.mjs keeps it).
+{
+  const sha = 'a'.repeat(40);
+  const launch = (agent, run, extra = {}) => ({ agent, initiative: 'I0001', job: 'J001', path: '.factory/initiatives/I0001/jobs/J001/brief-r1.md', checkpoint: sha, base: sha, ...(run && { run }), ...extra });
+  const record = (name, { run, role = 'roles/worker.md', brief = 'brief-r1.md' } = {}) => ({
+    path: `/work/project/.factory/initiatives/I0001/jobs/J001/${name}`,
+    text: `# Report\n\n## Identity and pinned inputs\n\n- Job ID and attempt ID: J001 ${name.slice(0, 4)}\n- Profile: .agents/${role}\n${run ? `- Run: claude agent=${run}\n` : ''}- Brief: .factory/initiatives/I0001/jobs/J001/${brief} at ${sha}\n\n${withFields([...attemptFields, ...reviewFields])}`,
+  });
+  const verdict = (file, launches, siblings = []) => checkRecord({ ...file, launches, siblings }).violations.map(({ code }) => code);
+  // Refusal: an attempt and a review each lack the line for the launch of their own role.
+  assert.deepEqual(verdict(record('A001.md'), [launch('isswf:isswf-worker', 'w1')]), ['run-line-missing']);
+  assert.deepEqual(verdict(record('V001.md', { role: 'roles/reviewer.md' }), [launch('isswf:isswf-reviewer', 'r1')]), ['run-line-missing']);
+  const [named] = checkRecord({ ...record('A001.md'), launches: [launch('isswf-worker', 'w1')] }).violations;
+  assert.match(named.message, /- Run: claude agent=w1/u);
+  // The line satisfies it, here or in a sibling record of the job (a second attempt continues the same launch).
+  assert.deepEqual(verdict(record('A001.md', { run: 'w1' }), [launch('isswf-worker', 'w1')]), []);
+  assert.deepEqual(verdict(record('A002.md'), [launch('isswf-worker', 'w1')], [record('A001.md', { run: 'w1' }).text]), []);
+  // Exceptions: a coordinator acting as writer, a launch with no returned identity, another job's or brief's launch, and a launch of the other role.
+  const coordinator = record('A001.md', { role: 'skills/isswf-coordinator/SKILL.md' });
+  assert.deepEqual(verdict(coordinator, [launch('isswf-worker', 'w1')]), []);
+  assert.deepEqual(verdict(record('A001.md'), [launch('isswf-worker')]), []);
+  assert.deepEqual(verdict(record('A001.md'), [launch('isswf-worker', 'w1', { job: 'J002' })]), []);
+  assert.deepEqual(verdict(record('A001.md', { brief: 'brief-r2.md' }), [launch('isswf-worker', 'w1')]), []);
+  assert.deepEqual(verdict(record('A001.md'), [launch('isswf-reviewer', 'r1')]), []);
+  assert.deepEqual(verdict(record('A001.md'), undefined), []);
+
+  // Through the CLI the launches come from the session notes under the Claude config directory.
+  const dir = await mkdtemp(join(tmpdir(), 'isswf-launch-'));
+  try {
+    const project = join(dir, 'project');
+    const jobDir = join(project, '.factory/initiatives/I0001/jobs/J001');
+    await mkdir(jobDir, { recursive: true });
+    await mkdir(join(dir, 'claude/isswf/compaction'), { recursive: true });
+    await writeFile(join(dir, 'claude/isswf/compaction/session1.json'), JSON.stringify({ version: 1, assignments: [launch('isswf:isswf-worker', 'w1')] }));
+    const file = join(jobDir, 'A001.md');
+    await writeFile(file, record('A001.md').text);
+    const cli = (...args) => spawnSync(process.execPath, [join(source, 'tools/isswf-record-check.mjs'), '--project', project, ...args], { encoding: 'utf8', timeout: 15000, env: { ...process.env, CLAUDE_CONFIG_DIR: join(dir, 'claude') } });
+    const refused = cli('--file', file);
+    assert.equal(refused.status, 1, refused.stderr);
+    assert.deepEqual(JSON.parse(refused.stdout).files[0].violations.map(({ code }) => code), ['run-line-missing']);
+    await writeFile(file, record('A001.md', { run: 'w1' }).text);
+    assert.equal(cli('--file', file).status, 0);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+}
+
 console.log('record check tests passed');
