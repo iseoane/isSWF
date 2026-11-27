@@ -217,19 +217,23 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J012
 
-- Status: pending
+- Status: completed
 - Size: M
 - Objective: A state migration records its phase in the journal, and recovery reads that phase instead of inferring it from directory names.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (phase recovery on two platforms). Ground the stage, retired and pending directories in `tools/state-migration.mjs` and the journal in `tools/isswf.mjs`. Lowest priority: do only if an observed failure or J009 needs it.
+- Next step: None.
 
 ### Acceptance
 
 - The journal records the phases staged, swapped, retired and done; recovery from each phase is tested.
 - Existing interrupted-migration fixtures still recover.
 - Works on Windows and Linux.
+
+### Evidence
+
+- Not implemented here: the operator moved this job to I0067 J002 on 2026-11-27.
 
 ## J013
 
