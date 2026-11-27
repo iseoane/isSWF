@@ -323,13 +323,13 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J018
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The Claude Code pane tests in `hooks/register.test.tsx` run on the current Claude Code release, so panel changes can be verified with `claude plugin test .`.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J018/brief-r1.md)
 - Blocker: None.
-- Next step: Size S. Ground how the fs.read stub reports a missing file (`hooks/register.test.tsx:68`) against the host plugin-test contract.
+- Next step: None.
 
 ### Acceptance
 
@@ -339,4 +339,4 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ### Evidence
 
-- None.
+- PR #417 merged after CI green; V001 inconclusive (AC1 then coordinator-observed claude plugin test 70/0), V002 pass at 8482315f
