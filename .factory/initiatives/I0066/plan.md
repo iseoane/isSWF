@@ -197,19 +197,23 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J011
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The panel AutoWakeUp is one explicit state (off, armed, waiting for reset, fired) instead of separate variables.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (local hook refactor). Ground the variables in `hooks/register.tsx` (resumeOn, resumeTimer, resumeFor, resumeAtMs, noReset).
+- Next step: None.
 
 ### Acceptance
 
 - A single state value drives the timer and the label; an invalid combination cannot be represented.
 - Behavior is unchanged: 90% threshold, reset +5 min, toggle cancels.
 - Tests cover each transition, including cancel and no reset.
+
+### Evidence
+
+- PR #419 merged after CI green; V001 fail, V002 pass at 36ca7b0f; claude plugin test 78/0
 
 ## J012
 
