@@ -323,7 +323,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J018
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: The Claude Code pane tests in `hooks/register.test.tsx` run on the current Claude Code release, so panel changes can be verified with `claude plugin test .`.
 - Depends on: None
