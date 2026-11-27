@@ -273,19 +273,23 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J015
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The Claude Code initiatives panel shows worker and reviewer runs whose attempt or review records exist only in a linked worktree that has not been integrated yet.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J015/brief-r1.md)
 - Blocker: None.
-- Next step: Size S. Ground how `tools/isswf-panel.mjs` reads records and how it can find linked worktrees (`git worktree list --porcelain`) without reading unrelated checkouts. Operator split it out of J001 on 2026-11-26.
+- Next step: None.
 
 ### Acceptance
 
 - A run recorded only in a linked worktree of the same repository appears in the panel; after integration it is not counted twice.
 - Tests cover a record in a linked worktree and the same record after integration.
 - It works on Windows and Linux.
+
+### Evidence
+
+- PR #420 merged after CI green; V001-V003 inconclusive only for the live Claude pane check (Standards pass); known limits S3, S8, S9, S10, I1
 
 ## J016
 
