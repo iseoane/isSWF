@@ -359,13 +359,13 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J019
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The comments reference names excuse comments (a comment that justifies a workaround) and describes how to audit existing comments, so reviews catch excuses and an occasional audit can find stale comments outside any diff.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J019/brief-r1.md)
 - Blocker: None.
-- Next step: Size S. Edit `.agents/roles/references/comments.md`.
+- Next step: None.
 
 ### Acceptance
 
@@ -375,4 +375,4 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ### Evidence
 
-- None.
+- Merged as cfc5c7877e43f159811d9288211d36364bcbd28a (PR #423) after exact-head CI green; main CI run 46005413788 success. Attempts A001, A002; reviews V001 (pass, suggestions fixed in A002) and V002 (pass).
