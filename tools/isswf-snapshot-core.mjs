@@ -94,7 +94,7 @@ function isModelToken(token) {
 function parseModel(text) {
   let best = null;
   for (const line of text.split('\n')) {
-    const label = line.match(/^[\s*|>-]*([A-Za-z][\w /-]*):/)?.[1];
+    const label = line.match(/^[\s*|>-]*([A-Za-z][\w ,/-]*):/)?.[1];
     if (!label || !/model|observer|profile|selection/i.test(label)) continue;
     for (const clause of line.split(/;|\.\s/)) {
       const token = [...clause.matchAll(/`([^`\s]+)`/g)].map(m => m[1]).find(isModelToken);
