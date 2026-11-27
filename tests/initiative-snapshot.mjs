@@ -159,6 +159,57 @@ try {
   assert.deepEqual(touched.filter(path => path.includes('/I0001/jobs')), []);
   assert.ok(touched.some(path => path.includes('/I0002/jobs/J002')), 'an open initiative still reads its jobs');
 
+  // Records written only in a linked worktree of the same repository show beside the project's own;
+  // a record present in both counts once, and a checkout that Git does not list for this repository is never read.
+  const repoFiles = (main, worktree, sep = '/') => {
+    const at = (base, rel) => base + sep + rel.split('/').join(sep);
+    const planText = plan('I0001', 'Linked', job('J001', 'pending'), job('J002', 'pending'));
+    return {
+      [at(main, '.isswf/initiatives/I0001/plan.md')]: planText,
+      [at(main, '.isswf/initiatives/I0001/jobs/J001/brief-r1.md')]: '# r1\n',
+      [at(main, '.isswf/initiatives/I0001/jobs/J001/A001.md')]: '- Reported status: complete\n',
+      [at(main, '.git/worktrees/wt1/gitdir')]: `${worktree.replaceAll('\\', '/')}/.git\n`,
+      [at(worktree, '.git')]: `gitdir: ${main.replaceAll('\\', '/')}/.git/worktrees/wt1\n`,
+      [at(worktree, '.isswf/initiatives/I0001/plan.md')]: planText,
+      [at(worktree, '.isswf/initiatives/I0001/jobs/J001/A001.md')]: '- Reported status: complete\n',
+      [at(worktree, '.isswf/initiatives/I0001/jobs/J001/A002.md')]: '- Reported status: running\n- Run: claude agent=w1\n',
+      [at(worktree, '.isswf/initiatives/I0001/jobs/J001/V001.md')]: '# Review\n\nAggregate PASS\n',
+      [at(worktree, '.isswf/initiatives/I0001/jobs/J002/A001.md')]: '- Reported status: running\n',
+      [at(worktree, '.isswf/initiatives/I0002/plan.md')]: plan('I0002', 'Only here', job('J001', 'pending')),
+    };
+  };
+  const idsOf = (snap, jobId) => snap.initiatives.find(i => i.id === 'I0001').jobs.find(j => j.id === jobId).rounds.flatMap(r => r.entries).map(e => e.id);
+  for (const [main, worktree, sep] of [['/m', '/wt/j1', '/'], ['C:\\m', 'C:\\wt\\j1', '\\']]) {
+    const files = repoFiles(main, worktree, sep);
+    for (const from of [main, worktree]) {
+      const shown = await core.readSnapshot(from, memoryFs(files));
+      assert.deepEqual(idsOf(shown, 'J001'), ['A001', 'A002', 'V001'], `${from}: worktree-only records appear, the integrated one once`);
+      assert.deepEqual(idsOf(shown, 'J002'), ['A001'], `${from}: a job with records only in the worktree`);
+      assert.equal(shown.initiatives[0].jobs[1].status, 'in-progress');
+      assert.equal(shown.initiatives[0].jobs[0].recordCount, 3);
+      assert.deepEqual(shown.initiatives.map(i => i.id), ['I0001'], 'an initiative that exists only in a worktree is not added');
+      assert.deepEqual(shown.unopened, []);
+    }
+    // The checkout's own copy wins over a worktree's for the same record name.
+    const differing = { ...files, [`${main}${sep}.isswf${sep}initiatives${sep}I0001${sep}jobs${sep}J001${sep}A001.md`]: '- Reported status: blocked\n' };
+    assert.equal((await core.readSnapshot(main, memoryFs(differing))).initiatives[0].jobs[0].rounds[0].entries.find(e => e.id === 'A001').outcome, 'blocked');
+  }
+  // Only worktrees listed under this repository's .git/worktrees are opened, and only when they use the same state directory.
+  const stray = repoFiles('/m', '/wt/j1');
+  stray['/other/.isswf/initiatives/I0001/jobs/J001/A009.md'] = '- Reported status: complete\n';
+  stray['/m/.git/worktrees/wt2/gitdir'] = '/gone/.git\n';
+  stray['/m/.git/worktrees/wt3/gitdir'] = '/wt/legacy/.git\n';
+  stray['/wt/legacy/.factory/initiatives/I0001/jobs/J001/A008.md'] = '- Reported status: complete\n';
+  const strayTouched = [];
+  const strayFs = memoryFs(stray);
+  const strayRecord = Object.fromEntries(Object.entries(strayFs).map(([name, call]) => [name, path => (strayTouched.push(path), call(path))]));
+  assert.deepEqual(idsOf(await core.readSnapshot('/m', strayRecord), 'J001'), ['A001', 'A002', 'V001']);
+  assert.deepEqual(strayTouched.filter(path => path.startsWith('/other') || path.startsWith('/wt/legacy/.factory/initiatives') || path.startsWith('/gone')), []);
+  // No Git metadata: the project reads as before.
+  const plain = repoFiles('/m', '/wt/j1');
+  delete plain['/m/.git/worktrees/wt1/gitdir'];
+  assert.deepEqual(idsOf(await core.readSnapshot('/m', memoryFs(plain)), 'J001'), ['A001']);
+
   // Spanish verdict labels, with markdown emphasis between label and value.
   const verdictOf = async text => (await core.readSnapshot('/es', memoryFs({
     '/es/.isswf/initiatives/I0001/plan.md': plan('I0001', 'Es', job('J001', 'in-progress')),
