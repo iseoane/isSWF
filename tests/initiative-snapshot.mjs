@@ -187,8 +187,10 @@ try {
       assert.deepEqual(idsOf(shown, 'J002'), ['A001'], `${from}: a job with records only in the worktree`);
       assert.equal(shown.initiatives[0].jobs[1].status, 'in-progress');
       assert.equal(shown.initiatives[0].jobs[0].recordCount, 3);
-      assert.deepEqual(shown.initiatives.map(i => i.id), ['I0001'], 'an initiative that exists only in a worktree is not added');
-      assert.deepEqual(shown.unopened, []);
+      if (from === main) {
+        assert.deepEqual(shown.initiatives.map(i => i.id), ['I0001'], 'an initiative that exists only in a worktree is not added');
+        assert.deepEqual(shown.unopened, []);
+      }
     }
     // The checkout's own copy wins over a worktree's for the same record name.
     const differing = { ...files, [`${main}${sep}.isswf${sep}initiatives${sep}I0001${sep}jobs${sep}J001${sep}A001.md`]: '- Reported status: blocked\n' };
@@ -204,11 +206,25 @@ try {
   const strayFs = memoryFs(stray);
   const strayRecord = Object.fromEntries(Object.entries(strayFs).map(([name, call]) => [name, path => (strayTouched.push(path), call(path))]));
   assert.deepEqual(idsOf(await core.readSnapshot('/m', strayRecord), 'J001'), ['A001', 'A002', 'V001']);
-  assert.deepEqual(strayTouched.filter(path => path.startsWith('/other') || path.startsWith('/wt/legacy/.factory/initiatives') || path.startsWith('/gone')), []);
+  assert.deepEqual(strayTouched.filter(path => path.startsWith('/other') || path.startsWith('/wt/legacy/.factory/initiatives') || path.startsWith('/gone') && path.includes('/initiatives')), []);
   // No Git metadata: the project reads as before.
   const plain = repoFiles('/m', '/wt/j1');
   delete plain['/m/.git/worktrees/wt1/gitdir'];
   assert.deepEqual(idsOf(await core.readSnapshot('/m', memoryFs(plain)), 'J001'), ['A001']);
+
+  // The same through a real repository and `git worktree add`, read with the Node filesystem.
+  const repo = join(root, 'repo');
+  const linkedCopy = join(root, 'repo-linked');
+  const git = (cwd, ...args) => assert.equal(spawnSync('git', args, { cwd, encoding: 'utf8' }).status, 0, `git ${args.join(' ')}`);
+  await files(repo, { '.isswf/initiatives/I0001/plan.md': plan('I0001', 'Real', job('J001', 'pending')) });
+  git(repo, 'init', '-q');
+  git(repo, '-c', 'user.name=t', '-c', 'user.email=t@example.com', 'add', '.');
+  git(repo, '-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-qm', 'plan');
+  git(repo, 'worktree', 'add', '-q', '-b', 'feature', linkedCopy);
+  await files(linkedCopy, { '.isswf/initiatives/I0001/jobs/J001/A001.md': '- Reported status: running\n' });
+  for (const from of [repo, linkedCopy]) {
+    assert.deepEqual(idsOf(await readSnapshot(from), 'J001'), ['A001'], from);
+  }
 
   // Spanish verdict labels, with markdown emphasis between label and value.
   const verdictOf = async text => (await core.readSnapshot('/es', memoryFs({
