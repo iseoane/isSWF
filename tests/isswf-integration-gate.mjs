@@ -61,7 +61,7 @@ function makeRepo(name, line) {
   return repo;
 }
 const checker = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8') });
-// The review coverage a host may inject (neither host does yet): the commits no recorded review covers, from `isswf-handoff coverage`.
+// The review coverage a caller may inject: the commits no recorded review covers, from `isswf-handoff coverage`.
 const { coverage } = await import(pathToFileURL(join(source, 'tools/isswf-handoff.mjs')));
 const gateCoverage = async ({ root, head, base }) => (await coverage({ project: root, head, base })).jobs.flatMap(job => job.uncovered.map(item => item.commit));
 const covering = repo => command => checkIntegrationGate({ command, cwd: repo, git, read: async path => readFileSync(path, 'utf8'), coverage: gateCoverage });
@@ -271,6 +271,17 @@ try {
   assert.equal(await piResult(observed, 'p3', true), undefined, 'a failed command gets no note');
   assert.equal(await piCall(tiers, 'p4', 'git push origin feat'), undefined, 'a stamped head passes');
   assert.equal(await piResult(tiers, 'p4'), undefined);
+
+  // Pi wires the coverage check: an unreviewed push is refused in enforce mode and noted in observe mode, and a covered push passes.
+  assert.match((await piCall(covered, 'p5', 'git push origin feat'))?.reason ?? '', new RegExp(`Unreviewed commits: ${lateCode.slice(0, 7)}`, 'u'));
+  assert.equal(await piCall(watched, 'p6', 'git push origin feat'), undefined, 'observe allows an unreviewed push');
+  assert.match((await piResult(watched, 'p6')).content.at(-1).text, /integration gate \(observe\).*Unreviewed commits/u);
+  const clean = makeRepo('clean', ENFORCE);
+  const cleanBase = run(clean, 'rev-parse', 'main');
+  const cleanCode = edit(clean, 'tools/c.mjs', 'c\n', 'reviewed code');
+  stamp(clean, cleanCode);
+  review(clean, cleanBase, cleanCode);
+  assert.equal(await piCall(clean, 'p7', 'git push origin feat'), undefined, 'a covered push passes');
 
   // register.tsx has no runner here, so the Claude hook is a source check: the gate runs after the records push guard, refuses before the call and adds its note after it.
   const hooks = await readFile(join(source, 'hooks/register.tsx'), 'utf8');

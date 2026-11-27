@@ -569,4 +569,19 @@ try {
   await rm(coverTemp, { recursive: true, force: true });
 }
 
+// The coverage core with an injected git: a runner that throws on a probe (a timeout on the ancestor or main-ref check) means "no", as the CLI always judged it, not a failed run.
+{
+  const { reviewCoverage } = await import(pathToFileURL(join(source, 'tools/isswf-handoff-coverage-core.mjs')));
+  const from = '1'.repeat(40), tip = '2'.repeat(40);
+  const answers = argv => {
+    const cmd = argv.join(' ');
+    if (cmd.startsWith('rev-parse --verify --quiet') || cmd.startsWith('merge-base --is-ancestor')) throw new Error('git-timeout');
+    if (cmd === `rev-list --reverse --parents ${from}..${tip}`) return { exitCode: 0, stdout: `${tip} ${from}\n` };
+    if (cmd.startsWith('diff-tree')) return { exitCode: 0, stdout: 'tools/x.mjs\0' };
+    return { exitCode: 0, stdout: '' };
+  };
+  const report = await reviewCoverage({ git: async argv => answers(argv), base: from, head: tip });
+  assert.deepEqual({ ok: report.ok, jobs: report.jobs, skipped: report.skipped }, { ok: true, jobs: [], skipped: [] });
+}
+
 console.log('PASS handoff');

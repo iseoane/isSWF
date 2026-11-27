@@ -13,6 +13,7 @@
     "tools/isswf-record-new-core.mjs",
     "tools/isswf-handoff.mjs",
     "tools/isswf-handoff-core.mjs",
+    "tools/isswf-handoff-coverage-core.mjs",
     "tools/isswf-review-prepare.mjs",
     "tools/isswf-parallel-workers.mjs",
     "tools/isswf-ci-state.mjs",
