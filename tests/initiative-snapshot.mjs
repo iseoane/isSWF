@@ -14,6 +14,7 @@ const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-snapshot-test-')
 const job = (id, status, extra = {}) => [
   `## ${id}`, '',
   `- Status: ${status}`,
+  ...(extra.size ? [`- Size: ${extra.size}`] : []),
   `- Objective: ${extra.objective ?? `Objective ${id}`}`,
   `- Depends on: ${extra.dependsOn ?? 'None'}`,
   `- Brief: [brief-r1.md](jobs/${id}/brief-r1.md)`,
@@ -48,6 +49,16 @@ try {
     'I0001/jobs/J003/V001.md': '\u0000\u0001 garbage without structure',
     'I0002/plan.md': plan('I0002', 'Not started', job('J001', 'pending')),
     'I0003/plan.md': 'Not a canonical plan.\n',
+    'I0005/plan.md': plan('I0005', 'Derived states',
+      job('J001', 'pending', { size: 'S (one flow)' }),
+      job('J002', 'pending'),
+      job('J003', 'blocked'),
+      job('J004', 'pending')),
+    'I0005/jobs/J001/brief-r1.md': '# r1\n',
+    'I0005/jobs/J001/A001.md': '# Attempt\n\n- Brief: `.factory/initiatives/I0005/jobs/J001/brief-r1.md`\n',
+    'I0005/jobs/J001/V001.md': '# Review\n\n- Brief: `.factory/initiatives/I0005/jobs/J001/brief-r1.md`\n',
+    'I0005/jobs/J003/A001.md': '# Attempt\n',
+    'I0005/jobs/J004/A001.md': '# Attempt\n',
     'I0004/plan.md': plan('I0004', 'Done', job('J001', 'completed', { evidence: ['- Done.'] })),
   });
   await mkdir(join(state, 'I0001/jobs/J003/A001.md'), { recursive: true });
@@ -73,6 +84,12 @@ try {
   assert.deepEqual(jobOf('J002').prs, []);
   assert.deepEqual(jobOf('J002').dependsOn, ['J001']);
   assert.deepEqual(jobOf('J002').rounds.map(r => r.round), [1, 2, 10]);
+
+  // The pane's job state is derived from the records, as isswf-status derives it; a job's size is the first word of the plan's Size field.
+  const derived = id => initiative('I0005').jobs.find(j => j.id === id);
+  assert.deepEqual(['J001', 'J002', 'J003', 'J004'].map(id => [derived(id).status, derived(id).size]), [['in-review', 'S'], ['pending', null], ['blocked', null], ['in-progress', null]]);
+  assert.equal(jobOf('J002').status, 'in-review');
+  assert.equal(jobOf('J002').size, null);
 
   // Windows-style brief path and CRLF line endings.
   assert.equal(roundOf('J002', 'A001'), 2);

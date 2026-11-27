@@ -6,23 +6,25 @@ import { recordResponse } from './isswf-response.mjs';
 import { isAbsolute, resolve } from 'node:path';
 import { realpath } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { jobStates } from './isswf-plan-core.mjs';
 import { initiatives, status } from './isswf-status.mjs';
 
 const escape = value => String(value ?? '').replace(/[&<>"']/gu, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-const names = { pending: 'Pending', 'in-progress': 'In progress', blocked: 'Blocked', 'in-review': 'In review', 'awaiting-human': 'Awaiting human', completed: 'Complete according to the plan' };
+const label = state => state === 'completed' ? 'Complete according to the plan' : state[0].toUpperCase() + state.slice(1).replaceAll('-', ' ');
+const names = Object.fromEntries(jobStates.map(state => [state, label(state)]));
 const list = values => `<ul>${values.map(value => `<li>${escape(value)}</li>`).join('')}</ul>`;
 const recommendationSection = (value, href) => `<section><h2>Recommended next step</h2><p><strong>${escape(value?.title ?? 'Unavailable')}</strong></p><p>${escape(value?.reason ?? 'No recommendation observed.')}</p>${value?.jobId ? `<p><a href="${escape(href)}">Open details for ${escape(value.jobId)}</a></p>` : ''}<p>This is a suggestion; it does not authorize execution.</p></section>`;
 function card(job, snapshot, token) {
   const artifact = job.artifacts, delivery = artifact.delivery;
   const section = (name, title) => `<section><h4>${title}</h4><pre>${escape(delivery?.sections?.[name] || 'Not recorded in the delivery. The coordinator must supply this information before requesting acceptance.')}</pre></section>`;
   const reports = artifact.reports ?? [];
-  return `<article><header><h2>${escape(job.id)} · ${escape(job.objective)}</h2><strong>${escape(names[job.reportedStatus] ?? job.reportedStatus)}</strong></header>
-  <p>State reported in the plan, not verified process activity.</p>
+  return `<article><header><h2>${escape(job.id)} · ${escape(job.objective)}</h2><strong>${escape(names[job.status] ?? job.status)}</strong></header>
+  <p>State from the plan and the job's attempt and review records, not verified process activity.</p>
   <dl><dt>Depends on</dt><dd>${escape(job.dependencies.join(', ') || 'No dependencies reported')}</dd><dt>Reported blocker</dt><dd>${escape(job.blocker)}</dd><dt>Next step</dt><dd>${escape(job.nextStep)}</dd><dt>Job record</dt><dd>${escape(artifact.status)}</dd></dl>
   <h3>What was requested</h3>${list(job.acceptance)}
   <h3>Delivery and acceptance record</h3><p>Delivery: ${escape(delivery?.status ?? 'unavailable')}. A finished process does not imply delivery or approval.</p>
   ${section('What changed and why', 'What was delivered')}${section('Visual summary', 'Demonstration')}${section('Checks and results', 'Checks and evidence')}${section('Independent review', 'Independent review')}${section('Scope', 'Scope and exclusions')}${section('Integration risk and recovery', 'Limits and risks')}${section('Closure and acceptance', 'Requested decision and recorded acceptance')}
-  <p><b>${job.reportedStatus === 'awaiting-human' ? 'Operator decision pending: definition, setup, acceptance or PR integration. Answer the recorded question through the coordinator; the note does not accept work, approve integration or change job state.' : 'State and decisions are recorded through the coordinator; a note does not change them.'}</b></p>
+  <p><b>${job.status === 'awaiting-human' ? 'Operator decision pending: definition, setup, acceptance or PR integration. Answer the recorded question through the coordinator; the note does not accept work, approve integration or change job state.' : 'State and decisions are recorded through the coordinator; a note does not change them.'}</b></p>
   <h3>Responses for the coordinator</h3><p>Local-session notes with an unauthenticated author. Recording a note does not accept work, change the plan, or grant execution permission.</p>
   <p>Response readback: ${escape(artifact.responses?.status ?? 'unavailable')}.</p>${list((artifact.responses?.records ?? []).map(record => record.recordedAt + ' · Note recorded, not applied: ' + record.note))}
   ${token && artifact.brief?.sha256 && ['recorded', 'absent'].includes(delivery?.status) ? `<form method="post" action="/responses/${escape(snapshot.initiative)}/${escape(job.id)}"><input type="hidden" name="token" value="${escape(token)}"><input type="hidden" name="responseId" value="${randomBytes(16).toString('hex')}"><input type="hidden" name="planSha256" value="${escape(snapshot.plan.sha256)}"><input type="hidden" name="briefSha256" value="${escape(artifact.brief.sha256)}"><input type="hidden" name="deliverySha256" value="${escape(delivery?.sha256 ?? '')}"><label>Response or requested changes (maximum 4000 bytes, no credentials)<br><textarea name="note" required maxlength="4000" rows="4" style="width:95%"></textarea></label><p><button type="submit">Record note for the coordinator</button></p></form>` : '<p>A note cannot be recorded without a readable brief and delivery state. Refresh or consult the coordinator.</p>'}
@@ -35,7 +37,7 @@ function card(job, snapshot, token) {
 }
 function board(jobs) {
   return `<div class="board" id="board" role="region" aria-label="Job board by phase" tabindex="0">${Object.entries(names).map(([state, name]) => {
-    const items = jobs.filter(job => job.reportedStatus === state);
+    const items = jobs.filter(job => job.status === state);
     return `<section class="lane" data-state="${escape(state)}"><h2>${escape(name)} <small>${items.length}</small></h2>${items.map(job => `<div class="tile"><b>${escape(job.id)}</b><p>${escape(job.objective)}</p><p class="tile-meta">${escape(job.dependencies.length ? 'Depends on ' + job.dependencies.join(', ') : 'No dependencies reported')}</p><a href="#detail-${escape(job.id)}">View record and evidence</a></div>`).join('') || '<p>No jobs in this phase.</p>'}</section>`;
   }).join('')}</div>`;
 }

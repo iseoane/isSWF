@@ -58,7 +58,7 @@ export function parsePlan(markdown) {
       if (seen.has(header[1])) throw planError('duplicate-job', { job: header[1], line: lineNo });
       seen.add(header[1]); current = { id: header[1], acceptance: [], evidence: [], line: lineNo, lines: {} }; jobs.push(current); section = null;
     } else if (current) {
-      const field = section ? null : /^- (Status|Objective|Depends on|Brief|Blocker|Next step): (.+)$/u.exec(line);
+      const field = section ? null : /^- (Status|Size|Objective|Depends on|Brief|Blocker|Next step): (.+)$/u.exec(line);
       if (field) {
         if (Object.hasOwn(current, field[1])) throw planError('duplicate-field', { job: current.id, field: field[1], line: lineNo });
         current[field[1]] = field[2]; current.lines[field[1]] = lineNo;
@@ -81,7 +81,7 @@ export function parsePlan(markdown) {
     if (new Set(dependencies).size !== dependencies.length || dependencies.some(dep => !seen.has(dep) || dep === job.id)) throw planError('invalid-dependency', at('Depends on'));
     const evidence = job.evidence.filter(item => item.trim() !== 'None.');
     if (job.Status === 'completed' && !hasEvidence(evidence)) throw planError('completed jobs require evidence', at('Evidence'));
-    return { id: job.id, reportedStatus: job.Status, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence, briefName: `brief-r${brief[1]}.md`, lines: job.lines };
+    return { id: job.id, reportedStatus: job.Status, size: job.Size?.split(' ')[0] ?? null, objective: job.Objective, dependencies, blocker: job.Blocker, nextStep: job['Next step'], acceptance: job.acceptance, evidence, briefName: `brief-r${brief[1]}.md`, lines: job.lines };
   });
   validateDependencyGraph(parsed);
   return parsed.map(({ lines, ...job }) => job);

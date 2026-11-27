@@ -3,9 +3,9 @@ import { buildEnvelope, diffCommandArguments, sha256Hex } from '../tools/isswf-h
 
 const ON = { options: { initiativesPane: true } }
 const AGENT = 'abc123'
-const plan = (id: string, title: string, jobs: [string, string, string][]) =>
+const plan = (id: string, title: string, jobs: [string, string, string, string?][]) =>
   `# ${id}: ${title}\n\nType: enhancement\n` +
-  jobs.map(([job, status, objective]) => `\n## ${job}\n\n- Status: ${status}\n- Objective: ${objective}\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${job}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Works.\n\n### Evidence\n\n- ${status === 'completed' ? 'Merged.' : 'None.'}\n`).join('')
+  jobs.map(([job, status, objective, size]) => `\n## ${job}\n\n- Status: ${status}\n${size ? `- Size: ${size}\n` : ''}- Objective: ${objective}\n- Depends on: None\n- Brief: [brief-r1.md](jobs/${job}/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n### Acceptance\n\n- Works.\n\n### Evidence\n\n- ${status === 'completed' ? 'Merged.' : 'None.'}\n`).join('')
 const RECORDS: Record<string, string> = {
   'I0046/plan.md': plan('I0046', 'Pane mod', [['J001', 'completed', 'triage'], ['J002', 'completed', 'reader'], ['J003', 'completed', 'cores'], ['J004', 'in-progress', 'pane'], ['J005', 'pending', 'docs']]),
   'I0046/jobs/J002/brief-r1.md': 'brief',
@@ -655,6 +655,29 @@ for (const cwd of ['/p', 'C:\\p']) {
     await ui.press({ key: 'tab-initiatives' })
     expect(await text(ui, /J005/)).toBe('▸ J005 (in-progress) docs')
     expect(recordReads(seen)).toBeGreaterThan(before)
+    await ui.unmount()
+  })
+
+  test(`a job line shows its size from the plan and the state derived from its records (${cwd})`, ON, async ($, on) => {
+    const { write } = engine(on, cwd)
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    write('I0046/plan.md', plan('I0046', 'Pane mod', [['J001', 'completed', 'triage'], ['J002', 'completed', 'reader'], ['J003', 'completed', 'cores', 'M'], ['J004', 'in-progress', 'pane'], ['J005', 'pending', 'docs', 'S (one flow)'], ['J006', 'pending', 'later', 'L']]))
+    write('I0046/jobs/J005/brief-r1.md', 'brief')
+    write('I0046/jobs/J005/A001.md', '- Brief: I0046/jobs/J005/brief-r1.md\n- Outcome: complete\n')
+    await $.tool.call({ tool: 'Bash', command: 'git merge feature' })
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /J005/)).toBe('▸ J005(S) (in-progress) docs')
+    write('I0046/jobs/J005/V001.md', '- Brief: I0046/jobs/J005/brief-r1.md\n- Verdict: pass\n')
+    await $.tool.call({ tool: 'Bash', command: 'git merge feature' })
+    await ui.press({ key: 'tab-agents' })
+    await ui.press({ key: 'tab-initiatives' })
+    expect(await text(ui, /J005/)).toBe('▸ J005(S) (in-review) docs')
+    expect(await text(ui, /J004/)).toContain('▸ J004 (in-progress) pane')
+    expect(await text(ui, /J006/)).toBe('○ J006(L) later')
+    expect(await text(ui, /J003/)).toBe('✓ J003(M) cores')
     await ui.unmount()
   })
 
