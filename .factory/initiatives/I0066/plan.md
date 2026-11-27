@@ -178,18 +178,22 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J010
 
-- Status: in-progress
+- Status: completed
 - Objective: Each review record declares its round and candidate, and a new round requires a correction attempt after a fail verdict.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one record-check rule). Ground the round inference in `tools/isswf-snapshot-core.mjs` (statedRound and reviewRound by position).
+- Next step: None.
 
 ### Acceptance
 
 - `isswf-record-check` refuses a review record whose round does not follow a fail verdict and a correction attempt, or whose candidate does not match that attempt.
 - Existing records keep parsing; the panel shows the same rounds for completed initiatives.
 - Tests cover the legal sequence and each refusal.
+
+### Evidence
+
+- PR #416 merged; V001 fail (operator chose wide round reading), V002 pass; CI green at 356e7b8f
 
 ## J011
 
