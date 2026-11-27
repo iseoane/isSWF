@@ -174,7 +174,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J010
 
-- Status: pending
+- Status: in-progress
 - Objective: Each review record declares its round and candidate, and a new round requires a correction attempt after a fail verdict.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
