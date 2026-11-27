@@ -352,3 +352,23 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 ### Evidence
 
 - PR #417 merged after CI green; V001 inconclusive (AC1 then coordinator-observed claude plugin test 70/0), V002 pass at 8482315f
+
+## J019
+
+- Status: in-progress
+- Size: S
+- Objective: The comments reference names excuse comments (a comment that justifies a workaround) and describes how to audit existing comments, so reviews catch excuses and an occasional audit can find stale comments outside any diff.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J019/brief-r1.md)
+- Blocker: None.
+- Next step: Size S. Edit `.agents/roles/references/comments.md`.
+
+### Acceptance
+
+- An excuse comment is removed and its workaround reported as an issue or out-of-scope option, not kept.
+- A short audit section classifies existing comments (tautology, stale, excuse, reason) with the action for each; reasons stay next to the code; nothing is deleted mechanically.
+- No new skill, tool or lint rule.
+
+### Evidence
+
+- None.
