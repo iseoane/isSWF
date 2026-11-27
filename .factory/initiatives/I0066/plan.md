@@ -248,13 +248,13 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J014
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The Claude Code panel (`tools/isswf-panel.mjs`, `hooks/register.tsx`) shows job status from the J009 shared state machine.
 - Depends on: J009
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (two consumers switch to the shared module). Ground the status string filters in `hooks/register.tsx` and `tools/isswf-panel.mjs`.
+- Next step: None.
 
 ### Acceptance
 
@@ -262,6 +262,10 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 - Completed initiatives render as before.
 - Each job line shows its size after the ID, for example `J005(S) (in-progress) ...`, read from the plan (operator request 2026-11-26); a job without a size shows no suffix.
 - Tests cover the derived states in the panel snapshot.
+
+### Evidence
+
+- PR #418 merged after CI green; V001 fail, V002 pass at 5d016c9d; claude plugin test 72/0
 
 ## J015
 
