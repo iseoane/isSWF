@@ -10,9 +10,9 @@ export const inFlightStates = Object.freeze(['in-progress', 'in-review']);
 const transitions = Object.freeze({
   pending: ['in-progress', 'blocked', 'awaiting-human'],
   'in-progress': ['blocked', 'awaiting-human', 'completed'],
-  'in-review': ['in-progress', 'completed'],
-  blocked: ['in-progress', 'pending'],
-  'awaiting-human': ['in-progress', 'pending'],
+  'in-review': ['in-progress', 'blocked', 'awaiting-human', 'completed'],
+  blocked: ['in-progress', 'pending', 'awaiting-human'],
+  'awaiting-human': ['in-progress', 'pending', 'blocked'],
   completed: [],
 });
 export const canTransition = (from, to) => transitions[from]?.includes(to) ?? false;
