@@ -438,6 +438,58 @@ test('without a reset time the switch says nothing is scheduled', ON, async ($, 
   expect(prompts.length).toBe(0)
 })
 
+test('a fired resume is re-armed by switching off and on in the same window', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95, resetsAt: new Date(10 * 60_000).toISOString() }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  const draw = async (key?: string) => {
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    if (key) await ui.press({ key })
+    await ui.unmount()
+    await clock.advance(1000)
+  }
+  await draw('resume-toggle')
+  await draw()
+  await clock.advance(16 * 60_000)
+  expect(prompts.length).toBe(1)
+  // Fired: further draws in the same window schedule nothing.
+  await draw()
+  await clock.advance(60_000)
+  expect(prompts.length).toBe(1)
+  await draw('resume-toggle')
+  await draw('resume-toggle')
+  await draw()
+  await clock.advance(1000)
+  expect(prompts.length).toBe(2)
+})
+
+test('a reset time that appears after the threshold schedules the resume', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  let resetsAt: string | undefined
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95, resetsAt }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  const draw = async (key?: string) => {
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    if (key) await ui.press({ key })
+    await ui.unmount()
+    await clock.advance(1000)
+  }
+  await draw('resume-toggle')
+  await draw()
+  await draw()
+  expect(prompts.length).toBe(0)
+  resetsAt = new Date(10 * 60_000).toISOString()
+  await draw()
+  await clock.advance(16 * 60_000)
+  expect(prompts.length).toBe(1)
+})
+
 test('the coordinator row says the worker profile was read, and an unresolved run gives no profile mark', ON, async ($, on) => {
   // J004 has a coordinator-written attempt, and this session read roles/worker.md; the reviewer's transcript is gone.
   const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: partial\n', 'I0046/jobs/J004/V001.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/roles/reviewer.md\n- Verdict: fail\n- Run: claude agent=gone2\n' }, [{ role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Read', input: { file_path: '/p/.agents/roles/worker.md' } }] }])
