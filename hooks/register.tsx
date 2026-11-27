@@ -182,7 +182,7 @@ let countingOwn = false
 // Brief texts by path, read once after a draw; the job view compares each with its attempt's runs.
 const briefs = new Map<string, string>()
 const briefsLoading = new Set<string>()
-// AutoWakeUp is one state. `off`: the switch is off. `armed`: on, nothing scheduled; `noReset` is true while the
+// AutoWakeUp is one state. `off`: the switch is off. `armed`: on, nothing scheduled. `noReset` (armed or fired) is true while the
 // threshold is met but the window gives no reset time. `waiting`: one prompt is scheduled for `atMs`. `fired`: the
 // prompt was sent, and `window` (the window's reset time) keeps the same window from being scheduled again.
 // The timer lives only in this session.
@@ -190,13 +190,13 @@ type Resume =
   | { state: 'off' }
   | { state: 'armed'; noReset: boolean }
   | { state: 'waiting'; window: string; atMs: number; timer: Timer }
-  | { state: 'fired'; window: string }
+  | { state: 'fired'; window: string; noReset: boolean }
 let resume: Resume = { state: 'off' }
 // The window's reset plus the delay, known even before the threshold, so the switch can say when a resume would come.
 let resumeWouldAtMs: number | undefined
 
 const clockTime = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
-const resumeNoReset = () => resume.state === 'armed' && resume.noReset
+const resumeNoReset = () => (resume.state === 'armed' || resume.state === 'fired') && resume.noReset
 
 function cancelResume() {
   if (resume.state === 'waiting') resume.timer.cancel()
@@ -217,7 +217,8 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
     const due = isOn && window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
     const noReset = due && at === undefined
     const wasNoReset = resumeNoReset()
-    if (resume.state === 'armed' || resume.state === 'fired') resume = noReset || resume.state === 'armed' ? { state: 'armed', noReset } : resume
+    if (resume.state === 'armed') resume = { state: 'armed', noReset }
+    else if (resume.state === 'fired') resume = { ...resume, noReset }
     if (at !== resumeWouldAtMs || resumeNoReset() !== wasNoReset) {
       resumeWouldAtMs = at
       scheduleRefresh($)
@@ -228,7 +229,7 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
     if (resume.state === 'off') return
     if (resume.state === 'waiting') resume.timer.cancel()
     const timer = $.clock.after(delay, () => {
-      resume = { state: 'fired', window: window.resetsAt }
+      resume = { state: 'fired', window: window.resetsAt, noReset: false }
       void $.prompt.submit({
         text: `isSWF: the five-hour usage window has reset. Work was in progress on ${work.join(', ')}. Load the isswf-coordinator skill, reconcile state first (isswf-status, open PRs, running reviews), then continue only the work already authorised; do not start new jobs without the operator's go.`,
       })
