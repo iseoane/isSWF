@@ -12,9 +12,14 @@ export async function launchesFor() {
   return launches.filter(({ run }) => run);
 }
 
-/** The texts of the other records in the directory of the record at `path`. */
-export async function siblingsOf(path) {
+/** The other records in the directory of the record at `path`, as `{ name, text }`. */
+export async function siblingRecordsOf(path) {
   const own = basename(path);
   const dir = dirname(path);
-  try { return await Promise.all((await readdir(dir)).filter(name => RECORD_NAME.test(name) && name !== own).map(name => readFile(join(dir, name), 'utf8'))); } catch { return []; }
+  try { return await Promise.all((await readdir(dir)).filter(name => RECORD_NAME.test(name) && name !== own).map(async name => ({ name, text: await readFile(join(dir, name), 'utf8') }))); } catch { return []; }
+}
+
+/** The texts of the other records in the directory of the record at `path`. */
+export async function siblingsOf(path) {
+  return (await siblingRecordsOf(path)).map(({ text }) => text);
 }

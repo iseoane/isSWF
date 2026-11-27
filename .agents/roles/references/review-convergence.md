@@ -32,4 +32,6 @@ A review round is one review of one candidate within the same job. The coordinat
 
 From round 2, scope the review to the delta under [changed candidates](review.md#choose-sufficient-verification). Do not report a finding again: cite its earlier ID and record whether it is resolved, still open or changed. Repeat the reviewer limits and convergence advice for the delta round; do not rely on an earlier round's limits.
 
+A new round is legal after a fail with a correction attempt of that round at the review's candidate, as a chained delta (its base is the previous review's candidate) after a pass or an inconclusive result, as a re-run after an inconclusive result, or as a full re-review of a correction after a pass; `isswf-record-check` refuses the rest.
+
 When the brief's review-round or correction budget is spent and a blocking finding remains, the reviewer recommends reconsidering the approach instead of another correction. The coordinator then asks the operator before any further correction. This recommendation never renews a spent budget.

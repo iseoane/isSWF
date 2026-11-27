@@ -178,12 +178,12 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J010
 
-- Status: in-progress
+- Status: completed
 - Objective: Each review record declares its round and candidate, and a new round requires a correction attempt after a fail verdict.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J010/brief-r1.md)
 - Blocker: None.
-- Next step: Size S (one record-check rule). Ground the round inference in `tools/isswf-snapshot-core.mjs` (statedRound and reviewRound by position).
+- Next step: None.
 
 ### Acceptance
 
@@ -191,9 +191,14 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 - Existing records keep parsing; the panel shows the same rounds for completed initiatives.
 - Tests cover the legal sequence and each refusal.
 
+### Evidence
+
+- PR #416 merged; V001 fail (operator chose wide round reading), V002 pass; CI green at 356e7b8f
+
 ## J011
 
 - Status: pending
+- Size: S
 - Objective: The panel AutoWakeUp is one explicit state (off, armed, waiting for reset, fired) instead of separate variables.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J011/brief-r1.md)
@@ -209,6 +214,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 ## J012
 
 - Status: pending
+- Size: M
 - Objective: A state migration records its phase in the journal, and recovery reads that phase instead of inferring it from directory names.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J012/brief-r1.md)
@@ -243,6 +249,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 ## J014
 
 - Status: in-progress
+- Size: S
 - Objective: The Claude Code panel (`tools/isswf-panel.mjs`, `hooks/register.tsx`) shows job status from the J009 shared state machine.
 - Depends on: J009
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md)
@@ -259,6 +266,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 ## J015
 
 - Status: pending
+- Size: S
 - Objective: The Claude Code initiatives panel shows worker and reviewer runs whose attempt or review records exist only in a linked worktree that has not been integrated yet.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J015/brief-r1.md)
@@ -312,3 +320,23 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 ### Evidence
 
 - PR #415 merged; reviews V001-V004 pass; CI green at e319faa2
+
+## J018
+
+- Status: completed
+- Size: S
+- Objective: The Claude Code pane tests in `hooks/register.test.tsx` run on the current Claude Code release, so panel changes can be verified with `claude plugin test .`.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J018/brief-r1.md)
+- Blocker: None.
+- Next step: None.
+
+### Acceptance
+
+- `claude plugin test .` passes the 39 tests that fail today with `fs.read hook was skipped: test: ENOENT`, on Windows.
+- Only test scaffolding changes; production hook behavior is unchanged.
+- The cause is recorded in the attempt report.
+
+### Evidence
+
+- PR #417 merged after CI green; V001 inconclusive (AC1 then coordinator-observed claude plugin test 70/0), V002 pass at 8482315f

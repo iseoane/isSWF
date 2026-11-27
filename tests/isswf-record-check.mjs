@@ -168,6 +168,46 @@ const attemptTemplate = await readFile(join(source, '.factory/templates/attempt.
 assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: `${attempt([])}${attemptTemplate.split('\n').find(line => line.includes(checksLabel))}\n`, newRecord: true }).violations, [], 'the unfilled field of the real template');
 assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: `${attempt([], reviewFields).replace('# Attempt report', '# Review report')}- ${checksLabel}: node tests/x.mjs . exit 0\n`, newRecord: true }).violations, [], 'reviews are not held to it');
 
+// A new review of a later round is legal when the prior review failed and a correction attempt of that round has the review's candidate, when the prior review passed
+// or was inconclusive and the review chains from its candidate (a delta), when the prior review was inconclusive and its candidate repeats (a re-run), or when the
+// prior review passed and a matching correction attempt re-reviews. Older records keep their wording.
+{
+  const [c1, c2, c3, c4] = ['1', '2', '3', '4'].map(digit => digit.repeat(40));
+  const roundLabel = 'Review round in this job, and prior review IDs:';
+  const review = (round, candidate, aggregate, base = c1) => `${attempt([], reviewFields).replace('# Attempt report', '# Review report')}- ${roundLabel} ${round}; prior reviews: none\n- Base commit SHA: ${base}\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n- Aggregate verdict, copied verbatim from the reviewer's report header: ${aggregate}\n`;
+  const correction = (round, candidate) => `${attempt([])}${round ? `- Review round: ${round}\n` : ''}- Candidate commit SHA: ${candidate}\n`;
+  const records = (...entries) => entries.map(([name, text]) => ({ name, text }));
+  const judge = (text, jobRecords, newRecord = true) => checkRecord({ path: recordPaths('V002.md')[0], text, newRecord, jobRecords }).violations.map(({ code }) => code);
+  const after = (aggregate, ...more) => records(['A001.md', correction(null, c1)], ['V001.md', review(1, c1, aggregate)], ...more);
+  const fixed = ['A002.md', correction(2, c2)];
+  // (1) fail, then a correction attempt of the round with the review's candidate.
+  for (const path of recordPaths('V002.md')) assert.deepEqual(checkRecord({ path, text: review(2, c2, 'pass'), newRecord: true, jobRecords: after('fail', fixed) }).violations, [], `legal round 2 at ${path}`);
+  assert.deepEqual(judge(review(1, c1, 'fail'), after('fail').slice(0, 1)), [], 'a first review states no sequence');
+  assert.deepEqual(judge(review(2, c2, 'pass'), after('fail', fixed), false), [], 'an existing record keeps its wording');
+  assert.deepEqual(checkRecord({ path: recordPaths('V002.md')[0], text: review(2, c2, 'pass'), newRecord: true }).violations, [], 'without the job records there is no input');
+  assert.deepEqual(judge(review(2, c2, 'pass'), after('fail')), ['review-round-without-correction'], 'fail with no correction attempt of the round');
+  assert.deepEqual(judge(review(2, c2, 'pass'), records(['V001.md', review(1, c1, 'fail')], ['A002.md', correction(null, c2)])), ['review-round-without-correction'], 'an attempt that states no round is no correction');
+  assert.deepEqual(judge(review(2, c3, 'pass', c2), after('fail', fixed)), ['review-candidate-mismatch'], 'a merge after a correction is not the correction candidate, even chained');
+  assert.deepEqual(judge(review(2, 'snapshot of the worktree', 'pass'), after('fail', fixed)), [], 'a snapshot identity names no commit to compare');
+  // (2) chained delta after pass or inconclusive.
+  for (const aggregate of ['pass', 'inconclusive']) assert.deepEqual(judge(review(2, c2, 'pass', c1), after(aggregate)), [], `delta after ${aggregate}`);
+  for (const aggregate of ['pass', 'inconclusive']) assert.deepEqual(judge(review(2, c3, 'pass', c2), after(aggregate)), ['review-round-unchained'], `unchained base after ${aggregate}`);
+  // (3) inconclusive re-run of the same candidate; after pass it is refused.
+  assert.deepEqual(judge(review(2, c1, 'pass', c4), after('inconclusive')), [], 're-run after inconclusive');
+  assert.deepEqual(judge(review(2, c1, 'pass', c4), after('pass')), ['review-round-unchained'], 're-roll after pass');
+  assert.deepEqual(judge(review(2, c1, 'pass', c1), after('pass')), ['review-round-unchained'], 'the same candidate is no delta');
+  // (4) full re-review of a correction after pass.
+  assert.deepEqual(judge(review(2, c2, 'pass', c4), after('pass', fixed)), [], 're-review of a correction after pass');
+  assert.deepEqual(judge(review(2, c3, 'pass', c4), after('pass', fixed)), ['review-candidate-mismatch'], 'a correction after pass reviewed at another candidate');
+  // No usable prior verdict.
+  assert.deepEqual(judge(review(2, c2, 'pass'), records(['A002.md', fixed[1]])), ['review-round-without-prior'], 'no earlier review');
+  assert.deepEqual(judge(review(2, c2, 'pass'), records(['V001.md', review(1, c1, '')], fixed)), ['review-round-without-prior'], 'an earlier review without a verdict');
+  assert.deepEqual(judge(review(2, c2, 'pass', c1), records(['V001.md', review(1, c1, 'fail')], ['V003.md', review(2, c1, 'pass')], fixed)), [], 'only earlier reviews count');
+  const [violation] = checkRecord({ path: recordPaths('V002.md')[0], text: review(2, c2, 'pass'), newRecord: true, jobRecords: after('fail') }).violations;
+  assert.equal(violation.field, roundLabel);
+  assert.equal(violation.line, lineOf(review(2, c2, 'pass'), roundLabel));
+}
+
 // The CLI reads files, adds the job directory listing for a plan, prints JSON and exits 1 on any violation.
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-check-')));
 try {
@@ -222,6 +262,13 @@ try {
   await writeFile(newReview, reviewWith('F1 fixed: kept'));
   assert.equal(checked(oldReview, newReview).status, 0);
   assert.equal(cli('--project', root, '--file', newReview).status, 0, 'without --base nothing is new');
+  // The round sequence reads the job's other records: V002 states round 2 though no earlier review failed.
+  const roundReview = join(state, 'jobs/J001/V003.md');
+  await writeFile(roundReview, `${reviewWith('None.')}- Review round in this job, and prior review IDs: 2; prior reviews: V002\n`);
+  const sequenced = checked(roundReview);
+  assert.equal(sequenced.status, 1, sequenced.stderr);
+  assert.deepEqual(JSON.parse(sequenced.stdout).files[0].violations.map(({ code }) => code), ['review-round-without-prior']);
+  await rm(roundReview);
   // The commit rule holds for an attempt new at the base and not for one that existed there.
   const oldAttempt = join(state, 'jobs/J001/A001.md');
   const newAttempt = join(state, 'jobs/J001/A002.md');
