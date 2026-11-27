@@ -3,7 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { reviewHandoff } from './isswf-handoff.mjs';
 import { planErrorDetail } from './isswf-plan-core.mjs';
 import { recordError } from './isswf-record-new-core.mjs';
-import { briefOf, createRecord, gitIn, jobTarget, knownRun, nextId, recordNames, reviewIds } from './isswf-record-new.mjs';
+import { briefOf, createRecord, gitIn, jobTarget, knownRun, nextId, recordNames } from './isswf-record-new.mjs';
+import { reviewIds } from './isswf-handoff-coverage-core.mjs';
 
 /**
  * Prepares one review dispatch: the handoff, the next review record and the prompt lines the dispatch guard reads.
