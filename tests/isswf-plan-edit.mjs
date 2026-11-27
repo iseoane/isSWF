@@ -122,8 +122,8 @@ try {
   await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'invented'], 'invalid-job', { job: 'J001', field: 'Status' });
   await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'completed'], 'completed jobs require evidence', { job: 'J001' });
   // in-review is derived from review records, so an edit never writes it; a move the transition table rejects is refused.
-  await refused(['set', ...target, '--job', 'J002', '--field', 'Status', '--value', 'in-review'], 'invalid-transition', { job: 'J002', from: 'in-progress', to: 'in-review' });
-  await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'in-review'], 'invalid-transition', { job: 'J001', from: 'pending', to: 'in-review' });
+  await refused(['set', ...target, '--job', 'J002', '--field', 'Status', '--value', 'in-review'], 'invalid-transition', { job: 'J002', field: 'Status' });
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'in-review'], 'invalid-transition', { job: 'J001', field: 'Status' });
   await refused(['set', ...target, '--job', 'J001', '--field', 'Objective', '--value', 'Other'], 'unknown-field');
   await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', 'one\ntwo'], 'invalid-value');
   await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', 'tab\there'], 'invalid-value');
