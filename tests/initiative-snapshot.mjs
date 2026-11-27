@@ -47,6 +47,7 @@ try {
     'I0001/jobs/J002/A001.md': '# Attempt\r\n\r\n- Reported status: running\r\n- Brief path: `.factory\\initiatives\\I0001\\jobs\\J002\\brief-r2.md`\r\n- Requested model/effort: `gpt-6-luna`, high; actual model `claude-opus-5-5`, effort unknown.\r\n- Profile: `.agents\\roles\\worker.md`\r\n- Run: claude agent=a1b2c3\r\n',
     'I0001/jobs/J002/V001.md': '# Review\n\n- Brief: `.factory/initiatives/I0001/jobs/J002/brief-r1.md`\n- Approved model/effort: `openai-codex/gpt-6.1-sol`, medium.\n- Run: claude session=0f9e-77\n- Run: pi child=run_42\n\nStandards PASS / Spec PASS / aggregate PASS.\n',
     'I0001/jobs/J002/V002.md': '# Review\n\nObserver: native `isswf:isswf-reviewer`, model inherited.\n- Run: claude agent=\n- Run: pi agent=x1\n- Run: claude agent=a b\n\nChanges requested on wording.\n',
+    'I0001/jobs/J001/A001.md': '# Attempt\n\n- Worker profile, model, and effort: not observed, see `docs/en/operations.md`, `tests/j030-claude-5.md` and `v1.9.12`.\n',
     'I0001/jobs/J001/V001.md': '# Review\n\n- Reviewer profile, model, and effort: .agents/roles/reviewer.md, blob 31fb9dbf, requested `opus`/`medium`\n',
     'I0001/jobs/J003/V001.md': '\u0000\u0001 garbage without structure',
     'I0002/plan.md': plan('I0002', 'Not started', job('J001', 'pending')),
@@ -109,6 +110,8 @@ try {
   assert.deepEqual(pick(entry('J002', 'V002')), ['review', 'reviewer', 'unknown', 'unknown', 'unknown', 'changes-requested']);
 
   // The review template's label has commas; its model and effort still parse.
+  // A prose line with commas whose only backticked tokens are a path and a version names no model.
+  assert.deepEqual(pick(entry('J001', 'A001')).slice(2, 5), ['unknown', 'unknown', 'unknown']);
   assert.deepEqual(pick(entry('J001', 'V001')), ['review', 'reviewer', 'opus', 'requested', 'medium', 'unknown']);
 
   // A malformed record with no brief degrades to unknown fields; a directory named like a record is ignored.
