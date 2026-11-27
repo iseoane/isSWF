@@ -3,7 +3,7 @@ import { lstat, readdir, readFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { launchesFor, siblingsOf } from './isswf-launch-notes.mjs';
+import { launchesFor, siblingRecordsOf, siblingsOf } from './isswf-launch-notes.mjs';
 import { checkRecord, reportedChecks } from './isswf-record-check-core.mjs';
 import { attemptUsages, briefNote, commandNotes, compareBrief } from './isswf-run-usage-core.mjs';
 import { RECORD_NAME } from './isswf-snapshot-core.mjs';
@@ -54,7 +54,7 @@ async function checkFile(project, file, isNew) {
   const text = await readFile(path, 'utf8');
   const notes = await notesFor(project, path, text);
   const launches = RECORD_NAME.test(basename(path)) ? await launchesFor() : [];
-  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path), ...(launches.length && { launches, siblings: await siblingsOf(path) }) }), ...(notes.length && { notes }) };
+  return { file: path, ...checkRecord({ path, text, jobFiles, newRecord: isNew?.(path), ...(/^V\d{3}\.md$/u.test(basename(path)) && { jobRecords: await siblingRecordsOf(path) }), ...(launches.length && { launches, siblings: await siblingsOf(path) }) }), ...(notes.length && { notes }) };
 }
 
 /** Parses `--project ABS [--base REV] --file ABS [--file ABS ...]`. */

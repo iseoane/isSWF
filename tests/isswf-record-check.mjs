@@ -247,6 +247,13 @@ try {
   await writeFile(newReview, reviewWith('F1 fixed: kept'));
   assert.equal(checked(oldReview, newReview).status, 0);
   assert.equal(cli('--project', root, '--file', newReview).status, 0, 'without --base nothing is new');
+  // The round sequence reads the job's other records: V002 states round 2 though no earlier review failed.
+  const roundReview = join(state, 'jobs/J001/V003.md');
+  await writeFile(roundReview, `${reviewWith('None.')}- Review round in this job, and prior review IDs: 2; prior reviews: V002\n`);
+  const sequenced = checked(roundReview);
+  assert.equal(sequenced.status, 1, sequenced.stderr);
+  assert.deepEqual(JSON.parse(sequenced.stdout).files[0].violations.map(({ code }) => code), ['review-round-without-fail']);
+  await rm(roundReview);
   // The commit rule holds for an attempt new at the base and not for one that existed there.
   const oldAttempt = join(state, 'jobs/J001/A001.md');
   const newAttempt = join(state, 'jobs/J001/A002.md');
