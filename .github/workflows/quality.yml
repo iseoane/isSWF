@@ -92,6 +92,8 @@ jobs:
         run: node tests/initiative-panel.mjs .
       - name: Verify repository plan records parse
         run: node tests/plan-records.mjs .
+      - name: Verify derived job states and transitions
+        run: node tests/job-state.mjs .
       - name: Verify static host portability
         run: node tests/host-portability.mjs .
       - name: Verify the reverse-route JSONL projection and synthetic transport controls without models

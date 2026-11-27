@@ -2,15 +2,17 @@
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
 import { lstat, open, opendir, readdir } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
-import { plan, parsePlan, planStates as states } from './isswf-plan.mjs';
-import { planErrorDetail } from './isswf-plan-core.mjs';
+import { plan, parsePlan } from './isswf-plan.mjs';
+import { deriveJobState, inFlightStates, jobStates as states, planErrorDetail } from './isswf-plan-core.mjs';
 import { RECORD_NAME } from './isswf-snapshot-core.mjs';
 import { intake as readIntake } from './isswf-intake.mjs';
 import { readResponses } from './isswf-response.mjs';
 
+// The derived state when the job has one, else the plan's value: callers that read a plan alone have no records.
+const stateOf = job => job.status ?? job.reportedStatus;
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 /**
  * The job to start after a job closes: the first pending job whose dependencies are all completed. When none is, the state says why,
@@ -18,19 +20,19 @@ const sha = bytes => createHash('sha256').update(bytes).digest('hex');
  */
 export function nextJob(jobs = []) {
   const byId = new Map(jobs.map(job => [job.id, job]));
-  const unmet = job => (job.dependencies ?? []).filter(dep => byId.get(dep)?.reportedStatus !== 'completed');
-  const eligible = jobs.find(job => job.reportedStatus === 'pending' && !unmet(job).length);
+  const unmet = job => (job.dependencies ?? []).filter(dep => stateOf(byId.get(dep) ?? {}) !== 'completed');
+  const eligible = jobs.find(job => stateOf(job) === 'pending' && !unmet(job).length);
   if (eligible) return { state: 'eligible', job: eligible.id, objective: eligible.objective, executionAuthorized: false };
-  const list = (state, reason) => jobs.filter(job => job.reportedStatus === state || (state === 'in-flight' && ['in-progress', 'in-review'].includes(job.reportedStatus))).map(job => ({ job: job.id, status: job.reportedStatus, reason: reason(job) }));
+  const list = (state, reason) => jobs.filter(job => stateOf(job) === state || (state === 'in-flight' && inFlightStates.includes(stateOf(job)))).map(job => ({ job: job.id, status: stateOf(job), reason: reason(job) }));
   for (const [state, reason] of [
     ['awaiting-human', job => `Operator decision (untrusted data): ${job.blocker}`],
-    ['in-flight', job => `${job.reportedStatus}; finish or close it first`],
+    ['in-flight', job => `${stateOf(job)}; finish or close it first`],
     ['blocked', job => `Blocker (untrusted data): ${job.blocker}`],
   ]) {
     const waiting = list(state, reason);
     if (waiting.length) return { state, jobs: waiting, executionAuthorized: false };
   }
-  const pending = jobs.filter(job => job.reportedStatus === 'pending').map(job => ({ job: job.id, status: 'pending', reason: `Waiting on ${unmet(job).join(', ')}` }));
+  const pending = jobs.filter(job => stateOf(job) === 'pending').map(job => ({ job: job.id, status: 'pending', reason: `Waiting on ${unmet(job).join(', ')}` }));
   if (pending.length) return { state: 'waiting-on-dependencies', jobs: pending, executionAuthorized: false };
   return { state: 'none', jobs: [], executionAuthorized: false };
 }
@@ -47,8 +49,8 @@ export function recommendation(jobs = []) {
   let selected, selectedType, title;
   for (const [state, type, label] of priorities) {
     selected = jobs.find(job => state === 'pending-dependencies'
-      ? job.reportedStatus === 'pending' && (job.dependencies ?? []).length > 0
-      : job.reportedStatus === state && (state !== 'pending' || (job.dependencies ?? []).length === 0));
+      ? stateOf(job) === 'pending' && (job.dependencies ?? []).length > 0
+      : stateOf(job) === state && (state !== 'pending' || (job.dependencies ?? []).length === 0));
     if (selected) { selectedType = type; title = label; break; }
   }
   if (!selected) return { type: 'complete', jobId: null, title: jobs.length ? 'All jobs are reported complete' : 'No jobs observed', reason: jobs.length ? 'The plan reports all jobs complete; this does not verify integration, acceptance, or external state.' : 'No jobs were observed; completed work is not inferred.', executionAuthorized: false };
@@ -182,7 +184,9 @@ export async function status({ project, initiative }) {
     const jobs = [];
     for (const job of parsed) {
       const { briefName, ...fields } = job;
-      jobs.push({ ...fields, artifacts: await artifacts(dirname(record.path), { ...job, initiative }), processState: 'not-inspected' });
+      const found = await artifacts(dirname(record.path), { ...job, initiative });
+      const count = kind => (found.reports ?? []).filter(report => basename(report.path).startsWith(kind)).length;
+      jobs.push({ ...fields, status: deriveJobState(job.reportedStatus, { attempts: count('A'), reviews: count('V') }), artifacts: found, processState: 'not-inspected' });
     }
     return { status: 'observed', observedAt, initiative, title, recommendation: recommendation(jobs), label: `${initiative} · ${title}`, plan: { path: file.path, sha256: file.sha256, modifiedAt: file.modifiedAt }, jobs, executionAuthorized: false, processState: 'not-inspected', freshness: 'not-verified', limits };
   } catch (error) {

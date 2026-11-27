@@ -1,5 +1,32 @@
 // No Node imports: tools/isswf-snapshot-core.mjs loads this in runtimes without Node built-ins.
-export const planStates = Object.freeze(['pending', 'in-progress', 'blocked', 'in-review', 'awaiting-human', 'completed']);
+/**
+ * Every job state a plan may hold, so an existing plan with any of them parses. `in-progress` and `in-review` are also derived from the job's
+ * records (`deriveJobState`); `blocked` and `awaiting-human` are the states no record reveals.
+ */
+export const jobStates = Object.freeze(['pending', 'in-progress', 'in-review', 'blocked', 'awaiting-human', 'completed']);
+/** The states of work that was started and is not closed, blocked or waiting for the operator. */
+export const inFlightStates = Object.freeze(['in-progress', 'in-review']);
+/** The moves a plan edit makes. `in-review` is derived from review records, so only a legacy plan moves out of it; `completed` is final. */
+const transitions = Object.freeze({
+  pending: ['in-progress', 'blocked', 'awaiting-human'],
+  'in-progress': ['blocked', 'awaiting-human', 'completed'],
+  'in-review': ['in-progress', 'blocked', 'awaiting-human', 'completed'],
+  blocked: ['in-progress', 'pending', 'awaiting-human'],
+  'awaiting-human': ['in-progress', 'pending', 'blocked'],
+  completed: [],
+});
+export const canTransition = (from, to) => transitions[from]?.includes(to) ?? false;
+const PROGRESS = ['pending', 'in-progress', 'in-review'];
+/**
+ * The state a job is in. Its plan value is raised to `in-progress` by an attempt record. With review records, the work is `in-review` when
+ * every attempt has been reviewed and back `in-progress` while a correction attempt has none. Records never change `blocked`,
+ * `awaiting-human` or `completed`, which they cannot reveal.
+ */
+export function deriveJobState(stored, { attempts = 0, reviews = 0 } = {}) {
+  if (!PROGRESS.includes(stored)) return stored;
+  if (reviews) return reviews >= attempts ? 'in-review' : 'in-progress';
+  return attempts ? PROGRESS[Math.max(PROGRESS.indexOf(stored), 1)] : stored;
+}
 export const hasEvidence = values => values.some(item => item.trim() && item.trim() !== 'None.');
 // A plan error keeps its code as the message and says where it is: the job, the field and the 1-based line, when known.
 const planError = (code, where = {}) => Object.assign(Error(code), { code }, Object.fromEntries(Object.entries(where).filter(([, value]) => value !== undefined)));
@@ -44,7 +71,7 @@ export function parsePlan(markdown) {
   if (!jobs.length || jobs.length > 100) throw planError('invalid-plan');
   const parsed = jobs.map(job => {
     const at = field => ({ job: job.id, field, line: job.lines[field] ?? job.line });
-    if (!planStates.includes(job.Status)) throw planError('invalid-job', at('Status'));
+    if (!jobStates.includes(job.Status)) throw planError('invalid-job', at('Status'));
     const missing = FIELDS.find(field => !job[field]);
     if (missing) throw planError('invalid-job', at(missing));
     if (!job.acceptance.length) throw planError('invalid-job', at('Acceptance'));

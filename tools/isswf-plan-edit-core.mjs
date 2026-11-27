@@ -1,5 +1,5 @@
 // No Node imports, as in isswf-plan-core.mjs: a runtime without Node built-ins can call these on plan text.
-import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
+import { canTransition, jobStates, parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 
 // Lines keep their own endings, so an edit never touches the bytes of the lines around it.
 const linesOf = text => text.split(/(?<=\n)/u);
@@ -41,11 +41,19 @@ function insertAfter(lines, index, added, eol) {
   lines.splice(index + 1, 0, ...added.map((line, at) => (open && at === added.length - 1 ? line : line + eol)));
 }
 
+// The status in-review is derived from review records, so an edit never writes it. A job closes from any state (completed needs evidence, which the parser checks);
+// every other move follows the transition table, and a completed job stays completed.
+function refuseMove(text, job, to) {
+  const from = parsePlan(text).find(item => item.id === job).reportedStatus;
+  if (jobStates.includes(to) && from !== to && (to === 'in-review' || (to !== 'completed' && !canTransition(from, to)))) throw editError('invalid-transition', { job, field: 'Status' });
+}
+
 export function setField(text, { job, field, value }) {
   if (!editableFields.includes(field)) throw editError('unknown-field', { field });
   oneLine(value, field);
   return guarded(text, () => {
     const lines = linesOf(text), { start, end } = locate(lines, job);
+    if (field === 'Status') refuseMove(text, job, value);
     // Past the first section heading a `- Field:` line is a list item, as the plan parser reads it. The plan parsed, so the field is there.
     const section = lines.findIndex((line, index) => index > start && index < end && /^### (Acceptance|Evidence)$/u.test(content(line)));
     const at = lines.findIndex((line, index) => index > start && index < (section < 0 ? end : section) && content(line).startsWith(`- ${field}: `));

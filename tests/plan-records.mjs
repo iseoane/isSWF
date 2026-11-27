@@ -4,11 +4,11 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
-const { parsePlan, planStates } = await import(pathToFileURL(join(source, 'tools/isswf-plan.mjs')));
+const { parsePlan, jobStates } = await import(pathToFileURL(join(source, 'tools/isswf-plan.mjs')));
 
 const job = ({ status = 'pending', acceptance = '### Acceptance\n\n- Observable outcome\n' } = {}) =>
   `# I0001: Synthetic\n\nType: bug\n\n## J001\n\n- Status: ${status}\n- Objective: Synthetic\n- Depends on: None\n- Brief: [brief-r1.md](jobs/J001/brief-r1.md)\n- Blocker: None.\n- Next step: None.\n\n${acceptance}\n### Evidence\n\n- Synthetic record\n`;
-for (const status of planStates) assert.equal(parsePlan(job({ status }))[0].reportedStatus, status);
+for (const status of jobStates) assert.equal(parsePlan(job({ status }))[0].reportedStatus, status);
 for (const status of ['active', 'done', 'ready']) assert.throws(() => parsePlan(job({ status })), /^Error: invalid-job$/u, status);
 assert.throws(() => parsePlan(job({ acceptance: '' })), /^Error: invalid-job$/u);
 // Each error keeps its message and says where it is: job, field and 1-based line.

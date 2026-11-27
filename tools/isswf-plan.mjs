@@ -5,8 +5,8 @@ import { lstat, readFile, realpath, mkdir, open, link, unlink, rename, rmdir } f
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './project-state.mjs';
-import { hasEvidence, planStates, validateDependencyGraph } from './isswf-plan-core.mjs';
-export { parsePlan, planStates } from './isswf-plan-core.mjs';
+import { hasEvidence, jobStates, validateDependencyGraph } from './isswf-plan-core.mjs';
+export { parsePlan, jobStates } from './isswf-plan-core.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Z][A-Z0-9-]{0,63}$/u.test(value);
@@ -35,7 +35,7 @@ function render(value, initiative) {
   const ids = new Set(value.jobs.map(job => job.id));
   if (ids.size !== value.jobs.length || [...ids].some(job => !id(job))) throw Error('unique job IDs required');
   for (const job of value.jobs) {
-    if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !planStates.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
+    if ((job.briefRevision !== undefined && (!Number.isSafeInteger(job.briefRevision) || job.briefRevision < 1 || job.briefRevision > 10000)) || !text(job.objective) || !jobStates.includes(job.status) || !Array.isArray(job.dependsOn) || new Set(job.dependsOn).size !== job.dependsOn.length || job.dependsOn.some(dep => !ids.has(dep) || dep === job.id) || !Array.isArray(job.acceptance) || !job.acceptance.length || job.acceptance.some(item => !text(item)) || !text(job.nextStep) || !Array.isArray(job.evidence) || job.evidence.some(item => !text(item)) || !text(job.blocker)) throw Error('invalid job or dependency');
     if (job.status === 'completed' && !hasEvidence(job.evidence)) throw Error('completed jobs require evidence');
   }
   validateDependencyGraph(value.jobs.map(job => ({ id: job.id, dependencies: job.dependsOn })));
