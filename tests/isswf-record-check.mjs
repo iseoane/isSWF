@@ -168,6 +168,31 @@ const attemptTemplate = await readFile(join(source, '.factory/templates/attempt.
 assert.deepEqual(checkRecord({ path: recordPaths('A001.md')[0], text: `${attempt([])}${attemptTemplate.split('\n').find(line => line.includes(checksLabel))}\n`, newRecord: true }).violations, [], 'the unfilled field of the real template');
 assert.deepEqual(checkRecord({ path: recordPaths('V001.md')[0], text: `${attempt([], reviewFields).replace('# Attempt report', '# Review report')}- ${checksLabel}: node tests/x.mjs . exit 0\n`, newRecord: true }).violations, [], 'reviews are not held to it');
 
+// A new review of a later round follows a fail review and a correction attempt of that round, and reviews that attempt's candidate. Older records keep their wording.
+{
+  const [c1, c2, c3] = ['1', '2', '3'].map(digit => digit.repeat(40));
+  const roundLabel = 'Review round in this job, and prior review IDs:';
+  const review = (round, candidate, aggregate) => `${attempt([], reviewFields).replace('# Attempt report', '# Review report')}- ${roundLabel} ${round}; prior reviews: none\n- Candidate commit SHA, or reproducible snapshot identity: ${candidate}\n- Aggregate verdict, copied verbatim from the reviewer's report header: ${aggregate}\n`;
+  const correction = (round, candidate) => `${attempt([])}${round ? `- Review round: ${round}\n` : ''}- Candidate commit SHA: ${candidate}\n`;
+  const records = (...entries) => entries.map(([name, text]) => ({ name, text }));
+  const judge = (text, jobRecords, newRecord = true) => checkRecord({ path: recordPaths('V002.md')[0], text, newRecord, jobRecords }).violations.map(({ code }) => code);
+  const legal = records(['A001.md', correction(null, c1)], ['V001.md', review(1, c1, 'fail')], ['A002.md', correction(2, c2)]);
+  for (const path of recordPaths('V002.md')) assert.deepEqual(checkRecord({ path, text: review(2, c2, 'pass'), newRecord: true, jobRecords: legal }).violations, [], `legal round 2 at ${path}`);
+  assert.deepEqual(judge(review(1, c1, 'fail'), legal.slice(0, 1)), [], 'a first review states no sequence');
+  assert.deepEqual(judge(review(2, c2, 'pass'), legal, false), [], 'an existing record keeps its wording');
+  assert.deepEqual(checkRecord({ path: recordPaths('V002.md')[0], text: review(2, c2, 'pass'), newRecord: true }).violations, [], 'without the job records there is no input');
+  const passed = records(['A001.md', correction(null, c1)], ['V001.md', review(1, c1, 'pass')], ['A002.md', correction(2, c2)]);
+  assert.deepEqual(judge(review(2, c2, 'pass'), passed), ['review-round-without-fail'], 'prior review did not fail');
+  assert.deepEqual(judge(review(2, c2, 'pass'), legal.slice(0, 2)), ['review-round-without-correction'], 'no correction attempt of the round');
+  assert.deepEqual(judge(review(2, c2, 'pass'), records(['V001.md', review(1, c1, 'fail')], ['A002.md', correction(null, c2)])), ['review-round-without-correction'], 'an attempt that states no round is no correction');
+  assert.deepEqual(judge(review(2, c3, 'pass'), legal), ['review-candidate-mismatch'], 'candidate differs from the correction attempt');
+  assert.deepEqual(judge(review(2, 'snapshot of the worktree', 'pass'), legal), [], 'a snapshot identity names no commit to compare');
+  assert.deepEqual(judge(review(2, c2, 'pass'), records(['V001.md', review(1, c1, 'fail')], ['V003.md', review(2, c1, 'pass')], ['A002.md', correction(2, c2)])), [], 'only earlier reviews count');
+  const [violation] = checkRecord({ path: recordPaths('V002.md')[0], text: review(2, c2, 'pass'), newRecord: true, jobRecords: passed }).violations;
+  assert.equal(violation.field, roundLabel);
+  assert.equal(violation.line, lineOf(review(2, c2, 'pass'), roundLabel));
+}
+
 // The CLI reads files, adds the job directory listing for a plan, prints JSON and exits 1 on any violation.
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-record-check-')));
 try {
