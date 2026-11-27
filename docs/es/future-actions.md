@@ -4,10 +4,6 @@
 
 Son propuestas, no funcionalidades implementadas, un calendario de entrega ni permisos para ejecutar trabajos. Antes de abordar una, comprueba el código actual y acuerda el alcance. Los planes existentes registran decisiones; no demuestran que esté implementado todo lo previsto.
 
-## Recuperación
-
-La recuperación tras reinicios, procesos supervivientes arbitrarios o respuestas externas perdidas necesita un diseño y unas pruebas propios. No presentar la recuperación acotada actual como una reanudación automática universal.
-
 ## Calidad de la revisión
 
 Construir un conjunto de regresión del revisor con los defectos que una revisión no detectó y que se confirmaron después, como reversiones o fallos de plataforma que se escaparon. Cada caso conserva el candidato exacto, el brief aceptado y el defecto confirmado. Volver a ejecutar el perfil de revisión sobre el conjunto cada vez que cambien su metodología, su modelo o su esfuerzo, y conservar un cambio solo cuando encuentre más defectos confirmados sin más hallazgos marcados después como erróneos. Ejecutarlo también sobre candidatos limpios conocidos para contar las falsas alarmas. Las resoluciones de hallazgos registradas en los informes de revisión aportan los datos de ruido.
@@ -18,10 +14,6 @@ Permitir que un proyecto destino declare umbrales numéricos de calidad para el 
 
 Ofrecer una asignación opcional de refactorización cuando los tests pasen, que el coordinador seleccionaría para funcionalidades grandes, con el comportamiento fijado por los tests existentes. Costes: una llamada adicional al modelo y más cambios en el código. Nunca sería una fase obligatoria. Fuente: los mismos repositorios.
 
-## Envíos de solo registros
-
-Comprobar los registros de plan antes de que un commit de solo registros llegue a `main` sin pull request. Una guarda analizaría cada `plan.md` cambiado con `parsePlan` y cada registro cambiado con la comprobación de registros, y rechazaría el envío si alguno falla. Hoy estos commits no pasan revisión, así que un registro mal formado llega a `main` y rompe el CI de todos los pull requests abiertos, como ocurrió el 18-11-2026 con `None.` en un campo de dependencias de I0061.
-
 ## Panel de iniciativas para Pi
 
-Un panel como el panel de iniciativas de Claude Code (tarjetas de planes, trabajos y rondas de revisión, un árbol de archivos y una vista de agentes) para Pi, que hoy no tiene uno equivalente. Costes: una interfaz específica de Pi que construir y mantener alineada con los formatos de los registros. Solo leería los registros y no concedería ningún permiso. Fuente: el plan del operador de llevar un panel similar a Pi.
+Un panel como el panel de iniciativas de Claude Code para Pi, que hoy no tiene equivalente. Está planificado como la iniciativa I0047 en los registros de este repositorio; solo leería los registros y no concedería ningún permiso.
