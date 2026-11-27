@@ -242,7 +242,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J014
 
-- Status: pending
+- Status: in-progress
 - Objective: The Claude Code panel (`tools/isswf-panel.mjs`, `hooks/register.tsx`) shows job status from the J009 shared state machine.
 - Depends on: J009
 - Brief: [brief-r1.md](jobs/J014/brief-r1.md)
