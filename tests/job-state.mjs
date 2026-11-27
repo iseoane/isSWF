@@ -66,7 +66,7 @@ Type: maintenance
   assert.throws(() => core.parsePlan(invented), { code: 'invalid-job' });
 
   // The moves: in-review is derived, so only a legacy plan moves out of it.
-  const allowed = { pending: ['in-progress', 'blocked', 'awaiting-human'], 'in-progress': ['blocked', 'awaiting-human', 'completed'], blocked: ['in-progress', 'pending'], 'awaiting-human': ['in-progress', 'pending'], 'in-review': ['in-progress', 'completed'], completed: [] };
+  const allowed = { pending: ['in-progress', 'blocked', 'awaiting-human'], 'in-progress': ['blocked', 'awaiting-human', 'completed'], blocked: ['in-progress', 'pending', 'awaiting-human'], 'awaiting-human': ['in-progress', 'pending', 'blocked'], 'in-review': ['in-progress', 'blocked', 'awaiting-human', 'completed'], completed: [] };
   for (const from of core.jobStates) assert.deepEqual(core.jobStates.filter(to => core.canTransition(from, to)), core.jobStates.filter(to => allowed[from].includes(to)), from);
 } finally { await rm(root, { recursive: true, force: true }); }
 console.log('job-state ok');

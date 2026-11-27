@@ -124,6 +124,13 @@ try {
   // in-review is derived from review records, so an edit never writes it; a move the transition table rejects is refused.
   await refused(['set', ...target, '--job', 'J002', '--field', 'Status', '--value', 'in-review'], 'invalid-transition', { job: 'J002', field: 'Status' });
   await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'in-review'], 'invalid-transition', { job: 'J001', field: 'Status' });
+  await writeFile(planPath, plan(block('J001', { evidence: ['ran it'], status: 'completed' }), block('J002', { status: 'blocked' })));
+  await refused(['set', ...target, '--job', 'J001', '--field', 'Status', '--value', 'in-progress'], 'invalid-transition', { job: 'J001', field: 'Status' });
+  for (const value of ['awaiting-human', 'in-progress']) {
+    assert.equal(cli('set', ...target, '--job', 'J002', '--field', 'Status', '--value', value).status, 0, value);
+    assert.match(await readFile(planPath, 'utf8'), new RegExp('- Status: ' + value));
+  }
+  await writeFile(planPath, current);
   await refused(['set', ...target, '--job', 'J001', '--field', 'Objective', '--value', 'Other'], 'unknown-field');
   await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', 'one\ntwo'], 'invalid-value');
   await refused(['set', ...target, '--job', 'J001', '--field', 'Next step', '--value', 'tab\there'], 'invalid-value');
