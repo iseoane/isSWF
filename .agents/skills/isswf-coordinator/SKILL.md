@@ -53,6 +53,7 @@ Classify what this assignment needs and briefly explain why:
 - Use [isswf-retrospective](../isswf-retrospective/SKILL.md) after completed features or bugs and at an explicit operator session close. Keep active work and policy unchanged; a chat ending alone is not session close.
 - When you observe a miss (a CI failure on a reviewed candidate that local checks did not report, or a revert), record the [miss block](../../roles/references/retrospective.md#misses) at once in the job's records, never by editing a reviewer's verdict; the retrospective collects it.
 - Use additional review only when a concrete risk or uncertainty warrants it.
+- When the operator asks for a direct change outside a job (no brief or review plan), offer an independent review before merging and let the operator choose; passing tests and CI do not make that choice.
 - Select optional methodology from the [trigger table](#optional-methodology-triggers) below.
 
 ### Optional methodology triggers
