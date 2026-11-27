@@ -57,7 +57,7 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   // A Linux test host resolves `C:\p` against its own directory; the mock keeps the path from the drive on.
   const norm = (path: string) => {
     // A Windows test host resolves `/p` to `C:\p`; the mock maps it back to the fixture's POSIX key.
-    const native = sep === '\\' ? path.slice(Math.max(0, path.search(/[A-Za-z]:\\/))) : path.replace(/^[A-Za-z]:/, '').replace(/\\/g, '/')
+    const native = sep === '\\' ? path.slice(Math.max(0, path.search(/[A-Za-z]:\\/))) : /^[A-Za-z]:\\/.test(path) ? path.replace(/^[A-Za-z]:/, '').replace(/\\/g, '/') : path
     seen.push(native)
     return native
   }
@@ -750,14 +750,14 @@ function dispatchHost(on: any, extra: Record<string, string | Uint8Array> = {}) 
   on('session.cwd', () => ({ value: CWD }))
   on('fs.list', (_: unknown, { path }: { path: string }) => ({ value: native(path) === CWD ? [{ name: '.factory', kind: 'dir', size: 0, mtimeMs: 0, isLink: false }] : [] }))
   on('fs.read', (_: unknown, { path, as }: { path: string; as?: string }) => {
-    if (!(native(path) in files)) throw new Error('ENOENT')
+    if (!(native(path) in files)) return { deny: 'ENOENT' }
     const content = files[native(path)]
     if (as !== 'bytes') return { value: content }
     const bytes = typeof content === 'string' ? new TextEncoder().encode(content) : content
     return { value: { base64: btoa(String.fromCharCode(...bytes)) } }
   })
   on('fs.stat', (_: unknown, { path }: { path: string }) => {
-    if (!(native(path) in files)) throw new Error('ENOENT')
+    if (!(native(path) in files)) return { deny: 'ENOENT' }
     return { value: { kind: 'file', size: files[native(path)].length, mtimeMs: 0, isLink: false } }
   })
   on('process.run', (_: unknown, e: { argv: string[] }) => ({ value: { exitCode: e.argv.includes('check-ignore') ? 1 : 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
@@ -974,7 +974,7 @@ function closingCommitHost(on: any, osLookup: () => unknown) {
     // The host may resolve `/p` against its own drive, so the plan is matched by its tail.
     const tail = path.split(String.fromCharCode(92)).join('/')
     if (tail.endsWith('/p/.git/HEAD')) return { value: 'ref: refs/heads/main\n' }
-    if (!tail.endsWith(planPath)) throw new Error('ENOENT ' + path)
+    if (!tail.endsWith(planPath)) return { deny: 'ENOENT ' + path }
     return { value: closed }
   })
   on('process.run', (_: unknown, e: { argv: string[] }) => ({ value: { exitCode: 0, stdout: answer(e.argv), stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
