@@ -86,6 +86,15 @@ try {
   assert.equal((await get(panel.url, '/', {}, 'OPTIONS')).code, 405);
   for (const path of ['/i/../I0001', '/i/%49%30%30%30%31', '/i/I0001?project=/other', '/api/status/I0001/extra', '/private', '/.git/config', '/api/status?project=/other', '/accept/J001']) assert.equal((await get(panel.url, path)).code, 404);
   assert.deepEqual(await tree(project), before);
+  // A job the plan still lists as pending is in review once its records show an attempt and a review: the landing counts and the board lane follow the records.
+  const derivedJob = join(project, '.factory/initiatives/I0003/jobs/J001'); await mkdir(derivedJob, { recursive: true });
+  await writeFile(join(project, '.factory/initiatives/I0003/plan.md'), '# I0003: Derived\n\nType: enhancement\n\n## J001\n\n- Status: pending\n- Objective: Derived job\n- Depends on: None\n- Brief: [brief-r1.md](jobs/J001/brief-r1.md)\n- Blocker: None.\n- Next step: Review.\n\n### Acceptance\n\n- Visible.\n\n### Evidence\n\n- None.\n');
+  await writeFile(join(derivedJob, 'brief-r1.md'), '# brief\n'); await writeFile(join(derivedJob, 'A001.md'), '# attempt\n'); await writeFile(join(derivedJob, 'V001.md'), '# review\n');
+  const derivedItem = JSON.parse((await get(panel.url, '/api/status')).body).initiatives.find(i => i.initiative === 'I0003');
+  assert.equal(derivedItem.counts['in-review'], 1); assert.equal(derivedItem.counts.pending, 0);
+  assert.match((await get(panel.url, '/')).body, /In review: 1/u);
+  assert.match((await get(panel.url, '/i/I0003')).body, /<section class="lane" data-state="in-review"><h2>In review <small>1<\/small><\/h2><div class="tile"><b>J001<\/b>/u);
+  await rm(join(project, '.factory/initiatives/I0003'), { recursive: true });
   const form = Object.fromEntries([...page.body.matchAll(/<input type="hidden" name="([^"<>]+)" value="([^"<>]*)">/gu)].slice(0, 5).map(match => [match[1], match[2]]));
   assert.deepEqual(Object.keys(form), ['token','responseId','planSha256','briefSha256','deliverySha256']);
   const post = (fields = {}, headers = {}, path = '/responses/I0001/J001') => get(panel.url, path, { origin: panel.url, 'content-type': 'application/x-www-form-urlencoded', ...headers }, 'POST', new URLSearchParams({ ...form, note: 'Please change <script>not-code</script>', ...fields }).toString());
