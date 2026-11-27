@@ -159,18 +159,22 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J009
 
-- Status: in-progress
+- Status: completed
 - Objective: The job status reported by `isswf-status` is derived from one shared state machine, and the plan stores only the states no record can reveal.
 - Depends on: J003
 - Brief: [brief-r1.md](jobs/J009/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (shared module and two tool consumers, legacy plans). Ground how `planStates` (`tools/isswf-plan-core.mjs:2`) is written and read: plans use only `pending` and `completed`, while the panel and `isswf-status` filter on `in-progress`, `in-review`, `blocked` and `awaiting-human`. Coordinator decision 2026-11-26 (V001): `in-progress` stays stored because authorization to start is not revealed by any record; `in-review` is derived and no longer stored.
+- Next step: None.
 
 ### Acceptance
 
 - One shared module defines the job states and their transitions; `tools/isswf-plan-core.mjs` and `tools/isswf-status.mjs` use it instead of their own string lists.
 - `in-progress` and `in-review` are derived from attempt and review records; existing plans with any current value still parse.
 - Tests cover each derived state and a plan using every legacy value.
+
+### Evidence
+
+- PR #414 merged; reviews V001 fail, V002-V005 pass; CI green incl. Knip at 3509a6b0
 
 ## J010
 
