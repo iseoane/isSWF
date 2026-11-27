@@ -161,7 +161,7 @@ try {
 
   // Records written only in a linked worktree of the same repository show beside the project's own;
   // a record present in both counts once, and a checkout that Git does not list for this repository is never read.
-  const repoFiles = (main, worktree, sep = '/') => {
+  const repoFiles = (main, worktree, sep = '/', sibling = worktree + '2') => {
     const at = (base, rel) => base + sep + rel.split('/').join(sep);
     const planText = plan('I0001', 'Linked', job('J001', 'pending'), job('J002', 'pending'));
     return {
@@ -176,6 +176,9 @@ try {
       [at(worktree, '.isswf/initiatives/I0001/jobs/J001/V001.md')]: '# Review\n\nAggregate PASS\n',
       [at(worktree, '.isswf/initiatives/I0001/jobs/J002/A001.md')]: '- Reported status: running\n',
       [at(worktree, '.isswf/initiatives/I0002/plan.md')]: plan('I0002', 'Only here', job('J001', 'pending')),
+      [at(main, '.git/worktrees/wt2/gitdir')]: `${sibling.replaceAll('\\', '/')}/.git\n`,
+      [at(sibling, '.git')]: `gitdir: ${main.replaceAll('\\', '/')}/.git/worktrees/wt2\n`,
+      [at(sibling, '.isswf/initiatives/I0001/jobs/J001/A003.md')]: '- Reported status: running\n',
     };
   };
   const idsOf = (snap, jobId) => snap.initiatives.find(i => i.id === 'I0001').jobs.find(j => j.id === jobId).rounds.flatMap(r => r.entries).map(e => e.id);
@@ -183,10 +186,10 @@ try {
     const files = repoFiles(main, worktree, sep);
     for (const from of [main, worktree]) {
       const shown = await core.readSnapshot(from, memoryFs(files));
-      assert.deepEqual(idsOf(shown, 'J001'), ['A001', 'A002', 'V001'], `${from}: worktree-only records appear, the integrated one once`);
+      assert.deepEqual(idsOf(shown, 'J001'), ['A001', 'A002', 'A003', 'V001'], `${from}: worktree-only records appear, the integrated one once`);
       assert.deepEqual(idsOf(shown, 'J002'), ['A001'], `${from}: a job with records only in the worktree`);
       assert.equal(shown.initiatives[0].jobs[1].status, 'in-progress');
-      assert.equal(shown.initiatives[0].jobs[0].recordCount, 3);
+      assert.equal(shown.initiatives[0].jobs[0].recordCount, 4);
       if (from === main) {
         assert.deepEqual(shown.initiatives.map(i => i.id), ['I0001'], 'an initiative that exists only in a worktree is not added');
         assert.deepEqual(shown.unopened, []);
@@ -201,12 +204,27 @@ try {
   stray['/other/.isswf/initiatives/I0001/jobs/J001/A009.md'] = '- Reported status: complete\n';
   stray['/m/.git/worktrees/wt2/gitdir'] = '/gone/.git\n';
   stray['/m/.git/worktrees/wt3/gitdir'] = '/wt/legacy/.git\n';
+  stray['/wt/legacy/.git'] = 'gitdir: /m/.git/worktrees/wt3\n';
+  // A listed path that does not point back at its entry (a stale or forged gitdir), and a relative path, are not opened.
+  stray['/m/.git/worktrees/wt4/gitdir'] = '/wt/liar/.git\n';
+  stray['/wt/liar/.git'] = 'gitdir: /elsewhere/.git/worktrees/x\n';
+  stray['/wt/liar/.isswf/initiatives/I0001/jobs/J001/A007.md'] = '- Reported status: complete\n';
+  stray['/m/.git/worktrees/wt5/gitdir'] = '../rel/.git\n';
+  stray['/m/rel/.git'] = 'gitdir: /m/.git/worktrees/wt5\n';
+  stray['/m/rel/.isswf/initiatives/I0001/jobs/J001/A006.md'] = '- Reported status: complete\n';
+  stray['/m/.isswf/initiatives/I0003/plan.md'] = plan('I0003', 'In no worktree', job('J001', 'pending'));
   stray['/wt/legacy/.factory/initiatives/I0001/jobs/J001/A008.md'] = '- Reported status: complete\n';
   const strayTouched = [];
   const strayFs = memoryFs(stray);
   const strayRecord = Object.fromEntries(Object.entries(strayFs).map(([name, call]) => [name, path => (strayTouched.push(path), call(path))]));
-  assert.deepEqual(idsOf(await core.readSnapshot('/m', strayRecord), 'J001'), ['A001', 'A002', 'V001']);
+  assert.deepEqual(idsOf(await core.readSnapshot('/m', strayRecord), 'J001'), ['A001', 'A002', 'A003', 'V001']);
+  assert.deepEqual(strayTouched.filter(path => path.startsWith('/wt/liar/.isswf') || path.startsWith('/m/rel/.isswf')), []);
+  assert.deepEqual(strayTouched.filter(path => path.startsWith('/wt/j1/.isswf/initiatives/I0003') && path !== '/wt/j1/.isswf/initiatives/I0003/jobs'), [], 'a worktree without the initiative is not listed per job');
   assert.deepEqual(strayTouched.filter(path => path.startsWith('/other') || path.startsWith('/wt/legacy/.factory/initiatives') || path.startsWith('/gone') && path.includes('/initiatives')), []);
+  // A relative path in a linked worktree's .git pointer finds no other checkout.
+  const relativePointer = repoFiles('/m', '/wt/j1');
+  relativePointer['/wt/j1/.git'] = 'gitdir: ../m/.git/worktrees/wt1\n';
+  assert.deepEqual(idsOf(await core.readSnapshot('/wt/j1', memoryFs(relativePointer)), 'J001'), ['A001', 'A002', 'V001']);
   // No Git metadata: the project reads as before.
   const plain = repoFiles('/m', '/wt/j1');
   delete plain['/m/.git/worktrees/wt1/gitdir'];
