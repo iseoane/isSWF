@@ -438,6 +438,139 @@ test('without a reset time the switch says nothing is scheduled', ON, async ($, 
   expect(prompts.length).toBe(0)
 })
 
+test('a fired resume is re-armed by switching off and on in the same window', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95, resetsAt: new Date(10 * 60_000).toISOString() }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  const draw = async (key?: string) => {
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    if (key) await ui.press({ key })
+    await ui.unmount()
+    await clock.advance(1000)
+  }
+  await draw('resume-toggle')
+  await draw()
+  await clock.advance(16 * 60_000)
+  expect(prompts.length).toBe(1)
+  // Fired: further draws in the same window schedule nothing.
+  await draw()
+  await clock.advance(60_000)
+  expect(prompts.length).toBe(1)
+  await draw('resume-toggle')
+  await draw('resume-toggle')
+  await draw()
+  await clock.advance(1000)
+  expect(prompts.length).toBe(2)
+})
+
+test('a reset time that appears after the threshold schedules the resume', ON, async ($, on) => {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  let resetsAt: string | undefined
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: 95, resetsAt }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  await activate($)
+  await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+  const draw = async (key?: string) => {
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    if (key) await ui.press({ key })
+    await ui.unmount()
+    await clock.advance(1000)
+  }
+  await draw('resume-toggle')
+  await draw()
+  await draw()
+  expect(prompts.length).toBe(0)
+  resetsAt = new Date(10 * 60_000).toISOString()
+  await draw()
+  await clock.advance(16 * 60_000)
+  expect(prompts.length).toBe(1)
+})
+
+// Drives AutoWakeUp through the pane: `usage` is mutable, and each draw lets the debounced refresh run.
+function resumeHarness($: any, on: any) {
+  const { clock } = engine(on, '/p')
+  const prompts: string[] = []
+  const usage: { used: number; resetsAt?: number } = { used: 95, resetsAt: 10 * 60_000 }
+  on('session.usage', () => ({ value: { startedAt: 0, context: {}, rateLimits: [{ kind: 'five_hour', percentUsed: usage.used, resetsAt: usage.resetsAt === undefined ? undefined : new Date(usage.resetsAt).toISOString() }] } }))
+  on('prompt.submit', (_: unknown, e: { text: string }) => (prompts.push(e.text), { text: e.text }))
+  const hhmm = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
+  const draw = async (key?: string) => {
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    if (key) await ui.press({ key })
+    await ui.unmount()
+    await clock.advance(1000)
+  }
+  const label = async () => {
+    const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+    const line = await text(ui, /^⏰/)
+    await ui.unmount()
+    return line
+  }
+  const start = async () => {
+    await activate($)
+    await $.command.run({ command: 'isswf-initiatives', args: 'pin I0046' })
+    await draw('resume-toggle')
+    await draw()
+  }
+  return { clock, prompts, usage, hhmm, draw, label, start }
+}
+
+test('a new reset time while waiting replaces the schedule: the old timer is cancelled and one prompt comes', ON, async ($, on) => {
+  const h = resumeHarness($, on)
+  await h.start()
+  h.usage.resetsAt = 100 * 60_000
+  await h.draw()
+  await h.draw()
+  await h.clock.advance(20 * 60_000)
+  expect(h.prompts.length).toBe(0)
+  expect(await h.label()).toBe(`⏰ AutoWakeUp: sí (${h.hhmm(105 * 60_000)})`)
+  await h.clock.advance(90 * 60_000)
+  expect(h.prompts.length).toBe(1)
+})
+
+test('after a prompt, a new window at the threshold schedules its own prompt', ON, async ($, on) => {
+  const h = resumeHarness($, on)
+  await h.start()
+  await h.clock.advance(16 * 60_000)
+  expect(h.prompts.length).toBe(1)
+  h.usage.resetsAt = 100 * 60_000
+  await h.draw()
+  await h.draw()
+  await h.clock.advance(90 * 60_000)
+  expect(h.prompts.length).toBe(2)
+})
+
+test('a fired window that loses its reset time is not prompted again when the time returns', ON, async ($, on) => {
+  const h = resumeHarness($, on)
+  await h.start()
+  await h.clock.advance(16 * 60_000)
+  expect(h.prompts.length).toBe(1)
+  h.usage.resetsAt = undefined
+  await h.draw()
+  await h.draw()
+  expect(await h.label()).toBe('⏰ AutoWakeUp: sí (sin hora de renovación)')
+  h.usage.resetsAt = 10 * 60_000
+  await h.draw()
+  await h.draw()
+  await h.clock.advance(60 * 60_000)
+  expect(h.prompts.length).toBe(1)
+})
+
+test('a waiting resume that loses its reset time keeps its schedule and still prompts', ON, async ($, on) => {
+  const h = resumeHarness($, on)
+  await h.start()
+  h.usage.resetsAt = undefined
+  await h.draw()
+  await h.draw()
+  expect(await h.label()).toBe(`⏰ AutoWakeUp: sí (${h.hhmm(15 * 60_000)})`)
+  await h.clock.advance(20 * 60_000)
+  expect(h.prompts.length).toBe(1)
+})
+
 test('the coordinator row says the worker profile was read, and an unresolved run gives no profile mark', ON, async ($, on) => {
   // J004 has a coordinator-written attempt, and this session read roles/worker.md; the reviewer's transcript is gone.
   const { clock } = engine(on, '/p', { ...RECORDS, 'I0046/jobs/J004/A002.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/skills/isswf-coordinator/SKILL.md (coordinator acting as writer)\n- Outcome: partial\n', 'I0046/jobs/J004/V001.md': '- Brief: I0046/jobs/J004/brief-r1.md\n- Profile: .agents/roles/reviewer.md\n- Verdict: fail\n- Run: claude agent=gone2\n' }, [{ role: 'assistant', text: '', toolUses: [{ tool_use_id: 't1', tool: 'Read', input: { file_path: '/p/.agents/roles/worker.md' } }] }])

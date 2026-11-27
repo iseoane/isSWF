@@ -182,26 +182,33 @@ let countingOwn = false
 // Brief texts by path, read once after a draw; the job view compares each with its attempt's runs.
 const briefs = new Map<string, string>()
 const briefsLoading = new Set<string>()
-// One resume per usage window: the timer lives only in this session, and `resumeFor` is the window's reset time.
-let resumeTimer: Timer | undefined
-let resumeFor: string | undefined
-let resumeAtMs: number | undefined
-// True while the threshold is met but the window gives no reset time, so nothing can be scheduled.
-let resumeNoReset = false
+// AutoWakeUp is one state. `off`: the switch is off. `armed`: on, nothing scheduled. `noReset` (armed or fired) is true while the
+// threshold is met but the window gives no reset time. `waiting`: one prompt is scheduled for `atMs`. `fired`: the
+// prompt was sent, and `window` (the window's reset time) keeps the same window from being scheduled again.
+// The timer lives only in this session.
+type Resume =
+  | { state: 'off' }
+  | { state: 'armed'; noReset: boolean }
+  | { state: 'waiting'; window: string; atMs: number; timer: Timer }
+  | { state: 'fired'; window: string; noReset: boolean }
+let resume: Resume = { state: 'off' }
 // The window's reset plus the delay, known even before the threshold, so the switch can say when a resume would come.
 let resumeWouldAtMs: number | undefined
 
 const clockTime = (ms: number) => new Date(ms).toTimeString().slice(0, 5)
+const resumeNoReset = () => (resume.state === 'armed' || resume.state === 'fired') && resume.noReset
 
 function cancelResume() {
-  resumeTimer?.cancel()
-  resumeTimer = resumeFor = resumeAtMs = undefined
+  if (resume.state === 'waiting') resume.timer.cancel()
+  resume = { state: 'off' }
 }
 
 // Runs after the draw. It keeps the would-be resume time current and, when the switch is on, at 90% or more
 // of the five-hour window with a job in progress, schedules one resume prompt for the window's reset plus
 // five minutes. The prompt asks the coordinator to reconcile, not to act.
 function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
+  if (!isOn) cancelResume()
+  else if (resume.state === 'off') resume = { state: 'armed', noReset: false }
   void (async () => {
     const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
     const parsed = window?.resetsAt ? Date.parse(window.resetsAt) + RESUME_DELAY_MS : NaN
@@ -209,22 +216,25 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
     const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => inFlightStates.includes(j.status)).map((j: any) => `${i.id}/${j.id}`))
     const due = isOn && window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
     const noReset = due && at === undefined
-    if (at !== resumeWouldAtMs || noReset !== resumeNoReset) {
+    const wasNoReset = resumeNoReset()
+    if (resume.state === 'armed') resume = { state: 'armed', noReset }
+    else if (resume.state === 'fired') resume = { ...resume, noReset }
+    if (at !== resumeWouldAtMs || resumeNoReset() !== wasNoReset) {
       resumeWouldAtMs = at
-      resumeNoReset = noReset
       scheduleRefresh($)
     }
-    if (!due || at === undefined || resumeFor === window.resetsAt) return
-    cancelResume()
-    resumeFor = window.resetsAt
-    resumeAtMs = at
-    resumeTimer = $.clock.after(Math.max(0, at - (await $.clock.now())), () => {
-      // `resumeFor` stays, so the same window is not scheduled again; the switch shows the next window's time.
-      resumeTimer = resumeAtMs = undefined
+    if (!due || at === undefined || resume.state === 'off' || ('window' in resume && resume.window === window.resetsAt)) return
+    const delay = Math.max(0, at - (await $.clock.now()))
+    // The switch may have gone off while the clock was read; a timer scheduled now would outlive it.
+    if (resume.state === 'off') return
+    if (resume.state === 'waiting') resume.timer.cancel()
+    const timer = $.clock.after(delay, () => {
+      resume = { state: 'fired', window: window.resetsAt, noReset: false }
       void $.prompt.submit({
         text: `isSWF: the five-hour usage window has reset. Work was in progress on ${work.join(', ')}. Load the isswf-coordinator skill, reconcile state first (isswf-status, open PRs, running reviews), then continue only the work already authorised; do not start new jobs without the operator's go.`,
       })
     })
+    resume = { state: 'waiting', window: window.resetsAt, atMs: at, timer }
     scheduleRefresh($)
   })().catch(() => {})
 }
@@ -967,11 +977,10 @@ export const register: Register = (on, options) => {
     const { title } = await paneSpec($)
     const { value: tab = 'initiatives' } = await $.state.get(TAB)
     const { value: resumeOn = false } = await $.state.get(RESUME)
-    if (!resumeOn && (resumeTimer || resumeFor)) cancelResume()
     checkResume($, cards, resumeOn)
     const toggleResume = () => $.state.set(RESUME, !resumeOn).then(() => $.ui.invalidate('ui.render'))
-    const resumeAt = resumeAtMs ?? resumeWouldAtMs
-    const resumeDetail = resumeOn && resumeNoReset ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
+    const resumeAt = resume.state === 'waiting' ? resume.atMs : resumeWouldAtMs
+    const resumeDetail = resumeOn && resumeNoReset() ? ` (${t.noReset})` : resumeAt !== undefined ? ` (${clockTime(resumeAt)})` : ''
     const resumeText = `⏰ AutoWakeUp: ${resumeOn ? t.on : t.off}${resumeDetail}`
     const tools = await connections($)
     const header = (
