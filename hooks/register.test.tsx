@@ -47,7 +47,7 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   const files: Record<string, string> = {}
   for (const [path, text] of Object.entries(records)) files[[cwd, '.factory', 'initiatives', ...path.split('/')].join(sep)] = text
   files[[home, '.claude', 'projects', 'x', 's1', 'subagents', `agent-${AGENT}.jsonl`].join(sep)] = TRANSCRIPT
-  const plugin = (path: string) => path.endsWith(`.claude-plugin${sep}plugin.json`) || path.endsWith('.claude-plugin/plugin.json')
+  const plugin = (path: string) => /[\\/]\.claude-plugin[\\/]plugin\.json$/.test(path)
   const isDir = (path: string) => Object.keys(files).some(f => f.startsWith(`${path}${sep}`))
   on('session.cwd', () => ({ value: cwd }))
   const settings: { language?: string } = { language: 'Español' }
@@ -56,18 +56,19 @@ function engine(on: any, cwd: string, records = RECORDS, messages: any[] = OWN_M
   const seen: string[] = []
   // A Linux test host resolves `C:\p` against its own directory; the mock keeps the path from the drive on.
   const norm = (path: string) => {
-    const native = sep === '\\' ? path.slice(Math.max(0, path.search(/[A-Za-z]:\\/))) : path
+    // A Windows test host resolves `/p` to `C:\p`; the mock maps it back to the fixture's POSIX key.
+    const native = sep === '\\' ? path.slice(Math.max(0, path.search(/[A-Za-z]:\\/))) : path.replace(/^[A-Za-z]:/, '').replace(/\\/g, '/')
     seen.push(native)
     return native
   }
   on('fs.exists', (_: unknown, e: { path: string }) => ({ value: norm(e.path) in files || isDir(norm(e.path)) }))
   on('fs.stat', (_: unknown, e: { path: string }) => {
-    if (!(norm(e.path) in files)) throw new Error('ENOENT')
+    if (!(norm(e.path) in files)) return { deny: 'ENOENT' }
     return { value: { kind: 'file', size: files[norm(e.path)].length, mtimeMs: 0, isLink: false } }
   })
   on('fs.read', (_: unknown, e: { path: string }) => {
     if (plugin(e.path)) return { value: '{"version":"9.8.7"}' }
-    if (!(norm(e.path) in files)) throw new Error('ENOENT')
+    if (!(norm(e.path) in files)) return { deny: 'ENOENT' }
     return { value: files[norm(e.path)] }
   })
   on('fs.list', (_: unknown, { path }: { path: string }) => {
@@ -1028,7 +1029,7 @@ function pushHost(on: any, { mode, reviewBase, reviewCandidate, coverageFails = 
   on('fs.read', (_: unknown, { path }: { path: string }) => {
     const tail = path.split(String.fromCharCode(92)).join('/')
     if (tail.endsWith(`/.git/isswf/verification-stamps/${PUSH_HEAD}.json`)) return { value: stamp }
-    throw new Error('ENOENT ' + path)
+    return { deny: 'ENOENT ' + path }
   })
   on('process.run', (_: unknown, e: { argv: string[] }) => {
     const { exitCode, stdout } = answer(e.argv)
