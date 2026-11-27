@@ -138,6 +138,15 @@ async function artifacts(root, job) {
     return { status: 'recorded', brief: { path: brief.path, sha256: brief.sha256, modifiedAt: brief.modifiedAt }, intake, reports, delivery: await deliveryAt(path), responses: await readResponses({ project: resolve(root, '../../..'), initiative: job.initiative, jobId: job.id }) };
   } catch (error) { return { status: error.code === 'ENOENT' ? 'not-prepared' : 'unknown', reason: error.code === 'ENOENT' ? 'missing-job-or-brief' : 'invalid-or-unsafe-artifact' }; }
 }
+// The attempt and review counts of a job, from its record file names alone, so the listing derives each job's state without reading records.
+async function recordCounts(root, jobId) {
+  try {
+    const path = join(root, 'jobs', jobId);
+    await directory(join(root, 'jobs')); await directory(path);
+    const names = (await readdir(path)).filter(name => RECORD_NAME.test(name));
+    return { attempts: names.filter(name => name.startsWith('A')).length, reviews: names.filter(name => name.startsWith('V')).length };
+  } catch { return {}; }
+}
 export async function initiatives({ project }) {
   const observedAt = new Date().toISOString(), entries = [];
   try {
@@ -159,8 +168,9 @@ export async function initiatives({ project }) {
       const prefix = '# ' + initiative + ': ', heading = record.markdown.split(/\r?\n/u, 1)[0];
       const title = heading.startsWith(prefix) ? heading.slice(prefix.length) : '';
       if (!title.trim() || title.length > 4000 || /[\x00-\x1f\x7f]/u.test(title)) throw Error('invalid-title');
-      const jobs = parsePlan(record.markdown);
-      items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.reportedStatus === state).length])), jobs: jobs.length, recommendation: recommendation(jobs), blockers: jobs.filter(job => job.reportedStatus === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
+      const jobs = [];
+      for (const job of parsePlan(record.markdown)) jobs.push({ ...job, status: deriveJobState(job.reportedStatus, await recordCounts(dirname(record.path), job.id)) });
+      items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.status === state).length])), jobs: jobs.length, recommendation: recommendation(jobs), blockers: jobs.filter(job => job.status === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
     } catch { items.push({ initiative, status: 'unknown', reason: 'invalid-changing-or-unsafe-plan' }); }
   }
   return { status: 'observed', observedAt, initiatives: items, limits: 'Declared canonical plan states only; no live process, remote PR, freshness or dependency verification. Records are read separately.' };

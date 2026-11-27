@@ -1,6 +1,6 @@
 // No Node imports and no `process` access: hook runtimes that only offer an injected fs (the Claude
 // Code pane's `$.fs`) load this module. tools/isswf-snapshot.mjs is the Node wrapper.
-import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
+import { deriveJobState, parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 
 export const SCHEMA_VERSION = 1;
 
@@ -203,7 +203,8 @@ async function readJob(fs, job, dir, initiativeId, skipped) {
   const refText = [job.nextStep, ...job.evidence, (await readBounded(fs, join(dir, 'delivery.md'), skipped)) ?? ''].join('\n');
   return {
     id: job.id,
-    status: job.reportedStatus,
+    status: deriveJobState(job.reportedStatus, { attempts: records.filter(r => r.kind === 'attempt').length, reviews: records.filter(r => r.kind === 'review').length }),
+    size: job.size,
     objective: job.objective,
     dependsOn: job.dependencies,
     ...issueRefs(refText),

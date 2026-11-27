@@ -13,6 +13,7 @@ import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
 import { gateCoverage } from '../tools/isswf-handoff-coverage-core.mjs'
 import { findUndispatched, freshUndispatched, undispatchedWarning } from '../tools/isswf-undispatched-core.mjs'
 import { checkRecordLocation, guardRecord } from '../tools/isswf-record-guard-core.mjs'
+import { inFlightStates } from '../tools/isswf-plan-core.mjs'
 import { initiativeIdsIn, initiativesDir, joiner, readSnapshot } from '../tools/isswf-snapshot-core.mjs'
 import { compareBrief, countToolUses, fallbackRole, resolveRunUsage, summarizeRuns } from '../tools/isswf-run-usage-core.mjs'
 
@@ -203,7 +204,7 @@ function checkResume($: EngineInterface, cards: any[], isOn: boolean) {
     const window = (await $.session.usage()).rateLimits.find((w: any) => w.kind === 'five_hour')
     const parsed = window?.resetsAt ? Date.parse(window.resetsAt) + RESUME_DELAY_MS : NaN
     const at = Number.isFinite(parsed) ? parsed : undefined
-    const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => j.status === 'in-progress').map((j: any) => `${i.id}/${j.id}`))
+    const work = cards.flatMap((i: any) => i.jobs.filter((j: any) => inFlightStates.includes(j.status)).map((j: any) => `${i.id}/${j.id}`))
     const due = isOn && window !== undefined && window.percentUsed >= RESUME_THRESHOLD && work.length > 0
     const noReset = due && at === undefined
     if (at !== resumeWouldAtMs || noReset !== resumeNoReset) {
@@ -1112,7 +1113,7 @@ export const register: Register = (on, options) => {
                 if (job.status === 'pending' && job.recordCount === 0) return <Text dimColor wrap="truncate-end">○ {job.id} {job.objective}</Text>
                 return (
                   <Box flexDirection="column">
-                    <Text color="suggestion" wrap="truncate-end">▸ {job.id} ({job.status}) {job.objective}</Text>
+                    <Text color="suggestion" wrap="truncate-end">▸ {job.id}{job.size && `(${job.size})`} ({job.status}) {job.objective}</Text>
                     {rounds(initiative, job)}
                   </Box>
                 )
