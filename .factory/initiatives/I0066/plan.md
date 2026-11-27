@@ -197,7 +197,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J011
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: The panel AutoWakeUp is one explicit state (off, armed, waiting for reset, fired) instead of separate variables.
 - Depends on: None
@@ -269,7 +269,7 @@ Order: starts after I0065 closes. Execution order (2026-11-26, at most two in pa
 
 ## J015
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: The Claude Code initiatives panel shows worker and reviewer runs whose attempt or review records exist only in a linked worktree that has not been integrated yet.
 - Depends on: J001
