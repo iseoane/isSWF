@@ -54,7 +54,7 @@ export function recommendation(jobs = []) {
     if (selected) { selectedType = type; title = label; break; }
   }
   if (!selected) return { type: 'complete', jobId: null, title: jobs.length ? 'All jobs are reported complete' : 'No jobs observed', reason: jobs.length ? 'The plan reports all jobs complete; this does not verify integration, acceptance, or external state.' : 'No jobs were observed; completed work is not inferred.', executionAuthorized: false };
-  let reason = `${title}; this is a suggestion based only on reported plan state, not execution authorization.`;
+  let reason = `${title}; this is a suggestion based only on the plan state and the job's record files, not execution authorization.`;
   if (selectedType === 'human') {
     const artifact = selected.artifacts;
     reason += ' The decision may concern definition, setup, acceptance or PR integration; answer the recorded question, not a generic request to continue.';
@@ -173,7 +173,7 @@ export async function initiatives({ project }) {
       items.push({ initiative, status: 'observed', title, label: initiative + ' · ' + title, counts: Object.fromEntries(states.map(state => [state, jobs.filter(job => job.status === state).length])), jobs: jobs.length, recommendation: recommendation(jobs), blockers: jobs.filter(job => job.status === 'blocked').map(job => ({ id: job.id, blocker: job.blocker })), planModifiedAt: file.modifiedAt });
     } catch { items.push({ initiative, status: 'unknown', reason: 'invalid-changing-or-unsafe-plan' }); }
   }
-  return { status: 'observed', observedAt, initiatives: items, limits: 'Declared canonical plan states only; no live process, remote PR, freshness or dependency verification. Records are read separately.' };
+  return { status: 'observed', observedAt, initiatives: items, limits: 'Plan states raised by the attempt and review record files each job holds (counted by file name, not read); no live process, remote PR, freshness or dependency verification. Records are read separately.' };
 }
 export async function status({ project, initiative }) {
   const observedAt = new Date().toISOString();

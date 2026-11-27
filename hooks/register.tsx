@@ -43,6 +43,8 @@ const PROFILES = new Set(['worker', 'reviewer', 'researcher', 'planner', 'diagno
 // A command that names an initiative, such as isswf-status --initiative I0046, also touches it.
 const INITIATIVE_FLAG = /--initiative(?:=|\s+)["']?(I\d+)\b/g
 const RECENT_COMPLETED = 2
+// A job's ID with its plan size when it has one: `J005(S)`.
+const idOf = (job: any) => (job.size ? `${job.id}(${job.size})` : job.id)
 // A drawing reads the records again once the snapshot is this old, even when no tool call and no timer said they changed.
 const SNAPSHOT_MAX_AGE_MS = 60_000
 // Tools that cannot change a record: the snapshot stays valid after them.
@@ -1103,17 +1105,17 @@ export const register: Register = (on, options) => {
               {recentOf(initiative).map((job: any) => (
                 <Box flexDirection="column">
                   <Button key={`${initiative.id}-${job.id}`} plain onPress={toggle(`${initiative.id}-${job.id}`)}>
-                    <Text color="success" wrap="truncate-end">✓ {job.id} {job.objective}</Text>
+                    <Text color="success" wrap="truncate-end">✓ {idOf(job)} {job.objective}</Text>
                   </Button>
                   {isExpanded(initiative, job) && rounds(initiative, job)}
                 </Box>
               ))}
               {initiative.jobs.map((job: any) => {
                 if (job.status === 'completed') return null
-                if (job.status === 'pending' && job.recordCount === 0) return <Text dimColor wrap="truncate-end">○ {job.id} {job.objective}</Text>
+                if (job.status === 'pending' && job.recordCount === 0) return <Text dimColor wrap="truncate-end">○ {idOf(job)} {job.objective}</Text>
                 return (
                   <Box flexDirection="column">
-                    <Text color="suggestion" wrap="truncate-end">▸ {job.id}{job.size && `(${job.size})`} ({job.status}) {job.objective}</Text>
+                    <Text color="suggestion" wrap="truncate-end">▸ {idOf(job)} ({job.status}) {job.objective}</Text>
                     {rounds(initiative, job)}
                   </Box>
                 )
