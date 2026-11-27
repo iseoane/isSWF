@@ -132,18 +132,50 @@ function checkViolations(text) {
     .map(({ line, entry }) => ({ code: 'check-without-commit', field: 'Checks run and observed results', line, message: `check reported as run names no full commit SHA: "${entry.slice(0, 160)}"` }));
 }
 
+const ROUND_LABEL = 'Review round in this job, and prior review IDs:';
+const AGGREGATE_LABEL = "Aggregate verdict, copied verbatim from the reviewer's report header:";
+const recordLines = text => text.split('\n').map(line => line.replace(/^\s*(?:[-*]\s+)?/u, ''));
+const labelValue = (text, label) => recordLines(text).find(line => line.startsWith(label))?.slice(label.length).trim() ?? '';
+const recordNumber = name => Number(/^[AV](\d+)/u.exec(name)[1]);
+const isRecord = (record, kind) => new RegExp(`^${kind}\\d+\\.md$`, 'u').test(record.name);
+
+// A review that states a round after the first is legal when the earlier review with the highest number either failed, or passed and the round has a
+// matching correction (a correction attempt stating that round, whose candidate is the review's), or when it chains from that review: its base is the
+// earlier candidate and its candidate differs (a delta after a pass or an inconclusive result), or an inconclusive review's candidate repeats (a re-run).
+// A candidate that names no 40-hex commit (a snapshot identity) has nothing to compare, so only a correction attempt of the round can justify it.
+function roundViolations({ text, name, jobRecords }) {
+  const round = Number(/^\d+/u.exec(labelValue(text, ROUND_LABEL))?.[0]);
+  if (!jobRecords || !(round > 1)) return [];
+  const violation = (code, message) => [{ code, field: ROUND_LABEL, line: recordLines(text).findIndex(line => line.startsWith(ROUND_LABEL)) + 1, message }];
+  const prior = jobRecords.filter(record => isRecord(record, 'V') && recordNumber(record.name) < recordNumber(name)).sort((a, b) => recordNumber(a.name) - recordNumber(b.name)).at(-1);
+  const verdict = prior && /^\W*(\w+)/u.exec(labelValue(prior.text, AGGREGATE_LABEL))?.[1].toLowerCase();
+  if (!['fail', 'pass', 'inconclusive'].includes(verdict)) return violation('review-round-without-prior', `round ${round} follows ${prior ? `${prior.name}, which has no aggregate verdict` : 'no earlier review of this job'}`);
+  const commit = (record, label) => COMMIT.exec(labelValue(record, label))?.[0];
+  const candidate = commit(text, 'Candidate commit SHA, or reproducible snapshot identity:');
+  const corrections = jobRecords.filter(record => isRecord(record, 'A') && Number(/^\d+/u.exec(labelValue(record.text, 'Review round:'))?.[0]) === round);
+  const corrected = corrections.some(record => !candidate || commit(record.text, 'Candidate commit SHA:') === candidate);
+  const priorCandidate = commit(prior.text, 'Candidate commit SHA, or reproducible snapshot identity:');
+  const chained = candidate && commit(text, 'Base commit SHA:') === priorCandidate && candidate !== priorCandidate;
+  const rerun = verdict === 'inconclusive' && candidate === priorCandidate;
+  if (verdict === 'fail' ? corrected : corrected || chained || rerun) return [];
+  if (verdict === 'fail' && !corrections.length) return violation('review-round-without-correction', `round ${round} follows the failed ${prior.name} and has no correction attempt that states "Review round: ${round}"`);
+  if (corrections.length) return violation('review-candidate-mismatch', `candidate ${candidate} is not the candidate of a round ${round} correction attempt (${corrections.map(record => record.name).join(', ')}); a merge after a correction needs its own chained delta round`);
+  return violation('review-round-unchained', `round ${round} follows the ${verdict} ${prior.name} and is neither a delta (base ${priorCandidate}, a different candidate) nor a re-run after an inconclusive result nor the review of a round ${round} correction attempt`);
+}
+
 /**
  * Checks one plan or record file and only reports: it never edits, grants or starts anything.
  * `path` may use `\` or `/`. `jobFiles` maps a job ID to the file names in its directory and is
  * only read when `path` is a plan. `newRecord` is true for a record absent at the base; only a new
  * review is held to the finding resolution vocabulary and only a new attempt to naming the commit of each check it reports as run.
+ * `jobRecords` are the job's other records as `{ name, text }`; only a new review's round sequence reads them.
  * `launches` are the accepted dispatches with their run identity (see compaction notes) and `siblings` the texts of the job's other records.
  * @returns {{ ok: boolean, violations: { code: string, job?: string, field?: string, line?: number, message: string }[] }}
  */
-export function checkRecord({ path, text, jobFiles, newRecord, launches, siblings }) {
+export function checkRecord({ path, text, jobFiles, newRecord, launches, siblings, jobRecords }) {
   const name = baseName(path);
   let violations = [];
   if (name === 'plan.md') violations = planViolations(text, jobFiles);
-  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...launchViolations({ path, text, name, launches, siblings }), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? resolutionViolations(text) : []), ...(newRecord === true && name[0] === 'A' ? checkViolations(text) : [])];
+  else if (RECORD_NAME.test(name)) violations = [...runViolations(text), ...launchViolations({ path, text, name, launches, siblings }), ...fieldViolations(name[0], text), ...(newRecord === true && name[0] === 'V' ? [...resolutionViolations(text), ...roundViolations({ text, name, jobRecords })] : []), ...(newRecord === true && name[0] === 'A' ? checkViolations(text) : [])];
   return { ok: violations.length === 0, violations };
 }
