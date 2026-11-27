@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { gitFixtureArgs, initRepository } from './support/git-fixture.mjs';
 
 const source = resolve(process.argv[2] || '.');
 const tool = join(source, 'tools/isswf-snapshot.mjs');
@@ -234,9 +235,9 @@ try {
   // The same through a real repository and `git worktree add`, read with the Node filesystem.
   const repo = join(root, 'repo');
   const linkedCopy = join(root, 'repo-linked');
-  const git = (cwd, ...args) => assert.equal(spawnSync('git', args, { cwd, encoding: 'utf8' }).status, 0, `git ${args.join(' ')}`);
+  const git = (cwd, ...args) => assert.equal(spawnSync('git', gitFixtureArgs(args), { cwd, encoding: 'utf8' }).status, 0, `git ${args.join(' ')}`);
   await files(repo, { '.isswf/initiatives/I0001/plan.md': plan('I0001', 'Real', job('J001', 'pending')) });
-  git(repo, 'init', '-q');
+  initRepository(repo);
   git(repo, '-c', 'user.name=t', '-c', 'user.email=t@example.com', 'add', '.');
   git(repo, '-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-qm', 'plan');
   git(repo, 'worktree', 'add', '-q', '-b', 'feature', linkedCopy);
