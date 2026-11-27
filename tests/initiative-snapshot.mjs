@@ -202,7 +202,7 @@ try {
   // Only worktrees listed under this repository's .git/worktrees are opened, and only when they use the same state directory.
   const stray = repoFiles('/m', '/wt/j1');
   stray['/other/.isswf/initiatives/I0001/jobs/J001/A009.md'] = '- Reported status: complete\n';
-  stray['/m/.git/worktrees/wt2/gitdir'] = '/gone/.git\n';
+  stray['/m/.git/worktrees/wt6/gitdir'] = '/gone/.git\n';
   stray['/m/.git/worktrees/wt3/gitdir'] = '/wt/legacy/.git\n';
   stray['/wt/legacy/.git'] = 'gitdir: /m/.git/worktrees/wt3\n';
   // A listed path that does not point back at its entry (a stale or forged gitdir), and a relative path, are not opened.
@@ -228,6 +228,7 @@ try {
   // No Git metadata: the project reads as before.
   const plain = repoFiles('/m', '/wt/j1');
   delete plain['/m/.git/worktrees/wt1/gitdir'];
+  delete plain['/m/.git/worktrees/wt2/gitdir'];
   assert.deepEqual(idsOf(await core.readSnapshot('/m', memoryFs(plain)), 'J001'), ['A001']);
 
   // The same through a real repository and `git worktree add`, read with the Node filesystem.

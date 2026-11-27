@@ -233,9 +233,15 @@ async function readInitiative(fs, id, dir, worktreeStateDirs, skipped) {
   }
   // A closed initiative is not drawn, so its job folders are never opened.
   if (jobs.every(job => job.reportedStatus === 'completed')) return { id, status: 'closed' };
+  // Only worktrees that hold this initiative's job folders are listed per job.
+  const worktreeBases = [];
+  for (const stateDir of worktreeStateDirs) {
+    const base = joiner(stateDir)(stateDir, id);
+    if (await fs.exists(joiner(base)(base, 'jobs'))) worktreeBases.push(base);
+  }
   const parsed = [];
   for (const job of jobs) {
-    const dirs = [dir, ...worktreeStateDirs.map(stateDir => joiner(stateDir)(stateDir, id))].map(base => joiner(base)(base, 'jobs', job.id));
+    const dirs = [dir, ...worktreeBases].map(base => joiner(base)(base, 'jobs', job.id));
     parsed.push(await readJob(fs, job, dirs, id, skipped));
   }
   return { id, title: title ?? UNKNOWN, type: plan.match(/^Type:\s*(.+)$/m)[1].trim(), status: 'parsed', jobs: parsed };
@@ -257,35 +263,44 @@ const normalized = path => path.replace(/\\/g, '/').replace(/(?<=.)\/+$/, '');
 const sameDir = (a, b) => (/^[A-Za-z]:/.test(a) ? a.toLowerCase() === b.toLowerCase() : a === b);
 
 // Git's own files tell which checkouts share this repository: `.git/worktrees/<name>/gitdir` names each linked
-// worktree, and a linked worktree's `.git` file points back at the shared directory. Nothing else is opened, so
-// an unrelated checkout is never read. Any unreadable piece means no worktree is added.
+// worktree, and that worktree's `.git` file must point back at `<common>/worktrees/<name>`; a linked worktree's own
+// `.git` file leads to the shared directory. Only absolute paths are followed and nothing else is opened, so an
+// unrelated checkout is never read. Any unreadable or inconsistent piece leaves that worktree out.
 async function linkedStateDirs(fs, project, join, stateDir) {
   const stateName = stateDir.slice(project.length + 1).split(/[\\/]/)[0];
+  // Git writes forward slashes; paths are read back through `fs` with the separator the project uses.
+  const local = path => (project.includes('\\') ? path.replaceAll('/', '\\') : path);
+  const absolute = path => /^(?:\/|[A-Za-z]:\/)/.test(path);
   const gitText = async path => {
     try {
-      const text = await fs.read(path);
+      const text = await fs.read(local(path));
       return typeof text === 'string' ? text : null;
     } catch {
       return null;
     }
   };
-  let common = join(project, '.git');
-  const pointer = (await gitText(common))?.match(/^gitdir:\s*(.+?)\s*$/m)?.[1];
+  const pointerIn = async path => {
+    const target = (await gitText(path))?.match(/^gitdir:\s*(.+?)\s*$/m)?.[1];
+    return target && absolute(normalized(target)) ? normalized(target) : null;
+  };
+  let common = normalized(project) + '/.git';
+  const roots = [];
+  const pointer = await pointerIn(common);
   if (pointer) {
     // <common>/worktrees/<name>
-    const parts = normalized(pointer).split('/');
+    const parts = pointer.split('/');
     if (parts.length < 3 || parts.at(-2) !== 'worktrees') return [];
     common = parts.slice(0, -2).join('/');
+    if (common.endsWith('/.git')) roots.push(common.slice(0, -'/.git'.length));
   }
-  const roots = [];
-  if (pointer && common.endsWith('/.git')) roots.push(common.slice(0, -'/.git'.length));
-  for (const entry of await listDir(fs, joiner(common)(common, 'worktrees'))) {
-    const text = entry.kind === 'dir' ? await gitText(joiner(common)(common, 'worktrees', entry.name, 'gitdir')) : null;
-    const gitFile = text?.split('\n')[0].trim();
-    if (gitFile && normalized(gitFile).endsWith('/.git')) roots.push(normalized(gitFile).slice(0, -'/.git'.length));
+  for (const entry of await listDir(fs, local(common + '/worktrees'))) {
+    if (entry.kind !== 'dir') continue;
+    const listed = (await gitText(common + '/worktrees/' + entry.name + '/gitdir'))?.split('\n')[0].trim();
+    const gitFile = listed && normalized(listed);
+    if (!gitFile || !absolute(gitFile) || !gitFile.endsWith('/.git')) continue;
+    const back = await pointerIn(gitFile);
+    if (back && sameDir(back, common + '/worktrees/' + entry.name)) roots.push(gitFile.slice(0, -'/.git'.length));
   }
-  // Git writes forward slashes; the paths are read back through `fs` with the separator the project uses.
-  const local = path => (project.includes(String.fromCharCode(92)) ? path.replaceAll('/', String.fromCharCode(92)) : path);
   const seen = [normalized(project)];
   const stateDirs = [];
   for (const root of roots) {
