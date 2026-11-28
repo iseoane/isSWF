@@ -208,6 +208,16 @@ async function openEffects(runtime, record) {
   }
   return open;
 }
+const leaseAction = 'Check the tool child and any processes it started, then delete the lease file by hand; isswf never removes a lease on its own';
+// A lease is never cleared here: the launcher's ceased verdict says nothing about the tool child it spawned.
+async function leaseBlocker(dir, entry) {
+  let record;
+  try { record = await json(join(dir, entry)); } catch (error) { return { lease: entry, state: 'unreadable', reason: error.message, action: leaseAction }; }
+  if (record === null || typeof record !== 'object') return { lease: entry, state: 'unreadable', reason: 'Lease is not a JSON object', action: leaseAction };
+  const detail = { lease: entry, tool: record.tool, child: record.child };
+  if (await ceased(record.owner)) return { ...detail, state: 'owner-ceased', reason: 'The launcher ended without removing its lease; the tool child may still run', action: leaseAction };
+  return { ...detail, state: 'active-or-unreconciled' };
+}
 async function activity(project, store) {
   const local = join(project, '.isswf/local'), blockers = [];
   for (const name of ['leases', 'workers']) {
@@ -215,8 +225,8 @@ async function activity(project, store) {
     if (!await exists(dir)) continue;
     await directory(dir);
     for (const entry of await readdir(dir)) {
+      if (name === 'leases') { blockers.push(await leaseBlocker(dir, entry)); continue; }
       const record = await json(join(dir, entry));
-      if (name === 'leases') { blockers.push({ lease: entry, state: 'active-or-unreconciled' }); continue; }
       const action = `Reconcile under the original pin ${record.pin?.version ?? 'unknown'} (${record.pin?.runtimeId ?? 'unknown'}) before changing versions: run that runtime's retained tools directly from <store>/releases/${record.pin?.runtimeId ?? 'unknown'} (the current launcher no longer runs legacy tools)`;
       try {
         if (record.project !== project || !isAbsolute(record.store || '') || !idPattern.test(record.attemptId || '')) fail('Invalid worker registration');
@@ -391,32 +401,54 @@ async function recover(project, store, opts) {
   await retireClaim(claim);
   return { status: 'recovered', id: opts.id };
 }
+// Windows delivers SIGINT on Ctrl-C and SIGBREAK on Ctrl-Break, and SIGHUP when its console closes.
+const launcherSignals = ['SIGINT', 'SIGHUP', 'SIGBREAK'];
 async function execute(project, store, _opts, args) {
   const current = await readPin(project); if (!current) fail('Initialize the project first');
   const runtime = await retained(store, current.pin), tool = args[0], forwarded = args.slice(1);
   if (!executableTools.includes(tool)) fail('Unknown tool; supported tools: ' + executableTools.join(', '));
   if (forwarded.includes('--project') || forwarded.includes('--repo')) fail('Project is supplied by the launcher, not tool arguments');
+  const invocation = releaseInvocation(runtime, tool, [...forwarded, '--project', project]);
   const id = randomUUID(), unlock = await lock(project, 'exec-' + id);
   const local = join(project, '.isswf/local'), lease = join(local, 'leases', id + '.json');
+  // The child starts under the operation claim, so no migration or recovery begins between registration and spawn.
+  // A signal to the launcher is not forwarded: a terminal sends it to the child too, and the lease must outlive the child.
+  let interrupted = false, unlocked = false, child, finished;
+  const onSignal = () => { interrupted = true; };
+  for (const signal of launcherSignals) process.on(signal, onSignal);
   try {
-    const lockedPin = await readPin(project);
-    if (!lockedPin || !lockedPin.bytes.equals(current.bytes)) fail('Project pin changed before execution registration; inspect and retry');
-    await safeParents(project, lease, true);
-    await writeExclusive(lease, jsonBytes({ format: 1, owner: await identity(), tool, runtimeId: current.pin.runtimeId }));
-    await unlock();
-  } catch (error) {
-    if (await exists(lease)) await unlink(lease);
-    await unlock(); throw error;
-  }
-  const invocation = releaseInvocation(runtime, tool, [...forwarded, '--project', project]);
-  const result = await new Promise((done, reject) => {
-    const child = spawn(invocation.command, invocation.args, { stdio: 'inherit' });
-    child.once('error', reject);
-    child.once('exit', (code, signal) => done({ code, signal }));
-  });
-  if (result.signal === null) await unlink(lease);
-  process.exitCode = result.code ?? 1;
-  return null;
+    try {
+      const lockedPin = await readPin(project);
+      if (!lockedPin || !lockedPin.bytes.equals(current.bytes)) fail('Project pin changed before execution registration; inspect and retry');
+      await safeParents(project, lease, true);
+      const owner = await identity();
+      if (interrupted) fail('Interrupted before the tool started; nothing was run');
+      child = spawn(invocation.command, invocation.args, { stdio: 'inherit' });
+      finished = new Promise((done, reject) => {
+        child.once('error', reject);
+        child.once('exit', (code, signal) => done({ code, signal }));
+      });
+      finished.catch(() => {}); // a spawn error surfaces at the await below, not as an unhandled rejection
+      await writeExclusive(lease, jsonBytes({ format: 1, owner, tool, runtimeId: current.pin.runtimeId, child: child.pid }));
+      await unlock();
+      unlocked = true;
+    } catch (error) {
+      // Once the child exists its lease stays until the child has exited.
+      if (child) { child.kill('SIGKILL'); await finished.catch(() => {}); }
+      if (await exists(lease)) await unlink(lease);
+      if (!unlocked) await unlock().catch(() => {});
+      throw error;
+    }
+    let result;
+    try { result = await finished; } catch (error) {
+      if (child.pid === undefined) await unlink(lease); // the tool never ran
+      throw error;
+    }
+    // Without a launcher signal, a child that died by signal keeps its lease for the operator to reconcile.
+    if (result.signal === null || interrupted) await unlink(lease);
+    process.exitCode = result.code ?? 1;
+    return null;
+  } finally { for (const signal of launcherSignals) process.off(signal, onSignal); }
 }
 function parse(argv) {
   const [command, ...rest] = argv, split = rest.indexOf('--'), parts = split < 0 ? rest : rest.slice(0, split), args = split < 0 ? [] : rest.slice(split + 1), opts = {};

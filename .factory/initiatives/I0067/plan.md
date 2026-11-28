@@ -46,7 +46,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J003
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: An interrupted `isswf exec` no longer leaves a lease that blocks recovery: the lease records the tool child, `exec` removes it after the child exits on Ctrl-C, and `inspect` and `recover` report a stale lease with its owner's ceased verdict instead of a bare blocker.
 - Depends on: None
@@ -62,7 +62,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- None.
+- Candidate 8b50c7f7bc8f588b1fb22cb78a6dad9679197343; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass). The operator approved integrating the `.github/workflows/quality.yml` change on 2026-11-28.
 
 ## J004
 
