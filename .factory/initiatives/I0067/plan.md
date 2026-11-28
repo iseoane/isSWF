@@ -6,7 +6,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: M
 - Objective: A design note names, from the current code, which interruptions isSWF recovers from today and which it does not (reboot, a process that survives its session, a lost external response such as a pull request merge or a CI result), and proposes S or M jobs for the gaps worth closing, each with its evidence.
 - Depends on: None
