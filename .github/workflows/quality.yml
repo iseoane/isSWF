@@ -78,6 +78,8 @@ jobs:
         run: node tests/state-interruption.mjs .
       - name: Verify interrupted exec leases and stale lease reports
         run: node tests/exec-interruption.mjs .
+      - name: Verify owners from an earlier boot are ceased
+        run: node tests/owner-reboot.mjs .
       - name: Verify factory tool installation
         run: node tests/factory-tools-install.mjs .
       - name: Verify the verification runner reads the base file and reports each check
