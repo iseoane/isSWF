@@ -26,7 +26,7 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 
 - Size: M
 - Status: in-progress
-- Objective: Implement a Pi widget above or below the editor that shows a compact summary of the snapshot (operator decision 2026-11-28): one line per active initiative with its open, blocked and next job, plus unopened initiatives.
+- Objective: Implement `tools/isswf-initiatives-pi-extension.mjs`: a string-array Pi widget below the editor with a compact summary of the snapshot (J001 research note, operator decisions 2026-11-28): one line per started initiative with its blocked count, open count and next job, a line for unopened initiatives and an overflow line, within the 9 of Pi's 10 widget entries.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None. Operator start 2026-11-28 ("Coordinador encárgate de la iniciativa"); integration of tools/factory-package.mjs and tools/build-release.mjs still needs the operator's approval.
@@ -34,9 +34,11 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 
 ### Acceptance
 
-- Shared snapshot fixtures render the compact summary, consistent with the Claude pane's counts, within the 10-entry widget cap with an overflow line.
-- The widget survives `/reload` and resume in a coordinator session (latch rebuilt from session entries); it is absent when `setWidget` is missing or the project is not trusted.
-- Shown only in coordinator sessions; no extra model calls; Linux and Windows evidence; en/es docs updated.
+- Fixtures render the compact lines with the Claude pane's counts (blocked; open = neither completed nor blocked) and the next job, within 9 lines with a `+N more initiatives` line and an unopened line.
+- The widget is set only when `ctx.mode` is `tui`, `ctx.isProjectTrusted()` is true, `ctx.ui.setWidget` exists and the coordinator is active; otherwise nothing is shown and no project record is read.
+- On `session_start` (`/reload`, resume) the latch is rebuilt from `ctx.sessionManager.getBranch()`, matching the stored `<skill name="isswf-coordinator"` block or a `read` tool call of the coordinator `SKILL.md`; entries in the stored form are tested.
+- Refresh on `agent_settled`, on a `tool_result` of a mutating tool and every 60 s; the timer is cleared on `session_shutdown`. No model calls.
+- Wired in `package.json` `pi.extensions`, `nativePiResources` and the release validators; en/es docs updated; focused test, documentation check and `git diff --check` clean; Linux and Windows evidence stated honestly (no live Pi UI observed).
 
 ## J003
 

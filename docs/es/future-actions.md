@@ -16,4 +16,4 @@ Ofrecer una asignación opcional de refactorización cuando los tests pasen, que
 
 ## Panel de iniciativas para Pi
 
-Un panel como el panel de iniciativas de Claude Code para Pi, que hoy no tiene equivalente. Está planificado como la iniciativa I0047 en los registros de este repositorio; solo leería los registros y no concedería ningún permiso.
+Un panel más completo para Pi, más allá del widget compacto de iniciativas que tiene hoy (iniciativa I0047). Solo leería los registros y no concedería ningún permiso.

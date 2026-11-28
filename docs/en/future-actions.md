@@ -16,4 +16,4 @@ Offer an optional refactor assignment after the tests pass, selected by the coor
 
 ## Initiatives panel for Pi
 
-A panel like the Claude Code initiatives pane for Pi, which has no equivalent today. It is planned as initiative I0047 in this repository's records; it would only read the records and grant no permission.
+A fuller panel for Pi beyond the compact initiatives widget it has today (initiative I0047). It would only read the records and grant no permission.
