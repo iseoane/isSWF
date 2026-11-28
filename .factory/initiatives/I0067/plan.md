@@ -6,13 +6,13 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: M
 - Objective: A design note names, from the current code, which interruptions isSWF recovers from today and which it does not (reboot, a process that survives its session, a lost external response such as a pull request merge or a CI result), and proposes S or M jobs for the gaps worth closing, each with its evidence.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Spec review of the design note. Previously: Size M (research only). Ground the launcher journal and recovery in `tools/isswf.mjs`, `tools/state-migration.mjs`, `isswf-integrate` resume paths and dispatch notes; read `docs/durable-work.md`.
+- Next step: None. Previously: Size M (research only). Ground the launcher journal and recovery in `tools/isswf.mjs`, `tools/state-migration.mjs`, `isswf-integrate` resume paths and dispatch notes; read `docs/durable-work.md`.
 
 ### Acceptance
 
@@ -22,7 +22,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- None.
+- [Design note](jobs/J001/design-note.md) at 0fcb227d45a8493f2c0861d9d6a57a3d4a0e056e; review V001 (pass). The operator accepted its recommendations on 2026-11-28 (J003 to J005, D1 and D2 no).
 
 ## J002
 
@@ -52,11 +52,11 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
 - Blocker: None.
-- Next step: Design note P1 (U1, U2, U14). Ground in `tools/isswf.mjs:211-242` and `:399-420`; Windows catches SIGINT only.
+- Next step: Design note P1 (U1, U2, U14). Ground in `tools/isswf.mjs:211-242` and `:399-420`; Windows also emits SIGBREAK and SIGHUP (review V001 F1).
 
 ### Acceptance
 
-- The lease names the child PID and tool; a Ctrl-C of `exec` whose child honours the signal leaves no lease, on Windows and Linux.
+- The lease also names the child PID (it already names the tool); after SIGINT, SIGHUP or SIGBREAK reaches `exec`, the lease is removed once the child has exited, whatever the child's exit signal, on Windows and Linux.
 - `inspect` shows each lease with the owner's ceased verdict and tolerates a damaged lease file; `recover` refuses a stale lease with a named reason.
 - No lease is removed automatically (operator decision D1, 2026-11-28).
 
