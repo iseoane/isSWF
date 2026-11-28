@@ -304,6 +304,24 @@
       "timeoutSeconds": 300
     },
     {
+      "id": "isswf-initiatives-pi",
+      "argv": [
+        "node",
+        "tests/isswf-initiatives-pi.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf-initiatives-pi-extension.mjs",
+        "tools/isswf-snapshot-core.mjs"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
       "id": "git-optional-locks",
       "argv": [
         "node",
