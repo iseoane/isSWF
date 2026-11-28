@@ -10,7 +10,7 @@ import { initRepository } from './support/git-fixture.mjs';
 const source = resolve(process.argv[2] || '.');
 const load = name => import(pathToFileURL(join(source, 'tools', name)).href);
 const { deriveState, refusalFor } = await load('isswf-delivery-core.mjs');
-const { integrate } = await load('isswf-integrate.mjs');
+const { integrate, jobState } = await load('isswf-integrate.mjs');
 
 // The lifecycle: the state is the furthest step whose earlier steps all hold; a later step alone does not count.
 const all = { brief: true, attempt: true, review: true, covered: true, ciGreen: true, merged: false, closed: false };
@@ -125,6 +125,7 @@ function fakeGh(f, { ci = 'SUCCESS', ciHead, unreadable = false, mergeThenFail =
 }
 
 const request = (f, gh, extra = {}) => ({ project: f.project, initiative: 'I0001', job: 'J001', branch: f.branch, head: f.head, pr: '1', evidence: 'PR #1 merged, CI green on the head.', gh, ...extra });
+const slash = path => path.replaceAll('\\', '/');
 const originMain = f => git(f.origin, 'rev-parse', 'main');
 const merged = fake => fake.calls.some(argv => argv[1] === 'merge');
 
@@ -238,6 +239,78 @@ try {
     assert.equal(result.step, 'push');
     assert.equal(fake.calls.filter(argv => argv[1] === 'merge').length, 1);
     assert.equal(existsSync(f.worktree), true, 'the worktree is removed only after the push');
+  }
+
+  // After a failed push the close commit exists only locally: a rerun refuses `primary-diverged`, `state` says merged with the local divergence, and the refusal names the push to run by hand.
+  // Once that push is done the rerun answers `already-closed` and names the worktree and branch still to remove.
+  {
+    const f = await fixture();
+    const hook = join(f.origin, 'hooks', 'pre-receive');
+    await mkdir(join(f.origin, 'hooks'), { recursive: true });
+    await writeFile(hook, '#!/bin/sh\n[ -f reject ] && exit 1\nexit 0\n', { mode: 0o755 });
+    const fake = fakeGh(f, { afterMerge: () => writeFileSync(join(f.origin, 'reject'), '') });
+    const first = await integrate(request(f, fake.gh));
+    assert.equal(first.step, 'push', JSON.stringify(first));
+    const rerun = await integrate(request(f, fake.gh));
+    assert.equal(rerun.ok, false);
+    assert.equal(rerun.code, 'primary-diverged', JSON.stringify(rerun));
+    assert.equal(rerun.divergence, 'local-ahead');
+    assert.match(rerun.next, /push origin HEAD:refs\/heads\/main/u);
+    assert.ok(rerun.next.includes(`-C "${slash(f.project)}"`), 'the checkout path is quoted with forward slashes');
+    assert.match(rerun.next, /log origin\/main\.\.HEAD/u, 'the push is preceded by the listing of the commits only here');
+    assert.equal(fake.calls.filter(argv => argv[1] === 'merge').length, 1, 'a rerun does not merge again');
+    assert.equal(existsSync(f.worktree), true);
+    const status = await jobState({ project: f.project, initiative: 'I0001', job: 'J001', branch: f.branch, head: f.head, pr: '1', gh: fake.gh });
+    assert.equal(status.state, 'merged');
+    assert.equal(status.detail.divergence, 'local-ahead');
+    // `state` does not require the primary checkout to be on the base branch, so the step names the local base ref, not HEAD.
+    git(f.project, 'checkout', '-q', '-b', 'elsewhere');
+    const elsewhere = await jobState({ project: f.project, initiative: 'I0001', job: 'J001', branch: f.branch, head: f.head, pr: '1', gh: fake.gh });
+    git(f.project, 'checkout', '-q', 'main');
+    assert.equal(elsewhere.detail.divergence, 'local-ahead');
+    assert.match(elsewhere.detail.next, /push origin refs\/heads\/main:refs\/heads\/main/u);
+    assert.doesNotMatch(elsewhere.detail.next, /HEAD:refs/u);
+    // The manual step the refusal names: push the local close commit.
+    await rm(join(f.origin, 'reject'));
+    git(f.project, 'push', '-q', 'origin', 'HEAD:refs/heads/main');
+    const closed = await integrate(request(f, fake.gh));
+    assert.equal(closed.ok, false);
+    assert.equal(closed.code, 'already-closed', JSON.stringify(closed));
+    assert.match(closed.next, /worktree remove "/u);
+    assert.ok(closed.next.includes(slash(f.worktree)), closed.next);
+    assert.doesNotMatch(closed.next, /\\/u, 'no backslashes');
+    assert.ok(closed.next.includes(`update-ref -d refs/heads/${f.branch} ${f.head}`), closed.next);
+  }
+  // A local base with commits the remote lacks, and no longer ahead of it, is `diverged`: the step is a manual reconcile, never a push.
+  {
+    const f = await fixture(), fake = fakeGh(f);
+    fake.forgeMerge();
+    forgeCommit(f, { 'other.txt': 'x\n' }, 'another contributor');
+    await put(f.project, 'local.txt', 'y\n');
+    git(f.project, 'add', '-A'); git(f.project, 'commit', '-qm', 'local only');
+    const status = await jobState({ project: f.project, initiative: 'I0001', job: 'J001', branch: f.branch, head: f.head, pr: '1', gh: fake.gh });
+    assert.equal(status.state, 'merged');
+    assert.equal(status.detail.divergence, 'diverged');
+    assert.match(status.detail.next, /reconcile/u);
+    assert.doesNotMatch(status.detail.next, /push/u);
+    const result = await integrate(request(f, fake.gh));
+    assert.equal(result.code, 'primary-diverged', JSON.stringify(result));
+    assert.equal(result.divergence, 'diverged');
+    assert.equal(merged(fake), false);
+  }
+  // A worktree that cannot be removed (a locked one stands in for a Windows file lock) leaves the close on the remote: a rerun answers `already-closed` and names the removal.
+  {
+    const f = await fixture(), fake = fakeGh(f);
+    git(f.project, 'worktree', 'lock', f.worktree);
+    const first = await integrate(request(f, fake.gh));
+    assert.equal(first.code, 'post-merge-failed', JSON.stringify(first));
+    assert.equal(first.step, 'remove-worktree');
+    const rerun = await integrate(request(f, fake.gh));
+    assert.equal(rerun.code, 'already-closed', JSON.stringify(rerun));
+    assert.match(rerun.next, /worktree remove/u);
+    assert.ok(rerun.next.includes(`update-ref -d refs/heads/${f.branch} ${f.head}`), rerun.next);
+    assert.equal(existsSync(f.worktree), true);
+    assert.equal(git(f.project, 'branch', '--list', f.branch).includes(f.branch), true);
   }
 
   // A merge call that exits 0 without merging (a merge queue, auto-merge) is not a merge: the close stops before the plan is edited.
