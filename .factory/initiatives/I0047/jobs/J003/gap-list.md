@@ -60,3 +60,9 @@
 ## Unknown
 
 - Whether anyone uses the note form or calls /api/status; no usage data.
+
+## Operator decision (2026-11-28)
+
+- Retire the panel and accept the loss of all ten capabilities listed above; one initiative's state stays available through `tools/isswf-status.mjs`.
+- Also remove `recordResponse` (keep `readResponses`), the Python prototype `isswf/panel.py` with its tests in `tests/test_u1.py`, and the "fuller panel for Pi" proposal in future-actions and README (en/es).
+- The removal's packaging edits (tools/factory-package.mjs, tools/bun-release.mjs, tools/isswf.mjs) are part of this decision.
