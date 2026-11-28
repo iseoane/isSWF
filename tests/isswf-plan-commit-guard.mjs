@@ -87,6 +87,58 @@ try {
   run(repo, 'rm', '-q', '.factory/initiatives/I0001/plan.md');
   assert.equal((await check('git commit -m removed')).deny, undefined);
   assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: repo, git: async () => { throw Error('no git'); }, read: async () => '' })).deny, undefined);
+  // Attempt and review records are read as the commit would record them and checked by the record check; a valid one commits.
+  const recRepo = join(temp, 'records');
+  const recDir = join(recRepo, '.factory/initiatives/I0001/jobs/J001');
+  mkdirSync(recDir, { recursive: true });
+  initRepository(recRepo, ['-b', 'main']);
+  run(recRepo, 'config', 'user.email', 't@example.invalid');
+  run(recRepo, 'config', 'user.name', 'T');
+  writeFileSync(join(recRepo, 'README.md'), 'x\n');
+  run(recRepo, 'add', '-A');
+  run(recRepo, 'commit', '-qm', 'start');
+  const recCheck = command => checkPlanCommit({ command, cwd: recRepo, git, read: async path => readFileSync(path, 'utf8') });
+  const attemptLabels = '- Deviations from required procedure and consequence: None.\n- Process deviations observed: None.\n';
+  const validRecord = `# Report\n\n- Run: claude agent=a1\n\n${attemptLabels}`;
+  const badRecord = `# Report\n\n- Run: claude agent=a1 (resumed)\n\n${attemptLabels}`;
+  const recordPath = join(recDir, 'A001.md');
+  writeFileSync(recordPath, validRecord);
+  run(recRepo, 'add', '-A');
+  assert.equal((await recCheck('git commit -m ok')).deny, undefined, 'a valid staged record commits');
+  writeFileSync(recordPath, badRecord);
+  run(recRepo, 'add', '-A');
+  const refusedRecord = await recCheck('git commit -m bad');
+  assert.match(refusedRecord.deny ?? '', /record check rejects/u);
+  assert.match(refusedRecord.deny, /\.factory\/initiatives\/I0001\/jobs\/J001\/A001\.md/u, 'names the path');
+  assert.match(refusedRecord.deny, /run-line-unparsed/u, 'names the violation');
+  // The index is what the commit records: a fixed working tree with the bad record still staged is refused.
+  writeFileSync(recordPath, validRecord);
+  assert.ok((await recCheck('git commit -m bad')).deny);
+  run(recRepo, 'add', '-A');
+  assert.equal((await recCheck('git commit -m ok')).deny, undefined);
+  // -a, a pathspec and a chained add commit the working tree; an unstaged bad record that nothing commits is not read.
+  run(recRepo, 'commit', '-qm', 'record');
+  writeFileSync(recordPath, badRecord);
+  assert.equal((await recCheck('git commit -m none')).deny, undefined, 'an unstaged change is not committed');
+  assert.ok((await recCheck('git commit -am all')).deny, '-a reads the working tree');
+  assert.ok((await recCheck('git commit -m p .factory/initiatives/I0001/jobs/J001/A001.md')).deny, 'a pathspec reads the working tree');
+  assert.ok((await recCheck('git add -A && git commit -m chained')).deny, 'a chained add reads the working tree');
+  // A review is checked too, including a new untracked one added by a chained add; other names are not records.
+  const reviewPath = join(recDir, 'V001.md');
+  writeFileSync(recordPath, validRecord);
+  writeFileSync(reviewPath, badRecord);
+  assert.match((await recCheck('git add -A && git commit -m new')).deny ?? '', /V001\.md/u, 'a new review added by a chained add is checked');
+  rmSync(reviewPath);
+  writeFileSync(join(recDir, 'notes.md'), badRecord);
+  run(recRepo, 'add', '-A');
+  assert.equal((await recCheck('git commit -m notes')).deny, undefined, 'only A and V records are checked');
+  // A git fault, or an unreadable working-tree record, fails open.
+  writeFileSync(recordPath, badRecord);
+  run(recRepo, 'add', '-A');
+  assert.ok((await recCheck('git commit -m bad')).deny);
+  assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: recRepo, git: async () => { throw Error('no git'); }, read: async () => '' })).deny, undefined);
+  assert.equal((await checkPlanCommit({ command: 'git commit -qam x', cwd: recRepo, git, read: async () => { throw Error('unreadable'); } })).deny, undefined);
+
   // Close gate: the commit that makes every job completed needs a passing close record at the newest non-records commit.
   const closeRepo = join(temp, 'close');
   mkdirSync(join(closeRepo, '.factory/initiatives/I0001'), { recursive: true });
