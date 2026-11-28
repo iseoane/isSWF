@@ -85,7 +85,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J005
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The documented integrate rerun outcomes are tested and visible: after a failed push or a failed cleanup, a rerun gives its named refusal or `already-closed`, `state` reports a local divergence, and each refusal names the exact manual step.
 - Depends on: None
@@ -101,4 +101,4 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- None.
+- Candidate ec6a131e5911dfcedbe7ee412d353bfbed5c4fa1; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass).
