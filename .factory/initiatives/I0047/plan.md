@@ -7,11 +7,11 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 ## J001
 
 - Size: S
-- Status: pending
+- Status: in-progress
 - Objective: Research the supported Pi extension mechanism for a persistent sidebar fed by the snapshot.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
-- Blocker: Awaiting I0046 J004 (packaged snapshot) and explicit operator start.
+- Blocker: None. I0046 J004 completed; operator start 2026-11-28 ("ponte con el I0047").
 - Next step: Assign a read-only researcher.
 
 ### Acceptance
