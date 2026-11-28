@@ -2,7 +2,7 @@
 
 Type: enhancement
 
-The operator created this initiative on 2026-11-27 ("prepara iniciativa para el recovery con el j012"). It takes the "Recovery" proposal from `docs/en/future-actions.md` (broader recovery across reboot, surviving processes and lost external responses, which needs its own design and evidence) and I0066 J012 (state migration phase in the journal), which moved here. Plan approval is preparation only; each job needs an explicit operator start. Every job is S or M.
+The operator created this initiative on 2026-11-27 ("prepara iniciativa para el recovery con el j012"). It takes the "Recovery" proposal from `docs/en/future-actions.md` (broader recovery across reboot, surviving processes and lost external responses, which needs its own design and evidence) and I0066 J012 (state migration phase in the journal), which moved here. Plan approval is preparation only; each job needs an explicit operator start. Every job is S or M. On 2026-11-28 the operator accepted the J001 design note's recommendations: add P1 to P3 as J003 to J005, leave P4 to P6 for a later initiative, and decide D1 (no automatic lease reclaim) and D2 (no automatic push on an integrate rerun); P7 and D3 to D7 stay as recorded in the note.
 
 ## J001
 
@@ -12,7 +12,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (research only). Ground the launcher journal and recovery in `tools/isswf.mjs`, `tools/state-migration.mjs`, `isswf-integrate` resume paths and dispatch notes; read `docs/durable-work.md`.
+- Next step: Spec review of the design note. Previously: Size M (research only). Ground the launcher journal and recovery in `tools/isswf.mjs`, `tools/state-migration.mjs`, `isswf-integrate` resume paths and dispatch notes; read `docs/durable-work.md`.
 
 ### Acceptance
 
@@ -39,6 +39,65 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 - The journal records the phases staged, swapped, retired and done; recovery from each phase is tested.
 - Existing interrupted-migration fixtures still recover.
 - Works on Windows and Linux.
+
+### Evidence
+
+- None.
+
+## J003
+
+- Status: pending
+- Size: S
+- Objective: An interrupted `isswf exec` no longer leaves a lease that blocks recovery: the lease records the tool child, `exec` removes it after the child exits on Ctrl-C, and `inspect` and `recover` report a stale lease with its owner's ceased verdict instead of a bare blocker.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J003/brief-r1.md)
+- Blocker: None.
+- Next step: Design note P1 (U1, U2, U14). Ground in `tools/isswf.mjs:211-242` and `:399-420`; Windows catches SIGINT only.
+
+### Acceptance
+
+- The lease names the child PID and tool; a Ctrl-C of `exec` whose child honours the signal leaves no lease, on Windows and Linux.
+- `inspect` shows each lease with the owner's ceased verdict and tolerates a damaged lease file; `recover` refuses a stale lease with a named reason.
+- No lease is removed automatically (operator decision D1, 2026-11-28).
+
+### Evidence
+
+- None.
+
+## J004
+
+- Status: pending
+- Size: S
+- Objective: The owner checks are tested for a reboot: a live PID with a different boot identity counts as ceased, and `recover` and `recover-state` proceed.
+- Depends on: J002
+- Brief: [brief-r1.md](jobs/J004/brief-r1.md)
+- Blocker: None.
+- Next step: Design note P2 (U3). Ground in `tools/isswf.mjs:133-168`; start after J002 merges, since it shares `tools/state-migration.mjs`.
+
+### Acceptance
+
+- A fixture with an alive PID and a changed boot identity makes `ceased` true on Linux and Windows.
+- `recover` and `recover-state` proceed on such an owner; existing dead-PID fixtures still pass.
+
+### Evidence
+
+- None.
+
+## J005
+
+- Status: pending
+- Size: S
+- Objective: The documented integrate rerun outcomes are tested and visible: after a failed push or a failed cleanup, a rerun gives its named refusal or `already-closed`, `state` reports a local divergence, and each refusal names the exact manual step.
+- Depends on: None
+- Brief: [brief-r1.md](jobs/J005/brief-r1.md)
+- Blocker: None.
+- Next step: Design note P3 (U5, U6). Ground in `tools/isswf-integrate.mjs:96-196` and `tests/isswf-integrate.mjs:216-259`.
+
+### Acceptance
+
+- Tests cover a rerun after a failed push (`primary-diverged`) and after a failed worktree or branch removal (`already-closed`).
+- `state` reports `merged` with a local-divergence reason when the local base is ahead of the remote.
+- No automatic push is added (operator decision D2, 2026-11-28).
 
 ### Evidence
 
