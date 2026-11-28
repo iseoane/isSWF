@@ -12,11 +12,15 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None. I0046 J004 completed; operator start 2026-11-28 ("ponte con el I0047").
-- Next step: Assign a read-only researcher.
+- Next step: Operator decisions 1 to 4 in the research note.
 
 ### Acceptance
 
 - Read-only report naming the Pi API, activation in coordinator sessions, refresh options, Windows/Linux limits and a recommendation or a documented blocker.
+
+### Evidence
+
+- [Research note](jobs/J001/research-note.md); spec review pending.
 
 ## J002
 
