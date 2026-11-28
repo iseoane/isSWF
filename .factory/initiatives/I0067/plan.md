@@ -26,13 +26,13 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J002
 
-- Status: in-progress
+- Status: done
 - Size: M
 - Objective: A state migration records its phase in the journal, and recovery reads that phase instead of inferring it from directory names.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None.
-- Next step: Size M (phase recovery on two platforms). Ground the stage, retired and pending directories in `tools/state-migration.mjs` and the journal in `tools/isswf.mjs`. Moved from I0066 J012; its earlier brief is I0066 `jobs/J012/brief-r1.md`.
+- Next step: None. Previously: Size M (phase recovery on two platforms). Ground the stage, retired and pending directories in `tools/state-migration.mjs` and the journal in `tools/isswf.mjs`. Moved from I0066 J012; its earlier brief is I0066 `jobs/J012/brief-r1.md`.
 
 ### Acceptance
 
@@ -42,4 +42,4 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- None.
+- Candidate f1d504c33909118fa197f72cbcbd31155d804c46; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass).
