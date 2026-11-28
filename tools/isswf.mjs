@@ -213,6 +213,7 @@ const leaseAction = 'Check the tool child and any processes it started, then del
 async function leaseBlocker(dir, entry) {
   let record;
   try { record = await json(join(dir, entry)); } catch (error) { return { lease: entry, state: 'unreadable', reason: error.message, action: leaseAction }; }
+  if (record === null || typeof record !== 'object') return { lease: entry, state: 'unreadable', reason: 'Lease is not a JSON object', action: leaseAction };
   const detail = { lease: entry, tool: record.tool, child: record.child };
   if (await ceased(record.owner)) return { ...detail, state: 'owner-ceased', reason: 'The launcher ended without removing its lease; the tool child may still run', action: leaseAction };
   return { ...detail, state: 'active-or-unreconciled' };
@@ -410,9 +411,9 @@ async function execute(project, store, _opts, args) {
   const invocation = releaseInvocation(runtime, tool, [...forwarded, '--project', project]);
   const id = randomUUID(), unlock = await lock(project, 'exec-' + id);
   const local = join(project, '.isswf/local'), lease = join(local, 'leases', id + '.json');
-  // The child starts under the operation claim so its PID is in the lease before anything else can inspect leases.
+  // The child starts under the operation claim, so no migration or recovery begins between registration and spawn.
   // A signal to the launcher is not forwarded: a terminal sends it to the child too, and the lease must outlive the child.
-  let interrupted = false, finished;
+  let interrupted = false, unlocked = false, child, finished;
   const onSignal = () => { interrupted = true; };
   for (const signal of launcherSignals) process.on(signal, onSignal);
   try {
@@ -421,19 +422,28 @@ async function execute(project, store, _opts, args) {
       if (!lockedPin || !lockedPin.bytes.equals(current.bytes)) fail('Project pin changed before execution registration; inspect and retry');
       await safeParents(project, lease, true);
       const owner = await identity();
-      const child = spawn(invocation.command, invocation.args, { stdio: 'inherit' });
+      if (interrupted) fail('Interrupted before the tool started; nothing was run');
+      child = spawn(invocation.command, invocation.args, { stdio: 'inherit' });
       finished = new Promise((done, reject) => {
         child.once('error', reject);
         child.once('exit', (code, signal) => done({ code, signal }));
       });
-      try { await writeExclusive(lease, jsonBytes({ format: 1, owner, tool, runtimeId: current.pin.runtimeId, child: child.pid })); } catch (error) { child.kill(); throw error; }
+      finished.catch(() => {}); // a spawn error surfaces at the await below, not as an unhandled rejection
+      await writeExclusive(lease, jsonBytes({ format: 1, owner, tool, runtimeId: current.pin.runtimeId, child: child.pid }));
       await unlock();
+      unlocked = true;
     } catch (error) {
-      finished?.catch(() => {});
+      // Once the child exists its lease stays until the child has exited.
+      if (child) { child.kill('SIGKILL'); await finished.catch(() => {}); }
       if (await exists(lease)) await unlink(lease);
-      await unlock(); throw error;
+      if (!unlocked) await unlock().catch(() => {});
+      throw error;
     }
-    const result = await finished;
+    let result;
+    try { result = await finished; } catch (error) {
+      if (child.pid === undefined) await unlink(lease); // the tool never ran
+      throw error;
+    }
     // Without a launcher signal, a child that died by signal keeps its lease for the operator to reconcile.
     if (result.signal === null || interrupted) await unlink(lease);
     process.exitCode = result.code ?? 1;
