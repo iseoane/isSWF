@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
+const { nodeFs } = await import(pathToFileURL(join(source, 'tools/isswf-snapshot.mjs')).href);
 const extension = await import(pathToFileURL(join(source, 'tools/isswf-initiatives-pi-extension.mjs')).href).catch(error => ({ loadError: error.code ?? String(error) }));
 assert.equal(extension.loadError, undefined, 'tools/isswf-initiatives-pi-extension.mjs loads');
 const { renderLines, latchFromBranch, MAX_LINES } = extension;
@@ -77,19 +78,41 @@ try {
 
   const session = (options = {}) => {
     const handlers = new Map();
-    extension.default({ on: (name, handler) => handlers.set(name, handler) });
+    extension.default({ on: (name, handler) => handlers.set(name, handler) }, options.io);
     const widgets = [];
     let branch = options.branch ?? [];
     const ctx = {
-      cwd: project,
+      cwd: options.cwd ?? project,
       mode: options.mode ?? 'tui',
       isProjectTrusted: () => options.trusted ?? true,
       sessionManager: { getBranch: () => branch },
       ui: 'noWidget' in options ? {} : { setWidget: (key, lines, widgetOptions) => widgets.push({ key, lines, placement: widgetOptions?.placement }) },
     };
-    return { widgets, setBranch: next => { branch = next; }, emit: async (name, event = {}) => { await handlers.get(name)?.(event, ctx); await new Promise(settle => setImmediate(settle)); } };
+    return { widgets, setBranch: next => { branch = next; }, call: (name, event = {}) => handlers.get(name)?.(event, ctx), emit: async (name, event = {}) => { await handlers.get(name)?.(event, ctx); await new Promise(settle => setImmediate(settle)); } };
   };
   const last = pi => pi.widgets.at(-1);
+  // The extension's file-system seam: counts every call and, once `hold` is set, parks the first record read after it has the text.
+  const watched = () => {
+    const io = { calls: [], hold: false, gate: undefined, reached: undefined };
+    const wrap = name => async (...args) => {
+      io.calls.push(name);
+      const result = await nodeFs[name](...args);
+      if (name === 'read' && io.hold) {
+        io.hold = false;
+        io.reachedNow();
+        await io.gate;
+      }
+      return result;
+    };
+    io.fs = Object.fromEntries(Object.keys(nodeFs).map(name => [name, wrap(name)]));
+    io.arm = () => {
+      io.hold = true;
+      io.reached = new Promise(resolveReached => { io.reachedNow = resolveReached; });
+      io.gate = new Promise(resolveGate => { io.release = resolveGate; });
+    };
+    return io;
+  };
+  const within = (promise, ms) => Promise.race([promise.then(() => true), new Promise(settle => setTimeout(() => settle(false), ms))]);
 
   // A coordinator session shows the widget below the editor and refreshes it when a run settles.
   const pi = session();
@@ -142,13 +165,48 @@ try {
   // No project records are read unless the project is trusted, the mode is the TUI and the UI has setWidget.
   const coordinator = [{ type: 'message', message: { role: 'user', content: expanded('isswf-coordinator') } }];
   for (const options of [{ trusted: false }, { mode: 'rpc' }, { mode: 'print' }, { noWidget: true }]) {
-    const blocked = session({ ...options, branch: coordinator });
+    const io = watched();
+    const blocked = session({ ...options, branch: coordinator, io: { fs: io.fs } });
     await blocked.emit('session_start', { reason: 'startup' });
     await blocked.emit('agent_settled', { aborted: false });
     await blocked.emit('input', { text: '/skill:isswf-coordinator' });
     assert.deepEqual(blocked.widgets, [], `nothing shown for ${JSON.stringify(options)}`);
+    assert.deepEqual(io.calls, [], `no record read for ${JSON.stringify(options)}`);
     await blocked.emit('session_shutdown', {});
   }
+
+  // The same session ungated does read the records, so the empty list above is not an artefact of the seam.
+  const control = watched();
+  const reading = session({ branch: coordinator, io: { fs: control.fs } });
+  await reading.emit('session_start', { reason: 'startup' });
+  assert.ok(control.calls.includes('read'), 'a gated-in session reads the plans through the seam');
+  await reading.emit('session_shutdown', {});
+
+  // A tool result does not wait for the read, and a refresh asked for during a read is run again afterwards instead of dropped.
+  const slow = watched();
+  const busy = session({ branch: coordinator, io: { fs: slow.fs } });
+  await busy.emit('session_start', { reason: 'startup' });
+  assert.deepEqual(last(busy).lines, expected);
+  slow.arm();
+  const returned = busy.call('tool_result', { toolName: 'bash' });
+  assert.equal(await within(slow.reached, 1000), true, 'the tool result started a read');
+  assert.equal(await within(returned, 1000), true, 'the tool_result handler returns while the read is in progress');
+  await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), plan('I0001', 'Active work', [['J001', 'completed'], ['J002', 'completed'], ['J003', 'completed'], ['J004', 'pending']]));
+  await busy.call('agent_settled', { aborted: false });
+  slow.release();
+  await new Promise(settle => setTimeout(settle, 200));
+  assert.deepEqual(last(busy).lines, ['I0001 Active work · 1 open · next J004', '○ 1 unopened: I0002'], 'the refresh asked for during the read ran afterwards');
+  await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), files['I0001/plan.md']);
+  await busy.emit('session_shutdown', {});
+
+  // The state directory must be a regular directory: a link in its place is refused, as the status tools do.
+  const linked = join(root, 'linked');
+  await mkdir(linked);
+  await symlink(join(project, '.factory'), join(linked, '.factory'), 'junction');
+  const through = session({ branch: coordinator, cwd: linked });
+  await through.emit('session_start', { reason: 'startup' });
+  assert.deepEqual(through.widgets, [], 'a linked state directory shows nothing');
+  await through.emit('session_shutdown', {});
 
   // A project whose initiatives become unreadable clears the widget.
   const bare = session({ branch: coordinator });
