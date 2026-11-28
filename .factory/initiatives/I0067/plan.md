@@ -26,7 +26,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J002
 
-- Status: in-progress
+- Status: completed
 - Size: M
 - Objective: A state migration records its phase in the journal, and recovery reads that phase instead of inferring it from directory names.
 - Depends on: None
@@ -42,4 +42,4 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- Candidate f1d504c33909118fa197f72cbcbd31155d804c46; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass).
+- Candidate efc648c931b4a2c1a1e285569afdaa087ab1707f; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass), V003 (pass after the CI miss recorded in V003).
