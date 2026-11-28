@@ -1,9 +1,11 @@
 import { execFile } from 'node:child_process';
-import { readFile, stat } from 'node:fs/promises';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { assignmentOf, checkBranch, observeFromFiles, refreshBranches } from './isswf-branch-guard-core.mjs';
 import { guardCommand } from './isswf-command-core.mjs';
 import { checkReferences } from './isswf-dispatch-guard-core.mjs';
-import { checkPlanCommit } from './isswf-plan-commit-guard-core.mjs';
+import { acceptedLaunches, checkPlanCommit } from './isswf-plan-commit-guard-core.mjs';
 import { checkVerificationCommit } from './isswf-verification-guard-core.mjs';
 import { checkRecordsPush } from './isswf-records-push-guard-core.mjs';
 import { checkIntegrationGate } from './isswf-integration-gate-core.mjs';
@@ -66,7 +68,7 @@ export default function (pi) {
     }
     const branch = await checkBranch({ command, cwd: ctx.cwd, loop: 'main', store, observe, assignment, usesIsswf });
     if (branch.deny !== undefined) return { block: true, reason: branch.deny };
-    const plans = await checkPlanCommit({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8') });
+    const plans = await checkPlanCommit({ command, cwd: ctx.cwd, git, read: path => readFile(path, 'utf8'), launches: () => acceptedLaunches({ claudeDir: process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude'), list: dir => readdir(dir), read: path => readFile(path, 'utf8') }) });
     if (plans.deny !== undefined) return { block: true, reason: plans.deny };
     const verification = await checkVerificationCommit({ command, cwd: ctx.cwd, git });
     if (verification.deny !== undefined) return { block: true, reason: verification.deny };

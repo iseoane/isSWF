@@ -3,7 +3,8 @@ import { targetDir } from './isswf-branch-guard-core.mjs';
 import { tokenize } from './isswf-command-core.mjs';
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
 import { checkRecord } from './isswf-record-check-core.mjs';
-import { isRecordPath, RECORD_NAME } from './isswf-snapshot-core.mjs';
+import { NOTE_DIR, parseNote } from './isswf-compaction-core.mjs';
+import { isRecordPath, joiner, RECORD_NAME } from './isswf-snapshot-core.mjs';
 
 // The same ceiling as tools/isswf-record-check.mjs: a larger record is not checked.
 const MAX_RECORD_CHARS = 1024 * 1024;
@@ -106,23 +107,61 @@ const describe = (path, { code, job, field, line }) => `${path}: ${code}${[job, 
 
 const isAttemptOrReview = path => isRecordPath(path) && RECORD_NAME.test(path.slice(path.lastIndexOf('/') + 1));
 
+/**
+ * The accepted dispatches that returned a run ID, from every session note under the Claude config directory `claudeDir`, as tools/isswf-launch-notes.mjs reads them for the record check CLI.
+ * `list(dir)` resolves to file names and `read(path)` to a file's text; a missing directory or an unreadable note is no launch. Pi keeps its dispatches only in the running extension, so it has none here.
+ */
+export async function acceptedLaunches({ claudeDir, list, read }) {
+  const dir = joiner(claudeDir)(claudeDir, ...NOTE_DIR);
+  const launches = [];
+  try { for (const name of await list(dir)) launches.push(...(parseNote(await read(joiner(dir)(dir, name)).catch(() => '')) ?? [])); } catch { /* no notes */ }
+  return launches.filter(({ run }) => run);
+}
+
 const violationKey = ({ code, job, field, message }) => JSON.stringify([code, job, field, message]);
 
 /**
- * The record check's violations of an attempt or review record, from the inputs the post-write guard uses (path and text), so a commit never refuses
- * what that guard accepts. The rules for a new record, which need the base commit, and the launch notes stay with `isswf-record-check`.
- * A violation the `before` text (the record at HEAD) already has is not reported, so editing a historical record that predates a newer rule is not refused;
- * each earlier violation excuses one equal violation, whatever its line.
+ * The violations `checkRecord` finds in the attempt or review record at `path` as the commit would record it, the same ones
+ * `isswf-record-check --base HEAD` reports for that content: a record absent from HEAD is new (the rules that hold a new record to the current template apply),
+ * a review reads its job's other records (as the commit would record them), and the accepted launches of the host sessions are checked against the record.
+ * A violation the HEAD version of an existing record already has is not reported, so editing a historical record that predates a newer rule is not refused;
+ * each earlier violation excuses one equal violation, whatever its line. A fault in any lookup returns [] (the commit is allowed).
  */
-function recordViolations(path, text, before) {
-  if (text.length > MAX_RECORD_CHARS) return [];
-  const known = new Map();
-  if (before !== undefined && before.length <= MAX_RECORD_CHARS) for (const violation of checkRecord({ path, text: before }).violations) known.set(violationKey(violation), (known.get(violationKey(violation)) ?? 0) + 1);
-  return checkRecord({ path, text }).violations.filter(violation => {
-    const key = violationKey(violation), left = known.get(key) ?? 0;
-    if (left > 0) known.set(key, left - 1);
-    return left === 0;
-  }).map(violation => `${describe(path, violation)}: ${violation.message}`);
+async function recordViolations({ path, text, all, root, git, read, untracked, launches }) {
+  try {
+    if (text.length > MAX_RECORD_CHARS) return [];
+    const tracked = await git(['ls-tree', 'HEAD', '--', path], root);
+    if (tracked.exitCode !== 0) return [];
+    const isNew = !tracked.stdout.trim();
+    let before;
+    if (!isNew) {
+      const head = await git(['show', `HEAD:${path}`], root);
+      if (head.exitCode !== 0 || head.stdout.length > MAX_RECORD_CHARS) return [];
+      before = head.stdout;
+    }
+    const slash = path.lastIndexOf('/'), dir = path.slice(0, slash + 1), name = path.slice(slash + 1);
+    const listing = await git(['ls-files', '-z', '--', dir], root);
+    if (listing.exitCode !== 0) return [];
+    const siblings = [];
+    for (const other of new Set([...listing.stdout.split(' '), ...untracked])) {
+      if (!other.startsWith(dir) || other.includes('/', dir.length) || other === path || !RECORD_NAME.test(other.slice(dir.length))) continue;
+      try {
+        const sibling = all ? { exitCode: 0, stdout: await read(`${root}/${other}`) } : await git(['show', `:${other}`], root);
+        if (sibling.exitCode === 0 && sibling.stdout.length <= MAX_RECORD_CHARS) siblings.push({ name: other.slice(dir.length), text: sibling.stdout });
+      } catch { /* deleted in the working tree: not recorded */ }
+    }
+    const accepted = (await launches?.()) ?? [];
+    const inputs = { path, ...(accepted.length && { launches: accepted, siblings: siblings.map(sibling => sibling.text) }) };
+    const known = new Map();
+    if (before !== undefined) for (const violation of checkRecord({ ...inputs, text: before, newRecord: false }).violations) known.set(violationKey(violation), (known.get(violationKey(violation)) ?? 0) + 1);
+    return checkRecord({ ...inputs, text, newRecord: isNew, ...(name[0] === 'V' && { jobRecords: siblings }) }).violations.filter(violation => {
+      const key = violationKey(violation), left = known.get(key) ?? 0;
+      if (left > 0) known.set(key, left - 1);
+      return left === 0;
+    }).map(violation => `${describe(path, violation)}: ${violation.message}`);
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -130,9 +169,9 @@ function recordViolations(path, text, before) {
  * It refuses a commit that would record an attempt or review record (`A###.md`, `V###.md`) that the record check rejects, read the same way.
  * It also refuses the commit that makes every job of an initiative completed unless that initiative's close verification record is passing and current (`closeProblems`).
  * It fails open: this guard enforces a process rule, not an authority, so a fault allows the command.
- * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text.
+ * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text; `launches()`, when given, resolves to the accepted dispatches the host sessions recorded.
  */
-export async function checkPlanCommit({ command, cwd, git, read, platform = globalThis.process?.platform }) {
+export async function checkPlanCommit({ command, cwd, git, read, launches, platform = globalThis.process?.platform }) {
   try {
     const problems = [], closes = [], violations = [];
     const segments = tokenize(command);
@@ -156,10 +195,7 @@ export async function checkPlanCommit({ command, cwd, git, read, platform = glob
         const match = PLAN_PATH.exec(path);
         if (!match && isAttemptOrReview(path)) {
           const record = all ? { exitCode: 0, stdout: await read(`${root}/${path}`) } : await git(['show', `:${path}`], root);
-          // An empty listing means HEAD has no such record (a new file); a failed lookup is a fault, which allows the commit.
-          const tracked = record.exitCode === 0 ? await git(['ls-tree', 'HEAD', '--', path], root) : undefined;
-          const before = tracked?.exitCode === 0 && tracked.stdout.trim() ? await git(['show', `HEAD:${path}`], root) : undefined;
-          if (tracked?.exitCode === 0 && (before === undefined || before.exitCode === 0)) violations.push(...recordViolations(path, record.stdout, before?.stdout));
+          if (record.exitCode === 0) violations.push(...await recordViolations({ path, text: record.stdout, all, root, git, read, untracked: added.stdout.split(' '), launches }));
           continue;
         }
         if (!match) continue;

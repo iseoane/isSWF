@@ -1,13 +1,13 @@
 import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
-const { checkPlanCommit } = await import(pathToFileURL(join(source, 'tools/isswf-plan-commit-guard-core.mjs')));
+const { acceptedLaunches, checkPlanCommit } = await import(pathToFileURL(join(source, 'tools/isswf-plan-commit-guard-core.mjs')));
 
 const temp = realpathSync(mkdtempSync(join(tmpdir(), 'isswf-plan-commit-')));
 const run = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8' });
@@ -154,6 +154,8 @@ try {
     const launch = { agent: 'isswf-worker', initiative: 'I0001', job: 'J001', path: '.factory/initiatives/I0001/jobs/J001/brief-r1.md', checkpoint: sha, base: sha, run: 'w1' };
     writeFileSync(join(notes, 'isswf/compaction/session1.json'), JSON.stringify({ version: 1, assignments: [launch] }));
     const launches = async () => [launch];
+    assert.deepEqual(await acceptedLaunches({ claudeDir: notes, list: async dir => readdirSync(dir), read: async path => readFileSync(path, 'utf8') }), [launch], 'the session notes are read as the CLI reads them');
+    assert.deepEqual(await acceptedLaunches({ claudeDir: join(temp, 'missing'), list: async dir => readdirSync(dir), read: async path => readFileSync(path, 'utf8') }), [], 'a missing directory is no launch');
     const reviewLabels = '- Unreviewed areas and evidence limits: None.\n- Convergence advice: None.\n- Process deviations observed: None.\n';
     const review = extra => `# Review report\n\n${extra}${reviewLabels}`;
     const rel = name => `.factory/initiatives/I0001/jobs/J001/${name}`;
