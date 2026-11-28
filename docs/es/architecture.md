@@ -31,6 +31,7 @@ Estas herramientas empaquetan la fábrica, gestionan la instalación de un proye
 | Integrar un trabajo revisado y derivar el estado de su ciclo de entrega | `tools/isswf-delivery-core.mjs`, `tools/isswf-integrate.mjs` |
 | Rechazar un comando de shell que espera al CI o adquiere paquetes | `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 | Conservar la asignación del coordinador durante una compactación | `tools/isswf-compaction-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
+| Mostrar un resumen compacto de iniciativas bajo el editor de Pi | `tools/isswf-initiatives-pi-extension.mjs`, `tools/isswf-snapshot-core.mjs` |
 | Avisar al terminar un turno de un trabajo en curso con brief confirmado y sin lanzamiento | `tools/isswf-undispatched-core.mjs`, `tools/isswf-compaction-pi-extension.mjs`, `hooks/register.tsx` |
 | Rechazar un `git commit` en una rama que la sesión no seleccionó | `tools/isswf-branch-guard-core.mjs`, `tools/isswf-command-core.mjs`, `tools/isswf-command-guard-pi-extension.mjs`, `hooks/register.tsx` |
 

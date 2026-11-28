@@ -182,7 +182,7 @@ try {
 
 // Packaging: the package declares the extension for the main session, after the guards', and the worker child does not load it.
 const manifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'));
-assert.equal(manifest.pi.extensions.at(-1), './tools/isswf-compaction-pi-extension.mjs');
+assert.ok(manifest.pi.extensions.indexOf('./tools/isswf-compaction-pi-extension.mjs') > manifest.pi.extensions.indexOf('./tools/isswf-command-guard-pi-extension.mjs'), 'the compaction extension comes after the guards');
 assert.ok(!(await readFile(join(source, '.agents/hosts/pi/agents/isswf-worker.md'), 'utf8')).includes('compaction'), 'children do not load the compaction extension');
 
 // Claude Code: the post-compaction reminder is a plugin settings hook, so it also runs where the built-in guard skips the mod's `classic.*` hooks.

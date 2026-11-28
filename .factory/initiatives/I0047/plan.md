@@ -25,18 +25,22 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 ## J002
 
 - Size: M
-- Status: in-progress
+- Status: completed
 - Objective: Implement a Pi widget above or below the editor that shows a compact summary of the snapshot (operator decision 2026-11-28): one line per active initiative with its open, blocked and next job, plus unopened initiatives.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
 - Blocker: None. Operator start 2026-11-28 ("Coordinador encárgate de la iniciativa"); integration of tools/factory-package.mjs and tools/build-release.mjs still needs the operator's approval.
-- Next step: Dispatch the worker.
+- Next step: None.
 
 ### Acceptance
 
 - Shared snapshot fixtures render the compact summary, consistent with the Claude pane's counts, within the 10-entry widget cap with an overflow line.
 - The widget survives `/reload` and resume in a coordinator session (latch rebuilt from session entries); it is absent when `setWidget` is missing or the project is not trusted.
 - Shown only in coordinator sessions; no extra model calls; Linux and Windows evidence; en/es docs updated.
+
+### Evidence
+
+- Attempts [A001](jobs/J002/A001.md), [A002](jobs/J002/A002.md); reviews [V001](jobs/J002/V001.md) fail, [V002](jobs/J002/V002.md) pass, [V003](jobs/J002/V003.md) pass; known limit S6; packaging change approved by the operator 2026-11-28; PR #434.
 
 ## J003
 
