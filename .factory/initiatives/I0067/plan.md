@@ -46,7 +46,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J003
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: An interrupted `isswf exec` no longer leaves a lease that blocks recovery: the lease records the tool child, `exec` removes it after the child exits on Ctrl-C, and `inspect` and `recover` report a stale lease with its owner's ceased verdict instead of a bare blocker.
 - Depends on: None
@@ -85,7 +85,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J005
 
-- Status: pending
+- Status: in-progress
 - Size: S
 - Objective: The documented integrate rerun outcomes are tested and visible: after a failed push or a failed cleanup, a rerun gives its named refusal or `already-closed`, `state` reports a local divergence, and each refusal names the exact manual step.
 - Depends on: None
