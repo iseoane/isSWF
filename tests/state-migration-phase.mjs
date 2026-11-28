@@ -55,7 +55,7 @@ const stopAt = {
   retired: () => interruptAt('rm', path => path.includes('/.isswf-transition-retired-')),
 };
 const phase = async ctx => (await readJSON(join(ctx.journal, 'phase.json'))).phase;
-const recover = ctx => recoverState({ project: ctx.project, store: ctx.store, id: ctx.id, ceased });
+const recover = (ctx, alive = ceased) => recoverState({ project: ctx.project, store: ctx.store, id: ctx.id, ceased: alive });
 const entries = async ctx => (await readdir(ctx.project)).sort();
 const retiredDirs = async ctx => (await entries(ctx)).filter(name => name.startsWith('.isswf-transition-retired-'));
 async function evidence(ctx) {
@@ -117,6 +117,17 @@ try {
   const unknown = await stopAt.staged();
   await writeFile(join(unknown.journal, 'phase.json'), JSON.stringify({ format: 1, id: unknown.id, phase: 'vanished' }));
   await assert.rejects(recover(unknown), /phase/iu);
+
+  // Finishing a retired claim refuses, keeping every byte, while the owner may be alive or a second root exists.
+  const alive = await stopAt.retired(), aliveBefore = await evidence(alive);
+  await assert.rejects(recover(alive, async () => false), /live or uncertain/u);
+  assert.equal(await evidence(alive), aliveBefore);
+  const twoRoots = await stopAt.retired();
+  await mkdir(join(twoRoots.project, '.factory'));
+  const twoBefore = await evidence(twoRoots);
+  await assert.rejects(recover(twoRoots), /State drift/u);
+  assert.equal(await evidence(twoRoots), twoBefore);
+  assert.equal(await phase(twoRoots), 'retired');
 
   // A migration interrupted before journals carried a phase still recovers by its directories.
   const oldStaged = await stopAt.staged(); await rm(join(oldStaged.journal, 'phase.json'));
