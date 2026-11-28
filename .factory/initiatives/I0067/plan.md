@@ -101,4 +101,4 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- Candidate ec6a131e5911dfcedbe7ee412d353bfbed5c4fa1; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass).
+- Candidate f0bff297991223d7b76745ad4d53b3e7836ecab8; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass).
