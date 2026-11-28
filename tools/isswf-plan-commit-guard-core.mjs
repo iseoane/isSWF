@@ -106,13 +106,23 @@ const describe = (path, { code, job, field, line }) => `${path}: ${code}${[job, 
 
 const isAttemptOrReview = path => isRecordPath(path) && RECORD_NAME.test(path.slice(path.lastIndexOf('/') + 1));
 
+const violationKey = ({ code, job, field, message }) => JSON.stringify([code, job, field, message]);
+
 /**
  * The record check's violations of an attempt or review record, from the inputs the post-write guard uses (path and text), so a commit never refuses
  * what that guard accepts. The rules for a new record, which need the base commit, and the launch notes stay with `isswf-record-check`.
+ * A violation the `before` text (the record at HEAD) already has is not reported, so editing a historical record that predates a newer rule is not refused;
+ * each earlier violation excuses one equal violation, whatever its line.
  */
-function recordViolations(path, text) {
+function recordViolations(path, text, before) {
   if (text.length > MAX_RECORD_CHARS) return [];
-  return checkRecord({ path, text }).violations.map(violation => `${describe(path, violation)}: ${violation.message}`);
+  const known = new Map();
+  if (before !== undefined && before.length <= MAX_RECORD_CHARS) for (const violation of checkRecord({ path, text: before }).violations) known.set(violationKey(violation), (known.get(violationKey(violation)) ?? 0) + 1);
+  return checkRecord({ path, text }).violations.filter(violation => {
+    const key = violationKey(violation), left = known.get(key) ?? 0;
+    if (left > 0) known.set(key, left - 1);
+    return left === 0;
+  }).map(violation => `${describe(path, violation)}: ${violation.message}`);
 }
 
 /**
@@ -146,7 +156,10 @@ export async function checkPlanCommit({ command, cwd, git, read, platform = glob
         const match = PLAN_PATH.exec(path);
         if (!match && isAttemptOrReview(path)) {
           const record = all ? { exitCode: 0, stdout: await read(`${root}/${path}`) } : await git(['show', `:${path}`], root);
-          if (record.exitCode === 0) violations.push(...recordViolations(path, record.stdout));
+          // An empty listing means HEAD has no such record (a new file); a failed lookup is a fault, which allows the commit.
+          const tracked = record.exitCode === 0 ? await git(['ls-tree', 'HEAD', '--', path], root) : undefined;
+          const before = tracked?.exitCode === 0 && tracked.stdout.trim() ? await git(['show', `HEAD:${path}`], root) : undefined;
+          if (tracked?.exitCode === 0 && (before === undefined || before.exitCode === 0)) violations.push(...recordViolations(path, record.stdout, before?.stdout));
           continue;
         }
         if (!match) continue;
