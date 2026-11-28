@@ -173,7 +173,7 @@ export async function recoverState({ project, store, id, ceased }) {
   const old = await exists(join(project, '.factory')), current = await exists(join(project, '.isswf'));
   if (old === current) throw Error('Ambiguous state locations block recovery');
   // A live claim holds the journal at staged or swapped. Staged also covers a rename that landed before the swapped phase was written.
-  if (phase && !['staged', 'swapped'].includes(phase) || phase === 'swapped' && old) throw Error('Journal phase ' + phase + ' contradicts the state directories');
+  if ((phase && !['staged', 'swapped'].includes(phase)) || (phase === 'swapped' && old)) throw Error('Journal phase ' + phase + ' contradicts the state directories');
   const observed = await tree(join(project, old ? '.factory' : '.isswf'));
   if (observed.expected !== record.expected) throw Error('State drift blocks recovery; preserve data for inspection');
   if (!hasRecord) {
