@@ -6,7 +6,7 @@ The operator created this initiative on 2026-11-27 ("para el records-only pushes
 
 ## J001
 
-- Status: pending
+- Status: in-progress
 - Size: M
 - Objective: A commit that records an attempt or review record is refused when the record check rejects that record as the commit would record it, on both hosts, so a malformed record no longer reaches `main` through a records-only push.
 - Depends on: None
