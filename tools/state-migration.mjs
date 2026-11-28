@@ -173,7 +173,8 @@ export async function recoverState({ project, store, id, ceased }) {
   const old = await exists(join(project, '.factory')), current = await exists(join(project, '.isswf'));
   if (old === current) throw Error('Ambiguous state locations block recovery');
   // A live claim holds the journal at staged or swapped. Staged also covers a rename that landed before the swapped phase was written.
-  if ((phase && !['staged', 'swapped'].includes(phase)) || (phase === 'swapped' && old)) throw Error('Journal phase ' + phase + ' contradicts the state directories');
+  // Done with a claim present is a finished move whose claim reappeared; it is cleared without moving the phase.
+  if (phase === 'retired' || ((phase === 'swapped' || phase === 'done') && old)) throw Error('Journal phase ' + phase + ' contradicts the state directories');
   const observed = await tree(join(project, old ? '.factory' : '.isswf'));
   if (observed.expected !== record.expected) throw Error('State drift blocks recovery; preserve data for inspection');
   if (!hasRecord) {
@@ -186,8 +187,9 @@ export async function recoverState({ project, store, id, ceased }) {
     await sync(path); await clearClaim(project);
     return { status: 'state-recovered', id, activeDirectory: '.factory' };
   }
-  if (phase !== 'swapped') await setPhase(path, id, 'swapped');
+  if (phase !== 'swapped' && phase !== 'done') await setPhase(path, id, 'swapped');
   if (!await exists(join(path, 'complete.json'))) await publish(join(path, 'complete.json'), { format: 1, id, state: 'moved' });
-  await sync(path); await retireClaim(project, path, id);
+  await sync(path);
+  if (phase === 'done') await clearClaim(project); else await retireClaim(project, path, id);
   return { status: 'state-recovered', id, activeDirectory: '.isswf' };
 }
