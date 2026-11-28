@@ -43,9 +43,18 @@ await writeFile(preload, `import { existsSync } from 'node:fs';
 const timer = setInterval(() => {
   if (!existsSync(process.env.ISSWF_TEST_TRIGGER)) return;
   clearInterval(timer);
+  // Without a listener, a real signal runs its default action and ends the process (130 stands for it).
+  if (!process.listenerCount(process.env.ISSWF_TEST_SIGNAL)) process.exit(130);
   process.emit(process.env.ISSWF_TEST_SIGNAL);
 }, 25);
 timer.unref();
+`);
+const failSpawn = join(temp, 'fail-spawn.mjs');
+await writeFile(failSpawn, `import cp from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
+const real = cp.spawn;
+cp.spawn = (command, ...rest) => real('isswf-missing-' + command, ...rest);
+syncBuiltinESMExports();
 `);
 
 const children = new Set();
@@ -60,12 +69,13 @@ async function scenario(options = {}) {
   const cli = (command, args = [], ok = true) => run(process.execPath, [join(release, 'tools/isswf.mjs'), command, ...common, ...args], ok);
   assert.equal(JSON.parse(cli('init', ['--tracking', 'local']).stdout).status, 'initialized');
   const childEnv = { ...env, ISSWF_TEST_READY: files.ready, ISSWF_TEST_STOP: files.stop, ISSWF_TEST_TRIGGER: files.trigger, ISSWF_TEST_SIGNAL: options.signal || 'SIGINT' };
-  const imports = options.signal ? ['--import', pathToFileURL(preload).href] : [];
+  const imports = options.signal ? ['--import', pathToFileURL(preload).href] : options.failSpawn ? ['--import', pathToFileURL(failSpawn).href] : [];
   const launcher = spawn(process.execPath, [...imports, join(release, 'tools/isswf.mjs'), 'exec', ...common, '--', 'isswf-status', '--initiative', 'I0001'], { env: childEnv, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
   children.add(launcher);
   let output = '', settled = null;
   for (const stream of [launcher.stdout, launcher.stderr]) stream.on('data', bytes => { output += bytes; });
   const exited = new Promise((done, reject) => { launcher.once('error', reject); launcher.once('exit', (code, signal) => { settled = { code, signal }; done(settled); }); });
+  if (options.failSpawn) return { project, cli, launcher, exited, settled: () => settled, output: () => output };
   const toolPid = Number(await until('the tool child to start', async () => existsSync(files.ready) && await readFile(files.ready, 'utf8')));
   const leaseDir = join(project, '.isswf/local/leases');
   const [leaseName] = await readdir(leaseDir);
@@ -110,22 +120,36 @@ try {
     await Promise.race([ctx.exited, sleep(15000).then(() => { throw Error('Launcher did not end'); })]);
     await stopTool(ctx);
     await writeFile(join(ctx.leaseDir, 'damaged.json'), '{"owner":');
+    await writeFile(join(ctx.leaseDir, 'null.json'), 'null');
     const blockers = JSON.parse(ctx.cli('inspect').stdout).blockers;
     const entry = blockers.find(blocker => blocker.lease === ctx.leaseName);
     assert.equal(entry?.state, 'owner-ceased', 'A lease whose launcher ceased is reported with that verdict');
     assert.equal(entry.tool, 'isswf-status');
     assert.equal(entry.child, ctx.toolPid, 'The report names the child PID to check');
-    assert.equal(blockers.find(blocker => blocker.lease === 'damaged.json')?.state, 'unreadable', 'A damaged lease is reported, not fatal');
+    for (const name of ['damaged.json', 'null.json']) assert.equal(blockers.find(blocker => blocker.lease === name)?.state, 'unreadable', `${name}: a damaged lease is reported, not fatal`);
     const pin = (await readFile(join(ctx.project, '.isswf/install.json'))).toString('base64');
     await mkdir(join(ctx.project, '.isswf/local/operation'));
     const record = { format: 1, id: 'stale', kind: 'migrate', owner: lease.owner, reference: 'Fixture', files: [{ path: '.isswf/install.json', before: pin, after: pin }] };
     await writeFile(join(ctx.project, '.isswf/local/operation/owner.json'), JSON.stringify({ id: 'stale', owner: lease.owner, transaction: record }));
     assert.match(ctx.cli('recover', ['--id', 'stale'], false).stderr, /owner-ceased/u, 'recover refuses a stale lease with a named reason');
-    assert.deepEqual((await readdir(ctx.leaseDir)).sort(), ['damaged.json', ctx.leaseName].sort(), 'No lease is removed automatically');
+    assert.deepEqual((await readdir(ctx.leaseDir)).sort(), ['damaged.json', 'null.json', ctx.leaseName].sort(), 'No lease is removed automatically');
     return 'stale';
   })();
 
-  const results = await Promise.all([...handled, stale]);
+  // 3. A tool that cannot start fails the launcher cleanly: the error is reported, the claim is released and no lease remains.
+  const spawnError = (async () => {
+    const ctx = await scenario({ failSpawn: true });
+    const end = await Promise.race([ctx.exited, sleep(30000).then(() => { throw Error('Launcher did not exit after a spawn error'); })]);
+    assert.equal(end.code, 1, `A spawn error ends the launcher with a reported failure
+${ctx.output()}`);
+    assert.match(ctx.output(), /ENOENT/u, 'The spawn error is reported');
+    assert.equal(existsSync(join(ctx.project, '.isswf/local/operation')), false, 'The operation claim is released');
+    assert.deepEqual(await readdir(join(ctx.project, '.isswf/local/leases')), [], 'No lease remains for a tool that never ran');
+    assert.deepEqual(JSON.parse(ctx.cli('inspect').stdout).blockers, []);
+    return 'spawn-error';
+  })();
+
+  const results = await Promise.all([...handled, stale, spawnError]);
   console.log(JSON.stringify({ status: 'PASS', platform: process.platform, node: process.version, scenarios: results }));
 } catch (error) { keep = true; console.error('Retained failing fixture: ' + temp); throw error; }
 finally {
