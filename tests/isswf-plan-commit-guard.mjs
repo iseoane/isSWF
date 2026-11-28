@@ -146,6 +146,48 @@ try {
   assert.match((await recCheck('git commit -m edit')).deny ?? '', /A002\.md/u, 'an edit that adds a violation is refused');
   run(recRepo, 'reset', '-q', '--hard');
 
+  // Parity: the guard refuses exactly what `isswf-record-check --base HEAD` rejects for a record the commit adds, with the same sibling and launch inputs.
+  {
+    const sha = 'a'.repeat(40);
+    const notes = join(temp, 'claude');
+    mkdirSync(join(notes, 'isswf/compaction'), { recursive: true });
+    const launch = { agent: 'isswf-worker', initiative: 'I0001', job: 'J001', path: '.factory/initiatives/I0001/jobs/J001/brief-r1.md', checkpoint: sha, base: sha, run: 'w1' };
+    writeFileSync(join(notes, 'isswf/compaction/session1.json'), JSON.stringify({ version: 1, assignments: [launch] }));
+    const launches = async () => [launch];
+    const reviewLabels = '- Unreviewed areas and evidence limits: None.\n- Convergence advice: None.\n- Process deviations observed: None.\n';
+    const review = extra => `# Review report\n\n${extra}${reviewLabels}`;
+    const rel = name => `.factory/initiatives/I0001/jobs/J001/${name}`;
+    const cliRejects = name => execFileSync(process.execPath, ['-e', `
+      const { spawnSync } = require('node:child_process');
+      const result = spawnSync(process.execPath, [process.argv[1], '--project', process.argv[2], '--base', 'HEAD', '--file', process.argv[3]], { encoding: 'utf8', env: { ...process.env, CLAUDE_CONFIG_DIR: process.argv[4] } });
+      process.stdout.write(String(result.status));
+    `, join(source, 'tools/isswf-record-check.mjs'), recRepo, join(recRepo, rel(name)), notes], { encoding: 'utf8' }) === '1';
+    const parity = async (name, text, expected, message) => {
+      writeFileSync(join(recRepo, rel(name)), text);
+      run(recRepo, 'add', rel(name));
+      const guarded = await checkPlanCommit({ command: 'git commit -m parity', cwd: recRepo, git, read: async path => readFileSync(path, 'utf8'), launches });
+      assert.equal(cliRejects(name), expected, `the CLI: ${message}`);
+      assert.equal(guarded.deny !== undefined, expected, `the guard matches the CLI: ${message}`);
+      run(recRepo, 'rm', '-qf', '--cached', rel(name));
+      rmSync(join(recRepo, rel(name)));
+    };
+    const resolutions = value => review(`- Finding resolutions, recorded afterwards by the coordinator: ${value}\n`);
+    await parity('V010.md', resolutions('F1 intentional: reason'), true, 'a new review with a resolution outside the vocabulary');
+    await parity('V010.md', resolutions('F1 fixed: reason'), false, 'a new review with a valid resolution');
+    const checks = value => `# Report\n\n- Checks run and observed results: ${value}\n${attemptLabels}`;
+    await parity('A010.md', checks('node tests/x.mjs . exit 0'), true, 'a new attempt reporting a check without its commit');
+    await parity('A010.md', checks(`node tests/x.mjs . exit 0 at ${sha}`), false, 'a new attempt naming the commit of its check');
+    await parity('A010.md', `# Report\n\n- Brief: ${rel('brief-r1.md')} at ${sha}\n${attemptLabels}`, true, 'a new attempt without the Run line of an accepted launch');
+    await parity('A010.md', `# Report\n\n- Run: claude agent=w1\n- Brief: ${rel('brief-r1.md')} at ${sha}\n${attemptLabels}`, false, 'a new attempt with that Run line');
+    const round = n => review(`- Review round in this job, and prior review IDs: ${n}; prior reviews: none\n`);
+    await parity('V010.md', round(2), true, 'a round 2 review with no earlier review');
+    writeFileSync(join(recRepo, rel('V009.md')), review(`- Review round in this job, and prior review IDs: 1; prior reviews: none\n- Aggregate verdict, copied verbatim from the reviewer's report header: fail\n`));
+    run(recRepo, 'add', rel('V009.md'));
+    run(recRepo, 'commit', '-qm', 'failed review', '--', rel('V009.md'));
+    await parity('V010.md', round(2), true, 'a round 2 review after a failed review with no correction');
+    await parity('V010.md', round(1), false, 'a round 1 review');
+  }
+
   // A git fault, or an unreadable working-tree record, fails open.
   writeFileSync(recordPath, badRecord);
   run(recRepo, 'add', '-A');
