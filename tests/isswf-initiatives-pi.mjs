@@ -56,7 +56,7 @@ assert.equal(latchFromBranch(undefined), false);
 assert.equal(latchFromBranch([null, { type: 'message' }, user(undefined), user([null, 7])]), false, 'unreadable entries are skipped');
 
 // The extension behind its events, with a stand-in `pi`, a context with a UI and real plan files.
-const plan = (id, title, jobs) => `# ${id}: ${title}\n\nType: enhancement\n\n${jobs.map(([jid, status, dependsOn = 'None']) => [`## ${jid}`, '', `- Status: ${status}`, `- Objective: Objective ${jid}`, `- Depends on: ${dependsOn}`, `- Brief: [brief-r1.md](jobs/${jid}/brief-r1.md)`, '- Blocker: None.', '- Next step: Continue.', '', '### Acceptance', '', '- Works.', '', '### Evidence', '', '- None.', ''].join('\n')).join('\n')}`;
+const plan = (id, title, jobs) => `# ${id}: ${title}\n\nType: enhancement\n\n${jobs.map(([jid, status, dependsOn = 'None']) => [`## ${jid}`, '', `- Status: ${status}`, `- Objective: Objective ${jid}`, `- Depends on: ${dependsOn}`, `- Brief: [brief-r1.md](jobs/${jid}/brief-r1.md)`, `- Blocker: ${status === 'blocked' ? 'Waiting.' : 'None.'}`, '- Next step: Continue.', '', '### Acceptance', '', '- Works.', '', '### Evidence', '', status === 'completed' ? '- Merged.' : '- None.', ''].join('\n')).join('\n')}`;
 const root = await realpath(await mkdtemp(join(tmpdir(), 'isswf-initiatives-pi-')));
 const timers = [];
 const realSetInterval = globalThis.setInterval;
@@ -123,7 +123,6 @@ try {
   const reader = session();
   await reader.emit('session_start', { reason: 'startup' });
   await reader.emit('tool_call', { toolName: 'read', input: { path: '/x/skills/isswf-coordinator/SKILL.md' } });
-  await reader.emit('tool_result', { toolName: 'read' });
   assert.deepEqual(last(reader).lines, expected);
   await reader.emit('session_shutdown', {});
 
