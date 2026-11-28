@@ -50,22 +50,26 @@ function worktreeOf(git, root, branch) {
   return undefined;
 }
 
+// A path as one argument that pastes into Git Bash and PowerShell alike: forward slashes, double quotes.
+const arg = path => `"${path.replaceAll('\\', '/')}"`;
+
 // How the local base `ref` differs from `upstream`, with the manual step each case needs; undefined when the remote has everything `ref` has.
-// `local-ahead` is what a failed push leaves: the close commit exists only here. Nothing is pushed or reset by this command.
+// `local-ahead` is what a failed push leaves: commits only here, the close commit among them, so the step lists them before pushing `ref` itself (`state` may run with another branch checked out).
+// Nothing is pushed or reset by this command.
 function localDivergence({ git, root, ref, upstream, remote, base }) {
   if (git(root, ['merge-base', '--is-ancestor', ref, upstream], { check: false }).status === 0) return undefined;
   if (git(root, ['merge-base', '--is-ancestor', upstream, ref], { check: false }).status === 0) {
-    return { divergence: 'local-ahead', next: `git -C ${root} push ${remote} HEAD:refs/heads/${base}, then rerun this command for the worktree and branch still to remove` };
+    return { divergence: 'local-ahead', next: `git -C ${arg(root)} log ${upstream}..${ref} --oneline && git -C ${arg(root)} push ${remote} ${ref}:refs/heads/${base}`, then: 'rerun this command for the worktree and branch still to remove' };
   }
-  return { divergence: 'diverged', next: `reconcile the local ${base} with ${upstream} by hand (git -C ${root} log ${upstream}..${ref} lists the commits only here), then rerun this command` };
+  return { divergence: 'diverged', next: `reconcile the local ${base} with ${upstream} by hand (git -C ${arg(root)} log ${upstream}..${ref} --oneline lists the commits only here), then rerun this command` };
 }
 
 // The manual cleanup a close leaves when its last steps failed: the job worktree and branch that still exist, as commands.
 function cleanupSteps({ git, root, branch, head }) {
   const worktree = worktreeOf(git, root, branch);
   const steps = [];
-  if (worktree && resolve(worktree) !== root) steps.push(`git -C ${root} worktree remove ${worktree}`);
-  if (git(root, ['rev-parse', '--verify', '-q', `refs/heads/${branch}`], { check: false }).status === 0) steps.push(`git -C ${root} update-ref -d refs/heads/${branch} ${head}`);
+  if (worktree && resolve(worktree) !== root) steps.push(`git -C ${arg(root)} worktree remove ${arg(worktree)}`);
+  if (git(root, ['rev-parse', '--verify', '-q', `refs/heads/${branch}`], { check: false }).status === 0) steps.push(`git -C ${arg(root)} update-ref -d refs/heads/${branch} ${head}`);
   return steps.length ? { next: steps.join(' && ') } : {};
 }
 
