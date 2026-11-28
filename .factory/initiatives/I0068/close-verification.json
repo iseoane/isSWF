@@ -1,0 +1,13 @@
+{
+  "schema": "isswf.close-verification",
+  "schemaVersion": 1,
+  "source": "ci",
+  "initiative": "I0068",
+  "head": "fa92040c70afaa0a35a9e22d3a397206d2c820d9",
+  "runUrl": "https://github.com/iseoane/isSWF/actions/runs/46117193415",
+  "checks": [
+    { "id": "Portable checks", "status": "passed" },
+    { "id": "Package and host discovery (ubuntu-latest)", "status": "passed" },
+    { "id": "Package and host discovery (windows-latest)", "status": "passed" }
+  ]
+}

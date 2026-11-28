@@ -24,3 +24,4 @@ The operator created this initiative on 2026-11-27 ("para el records-only pushes
 ### Evidence
 
 - Candidate 80b4a36ff1fba9be33b49b559960130f3071df2b; attempt A001; reviews V001 (fail, corrected), V002 (pass), V003 (pass). Operator decision 2026-11-28: the guard enforces parity with isswf-record-check --base HEAD.
+- Merged in #428 as 3077a8e09a70409af20598480051361e72fd22b2. Full local check at fa92040c70afaa0a35a9e22d3a397206d2c820d9 passed (check-quality: 1461 s); CI passed (close-verification.json).
