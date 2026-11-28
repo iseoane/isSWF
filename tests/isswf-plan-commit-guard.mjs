@@ -132,6 +132,20 @@ try {
   writeFileSync(join(recDir, 'notes.md'), badRecord);
   run(recRepo, 'add', '-A');
   assert.equal((await recCheck('git commit -m notes')).deny, undefined, 'only A and V records are checked');
+  // A historical record that already has a violation at HEAD can be edited: only a violation the HEAD version lacks refuses, and a new file has none at HEAD.
+  const oldPath = join(recDir, 'A002.md');
+  writeFileSync(oldPath, badRecord);
+  run(recRepo, 'add', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  assert.ok((await recCheck('git commit -m new')).deny, 'a new record with a violation is refused');
+  run(recRepo, 'commit', '-qm', 'historical record', '--', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  writeFileSync(oldPath, `${badRecord}\nA note added to a historical record.\n`);
+  run(recRepo, 'add', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  assert.equal((await recCheck('git commit -m edit')).deny, undefined, 'an edit that keeps the existing violation is allowed');
+  writeFileSync(oldPath, `${badRecord}\n- Run: claude agent=a2 (resumed)\n`);
+  run(recRepo, 'add', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  assert.match((await recCheck('git commit -m edit')).deny ?? '', /A002\.md/u, 'an edit that adds a violation is refused');
+  run(recRepo, 'reset', '-q', '--hard');
+
   // A git fault, or an unreadable working-tree record, fails open.
   writeFileSync(recordPath, badRecord);
   run(recRepo, 'add', '-A');
