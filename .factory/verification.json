@@ -7,7 +7,7 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "a3f750bf27cc548c03b46db1b881dffc60541558208ee0f679cd0807230154ea"
+      "sha256": "f9c593aa8758337894a97d2e6cac5e79e50d526a9366be29e909340992b4c354"
     }
   ],
   "checks": [
@@ -48,6 +48,24 @@
         "tools/"
       ],
       "timeoutSeconds": 120
+    },
+    {
+      "id": "exec-interruption",
+      "argv": [
+        "node",
+        "tests/exec-interruption.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf.mjs",
+        "tests/exec-interruption.mjs"
+      ],
+      "timeoutSeconds": 300
     },
     {
       "id": "factory-tools-install",
