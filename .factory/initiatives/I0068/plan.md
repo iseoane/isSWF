@@ -6,13 +6,13 @@ The operator created this initiative on 2026-11-27 ("para el records-only pushes
 
 ## J001
 
-- Status: in-progress
+- Status: completed
 - Size: M
 - Objective: A commit that records an attempt or review record is refused when the record check rejects that record as the commit would record it, on both hosts, so a malformed record no longer reaches `main` through a records-only push.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None.
-- Next step: Size M. Ground the plan commit guard in `tools/isswf-plan-commit-guard-core.mjs` (how it reads the staged or working-tree version) and `checkRecord` in `tools/isswf-record-check-core.mjs`; reuse both rather than adding a second reader.
+- Next step: None. Previously: Size M. Ground the plan commit guard in `tools/isswf-plan-commit-guard-core.mjs` (how it reads the staged or working-tree version) and `checkRecord` in `tools/isswf-record-check-core.mjs`; reuse both rather than adding a second reader.
 
 ### Acceptance
 
@@ -23,4 +23,4 @@ The operator created this initiative on 2026-11-27 ("para el records-only pushes
 
 ### Evidence
 
-- None.
+- Candidate 80b4a36ff1fba9be33b49b559960130f3071df2b; attempt A001; reviews V001 (fail, corrected), V002 (pass), V003 (pass). Operator decision 2026-11-28: the guard enforces parity with isswf-record-check --base HEAD.

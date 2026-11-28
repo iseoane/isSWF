@@ -1,13 +1,13 @@
 import { initRepository } from './support/git-fixture.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const source = resolve(process.argv[2] || '.');
-const { checkPlanCommit } = await import(pathToFileURL(join(source, 'tools/isswf-plan-commit-guard-core.mjs')));
+const { acceptedLaunches, checkPlanCommit } = await import(pathToFileURL(join(source, 'tools/isswf-plan-commit-guard-core.mjs')));
 
 const temp = realpathSync(mkdtempSync(join(tmpdir(), 'isswf-plan-commit-')));
 const run = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8' });
@@ -87,6 +87,116 @@ try {
   run(repo, 'rm', '-q', '.factory/initiatives/I0001/plan.md');
   assert.equal((await check('git commit -m removed')).deny, undefined);
   assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: repo, git: async () => { throw Error('no git'); }, read: async () => '' })).deny, undefined);
+  // Attempt and review records are read as the commit would record them and checked by the record check; a valid one commits.
+  const recRepo = join(temp, 'records');
+  const recDir = join(recRepo, '.factory/initiatives/I0001/jobs/J001');
+  mkdirSync(recDir, { recursive: true });
+  initRepository(recRepo, ['-b', 'main']);
+  run(recRepo, 'config', 'user.email', 't@example.invalid');
+  run(recRepo, 'config', 'user.name', 'T');
+  writeFileSync(join(recRepo, 'README.md'), 'x\n');
+  run(recRepo, 'add', '-A');
+  run(recRepo, 'commit', '-qm', 'start');
+  const recCheck = command => checkPlanCommit({ command, cwd: recRepo, git, read: async path => readFileSync(path, 'utf8') });
+  const attemptLabels = '- Deviations from required procedure and consequence: None.\n- Process deviations observed: None.\n';
+  const validRecord = `# Report\n\n- Run: claude agent=a1\n\n${attemptLabels}`;
+  const badRecord = `# Report\n\n- Run: claude agent=a1 (resumed)\n\n${attemptLabels}`;
+  const recordPath = join(recDir, 'A001.md');
+  writeFileSync(recordPath, validRecord);
+  run(recRepo, 'add', '-A');
+  assert.equal((await recCheck('git commit -m ok')).deny, undefined, 'a valid staged record commits');
+  writeFileSync(recordPath, badRecord);
+  run(recRepo, 'add', '-A');
+  const refusedRecord = await recCheck('git commit -m bad');
+  assert.match(refusedRecord.deny ?? '', /record check rejects/u);
+  assert.match(refusedRecord.deny, /\.factory\/initiatives\/I0001\/jobs\/J001\/A001\.md/u, 'names the path');
+  assert.match(refusedRecord.deny, /run-line-unparsed/u, 'names the violation');
+  // The index is what the commit records: a fixed working tree with the bad record still staged is refused.
+  writeFileSync(recordPath, validRecord);
+  assert.ok((await recCheck('git commit -m bad')).deny);
+  run(recRepo, 'add', '-A');
+  assert.equal((await recCheck('git commit -m ok')).deny, undefined);
+  // -a, a pathspec and a chained add commit the working tree; an unstaged bad record that nothing commits is not read.
+  run(recRepo, 'commit', '-qm', 'record');
+  writeFileSync(recordPath, badRecord);
+  assert.equal((await recCheck('git commit -m none')).deny, undefined, 'an unstaged change is not committed');
+  assert.ok((await recCheck('git commit -am all')).deny, '-a reads the working tree');
+  assert.ok((await recCheck('git commit -m p .factory/initiatives/I0001/jobs/J001/A001.md')).deny, 'a pathspec reads the working tree');
+  assert.ok((await recCheck('git add -A && git commit -m chained')).deny, 'a chained add reads the working tree');
+  // A review is checked too, including a new untracked one added by a chained add; other names are not records.
+  const reviewPath = join(recDir, 'V001.md');
+  writeFileSync(recordPath, validRecord);
+  writeFileSync(reviewPath, badRecord);
+  assert.match((await recCheck('git add -A && git commit -m new')).deny ?? '', /V001\.md/u, 'a new review added by a chained add is checked');
+  rmSync(reviewPath);
+  writeFileSync(join(recDir, 'notes.md'), badRecord);
+  run(recRepo, 'add', '-A');
+  assert.equal((await recCheck('git commit -m notes')).deny, undefined, 'only A and V records are checked');
+  // A historical record that already has a violation at HEAD can be edited: only a violation the HEAD version lacks refuses, and a new file has none at HEAD.
+  const oldPath = join(recDir, 'A002.md');
+  writeFileSync(oldPath, badRecord);
+  run(recRepo, 'add', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  assert.ok((await recCheck('git commit -m new')).deny, 'a new record with a violation is refused');
+  run(recRepo, 'commit', '-qm', 'historical record', '--', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  writeFileSync(oldPath, `${badRecord}\nA note added to a historical record.\n`);
+  run(recRepo, 'add', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  assert.equal((await recCheck('git commit -m edit')).deny, undefined, 'an edit that keeps the existing violation is allowed');
+  writeFileSync(oldPath, `${badRecord}\n- Run: claude agent=a2 (resumed)\n`);
+  run(recRepo, 'add', '.factory/initiatives/I0001/jobs/J001/A002.md');
+  assert.match((await recCheck('git commit -m edit')).deny ?? '', /A002\.md/u, 'an edit that adds a violation is refused');
+  run(recRepo, 'reset', '-q', '--hard');
+
+  // Parity: the guard refuses exactly what `isswf-record-check --base HEAD` rejects for a record the commit adds, with the same sibling and launch inputs.
+  {
+    const sha = 'a'.repeat(40);
+    const notes = join(temp, 'claude');
+    mkdirSync(join(notes, 'isswf/compaction'), { recursive: true });
+    const launch = { agent: 'isswf-worker', initiative: 'I0001', job: 'J001', path: '.factory/initiatives/I0001/jobs/J001/brief-r1.md', checkpoint: sha, base: sha, run: 'w1' };
+    writeFileSync(join(notes, 'isswf/compaction/session1.json'), JSON.stringify({ version: 1, assignments: [launch] }));
+    const launches = async () => [launch];
+    assert.deepEqual(await acceptedLaunches({ claudeDir: notes, list: async dir => readdirSync(dir), read: async path => readFileSync(path, 'utf8') }), [launch], 'the session notes are read as the CLI reads them');
+    assert.deepEqual(await acceptedLaunches({ claudeDir: join(temp, 'missing'), list: async dir => readdirSync(dir), read: async path => readFileSync(path, 'utf8') }), [], 'a missing directory is no launch');
+    const reviewLabels = '- Unreviewed areas and evidence limits: None.\n- Convergence advice: None.\n- Process deviations observed: None.\n';
+    const review = extra => `# Review report\n\n${extra}${reviewLabels}`;
+    const rel = name => `.factory/initiatives/I0001/jobs/J001/${name}`;
+    const cliRejects = name => execFileSync(process.execPath, ['-e', `
+      const { spawnSync } = require('node:child_process');
+      const result = spawnSync(process.execPath, [process.argv[1], '--project', process.argv[2], '--base', 'HEAD', '--file', process.argv[3]], { encoding: 'utf8', env: { ...process.env, CLAUDE_CONFIG_DIR: process.argv[4] } });
+      process.stdout.write(String(result.status));
+    `, join(source, 'tools/isswf-record-check.mjs'), recRepo, join(recRepo, rel(name)), notes], { encoding: 'utf8' }) === '1';
+    const parity = async (name, text, expected, message) => {
+      writeFileSync(join(recRepo, rel(name)), text);
+      run(recRepo, 'add', rel(name));
+      const guarded = await checkPlanCommit({ command: 'git commit -m parity', cwd: recRepo, git, read: async path => readFileSync(path, 'utf8'), launches });
+      assert.equal(cliRejects(name), expected, `the CLI: ${message}`);
+      assert.equal(guarded.deny !== undefined, expected, `the guard matches the CLI: ${message}`);
+      run(recRepo, 'rm', '-qf', '--cached', rel(name));
+      rmSync(join(recRepo, rel(name)));
+    };
+    const resolutions = value => review(`- Finding resolutions, recorded afterwards by the coordinator: ${value}\n`);
+    await parity('V010.md', resolutions('F1 intentional: reason'), true, 'a new review with a resolution outside the vocabulary');
+    await parity('V010.md', resolutions('F1 fixed: reason'), false, 'a new review with a valid resolution');
+    const checks = value => `# Report\n\n- Checks run and observed results: ${value}\n${attemptLabels}`;
+    await parity('A010.md', checks('node tests/x.mjs . exit 0'), true, 'a new attempt reporting a check without its commit');
+    await parity('A010.md', checks(`node tests/x.mjs . exit 0 at ${sha}`), false, 'a new attempt naming the commit of its check');
+    await parity('A010.md', `# Report\n\n- Brief: ${rel('brief-r1.md')} at ${sha}\n${attemptLabels}`, true, 'a new attempt without the Run line of an accepted launch');
+    await parity('A010.md', `# Report\n\n- Run: claude agent=w1\n- Brief: ${rel('brief-r1.md')} at ${sha}\n${attemptLabels}`, false, 'a new attempt with that Run line');
+    const round = n => review(`- Review round in this job, and prior review IDs: ${n}; prior reviews: none\n`);
+    await parity('V010.md', round(2), true, 'a round 2 review with no earlier review');
+    writeFileSync(join(recRepo, rel('V009.md')), review(`- Review round in this job, and prior review IDs: 1; prior reviews: none\n- Aggregate verdict, copied verbatim from the reviewer's report header: fail\n`));
+    run(recRepo, 'add', rel('V009.md'));
+    run(recRepo, 'commit', '-qm', 'failed review', '--', rel('V009.md'));
+    await parity('V010.md', round(2), true, 'a round 2 review after a failed review with no correction');
+    await parity('V010.md', round(1), false, 'a round 1 review');
+  }
+
+  // A git fault, or an unreadable working-tree record, fails open.
+  writeFileSync(recordPath, badRecord);
+  run(recRepo, 'add', '-A');
+  assert.ok((await recCheck('git commit -m bad')).deny);
+  assert.equal((await checkPlanCommit({ command: 'git commit -m x', cwd: recRepo, git: async () => { throw Error('no git'); }, read: async () => '' })).deny, undefined);
+  assert.equal((await checkPlanCommit({ command: 'git commit -qam x', cwd: recRepo, git, read: async () => { throw Error('unreadable'); } })).deny, undefined);
+
   // Close gate: the commit that makes every job completed needs a passing close record at the newest non-records commit.
   const closeRepo = join(temp, 'close');
   mkdirSync(join(closeRepo, '.factory/initiatives/I0001'), { recursive: true });

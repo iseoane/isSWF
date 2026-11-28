@@ -6,7 +6,7 @@ import { guardCommand, HEREDOC, QUOTED } from '../tools/isswf-command-core.mjs'
 import { compactionInstructions, isCoordinatorSkill, noteFileName, NOTE_DIR, rememberDispatch, serializeNote } from '../tools/isswf-compaction-core.mjs'
 import { callsOf, guardDispatch, isRoleAgent, workerCalls } from '../tools/isswf-dispatch-guard-core.mjs'
 import { closeWorker, closeWorkerRun, markWorkerRun, openWorkers } from '../tools/isswf-parallel-workers-core.mjs'
-import { checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
+import { acceptedLaunches, checkPlanCommit } from '../tools/isswf-plan-commit-guard-core.mjs'
 import { checkVerificationCommit } from '../tools/isswf-verification-guard-core.mjs'
 import { checkRecordsPush } from '../tools/isswf-records-push-guard-core.mjs'
 import { checkIntegrationGate } from '../tools/isswf-integration-gate-core.mjs'
@@ -664,6 +664,10 @@ export const register: Register = (on, options) => {
             return { exitCode, stdout }
           },
           read: (file: string) => $.fs.read(file),
+          launches: async () => {
+            const { claudeDir } = await findHomes($)
+            return claudeDir === undefined ? [] : acceptedLaunches({ claudeDir, list: async (dir: string) => (await $.fs.list(dir)).map((entry: { name: string }) => entry.name), read: (file: string) => $.fs.read(file) })
+          },
           platform,
         })
         if (plans.deny !== undefined) return { deny: plans.deny }

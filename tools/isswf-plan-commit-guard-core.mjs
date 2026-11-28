@@ -2,7 +2,12 @@
 import { targetDir } from './isswf-branch-guard-core.mjs';
 import { tokenize } from './isswf-command-core.mjs';
 import { parsePlan, planErrorDetail } from './isswf-plan-core.mjs';
+import { checkRecord } from './isswf-record-check-core.mjs';
+import { NOTE_DIR, parseNote } from './isswf-compaction-core.mjs';
+import { isRecordPath, joiner, RECORD_NAME } from './isswf-snapshot-core.mjs';
 
+// The same ceiling as tools/isswf-record-check.mjs: a larger record is not checked.
+const MAX_RECORD_CHARS = 1024 * 1024;
 const PLAN_PATH = /^(\.isswf|\.factory)\/initiatives\/(I\d+)\/plan\.md$/u;
 const SHA = /^[0-9a-f]{40}$/u;
 const ALL_FLAG = arg => arg === '--all' || /^-[a-zA-Z]*a[a-zA-Z]*$/u.test(arg);
@@ -100,15 +105,75 @@ async function closeProblems({ state, initiative, path, plan, all, root, listed,
 
 const describe = (path, { code, job, field, line }) => `${path}: ${code}${[job, field].filter(Boolean).length ? ` at ${[job, field].filter(Boolean).join(' ')}` : ''}${line === undefined ? '' : ` (line ${line})`}`;
 
+const isAttemptOrReview = path => isRecordPath(path) && RECORD_NAME.test(path.slice(path.lastIndexOf('/') + 1));
+
+/**
+ * The accepted dispatches that returned a run ID, from every session note under the Claude config directory `claudeDir`, as tools/isswf-launch-notes.mjs reads them for the record check CLI.
+ * `list(dir)` resolves to file names and `read(path)` to a file's text; a missing directory or an unreadable note is no launch. Pi keeps its dispatches only in the running extension, so it has none here.
+ */
+export async function acceptedLaunches({ claudeDir, list, read }) {
+  const dir = joiner(claudeDir)(claudeDir, ...NOTE_DIR);
+  const launches = [];
+  try { for (const name of await list(dir)) launches.push(...(parseNote(await read(joiner(dir)(dir, name)).catch(() => '')) ?? [])); } catch { /* no notes */ }
+  return launches.filter(({ run }) => run);
+}
+
+const violationKey = ({ code, job, field, message }) => JSON.stringify([code, job, field, message]);
+
+/**
+ * The violations `checkRecord` finds in the attempt or review record at `path` as the commit would record it, the same ones
+ * `isswf-record-check --base HEAD` reports for that content: a record absent from HEAD is new (the rules that hold a new record to the current template apply),
+ * a review reads its job's other records (as the commit would record them), and the accepted launches of the host sessions are checked against the record.
+ * A violation the HEAD version of an existing record already has is not reported, so editing a historical record that predates a newer rule is not refused;
+ * each earlier violation excuses one equal violation, whatever its line. A fault in any lookup returns [] (the commit is allowed).
+ */
+async function recordViolations({ path, text, all, root, git, read, untracked, launches }) {
+  try {
+    if (text.length > MAX_RECORD_CHARS) return [];
+    const tracked = await git(['ls-tree', 'HEAD', '--', path], root);
+    if (tracked.exitCode !== 0) return [];
+    const isNew = !tracked.stdout.trim();
+    let before;
+    if (!isNew) {
+      const head = await git(['show', `HEAD:${path}`], root);
+      if (head.exitCode !== 0 || head.stdout.length > MAX_RECORD_CHARS) return [];
+      before = head.stdout;
+    }
+    const slash = path.lastIndexOf('/'), dir = path.slice(0, slash + 1), name = path.slice(slash + 1);
+    const listing = await git(['ls-files', '-z', '--', dir], root);
+    if (listing.exitCode !== 0) return [];
+    const siblings = [];
+    for (const other of new Set([...listing.stdout.split('\0'), ...untracked])) {
+      if (!other.startsWith(dir) || other.includes('/', dir.length) || other === path || !RECORD_NAME.test(other.slice(dir.length))) continue;
+      try {
+        const sibling = all ? { exitCode: 0, stdout: await read(`${root}/${other}`) } : await git(['show', `:${other}`], root);
+        if (sibling.exitCode === 0 && sibling.stdout.length <= MAX_RECORD_CHARS) siblings.push({ name: other.slice(dir.length), text: sibling.stdout });
+      } catch { /* deleted in the working tree: not recorded */ }
+    }
+    const accepted = (await launches?.()) ?? [];
+    const inputs = { path, ...(accepted.length && { launches: accepted, siblings: siblings.map(sibling => sibling.text) }) };
+    const known = new Map();
+    if (before !== undefined) for (const violation of checkRecord({ ...inputs, text: before, newRecord: false }).violations) known.set(violationKey(violation), (known.get(violationKey(violation)) ?? 0) + 1);
+    return checkRecord({ ...inputs, text, newRecord: isNew, ...(name[0] === 'V' && { jobRecords: siblings }) }).violations.filter(violation => {
+      const key = violationKey(violation), left = known.get(key) ?? 0;
+      if (left > 0) known.set(key, left - 1);
+      return left === 0;
+    }).map(violation => `${describe(path, violation)}: ${violation.message}`);
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Refuses a `git commit` that would record a plan `isswf-status` cannot read back, before it runs: the staged plan, or the working-tree plan with `-a`, a pathspec, or an earlier command in the same call.
+ * It refuses a commit that would record an attempt or review record (`A###.md`, `V###.md`) that the record check rejects, read the same way.
  * It also refuses the commit that makes every job of an initiative completed unless that initiative's close verification record is passing and current (`closeProblems`).
  * It fails open: this guard enforces a process rule, not an authority, so a fault allows the command.
- * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text.
+ * `git(argv, cwd)` resolves to `{ exitCode, stdout }`; `read(path)` resolves to a working-tree file's text; `launches()`, when given, resolves to the accepted dispatches the host sessions recorded.
  */
-export async function checkPlanCommit({ command, cwd, git, read, platform = globalThis.process?.platform }) {
+export async function checkPlanCommit({ command, cwd, git, read, launches, platform = globalThis.process?.platform }) {
   try {
-    const problems = [], closes = [];
+    const problems = [], closes = [], violations = [];
     const segments = tokenize(command);
     for (const [position, segment] of segments.entries()) {
       if (segment.git?.subcommand !== 'commit') continue;
@@ -128,6 +193,11 @@ export async function checkPlanCommit({ command, cwd, git, read, platform = glob
       const paths = [...listed.stdout.split('\0'), ...added.stdout.split('\0')];
       for (const path of paths) {
         const match = PLAN_PATH.exec(path);
+        if (!match && isAttemptOrReview(path)) {
+          const record = all ? { exitCode: 0, stdout: await read(`${root}/${path}`) } : await git(['show', `:${path}`], root);
+          if (record.exitCode === 0) violations.push(...await recordViolations({ path, text: record.stdout, all, root, git, read, untracked: added.stdout.split('\0'), launches }));
+          continue;
+        }
         if (!match) continue;
         const [, state, initiative] = match;
         const content = all ? { exitCode: 0, stdout: await read(`${root}/${path}`) } : await git(['show', `:${path}`], root);
@@ -141,14 +211,15 @@ export async function checkPlanCommit({ command, cwd, git, read, platform = glob
         } catch { /* fail open */ }
       }
     }
-    if (!problems.length && !closes.length) return {};
+    if (!problems.length && !closes.length && !violations.length) return {};
     const unreadable = problems.length ? `isSWF plan commit guard: git commit refused. isswf-status cannot read back ${problems.length === 1 ? 'this plan' : 'these plans'}:\n${problems.map(item => `- ${item}`).join('\n')}\nFix the plan with tools/isswf-plan-edit.mjs or by hand, stage it, and commit again.` : '';
     // A local record often cannot pass on Windows, where checks limited to other platforms do not run, so the CI record leads there.
     const route = initiative => (platform === 'win32'
       ? `Record a passing CI run with \`source: "ci"\` and its run URL (or run \`isswf-verify --tier initiative --record ${initiative}\` if every check runs on Windows)`
       : `Run the initiative tier with \`isswf-verify --tier initiative --record ${initiative}\` (or record a passing CI run with \`source: "ci"\` and its run URL)`);
+    const malformed = violations.length ? `isSWF plan commit guard: git commit refused. The isSWF record check rejects ${violations.length === 1 ? 'this record' : 'these records'} as the commit would record ${violations.length === 1 ? 'it' : 'them'}:\n${violations.map(item => `- ${item}`).join('\n')}\nFix the record, stage it and commit again; \`node tools/isswf-record-check.mjs\` reports the same violations.` : '';
     const open = closes.map(({ initiative, found }) => `isSWF plan commit guard: git commit refused. This commit completes every job of ${initiative}, and its close verification is not recorded at the closing head:\n${found.map(item => `- ${item}`).join('\n')}\n${route(initiative)}, commit the record, and commit the plan again.`);
-    return { deny: `${[unreadable, ...open].join('\n\n').trim()}\nThis is a process rule, not a retry signal: do not rephrase the command to get past it.` };
+    return { deny: `${[unreadable, malformed, ...open].filter(Boolean).join('\n\n').trim()}\nThis is a process rule, not a retry signal: do not rephrase the command to get past it.` };
   } catch {
     return {};
   }
