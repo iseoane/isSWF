@@ -25,7 +25,7 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 ## J002
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Implement a Pi widget above or below the editor that shows a compact summary of the snapshot (operator decision 2026-11-28): one line per active initiative with its open, blocked and next job, plus unopened initiatives.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
