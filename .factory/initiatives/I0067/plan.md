@@ -102,3 +102,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 ### Evidence
 
 - Candidate f0bff297991223d7b76745ad4d53b3e7836ecab8; attempts A001, A002; reviews V001 (fail, corrected), V002 (pass).
+
+## Close
+
+- All jobs completed; last merged in #432 as 5c1374be783c6170b485164ec8a5462485ebfe9e. Full local check at 1e39cea25f92c77785b0a4c0f9fe2fc2dc98d683 passed (check-quality: 1378 s); CI passed (close-verification.json).
