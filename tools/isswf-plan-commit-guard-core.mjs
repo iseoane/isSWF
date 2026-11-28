@@ -143,7 +143,7 @@ async function recordViolations({ path, text, all, root, git, read, untracked, l
     const listing = await git(['ls-files', '-z', '--', dir], root);
     if (listing.exitCode !== 0) return [];
     const siblings = [];
-    for (const other of new Set([...listing.stdout.split(' '), ...untracked])) {
+    for (const other of new Set([...listing.stdout.split('\0'), ...untracked])) {
       if (!other.startsWith(dir) || other.includes('/', dir.length) || other === path || !RECORD_NAME.test(other.slice(dir.length))) continue;
       try {
         const sibling = all ? { exitCode: 0, stdout: await read(`${root}/${other}`) } : await git(['show', `:${other}`], root);
@@ -195,7 +195,7 @@ export async function checkPlanCommit({ command, cwd, git, read, launches, platf
         const match = PLAN_PATH.exec(path);
         if (!match && isAttemptOrReview(path)) {
           const record = all ? { exitCode: 0, stdout: await read(`${root}/${path}`) } : await git(['show', `:${path}`], root);
-          if (record.exitCode === 0) violations.push(...await recordViolations({ path, text: record.stdout, all, root, git, read, untracked: added.stdout.split(' '), launches }));
+          if (record.exitCode === 0) violations.push(...await recordViolations({ path, text: record.stdout, all, root, git, read, untracked: added.stdout.split('\0'), launches }));
           continue;
         }
         if (!match) continue;
