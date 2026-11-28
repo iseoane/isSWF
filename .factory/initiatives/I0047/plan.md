@@ -45,11 +45,11 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 ## J003
 
 - Size: M
-- Status: pending
+- Status: in-progress
 - Objective: Retire the loopback panel tools/isswf-panel.mjs once both host views cover its use.
 - Depends on: J002
 - Brief: [brief-r1.md](jobs/J003/brief-r1.md)
-- Blocker: Awaiting J002, I0046 J008 and an operator decision to remove the panel.
+- Blocker: J002 and I0046 J008 completed; operator start 2026-11-28 ("Coordinador encárgate de la iniciativa") covers the gap list; removal still needs the operator's decision on it.
 - Next step: Compare panel features against both views and list gaps.
 
 ### Acceptance
