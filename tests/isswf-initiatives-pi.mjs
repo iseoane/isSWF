@@ -112,7 +112,7 @@ try {
     };
     return io;
   };
-  const within = (promise, ms) => Promise.race([promise.then(() => true), new Promise(settle => setTimeout(() => settle(false), ms))]);
+  const within = (promise, ms) => Promise.race([Promise.resolve(promise).then(() => true), new Promise(settle => setTimeout(() => settle(false), ms))]);
 
   // A coordinator session shows the widget below the editor and refreshes it when a run settles.
   const pi = session();
@@ -128,6 +128,7 @@ try {
   assert.deepEqual(last(pi).lines, ['I0001 Active work · 1 open · next J003', '○ 1 unopened: I0002']);
   await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), plan('I0001', 'Active work', [['J001', 'completed'], ['J002', 'completed'], ['J003', 'completed'], ['J004', 'pending']]));
   await pi.emit('tool_result', { toolName: 'bash' });
+  await new Promise(settle => setTimeout(settle, 300));
   assert.deepEqual(last(pi).lines, ['I0001 Active work · 1 open · next J004', '○ 1 unopened: I0002'], 'a tool result refreshes it');
   await writeFile(join(project, '.factory/initiatives/I0001/plan.md'), files['I0001/plan.md']);
 

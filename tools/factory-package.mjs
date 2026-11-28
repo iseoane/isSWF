@@ -45,6 +45,7 @@ export const nativePiResources = [
   "tools/isswf-undispatched-core.mjs",
   "tools/isswf-compaction-pi-extension.mjs",
   "tools/isswf-initiatives-pi-extension.mjs",
+  "tools/project-state.mjs",
   "tools/isswf-compaction-core.mjs",
   "tools/isswf-record-check-core.mjs",
   "tools/isswf-plan-core.mjs",

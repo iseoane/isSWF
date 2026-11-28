@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { isCoordinatorSkill } from './isswf-compaction-core.mjs';
+import { stateDirectory } from './project-state.mjs';
 import { readSnapshot } from './isswf-snapshot-core.mjs';
 
 const KEY = 'isswf-initiatives';
@@ -65,29 +66,44 @@ export function latchFromBranch(entries) {
 // A string widget under the editor shows a compact summary of the project's initiatives in a coordinator session of the TUI. The records are
 // read only for a trusted project, no model call is made, and each handler fails open: a fault never reaches Pi. Pi clears widgets and builds a
 // new runner on /reload and on a session switch, so `session_start` rebuilds the coordinator latch from the stored entries and draws again.
-export default function (pi) {
+// `io.fs` replaces the file-system adapter; Pi passes only `pi`.
+export default function (pi, io = {}) {
   let active = false;
   let timer;
   let last;
   let shownKey;
   let reading = false;
+  let again;
 
   const eligible = ctx => active && ctx?.mode === 'tui' && ctx.isProjectTrusted?.() === true && typeof ctx.ui?.setWidget === 'function';
 
+  async function draw(ctx) {
+    let lines;
+    try {
+      stateDirectory(ctx.cwd);
+      lines = renderLines(await readSnapshot(ctx.cwd, io.fs ?? fs));
+    } catch {
+      lines = [];
+    }
+    const key = lines.join('\n');
+    if (lines.length ? key === shownKey : shownKey === undefined) return;
+    ctx.ui.setWidget(KEY, lines.length ? lines : undefined, { placement: 'belowEditor' });
+    shownKey = lines.length ? key : undefined;
+  }
+
+  // A refresh asked for during a read runs once more after it, with the newest context, so a change made meanwhile is not lost.
   async function refresh(ctx) {
-    if (!eligible(ctx) || reading) return;
+    if (!eligible(ctx)) return;
+    if (reading) {
+      again = ctx;
+      return;
+    }
     reading = true;
     try {
-      let lines;
-      try {
-        lines = renderLines(await readSnapshot(ctx.cwd, fs));
-      } catch {
-        lines = [];
+      for (let next = ctx; next; next = again) {
+        again = undefined;
+        if (eligible(next)) await draw(next);
       }
-      const key = lines.join('\n');
-      if (lines.length ? key === shownKey : shownKey === undefined) return;
-      ctx.ui.setWidget(KEY, lines.length ? lines : undefined, { placement: 'belowEditor' });
-      shownKey = lines.length ? key : undefined;
     } catch {} finally {
       reading = false;
     }
@@ -132,10 +148,10 @@ export default function (pi) {
     return undefined;
   });
 
-  pi.on('tool_result', async (event, ctx) => {
+  pi.on('tool_result', (event, ctx) => {
     try {
       last = ctx;
-      if (!READ_ONLY_TOOLS.has(event?.toolName)) await refresh(ctx);
+      if (!READ_ONLY_TOOLS.has(event?.toolName)) void refresh(ctx);
     } catch {}
     return undefined;
   });
