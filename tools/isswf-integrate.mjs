@@ -50,6 +50,29 @@ function worktreeOf(git, root, branch) {
   return undefined;
 }
 
+// A path as one argument that pastes into Git Bash and PowerShell alike: forward slashes, double quotes.
+const arg = path => `"${path.replaceAll('\\', '/')}"`;
+
+// How the local base `ref` differs from `upstream`, with the manual step each case needs; undefined when the remote has everything `ref` has.
+// `local-ahead` is what a failed push leaves: commits only here, the close commit among them, so the step lists them before pushing `ref` itself (`state` may run with another branch checked out).
+// Nothing is pushed or reset by this command.
+function localDivergence({ git, root, ref, upstream, remote, base }) {
+  if (git(root, ['merge-base', '--is-ancestor', ref, upstream], { check: false }).status === 0) return undefined;
+  if (git(root, ['merge-base', '--is-ancestor', upstream, ref], { check: false }).status === 0) {
+    return { divergence: 'local-ahead', next: `git -C ${arg(root)} log ${upstream}..${ref} --oneline && git -C ${arg(root)} push ${remote} ${ref}:refs/heads/${base}`, then: 'rerun this command for the worktree and branch still to remove' };
+  }
+  return { divergence: 'diverged', next: `reconcile the local ${base} with ${upstream} by hand (git -C ${arg(root)} log ${upstream}..${ref} --oneline lists the commits only here), then rerun this command` };
+}
+
+// The manual cleanup a close leaves when its last steps failed: the job worktree and branch that still exist, as commands.
+function cleanupSteps({ git, root, branch, head }) {
+  const worktree = worktreeOf(git, root, branch);
+  const steps = [];
+  if (worktree && resolve(worktree) !== root) steps.push(`git -C ${arg(root)} worktree remove ${arg(worktree)}`);
+  if (git(root, ['rev-parse', '--verify', '-q', `refs/heads/${branch}`], { check: false }).status === 0) steps.push(`git -C ${arg(root)} update-ref -d refs/heads/${branch} ${head}`);
+  return steps.length ? { next: steps.join(' && ') } : {};
+}
+
 function checkRequest({ project, initiative, job, branch, head, pr, repo, remote }) {
   const good = typeof project === 'string' && isAbsolute(project) && /^I\d+$/u.test(initiative ?? '') && isIdentifier(job ?? '')
     && /^[\w][\w./-]*$/u.test(branch ?? '') && SHA.test(head ?? '') && /^[1-9]\d*$/u.test(pr ?? '') && (remote === undefined || REMOTE.test(remote)) && (repo === undefined || /^[\w.-]+\/[\w.-]+$/u.test(repo));
@@ -107,7 +130,12 @@ export async function jobState({ project, initiative, job, branch, head, pr, rep
   if (tip.status !== 0) return { error: refuse('branch-not-found') };
   if (tip.stdout !== head) return { error: refuse('head-mismatch', { branch: tip.stdout }) };
   facts.merged = git(root, ['merge-base', '--is-ancestor', head, upstream], { check: false }).status === 0 || (pr !== undefined && mergedAt(await readPr({ pr, repo, gh }), head));
-  if (facts.merged) return { ...found, facts: { ...facts, brief: true, attempt: true, review: true, covered: true, ciGreen: true }, detail: {}, state: 'merged' };
+  if (facts.merged) {
+    const localBase = `refs/heads/${base}`;
+    const hasLocalBase = git(root, ['rev-parse', '--verify', '-q', localBase], { check: false }).status === 0;
+    const detail = hasLocalBase ? localDivergence({ git, root, ref: localBase, upstream, remote, base }) ?? {} : {};
+    return { ...found, facts: { ...facts, brief: true, attempt: true, review: true, covered: true, ciGreen: true }, detail, state: 'merged' };
+  }
   const names = git(root, ['ls-tree', '--name-only', head, `${stateDir}/initiatives/${initiative}/jobs/${job}/`]).stdout.split(/\r?\n/u).map(path => path.split('/').pop());
   facts.brief = names.some(name => /^brief-r\d+\.md$/u.test(name));
   facts.attempt = names.some(name => /^A\d{3}\.md$/u.test(name));
@@ -156,10 +184,11 @@ export async function integrate(request) {
     // A pull request already merged at this head resumes after the merge; any other state needs the merge first.
     const resuming = found.state === 'merged';
     const reason = resuming ? refusalFor('merged', 'closed') : refusalFor(found.state, 'merged');
-    if (reason) return refuse(reason === 'ci-not-green' && found.detail.missUnrecorded ? 'ci-miss-unrecorded' : reason, { state: found.state, ...found.detail });
+    if (reason) return refuse(reason === 'ci-not-green' && found.detail.missUnrecorded ? 'ci-miss-unrecorded' : reason, { state: found.state, ...found.detail, ...(reason === 'already-closed' ? cleanupSteps({ git, root, branch, head }) : {}) });
     if (found.closesInitiative) return refuse('initiative-close-required', { state: found.state });
     const { upstream } = found;
-    if (git(root, ['merge-base', '--is-ancestor', 'HEAD', upstream], { check: false }).status !== 0) return refuse('primary-diverged');
+    const diverged = localDivergence({ git, root, ref: 'HEAD', upstream, remote, base });
+    if (diverged) return refuse('primary-diverged', diverged);
     // The push below bypasses the shell guard, so the records-only grant the guard reads is checked here on the remote's base, before anything is merged.
     const setup = git(root, ['show', `${upstream}:${found.stateDir}/project-setup.md`], { check: false });
     if (setup.status !== 0 || !GRANT.test(setup.stdout)) return refuse('records-push-not-granted');
