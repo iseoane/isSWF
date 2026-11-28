@@ -7,7 +7,7 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "58cac65f7ec9baca397c17618661d4ae01cf2e6925151796a7f72575376d6217"
+      "sha256": "a3f750bf27cc548c03b46db1b881dffc60541558208ee0f679cd0807230154ea"
     }
   ],
   "checks": [

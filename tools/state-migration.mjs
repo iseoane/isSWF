@@ -75,11 +75,38 @@ async function claim(project, id, recordPath, record) {
     await sync(stage); await rename(stage, path); await sync(project);
   } catch (error) { await rm(stage, { recursive: true, force: true }); throw error; }
 }
+// The journal's phase.json names the last completed step; recovery reads it instead of inferring the step from directory names.
+// A journal written before phases existed has none, and recovery then falls back to the directories alone.
+const PHASES = ['staged', 'swapped', 'retired', 'done'];
+const RETIRED_PREFIX = '.isswf-transition-retired-';
+async function readPhase(path, id) {
+  if (!await exists(join(path, 'phase.json'))) return null;
+  const value = await json(join(path, 'phase.json'));
+  if (value?.format !== 1 || value.id !== id || !PHASES.includes(value.phase)) throw Error('State migration journal phase is malformed or belongs to another migration');
+  return value.phase;
+}
+// The phase is replaced through a synced temporary file, so a stop leaves either the previous phase or the new one. It never moves backwards.
+async function setPhase(path, id, phase) {
+  const current = await readPhase(path, id);
+  if (current && PHASES.indexOf(current) > PHASES.indexOf(phase)) throw Error('State migration phase cannot move backwards');
+  const temp = join(path, 'phase.json.pending-' + randomUUID());
+  const file = await open(temp, 'wx', 0o600);
+  try { await file.writeFile(JSON.stringify({ format: 1, id, phase }) + '\n'); await file.sync(); } finally { await file.close(); }
+  await rename(temp, join(path, 'phase.json')); await sync(path);
+}
 async function clearClaim(project) {
   const path = join(project, '.isswf-transition');
-  const retired = join(project, '.isswf-transition-retired-' + randomUUID());
+  const retired = join(project, RETIRED_PREFIX + randomUUID());
   await rename(path, retired); await sync(project);
   await rm(retired, { recursive: true });
+}
+async function retireClaim(project, journalPath, id) {
+  const path = join(project, '.isswf-transition');
+  const retired = join(project, RETIRED_PREFIX + randomUUID());
+  await rename(path, retired); await sync(project);
+  await setPhase(journalPath, id, 'retired');
+  await rm(retired, { recursive: true });
+  await setPhase(journalPath, id, 'done');
 }
 export async function moveState({ project, store, id, expected, reference, owner }) {
   if (!reference?.trim()) throw Error('Explicit --quiescent-ref for legacy and external writers required');
@@ -100,25 +127,54 @@ export async function moveState({ project, store, id, expected, reference, owner
   await journalParents(store, project, id);
   await publish(join(path, 'record.json'), record);
   await sync(path);
+  await setPhase(path, id, 'staged');
   if ((await inspectStateMigration(project)).expected !== expected) throw Error('Legacy state changed after inspection; claim retained');
   if (await exists(join(project, '.isswf'))) throw Error('State destination appeared; claim retained');
   await rename(join(project, '.factory'), join(project, '.isswf'));
   await sync(project);
   if ((await tree(join(project, '.isswf'))).expected !== expected) throw Error('Moved state differs from recorded bytes; claim retained');
+  await setPhase(path, id, 'swapped');
   await publish(join(path, 'complete.json'), { format: 1, id, state: 'moved' });
-  await sync(path); await clearClaim(project);
+  await sync(path); await retireClaim(project, path, id);
   return { status: 'state-migrated', id, from: '.factory', to: '.isswf', changedFiles: 0, journal: path };
+}
+const recordMatches = (record, project, id) => record?.format === 1 && record.kind === 'move' && Array.isArray(record.files) && digest(JSON.stringify(record.files)) === record.expected && record.project === project && record.id === id;
+// After the claim is moved aside the journal alone says the migration finished; only its leftover retired claims remain to remove.
+async function finishRetirement({ project, path, id, ceased, phase }) {
+  const record = await json(join(path, 'record.json'));
+  if (!recordMatches(record, project, id) || !await ceased(record.owner)) throw Error('State migration owner is live or uncertain, or journal mismatches');
+  if (await exists(join(project, '.factory')) || (await tree(join(project, '.isswf'))).expected !== record.expected) throw Error('State drift blocks recovery; preserve data for inspection');
+  const leftovers = [];
+  for (const name of (await readdir(project)).filter(entry => entry.startsWith(RETIRED_PREFIX))) {
+    const retired = join(project, name);
+    await dir(retired);
+    const owner = await exists(join(retired, 'owner.json')) ? await json(join(retired, 'owner.json')) : null;
+    if (owner?.id !== id) continue;
+    if (!await ceased(owner.owner)) throw Error('State migration owner is live or uncertain, or journal mismatches');
+    leftovers.push(retired);
+  }
+  if (!await exists(join(path, 'recovered.json'))) await publish(join(path, 'recovered.json'), { format: 1, id, state: 'moved' });
+  if (phase === 'swapped') await setPhase(path, id, 'retired');
+  for (const retired of leftovers) await rm(retired, { recursive: true });
+  await setPhase(path, id, 'done');
+  return { status: 'state-recovered', id, activeDirectory: '.isswf' };
 }
 export async function recoverState({ project, store, id, ceased }) {
   const path = await checkJournal(store, project, id);
-  const claimPath = join(project, '.isswf-transition'); await dir(claimPath);
+  const phase = await readPhase(path, id);
+  const claimPath = join(project, '.isswf-transition');
+  if (!await exists(claimPath) && (phase === 'swapped' || phase === 'retired') && await exists(join(path, 'complete.json'))) return finishRetirement({ project, path, id, ceased, phase });
+  await dir(claimPath);
   const owner = await json(join(claimPath, 'owner.json'));
   const hasRecord = await exists(join(path, 'record.json'));
   const record = hasRecord ? await json(join(path, 'record.json')) : owner.record;
   if (owner.record && JSON.stringify(owner.record) !== JSON.stringify(record)) throw Error('Claim and state journal disagree');
-  if (record?.format !== 1 || record.kind !== 'move' || !Array.isArray(record.files) || digest(JSON.stringify(record.files)) !== record.expected || record.project !== project || record.id !== id || owner.id !== id || owner.recordPath !== path || !await ceased(owner.owner) || !await ceased(record.owner)) throw Error('State migration owner is live or uncertain, or journal mismatches');
+  if (!recordMatches(record, project, id) || owner.id !== id || owner.recordPath !== path || !await ceased(owner.owner) || !await ceased(record.owner)) throw Error('State migration owner is live or uncertain, or journal mismatches');
   const old = await exists(join(project, '.factory')), current = await exists(join(project, '.isswf'));
   if (old === current) throw Error('Ambiguous state locations block recovery');
+  // A live claim holds the journal at staged or swapped. Staged also covers a rename that landed before the swapped phase was written.
+  // Done with a claim present is a finished move whose claim reappeared; it is cleared without moving the phase.
+  if (phase === 'retired' || ((phase === 'swapped' || phase === 'done') && old)) throw Error('Journal phase ' + phase + ' contradicts the state directories');
   const observed = await tree(join(project, old ? '.factory' : '.isswf'));
   if (observed.expected !== record.expected) throw Error('State drift blocks recovery; preserve data for inspection');
   if (!hasRecord) {
@@ -126,7 +182,14 @@ export async function recoverState({ project, store, id, ceased }) {
     await publish(join(path, 'record.json'), record);
   }
   if (!await exists(join(path, 'recovered.json'))) await publish(join(path, 'recovered.json'), { format: 1, id, state: old ? 'unchanged-before' : 'moved' });
-  if (current && !await exists(join(path, 'complete.json'))) await publish(join(path, 'complete.json'), { format: 1, id, state: 'moved' });
-  await sync(path); await clearClaim(project);
-  return { status: 'state-recovered', id, activeDirectory: old ? '.factory' : '.isswf' };
+  if (!current) {
+    if (!phase) await setPhase(path, id, 'staged');
+    await sync(path); await clearClaim(project);
+    return { status: 'state-recovered', id, activeDirectory: '.factory' };
+  }
+  if (phase !== 'swapped' && phase !== 'done') await setPhase(path, id, 'swapped');
+  if (!await exists(join(path, 'complete.json'))) await publish(join(path, 'complete.json'), { format: 1, id, state: 'moved' });
+  await sync(path);
+  if (phase === 'done') await clearClaim(project); else await retireClaim(project, path, id);
+  return { status: 'state-recovered', id, activeDirectory: '.isswf' };
 }
