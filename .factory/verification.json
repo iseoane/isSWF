@@ -7,7 +7,7 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "f9c593aa8758337894a97d2e6cac5e79e50d526a9366be29e909340992b4c354"
+      "sha256": "74bb4aca9a1b898f7cd55e3e06301fa51de55b65665275ef9443e2920313857c"
     }
   ],
   "checks": [
@@ -64,6 +64,25 @@
       "covers": [
         "tools/isswf.mjs",
         "tests/exec-interruption.mjs"
+      ],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "owner-reboot",
+      "argv": [
+        "node",
+        "tests/owner-reboot.mjs",
+        "."
+      ],
+      "platforms": [
+        "linux",
+        "win32"
+      ],
+      "cost": "job",
+      "covers": [
+        "tools/isswf.mjs",
+        "tools/state-migration.mjs",
+        "tests/owner-reboot.mjs"
       ],
       "timeoutSeconds": 300
     },

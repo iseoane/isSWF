@@ -66,7 +66,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ## J004
 
-- Status: in-progress
+- Status: completed
 - Size: S
 - Objective: The owner checks are tested for a reboot: a live PID with a different boot identity counts as ceased, and `recover` and `recover-state` proceed.
 - Depends on: J002
@@ -81,7 +81,7 @@ The operator created this initiative on 2026-11-27 ("prepara iniciativa para el 
 
 ### Evidence
 
-- None.
+- Characterization: the behavior already held; candidate 908b347c95b495e1df9cbb31413e851743c83529 adds tests/owner-reboot.mjs; attempt A001; review V001 (pass).
 
 ## J005
 
