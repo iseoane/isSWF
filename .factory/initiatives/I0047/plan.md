@@ -7,12 +7,12 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 ## J001
 
 - Size: S
-- Status: in-progress
+- Status: completed
 - Objective: Research the supported Pi extension mechanism for a persistent sidebar fed by the snapshot.
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None. I0046 J004 completed; operator start 2026-11-28 ("ponte con el I0047").
-- Next step: Delta review of the corrected research note.
+- Next step: None.
 
 ### Acceptance
 
@@ -20,7 +20,7 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 
 ### Evidence
 
-- [Research note](jobs/J001/research-note.md); spec review pending.
+- [Research note](jobs/J001/research-note.md); spec review [V001](jobs/J001/V001.md) fail, correction [A001](jobs/J001/A001.md), [V002](jobs/J001/V002.md) pass.
 
 ## J002
 
@@ -29,8 +29,8 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 - Objective: Implement a Pi widget above or below the editor that shows a compact summary of the snapshot (operator decision 2026-11-28): one line per active initiative with its open, blocked and next job, plus unopened initiatives.
 - Depends on: J001
 - Brief: [brief-r1.md](jobs/J002/brief-r1.md)
-- Blocker: Awaiting J001 and explicit operator start.
-- Next step: Operator starts J002 after reviewing J001.
+- Blocker: None. Operator start 2026-11-28 ("Coordinador encárgate de la iniciativa"); integration of tools/factory-package.mjs and tools/build-release.mjs still needs the operator's approval.
+- Next step: Dispatch the worker.
 
 ### Acceptance
 

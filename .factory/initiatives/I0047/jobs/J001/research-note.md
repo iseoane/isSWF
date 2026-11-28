@@ -34,3 +34,5 @@ The `pi` on PATH, widget behavior while streaming, whether background children l
 2. Accepted as a compact summary (follows from 1).
 3. Feature-detect `ctx.ui.setWidget`; keep the Pi 1.4.0 floor and show nothing when it is missing.
 4. Read project records only when `ctx.isProjectTrusted()` is true.
+
+Provenance: the coordinator corrected the reload, activation and wiring bullets after review V001 (commit 5921efb95eddba809f822beee5efa5e6b9e7a66b); the rest is the researcher's.
