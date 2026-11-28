@@ -27,3 +27,10 @@ A new `tools/isswf-initiatives-pi-extension.mjs` sets a string-array widget of a
 ## Unverified
 
 The `pi` on PATH, widget behavior while streaming, whether background children load `pi.extensions`, `fs.watch` behavior.
+
+## Operator answers (2026-11-28)
+
+1. Widget above or below the editor, compact summary.
+2. Accepted as a compact summary (follows from 1).
+3. Feature-detect `ctx.ui.setWidget`; keep the Pi 1.4.0 floor and show nothing when it is missing.
+4. Read project records only when `ctx.isProjectTrusted()` is true.

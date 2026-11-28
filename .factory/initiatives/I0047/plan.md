@@ -12,7 +12,7 @@ Split from I0046 by the operator on 2026-11-11. Consumes the packaged snapshot f
 - Depends on: None
 - Brief: [brief-r1.md](jobs/J001/brief-r1.md)
 - Blocker: None. I0046 J004 completed; operator start 2026-11-28 ("ponte con el I0047").
-- Next step: Operator decisions 1 to 4 in the research note.
+- Next step: Spec review of the research note; operator decisions recorded 2026-11-28.
 
 ### Acceptance
 
