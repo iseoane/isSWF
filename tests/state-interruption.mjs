@@ -77,9 +77,9 @@ syncBuiltinESMExports();
 
 // What a moveState pause must look like on disk, and what recover-state must then report.
 const boundaries = {
-  claim: { label: 'claim published, no journal', legacy: true, journalDir: false, record: false, activeDirectory: '.factory', recovered: 'unchanged-before', journalFiles: ['record.json', 'recovered.json'] },
-  record: { label: 'record published, before rename', legacy: true, journalDir: true, record: true, activeDirectory: '.factory', recovered: 'unchanged-before', journalFiles: ['record.json', 'recovered.json'] },
-  renamed: { label: 'after rename, before complete.json', legacy: false, journalDir: true, record: true, activeDirectory: '.isswf', recovered: 'moved', journalFiles: ['complete.json', 'record.json', 'recovered.json'] },
+  claim: { label: 'claim published, no journal', legacy: true, journalDir: false, record: false, activeDirectory: '.factory', recovered: 'unchanged-before', journalFiles: ['phase.json', 'record.json', 'recovered.json'] },
+  record: { label: 'record published, before rename', legacy: true, journalDir: true, record: true, activeDirectory: '.factory', recovered: 'unchanged-before', journalFiles: ['phase.json', 'record.json', 'recovered.json'] },
+  renamed: { label: 'after rename, before complete.json', legacy: false, journalDir: true, record: true, activeDirectory: '.isswf', recovered: 'moved', journalFiles: ['complete.json', 'phase.json', 'record.json', 'recovered.json'] },
 };
 const children = new Set(), receipts = [];
 let installed, nodeLauncher, counter = 0;

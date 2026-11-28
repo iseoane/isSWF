@@ -72,6 +72,8 @@ jobs:
         run: node tests/plan-publication.mjs .
       - name: Verify portable state migration publication
         run: node tests/state-migration-publication.mjs .
+      - name: Verify journaled state migration phases and recovery from each
+        run: node tests/state-migration-phase.mjs .
       - name: Verify real migration-owner interruption and public recovery
         run: node tests/state-interruption.mjs .
       - name: Verify factory tool installation
